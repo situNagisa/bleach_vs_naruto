@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="source">
+      <UniqueIdentifier>{898a3ea5-c334-434e-a137-20062a3c8108}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\main.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\include\bvn\module_loader\detail\environment.h" />
+    <ClInclude Include="include\include\bvn\module_loader\environment.h" />
+    <ClInclude Include="include\include\bvn\module_loader\export.h" />
+    <ClInclude Include="include\include\bvn\module_loader\module_loader.h" />
+    <ClInclude Include="include\bvn\module_loader\detail\api.h" />
+    <ClInclude Include="include\bvn\module_loader\detail\environment.h" />
+    <ClInclude Include="include\bvn\module_loader\environment.h" />
+    <ClInclude Include="include\bvn\module_loader\export.h" />
+    <ClInclude Include="include\bvn\module_loader\module_loader.h" />
+  </ItemGroup>
+</Project>
