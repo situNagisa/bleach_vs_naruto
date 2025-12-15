@@ -41,6 +41,12 @@
     <ClInclude Include="include\engine\platform\platform.hpp" />
     <ClInclude Include="include\engine\render\renderer.hpp" />
     <ClInclude Include="include\engine\render\texture.hpp" />
+    <ClInclude Include="source\fighter.h" />
+    <ClInclude Include="source\graphic.h" />
+    <ClInclude Include="source\io.h" />
+    <ClInclude Include="source\physical.h" />
+    <ClInclude Include="source\sdl_graphic.h" />
+    <ClInclude Include="source\sdl_io.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp" />
