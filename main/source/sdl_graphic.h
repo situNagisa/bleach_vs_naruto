@@ -121,6 +121,20 @@ struct sdl_renderer : graphic::renderer
 
 		SDL_SetRenderTarget(_canvas.renderer, nullptr);
 	}
+	void draw_texture(void* tex, int x, int y) override
+	{
+		int w, h;
+		SDL_QueryTexture(static_cast<SDL_Texture*>(tex), nullptr, nullptr, &w, &h);
+
+		SDL_SetRenderTarget(_canvas.renderer, _canvas.texture);
+
+		SDL_Rect dst{ x, y, w, h };
+		SDL_RenderCopy(_canvas.renderer, static_cast<SDL_Texture*>(tex), nullptr, &dst);
+
+		SDL_SetRenderTarget(_canvas.renderer, nullptr);
+	}
+
+
 
 	window _window{};
 	canvas _canvas{ _window.renderer, 800, 600 };
