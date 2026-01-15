@@ -41,7 +41,10 @@
     <ClInclude Include="include\engine\platform\platform.hpp" />
     <ClInclude Include="include\engine\render\renderer.hpp" />
     <ClInclude Include="include\engine\render\texture.hpp" />
+    <ClInclude Include="source\fighter\a_player.h" />
     <ClInclude Include="source\fighter.h" />
+    <ClInclude Include="source\fighter\player.h" />
+    <ClInclude Include="source\fighter\scene.h" />
     <ClInclude Include="source\graphic.h" />
     <ClInclude Include="source\io.h" />
     <ClInclude Include="source\physical.h" />
@@ -50,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\stb.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

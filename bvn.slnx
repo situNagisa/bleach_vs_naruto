@@ -1,0 +1,8 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="include/bvn/bvn.vcxproj" Id="e6af628c-cf2e-4d04-ad2f-7ca45154034e" />
+  <Project Path="main/main.vcxproj" Id="3d21993b-c2d2-480c-91e2-1c58bb1875d4" />
+</Solution>
