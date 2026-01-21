@@ -1,0 +1,69 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11104.47
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "main", "main\main.vcxproj", "{3D21993B-C2D2-480C-91E2-1C58BB1875D4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "fighter", "fighter", "{1F8F0594-18A0-44BA-84F4-408F82AFD71F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ichigo", "fighter\ichigo\ichigo.vcxproj", "{872836C1-F2E0-4064-9349-2061A7242B61}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "module", "module", "{3C0F63B1-FABC-4535-B3AE-0471C7E8F3DF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "module_loader", "module\module_loader\module_loader.vcxproj", "{A0BC8857-03D6-4120-8C37-4C72074B73C7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bvn", "include\bvn\bvn.vcxproj", "{E6AF628C-CF2E-4D04-AD2F-7CA45154034E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3D21993B-C2D2-480C-91E2-1C58BB1875D4}.Debug|x64.ActiveCfg = Debug|x64
+		{3D21993B-C2D2-480C-91E2-1C58BB1875D4}.Debug|x64.Build.0 = Debug|x64
+		{3D21993B-C2D2-480C-91E2-1C58BB1875D4}.Debug|x86.ActiveCfg = Debug|Win32
+		{3D21993B-C2D2-480C-91E2-1C58BB1875D4}.Debug|x86.Build.0 = Debug|Win32
+		{3D21993B-C2D2-480C-91E2-1C58BB1875D4}.Release|x64.ActiveCfg = Release|x64
+		{3D21993B-C2D2-480C-91E2-1C58BB1875D4}.Release|x64.Build.0 = Release|x64
+		{3D21993B-C2D2-480C-91E2-1C58BB1875D4}.Release|x86.ActiveCfg = Release|Win32
+		{3D21993B-C2D2-480C-91E2-1C58BB1875D4}.Release|x86.Build.0 = Release|Win32
+		{872836C1-F2E0-4064-9349-2061A7242B61}.Debug|x64.ActiveCfg = Debug|x64
+		{872836C1-F2E0-4064-9349-2061A7242B61}.Debug|x64.Build.0 = Debug|x64
+		{872836C1-F2E0-4064-9349-2061A7242B61}.Debug|x86.ActiveCfg = Debug|Win32
+		{872836C1-F2E0-4064-9349-2061A7242B61}.Debug|x86.Build.0 = Debug|Win32
+		{872836C1-F2E0-4064-9349-2061A7242B61}.Release|x64.ActiveCfg = Release|x64
+		{872836C1-F2E0-4064-9349-2061A7242B61}.Release|x64.Build.0 = Release|x64
+		{872836C1-F2E0-4064-9349-2061A7242B61}.Release|x86.ActiveCfg = Release|Win32
+		{872836C1-F2E0-4064-9349-2061A7242B61}.Release|x86.Build.0 = Release|Win32
+		{A0BC8857-03D6-4120-8C37-4C72074B73C7}.Debug|x64.ActiveCfg = Debug|x64
+		{A0BC8857-03D6-4120-8C37-4C72074B73C7}.Debug|x64.Build.0 = Debug|x64
+		{A0BC8857-03D6-4120-8C37-4C72074B73C7}.Debug|x86.ActiveCfg = Debug|Win32
+		{A0BC8857-03D6-4120-8C37-4C72074B73C7}.Debug|x86.Build.0 = Debug|Win32
+		{A0BC8857-03D6-4120-8C37-4C72074B73C7}.Release|x64.ActiveCfg = Release|x64
+		{A0BC8857-03D6-4120-8C37-4C72074B73C7}.Release|x64.Build.0 = Release|x64
+		{A0BC8857-03D6-4120-8C37-4C72074B73C7}.Release|x86.ActiveCfg = Release|Win32
+		{A0BC8857-03D6-4120-8C37-4C72074B73C7}.Release|x86.Build.0 = Release|Win32
+		{E6AF628C-CF2E-4D04-AD2F-7CA45154034E}.Debug|x64.ActiveCfg = Debug|x64
+		{E6AF628C-CF2E-4D04-AD2F-7CA45154034E}.Debug|x64.Build.0 = Debug|x64
+		{E6AF628C-CF2E-4D04-AD2F-7CA45154034E}.Debug|x86.ActiveCfg = Debug|Win32
+		{E6AF628C-CF2E-4D04-AD2F-7CA45154034E}.Debug|x86.Build.0 = Debug|Win32
+		{E6AF628C-CF2E-4D04-AD2F-7CA45154034E}.Release|x64.ActiveCfg = Release|x64
+		{E6AF628C-CF2E-4D04-AD2F-7CA45154034E}.Release|x64.Build.0 = Release|x64
+		{E6AF628C-CF2E-4D04-AD2F-7CA45154034E}.Release|x86.ActiveCfg = Release|Win32
+		{E6AF628C-CF2E-4D04-AD2F-7CA45154034E}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{872836C1-F2E0-4064-9349-2061A7242B61} = {1F8F0594-18A0-44BA-84F4-408F82AFD71F}
+		{A0BC8857-03D6-4120-8C37-4C72074B73C7} = {3C0F63B1-FABC-4535-B3AE-0471C7E8F3DF}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {217FD17F-4E87-457E-A791-86A21DF4C685}
+	EndGlobalSection
+EndGlobal

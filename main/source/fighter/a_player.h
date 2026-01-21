@@ -3,48 +3,19 @@
 #include <SDL2/SDL.h>
 #include <vector>
 #include <stdexcept>
-#include <stb_image.h>
+#include "./animation.h"
 #include <boost/sml.hpp>
 #include <unordered_map>
 
 #include "../sdl_graphic.h"
 
 #include "./player.h"
+#include "./physical.h"
+#include "./scene_context.h"
 
 namespace a_impl
 {
-	struct GifFrame {
-		SDL_Texture* tex;
-		::std::chrono::milliseconds delay;
-	};
-
-	struct GifPlayer {
-		std::vector<GifFrame> frames{};
-		::std::chrono::milliseconds delay{};
-		::std::size_t current = 0;
-
-		void update(::std::chrono::milliseconds delta)
-		{
-			if (frames.empty())
-				return;
-			if (delay > delta)
-			{
-				delay -= delta;
-				return;
-			}
-			while (true)
-			{
-				delta -= delay;
-				current = (current + 1) % frames.size();
-				delay = frames[current].delay;
-				if (delay > delta)
-				{
-					delay -= delta;
-					break;
-				}
-			}
-		}
-	};
+	// Use Animator from animation.h
 
 	namespace states
 	{
@@ -67,20 +38,24 @@ namespace a_impl
 
 	struct context
 	{
-		float x{}, y{};
-		float vx{}, vy{};
-		int speed = 1;
+		::entt::registry* world{};
+		::entt::entity entity{world->create()};
+		float speed = 1.0f;
 		
-		::std::unordered_map<gif_type, GifPlayer> gif_pool{
-			{gif_type::idle, {}},
-			{gif_type::a1, {}},
-		};
-		GifPlayer* current{};
+		::std::unordered_map<gif_type, animation_impl::Animator> gif_pool = []
+			{
+				::std::unordered_map<gif_type, animation_impl::Animator> result{};
+				result.try_emplace(gif_type::idle, animation_impl::Animator{});
+				result.try_emplace(gif_type::a1, animation_impl::Animator{});
+				return result;
+			}();
+		animation_impl::Animator* current{};
 
 		static void move(events::move m, context& self)
 		{
-			self.x += m.dx * self.speed;
-			self.y += m.dy * self.speed;
+			auto&& phys = self.world->get<physical_component>(self.entity);
+			phys.position.x += m.dx * self.speed;
+			phys.position.y += m.dy * self.speed;
 		}
 	};
 
@@ -115,63 +90,20 @@ namespace a_impl
 		}
 	};
 
-	inline void load_gif(
-		SDL_Renderer* renderer,
-		const char* path,
-		GifPlayer& out_player
-	) {
-		auto f = ::std::fopen(path, "rb");
-		if (!f)
-			throw ::std::runtime_error("fail to open file");
-		::std::fseek(f, 0, SEEK_END);
-		auto size = ::std::ftell(f);
-		::std::rewind(f);
-
-		::std::vector<unsigned char> fileData(size);
-		::std::fread(fileData.data(), 1, size, f);
-		::std::fclose(f);
-
-		int* delays = nullptr;
-		int width, height, frames;
-		unsigned char* pixels = stbi_load_gif_from_memory(
-			fileData.data(), size,
-			&delays,
-			&width, &height,
-			&frames,
-			nullptr, 4
-		);
-
-		if (!pixels)
-			throw ::std::runtime_error("Failed to load gif");
-
-		for (int i = 0; i < frames; i++) {
-			auto tex = SDL_CreateTexture(
-				renderer,
-				SDL_PIXELFORMAT_RGBA32,
-				SDL_TEXTUREACCESS_STATIC,
-				width, height
-			);
-
-			SDL_UpdateTexture(
-				tex,
-				nullptr,
-				pixels + i * width * height * 4,
-				width * 4
-			);
-
-			out_player.frames.emplace_back(tex, ::std::chrono::milliseconds(delays[i]));
-		}
-		::stbi_image_free(pixels);
-		::stbi_image_free(delays);
-	}
+	// Loading is handled by animation_impl::load_gif_to_animator
 }
 
 struct a_player : player
 {
 	a_impl::context c{};
 	::boost::sml::sm<a_impl::state_machine> sm{ c };
-	a_player()
+	a_player(fighter_scene_context& context, sdl_renderer& renderer)
+		: c{ .world = &context.world, .entity = context.world.create() }
 	{
+		context.world.emplace<physical_component>(c.entity);
+		// construct animator entries and load into them
+		animation_impl::load_gif_to_animator(renderer._window.renderer, "default.gif", c.gif_pool.at(a_impl::gif_type::idle));
+		animation_impl::load_gif_to_animator(renderer._window.renderer, "1a.gif", c.gif_pool.at(a_impl::gif_type::a1));
 	}
 	void process_io(io::keyboard& keyboard) override
 	{
@@ -220,18 +152,15 @@ struct a_player : player
 
 		}
 	}
-	bool loaded = false;
 	void process_graphic(graphic::renderer& renderer) override
 	{
-		if (!::std::exchange(loaded, true))
-		{
-			auto r = static_cast<sdl_renderer&>(renderer)._window.renderer;
-			a_impl::load_gif(r, "default.gif", c.gif_pool[a_impl::gif_type::idle]);
-			a_impl::load_gif(r, "1a.gif", c.gif_pool[a_impl::gif_type::a1]);
-		}
 		if (c.current)
 		{
-			renderer.draw_texture(c.current->frames[c.current->current].tex, c.x, c.y);
+			auto& phys = c.world->get<physical_component>(c.entity);
+			auto off = c.current->get_current_offset();
+			int x = static_cast<int>(phys.position.x) + off.x;
+			int y = static_cast<int>(phys.position.y) + off.y;
+			renderer.draw_texture(c.current->get_current_texture(), x, y);
 		}
 	}
 	void process_time(::std::chrono::milliseconds delta) override
@@ -245,22 +174,12 @@ struct a_player : player
 			c.current->update(delta);
 			if (sm.is(state<ss::a1>))
 			{
-				if (c.current->current == c.current->frames.size() - 1)
+				if (!c.current->frames.empty() && c.current->current == c.current->frames.size() - 1)
 				{
 					c.current->current = 0;
 					sm.process_event(ee::idle{});
 				}
 			}
-		}
-		auto dt = delta.count() / 1000.0f;
-		constexpr auto gravity = 3000.0f;
-		c.vy += gravity * dt;
-		c.y += c.vy * dt;
-		constexpr auto ground_y = 500.0f;
-		if (c.y >= ground_y)
-		{
-			c.y = ground_y;
-			c.vy = 0.0f;
 		}
 	}
 };
