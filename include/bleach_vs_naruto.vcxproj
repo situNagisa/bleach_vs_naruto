@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -19,64 +19,29 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="stb.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ANIMATE_CC_QUICK_START.md" />
-    <None Include="ANIMATE_CC_SEMANTICS.md" />
-    <None Include="CODE_STRUCTURE.md" />
-    <None Include="COMPLETE_DOCUMENTATION_MAP.md" />
-    <None Include="COMPLETION_SUMMARY.md" />
-    <None Include="DEVELOPER_EXTENSION_GUIDE.md" />
-    <None Include="DISPLAY_OBJECT_ARCHITECTURE.md" />
-    <None Include="DISPLAY_OBJECT_README.md" />
-    <None Include="DISPLAY_OBJECT_SPECIFICATION.md" />
-    <None Include="DOCUMENTATION_INDEX.md" />
-    <None Include="FILE_MANIFEST.md" />
-    <None Include="FINAL_DELIVERY_SUMMARY.md" />
-    <None Include="FINAL_SUMMARY.md" />
-    <None Include="IMPLEMENTATION_COMPLETE.md" />
-    <None Include="QUICK_START.md" />
-    <None Include="README.md" />
-    <None Include="README_TIMELINE.md" />
-    <None Include="REFACTOR_COMPARISON.md" />
-    <None Include="REFACTOR_SUMMARY.md" />
-    <None Include="TIMELINE_API_REFERENCE.md" />
-    <None Include="TIMELINE_ARCHITECTURE.md" />
-    <None Include="TIMELINE_CHEAT_SHEET.md" />
-    <None Include="TIMELINE_ENHANCEMENT_COMPLETE.md" />
-    <None Include="TIMELINE_QUICK_START.md" />
-    <None Include="TIMELINE_REFACTORING_SUMMARY.md" />
-    <None Include="TIMELINE_SYSTEM.md" />
-    <None Include="TIMELINE_SYSTEM_GUIDE.md" />
-    <None Include="TIMELINE_USAGE.md" />
-    <None Include="TIMELINE_VISUAL_REFERENCE.md" />
-    <None Include="VERIFICATION_COMPLETE.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="asset_browser.h" />
-    <ClInclude Include="asset_manager.h" />
-    <ClInclude Include="clip.h" />
-    <ClInclude Include="display_object.h" />
-    <ClInclude Include="display_objects.h" />
-    <ClInclude Include="image.h" />
-    <ClInclude Include="movie_clip.h" />
-    <ClInclude Include="timeline\frame.h" />
-    <ClInclude Include="timeline\timeline.h" />
-    <ClInclude Include="timeline_data.h" />
-    <ClInclude Include="timeline_layer.h" />
-    <ClInclude Include="timeline_mgmt.h" />
-    <ClInclude Include="timeline_system.h" />
-    <ClInclude Include="timeline_ui.h" />
+    <ClInclude Include="include\bvn\environment.h" />
+    <ClInclude Include="include\bvn\fight\environment.h" />
+    <ClInclude Include="include\bvn\fight\fight.h" />
+    <ClInclude Include="include\bvn\infra\detail\environment.h" />
+    <ClInclude Include="include\bvn\infra\detail\io.h" />
+    <ClInclude Include="include\bvn\infra\detail\module.h" />
+    <ClInclude Include="include\bvn\infra\detail\render.h" />
+    <ClInclude Include="include\bvn\infra\detail\scene.h" />
+    <ClInclude Include="include\bvn\infra\environment.h" />
+    <ClInclude Include="include\bvn\infra\export.h" />
+    <ClInclude Include="include\bvn\infra\infra.h" />
+    <ClInclude Include="_infra\module.h" />
+    <ClInclude Include="_infra\scene.h" />
+    <ClInclude Include="_infra\environment.h" />
+    <ClInclude Include="_infra\infra.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{7d788cbd-5e4d-4d50-a95d-0c14928a5fa2}</ProjectGuid>
-    <RootNamespace>animation_editor</RootNamespace>
+    <ProjectGuid>{1D549C22-96B0-4D5E-8810-194350AF9C58}</ProjectGuid>
+    <RootNamespace>bvn</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>animation_editor</ProjectName>
+    <ProjectName>bleach_vs_naruto</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

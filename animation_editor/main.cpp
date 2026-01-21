@@ -415,7 +415,7 @@ protected:
 			if (parent_clip && parent_clip->player) {
 				int parent_frame_idx = parent_clip->player->currentFrame();
 				if (player->frameCount() > 0) {
-					player->gotoFrame(parent_frame_idx % player->frameCount());
+				 player->gotoFrame(parent_frame_idx % player->frameCount());
 				}
 			}
 		} else {
@@ -487,8 +487,6 @@ public:
 	float zoom = 1.0f;
 
 	// === 对象管理 ===
-	int nextClipId = 0;
-	int nextZOrder = 0;
 	int selectedClipId = -1;
 
 	// === 时间轴系统 ===
@@ -504,62 +502,23 @@ public:
 		timeline_system.clear();
 	}
 
-	// 创建并添加新剪辑
-	Clip* createClip() {
-		Clip* clip = new Clip();
-		clip->id = nextClipId++;
-		clip->z_order = nextZOrder++;
-		clip->player = new ClipPlayer();
-		addChild(clip);
-
-		// 创建对应的时间轴
-		Timeline* timeline = timeline_system.createTimeline(120);
-		if (timeline) {
-			std::string layer_name = "Clip_" + std::to_string(clip->id);
-			timeline_system.createLayer(clip->id, timeline->getId(), layer_name);
-			timeline_system.setCurrentTimelineId(timeline->getId());
-		}
-
-		return clip;
-	}
-
-	// 删除剪辑
-	void deleteClip(int clip_id) {
-		for (auto it = children.begin(); it != children.end(); ++it) {
-			DisplayObject* obj = *it;
-			if (obj && obj->id == clip_id) {
-				// 删除对应的时间轴
-				TimelineLayer* layer = timeline_system.getLayer(clip_id);
-				if (layer) {
-					timeline_system.deleteTimeline(layer->getTimelineId());
-					timeline_system.deleteLayer(clip_id);
-				}
-
-				delete obj;
-				removeChild(obj);
-				break;
-			}
-		}
-	}
-
-	// 选择剪辑
-	void selectClip(int clip_id) {
+	// 选择对象
+	void selectObject(int obj_id) {
 		for (auto child : children) {
 			if (child) {
-				child->selected = (child->id == clip_id);
+				child->selected = (child->id == obj_id);
 				if (child->selected) {
-					selectedClipId = clip_id;
+					selectedClipId = obj_id;
 				}
 			}
 		}
 	}
 
-	// 获取选中的剪辑
-	Clip* getSelectedClip() {
+	// 获取选中的对象
+	DisplayObject* getSelectedObject() {
 		for (auto child : children) {
 			if (child && child->id == selectedClipId) {
-				Clip* clip = dynamic_cast<Clip*>(child);
-				return clip;
+				return child;
 			}
 		}
 		return nullptr;
@@ -576,38 +535,51 @@ public:
 	}
 
 	// 层级操作
-	void raiseClip(int clip_id) {
+	void raiseObject(int obj_id) {
 		for (auto child : children) {
-			if (child && child->id == clip_id) {
+			if (child && child->id == obj_id) {
 				child->z_order++;
 				break;
 			}
 		}
 	}
 
-	void lowerClip(int clip_id) {
+	void lowerObject(int obj_id) {
 		for (auto child : children) {
-			if (child && child->id == clip_id) {
+			if (child && child->id == obj_id) {
 				child->z_order--;
 				break;
 			}
 		}
 	}
 
-	void raiseClipToTop(int clip_id) {
+	void raiseObjectToTop(int obj_id) {
+		// Find maximum z_order and assign higher
+		int max_z = 0;
 		for (auto child : children) {
-			if (child && child->id == clip_id) {
-				child->z_order = nextZOrder++;
+			if (child && child->z_order > max_z) {
+				max_z = child->z_order;
+			}
+		}
+		for (auto child : children) {
+			if (child && child->id == obj_id) {
+				child->z_order = max_z + 1;
 				break;
 			}
 		}
 	}
 
-	void lowerClipToBottom(int clip_id) {
+	void lowerObjectToBottom(int obj_id) {
+		// Find minimum z_order and assign lower
+		int min_z = 0;
 		for (auto child : children) {
-			if (child && child->id == clip_id) {
-				child->z_order = -nextZOrder;
-				nextZOrder++;
+			if (child && child->z_order < min_z) {
+				min_z = child->z_order;
+			}
+		}
+		for (auto child : children) {
+			if (child && child->id == obj_id) {
+				child->z_order = min_z - 1;
 				break;
 			}
 		}
@@ -674,6 +646,303 @@ protected:
 	}
 };
 
+// === Image - 静态图像显示对象 ===
+class Image : public DisplayObject {
+public:
+	GLuint texture_id = 0;
+	int width = 0;
+	int height = 0;
+	std::string source_path;
+
+	virtual ~Image() { clear(); }
+
+	bool load(const std::string& path) {
+		int w, h, n;
+		unsigned char* data = stbi_load(path.c_str(), &w, &h, &n, 4);
+		if (!data) {
+			std::cerr << "stb_image failed to load: " << path << "\n";
+			return false;
+		}
+
+		clear();
+
+		GLuint tex = 0;
+		glGenTextures(1, &tex);
+		glBindTexture(GL_TEXTURE_2D, tex);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		stbi_image_free(data);
+
+		texture_id = tex;
+		width = w;
+		height = h;
+		source_path = path;
+
+		return true;
+	}
+
+	void clear() {
+		if (texture_id > 0) {
+			glDeleteTextures(1, &texture_id);
+			texture_id = 0;
+		}
+		width = 0;
+		height = 0;
+	}
+
+protected:
+	virtual void update(int parent_frame = 0) override {}
+
+	virtual void render(ImDrawList* draw_list, ImVec2 canvas_pos, ImVec2 canvas_size,
+		float stage_pan_x, float stage_pan_y, float stage_zoom) override {
+		if (!texture_id || width == 0 || height == 0) return;
+
+		float scaled_w = width * scaleX;
+		float scaled_h = height * scaleY;
+
+		float screen_x = canvas_pos.x + stage_pan_x + x * stage_zoom;
+		float screen_y = canvas_pos.y + stage_pan_y + y * stage_zoom;
+		float screen_w = scaled_w * stage_zoom;
+		float screen_h = scaled_h * stage_zoom;
+
+		ImGui::SetCursorScreenPos(ImVec2(screen_x, screen_y));
+
+		if (selected) {
+			ImU32 border_color = IM_COL32(0, 255, 0, 255);
+			float border_thickness = 2.0f;
+			draw_list->AddRect(ImVec2(screen_x, screen_y), ImVec2(screen_x + screen_w, screen_y + screen_h),
+				border_color, 0.0f, 15, border_thickness);
+		}
+
+		ImGui::Image((ImTextureID)(intptr_t)texture_id, ImVec2(screen_w, screen_h));
+	}
+
+	virtual int hitTest(float mx, float my) override {
+		float scaled_w = width * scaleX;
+		float scaled_h = height * scaleY;
+		float x1 = x;
+		float y1 = y;
+		float x2 = x1 + scaled_w;
+		float y2 = y1 + scaled_h;
+
+		if (mx >= x1 && mx < x2 && my >= y1 && my < y2) {
+			return id;
+		}
+		return -1;
+	}
+};
+
+// === MovieClip - 影片剪辑（包含动画帧和时间轴）===
+class MovieClip : public DisplayObjectContainer {
+public:
+	ClipPlayer* player = nullptr;
+	bool editing_frames = false;
+	int editing_frame_idx = -1;
+
+	virtual ~MovieClip() {
+		if (player) delete player;
+	}
+
+	bool load(const std::string& path) {
+		if (!player) player = new ClipPlayer();
+		return player->load(path);
+	}
+
+protected:
+	virtual void updateSelf(int parent_frame) override {
+		if (!player) return;
+
+		if (parent) {
+			MovieClip* parent_clip = dynamic_cast<MovieClip*>(parent);
+			if (parent_clip && parent_clip->player) {
+				int parent_frame_idx = parent_clip->player->currentFrame();
+				if (player->frameCount() > 0) {
+				 player->gotoFrame(parent_frame_idx % player->frameCount());
+				}
+			}
+		} else {
+			player->update();
+		}
+	}
+
+	virtual void renderSelf(ImDrawList* draw_list, ImVec2 canvas_pos, ImVec2 canvas_size,
+		float stage_pan_x, float stage_pan_y, float stage_zoom) override {
+		if (!player || player->frameCount() == 0) return;
+
+		Frame* f = player->getCurrentFrame();
+		if (!f) return;
+
+		float scaled_w = f->width * scaleX;
+		float scaled_h = f->height * scaleY;
+
+		float screen_x = canvas_pos.x + stage_pan_x + (x + f->offset_x) * stage_zoom;
+		float screen_y = canvas_pos.y + stage_pan_y + (y + f->offset_y) * stage_zoom;
+		float screen_w = scaled_w * stage_zoom;
+		float screen_h = scaled_h * stage_zoom;
+
+		ImGui::SetCursorScreenPos(ImVec2(screen_x, screen_y));
+
+		if (selected) {
+			ImU32 border_color = editing_frames ? IM_COL32(0, 150, 255, 255) : IM_COL32(0, 255, 0, 255);
+			float border_thickness = editing_frames ? 3.0f : 2.0f;
+			draw_list->AddRect(ImVec2(screen_x, screen_y), ImVec2(screen_x + screen_w, screen_y + screen_h),
+				border_color, 0.0f, 15, border_thickness);
+
+			if (editing_frames) {
+				draw_list->AddText(ImVec2(screen_x + 5, screen_y + 5), IM_COL32(0, 150, 255, 255), "[EDIT MODE]");
+			}
+		}
+
+		ImGui::Image((ImTextureID)(intptr_t)f->texture, ImVec2(screen_w, screen_h));
+	}
+
+	virtual int hitTestSelf(float mx, float my) override {
+		if (!player || player->frameCount() == 0) return -1;
+
+		Frame* f = player->getCurrentFrame();
+		if (!f) return -1;
+
+		float scaled_w = f->width * scaleX;
+		float scaled_h = f->height * scaleY;
+		float x1 = x;
+		float y1 = y;
+		float x2 = x1 + scaled_w;
+		float y2 = y1 + scaled_h;
+
+		if (mx >= x1 && mx < x2 && my >= y1 && my < y2) {
+			return id;
+		}
+		return -1;
+	}
+};
+
+// === AssetManager - 管理Clip和Image对象的生命周期 ===
+class AssetManager {
+public:
+	AssetManager(Stage* stage, TimelineSystem* timeline_system)
+		: stage(stage), timeline_system(timeline_system), next_object_id(0), next_z_order(0) {}
+
+	~AssetManager() { clear(); }
+
+	void clear() {
+		// Objects are owned by Stage's children, but we can clear our tracking
+		objects.clear();
+	}
+
+	// 创建影片剪辑（GIF）
+	MovieClip* createMovieClip(const std::string& path) {
+		if (!stage) return nullptr;
+
+		MovieClip* clip = new MovieClip();
+		clip->id = next_object_id++;
+		clip->z_order = next_z_order++;
+		clip->player = new ClipPlayer();
+
+		if (!clip->player->load(path)) {
+			delete clip;
+			return nullptr;
+		}
+
+		stage->addChild(clip);
+		objects.push_back(clip);
+
+		// 创建对应的时间轴
+		if (timeline_system) {
+			Timeline* timeline = timeline_system->createTimeline();
+			if (timeline) {
+				std::string layer_name = "MovieClip_" + std::to_string(clip->id);
+				timeline_system->createLayer(clip->id, timeline->getId(), layer_name);
+				timeline_system->setCurrentTimelineId(timeline->getId());
+
+				// 根据GIF帧数和时长填充时间轴关键帧
+				int fc = clip->player->frameCount();
+				std::vector<int> durs;
+				for (int i = 0; i < fc; ++i) {
+				 durs.push_back(clip->player->frameDuration(i));
+				}
+				timeline_system->populateTimelineFromPlayer(timeline->getId(), fc, durs);
+			}
+		}
+
+		clip->player->source_path = path;
+		return clip;
+	}
+
+	// 创建图像（PNG、JPG等）
+	Image* createImage(const std::string& path) {
+		if (!stage) return nullptr;
+
+		Image* img = new Image();
+		img->id = next_object_id++;
+		img->z_order = next_z_order++;
+
+		if (!img->load(path)) {
+			delete img;
+			return nullptr;
+		}
+
+		stage->addChild(img);
+		objects.push_back(img);
+		img->source_path = path;
+		return img;
+	}
+
+	// 根据文件扩展名自动创建合适的对象
+	DisplayObject* createFromPath(const std::string& path) {
+		std::string lower = path;
+		for (auto& c : lower) c = (char)tolower(c);
+
+		if (lower.size() >= 4 && lower.substr(lower.size() - 4) == ".gif") {
+			return createMovieClip(path);
+		} else {
+			return createImage(path);
+		}
+	}
+
+	// 删除对象
+	void deleteObject(int object_id) {
+		for (auto it = objects.begin(); it != objects.end(); ++it) {
+			DisplayObject* obj = *it;
+			if (obj && obj->id == object_id) {
+				// 如果是MovieClip，删除对应的时间轴
+				MovieClip* clip = dynamic_cast<MovieClip*>(obj);
+				if (clip && timeline_system) {
+					TimelineLayer* layer = timeline_system->getLayer(clip->id);
+					if (layer) {
+						timeline_system->deleteTimeline(layer->getTimelineId());
+						timeline_system->deleteLayer(clip->id);
+					}
+				}
+
+				stage->removeChild(obj);
+				delete obj;
+				objects.erase(it);
+				break;
+			}
+		}
+	}
+
+	// 获取对象
+	DisplayObject* getObject(int object_id) {
+		for (auto obj : objects) {
+			if (obj && obj->id == object_id) {
+				return obj;
+			}
+		}
+		return nullptr;
+	}
+
+private:
+	Stage* stage = nullptr;
+	TimelineSystem* timeline_system = nullptr;
+	std::vector<DisplayObject*> objects;
+	int next_object_id = 0;
+	int next_z_order = 0;
+};
+
 int main(int argc, char** argv) {
 	// Initialize GLFW and create window with OpenGL context
 	if (!glfwInit()) {
@@ -714,34 +983,37 @@ int main(int argc, char** argv) {
 	// Initialize to current working directory
 	asset_library.scanDirectory(".");
 	AssetBrowser asset_browser;
-	// Simple application context to access both Stage and AssetLibrary from GLFW callbacks
-	struct AppContext { Stage* stage; AssetLibrary* assets; } app_ctx{ &stage, &asset_library };
+	
+	// Asset manager for object lifecycle management
+	AssetManager asset_manager(&stage, &stage.timeline_system);
+	
+	// Simple application context to access both Stage, AssetLibrary, and AssetManager from GLFW callbacks
+	struct AppContext { 
+		Stage* stage; 
+		AssetLibrary* assets;
+		AssetManager* asset_mgr;
+	} app_ctx{ &stage, &asset_library, &asset_manager };
 
 	asset_browser.setOnAssetSelected([&](const std::string& path) {
 		// Create or update asset entry
 		int asset_idx = asset_library.addOrUpdateAsset(path);
 
-		// Create a clip and load selected asset
-		Clip* clip = stage.createClip();
-		if (clip) {
-			if (clip->player->load(path)) {
-				// Populate timeline keyframes from clip frames
-				TimelineLayer* layer = stage.timeline_system.getLayer(clip->id);
-				if (layer) {
-					int fc = clip->player->frameCount();
-					std::vector<int> durs;
-					for (int i = 0; i < fc; ++i) durs.push_back(clip->player->frameDuration(i));
-					stage.timeline_system.populateTimelineFromPlayer(layer->getTimelineId(), fc, durs);
-					stage.timeline_system.setCurrentTimelineId(layer->getTimelineId());
-				}
-				// Update asset library with thumbnail and frame count
-				int tex = asset_library.generateThumbnail(path);
-				if (tex > 0) asset_library.setAssetTexture(asset_idx, tex);
-				asset_library.setAssetFrameCount(asset_idx, clip->player->frameCount());
-				// Record source_path on player
-				clip->player->source_path = path;
-				stage.selectClip(clip->id);
+		// Use AssetManager to create appropriate object (MovieClip or Image)
+		DisplayObject* obj = asset_manager.createFromPath(path);
+		if (obj) {
+			// Update asset library with thumbnail and frame count
+			int tex = asset_library.generateThumbnail(path);
+			if (tex > 0) asset_library.setAssetTexture(asset_idx, tex);
+
+			// Set frame count if it's a MovieClip
+			MovieClip* movie_clip = dynamic_cast<MovieClip*>(obj);
+			if (movie_clip && movie_clip->player) {
+				asset_library.setAssetFrameCount(asset_idx, movie_clip->player->frameCount());
+			} else {
+				asset_library.setAssetFrameCount(asset_idx, 1);
 			}
+
+			stage.selectObject(obj->id);
 		}
 	});
 
@@ -750,29 +1022,29 @@ int main(int argc, char** argv) {
 	glfwSetDropCallback(window, [](GLFWwindow* w, int count, const char** paths) {
 		if (count <= 0 || !paths) return;
 		AppContext* ctx = (AppContext*)glfwGetWindowUserPointer(w);
-		if (!ctx || !ctx->stage || !ctx->assets) return;
+		if (!ctx || !ctx->stage || !ctx->assets || !ctx->asset_mgr) return;
+
 		Stage* stage = ctx->stage;
 		AssetLibrary* asset_library = ctx->assets;
-		
-		Clip* clip = stage->createClip();
-		if (clip) {
-			std::string path = paths[0];
-			if (clip->player->load(path)) {
-				int asset_idx = asset_library->addOrUpdateAsset(path);
-				int tex = asset_library->generateThumbnail(path);
-				if (tex > 0) asset_library->setAssetTexture(asset_idx, tex);
-				asset_library->setAssetFrameCount(asset_idx, clip->player->frameCount());
-				TimelineLayer* layer = stage->timeline_system.getLayer(clip->id);
-				if (layer) {
-					int fc = clip->player->frameCount();
-					std::vector<int> durs;
-					for (int i = 0; i < fc; ++i) durs.push_back(clip->player->frameDuration(i));
-					stage->timeline_system.populateTimelineFromPlayer(layer->getTimelineId(), fc, durs);
-					stage->timeline_system.setCurrentTimelineId(layer->getTimelineId());
-				}
-				clip->player->source_path = path;
-				stage->selectClip(clip->id);
+		AssetManager* asset_manager = ctx->asset_mgr;
+
+		std::string path = paths[0];
+		int asset_idx = asset_library->addOrUpdateAsset(path);
+
+		// Use AssetManager to create appropriate object
+		DisplayObject* obj = asset_manager->createFromPath(path);
+		if (obj) {
+			int tex = asset_library->generateThumbnail(path);
+			if (tex > 0) asset_library->setAssetTexture(asset_idx, tex);
+
+			MovieClip* movie_clip = dynamic_cast<MovieClip*>(obj);
+			if (movie_clip && movie_clip->player) {
+				asset_library->setAssetFrameCount(asset_idx, movie_clip->player->frameCount());
+			} else {
+				asset_library->setAssetFrameCount(asset_idx, 1);
 			}
+
+			stage->selectObject(obj->id);
 		}
 	});
 
@@ -792,12 +1064,12 @@ int main(int argc, char** argv) {
 
 		// Update timeline system (advance if playing) and sync clip players
 		ImGuiIO& io_main = ImGui::GetIO();
-		double dt_ms = io_main.DeltaTime * 1000.0;
-		stage.timeline_system.update(dt_ms);
+		auto dt = ::std::chrono::milliseconds{ static_cast<int>(io_main.DeltaTime) * 1000 };
+		stage.timeline_system.update(dt);
 		if (stage.timeline_system.isPlaying()) {
 			int cf = stage.timeline_system.getCurrentFrame();
 			for (auto child : stage.children) {
-				Clip* clip = dynamic_cast<Clip*>(child);
+				MovieClip* clip = dynamic_cast<MovieClip*>(child);
 				if (clip && clip->player && clip->player->frameCount() > 0) {
 					clip->player->gotoFrame(cf % clip->player->frameCount());
 				}
@@ -842,18 +1114,19 @@ int main(int argc, char** argv) {
 
 				// 双击进入帧编辑模式
 				if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && hovered_clip_id >= 0) {
-					Clip* clip = nullptr;
+					DisplayObject* obj = nullptr;
 					for (auto child : stage.children) {
 						if (child && child->id == hovered_clip_id) {
-							clip = dynamic_cast<Clip*>(child);
+							obj = child;
 							break;
 						}
 					}
-					
+
+					MovieClip* clip = dynamic_cast<MovieClip*>(obj);
 					if (clip) {
 						double now = glfwGetTime();
 						double time_since_last = now - clip->last_click_time;
-						
+
 						if (time_since_last < 0.3) {
 							clip->editing_frames = !clip->editing_frames;
 							if (clip->editing_frames && clip->player) {
@@ -861,28 +1134,31 @@ int main(int argc, char** argv) {
 							}
 						}
 						clip->last_click_time = now;
-						stage.selectClip(hovered_clip_id);
+						stage.selectObject(hovered_clip_id);
 						dragging_clip = true;
+					} else {
+						stage.selectObject(hovered_clip_id);
 					}
 				}
 
 				// 拖动
 				if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
-					Clip* clip = nullptr;
+					DisplayObject* obj = nullptr;
 					if (hovered_clip_id >= 0) {
 						for (auto child : stage.children) {
 							if (child && child->id == hovered_clip_id) {
-								clip = dynamic_cast<Clip*>(child);
+								obj = child;
 								break;
 							}
 						}
 					}
-					
+
+					MovieClip* clip = dynamic_cast<MovieClip*>(obj);
 					if (clip && !clip->editing_frames) {
 						clip->x += io_local.MouseDelta.x / stage.zoom;
 						clip->y += io_local.MouseDelta.y / stage.zoom;
 						dragging_clip = true;
-						stage.selectClip(hovered_clip_id);
+						stage.selectObject(hovered_clip_id);
 					} else if (hovered_clip_id < 0) {
 						stage.pan_x += io_local.MouseDelta.x;
 						stage.pan_y += io_local.MouseDelta.y;
@@ -898,7 +1174,7 @@ int main(int argc, char** argv) {
 
 				// 单击选择
 				if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !dragging_clip) {
-					stage.selectClip(hovered_clip_id);
+					stage.selectObject(hovered_clip_id);
 				}
 			}
 
@@ -926,7 +1202,7 @@ int main(int argc, char** argv) {
 				stage.timeline_system.setCurrentFrame(0);
 				// sync
 				for (auto child : stage.children) {
-					Clip* clip = dynamic_cast<Clip*>(child);
+					MovieClip* clip = dynamic_cast<MovieClip*>(child);
 					if (clip && clip->player && clip->player->frameCount() > 0) {
 						clip->player->gotoFrame(0);
 					}
@@ -938,7 +1214,7 @@ int main(int argc, char** argv) {
 				stage.timeline_system.setCurrentFrame(std::max(0, current_frame - 1));
 				int cf = stage.timeline_system.getCurrentFrame();
 				for (auto child : stage.children) {
-					Clip* clip = dynamic_cast<Clip*>(child);
+					MovieClip* clip = dynamic_cast<MovieClip*>(child);
 					if (clip && clip->player && clip->player->frameCount() > 0) {
 						clip->player->gotoFrame(cf % clip->player->frameCount());
 					}
@@ -955,7 +1231,7 @@ int main(int argc, char** argv) {
 				stage.timeline_system.setCurrentFrame(std::min(total_frames - 1, current_frame + 1));
 				int cf = stage.timeline_system.getCurrentFrame();
 				for (auto child : stage.children) {
-					Clip* clip = dynamic_cast<Clip*>(child);
+					MovieClip* clip = dynamic_cast<MovieClip*>(child);
 					if (clip && clip->player && clip->player->frameCount() > 0) {
 						clip->player->gotoFrame(cf % clip->player->frameCount());
 					}
@@ -966,7 +1242,7 @@ int main(int argc, char** argv) {
 				stage.timeline_system.setPlaying(false);
 				stage.timeline_system.setCurrentFrame(total_frames - 1);
 				for (auto child : stage.children) {
-					Clip* clip = dynamic_cast<Clip*>(child);
+					MovieClip* clip = dynamic_cast<MovieClip*>(child);
 					if (clip && clip->player && clip->player->frameCount() > 0) {
 						clip->player->gotoFrame((total_frames - 1) % clip->player->frameCount());
 					}
@@ -977,7 +1253,7 @@ int main(int argc, char** argv) {
 				stage.timeline_system.setPlaying(false);
 				stage.timeline_system.setCurrentFrame(0);
 				for (auto child : stage.children) {
-					Clip* clip = dynamic_cast<Clip*>(child);
+					MovieClip* clip = dynamic_cast<MovieClip*>(child);
 					if (clip && clip->player && clip->player->frameCount() > 0) {
 						clip->player->gotoFrame(0);
 					}
@@ -993,7 +1269,7 @@ int main(int argc, char** argv) {
 				stage.timeline_system.setPlaying(false);
 				stage.timeline_system.setCurrentFrame(current_frame);
 				for (auto child : stage.children) {
-					Clip* clip = dynamic_cast<Clip*>(child);
+					MovieClip* clip = dynamic_cast<MovieClip*>(child);
 					if (clip && clip->player && clip->player->frameCount() > 0) {
 						clip->player->gotoFrame(current_frame % clip->player->frameCount());
 					}

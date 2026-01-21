@@ -35,6 +35,9 @@ public:
 	void setSelectedFrame(int frame) {
 		if (frame >= 0 && frame < frame_count) {
 			selected_frame = frame;
+			// Clear any existing range selection when a single frame is selected
+			selected_frame_range_start = -1;
+			selected_frame_range_end = -1;
 		} else if (frame == -1) {
 			selected_frame = -1;
 		}
@@ -52,29 +55,14 @@ public:
 		if (min_frame <= max_frame) {
 			selected_frame_range_start = min_frame;
 			selected_frame_range_end = max_frame;
+			// Clear single frame selection when a range is selected
+			selected_frame = -1;
 		}
 	}
 
 	int getSelectedFrameRangeStart() const { return selected_frame_range_start; }
 	int getSelectedFrameRangeEnd() const { return selected_frame_range_end; }
 	bool hasFrameRangeSelection() const { return selected_frame_range_start >= 0; }
-
-	// Keyframe duration tracking - stores duration for each keyframe
-	void setKeyframeDuration(int keyframe_id, int duration) {
-		if (duration > 0) {
-			keyframe_durations[keyframe_id] = duration;
-		}
-	}
-
-	int getKeyframeDuration(int keyframe_id) const {
-		auto it = keyframe_durations.find(keyframe_id);
-		return (it != keyframe_durations.end()) ? it->second : 1;
-	}
-
-	// Get total playback duration for a keyframe (child objects play for this many frames)
-	int getKeyframePlaybackDuration(int keyframe_id) const {
-		return getKeyframeDuration(keyframe_id);
-	}
 
 	// UI state
 	bool is_visible = true;
@@ -93,7 +81,6 @@ private:
 	int selected_frame = -1;
 	int selected_frame_range_start = -1;
 	int selected_frame_range_end = -1;
-	std::unordered_map<int, int> keyframe_durations;  // keyframe_id -> duration in frames
 };
 
 // ============================================================================
@@ -123,7 +110,7 @@ public:
 	// Rendering constants
 	static constexpr float LAYER_LABEL_WIDTH = 120.0f;
 	static constexpr float FRAME_WIDTH = 15.0f;
-	static constexpr float KEYFRAME_MARKER_SIZE = 8.0f;
+	static constexpr float KEYFRAME_MARKER_SIZE = 2.0f;
 
 	struct RenderContext {
 		ImDrawList* draw_list = nullptr;
@@ -186,7 +173,13 @@ public:
 		// Check if mouse is over timeline
 		if (mouse_pos.x < ctx.panel_pos.x || mouse_pos.x > ctx.panel_pos.x + ctx.panel_size.x ||
 			mouse_pos.y < ctx.panel_pos.y || mouse_pos.y > ctx.panel_pos.y + ctx.panel_size.y) {
-			ctx.is_dragging = false;
+			// If mouse released outside, ensure dragging stops
+			if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+				ctx.is_dragging = false;
+				ctx.dragging_layer_index = -1;
+				ctx.drag_start_frame = -1;
+				ctx.drag_end_frame = -1;
+			}
 			return;
 		}
 
@@ -203,13 +196,20 @@ public:
 			y_offset += layers[i]->height;
 		}
 
+		// If mouse released anywhere in timeline, stop dragging
+		if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && ctx.is_dragging) {
+			ctx.is_dragging = false;
+			ctx.dragging_layer_index = -1;
+			ctx.drag_start_frame = -1;
+			ctx.drag_end_frame = -1;
+		}
+
 		// Layer label selection
 		if (mouse_pos.x < label_right) {
 			if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && hovered_layer >= 0) {
 				selected_layer_index = hovered_layer;
 				layers[hovered_layer]->is_editing = true;
 			}
-			ctx.is_dragging = false;
 			return;
 		}
 
@@ -222,27 +222,25 @@ public:
 			if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
 				ctx.dragging_layer_index = hovered_layer;
 				ctx.drag_start_frame = clicked_frame;
+				ctx.drag_end_frame = clicked_frame;
 				ctx.is_dragging = true;
 				layers[hovered_layer]->setSelectedFrame(clicked_frame);
 				state.current_frame = clicked_frame;
 			}
 			// Handle drag continuation
-			else if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && ctx.is_dragging && 
-					 ctx.dragging_layer_index == hovered_layer) {
+			/*else*/ if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && ctx.is_dragging && 
+				 ctx.dragging_layer_index == hovered_layer) {
 				ctx.drag_end_frame = clicked_frame;
 				layers[hovered_layer]->setSelectedFrameRange(ctx.drag_start_frame, ctx.drag_end_frame);
 			}
-			// Handle drag release
-			else if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && ctx.is_dragging) {
-				ctx.is_dragging = false;
-			}
+			// Note: mouse release is handled above
 		}
 	}
 
 	// Overload for const RenderContext (for backward compatibility)
 	void handleMouseInput(const RenderContext& ctx_const, ImVec2 mouse_pos, TimelineState& state) {
-		RenderContext ctx = ctx_const;
-		handleMouseInput(ctx, mouse_pos, state);
+		// Forward to non-const overload so that interaction updates persist in the caller's context
+		handleMouseInput(const_cast<RenderContext&>(ctx_const), mouse_pos, state);
 	}
 
 	int getSelectedLayerIndex() const { return selected_layer_index; }
@@ -369,7 +367,7 @@ private:
 		if (timeline_id < 0) return;
 		
 		// Render keyframe markers from the provided data
-		const float KEYFRAME_MARKER_HEIGHT = layer_height * 0.5f;
+		const float KEYFRAME_MARKER_HEIGHT = layer_height * 0.8f;
 		const float KEYFRAME_MARKER_Y = timeline_start.y + (layer_height - KEYFRAME_MARKER_HEIGHT) / 2;
 		
 		// Draw duration bars for each keyframe

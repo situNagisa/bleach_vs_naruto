@@ -9,6 +9,7 @@
 #include <memory>
 #include <string>
 #include <algorithm>
+#include <chrono>
 
 // ============================================================================
 // SECTION 1: KEYFRAME DATA STRUCTURE
@@ -17,12 +18,11 @@
 struct TimelineKeyframe {
 	int id = -1;                           // Keyframe unique identifier
 	int frame_index = 0;                   // Frame index where this keyframe is placed
-	int duration = 1;                      // How many frames this keyframe lasts
 	std::vector<int> child_display_ids;    // DisplayObject IDs contained in this keyframe
 
 	TimelineKeyframe() = default;
 	TimelineKeyframe(int id, int frame_idx)
-		: id(id), frame_index(frame_idx), duration(1) {}
+		: id(id), frame_index(frame_idx) {}
 };
 
 // ============================================================================
@@ -227,12 +227,15 @@ private:
 
 class Timeline {
 public:
-	Timeline(int id, int frame_count = 120)
-		: id(id), frame_count(frame_count) {}
+	Timeline(int id)
+		: id(id) {}
 
 	int getId() const { return id; }
-	int getFrameCount() const { return frame_count; }
-	void setFrameCount(int count) { frame_count = std::max(1, count); }
+	int getFrameCount() const { return spans.empty() ? 0 : spans.back().end; }
+	void setFrameCount(int count) { 
+		if (spans.empty()) return;
+		spans.back().end = ::std::max(spans.back().start + 1, count);
+	}
 
 	// FrameSpan - represents an interval [start, end) with a keyframe at start
 	struct FrameSpan {
@@ -294,7 +297,7 @@ public:
 
 	// Create a keyframe at frame_index and ensure FrameSpan semantics
 	int createKeyframe(int frame_index, KeyframePool& pool) {
-		if (frame_index < 0 || frame_index >= frame_count) return -1;
+		assert(frame_index >= 0);
 
 		// Create keyframe in the pool
 		int kf_id = pool.createKeyframe(frame_index);
@@ -483,9 +486,9 @@ public:
 	~TimelinePool() { clear(); }
 
 	// Create timeline for a layer
-	int createTimeline(int frame_count = 120) {
+	int createTimeline() {
 		int id = next_timeline_id++;
-		timelines[id] = std::make_unique<Timeline>(id, frame_count);
+		timelines[id] = std::make_unique<Timeline>(id);
 		return id;
 	}
 
@@ -705,9 +708,9 @@ public:
 	KeyframePool& getMutableKeyframePool() { return keyframe_pool; }
 
 	// Timeline creation
-	int createTimeline(int frame_count = 120) {
+	int createTimeline() {
 		int id = next_timeline_id++;
-		timelines[id] = std::make_unique<Timeline>(id, frame_count);
+		timelines[id] = std::make_unique<Timeline>(id);
 		return id;
 	}
 
@@ -835,14 +838,14 @@ struct TimelineState {
 	int current_timeline_id = -1;  // Currently selected timeline
 	int current_frame = 0;          // Current frame for display/editing
 	bool is_playing = false;
-	double last_frame_time = 0.0;
-	float frame_duration_ms = 100.0f;  // Fixed frame duration for all timelines
+	::std::chrono::milliseconds last_frame_time{};
+	::std::chrono::milliseconds frame_duration = ::std::chrono::milliseconds(1000) / 60;  // Fixed frame duration for all timelines
 
 	void reset() {
 		current_timeline_id = -1;
 		current_frame = 0;
 		is_playing = false;
-		last_frame_time = 0.0;
+		last_frame_time = {};
 	}
 };
 

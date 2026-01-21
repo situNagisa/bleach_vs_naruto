@@ -9,6 +9,7 @@
 #include "timeline_data.h"
 #include "timeline_layer.h"
 #include <cmath>
+#include <chrono>
 
 // Forward declarations
 class Stage;
@@ -38,8 +39,8 @@ public:
 
 	// === TIMELINE POOL ACCESS ===
 
-	Timeline* createTimeline(int frame_count = 120) {
-		int timeline_id = timeline_pool->createTimeline(frame_count);
+	Timeline* createTimeline() {
+		int timeline_id = timeline_pool->createTimeline();
 		return timeline_pool->getTimeline(timeline_id);
 	}
 
@@ -164,18 +165,16 @@ public:
 			if (timeline) {
 				ctx.visible_frame_count = std::min(ctx.visible_frame_count, timeline->getFrameCount());
 
-				// Get all keyframes for this timeline
-				std::vector<int> keyframes = timeline->getAllKeyframes(*keyframe_pool);
-				ctx.visible_keyframes = keyframes;
-
-				// Populate keyframe frame positions and durations
-				for (int kf_id : keyframes) {
-					const TimelineKeyframe* kf = keyframe_pool->getKeyframe(kf_id);
-					if (kf) {
-						ctx.keyframe_frames[kf_id] = kf->frame_index;
-						ctx.keyframe_durations[kf_id] = kf->duration;
-					}
+				// Get all spans and compute duration for each keyframe
+				const auto& spans = timeline->getSpans();
+				std::vector<int> keyframes;
+				for (const auto& span : spans) {
+					keyframes.push_back(span.keyframe_id);
+					ctx.keyframe_frames[span.keyframe_id] = span.start;
+					// Duration is implicit in the span length (end - start)
+					ctx.keyframe_durations[span.keyframe_id] = span.end - span.start;
 				}
+				ctx.visible_keyframes = keyframes;
 			}
 		}
 
@@ -193,12 +192,12 @@ public:
 
 	// === UPDATE ===
 
-	void update(double delta_time) {
+	void update(::std::chrono::milliseconds delta_time) {
 		if (!state.is_playing) return;
 
 		state.last_frame_time += delta_time;
-		if (state.last_frame_time >= state.frame_duration_ms) {
-			state.last_frame_time -= state.frame_duration_ms;
+		if (state.last_frame_time >= state.frame_duration) {
+			state.last_frame_time -= state.frame_duration;
 
 			// Get current timeline
 			Timeline* timeline = getTimeline(state.current_timeline_id);
@@ -225,31 +224,41 @@ public:
 		return timeline_ui->getTimelineHeight();
 	}
 
-	// Set duration (in frames) for a keyframe
-	void setKeyframeDuration(int keyframe_id, int duration) {
-		TimelineKeyframe* kf = keyframe_pool->getKeyframe(keyframe_id);
-		if (kf) {
-			kf->duration = std::max(1, duration);
-		}
-	}
-
 	// Populate a timeline's keyframes from a player's frame durations
 	// frames_count: number of frames
-	// frame_ms: vector of milliseconds duration per frame (size may be frames_count)
+	// frame_ms: vector of milliseconds duration per frame
+	// Creates keyframes based on cumulative frame duration
 	void populateTimelineFromPlayer(int timeline_id, int frames_count, const std::vector<int>& frame_ms) {
 		Timeline* timeline = getTimeline(timeline_id);
 		if (!timeline) return;
 
+		if (frames_count <= 0) return;
+
+		// Convert frame durations (in ms) to timeline frames and accumulate positions
+		int cumulative_frame_index = 0;
 		for (int i = 0; i < frames_count; ++i) {
-			int kf_id = createKeyframe(timeline_id, i);
-			int ms = 100;
-			if (i >= 0 && i < (int)frame_ms.size()) ms = frame_ms[i];
-			// Convert milliseconds to timeline frames using the timeline state's frame duration
-			int dur_frames = 1;
-			if (state.frame_duration_ms > 0.0f) {
-				dur_frames = std::max(1, (int)std::ceil(ms / state.frame_duration_ms));
+			// Get duration in milliseconds for this frame
+			int ms = (i >= 0 && i < (int)frame_ms.size()) ? frame_ms[i] : 100;
+			
+			// Convert ms to timeline frames
+			int duration_in_frames = 1;
+			if (state.frame_duration > ::std::chrono::milliseconds{}) {
+				duration_in_frames = std::max(1, (int)std::ceil(static_cast<float>(ms) / state.frame_duration.count()));
 			}
-			setKeyframeDuration(kf_id, dur_frames);
+			
+			// Create keyframe at cumulative position
+			int kf_id = createKeyframe(timeline_id, cumulative_frame_index);
+			auto span = timeline->getFrameSpanAt(cumulative_frame_index);
+			if (span) {
+				assert(span->keyframe_id == kf_id);
+				span->end = cumulative_frame_index + duration_in_frames;
+			}
+			
+			// Move to next keyframe position (current position + duration of this frame's span)
+			cumulative_frame_index += duration_in_frames;
+			if (cumulative_frame_index > timeline->getFrameCount()) {
+				timeline->setFrameCount(cumulative_frame_index);
+			}
 		}
 	}
 
