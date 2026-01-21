@@ -15,18 +15,34 @@ namespace a_impl
 {
 	struct GifFrame {
 		SDL_Texture* tex;
-		int delay_ms;
+		::std::chrono::milliseconds delay;
 	};
 
 	struct GifPlayer {
 		std::vector<GifFrame> frames{};
+		::std::chrono::milliseconds delay{};
 		::std::size_t current = 0;
 
 		void update(::std::chrono::milliseconds delta)
 		{
 			if (frames.empty())
 				return;
-			current = (current + 1) % frames.size();
+			if (delay > delta)
+			{
+				delay -= delta;
+				return;
+			}
+			while (true)
+			{
+				delta -= delay;
+				current = (current + 1) % frames.size();
+				delay = frames[current].delay;
+				if (delay > delta)
+				{
+					delay -= delta;
+					break;
+				}
+			}
 		}
 	};
 
@@ -51,7 +67,8 @@ namespace a_impl
 
 	struct context
 	{
-		int x{}, y{};
+		float x{}, y{};
+		float vx{}, vy{};
 		int speed = 1;
 		
 		::std::unordered_map<gif_type, GifPlayer> gif_pool{
@@ -142,7 +159,7 @@ namespace a_impl
 				width * 4
 			);
 
-			out_player.frames.emplace_back(tex, delays[i]);
+			out_player.frames.emplace_back(tex, ::std::chrono::milliseconds(delays[i]));
 		}
 		::stbi_image_free(pixels);
 		::stbi_image_free(delays);
@@ -234,6 +251,16 @@ struct a_player : player
 					sm.process_event(ee::idle{});
 				}
 			}
+		}
+		auto dt = delta.count() / 1000.0f;
+		constexpr auto gravity = 3000.0f;
+		c.vy += gravity * dt;
+		c.y += c.vy * dt;
+		constexpr auto ground_y = 500.0f;
+		if (c.y >= ground_y)
+		{
+			c.y = ground_y;
+			c.vy = 0.0f;
 		}
 	}
 };

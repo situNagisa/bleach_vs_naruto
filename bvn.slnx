@@ -3,6 +3,8 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Project Path="../stdexec/stdexec.vcxproj" Id="f51388f3-a0fe-4101-afde-dd840c8fce33" />
+  <Project Path="animation_editor/animation_editor.vcxproj" Id="7d788cbd-5e4d-4d50-a95d-0c14928a5fa2" />
   <Project Path="include/bvn/bvn.vcxproj" Id="e6af628c-cf2e-4d04-ad2f-7ca45154034e" />
   <Project Path="main/main.vcxproj" Id="3d21993b-c2d2-480c-91e2-1c58bb1875d4" />
 </Solution>
