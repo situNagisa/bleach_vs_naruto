@@ -17,15 +17,12 @@
 #include "asset_manager.h"
 #include "asset_browser.h"
 
-#include "./timeline/movie_clip.h"
-#include "./timeline/system.h"
-#include "./timeline/hit_test.h"
+#include "./component/timeline/system.h"
+#include "./component/hit_test.h"
+#include "./component/movie_clip.h"
+#include "./component/check_box.h"
 
 #undef main
-
-// ============================================================================
-// SECTION 1: DATA STRUCTURES - 数据结构定义
-// ============================================================================
 
 // 单个帧的数据（纹理、尺寸、持续时间、偏移）
 struct Frame {
@@ -36,10 +33,6 @@ struct Frame {
 	float offset_x = 0.0f;   // 帧在剪辑本地坐标系中的偏移
 	float offset_y = 0.0f;
 };
-
-// ============================================================================
-// SECTION 2: CLIPPLAYER CLASS - Handles loading image sequences / animated clips
-// ============================================================================
 
 class ClipPlayer {
 public:
@@ -275,10 +268,6 @@ private:
 	double last_time = 0.0;
 	bool playing = false;
 };
-
-// ============================================================================
-// SECTION 3: DISPLAY TREE - 显示树结构（参考AS3 DisplayObject）
-// ============================================================================
 
 // 前向声明
 class DisplayObjectContainer;
@@ -993,37 +982,44 @@ constexpr void dfs(::entt::handle handle, auto f) noexcept
 }
 
 int main(int argc, char** argv) {
-	// Initialize GLFW and create window with OpenGL context
-	if (!glfwInit()) {
-		std::cerr << "glfwInit failed\n";
-		return 1;
+	{
+		// Initialize GLFW and create window with OpenGL context
+		if (!glfwInit()) {
+			std::cerr << "glfwInit failed\n";
+			return 1;
+		}
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 	}
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 	GLFWwindow* window = glfwCreateWindow(1600, 1000, "Animation Editor", NULL, NULL);
-	if (!window) {
-		std::cerr << "glfwCreateWindow failed\n";
-		glfwTerminate();
-		return 1;
+	{
+		if (!window) {
+			std::cerr << "glfwCreateWindow failed\n";
+			glfwTerminate();
+			return 1;
+		}
+		glfwMakeContextCurrent(window);
+		glfwSwapInterval(1);
+		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+			std::cerr << "Failed to initialize GLAD\n";
+			return 1;
+		}
 	}
-	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1);
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		std::cerr << "Failed to initialize GLAD\n";
-		return 1;
+	
+	{
+		// Setup ImGui
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
 	}
-
-	// Setup ImGui
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	// Enable docking
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 130");
-	ImGui::StyleColorsDark();
-
+	ImGuiIO& io = ImGui::GetIO();
+	{
+		// Enable docking
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		ImGui_ImplGlfw_InitForOpenGL(window, true);
+		ImGui_ImplOpenGL3_Init("#version 130");
+		ImGui::StyleColorsDark();
+	}
 	::entt::registry display_world{};
 	// Initialize stage
 	auto stage = ::entt::handle(display_world, display_world.create());
@@ -1065,7 +1061,7 @@ int main(int argc, char** argv) {
 				asset_library.setAssetFrameCount(asset_idx, 1);
 			}
 
-			stage.selectObject(obj->id);
+			// stage.selectObject(obj->id);
 		}
 	});
 
@@ -1156,6 +1152,7 @@ int main(int argc, char** argv) {
 
 			// === 交互处理 ===
 			if (ImGui::IsItemHovered()) {
+				/*
 				// 碰撞检测
 				hovered_clip_id = stage.hitTestStage(canvas_mx, canvas_my);
 
@@ -1223,11 +1220,20 @@ int main(int argc, char** argv) {
 				if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !dragging_clip) {
 					stage.selectObject(hovered_clip_id);
 				}
+				*/
 			}
 
 			// === 绘制 ===
 			ImDrawList* draw_list = ImGui::GetWindowDrawList();
-			stage.renderStageAxes(draw_list, canvas_pos, canvas_size);
+			// stage.renderStageAxes(draw_list, canvas_pos, canvas_size);
+			::dfs(stage, [&](::std::size_t deep, ::std::size_t index, ::entt::handle handle) noexcept
+				{
+					if (handle.any_of<movie_clip>())
+					{
+						auto&& mc = handle.get<movie_clip>();
+						mc.current_frame++;
+					}
+				});
 			stage.render(draw_list, canvas_pos, canvas_size, stage.pan_x, stage.pan_y, stage.zoom);
 
 			ImGui::End();
