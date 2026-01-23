@@ -48,9 +48,6 @@
     <None Include="TIMELINE_ENHANCEMENT_COMPLETE.md" />
     <None Include="TIMELINE_QUICK_START.md" />
     <None Include="TIMELINE_REFACTORING_SUMMARY.md" />
-    <None Include="TIMELINE_SYSTEM.md" />
-    <None Include="TIMELINE_SYSTEM_GUIDE.md" />
-    <None Include="TIMELINE_USAGE.md" />
     <None Include="TIMELINE_VISUAL_REFERENCE.md" />
     <None Include="VERIFICATION_COMPLETE.md" />
   </ItemGroup>
@@ -58,17 +55,24 @@
     <ClInclude Include="asset_browser.h" />
     <ClInclude Include="asset_manager.h" />
     <ClInclude Include="clip.h" />
+    <ClInclude Include="storage\container.h" />
+    <ClInclude Include="storage\dfs.h" />
+    <ClInclude Include="storage\display_object.h" />
+    <ClInclude Include="storage\display_object_container.h" />
+    <ClInclude Include="storage\display_tree.h" />
+    <ClInclude Include="timeline\hit_test.h" />
+    <ClInclude Include="timeline\movie_clip.h" />
     <ClInclude Include="display_object.h" />
     <ClInclude Include="display_objects.h" />
     <ClInclude Include="image.h" />
     <ClInclude Include="movie_clip.h" />
     <ClInclude Include="timeline\frame.h" />
+    <ClInclude Include="timeline\layer.h" />
+    <ClInclude Include="timeline\system.h" />
     <ClInclude Include="timeline\timeline.h" />
     <ClInclude Include="timeline_data.h" />
     <ClInclude Include="timeline_layer.h" />
     <ClInclude Include="timeline_mgmt.h" />
-    <ClInclude Include="timeline_system.h" />
-    <ClInclude Include="timeline_ui.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

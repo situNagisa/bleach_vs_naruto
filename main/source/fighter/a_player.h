@@ -38,8 +38,7 @@ namespace a_impl
 
 	struct context
 	{
-		::entt::registry* world{};
-		::entt::entity entity{world->create()};
+		::entt::handle entity{};
 		float speed = 1.0f;
 		
 		::std::unordered_map<gif_type, animation_impl::Animator> gif_pool = []
@@ -53,7 +52,7 @@ namespace a_impl
 
 		static void move(events::move m, context& self)
 		{
-			auto&& phys = self.world->get<physical_component>(self.entity);
+			auto&& phys = self.entity.get<physical_component>();
 			phys.position.x += m.dx * self.speed;
 			phys.position.y += m.dy * self.speed;
 		}
@@ -98,7 +97,7 @@ struct a_player : player
 	a_impl::context c{};
 	::boost::sml::sm<a_impl::state_machine> sm{ c };
 	a_player(fighter_scene_context& context, sdl_renderer& renderer)
-		: c{ .world = &context.world, .entity = context.world.create() }
+		: c{ .entity{ context.world, context.world.create(),  }, }
 	{
 		context.world.emplace<physical_component>(c.entity);
 		// construct animator entries and load into them

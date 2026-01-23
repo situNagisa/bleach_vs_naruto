@@ -1,4 +1,4 @@
-// Simple animation editor prototype using SDL, ImGui and stb_image
+ï»¿// Simple animation editor prototype using SDL, ImGui and stb_image
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <algorithm>
@@ -17,19 +17,23 @@
 #include "asset_manager.h"
 #include "asset_browser.h"
 
+#include "./timeline/movie_clip.h"
+#include "./timeline/system.h"
+#include "./timeline/hit_test.h"
+
 #undef main
 
 // ============================================================================
-// SECTION 1: DATA STRUCTURES - Êı¾İ½á¹¹¶¨Òå
+// SECTION 1: DATA STRUCTURES - æ•°æ®ç»“æ„å®šä¹‰
 // ============================================================================
 
-// µ¥¸öÖ¡µÄÊı¾İ£¨ÎÆÀí¡¢³ß´ç¡¢³ÖĞøÊ±¼ä¡¢Æ«ÒÆ£©
+// å•ä¸ªå¸§çš„æ•°æ®ï¼ˆçº¹ç†ã€å°ºå¯¸ã€æŒç»­æ—¶é—´ã€åç§»ï¼‰
 struct Frame {
 	unsigned int texture = 0;
 	int width = 0;
 	int height = 0;
 	int duration_ms = 100;
-	float offset_x = 0.0f;   // Ö¡ÔÚ¼ô¼­±¾µØ×ø±êÏµÖĞµÄÆ«ÒÆ
+	float offset_x = 0.0f;   // å¸§åœ¨å‰ªè¾‘æœ¬åœ°åæ ‡ç³»ä¸­çš„åç§»
 	float offset_y = 0.0f;
 };
 
@@ -273,56 +277,56 @@ private:
 };
 
 // ============================================================================
-// SECTION 3: DISPLAY TREE - ÏÔÊ¾Ê÷½á¹¹£¨²Î¿¼AS3 DisplayObject£©
+// SECTION 3: DISPLAY TREE - æ˜¾ç¤ºæ ‘ç»“æ„ï¼ˆå‚è€ƒAS3 DisplayObjectï¼‰
 // ============================================================================
 
-// Ç°ÏòÉùÃ÷
+// å‰å‘å£°æ˜
 class DisplayObjectContainer;
 
-// === DisplayObject »ùÀà - ËùÓĞ¿ÉÏÔÊ¾¶ÔÏóµÄ»ùÀà ===
+// === DisplayObject åŸºç±» - æ‰€æœ‰å¯æ˜¾ç¤ºå¯¹è±¡çš„åŸºç±» ===
 class DisplayObject {
 public:
 	virtual ~DisplayObject() {}
 
-	// === »ù´¡ÊôĞÔ ===
+	// === åŸºç¡€å±æ€§ ===
 	int id = -1;
 	float x = 0.0f;
 	float y = 0.0f;
 	float scaleX = 1.0f;
 	float scaleY = 1.0f;
 
-	// === ²ã¼¶¹ØÏµ ===
+	// === å±‚çº§å…³ç³» ===
 	int z_order = 0;
 	DisplayObjectContainer* parent = nullptr;
 
-	// === ½»»¥×´Ì¬ ===
+	// === äº¤äº’çŠ¶æ€ ===
 	bool selected = false;
 	double last_click_time = 0.0;
 
-	// === Ğé·½·¨ ===
-	virtual void update(int parent_frame = 0) = 0;  // ¸üĞÂÂß¼­£¨²¥·ÅÍ¬²½µÈ£©
+	// === è™šæ–¹æ³• ===
+	virtual void update(int parent_frame = 0) = 0;  // æ›´æ–°é€»è¾‘ï¼ˆæ’­æ”¾åŒæ­¥ç­‰ï¼‰
 	virtual void render(ImDrawList* draw_list, ImVec2 canvas_pos, ImVec2 canvas_size,
-		float stage_pan_x, float stage_pan_y, float stage_zoom) = 0;  // »æÖÆ
-	virtual int hitTest(float mx, float my) { return -1; }  // Åö×²¼ì²â£¬·µ»Ø×îÉÏ²ã¶ÔÏóµÄID»ò-1
-	virtual bool isContainer() const { return false; }  // ÊÇ·ñÎªÈİÆ÷
+		float stage_pan_x, float stage_pan_y, float stage_zoom) = 0;  // ç»˜åˆ¶
+	virtual int hitTest(float mx, float my) { return -1; }  // ç¢°æ’æ£€æµ‹ï¼Œè¿”å›æœ€ä¸Šå±‚å¯¹è±¡çš„IDæˆ–-1
+	virtual bool isContainer() const { return false; }  // æ˜¯å¦ä¸ºå®¹å™¨
 };
 
-// === DisplayObjectContainer - ¿É°üº¬ÆäËûDisplayObjectµÄÈİÆ÷ ===
+// === DisplayObjectContainer - å¯åŒ…å«å…¶ä»–DisplayObjectçš„å®¹å™¨ ===
 class DisplayObjectContainer : public DisplayObject {
 public:
 	virtual ~DisplayObjectContainer() {}
 
-	// === ×Ó¶ÔÏó¹ÜÀí ===
+	// === å­å¯¹è±¡ç®¡ç† ===
 	std::vector<DisplayObject*> children;
 
-	// Ìí¼Ó×Ó¶ÔÏó
+	// æ·»åŠ å­å¯¹è±¡
 	void addChild(DisplayObject* child) {
 		if (!child) return;
 		child->parent = this;
 		children.push_back(child);
 	}
 
-	// ÒÆ³ı×Ó¶ÔÏó
+	// ç§»é™¤å­å¯¹è±¡
 	void removeChild(DisplayObject* child) {
 		if (!child) return;
 		auto it = std::find(children.begin(), children.end(), child);
@@ -332,15 +336,15 @@ public:
 		}
 	}
 
-	// »ñÈ¡×Ó¶ÔÏóÊıÁ¿
+	// è·å–å­å¯¹è±¡æ•°é‡
 	int numChildren() const { return (int)children.size(); }
 
-	// µİ¹é¸üĞÂËùÓĞ×Ó¶ÔÏó
+	// é€’å½’æ›´æ–°æ‰€æœ‰å­å¯¹è±¡
 	virtual void update(int parent_frame = 0) override {
-		// ÏÈ¸üĞÂ×Ô¼º
+		// å…ˆæ›´æ–°è‡ªå·±
 		updateSelf(parent_frame);
 		
-		// ÔÙµİ¹é¸üĞÂËùÓĞ×Ó¶ÔÏó
+		// å†é€’å½’æ›´æ–°æ‰€æœ‰å­å¯¹è±¡
 		for (auto child : children) {
 			if (child) {
 				child->update(parent_frame);
@@ -348,13 +352,13 @@ public:
 		}
 	}
 
-	// µİ¹éäÖÈ¾ËùÓĞ×Ó¶ÔÏó
+	// é€’å½’æ¸²æŸ“æ‰€æœ‰å­å¯¹è±¡
 	virtual void render(ImDrawList* draw_list, ImVec2 canvas_pos, ImVec2 canvas_size,
 		float stage_pan_x, float stage_pan_y, float stage_zoom) override {
-		// ÏÈäÖÈ¾×Ô¼º£¨Èç¹ûÓĞÄÚÈİ£©
+		// å…ˆæ¸²æŸ“è‡ªå·±ï¼ˆå¦‚æœæœ‰å†…å®¹ï¼‰
 		renderSelf(draw_list, canvas_pos, canvas_size, stage_pan_x, stage_pan_y, stage_zoom);
 		
-		// ÔÙµİ¹éäÖÈ¾ËùÓĞ×Ó¶ÔÏó
+		// å†é€’å½’æ¸²æŸ“æ‰€æœ‰å­å¯¹è±¡
 		for (auto child : children) {
 			if (child) {
 				child->render(draw_list, canvas_pos, canvas_size, stage_pan_x, stage_pan_y, stage_zoom);
@@ -362,21 +366,21 @@ public:
 		}
 	}
 
-	// µİ¹éÅö×²¼ì²â
+	// é€’å½’ç¢°æ’æ£€æµ‹
 	virtual int hitTest(float mx, float my) override {
 		int result = -1;
 		
-		// ÏÈ¼ì²âËùÓĞ×Ó¶ÔÏó£¨´ÓºóÍùÇ°£¬È·±£¶¥²ãÓÅÏÈ£©
+		// å…ˆæ£€æµ‹æ‰€æœ‰å­å¯¹è±¡ï¼ˆä»åå¾€å‰ï¼Œç¡®ä¿é¡¶å±‚ä¼˜å…ˆï¼‰
 		for (int i = (int)children.size() - 1; i >= 0; --i) {
 			if (children[i]) {
 				int hit = children[i]->hitTest(mx, my);
 				if (hit >= 0) {
-					return hit;  // ·µ»Ø×îÏÈÅö×²µÄ£¨×îÉÏ²ã£©
+					return hit;  // è¿”å›æœ€å…ˆç¢°æ’çš„ï¼ˆæœ€ä¸Šå±‚ï¼‰
 				}
 			}
 		}
 		
-		// ÔÙ¼ì²â×Ô¼º
+		// å†æ£€æµ‹è‡ªå·±
 		result = hitTestSelf(mx, my);
 		return result;
 	}
@@ -384,20 +388,20 @@ public:
 	virtual bool isContainer() const override { return true; }
 
 protected:
-	// ×ÓÀà¿É¸²¸ÇÕâĞ©·½·¨À´ÊµÏÖ×Ô¶¨ÒåÂß¼­
+	// å­ç±»å¯è¦†ç›–è¿™äº›æ–¹æ³•æ¥å®ç°è‡ªå®šä¹‰é€»è¾‘
 	virtual void updateSelf(int parent_frame) {}
 	virtual void renderSelf(ImDrawList* draw_list, ImVec2 canvas_pos, ImVec2 canvas_size,
 		float stage_pan_x, float stage_pan_y, float stage_zoom) {}
 	virtual int hitTestSelf(float mx, float my) { return -1; }
 };
 
-// === Clip - Ó°Æ¬¼ô¼­£¨DisplayObjectContainer µÄ¾ßÌåÊµÏÖ£©===
+// === Clip - å½±ç‰‡å‰ªè¾‘ï¼ˆDisplayObjectContainer çš„å…·ä½“å®ç°ï¼‰===
 class Clip : public DisplayObjectContainer {
 public:
-	// === Ã½ÌåºÍ²¥·Å ===
+	// === åª’ä½“å’Œæ’­æ”¾ ===
 	ClipPlayer* player = nullptr;
 
-	// === Ö¡±à¼­Ä£Ê½ ===
+	// === å¸§ç¼–è¾‘æ¨¡å¼ ===
 	bool editing_frames = false;
 	int editing_frame_idx = -1;
 
@@ -409,7 +413,7 @@ protected:
 	virtual void updateSelf(int parent_frame) override {
 		if (!player) return;
 		
-		// Èç¹ûÓĞ¸¸ÈİÆ÷ÇÒ¸¸ÈİÆ÷Ò²ÊÇ Clip£¬Í¬²½µ½¸¸Ö¡
+		// å¦‚æœæœ‰çˆ¶å®¹å™¨ä¸”çˆ¶å®¹å™¨ä¹Ÿæ˜¯ Clipï¼ŒåŒæ­¥åˆ°çˆ¶å¸§
 		if (parent) {
 			Clip* parent_clip = dynamic_cast<Clip*>(parent);
 			if (parent_clip && parent_clip->player) {
@@ -419,7 +423,7 @@ protected:
 				}
 			}
 		} else {
-			// ·ñÔò¸üĞÂ×Ô¼ºµÄ²¥·Å
+			// å¦åˆ™æ›´æ–°è‡ªå·±çš„æ’­æ”¾
 			player->update();
 		}
 	}
@@ -431,11 +435,11 @@ protected:
 		Frame* f = player->getCurrentFrame();
 		if (!f) return;
 
-		// ¼ÆËãËõ·Å³ß´ç
+		// è®¡ç®—ç¼©æ”¾å°ºå¯¸
 		float scaled_w = f->width * scaleX;
 		float scaled_h = f->height * scaleY;
 
-		// ¼ÆËãÆÁÄ»×ø±ê
+		// è®¡ç®—å±å¹•åæ ‡
 		float screen_x = canvas_pos.x + stage_pan_x + (x + f->offset_x) * stage_zoom;
 		float screen_y = canvas_pos.y + stage_pan_y + (y + f->offset_y) * stage_zoom;
 		float screen_w = scaled_w * stage_zoom;
@@ -443,7 +447,7 @@ protected:
 
 		ImGui::SetCursorScreenPos(ImVec2(screen_x, screen_y));
 		
-		// »æÖÆ±ß¿ò
+		// ç»˜åˆ¶è¾¹æ¡†
 		if (selected) {
 			ImU32 border_color = editing_frames ? IM_COL32(0, 150, 255, 255) : IM_COL32(0, 255, 0, 255);
 			float border_thickness = editing_frames ? 3.0f : 2.0f;
@@ -472,24 +476,24 @@ protected:
 		float y2 = y1 + scaled_h;
 
 		if (mx >= x1 && mx < x2 && my >= y1 && my < y2) {
-			return id;  // ·µ»Ø×Ô¼ºµÄID
+			return id;  // è¿”å›è‡ªå·±çš„ID
 		}
 		return -1;
 	}
 };
 
-// === Stage - ÎèÌ¨£¨ÌØÊâµÄ DisplayObjectContainer£¬ÊÇÏÔÊ¾Ê÷µÄ¸ù£©===
+// === Stage - èˆå°ï¼ˆç‰¹æ®Šçš„ DisplayObjectContainerï¼Œæ˜¯æ˜¾ç¤ºæ ‘çš„æ ¹ï¼‰===
 class Stage : public DisplayObjectContainer {
 public:
-	// === ÎèÌ¨ÏÔÊ¾ÊôĞÔ ===
+	// === èˆå°æ˜¾ç¤ºå±æ€§ ===
 	float pan_x = 0.0f;
 	float pan_y = 0.0f;
 	float zoom = 1.0f;
 
-	// === ¶ÔÏó¹ÜÀí ===
+	// === å¯¹è±¡ç®¡ç† ===
 	int selectedClipId = -1;
 
-	// === Ê±¼äÖáÏµÍ³ ===
+	// === æ—¶é—´è½´ç³»ç»Ÿ ===
 	TimelineSystem timeline_system;
 
 	Stage() {
@@ -502,7 +506,7 @@ public:
 		timeline_system.clear();
 	}
 
-	// Ñ¡Ôñ¶ÔÏó
+	// é€‰æ‹©å¯¹è±¡
 	void selectObject(int obj_id) {
 		for (auto child : children) {
 			if (child) {
@@ -514,7 +518,7 @@ public:
 		}
 	}
 
-	// »ñÈ¡Ñ¡ÖĞµÄ¶ÔÏó
+	// è·å–é€‰ä¸­çš„å¯¹è±¡
 	DisplayObject* getSelectedObject() {
 		for (auto child : children) {
 			if (child && child->id == selectedClipId) {
@@ -524,17 +528,17 @@ public:
 		return nullptr;
 	}
 
-	// Åö×²¼ì²â£¨×ª»»×ø±êºóµİ¹éµ÷ÓÃ£©
+	// ç¢°æ’æ£€æµ‹ï¼ˆè½¬æ¢åæ ‡åé€’å½’è°ƒç”¨ï¼‰
 	int hitTestStage(float screen_mx, float screen_my) {
-		// ×ª»»µ½ÎèÌ¨×ø±êÏµ
+		// è½¬æ¢åˆ°èˆå°åæ ‡ç³»
 		float stage_mx = (screen_mx - pan_x) / zoom;
 		float stage_my = (screen_my - pan_y) / zoom;
 		
-		// µİ¹éÅö×²¼ì²â
+		// é€’å½’ç¢°æ’æ£€æµ‹
 		return hitTest(stage_mx, stage_my);
 	}
 
-	// ²ã¼¶²Ù×÷
+	// å±‚çº§æ“ä½œ
 	void raiseObject(int obj_id) {
 		for (auto child : children) {
 			if (child && child->id == obj_id) {
@@ -585,7 +589,7 @@ public:
 		}
 	}
 
-	// ÎèÌ¨ÌØÓĞ£ºäÖÈ¾×ø±êÏµ
+	// èˆå°ç‰¹æœ‰ï¼šæ¸²æŸ“åæ ‡ç³»
 	void renderStageAxes(ImDrawList* draw_list, ImVec2 canvas_pos, ImVec2 canvas_size) {
 		float grid_step = 50.0f;
 		ImU32 grid_color = IM_COL32(50, 50, 50, 100);
@@ -637,16 +641,16 @@ protected:
 	bool is_stage_root = false;
 
 	virtual void updateSelf(int parent_frame) override {
-		// ÎèÌ¨±¾ÉíÃ»ÓĞ²¥·ÅÂß¼­£¬½ö¸üĞÂ×Ó¶ÔÏó
+		// èˆå°æœ¬èº«æ²¡æœ‰æ’­æ”¾é€»è¾‘ï¼Œä»…æ›´æ–°å­å¯¹è±¡
 	}
 
 	virtual void renderSelf(ImDrawList* draw_list, ImVec2 canvas_pos, ImVec2 canvas_size,
 		float stage_pan_x, float stage_pan_y, float stage_zoom) override {
-		// ÎèÌ¨±¾Éí²»ĞèÒªäÖÈ¾£¬×ø±êÖáÔÚÍâ²¿µ¥¶ÀäÖÈ¾
+		// èˆå°æœ¬èº«ä¸éœ€è¦æ¸²æŸ“ï¼Œåæ ‡è½´åœ¨å¤–éƒ¨å•ç‹¬æ¸²æŸ“
 	}
 };
 
-// === Image - ¾²Ì¬Í¼ÏñÏÔÊ¾¶ÔÏó ===
+// === Image - é™æ€å›¾åƒæ˜¾ç¤ºå¯¹è±¡ ===
 class Image : public DisplayObject {
 public:
 	GLuint texture_id = 0;
@@ -735,7 +739,7 @@ protected:
 	}
 };
 
-// === MovieClip - Ó°Æ¬¼ô¼­£¨°üº¬¶¯»­Ö¡ºÍÊ±¼äÖá£©===
+// === MovieClip - å½±ç‰‡å‰ªè¾‘ï¼ˆåŒ…å«åŠ¨ç”»å¸§å’Œæ—¶é—´è½´ï¼‰===
 class MovieClip : public DisplayObjectContainer {
 public:
 	ClipPlayer* player = nullptr;
@@ -819,7 +823,7 @@ protected:
 	}
 };
 
-// === AssetManager - ¹ÜÀíClipºÍImage¶ÔÏóµÄÉúÃüÖÜÆÚ ===
+// === AssetManager - ç®¡ç†Clipå’ŒImageå¯¹è±¡çš„ç”Ÿå‘½å‘¨æœŸ ===
 class AssetManager {
 public:
 	AssetManager(Stage* stage, TimelineSystem* timeline_system)
@@ -832,7 +836,7 @@ public:
 		objects.clear();
 	}
 
-	// ´´½¨Ó°Æ¬¼ô¼­£¨GIF£©
+	// åˆ›å»ºå½±ç‰‡å‰ªè¾‘ï¼ˆGIFï¼‰
 	MovieClip* createMovieClip(const std::string& path) {
 		if (!stage) return nullptr;
 
@@ -849,7 +853,7 @@ public:
 		stage->addChild(clip);
 		objects.push_back(clip);
 
-		// ´´½¨¶ÔÓ¦µÄÊ±¼äÖá
+		// åˆ›å»ºå¯¹åº”çš„æ—¶é—´è½´
 		if (timeline_system) {
 			Timeline* timeline = timeline_system->createTimeline();
 			if (timeline) {
@@ -857,7 +861,7 @@ public:
 				timeline_system->createLayer(clip->id, timeline->getId(), layer_name);
 				timeline_system->setCurrentTimelineId(timeline->getId());
 
-				// ¸ù¾İGIFÖ¡ÊıºÍÊ±³¤Ìî³äÊ±¼äÖá¹Ø¼üÖ¡
+				// æ ¹æ®GIFå¸§æ•°å’Œæ—¶é•¿å¡«å……æ—¶é—´è½´å…³é”®å¸§
 				int fc = clip->player->frameCount();
 				std::vector<int> durs;
 				for (int i = 0; i < fc; ++i) {
@@ -871,7 +875,7 @@ public:
 		return clip;
 	}
 
-	// ´´½¨Í¼Ïñ£¨PNG¡¢JPGµÈ£©
+	// åˆ›å»ºå›¾åƒï¼ˆPNGã€JPGç­‰ï¼‰
 	Image* createImage(const std::string& path) {
 		if (!stage) return nullptr;
 
@@ -890,7 +894,7 @@ public:
 		return img;
 	}
 
-	// ¸ù¾İÎÄ¼şÀ©Õ¹Ãû×Ô¶¯´´½¨ºÏÊÊµÄ¶ÔÏó
+	// æ ¹æ®æ–‡ä»¶æ‰©å±•åè‡ªåŠ¨åˆ›å»ºåˆé€‚çš„å¯¹è±¡
 	DisplayObject* createFromPath(const std::string& path) {
 		std::string lower = path;
 		for (auto& c : lower) c = (char)tolower(c);
@@ -902,12 +906,12 @@ public:
 		}
 	}
 
-	// É¾³ı¶ÔÏó
+	// åˆ é™¤å¯¹è±¡
 	void deleteObject(int object_id) {
 		for (auto it = objects.begin(); it != objects.end(); ++it) {
 			DisplayObject* obj = *it;
 			if (obj && obj->id == object_id) {
-				// Èç¹ûÊÇMovieClip£¬É¾³ı¶ÔÓ¦µÄÊ±¼äÖá
+				// å¦‚æœæ˜¯MovieClipï¼Œåˆ é™¤å¯¹åº”çš„æ—¶é—´è½´
 				MovieClip* clip = dynamic_cast<MovieClip*>(obj);
 				if (clip && timeline_system) {
 					TimelineLayer* layer = timeline_system->getLayer(clip->id);
@@ -925,7 +929,7 @@ public:
 		}
 	}
 
-	// »ñÈ¡¶ÔÏó
+	// è·å–å¯¹è±¡
 	DisplayObject* getObject(int object_id) {
 		for (auto obj : objects) {
 			if (obj && obj->id == object_id) {
@@ -942,6 +946,51 @@ private:
 	int next_object_id = 0;
 	int next_z_order = 0;
 };
+
+
+constexpr void dfs_impl(timeline_system& t, movie_clip clip, ::std::size_t deep, auto f) noexcept;
+constexpr void dfs_impl(::entt::handle handle, ::std::size_t deep, auto f) noexcept
+{
+	f(deep, 0, handle);
+	if (!handle.any_of<timeline_system>())
+		return;
+	::dfs_impl(handle.get<timeline_system>(), handle.any_of<movie_clip>() ? handle.get<movie_clip>() : movie_clip{ 0 }, deep + 1, f);
+}
+
+constexpr void dfs_impl(timeline_system& t, movie_clip clip, ::std::size_t deep, auto f) noexcept
+{
+	::std::size_t i = 0;
+	auto transformer = [](auto&& o) -> ::std::optional<timeline::keyframe>
+		{
+			if (!o)
+				return ::std::nullopt;
+			switch (o->index())
+			{
+			case 0:
+				return ::std::make_optional(::std::get<0>(*o).keyframe());
+			case 1:
+				return ::std::make_optional(::std::get<1>(*o).keyframe());
+			default:
+				return ::std::nullopt;
+			}
+		};
+	for (::std::optional<timeline::keyframe> const& ff : t.frames()[clip.current_frame] | ::std::views::transform(transformer))
+	{
+		if (!ff)
+			continue;
+		for (auto h : ff->displays)
+		{
+			f(deep, i, h);
+			::dfs_impl(h, deep + 1, f);
+			++i;
+		}
+	}
+}
+
+constexpr void dfs(::entt::handle handle, auto f) noexcept
+{
+	::dfs_impl(handle, 0, f);
+}
 
 int main(int argc, char** argv) {
 	// Initialize GLFW and create window with OpenGL context
@@ -975,8 +1024,11 @@ int main(int argc, char** argv) {
 	ImGui_ImplOpenGL3_Init("#version 130");
 	ImGui::StyleColorsDark();
 
+	::entt::registry display_world{};
 	// Initialize stage
-	Stage stage;
+	auto stage = ::entt::handle(display_world, display_world.create());
+	stage.emplace<timeline_system>();
+	stage.emplace<movie_clip>();
 
 	// Asset library and browser
 	AssetLibrary asset_library;
@@ -989,10 +1041,10 @@ int main(int argc, char** argv) {
 	
 	// Simple application context to access both Stage, AssetLibrary, and AssetManager from GLFW callbacks
 	struct AppContext { 
-		Stage* stage; 
+		::entt::handle stage;
 		AssetLibrary* assets;
 		AssetManager* asset_mgr;
-	} app_ctx{ &stage, &asset_library, &asset_manager };
+	} app_ctx{ stage, &asset_library, &asset_manager };
 
 	asset_browser.setOnAssetSelected([&](const std::string& path) {
 		// Create or update asset entry
@@ -1049,15 +1101,21 @@ int main(int argc, char** argv) {
 	});
 
 	// ============================================================================
-	// MAIN LOOP - Ö÷Ñ­»·
+	// MAIN LOOP - ä¸»å¾ªç¯
 	// ============================================================================
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
-		
-		// === PHASE 1: UPDATE - ¸üĞÂÏÔÊ¾Ê÷ ===
-		stage.update();
 
-		// === PHASE 2: IMGUI FRAME - ImGuiÖ¡ ===
+		::dfs(stage, [&](::std::size_t deep, ::std::size_t index, ::entt::handle handle) noexcept
+			{
+				if (handle.any_of<movie_clip>())
+				{
+					auto&& mc = handle.get<movie_clip>();
+					mc.current_frame++;
+				}
+			});
+
+		// === PHASE 2: IMGUI FRAME - ImGuiå¸§ ===
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -1065,16 +1123,6 @@ int main(int argc, char** argv) {
 		// Update timeline system (advance if playing) and sync clip players
 		ImGuiIO& io_main = ImGui::GetIO();
 		auto dt = ::std::chrono::milliseconds{ static_cast<int>(io_main.DeltaTime) * 1000 };
-		stage.timeline_system.update(dt);
-		if (stage.timeline_system.isPlaying()) {
-			int cf = stage.timeline_system.getCurrentFrame();
-			for (auto child : stage.children) {
-				MovieClip* clip = dynamic_cast<MovieClip*>(child);
-				if (clip && clip->player && clip->player->frameCount() > 0) {
-					clip->player->gotoFrame(cf % clip->player->frameCount());
-				}
-			}
-		}
 
 		// Begin full-screen dockspace host
 		ImGuiWindowFlags host_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoBackground;
@@ -1089,8 +1137,7 @@ int main(int argc, char** argv) {
 		ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
 
-		// === PHASE 3: CANVAS RENDERING - Canvas´°¿ÚäÖÈ¾ ===
-		if (stage.numChildren() > 0) {
+		{
 			// Make Canvas a dockable window (do not force position/size)
 			ImGui::Begin("Canvas");
 
@@ -1107,13 +1154,13 @@ int main(int argc, char** argv) {
 			bool dragging_clip = false;
 			int hovered_clip_id = -1;
 
-			// === ½»»¥´¦Àí ===
+			// === äº¤äº’å¤„ç† ===
 			if (ImGui::IsItemHovered()) {
-				// Åö×²¼ì²â
+				// ç¢°æ’æ£€æµ‹
 				hovered_clip_id = stage.hitTestStage(canvas_mx, canvas_my);
 
-				// Ë«»÷½øÈëÖ¡±à¼­Ä£Ê½
-				if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && hovered_clip_id >= 0) {
+				// åŒå‡»è¿›å…¥å¸§ç¼–è¾‘æ¨¡å¼
+				if(ImGui::IsMouseClicked(ImGuiMouseButton_Left) && hovered_clip_id >= 0) {
 					DisplayObject* obj = nullptr;
 					for (auto child : stage.children) {
 						if (child && child->id == hovered_clip_id) {
@@ -1141,7 +1188,7 @@ int main(int argc, char** argv) {
 					}
 				}
 
-				// ÍÏ¶¯
+				// æ‹–åŠ¨
 				if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
 					DisplayObject* obj = nullptr;
 					if (hovered_clip_id >= 0) {
@@ -1165,20 +1212,20 @@ int main(int argc, char** argv) {
 					}
 				}
 
-				// Ëõ·Å
+				// ç¼©æ”¾
 				if (io_local.MouseWheel != 0.0f) {
 					float zoom_factor = io_local.MouseWheel > 0.0f ? 1.1f : 0.9f;
 					stage.zoom *= zoom_factor;
 					stage.zoom = std::clamp(stage.zoom, 0.1f, 10.0f);
 				}
 
-				// µ¥»÷Ñ¡Ôñ
+				// å•å‡»é€‰æ‹©
 				if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !dragging_clip) {
 					stage.selectObject(hovered_clip_id);
 				}
 			}
 
-			// === »æÖÆ ===
+			// === ç»˜åˆ¶ ===
 			ImDrawList* draw_list = ImGui::GetWindowDrawList();
 			stage.renderStageAxes(draw_list, canvas_pos, canvas_size);
 			stage.render(draw_list, canvas_pos, canvas_size, stage.pan_x, stage.pan_y, stage.zoom);
@@ -1186,7 +1233,7 @@ int main(int argc, char** argv) {
 			ImGui::End();
 		}
 
-		// === PHASE 4: TIMELINE UI - TimelineÃæ°å ===
+		// === PHASE 4: TIMELINE UI - Timelineé¢æ¿ ===
 		// Make Timeline dockable and movable
 		ImGui::Begin("Timeline");
 
@@ -1307,7 +1354,7 @@ int main(int argc, char** argv) {
 		// End dockspace host
 		ImGui::End();
 
-		// === PHASE 6: RENDERING - ×îÖÕäÖÈ¾ ===
+		// === PHASE 6: RENDERING - æœ€ç»ˆæ¸²æŸ“ ===
 		ImGui::Render();
 		int display_w, display_h;
 		glfwGetFramebufferSize(window, &display_w, &display_h);
