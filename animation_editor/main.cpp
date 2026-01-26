@@ -874,9 +874,14 @@ int main(int argc, char** argv) {
 		// select handle
 	});
 
-	// ============================================================================
-	// MAIN LOOP - 主循环
-	// ============================================================================
+	constexpr auto timeline_theme = ::aned::timeline_system::theme::visual_studio_dark();
+	::aned::controller::render_timeline_context render_timeline_context{
+		.system = ::std::addressof(app_ctx.current_stage->get<::aned::component::timeline_system>()),
+		.select_layer = ::std::addressof(app_ctx.current_stage->get<::aned::component::select_timeline_layer>()),
+		.movie_clip = ::std::addressof(app_ctx.current_stage->get<::aned::component::movie_clip>()),
+		.theme = ::std::addressof(timeline_theme),
+		.start_frame_index = 0,
+	};
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 #if 0
@@ -1015,7 +1020,7 @@ int main(int argc, char** argv) {
 
 			ImGui::End();
 		}
-
+		::ImGui::ShowDemoWindow();
 		// === PHASE 4: TIMELINE UI - Timeline面板 ===
 		// Make Timeline dockable and movable
 		ImGui::Begin("Timeline");
@@ -1130,16 +1135,11 @@ int main(int argc, char** argv) {
 			// 	//stage.timeline_system.handleMouseInput(timeline_pos, timeline_size, io2.MousePos);
 			// }
 
-			constexpr auto timeline_theme = ::aned::timeline_system::theme::visual_studio_dark();
-
-			::aned::controller::render_timeline_ui({
-				.system = ::std::addressof(app_ctx.current_stage->get<::aned::component::timeline_system>()),
-				.select_layer = ::std::addressof(app_ctx.current_stage->get<::aned::component::select_timeline_layer>()),
-				.movie_clip = ::std::addressof(app_ctx.current_stage->get<::aned::component::movie_clip>()),
-				.theme = ::std::addressof(timeline_theme),
-				.start_frame_index = 0,
-				.frame_width = 24.0f,
-			});
+			
+			render_timeline_context.system = ::std::addressof(app_ctx.current_stage->get<::aned::component::timeline_system>());
+			render_timeline_context.select_layer = ::std::addressof(app_ctx.current_stage->get<::aned::component::select_timeline_layer>());
+			render_timeline_context.movie_clip = ::std::addressof(app_ctx.current_stage->get<::aned::component::movie_clip>());
+			::aned::controller::render_timeline_ui(render_timeline_context);
 		}
 		ImGui::End();
 

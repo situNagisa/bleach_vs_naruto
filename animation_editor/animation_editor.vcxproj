@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="imgui_demo.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="stb.cpp" />
   </ItemGroup>
