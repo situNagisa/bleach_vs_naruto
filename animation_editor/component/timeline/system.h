@@ -3,6 +3,7 @@
 #include <vector>
 #include <ranges>
 #include <algorithm>
+#include <variant>
 
 #include "./timeline.h"
 #include "./layer.h"
@@ -28,6 +29,29 @@ struct timeline_system
 							}
 							return ::std::nullopt;
 						});
+				});
+	}
+	auto keyframes() const noexcept
+	{
+		using namespace ::std::views;
+		return frames()
+			| transform([](auto&& frame_views) noexcept
+				{
+					constexpr auto transformer = [](::std::optional<timeline::iterator_impl<true>::frame> const& o) -> ::std::optional<timeline::keyframe>
+						{
+							if (!o)
+								return ::std::nullopt;
+							switch (o->index())
+							{
+							case 0:
+								return ::std::make_optional(::std::get<0>(*o).keyframe());
+							case 1:
+								return ::std::make_optional(::std::get<1>(*o).keyframe());
+							default:
+								return ::std::nullopt;
+							}
+						};
+					return frame_views | transform(transformer);
 				});
 	}
 };

@@ -58,6 +58,8 @@
     <ClInclude Include="component\check_box.h" />
     <ClInclude Include="component\clip_player.h" />
     <ClInclude Include="component\image.h" />
+    <ClInclude Include="controller\render.h" />
+    <ClInclude Include="controller\timeline_system_dfs.h" />
     <ClInclude Include="storage\container.h" />
     <ClInclude Include="storage\dfs.h" />
     <ClInclude Include="storage\display_object.h" />
