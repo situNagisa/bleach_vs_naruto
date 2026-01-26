@@ -10,6 +10,7 @@
 #include <string>
 #include <iostream>
 #include <memory>
+#include <string_view>
 #include "stb_image.h"
 #include "timeline_data.h"
 #include "timeline_layer.h"
@@ -17,13 +18,20 @@
 #include "asset_manager.h"
 #include "asset_browser.h"
 
-#include "./component/timeline/system.h"
-#include "./component/hit_test.h"
-#include "./component/movie_clip.h"
-#include "./component/check_box.h"
-#include "./component/image.h"
-#include "./controller/timeline_system_dfs.h"
-#include "./controller/render.h"
+#include <entt/entt.hpp>
+
+#include "aned/loader/picture.h"
+#include "aned/loader/gif.h"
+
+#include "aned/ui/select_timeline_layer.h"
+
+#include "aned/timeline/system.h"
+#include "aned/timeline/timeline.h"
+#include "aned/movie/movie_clip.h"
+#include "aned/image/image.h"
+
+#include "aned/render_canvas.h"
+#include "aned/timeline/render_ui.h"
 
 #undef main
 
@@ -726,128 +734,13 @@ protected:
 	}
 };
 
-// === AssetManager - 管理Clip和Image对象的生命周期 ===
-class AssetManager {
-public:
-	AssetManager(Stage* stage, TimelineSystem* timeline_system)
-		: stage(stage), timeline_system(timeline_system), next_object_id(0), next_z_order(0) {}
-
-	~AssetManager() { clear(); }
-
-	void clear() {
-		// Objects are owned by Stage's children, but we can clear our tracking
-		objects.clear();
+struct entt_raii_handle : ::entt::handle
+{
+	using ::entt::handle::handle;
+	~entt_raii_handle() noexcept
+	{
+		destroy();
 	}
-
-	// 创建影片剪辑（GIF）
-	MovieClip* createMovieClip(const std::string& path) {
-		if (!stage) return nullptr;
-
-		MovieClip* clip = new MovieClip();
-		clip->id = next_object_id++;
-		clip->z_order = next_z_order++;
-		clip->player = new ClipPlayer();
-
-		if (!clip->player->load(path)) {
-			delete clip;
-			return nullptr;
-		}
-
-		stage->addChild(clip);
-		objects.push_back(clip);
-
-		// 创建对应的时间轴
-		if (timeline_system) {
-			Timeline* timeline = timeline_system->createTimeline();
-			if (timeline) {
-				std::string layer_name = "MovieClip_" + std::to_string(clip->id);
-				timeline_system->createLayer(clip->id, timeline->getId(), layer_name);
-				timeline_system->setCurrentTimelineId(timeline->getId());
-
-				// 根据GIF帧数和时长填充时间轴关键帧
-				int fc = clip->player->frameCount();
-				std::vector<int> durs;
-				for (int i = 0; i < fc; ++i) {
-				 durs.push_back(clip->player->frameDuration(i));
-				}
-				timeline_system->populateTimelineFromPlayer(timeline->getId(), fc, durs);
-			}
-		}
-
-		clip->player->source_path = path;
-		return clip;
-	}
-
-	// 创建图像（PNG、JPG等）
-	Image* createImage(const std::string& path) {
-		if (!stage) return nullptr;
-
-		Image* img = new Image();
-		img->id = next_object_id++;
-		img->z_order = next_z_order++;
-
-		if (!img->load(path)) {
-			delete img;
-			return nullptr;
-		}
-
-		stage->addChild(img);
-		objects.push_back(img);
-		img->source_path = path;
-		return img;
-	}
-
-	// 根据文件扩展名自动创建合适的对象
-	DisplayObject* createFromPath(const std::string& path) {
-		std::string lower = path;
-		for (auto& c : lower) c = (char)tolower(c);
-
-		if (lower.size() >= 4 && lower.substr(lower.size() - 4) == ".gif") {
-			return createMovieClip(path);
-		} else {
-			return createImage(path);
-		}
-	}
-
-	// 删除对象
-	void deleteObject(int object_id) {
-		for (auto it = objects.begin(); it != objects.end(); ++it) {
-			DisplayObject* obj = *it;
-			if (obj && obj->id == object_id) {
-				// 如果是MovieClip，删除对应的时间轴
-				MovieClip* clip = dynamic_cast<MovieClip*>(obj);
-				if (clip && timeline_system) {
-					TimelineLayer* layer = timeline_system->getLayer(clip->id);
-					if (layer) {
-						timeline_system->deleteTimeline(layer->getTimelineId());
-						timeline_system->deleteLayer(clip->id);
-					}
-				}
-
-				stage->removeChild(obj);
-				delete obj;
-				objects.erase(it);
-				break;
-			}
-		}
-	}
-
-	// 获取对象
-	DisplayObject* getObject(int object_id) {
-		for (auto obj : objects) {
-			if (obj && obj->id == object_id) {
-				return obj;
-			}
-		}
-		return nullptr;
-	}
-
-private:
-	Stage* stage = nullptr;
-	TimelineSystem* timeline_system = nullptr;
-	std::vector<DisplayObject*> objects;
-	int next_object_id = 0;
-	int next_z_order = 0;
 };
 
 int main(int argc, char** argv) {
@@ -892,8 +785,13 @@ int main(int argc, char** argv) {
 	::entt::registry display_world{};
 	// Initialize stage
 	auto stage = ::entt::handle(display_world, display_world.create());
-	stage.emplace<timeline_system>();
-	stage.emplace<movie_clip>();
+	{
+		auto&& system = stage.emplace<::aned::component::timeline_system>();
+		auto&& layer = system._layers.emplace_back("Main Timeline", ::aned::timeline_system::timeline());
+		layer.timeline.emplace_back();
+	}
+	stage.emplace<::aned::component::movie_clip>();
+	stage.emplace<::aned::component::select_timeline_layer>();
 
 	// Asset library and browser
 	AssetLibrary asset_library;
@@ -902,15 +800,23 @@ int main(int argc, char** argv) {
 	AssetBrowser asset_browser;
 	
 	// Asset manager for object lifecycle management
-	AssetManager asset_manager(&stage, &stage.timeline_system);
+	auto asset_manager = ::std::vector<entt_raii_handle>();
 	
 	// Simple application context to access both Stage, AssetLibrary, and AssetManager from GLFW callbacks
 	struct AppContext { 
 		::entt::handle stage;
-		AssetLibrary* assets;
-		AssetManager* asset_mgr;
-	} app_ctx{ stage, &asset_library, &asset_manager };
+		::entt::registry& display_world;
+		::entt::handle* current_stage = &stage;
+		AssetLibrary& assets;
+		decltype(asset_manager)& asset_manager;
+	} app_ctx{
+		.stage = stage,
+		.display_world = display_world,
+		.assets = asset_library,
+		.asset_manager =  asset_manager,
+	};
 
+#if 0
 	asset_browser.setOnAssetSelected([&](const std::string& path) {
 		// Create or update asset entry
 		int asset_idx = asset_library.addOrUpdateAsset(path);
@@ -933,36 +839,39 @@ int main(int argc, char** argv) {
 			// stage.selectObject(obj->id);
 		}
 	});
+#endif
 
 	// Setup drag-drop callback - use AppContext as window user pointer
 	glfwSetWindowUserPointer(window, &app_ctx);
 	glfwSetDropCallback(window, [](GLFWwindow* w, int count, const char** paths) {
 		if (count <= 0 || !paths) return;
-		AppContext* ctx = (AppContext*)glfwGetWindowUserPointer(w);
-		if (!ctx || !ctx->stage || !ctx->assets || !ctx->asset_mgr) return;
-
-		Stage* stage = ctx->stage;
-		AssetLibrary* asset_library = ctx->assets;
-		AssetManager* asset_manager = ctx->asset_mgr;
+		auto ctx = static_cast<AppContext*>(glfwGetWindowUserPointer(w));
+		if (!ctx) return;
 
 		std::string path = paths[0];
-		int asset_idx = asset_library->addOrUpdateAsset(path);
+		int asset_idx = ctx->assets.addOrUpdateAsset(path);
 
-		// Use AssetManager to create appropriate object
-		DisplayObject* obj = asset_manager->createFromPath(path);
-		if (obj) {
-			int tex = asset_library->generateThumbnail(path);
-			if (tex > 0) asset_library->setAssetTexture(asset_idx, tex);
-
-			MovieClip* movie_clip = dynamic_cast<MovieClip*>(obj);
-			if (movie_clip && movie_clip->player) {
-				asset_library->setAssetFrameCount(asset_idx, movie_clip->player->frameCount());
-			} else {
-				asset_library->setAssetFrameCount(asset_idx, 1);
-			}
-
-			stage->selectObject(obj->id);
+		auto entity = ctx->display_world.create();
+		auto&& handle = ctx->asset_manager.emplace_back(ctx->display_world, entity);
+		if (path.ends_with(".gif"))
+		{
+			auto&& system = handle.emplace<::aned::component::timeline_system>();
+			system._layers.emplace_back("hhh", ::aned::loader::gif(ctx->display_world, path));
 		}
+		else
+		{
+			handle.emplace<::aned::component::image>(::aned::loader::picture(path.c_str()));
+		}
+
+		{
+			auto&& system = ctx->current_stage->get<::aned::component::timeline_system>();
+			auto&& layer_selector = ctx->current_stage->get<::aned::component::select_timeline_layer>();
+			auto&& layer = system._layers.at(layer_selector.index);
+			auto&& frame = layer.timeline[ctx->current_stage->get<::aned::component::movie_clip>().current_frame];
+			frame.keyframe->displays.emplace_back(handle);
+		}
+		
+		// select handle
 	});
 
 	// ============================================================================
@@ -970,7 +879,7 @@ int main(int argc, char** argv) {
 	// ============================================================================
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
-
+#if 0
 		::dfs(stage, [&](::std::size_t deep, ::std::size_t index, ::entt::handle handle) noexcept
 			{
 				if (handle.any_of<movie_clip>())
@@ -979,6 +888,7 @@ int main(int argc, char** argv) {
 					mc.current_frame++;
 				}
 			});
+#endif
 
 		// === PHASE 2: IMGUI FRAME - ImGui帧 ===
 		ImGui_ImplOpenGL3_NewFrame();
@@ -1007,6 +917,11 @@ int main(int argc, char** argv) {
 			ImGui::Begin("Canvas");
 
 			ImVec2 canvas_size = ImGui::GetContentRegionAvail();
+			
+			// Ensure minimum size to avoid assertion failure
+			if (canvas_size.x < 1.0f) canvas_size.x = 1.0f;
+			if (canvas_size.y < 1.0f) canvas_size.y = 1.0f;
+			
 			ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
 
 			ImGui::InvisibleButton("canvas_drag", canvas_size);
@@ -1095,7 +1010,7 @@ int main(int argc, char** argv) {
 			// === 绘制 ===
 			ImDrawList* draw_list = ImGui::GetWindowDrawList();
 			// stage.renderStageAxes(draw_list, canvas_pos, canvas_size);
-			::render(stage);
+			::aned::controller::render_canvas(stage);
 			// stage.render(draw_list, canvas_pos, canvas_size, stage.pan_x, stage.pan_y, stage.zoom);
 
 			ImGui::End();
@@ -1107,6 +1022,7 @@ int main(int argc, char** argv) {
 
 		// Toolbar controls: first, previous, play/pause, next, last, stop, loop toggle
 		{
+#if 0
 			int current_frame = stage.timeline_system.getCurrentFrame();
 			int timeline_id = stage.timeline_system.getCurrentTimelineId();
 			Timeline* cur_tl = stage.timeline_system.getTimeline(timeline_id);
@@ -1179,8 +1095,8 @@ int main(int argc, char** argv) {
 			// Frame display and scrubber
 			ImGui::Text("Frame:");
 			ImGui::SameLine();
-			int frame_before = current_frame;
-			if (ImGui::SliderInt("##frame_scrub", &current_frame, 0, std::max(0, total_frames - 1))) {
+		 int frame_before = current_frame;
+		 if (ImGui::SliderInt("##frame_scrub", &current_frame, 0, std::max(0, total_frames - 1))) {
 				stage.timeline_system.setPlaying(false);
 				stage.timeline_system.setCurrentFrame(current_frame);
 				for (auto child : stage.children) {
@@ -1192,28 +1108,39 @@ int main(int argc, char** argv) {
 			}
 			ImGui::SameLine();
 			ImGui::Text("/%d", std::max(1, total_frames));
+#endif
 		}
 
-		if (stage.numChildren() == 0) {
-			ImGui::Text("No clip loaded. Drag and drop a GIF or image file into the window.");
-		} else {
+		{
 			// Render timeline system
-			ImDrawList* timeline_draw_list = ImGui::GetWindowDrawList();
-			ImVec2 timeline_pos = ImGui::GetCursorScreenPos();
-			ImVec2 timeline_size = ImGui::GetContentRegionAvail();
-			
-			// Create invisible button for mouse input
-			ImGui::InvisibleButton("timeline_area", timeline_size);
-			
-			// Handle mouse input for timeline
-			if (ImGui::IsItemHovered() || ImGui::IsItemActive()) {
-				ImGuiIO& io2 = ImGui::GetIO();
-				stage.timeline_system.handleMouseInput(timeline_pos, timeline_size, io2.MousePos);
-			}
-			
-			stage.timeline_system.render(timeline_draw_list, timeline_pos, timeline_size);
-		}
+			// ImDrawList* timeline_draw_list = ImGui::GetWindowDrawList();
+			// ImVec2 timeline_pos = ImGui::GetCursorScreenPos();
+			// ImVec2 timeline_size = ImGui::GetContentRegionAvail();
+			// 
+			// // Ensure minimum size to avoid assertion failure
+			// if (timeline_size.x < 1.0f) timeline_size.x = 1.0f;
+			// if (timeline_size.y < 1.0f) timeline_size.y = 1.0f;
+			// 
+			// // Create invisible button for mouse input
+			// ImGui::InvisibleButton("timeline_area", timeline_size);
+			// 
+			// // Handle mouse input for timeline
+			// if (ImGui::IsItemHovered() || ImGui::IsItemActive()) {
+			// 	ImGuiIO& io2 = ImGui::GetIO();
+			// 	//stage.timeline_system.handleMouseInput(timeline_pos, timeline_size, io2.MousePos);
+			// }
 
+			constexpr auto timeline_theme = ::aned::timeline_system::theme::visual_studio_dark();
+
+			::aned::controller::render_timeline_ui({
+				.system = ::std::addressof(app_ctx.current_stage->get<::aned::component::timeline_system>()),
+				.select_layer = ::std::addressof(app_ctx.current_stage->get<::aned::component::select_timeline_layer>()),
+				.movie_clip = ::std::addressof(app_ctx.current_stage->get<::aned::component::movie_clip>()),
+				.theme = ::std::addressof(timeline_theme),
+				.start_frame_index = 0,
+				.frame_width = 24.0f,
+			});
+		}
 		ImGui::End();
 
 		// === PHASE 5: ASSETS WINDOW - Asset Browser ===

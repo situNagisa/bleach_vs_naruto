@@ -1,0 +1,275 @@
+#pragma once
+
+#include <cstddef>
+#include <string>
+#include <ranges>
+#include <optional>
+
+#include <imgui.h>
+
+#include "../ui/select_timeline_layer.h"
+#include "../movie/movie_clip.h"
+
+#include "./system.h"
+#include "./theme.h"
+
+namespace aned::controller
+{
+	struct render_timeline_context
+	{
+		component::timeline_system const* system;
+		component::select_timeline_layer const* select_layer;
+		component::movie_clip const* movie_clip;
+		timeline_system::theme const* theme{};
+
+		// Selection state (could be extended for range selection)
+		mutable ::std::optional<::std::size_t> selected_frame;
+
+		// Frame navigation
+		::std::size_t start_frame_index{};
+		float frame_width = 15.f;  // Width of each frame cell
+	};
+
+	inline void render_timeline_ui(const render_timeline_context& context)
+	{
+		auto const& theme = *context.theme;
+
+		// ===== FRAME HEADER SECTION =====
+		{
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(theme.layout.frame_padding_x, theme.layout.frame_padding_y));
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+
+			// Header container
+			ImVec2 header_region_avail = ImGui::GetContentRegionAvail();
+			ImDrawList* draw_list = ImGui::GetWindowDrawList();
+			ImVec2 header_start = ImGui::GetCursorScreenPos();
+			
+			// Draw header background
+			ImVec2 header_end(header_start.x + header_region_avail.x, header_start.y + theme.header.height);
+			draw_list->AddRectFilled(header_start, header_end, theme.header.background);
+			draw_list->AddRect(header_start, header_end, theme.header.border, 0.0f, 0);
+
+			// Reserve space for header
+			ImGui::Dummy(ImVec2(header_region_avail.x, theme.header.height));
+
+			// Now draw frame numbers and grid lines on the header we just drew
+			{
+				// Draw vertical separator between label and timeline areas
+				float label_width = 150.0f;  // Standard label width
+				ImVec2 separator_pos(header_start.x + label_width, header_start.y);
+				draw_list->AddLine(separator_pos, ImVec2(separator_pos.x, header_end.y), theme.header.border);
+
+				// Calculate how many frames fit in the available space
+				float timeline_width = header_region_avail.x - label_width;
+				int visible_frame_count = static_cast<int>(timeline_width / context.frame_width);
+
+				// Draw frame numbers and grid lines
+				for (int i = 0; i <= visible_frame_count; ++i) {
+					float x = header_start.x + label_width + i * context.frame_width;
+					auto frame_num = context.start_frame_index + i;
+
+					// Grid line
+					auto line_color = (frame_num % theme.frame_grid.major_interval == 0) ?
+						theme.frame_grid.major_line : theme.frame_grid.minor_line;
+					draw_list->AddLine(
+						ImVec2(x, header_start.y),
+						ImVec2(x, header_end.y),
+						line_color);
+
+					// Frame number text (only for major intervals)
+					if (frame_num % theme.frame_grid.major_interval == 0) {
+						ImVec2 text_pos(x + theme.frame_number.offset_x, header_start.y + theme.frame_number.offset_y);
+						ImGui::PushID(static_cast<int>(i));
+						ImGui::SetCursorScreenPos(text_pos);
+						ImGui::TextColored(ImGui::GetStyleColorVec4(ImGuiCol_Text), "%zu", frame_num);
+						ImGui::PopID();
+					}
+				}
+			}
+
+			ImGui::PopStyleVar(2);
+		}
+
+		// ===== LAYERS CONTENT SECTION =====
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(theme.layout.frame_padding_x, theme.layout.frame_padding_y));
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, theme.layout.item_spacing));
+
+		ImVec2 content_avail = ImGui::GetContentRegionAvail();
+		float label_width = 150.0f;
+		float timeline_width = content_avail.x - label_width;
+
+		// Create a table-like layout: left panel (labels) and right panel (timeline)
+		{
+			ImGui::Columns(2, "timeline_layout", false);
+			ImGui::SetColumnWidth(0, label_width);
+
+			// ===== LEFT PANEL: LAYER LABELS =====
+			{
+				ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+				for (auto&& [index, layer] : context.system->layers() | ::std::views::enumerate) {
+					ImVec2 item_start = ImGui::GetCursorScreenPos();
+
+					// Layer background (alternating colors)
+					ImU32 bg_color = (index % 2 == 0) ? theme.layer.background_even : theme.layer.background_odd;
+					if (context.select_layer && context.select_layer->index == index)
+						bg_color = theme.layer.selected_background;
+
+					ImVec2 item_end(item_start.x + label_width, item_start.y + theme.layout.layer_height);
+					draw_list->AddRectFilled(item_start, item_end, bg_color);
+					draw_list->AddLine(ImVec2(item_end.x, item_start.y), ImVec2(item_end.x, item_end.y), theme.layer.border_right);
+
+					// Layer name text
+					ImGui::SetCursorPosX(theme.layer.label_padding_x);
+					ImGui::PushID(static_cast<int>(index));
+					ImGui::Text("%s", layer.name.c_str());
+					ImGui::PopID();
+
+					// Invisible button for selection
+					ImGui::SetCursorScreenPos(item_start);
+					ImGui::PushID(static_cast<int>(index * 100000));
+					ImGui::InvisibleButton("##layer_select", ImVec2(label_width, theme.layout.layer_height));
+					if (ImGui::IsItemClicked()) {
+						// Update selection - note: context is now non-const
+						// This would need to be handled by the caller
+					}
+					ImGui::PopID();
+
+					// Advance cursor
+					ImGui::Dummy(ImVec2(0, theme.layout.layer_height));
+				}
+			}
+
+			ImGui::NextColumn();
+
+			// ===== RIGHT PANEL: TIMELINE FRAMES =====
+			{
+				ImDrawList* draw_list = ImGui::GetWindowDrawList();
+				ImVec2 timeline_start = ImGui::GetCursorScreenPos();
+				int visible_frame_count = static_cast<int>(timeline_width / context.frame_width);
+				ImVec2 last_row_end = timeline_start;
+
+				for (auto&& [idx, layer] : context.system->layers() | ::std::views::enumerate) {
+					ImVec2 row_start = ImGui::GetCursorScreenPos();
+					ImVec2 row_end(row_start.x + timeline_width, row_start.y + theme.layout.layer_height);
+					last_row_end = row_end;
+
+					// Row background (alternating colors)
+					ImU32 bg_color = (idx % 2 == 0) ? theme.layer.background_even : theme.layer.background_odd;
+					draw_list->AddRectFilled(row_start, row_end, bg_color);
+
+					// Draw vertical grid lines
+					for (int frame_idx = 0; frame_idx <= visible_frame_count; ++frame_idx) {
+						float x = row_start.x + frame_idx * context.frame_width;
+						auto frame_num = context.start_frame_index + frame_idx;
+						auto line_color = (frame_num % theme.frame_grid.major_interval == 0) ?
+							theme.frame_grid.major_line : theme.frame_grid.minor_line;
+
+						draw_list->AddLine(
+							ImVec2(x, row_start.y),
+							ImVec2(x, row_end.y),
+							line_color);
+					}
+
+					// Draw keyframes for this layer
+					auto keyframe_marker_height = theme.layout.layer_height * theme.keyframe.height_ratio;
+					auto keyframe_marker_y = row_start.y + (theme.layout.layer_height - keyframe_marker_height) / 2;
+
+					for (auto&& [keyframe_data, duration_frame, keyframe_index] : layer.timeline._data) {
+						auto frame_offset = static_cast<long long>(keyframe_index) - static_cast<long long>(context.start_frame_index);
+						if (frame_offset < -static_cast<long long>(duration_frame.hold_frame) ||
+							frame_offset >= visible_frame_count)
+							continue;
+
+						// Draw duration bar
+						auto bar_start_x = row_start.x + std::max(0LL, frame_offset) * context.frame_width;
+						auto bar_end_x = row_start.x + std::min(static_cast<long long>(visible_frame_count),
+							frame_offset + static_cast<long long>(duration_frame.hold_frame)) * context.frame_width;
+
+						if (bar_start_x < row_start.x + visible_frame_count * context.frame_width &&
+							bar_end_x > row_start.x) {
+							draw_list->AddRectFilled(
+								ImVec2(bar_start_x + theme.keyframe.padding, keyframe_marker_y),
+								ImVec2(bar_end_x - theme.keyframe.padding, keyframe_marker_y + keyframe_marker_height),
+								theme.keyframe.duration_bar_fill);
+
+							draw_list->AddRect(
+								ImVec2(bar_start_x + theme.keyframe.padding, keyframe_marker_y),
+								ImVec2(bar_end_x - theme.keyframe.padding, keyframe_marker_y + keyframe_marker_height),
+								theme.keyframe.duration_bar_border, theme.keyframe.rounding, 0, 1.0f);
+						}
+
+						// Draw keyframe marker (diamond)
+						if (frame_offset >= -1 && frame_offset <= visible_frame_count) {
+							float marker_x = row_start.x + frame_offset * context.frame_width + context.frame_width / 2;
+							float marker_size = theme.keyframe.marker_size;
+
+							ImVec2 marker_points[] = {
+								ImVec2(marker_x, keyframe_marker_y - marker_size),
+								ImVec2(marker_x + marker_size, keyframe_marker_y),
+								ImVec2(marker_x, keyframe_marker_y + marker_size),
+								ImVec2(marker_x - marker_size, keyframe_marker_y)
+							};
+
+							draw_list->AddConvexPolyFilled(marker_points, 4, theme.keyframe.marker_fill);
+							draw_list->AddPolyline(marker_points, 4, theme.keyframe.marker_border, true, theme.keyframe.border_thickness);
+						}
+					}
+
+					// Handle frame interaction (click to select)
+					for (int frame_idx = 0; frame_idx < visible_frame_count; ++frame_idx) {
+						float frame_x = row_start.x + frame_idx * context.frame_width;
+						ImVec2 frame_pos(frame_x, row_start.y);
+						ImVec2 frame_size(context.frame_width, theme.layout.layer_height);
+
+						ImGui::PushID(static_cast<int>(idx * 10000 + frame_idx));
+						ImGui::SetCursorScreenPos(frame_pos);
+						ImGui::InvisibleButton("##frame", frame_size);
+
+						// Frame hover feedback
+						if (ImGui::IsItemHovered()) {
+							draw_list->AddRectFilled(frame_pos,
+								ImVec2(frame_pos.x + frame_size.x, frame_pos.y + frame_size.y),
+								theme.interaction.frame_hover_color);
+						}
+
+						// Frame selection feedback
+						bool is_selected = context.selected_frame.has_value() &&
+							context.selected_frame.value() == context.start_frame_index + frame_idx;
+						if (is_selected) {
+							draw_list->AddRect(frame_pos,
+								ImVec2(frame_pos.x + frame_size.x, frame_pos.y + frame_size.y),
+								theme.interaction.frame_selected_color, 0.0f, 0, 1.0f);
+						}
+
+						if (ImGui::IsItemClicked()) {
+							context.selected_frame = context.start_frame_index + frame_idx;
+						}
+
+						ImGui::PopID();
+					}
+
+					// Advance cursor
+					ImGui::Dummy(ImVec2(timeline_width, theme.layout.layer_height));
+				}
+
+				// Draw playhead across all layers
+				if (context.movie_clip && context.movie_clip->current_frame >= context.start_frame_index &&
+					context.movie_clip->current_frame < context.start_frame_index + visible_frame_count) {
+
+					float playhead_x = timeline_start.x +
+						(context.movie_clip->current_frame - context.start_frame_index) * context.frame_width;
+					ImVec2 playhead_start(playhead_x, timeline_start.y);
+					ImVec2 playhead_end(playhead_x, last_row_end.y);
+
+					draw_list->AddLine(playhead_start, playhead_end,
+						theme.playhead.color, theme.playhead.thickness);
+				}
+			}
+
+			ImGui::Columns(1);
+		}
+
+		ImGui::PopStyleVar(2);
+	}
+}

@@ -8,7 +8,7 @@
 #include "../component/movie_clip.h"
 #include "../component/image.h"
 
-constexpr void render_impl(::entt::handle handle, ::glm::mat3x3 const& parent_matrix) noexcept
+void render_impl(::entt::handle handle, ::glm::mat3x3 const& parent_matrix) noexcept
 {
 	using namespace ::std::views;
 	auto&& local_matrix = handle.any_of<::glm::mat3x3>() ? handle.get<::glm::mat3x3>() : ::glm::mat3x3(1.0f);
@@ -44,7 +44,7 @@ constexpr void render_impl(::entt::handle handle, ::glm::mat3x3 const& parent_ma
 	}
 }
 
-constexpr void render(::entt::handle handle) noexcept
+void render(::entt::handle handle) noexcept
 {
 	::render_impl(handle, ::glm::mat3x3(1.0f));
 }

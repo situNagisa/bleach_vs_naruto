@@ -16,11 +16,11 @@ struct timeline_system
 	auto frames() const noexcept
 	{
 		using namespace ::std::views;
-		auto size = ::std::ranges::max(_layers | transform(&timeline_layer::timeline) | transform(::std::ranges::size));
+		auto size = _layers.empty() ? 0 : ::std::ranges::max(_layers | transform(&timeline_layer::timeline) | transform(::std::ranges::size));
 		return iota(0u, size)
 			| transform([this](::std::size_t index) noexcept
 				{
-					return _layers | transform([index](timeline_layer const& layer) noexcept
+					return _layers | transform([index](timeline_layer const& layer) noexcept -> ::std::optional<timeline::iterator_impl<true>::frame>
 						{
 							auto&& tl = layer.timeline;
 							if (index < ::std::ranges::size(tl))
