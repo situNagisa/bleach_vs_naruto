@@ -19,6 +19,7 @@
 #include "asset_browser.h"
 
 #include <entt/entt.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "aned/loader/picture.h"
 #include "aned/loader/gif.h"
@@ -809,6 +810,8 @@ int main(int argc, char** argv) {
 		::entt::handle* current_stage = &stage;
 		AssetLibrary& assets;
 		decltype(asset_manager)& asset_manager;
+		float zoom = 1.0f;
+		ImVec2 offset{};
 	} app_ctx{
 		.stage = stage,
 		.display_world = display_world,
@@ -857,6 +860,8 @@ int main(int argc, char** argv) {
 		{
 			auto&& system = handle.emplace<::aned::component::timeline_system>();
 			system._layers.emplace_back("hhh", ::aned::loader::gif(ctx->display_world, path));
+			handle.emplace<::aned::component::movie_clip>();
+			handle.emplace<::aned::component::select_timeline_layer>();
 		}
 		else
 		{
@@ -868,8 +873,9 @@ int main(int argc, char** argv) {
 			auto&& layer_selector = ctx->current_stage->get<::aned::component::select_timeline_layer>();
 			auto&& layer = system._layers.at(layer_selector.index);
 			auto&& frame = layer.timeline[ctx->current_stage->get<::aned::component::movie_clip>().current_frame];
-			frame.keyframe->displays.emplace_back(handle);
+			ctx->current_stage = &handle;
 		}
+
 		
 		// select handle
 	});
@@ -919,7 +925,7 @@ int main(int argc, char** argv) {
 
 		{
 			// Make Canvas a dockable window (do not force position/size)
-			ImGui::Begin("Canvas");
+			ImGui::Begin("Canvas", nullptr, ImGuiWindowFlags_HorizontalScrollbar);
 
 			ImVec2 canvas_size = ImGui::GetContentRegionAvail();
 			
@@ -972,50 +978,80 @@ int main(int argc, char** argv) {
 					} else {
 						stage.selectObject(hovered_clip_id);
 					}
-				}
+				}*/
 
 				// 拖动
 				if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
 					DisplayObject* obj = nullptr;
-					if (hovered_clip_id >= 0) {
-						for (auto child : stage.children) {
-							if (child && child->id == hovered_clip_id) {
-								obj = child;
-								break;
-							}
-						}
-					}
+					// if (hovered_clip_id >= 0) {
+					// 	for (auto child : stage.children) {
+					// 		if (child && child->id == hovered_clip_id) {
+					// 			obj = child;
+					// 			break;
+					// 		}
+					// 	}
+					// }
 
-					MovieClip* clip = dynamic_cast<MovieClip*>(obj);
-					if (clip && !clip->editing_frames) {
-						clip->x += io_local.MouseDelta.x / stage.zoom;
-						clip->y += io_local.MouseDelta.y / stage.zoom;
-						dragging_clip = true;
-						stage.selectObject(hovered_clip_id);
-					} else if (hovered_clip_id < 0) {
-						stage.pan_x += io_local.MouseDelta.x;
-						stage.pan_y += io_local.MouseDelta.y;
-					}
+					// MovieClip* clip = dynamic_cast<MovieClip*>(obj);
+					// if (clip && !clip->editing_frames) {
+					// 	clip->x += io_local.MouseDelta.x / stage.zoom;
+					// 	clip->y += io_local.MouseDelta.y / stage.zoom;
+					// 	dragging_clip = true;
+					// 	stage.selectObject(hovered_clip_id);
+					// } else if (hovered_clip_id < 0) {
+					// 	stage.pan_x += io_local.MouseDelta.x;
+					// 	stage.pan_y += io_local.MouseDelta.y;
+					// }
+					app_ctx.offset.x += io_local.MouseDelta.x;
+					app_ctx.offset.y += io_local.MouseDelta.y;
 				}
 
 				// 缩放
 				if (io_local.MouseWheel != 0.0f) {
-					float zoom_factor = io_local.MouseWheel > 0.0f ? 1.1f : 0.9f;
-					stage.zoom *= zoom_factor;
-					stage.zoom = std::clamp(stage.zoom, 0.1f, 10.0f);
+					if (ImGui::GetIO().KeyCtrl)
+					{
+						float zoom_factor = io_local.MouseWheel > 0.0f ? 1.1f : 0.9f;
+						app_ctx.zoom *= zoom_factor;
+						app_ctx.zoom = ::std::clamp(app_ctx.zoom, 0.1f, 10.0f);
+					}
+					else
+					{
+						if (ImGui::GetIO().KeyShift)
+						{
+							app_ctx.offset.x += io_local.MouseWheel * 20.0f;
+						}
+						else
+						{
+							app_ctx.offset.y += io_local.MouseWheel * 20.0f;
+						}
+					}
 				}
 
 				// 单击选择
-				if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !dragging_clip) {
-					stage.selectObject(hovered_clip_id);
-				}
-				*/
+				// if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !dragging_clip) {
+				// 	stage.selectObject(hovered_clip_id);
+				// }
+				
 			}
 
 			// === 绘制 ===
 			ImDrawList* draw_list = ImGui::GetWindowDrawList();
 			// stage.renderStageAxes(draw_list, canvas_pos, canvas_size);
-			::aned::controller::render_canvas(stage);
+			{
+				auto stage_transform = ::glm::mat4x4(1.0f);
+				stage_transform = ::glm::translate(stage_transform, ::glm::vec3(app_ctx.offset.x, app_ctx.offset.y, 0.0f));
+				stage_transform = ::glm::scale(stage_transform, ::glm::vec3(app_ctx.zoom, app_ctx.zoom, 1.0f));
+				auto mat3 = ::glm::mat3(1.0f);
+				mat3[0][0] = stage_transform[0][0];
+				mat3[0][1] = stage_transform[0][1];
+				mat3[1][0] = stage_transform[1][0];
+				mat3[1][1] = stage_transform[1][1];
+				mat3[2][0] = stage_transform[3][0];
+				mat3[2][1] = stage_transform[3][1];
+				mat3[2][2] = 1.0f;
+				::aned::controller::render_canvas(stage, mat3);
+			}
+			
 			// stage.render(draw_list, canvas_pos, canvas_size, stage.pan_x, stage.pan_y, stage.zoom);
 
 			ImGui::End();

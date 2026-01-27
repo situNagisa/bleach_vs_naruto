@@ -31,7 +31,7 @@ namespace aned::loader
 		::stbi_image_free(data);
 
 		return component::image{
-			.texture{&tex, {}},
+			.texture{tex},
 			.width = static_cast<::std::size_t>(w),
 			.height = static_cast<::std::size_t>(h),
 		};

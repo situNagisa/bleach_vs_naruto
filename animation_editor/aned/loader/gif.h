@@ -122,7 +122,7 @@ namespace aned::loader
 			auto handle = ::entt::handle(registry, entity);
 			handle.emplace<component::image>(
 				component::image{
-					.texture{&tex, {}},
+					.texture{tex},
 					.width = static_cast<::std::size_t>(w),
 					.height = static_cast<::std::size_t>(h),
 				});

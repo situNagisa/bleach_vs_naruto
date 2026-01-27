@@ -36,59 +36,59 @@ namespace aned::controller
 	{
 		auto const& theme = *context.theme;
 
+		auto visible_frame_count = ::std::max<::std::size_t>(context.system->frames().size(), 1);
 		if (ImGui::BeginTable(
 			"timeline"
-			, 2
-			, ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable
+			, 1 + visible_frame_count
+			, ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_HighlightHoveredColumn | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_NoClip
 		))
 		{
-			ImGui::TableSetupColumn("folder", ImGuiTableColumnFlags_WidthFixed);
-			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
-			ImGui::TableHeadersRow();
-
-			ImGui::TableSetColumnIndex(1);
-			if (ImGui::BeginChild("timeline", ImVec2(), ImGuiChildFlags_None, ImGuiWindowFlags_NoMove))
+			ImGui::TableSetupScrollFreeze(1, 1);
+			ImGui::TableSetupColumn("folder", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide);
+			for (auto n : ::std::views::iota(0u, static_cast<::std::size_t>(visible_frame_count)))
 			{
-				auto draw_list = ImGui::GetWindowDrawList();
-				const float avail_width = ImGui::GetContentRegionAvail().x;
-				auto visible_frame_count = static_cast<int>(avail_width / context.frame_width);
-
-				// ImVec2 start_pos = ImGui::GetCursorScreenPos();
-				// ImGuiMultiSelectIO* ms_io = ImGui::BeginMultiSelect(
-				// 	ImGuiMultiSelectFlags_ClearOnEscape | ImGuiMultiSelectFlags_ClearOnClickVoid
-				// 	, context.frame_header_selection.Size
-				// 	, Items.Size
-				// );
-				// context.frame_header_selection.UserData = &context;
-				// context.frame_header_selection.AdapterIndexToStorageId = [](ImGuiSelectionBasicStorage* self_, int idx) { auto self = (render_timeline_context*)self_->UserData; return self->Items[idx].ID; };
-				// context.frame_header_selection.ApplyRequests(ms_io);
-				ImGuiMultiSelectFlags flags = ImGuiMultiSelectFlags_ClearOnEscape | ImGuiMultiSelectFlags_BoxSelect1d;
-				ImGuiMultiSelectIO* ms_io = ImGui::BeginMultiSelect(flags, context.frame_header_selection.Size, visible_frame_count);
-				context.frame_header_selection.ApplyRequests(ms_io);
-
-				ImGuiListClipper clipper;
-				clipper.Begin(visible_frame_count);
-				if (ms_io->RangeSrcItem != -1)
-					clipper.IncludeItemByIndex((int)ms_io->RangeSrcItem); // Ensure RangeSrc item is not clipped.
-				while (clipper.Step())
-				{
-					for (int n = clipper.DisplayStart; n < clipper.DisplayEnd; n++)
-					{
-						bool item_is_selected = context.frame_header_selection.Contains((ImGuiID)n);
-						ImGui::SetNextItemSelectionUserData(n);
-						auto frame_index = n + context.start_frame_index;
-						auto label = n % theme.frame_grid.major_interval ? ::std::format(".##{}", frame_index) : ::std::format("{}", frame_index);
-						ImGui::Selectable(label.c_str(), item_is_selected, {}, { context.frame_width, 0.0f });
-						ImGui::SameLine();
-					}
-					ImGui::NewLine();
-				}
-
-				ms_io = ImGui::EndMultiSelect();
-				context.frame_header_selection.ApplyRequests(ms_io);
-
+				ImGui::TableSetupColumn(
+					::std::format("##{}-0", n).c_str()
+					, ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed
+					, context.frame_width
+				);
 			}
-			ImGui::EndChild();
+			ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
+
+			ImGui::TableSetColumnIndex(0);
+			ImGui::TableHeader(ImGui::TableGetColumnName(0));
+
+			ImGuiMultiSelectFlags flags = ImGuiMultiSelectFlags_ClearOnEscape | ImGuiMultiSelectFlags_BoxSelect1d;
+			ImGuiMultiSelectIO* ms_io = ImGui::BeginMultiSelect(flags, context.frame_header_selection.Size, visible_frame_count);
+			context.frame_header_selection.ApplyRequests(ms_io);
+			for (auto n : ::std::views::iota(0u, static_cast<::std::size_t>(visible_frame_count)))
+			{
+				ImGui::TableSetColumnIndex(n + 1);
+				bool item_is_selected = context.frame_header_selection.Contains((ImGuiID)n);
+				ImGui::SetNextItemSelectionUserData(n);
+				auto frame_index = n + context.start_frame_index + 1;
+				auto label = n % theme.frame_grid.major_interval ? ::std::format("##0-{}", frame_index) : ::std::format("{}", frame_index);
+				ImGui::Selectable(label.c_str(), item_is_selected, {}, { context.frame_width, 0.f });
+			}
+			ms_io = ImGui::EndMultiSelect();
+			context.frame_header_selection.ApplyRequests(ms_io);
+
+			for (auto&& [idx, layer] : context.system->layers() | ::std::views::enumerate)
+			{
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text("%s", layer.name.c_str());
+
+				for (auto n : ::std::views::iota(0u, static_cast<::std::size_t>(layer.timeline.size())))
+				{
+					ImGui::TableSetColumnIndex(n + 1);
+					bool item_is_selected = context.frame_header_selection.Contains((ImGuiID)n);
+					ImGui::SetNextItemSelectionUserData(n);
+					auto frame_index = n + context.start_frame_index + 1;
+					auto label = ::std::format("##{}-{}", idx + 1, frame_index);
+					ImGui::Selectable(label.c_str(), item_is_selected, {}, { context.frame_width, 40.f });
+				}
+			}
 
 			ImGui::EndTable();
 		}
