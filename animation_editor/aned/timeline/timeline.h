@@ -66,7 +66,7 @@ namespace aned::timeline_system
 			{
 			}
 			constexpr bool operator==(iterator_impl const& other) const noexcept { return _tl == other._tl && _index == other._index; }
-			constexpr auto&& operator*() const noexcept
+			constexpr auto operator*() const noexcept
 			{
 				auto&& [kf, dur, psum] = _tl->_data[_current_data];
 				return frame{

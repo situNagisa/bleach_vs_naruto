@@ -3,12 +3,13 @@
 #include <cstddef>
 #include <string>
 #include <ranges>
+#include <algorithm>
 #include <optional>
 
 #include <imgui.h>
 
 #include "../ui/select_timeline_layer.h"
-#include "../movie/movie_clip.h"
+#include "../movie/play_data.h"
 
 #include "./system.h"
 #include "./theme.h"
@@ -19,7 +20,7 @@ namespace aned::controller
 	{
 		component::timeline_system const* system;
 		component::select_timeline_layer const* select_layer;
-		component::movie_clip const* movie_clip;
+		component::play_data const* play_data;
 		timeline_system::theme const* theme{};
 
 		// Selection state (could be extended for range selection)
@@ -29,7 +30,11 @@ namespace aned::controller
 		::std::size_t start_frame_index{};
 		float frame_width = 15.f;  // Width of each frame cell
 
-		ImGuiSelectionBasicStorage frame_header_selection{};
+		struct {
+			ImGuiSelectionBasicStorage frame_header{};
+			ImGuiSelectionBasicStorage frame{};
+			ImGuiSelectionBasicStorage label{};
+		} selection{};
 	};
 
 	inline void render_timeline_ui(render_timeline_context& context)
@@ -40,9 +45,14 @@ namespace aned::controller
 		if (ImGui::BeginTable(
 			"timeline"
 			, 1 + visible_frame_count
-			, ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_HighlightHoveredColumn | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_NoClip
+			, ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable
+			| ImGuiTableFlags_HighlightHoveredColumn | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_NoClip
+			| ImGuiTableFlags_NoPadInnerX | ImGuiTableFlags_NoPadOuterX
 		))
 		{
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2());
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2());
+
 			ImGui::TableSetupScrollFreeze(1, 1);
 			ImGui::TableSetupColumn("folder", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide);
 			for (auto n : ::std::views::iota(0u, static_cast<::std::size_t>(visible_frame_count)))
@@ -58,43 +68,87 @@ namespace aned::controller
 			ImGui::TableSetColumnIndex(0);
 			ImGui::TableHeader(ImGui::TableGetColumnName(0));
 
-			ImGuiMultiSelectFlags flags = ImGuiMultiSelectFlags_ClearOnEscape | ImGuiMultiSelectFlags_BoxSelect1d;
-			ImGuiMultiSelectIO* ms_io = ImGui::BeginMultiSelect(flags, context.frame_header_selection.Size, visible_frame_count);
-			context.frame_header_selection.ApplyRequests(ms_io);
+			auto flags = ImGuiMultiSelectFlags_ClearOnEscape | ImGuiMultiSelectFlags_BoxSelect1d;
+			auto fh_ms_io = ImGui::BeginMultiSelect(flags, context.selection.frame_header.Size, visible_frame_count);
+			context.selection.frame_header.ApplyRequests(fh_ms_io);
 			for (auto n : ::std::views::iota(0u, static_cast<::std::size_t>(visible_frame_count)))
 			{
 				ImGui::TableSetColumnIndex(n + 1);
-				bool item_is_selected = context.frame_header_selection.Contains((ImGuiID)n);
+				bool item_is_selected = context.selection.frame_header.Contains((ImGuiID)n);
 				ImGui::SetNextItemSelectionUserData(n);
 				auto frame_index = n + context.start_frame_index + 1;
 				auto label = n % theme.frame_grid.major_interval ? ::std::format("##0-{}", frame_index) : ::std::format("{}", frame_index);
-				ImGui::Selectable(label.c_str(), item_is_selected, {}, { context.frame_width, 0.f });
+				ImGui::Selectable(label.c_str(), item_is_selected, {}, { });
 			}
-			ms_io = ImGui::EndMultiSelect();
-			context.frame_header_selection.ApplyRequests(ms_io);
+			fh_ms_io = ImGui::EndMultiSelect();
+			context.selection.frame_header.ApplyRequests(fh_ms_io);
 
+			// auto label_ms_io = ImGui::BeginMultiSelect(flags, context.selection.label.Size, context.system->layers().size());
+			// context.selection.label.ApplyRequests(label_ms_io);
+			auto frame_size = ::std::ranges::fold_left(
+				context.system->layers() | ::std::views::transform(&timeline_system::timeline_layer::timeline) | ::std::views::transform(::std::ranges::size)
+				, 0u
+				, ::std::plus{}
+			);
+			auto frame_ms_io = ImGui::BeginMultiSelect(flags, context.selection.frame.Size, frame_size);
+			context.selection.frame.ApplyRequests(frame_ms_io);
 			for (auto&& [idx, layer] : context.system->layers() | ::std::views::enumerate)
 			{
 				ImGui::TableNextRow();
-				ImGui::TableSetColumnIndex(0);
-				ImGui::Text("%s", layer.name.c_str());
-
-				for (auto n : ::std::views::iota(0u, static_cast<::std::size_t>(layer.timeline.size())))
 				{
-					ImGui::TableSetColumnIndex(n + 1);
-					bool item_is_selected = context.frame_header_selection.Contains((ImGuiID)n);
-					ImGui::SetNextItemSelectionUserData(n);
-					auto frame_index = n + context.start_frame_index + 1;
+					ImGui::TableSetColumnIndex(0);
+					// bool item_is_selected = context.selection.label.Contains((ImGuiID)idx);
+					auto item_is_selected = false;
+					ImGui::SetNextItemSelectionUserData(idx);
+					ImGui::Selectable(layer.name.c_str(), item_is_selected, {}, { 0.f, context.theme->layout.layer_height });
+				}
+
+				for (auto [i, frame] : layer.timeline | ::std::views::enumerate)
+				{
+					ImGui::TableSetColumnIndex(i + 1);
+
+					auto region_avail = ImGui::GetContentRegionAvail();
+					auto draw_list = ImGui::GetWindowDrawList();
+					auto start = ImGui::GetCursorScreenPos();
+
+					ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, context.theme->keyframe.fill);
+
+					auto id = (static_cast<::std::size_t>(idx) << 21) | static_cast<::std::size_t>(i);
+					bool item_is_selected = context.selection.frame.Contains((ImGuiID)id);
+					ImGui::SetNextItemSelectionUserData(id);
+
+					auto frame_index = i + context.start_frame_index + 1;
 					auto label = ::std::format("##{}-{}", idx + 1, frame_index);
-					ImGui::Selectable(label.c_str(), item_is_selected, {}, { context.frame_width, 40.f });
+					ImGui::Selectable(label.c_str(), item_is_selected, {}, { context.frame_width, context.theme->layout.layer_height });
+
+					if (i == frame.keyframe_index)
+					{
+						// draw_list->AddRectFilled(
+						// 	{ start.x, start.y }
+						// 	, { start.x + region_avail.x, start.y + region_avail.y }
+						// 	, IM_COL32(255, 255, 255, 255)
+						// );
+						draw_list->AddCircleFilled(
+							{ start.x + region_avail.x / 2, start.y + context.theme->layout.layer_height / 4 }
+							, context.theme->keyframe.marker_radius
+							, context.theme->keyframe.marker_fill
+						);
+					}
 				}
 			}
+			frame_ms_io = ImGui::EndMultiSelect();
+			context.selection.frame.ApplyRequests(frame_ms_io);
+			// label_ms_io = ImGui::EndMultiSelect();
+			// context.selection.label.ApplyRequests(label_ms_io);
+
+			ImGui::PopStyleVar(2);
 
 			ImGui::EndTable();
 		}
+		return;
 		// ===== FRAME HEADER SECTION =====
 		{
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(theme.layout.frame_padding_x, theme.layout.frame_padding_y));
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2());
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
 
 			// Header container
@@ -149,8 +203,8 @@ namespace aned::controller
 		}
 
 		// ===== LAYERS CONTENT SECTION =====
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(theme.layout.frame_padding_x, theme.layout.frame_padding_y));
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, theme.layout.item_spacing));
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2());
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2());
 
 		ImVec2 content_avail = ImGui::GetContentRegionAvail();
 		float label_width = 150.0f;
@@ -230,7 +284,7 @@ namespace aned::controller
 					}
 
 					// Draw keyframes for this layer
-					auto keyframe_marker_height = theme.layout.layer_height * theme.keyframe.height_ratio;
+					auto keyframe_marker_height = theme.layout.layer_height * theme.keyframe.marker_radius;
 					auto keyframe_marker_y = row_start.y + (theme.layout.layer_height - keyframe_marker_height) / 2;
 
 					for (auto&& [keyframe_data, duration_frame, keyframe_index] : layer.timeline._data) {
@@ -247,20 +301,20 @@ namespace aned::controller
 						if (bar_start_x < row_start.x + visible_frame_count * context.frame_width &&
 							bar_end_x > row_start.x) {
 							draw_list->AddRectFilled(
-								ImVec2(bar_start_x + theme.keyframe.padding, keyframe_marker_y),
-								ImVec2(bar_end_x - theme.keyframe.padding, keyframe_marker_y + keyframe_marker_height),
-								theme.keyframe.duration_bar_fill);
+								ImVec2(bar_start_x + 0, keyframe_marker_y),
+								ImVec2(bar_end_x - 0, keyframe_marker_y + keyframe_marker_height),
+								theme.keyframe.fill);
 
 							draw_list->AddRect(
-								ImVec2(bar_start_x + theme.keyframe.padding, keyframe_marker_y),
-								ImVec2(bar_end_x - theme.keyframe.padding, keyframe_marker_y + keyframe_marker_height),
-								theme.keyframe.duration_bar_border, theme.keyframe.rounding, 0, 1.0f);
+								ImVec2(bar_start_x + 0, keyframe_marker_y),
+								ImVec2(bar_end_x - 0, keyframe_marker_y + keyframe_marker_height),
+								theme.keyframe.marker_fill, 0, 0, 1.0f);
 						}
 
 						// Draw keyframe marker (diamond)
 						if (frame_offset >= -1 && frame_offset <= visible_frame_count) {
 							float marker_x = row_start.x + frame_offset * context.frame_width + context.frame_width / 2;
-							float marker_size = theme.keyframe.marker_size;
+							float marker_size = theme.keyframe.marker_radius;
 
 							ImVec2 marker_points[] = {
 								ImVec2(marker_x, keyframe_marker_y - marker_size),
@@ -269,8 +323,8 @@ namespace aned::controller
 								ImVec2(marker_x - marker_size, keyframe_marker_y)
 							};
 
-							draw_list->AddConvexPolyFilled(marker_points, 4, theme.keyframe.marker_fill);
-							draw_list->AddPolyline(marker_points, 4, theme.keyframe.marker_border, true, theme.keyframe.border_thickness);
+							draw_list->AddConvexPolyFilled(marker_points, 4, theme.keyframe.fill);
+							draw_list->AddPolyline(marker_points, 4, theme.keyframe.marker_fill, true, 0);
 						}
 					}
 
@@ -312,11 +366,11 @@ namespace aned::controller
 				}
 
 				// Draw playhead across all layers
-				if (context.movie_clip && context.movie_clip->current_frame >= context.start_frame_index &&
-					context.movie_clip->current_frame < context.start_frame_index + visible_frame_count) {
+				if (context.play_data && context.play_data->current_frame >= context.start_frame_index &&
+					context.play_data->current_frame < context.start_frame_index + visible_frame_count) {
 
 					float playhead_x = timeline_start.x +
-						(context.movie_clip->current_frame - context.start_frame_index) * context.frame_width;
+						(context.play_data->current_frame - context.start_frame_index) * context.frame_width;
 					ImVec2 playhead_start(playhead_x, timeline_start.y);
 					ImVec2 playhead_end(playhead_x, last_row_end.y);
 

@@ -4,8 +4,9 @@
 
 namespace aned::component
 {
-	struct movie_clip
+	struct play_data
 	{
 		::std::size_t current_frame{};
+		bool play{};
 	};
 }

@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <imgui.h>
 
-#include "./movie/movie_clip.h"
+#include "./movie/play_data.h"
 #include "./image/image.h"
 
 #include "./timeline/system.h"
@@ -31,7 +31,7 @@ namespace aned::controller
 		}
 		if (handle.any_of<component::timeline_system>())
 		{
-			auto current_frame = handle.any_of<component::movie_clip>() ? handle.get<component::movie_clip>().current_frame : 0;
+			auto current_frame = handle.any_of<component::play_data>() ? handle.get<component::play_data>().current_frame : 0;
 			for (auto&& frames : handle.get<component::timeline_system>().frames() | drop(current_frame) | take(1))
 			{
 				for (auto&& ff : frames)

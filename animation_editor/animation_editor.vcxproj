@@ -39,7 +39,7 @@
     <ClInclude Include="controller\render.h" />
     <ClInclude Include="aned\render_canvas.h" />
     <ClInclude Include="aned\loader\gif.h" />
-    <ClInclude Include="aned\movie\movie_clip.h" />
+    <ClInclude Include="aned\movie\play_data.h" />
     <ClInclude Include="aned\movie\player.h" />
     <ClInclude Include="aned\opengl.h" />
     <ClInclude Include="storage\container.h" />

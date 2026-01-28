@@ -43,15 +43,9 @@ namespace aned::timeline_system
 		// Keyframe marker colors and sizes
 		struct
 		{
-			ImU32 duration_bar_fill;
-			ImU32 duration_bar_border;
+			ImU32 fill;
 			ImU32 marker_fill;
-			ImU32 marker_border;
-			float marker_size;
-			float height_ratio;
-			float border_thickness;
-			float padding;
-			float rounding;
+			float marker_radius;
 		} keyframe;
 
 		// Playhead colors
@@ -73,9 +67,6 @@ namespace aned::timeline_system
 		struct
 		{
 			float layer_height;
-			float frame_padding_x;
-			float frame_padding_y;
-			float item_spacing;
 		} layout;
 
 		// Selection and interaction
@@ -113,15 +104,9 @@ namespace aned::timeline_system
 			result.layer.border_bottom = IM_COL32(63, 63, 70, 255);
 
 			// Keyframe styling - orange accent (VS orange)
-			result.keyframe.duration_bar_fill = IM_COL32(206, 145, 120, 180);
-			result.keyframe.duration_bar_border = IM_COL32(206, 145, 120, 255);
-			result.keyframe.marker_fill = IM_COL32(220, 140, 50, 255);
-			result.keyframe.marker_border = IM_COL32(220, 140, 50, 255);
-			result.keyframe.marker_size = 2.0f;
-			result.keyframe.height_ratio = 0.8f;
-			result.keyframe.border_thickness = 1.5f;
-			result.keyframe.padding = 1.0f;
-			result.keyframe.rounding = 15.0f;
+			result.keyframe.fill = IM_COL32(128, 128, 128, 189);
+			result.keyframe.marker_fill = IM_COL32(0, 0, 0, 255);
+			result.keyframe.marker_radius = 3.f;
 
 			// Playhead - red accent
 			result.playhead.color = IM_COL32(240, 101, 101, 255);
@@ -133,10 +118,7 @@ namespace aned::timeline_system
 			result.frame_number.offset_y = 3.0f;
 
 			// Layout defaults
-			result.layout.layer_height = 24.0f;
-			result.layout.frame_padding_x = 0.0f;
-			result.layout.frame_padding_y = 0.0f;
-			result.layout.item_spacing = 0.0f;
+			result.layout.layer_height = 40.f;
 
 			// Interaction colors
 			result.interaction.frame_selected_color = IM_COL32(100, 200, 255, 200);
