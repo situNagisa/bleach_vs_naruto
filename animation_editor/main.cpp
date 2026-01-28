@@ -34,6 +34,9 @@
 #include "aned/render_canvas.h"
 #include "aned/timeline/render_ui.h"
 
+//#include "aned/hit_test/box.h"
+//#include "aned/hit_test/hit_test.h"
+
 #undef main
 
 struct entt_raii_handle : ::entt::handle
@@ -44,6 +47,8 @@ struct entt_raii_handle : ::entt::handle
 		destroy();
 	}
 };
+
+
 
 int main(int argc, char** argv) {
 	{
@@ -166,18 +171,15 @@ int main(int argc, char** argv) {
 		}
 		else
 		{
-			handle.emplace<::aned::component::image>(::aned::loader::picture(path.c_str()));
+			auto&& img = handle.emplace<::aned::component::image>(::aned::loader::picture(path.c_str()));
+			// namespace bg = ::boost::geometry;
+			// handle.emplace<::aned::component::hit_box>(
+			// 	::aned::component::hit_box{
+			// 		{bg::model::d2::point_xy<float>{}, bg::model::d2::point_xy<float>(img.width, img.height)}
+			// 	}
+			// );
 		}
 
-		{
-			auto&& system = ctx->stage->get<::aned::component::timeline_system>();
-			auto&& layer_selector = ctx->stage->get<::aned::component::select_timeline_layer>();
-			auto&& layer = system._layers.at(layer_selector.index);
-			auto&& frame = layer.timeline[ctx->stage->get<::aned::component::play_data>().current_frame];
-			ctx->stage = &handle;
-		}
-
-		
 		// select handle
 	});
 
@@ -187,8 +189,13 @@ int main(int argc, char** argv) {
 		.select_layer = ::std::addressof(app_ctx.stage->get<::aned::component::select_timeline_layer>()),
 		.play_data = ::std::addressof(app_ctx.stage->get<::aned::component::play_data>()),
 		.theme = ::std::addressof(timeline_theme),
-		.start_frame_index = 0,
 	};
+
+	using clock_type = ::std::chrono::steady_clock;
+	auto frame_rate_record = clock_type::now();
+
+	auto stage_transform_cache = ::glm::mat3x3(1.f);
+
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 #if 0
@@ -248,6 +255,93 @@ int main(int argc, char** argv) {
 
 			// === 交互处理 ===
 			if (ImGui::IsItemHovered()) {
+				// 拖动
+				if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
+					DisplayObject* obj = nullptr;
+					// if (hovered_clip_id >= 0) {
+					// 	for (auto child : stage.children) {
+					// 		if (child && child->id == hovered_clip_id) {
+					// 			obj = child;
+					// 			break;
+					// 		}
+					// 	}
+					// }
+
+					// MovieClip* clip = dynamic_cast<MovieClip*>(obj);
+					// if (clip && !clip->editing_frames) {
+					// 	clip->x += io_local.MouseDelta.x / stage.zoom;
+					// 	clip->y += io_local.MouseDelta.y / stage.zoom;
+					// 	dragging_clip = true;
+					// 	stage.selectObject(hovered_clip_id);
+					// } else if (hovered_clip_id < 0) {
+					// 	stage.pan_x += io_local.MouseDelta.x;
+					// 	stage.pan_y += io_local.MouseDelta.y;
+					// }
+					if (io_local.KeyAlt)
+					{
+						app_ctx.offset.x += io_local.MouseDelta.x;
+						app_ctx.offset.y += io_local.MouseDelta.y;
+					}
+				}
+
+				// 缩放
+				if (io_local.MouseWheel != 0.0f) {
+					if (io_local.KeyCtrl)
+					{
+						float zoom_factor = io_local.MouseWheel > 0.0f ? 1.1f : 0.9f;
+						app_ctx.zoom *= zoom_factor;
+						app_ctx.zoom = ::std::clamp(app_ctx.zoom, 0.1f, 10.0f);
+					}
+					else
+					{
+						if (io_local.KeyShift)
+						{
+							app_ctx.offset.x += io_local.MouseWheel * 20.0f;
+						}
+						else
+						{
+							app_ctx.offset.y += io_local.MouseWheel * 20.0f;
+						}
+					}
+				}
+
+				// 单击选择
+				// if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !dragging_clip) {
+				// 	stage.selectObject(hovered_clip_id);
+				// }
+
+				{
+					auto mat4 = ::glm::mat4x4(1.0f);
+					mat4 = ::glm::translate(mat4, ::glm::vec3(app_ctx.offset.x, app_ctx.offset.y, 0.0f));
+					mat4 = ::glm::scale(mat4, ::glm::vec3(app_ctx.zoom, app_ctx.zoom, 1.0f));
+					stage_transform_cache = ::glm::mat3(1.0f);
+					stage_transform_cache[0][0] = mat4[0][0];
+					stage_transform_cache[0][1] = mat4[0][1];
+					stage_transform_cache[1][0] = mat4[1][0];
+					stage_transform_cache[1][1] = mat4[1][1];
+					stage_transform_cache[2][0] = mat4[3][0];
+					stage_transform_cache[2][1] = mat4[3][1];
+					stage_transform_cache[2][2] = 1.0f;
+				}
+
+				// auto hits = ::aned::controller::hit_test(
+				// 	*app_ctx.stage
+				// 	, app_ctx.stage->get<::aned::component::play_data>().current_frame
+				// 	, ::boost::geometry::model::d2::point_xy<float>{canvas_mx, canvas_my}
+				// 	, stage_transform_cache
+				// );
+				// 
+				// if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+				// {
+				// 	for (auto&& hit : hits)
+				// 	{
+				// 		if (hit.any_of<::aned::component::timeline_system>())
+				// 		{
+				// 			app_ctx.stage = &hit;
+				// 		}
+				// 		break;
+				// 	}
+				// }
 				/*
 				// 碰撞检测
 				hovered_clip_id = stage.hitTestStage(canvas_mx, canvas_my);
@@ -280,81 +374,12 @@ int main(int argc, char** argv) {
 						stage.selectObject(hovered_clip_id);
 					}
 				}*/
-
-				// 拖动
-				if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
-					DisplayObject* obj = nullptr;
-					// if (hovered_clip_id >= 0) {
-					// 	for (auto child : stage.children) {
-					// 		if (child && child->id == hovered_clip_id) {
-					// 			obj = child;
-					// 			break;
-					// 		}
-					// 	}
-					// }
-
-					// MovieClip* clip = dynamic_cast<MovieClip*>(obj);
-					// if (clip && !clip->editing_frames) {
-					// 	clip->x += io_local.MouseDelta.x / stage.zoom;
-					// 	clip->y += io_local.MouseDelta.y / stage.zoom;
-					// 	dragging_clip = true;
-					// 	stage.selectObject(hovered_clip_id);
-					// } else if (hovered_clip_id < 0) {
-					// 	stage.pan_x += io_local.MouseDelta.x;
-					// 	stage.pan_y += io_local.MouseDelta.y;
-					// }
-					if (ImGui::IsKeyPressed(ImGuiKey_Space, false))
-					{
-						app_ctx.offset.x += io_local.MouseDelta.x;
-						app_ctx.offset.y += io_local.MouseDelta.y;
-					}
-				}
-
-				// 缩放
-				if (io_local.MouseWheel != 0.0f) {
-					if (io_local.KeyCtrl)
-					{
-						float zoom_factor = io_local.MouseWheel > 0.0f ? 1.1f : 0.9f;
-						app_ctx.zoom *= zoom_factor;
-						app_ctx.zoom = ::std::clamp(app_ctx.zoom, 0.1f, 10.0f);
-					}
-					else
-					{
-						if (io_local.KeyShift)
-						{
-							app_ctx.offset.x += io_local.MouseWheel * 20.0f;
-						}
-						else
-						{
-							app_ctx.offset.y += io_local.MouseWheel * 20.0f;
-						}
-					}
-				}
-
-				// 单击选择
-				// if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !dragging_clip) {
-				// 	stage.selectObject(hovered_clip_id);
-				// }
-				
 			}
 
 			// === 绘制 ===
 			ImDrawList* draw_list = ImGui::GetWindowDrawList();
 			// stage.renderStageAxes(draw_list, canvas_pos, canvas_size);
-			{
-				auto stage_transform = ::glm::mat4x4(1.0f);
-				stage_transform = ::glm::translate(stage_transform, ::glm::vec3(app_ctx.offset.x, app_ctx.offset.y, 0.0f));
-				stage_transform = ::glm::scale(stage_transform, ::glm::vec3(app_ctx.zoom, app_ctx.zoom, 1.0f));
-				auto mat3 = ::glm::mat3(1.0f);
-				mat3[0][0] = stage_transform[0][0];
-				mat3[0][1] = stage_transform[0][1];
-				mat3[1][0] = stage_transform[1][0];
-				mat3[1][1] = stage_transform[1][1];
-				mat3[2][0] = stage_transform[3][0];
-				mat3[2][1] = stage_transform[3][1];
-				mat3[2][2] = 1.0f;
-				::aned::controller::render_canvas(*app_ctx.stage, mat3);
-			}
+			::aned::controller::render_canvas(*app_ctx.stage, app_ctx.stage->get<::aned::component::play_data>().current_frame, stage_transform_cache);
 			
 			// stage.render(draw_list, canvas_pos, canvas_size, stage.pan_x, stage.pan_y, stage.zoom);
 
@@ -386,6 +411,10 @@ int main(int argc, char** argv) {
 			if (ImGui::Button(play_data.play ? "Pause" : "Play")) 
 			{
 				play_data.play = !play_data.play;
+				if (play_data.play)
+				{
+					play_data.current_frame = 0;
+				}
 			}
 			ImGui::SameLine();
 			if (ImGui::Button(">>")) 
@@ -403,7 +432,22 @@ int main(int argc, char** argv) {
 
 			ImGui::SameLine();
 			// Frame display and scrubber
-			ImGui::Text(::std::format("frame: {} total frames: {}", play_data.current_frame, total_frames).c_str());
+			ImGui::Text(::std::format("frame: {} total frames: {} frame rate: {}", play_data.current_frame + 1, total_frames, play_data.frame_rate).c_str());
+
+			if (play_data.play) 
+			{
+				auto now = clock_type::now();
+				auto elapsed = now - frame_rate_record;
+				if (elapsed >= ::std::chrono::milliseconds(1000 / play_data.frame_rate)) 
+				{
+					play_data.current_frame++;
+					if (play_data.current_frame >= total_frames) {
+						play_data.current_frame = total_frames - 1;
+						play_data.play = false;
+					}
+					frame_rate_record = now;
+				}
+			}
 		}
 
 		{

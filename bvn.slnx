@@ -3,7 +3,6 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="../stdexec/stdexec.vcxproj" Id="30cf5555-749d-429c-a233-de1bf2bbba72" />
   <Project Path="animation_editor/animation_editor.vcxproj" Id="7d788cbd-5e4d-4d50-a95d-0c14928a5fa2" />
   <Project Path="include/bleach_vs_naruto.vcxproj" Id="1d549c22-96b0-4d5e-8810-194350af9c58" />
   <Project Path="include/bvn/bvn.vcxproj" Id="e6af628c-cf2e-4d04-ad2f-7ca45154034e" />

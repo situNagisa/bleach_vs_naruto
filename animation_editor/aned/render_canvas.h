@@ -4,14 +4,13 @@
 #include <glm/glm.hpp>
 #include <imgui.h>
 
-#include "./movie/play_data.h"
 #include "./image/image.h"
 
 #include "./timeline/system.h"
 
 namespace aned::controller
 {
-	inline void render_canvas(::entt::handle handle, ::glm::mat3x3 const& parent_matrix = ::glm::mat3x3(1.0f)) noexcept
+	inline void render_canvas(::entt::handle handle, ::std::size_t current_frame, ::glm::mat3x3 const& parent_matrix = ::glm::mat3x3(1.0f)) noexcept
 	{
 		using namespace ::std::views;
 		auto&& local_matrix = handle.any_of<::glm::mat3x3>() ? handle.get<::glm::mat3x3>() : ::glm::mat3x3(1.0f);
@@ -31,18 +30,15 @@ namespace aned::controller
 		}
 		if (handle.any_of<component::timeline_system>())
 		{
-			auto current_frame = handle.any_of<component::play_data>() ? handle.get<component::play_data>().current_frame : 0;
-			for (auto&& frames : handle.get<component::timeline_system>().frames() | drop(current_frame) | take(1))
+			for (auto&& frames : handle.get<component::timeline_system>().frames() | join | drop(current_frame))
 			{
-				for (auto&& ff : frames)
+				if (!frames)
+					continue;
+				for (auto h : frames->keyframe->displays)
 				{
-					if (!ff)
-						continue;
-					for (auto h : ff->keyframe->displays)
-					{
-						controller::render_canvas(h, matrix);
-					}
+					controller::render_canvas(h, current_frame - frames->keyframe_index, matrix);
 				}
+				break;
 			}
 		}
 	}

@@ -16,6 +16,8 @@ namespace aned::component
 		using timeline = aned::timeline_system::timeline;
 		::std::vector<timeline_layer> _layers{};
 
+		constexpr static auto _empty_displays = ::std::span<::entt::handle const>{};
+
 		auto layers() const { return _layers | ::std::views::all; }
 		auto frames() const noexcept
 		{

@@ -18,6 +18,8 @@
 
 #include "../timeline/timeline.h"
 
+#include "../project_config.h"
+
 namespace aned::loader
 {
 	inline auto gif(::entt::registry& registry, ::std::string_view path)
@@ -116,7 +118,7 @@ namespace aned::loader
 			glBindTexture(GL_TEXTURE_2D, 0);
 
 			auto ms = ::std::chrono::milliseconds(delay_cs > 0 ? delay_cs * 10 : 100);
-			constexpr auto frame_duration = ::std::chrono::milliseconds(1000) / 60;
+			constexpr auto frame_duration = ::std::chrono::milliseconds(1000) / project_config::frame_rate;
 			auto range = result.emplace_back(::std::max(1, static_cast<int>(std::ceil(static_cast<float>(ms / frame_duration)))));
 			auto entity = registry.create();
 			auto handle = ::entt::handle(registry, entity);

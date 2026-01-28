@@ -36,8 +36,8 @@ namespace aned::timeline_system
 
 		constexpr auto _frame_at(::std::size_t index) const noexcept
 		{
-			auto it = ::std::ranges::lower_bound(_data, index, {}, &_data_type::prefix_sum);
-			return static_cast<::std::size_t>(::std::ranges::distance(_data.begin(), it));
+			auto it = ::std::ranges::upper_bound(_data, index, {}, &_data_type::prefix_sum);
+			return static_cast<::std::size_t>(::std::ranges::distance(_data.begin(), ::std::ranges::prev(it)));
 		}
 
 		template<bool Const>
