@@ -34,8 +34,8 @@
 #include "aned/render_canvas.h"
 #include "aned/timeline/render_ui.h"
 
-//#include "aned/hit_test/box.h"
-//#include "aned/hit_test/hit_test.h"
+#include "aned/hit_test/box.h"
+#include "aned/hit_test/hit_test.h"
 
 #undef main
 
@@ -165,19 +165,40 @@ int main(int argc, char** argv) {
 		if (path.ends_with(".gif"))
 		{
 			auto&& system = handle.emplace<::aned::component::timeline_system>();
-			system._layers.emplace_back("hhh", ::aned::loader::gif(ctx->display_world, path));
+			auto&& layer = system._layers.emplace_back("hhh", ::aned::loader::gif(ctx->display_world, path));
 			handle.emplace<::aned::component::play_data>();
 			handle.emplace<::aned::component::select_timeline_layer>();
+
+			for (auto&& frame : layer.timeline._data)
+			{
+				for (auto&& h : frame.keyframe.displays)
+				{
+					auto&& img = h.get<::aned::component::image>();
+					namespace bg = ::boost::geometry;
+					h.emplace<::aned::component::hit_box>(
+						::aned::component::hit_box{
+							{bg::model::d2::point_xy<float>{}, bg::model::d2::point_xy<float>(img.width, img.height)}
+						}
+					);
+				}
+			}
 		}
 		else
 		{
 			auto&& img = handle.emplace<::aned::component::image>(::aned::loader::picture(path.c_str()));
-			// namespace bg = ::boost::geometry;
-			// handle.emplace<::aned::component::hit_box>(
-			// 	::aned::component::hit_box{
-			// 		{bg::model::d2::point_xy<float>{}, bg::model::d2::point_xy<float>(img.width, img.height)}
-			// 	}
-			// );
+			namespace bg = ::boost::geometry;
+			handle.emplace<::aned::component::hit_box>(
+				::aned::component::hit_box{
+					{bg::model::d2::point_xy<float>{}, bg::model::d2::point_xy<float>(img.width, img.height)}
+				}
+			);
+		}
+		{
+			auto&& system = ctx->stage->get<::aned::component::timeline_system>();
+			auto&& layer_selector = ctx->stage->get<::aned::component::select_timeline_layer>();
+			auto&& layer = system._layers.at(layer_selector.index);
+			auto&& frame = layer.timeline[ctx->stage->get<::aned::component::play_data>().current_frame];
+			frame.keyframe->displays.push_back(handle);
 		}
 
 		// select handle
@@ -324,24 +345,26 @@ int main(int argc, char** argv) {
 					stage_transform_cache[2][2] = 1.0f;
 				}
 
-				// auto hits = ::aned::controller::hit_test(
-				// 	*app_ctx.stage
-				// 	, app_ctx.stage->get<::aned::component::play_data>().current_frame
-				// 	, ::boost::geometry::model::d2::point_xy<float>{canvas_mx, canvas_my}
-				// 	, stage_transform_cache
-				// );
-				// 
-				// if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-				// {
-				// 	for (auto&& hit : hits)
-				// 	{
-				// 		if (hit.any_of<::aned::component::timeline_system>())
-				// 		{
-				// 			app_ctx.stage = &hit;
-				// 		}
-				// 		break;
-				// 	}
-				// }
+				
+				if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+				{
+
+					auto hits = ::aned::controller::hit_test(
+						*app_ctx.stage
+						, app_ctx.stage->get<::aned::component::play_data>().current_frame
+						, ::boost::geometry::model::d2::point_xy<float>{canvas_mx, canvas_my}
+					, stage_transform_cache
+						);
+
+					for (auto&& hit : hits)
+					{
+						if (hit.any_of<::aned::component::timeline_system>())
+						{
+							app_ctx.stage = &hit;
+						}
+						break;
+					}
+				}
 				/*
 				// 碰撞检测
 				hovered_clip_id = stage.hitTestStage(canvas_mx, canvas_my);
