@@ -8,4 +8,5 @@ namespace aned::component
 	{
 		::boost::geometry::model::box<::boost::geometry::model::d2::point_xy<float>> box;
 	};
+	struct hit_box_depend_children_tag{};
 }

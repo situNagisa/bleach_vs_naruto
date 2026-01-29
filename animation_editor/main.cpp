@@ -50,7 +50,8 @@ struct entt_raii_handle : ::entt::handle
 
 
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
 	{
 		// Initialize GLFW and create window with OpenGL context
 		if (!glfwInit()) {
@@ -113,7 +114,7 @@ int main(int argc, char** argv) {
 	struct AppContext { 
 		::entt::handle root;
 		::entt::registry& display_world;
-		::entt::handle* stage = &root;
+		::entt::handle stage = root;
 		AssetLibrary& assets;
 		decltype(asset_manager)& asset_manager;
 		float zoom = 1.0f;
@@ -194,10 +195,10 @@ int main(int argc, char** argv) {
 			);
 		}
 		{
-			auto&& system = ctx->stage->get<::aned::component::timeline_system>();
-			auto&& layer_selector = ctx->stage->get<::aned::component::select_timeline_layer>();
+			auto&& system = ctx->stage.get<::aned::component::timeline_system>();
+			auto&& layer_selector = ctx->stage.get<::aned::component::select_timeline_layer>();
 			auto&& layer = system._layers.at(layer_selector.index);
-			auto&& frame = layer.timeline[ctx->stage->get<::aned::component::play_data>().current_frame];
+			auto&& frame = layer.timeline[ctx->stage.get<::aned::component::play_data>().current_frame];
 			frame.keyframe->displays.push_back(handle);
 		}
 
@@ -206,9 +207,9 @@ int main(int argc, char** argv) {
 
 	constexpr auto timeline_theme = ::aned::timeline_system::theme::visual_studio_dark();
 	::aned::controller::render_timeline_context render_timeline_context{
-		.system = ::std::addressof(app_ctx.stage->get<::aned::component::timeline_system>()),
-		.select_layer = ::std::addressof(app_ctx.stage->get<::aned::component::select_timeline_layer>()),
-		.play_data = ::std::addressof(app_ctx.stage->get<::aned::component::play_data>()),
+		.system = ::std::addressof(app_ctx.stage.get<::aned::component::timeline_system>()),
+		.select_layer = ::std::addressof(app_ctx.stage.get<::aned::component::select_timeline_layer>()),
+		.play_data = ::std::addressof(app_ctx.stage.get<::aned::component::play_data>()),
 		.theme = ::std::addressof(timeline_theme),
 	};
 
@@ -346,23 +347,24 @@ int main(int argc, char** argv) {
 				}
 
 				
-				if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+				if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 				{
-
-					auto hits = ::aned::controller::hit_test(
-						*app_ctx.stage
-						, app_ctx.stage->get<::aned::component::play_data>().current_frame
-						, ::boost::geometry::model::d2::point_xy<float>{canvas_mx, canvas_my}
-					, stage_transform_cache
-						);
-
-					for (auto&& hit : hits)
+					auto old_stage = app_ctx.stage;
+					for (auto&& hit 
+							: ::aned::controller::hit_test(app_ctx.stage
+							, app_ctx.stage.get<::aned::component::play_data>().current_frame
+							, ::boost::geometry::model::d2::point_xy<float>{canvas_mx, canvas_my}
+							, stage_transform_cache
+						))
 					{
-						if (hit.any_of<::aned::component::timeline_system>())
-						{
-							app_ctx.stage = &hit;
-						}
+						if (hit.size() < 2)
+							continue;
+						app_ctx.stage = *::std::ranges::next(hit.begin());
 						break;
+					}
+					if (old_stage == app_ctx.stage)
+					{
+						
 					}
 				}
 				/*
@@ -402,7 +404,7 @@ int main(int argc, char** argv) {
 			// === 绘制 ===
 			ImDrawList* draw_list = ImGui::GetWindowDrawList();
 			// stage.renderStageAxes(draw_list, canvas_pos, canvas_size);
-			::aned::controller::render_canvas(*app_ctx.stage, app_ctx.stage->get<::aned::component::play_data>().current_frame, stage_transform_cache);
+			::aned::controller::render_canvas(app_ctx.stage, app_ctx.stage.get<::aned::component::play_data>().current_frame, stage_transform_cache);
 			
 			// stage.render(draw_list, canvas_pos, canvas_size, stage.pan_x, stage.pan_y, stage.zoom);
 
@@ -415,8 +417,8 @@ int main(int argc, char** argv) {
 
 		// Toolbar controls: first, previous, play/pause, next, last, stop, loop toggle
 		{
-			auto&& play_data = app_ctx.stage->get<::aned::component::play_data>();
-			auto&& system = app_ctx.stage->get<::aned::component::timeline_system>();
+			auto&& play_data = app_ctx.stage.get<::aned::component::play_data>();
+			auto&& system = app_ctx.stage.get<::aned::component::timeline_system>();
 			auto total_frames = system.frames().size();
 
 			if (ImGui::Button("|<<")) 
@@ -493,9 +495,9 @@ int main(int argc, char** argv) {
 			// }
 
 			
-			render_timeline_context.system = ::std::addressof(app_ctx.stage->get<::aned::component::timeline_system>());
-			render_timeline_context.select_layer = ::std::addressof(app_ctx.stage->get<::aned::component::select_timeline_layer>());
-			render_timeline_context.play_data = ::std::addressof(app_ctx.stage->get<::aned::component::play_data>());
+			render_timeline_context.system = ::std::addressof(app_ctx.stage.get<::aned::component::timeline_system>());
+			render_timeline_context.select_layer = ::std::addressof(app_ctx.stage.get<::aned::component::select_timeline_layer>());
+			render_timeline_context.play_data = ::std::addressof(app_ctx.stage.get<::aned::component::play_data>());
 			::aned::controller::render_timeline_ui(render_timeline_context);
 		}
 		ImGui::End();

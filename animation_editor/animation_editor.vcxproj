@@ -24,6 +24,9 @@
     <ClCompile Include="stb.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="aned\asset\image.h" />
+    <ClInclude Include="aned\asset\library.h" />
+    <ClInclude Include="aned\asset\movie_clip.h" />
     <ClInclude Include="aned\hit_test\box.h" />
     <ClInclude Include="aned\hit_test\hit_test.h" />
     <ClInclude Include="aned\loader\picture.h" />
@@ -36,7 +39,6 @@
     <ClInclude Include="aned\ui\select_timeline_layer.h" />
     <ClInclude Include="asset_browser.h" />
     <ClInclude Include="asset_manager.h" />
-    <ClInclude Include="aned\image\image.h" />
     <ClInclude Include="aned\render_canvas.h" />
     <ClInclude Include="aned\loader\gif.h" />
     <ClInclude Include="aned\movie\play_data.h" />
