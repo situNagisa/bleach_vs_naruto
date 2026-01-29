@@ -14,7 +14,7 @@
 
 #include "../opengl.h"
 
-#include "../image/image.h"
+#include "../asset/image.h"
 
 #include "../timeline/timeline.h"
 
@@ -108,26 +108,12 @@ namespace aned::loader
 				}
 			}
 
-			GLuint tex = 0;
-			glGenTextures(1, &tex);
-			glBindTexture(GL_TEXTURE_2D, tex);
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, canvas.data());
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glBindTexture(GL_TEXTURE_2D, 0);
-
 			auto ms = ::std::chrono::milliseconds(delay_cs > 0 ? delay_cs * 10 : 100);
 			constexpr auto frame_duration = ::std::chrono::milliseconds(1000) / project_config::frame_rate;
 			auto range = result.emplace_back(::std::max(1, static_cast<int>(std::ceil(static_cast<float>(ms / frame_duration)))));
 			auto entity = registry.create();
 			auto handle = ::entt::handle(registry, entity);
-			handle.emplace<component::image>(
-				component::image{
-					.texture{tex},
-					.width = static_cast<::std::size_t>(w),
-					.height = static_cast<::std::size_t>(h),
-				});
+			handle.emplace<component::image>(component::image::create(reinterpret_cast<::std::byte const*>(canvas.data()), w, h));
 			result._data.back().keyframe.displays.push_back(handle);
 
 			if (disposal == 2) {

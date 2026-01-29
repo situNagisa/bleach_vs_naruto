@@ -1,10 +1,9 @@
 #pragma once
 
-#include "./image.h"
 
 #include "../timeline/system.h"
 
-namespace aned::asset
+namespace aned::component
 {
 	struct movie_clip
 	{

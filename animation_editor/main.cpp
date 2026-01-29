@@ -29,7 +29,7 @@
 #include "aned/timeline/system.h"
 #include "aned/timeline/timeline.h"
 #include "aned/movie/play_data.h"
-#include "aned/image/image.h"
+#include "aned/asset/image.h"
 
 #include "aned/render_canvas.h"
 #include "aned/timeline/render_ui.h"
@@ -37,16 +37,11 @@
 #include "aned/hit_test/box.h"
 #include "aned/hit_test/hit_test.h"
 
+#include "aned/asset/library.h"
+
 #undef main
 
-struct entt_raii_handle : ::entt::handle
-{
-	using ::entt::handle::handle;
-	~entt_raii_handle() noexcept
-	{
-		destroy();
-	}
-};
+
 
 
 
@@ -108,7 +103,7 @@ int main(int argc, char** argv)
 	AssetBrowser asset_browser;
 	
 	// Asset manager for object lifecycle management
-	auto asset_manager = ::std::vector<entt_raii_handle>();
+	auto asset_manager = ::aned::asset::asset_library();
 	
 	// Simple application context to access both Stage, AssetLibrary, and AssetManager from GLFW callbacks
 	struct AppContext { 
@@ -158,41 +153,41 @@ int main(int argc, char** argv)
 		auto ctx = static_cast<AppContext*>(glfwGetWindowUserPointer(w));
 		if (!ctx) return;
 
-		std::string path = paths[0];
-		int asset_idx = ctx->assets.addOrUpdateAsset(path);
+		::std::filesystem::path path = paths[0];
+		// int asset_idx = ctx->assets.addOrUpdateAsset(path);
 
-		auto entity = ctx->display_world.create();
-		auto&& handle = ctx->asset_manager.emplace_back(ctx->display_world, entity);
-		if (path.ends_with(".gif"))
+		::entt::handle handle{};
+		if (path.filename().string().ends_with(".gif"))
 		{
-			auto&& system = handle.emplace<::aned::component::timeline_system>();
-			auto&& layer = system._layers.emplace_back("hhh", ::aned::loader::gif(ctx->display_world, path));
+			handle = ctx->asset_manager.create_movie_clip(path.filename(), {.timeline_system = {
+				._layers{{"hhh", ::aned::loader::gif(ctx->display_world, path.string())}}
+			},});
 			handle.emplace<::aned::component::play_data>();
 			handle.emplace<::aned::component::select_timeline_layer>();
 
-			for (auto&& frame : layer.timeline._data)
-			{
-				for (auto&& h : frame.keyframe.displays)
-				{
-					auto&& img = h.get<::aned::component::image>();
-					namespace bg = ::boost::geometry;
-					h.emplace<::aned::component::hit_box>(
-						::aned::component::hit_box{
-							{bg::model::d2::point_xy<float>{}, bg::model::d2::point_xy<float>(img.width, img.height)}
-						}
-					);
-				}
-			}
+			// for (auto&& frame : layer.timeline._data)
+			// {
+			// 	for (auto&& h : frame.keyframe.displays)
+			// 	{
+			// 		auto&& img = h.get<::aned::component::image>();
+			// 		namespace bg = ::boost::geometry;
+			// 		h.emplace<::aned::component::hit_box>(
+			// 			::aned::component::hit_box{
+			// 				{bg::model::d2::point_xy<float>{}, bg::model::d2::point_xy<float>(img.width, img.height)}
+			// 			}
+			// 		);
+			// 	}
+			// }
 		}
 		else
 		{
-			auto&& img = handle.emplace<::aned::component::image>(::aned::loader::picture(path.c_str()));
+			handle = ctx->asset_manager.create_image(path.filename(), ::aned::loader::picture(path.string().c_str()));
 			namespace bg = ::boost::geometry;
-			handle.emplace<::aned::component::hit_box>(
-				::aned::component::hit_box{
-					{bg::model::d2::point_xy<float>{}, bg::model::d2::point_xy<float>(img.width, img.height)}
-				}
-			);
+			// handle.emplace<::aned::component::hit_box>(
+			// 	::aned::component::hit_box{
+			// 		{bg::model::d2::point_xy<float>{}, bg::model::d2::point_xy<float>(img.width, img.height)}
+			// 	}
+			// );
 		}
 		{
 			auto&& system = ctx->stage.get<::aned::component::timeline_system>();

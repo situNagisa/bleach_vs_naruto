@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <imgui.h>
 
-#include "./image/image.h"
+#include "./asset/image.h"
 
 #include "./timeline/system.h"
 
