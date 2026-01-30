@@ -44,7 +44,7 @@ namespace aned::controller
 
 			if (handle.any_of<component::timeline_system>())
 			{
-				for (auto&& frames : handle.get<component::timeline_system>().frames() | reverse | join | drop(current_frame))
+				for (auto&& frames : handle.get<component::timeline_system>().frames() | join | drop(current_frame))
 				{
 					if (!frames)
 						continue;

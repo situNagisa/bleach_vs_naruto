@@ -27,8 +27,11 @@
     <ClInclude Include="aned\asset\image.h" />
     <ClInclude Include="aned\asset\library.h" />
     <ClInclude Include="aned\asset\movie_clip.h" />
+    <ClInclude Include="aned\handle_observer\image.h" />
+    <ClInclude Include="aned\handle_observer\movie_clip.h" />
     <ClInclude Include="aned\hit_test\box.h" />
     <ClInclude Include="aned\hit_test\hit_test.h" />
+    <ClInclude Include="aned\hit_test\update.h" />
     <ClInclude Include="aned\loader\picture.h" />
     <ClInclude Include="aned\project_config.h" />
     <ClInclude Include="aned\timeline\layer.h" />
@@ -36,7 +39,6 @@
     <ClInclude Include="aned\timeline\system.h" />
     <ClInclude Include="aned\timeline\theme.h" />
     <ClInclude Include="aned\timeline\timeline.h" />
-    <ClInclude Include="aned\ui\select_timeline_layer.h" />
     <ClInclude Include="asset_browser.h" />
     <ClInclude Include="asset_manager.h" />
     <ClInclude Include="aned\render_canvas.h" />

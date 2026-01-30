@@ -8,6 +8,7 @@ namespace aned::component
 {
 	struct play_data
 	{
+		::std::size_t current_layer{};
 		::std::size_t current_frame{};
 		bool play{};
 		::std::size_t frame_rate = project_config::frame_rate;

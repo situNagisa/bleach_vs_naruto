@@ -20,11 +20,10 @@
 
 #include <entt/entt.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <boost/assert.hpp>
 
 #include "aned/loader/picture.h"
 #include "aned/loader/gif.h"
-
-#include "aned/ui/select_timeline_layer.h"
 
 #include "aned/timeline/system.h"
 #include "aned/timeline/timeline.h"
@@ -39,11 +38,9 @@
 
 #include "aned/asset/library.h"
 
+#include "aned/handle_observer/movie_clip.h"
+
 #undef main
-
-
-
-
 
 int main(int argc, char** argv)
 {
@@ -71,7 +68,7 @@ int main(int argc, char** argv)
 			return 1;
 		}
 	}
-	
+
 	{
 		// Setup ImGui
 		IMGUI_CHECKVERSION();
@@ -86,15 +83,13 @@ int main(int argc, char** argv)
 		ImGui::StyleColorsDark();
 	}
 	::entt::registry display_world{};
+	auto asset_manager = ::aned::asset::asset_library();
+
 	// Initialize stage
-	auto stage = ::entt::handle(display_world, display_world.create());
-	{
-		auto&& system = stage.emplace<::aned::component::timeline_system>();
-		auto&& layer = system._layers.emplace_back("Main Timeline", ::aned::timeline_system::timeline());
-		layer.timeline.emplace_back();
-	}
-	stage.emplace<::aned::component::play_data>();
-	stage.emplace<::aned::component::select_timeline_layer>();
+	::aned::handle_observer::movie_clip main_stage{
+		asset_manager.create_movie_clip("main", {{ ::aned::handle_observer::movie_clip::default_layer }})
+	};
+	main_stage.handle().emplace<::aned::component::play_data>();
 
 	// Asset library and browser
 	AssetLibrary asset_library;
@@ -102,21 +97,16 @@ int main(int argc, char** argv)
 	asset_library.scanDirectory(".");
 	AssetBrowser asset_browser;
 	
-	// Asset manager for object lifecycle management
-	auto asset_manager = ::aned::asset::asset_library();
-	
-	// Simple application context to access both Stage, AssetLibrary, and AssetManager from GLFW callbacks
 	struct AppContext { 
-		::entt::handle root;
 		::entt::registry& display_world;
-		::entt::handle stage = root;
+		::entt::handle stage;
 		AssetLibrary& assets;
 		decltype(asset_manager)& asset_manager;
 		float zoom = 1.0f;
 		ImVec2 offset{};
 	} app_ctx{
-		.root = stage,
 		.display_world = display_world,
+		.stage = main_stage.handle(),
 		.assets = asset_library,
 		.asset_manager =  asset_manager,
 	};
@@ -156,14 +146,19 @@ int main(int argc, char** argv)
 		::std::filesystem::path path = paths[0];
 		// int asset_idx = ctx->assets.addOrUpdateAsset(path);
 
+		if (!ctx->stage.any_of<::aned::component::timeline_system>())
+			return;
+		auto stage = ::aned::handle_observer::movie_clip(ctx->stage);
+
 		::entt::handle handle{};
 		if (path.filename().string().ends_with(".gif"))
 		{
-			handle = ctx->asset_manager.create_movie_clip(path.filename(), {.timeline_system = {
-				._layers{{"hhh", ::aned::loader::gif(ctx->display_world, path.string())}}
-			},});
+			handle = ctx->asset_manager.create_movie_clip(path.filename(),{
+				._layers{
+					{"Main Timeline", ::aned::loader::gif(ctx->display_world, path.string())}
+				}
+			});
 			handle.emplace<::aned::component::play_data>();
-			handle.emplace<::aned::component::select_timeline_layer>();
 
 			// for (auto&& frame : layer.timeline._data)
 			// {
@@ -189,13 +184,9 @@ int main(int argc, char** argv)
 			// 	}
 			// );
 		}
-		{
-			auto&& system = ctx->stage.get<::aned::component::timeline_system>();
-			auto&& layer_selector = ctx->stage.get<::aned::component::select_timeline_layer>();
-			auto&& layer = system._layers.at(layer_selector.index);
-			auto&& frame = layer.timeline[ctx->stage.get<::aned::component::play_data>().current_frame];
-			frame.keyframe->displays.push_back(handle);
-		}
+		BOOST_ASSERT(handle);
+		BOOST_ASSERT(stage.handle().any_of<::aned::component::play_data>());
+		stage.current_frame(stage.handle().get<::aned::component::play_data>()).keyframe->displays.push_back(handle);
 
 		// select handle
 	});
@@ -203,7 +194,6 @@ int main(int argc, char** argv)
 	constexpr auto timeline_theme = ::aned::timeline_system::theme::visual_studio_dark();
 	::aned::controller::render_timeline_context render_timeline_context{
 		.system = ::std::addressof(app_ctx.stage.get<::aned::component::timeline_system>()),
-		.select_layer = ::std::addressof(app_ctx.stage.get<::aned::component::select_timeline_layer>()),
 		.play_data = ::std::addressof(app_ctx.stage.get<::aned::component::play_data>()),
 		.theme = ::std::addressof(timeline_theme),
 	};
@@ -274,26 +264,6 @@ int main(int argc, char** argv)
 			if (ImGui::IsItemHovered()) {
 				// 拖动
 				if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
-					DisplayObject* obj = nullptr;
-					// if (hovered_clip_id >= 0) {
-					// 	for (auto child : stage.children) {
-					// 		if (child && child->id == hovered_clip_id) {
-					// 			obj = child;
-					// 			break;
-					// 		}
-					// 	}
-					// }
-
-					// MovieClip* clip = dynamic_cast<MovieClip*>(obj);
-					// if (clip && !clip->editing_frames) {
-					// 	clip->x += io_local.MouseDelta.x / stage.zoom;
-					// 	clip->y += io_local.MouseDelta.y / stage.zoom;
-					// 	dragging_clip = true;
-					// 	stage.selectObject(hovered_clip_id);
-					// } else if (hovered_clip_id < 0) {
-					// 	stage.pan_x += io_local.MouseDelta.x;
-					// 	stage.pan_y += io_local.MouseDelta.y;
-					// }
 					if (io_local.KeyAlt)
 					{
 						app_ctx.offset.x += io_local.MouseDelta.x;
@@ -362,47 +332,12 @@ int main(int argc, char** argv)
 						
 					}
 				}
-				/*
-				// 碰撞检测
-				hovered_clip_id = stage.hitTestStage(canvas_mx, canvas_my);
-
-				// 双击进入帧编辑模式
-				if(ImGui::IsMouseClicked(ImGuiMouseButton_Left) && hovered_clip_id >= 0) {
-					DisplayObject* obj = nullptr;
-					for (auto child : stage.children) {
-						if (child && child->id == hovered_clip_id) {
-							obj = child;
-							break;
-						}
-					}
-
-					MovieClip* clip = dynamic_cast<MovieClip*>(obj);
-					if (clip) {
-						double now = glfwGetTime();
-						double time_since_last = now - clip->last_click_time;
-
-						if (time_since_last < 0.3) {
-							clip->editing_frames = !clip->editing_frames;
-							if (clip->editing_frames && clip->player) {
-								clip->editing_frame_idx = clip->player->currentFrame();
-							}
-						}
-						clip->last_click_time = now;
-						stage.selectObject(hovered_clip_id);
-						dragging_clip = true;
-					} else {
-						stage.selectObject(hovered_clip_id);
-					}
-				}*/
 			}
 
 			// === 绘制 ===
-			ImDrawList* draw_list = ImGui::GetWindowDrawList();
 			// stage.renderStageAxes(draw_list, canvas_pos, canvas_size);
+			BOOST_ASSERT(app_ctx.stage.any_of<::aned::component::play_data>());
 			::aned::controller::render_canvas(app_ctx.stage, app_ctx.stage.get<::aned::component::play_data>().current_frame, stage_transform_cache);
-			
-			// stage.render(draw_list, canvas_pos, canvas_size, stage.pan_x, stage.pan_y, stage.zoom);
-
 			ImGui::End();
 		}
 		::ImGui::ShowDemoWindow();
@@ -491,7 +426,6 @@ int main(int argc, char** argv)
 
 			
 			render_timeline_context.system = ::std::addressof(app_ctx.stage.get<::aned::component::timeline_system>());
-			render_timeline_context.select_layer = ::std::addressof(app_ctx.stage.get<::aned::component::select_timeline_layer>());
 			render_timeline_context.play_data = ::std::addressof(app_ctx.stage.get<::aned::component::play_data>());
 			::aned::controller::render_timeline_ui(render_timeline_context);
 		}

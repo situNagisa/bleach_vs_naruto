@@ -16,7 +16,8 @@ namespace aned::component
 		using timeline = aned::timeline_system::timeline;
 		::std::vector<timeline_layer> _layers{};
 
-		auto layers() const { return _layers | ::std::views::all; }
+		auto layers() noexcept { return _layers | ::std::views::all; }
+		auto layers() const noexcept { return _layers | ::std::views::all; }
 		auto frames() const noexcept
 		{
 			using namespace ::std::views;

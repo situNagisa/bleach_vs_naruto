@@ -53,7 +53,7 @@ namespace aned::asset
 				{
 					current = it->second;
 					if (!_registry.any_of<component::asset_folder>(current))
-						throw ::std::runtime_error(::std::format("{} is not directory", part));
+						throw ::std::runtime_error(::std::format("{} is not directory", part.string()));
 					continue;
 				}
 				auto e = _registry.create();
@@ -71,7 +71,7 @@ namespace aned::asset
 		{
 			auto&& folder = create_folder(path.parent_path()).get<component::asset_folder>();
 			if (folder.children.contains(path.filename().string()))
-				throw ::std::runtime_error(::std::format("{} already exists", path));
+				throw ::std::runtime_error(::std::format("{} already exists", path.string()));
 			auto e = _registry.create();
 			folder.children.emplace(path.filename().string(), e);
 			return ::entt::handle(_registry, e);

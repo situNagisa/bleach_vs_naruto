@@ -8,7 +8,6 @@
 
 #include <imgui.h>
 
-#include "../ui/select_timeline_layer.h"
 #include "../movie/play_data.h"
 
 #include "./system.h"
@@ -19,7 +18,6 @@ namespace aned::controller
 	struct render_timeline_context
 	{
 		component::timeline_system const* system;
-		component::select_timeline_layer const* select_layer;
 		component::play_data const* play_data;
 		timeline_system::theme const* theme{};
 
@@ -224,7 +222,7 @@ namespace aned::controller
 
 					// Layer background (alternating colors)
 					ImU32 bg_color = (index % 2 == 0) ? theme.layer.background_even : theme.layer.background_odd;
-					if (context.select_layer && context.select_layer->index == index)
+					if (context.play_data->current_layer && context.play_data->current_layer == index)
 						bg_color = theme.layer.selected_background;
 
 					ImVec2 item_end(item_start.x + label_width, item_start.y + theme.layout.layer_height);
