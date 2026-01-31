@@ -17,7 +17,7 @@ namespace aned::loader
 		if (!data)
 			throw ::std::runtime_error(::std::format("stb_image failed to load: {}\n", path));
 
-		auto result = component::image::create(reinterpret_cast<::std::byte const*>(data), static_cast<::std::size_t>(w), static_cast<::std::size_t>(h));
+		auto result = asset::image::create(reinterpret_cast<::std::byte const*>(data), static_cast<::std::size_t>(w), static_cast<::std::size_t>(h));
 		::stbi_image_free(data);
 		return result;
 	}

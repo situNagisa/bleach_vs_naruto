@@ -5,35 +5,26 @@
 #include <stdexcept>
 #include <format>
 #include <chrono>
+#include <generator>
 
 #include <gif_lib.h>
-
-#include <glad/glad.h>
-
-#include <entt/entt.hpp>
-
-#include "../opengl.h"
 
 #include "../asset/image.h"
 
 #include "../timeline/timeline.h"
 
-#include "../project_config.h"
-
 namespace aned::loader
 {
-	inline auto gif(::entt::registry& registry, ::std::string_view path)
+	inline ::std::generator<::std::pair<asset::image, ::std::chrono::milliseconds>> gif(::std::string path)
 	{
 		int error = 0;
-		auto gif = ::DGifOpenFileName(::std::string(path).c_str(), &error);
+		auto gif = ::DGifOpenFileName(path.c_str(), &error);
 		if (!gif)
 			throw ::std::runtime_error(::std::format("{} Not a GIF or failed to open", path));
 		if (::DGifSlurp(gif) != GIF_OK) {
 			::DGifCloseFile(gif, &error);
 			throw ::std::runtime_error(::std::format("{} Failed to parse GIF, error = {}", path, error));
 		}
-
-		auto result = timeline_system::timeline();
 
 		auto w = gif->SWidth;
 		auto h = gif->SHeight;
@@ -109,12 +100,7 @@ namespace aned::loader
 			}
 
 			auto ms = ::std::chrono::milliseconds(delay_cs > 0 ? delay_cs * 10 : 100);
-			constexpr auto frame_duration = ::std::chrono::milliseconds(1000) / project_config::frame_rate;
-			auto range = result.emplace_back(::std::max(1, static_cast<int>(std::ceil(static_cast<float>(ms / frame_duration)))));
-			auto entity = registry.create();
-			auto handle = ::entt::handle(registry, entity);
-			handle.emplace<component::image>(component::image::create(reinterpret_cast<::std::byte const*>(canvas.data()), w, h));
-			result._data.back().keyframe.displays.push_back(handle);
+			co_yield ::std::make_pair(asset::image::create(reinterpret_cast<::std::byte const*>(canvas.data()), w, h), ms);
 
 			if (disposal == 2) {
 				for (int ry = 0; ry < fh; ++ry) {
@@ -131,6 +117,6 @@ namespace aned::loader
 		}
 
 		::DGifCloseFile(gif, &error);
-		return result;
+		co_return;
 	}
 }

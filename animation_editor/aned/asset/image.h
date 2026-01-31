@@ -34,5 +34,5 @@ namespace aned::asset
 
 namespace aned::component
 {
-	using asset::image;
+	using image = asset::image*;
 }

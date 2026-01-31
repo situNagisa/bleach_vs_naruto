@@ -37,8 +37,10 @@
 #include "aned/hit_test/hit_test.h"
 
 #include "aned/asset/library.h"
+#include "aned/asset/accessor.h"
 
-#include "aned/handle_observer/movie_clip.h"
+#include "aned/haob/movie_clip.h"
+#include "aned/haob/manager.h"
 
 #undef main
 
@@ -82,14 +84,12 @@ int main(int argc, char** argv)
 		ImGui_ImplOpenGL3_Init("#version 130");
 		ImGui::StyleColorsDark();
 	}
-	::entt::registry display_world{};
-	auto asset_manager = ::aned::asset::asset_library();
 
-	// Initialize stage
-	::aned::handle_observer::movie_clip main_stage{
-		asset_manager.create_movie_clip("main", {{ ::aned::handle_observer::movie_clip::default_layer }})
-	};
-	main_stage.handle().emplace<::aned::component::play_data>();
+	auto asset_manager = ::aned::asset::asset_library();
+	auto display_manager = ::aned::haob::handle_manager();
+	auto main_stage = display_manager.movie_clip();
+	main_stage.timeline_system() = &::aned::asset::accessor(&asset_manager).emplace_if().movie_clip("main");
+	main_stage.timeline_system()->_layers.emplace_back(::aned::haob::movie_clip::default_layer);
 
 	// Asset library and browser
 	AssetLibrary asset_library;
@@ -98,17 +98,17 @@ int main(int argc, char** argv)
 	AssetBrowser asset_browser;
 	
 	struct AppContext { 
-		::entt::registry& display_world;
 		::entt::handle stage;
 		AssetLibrary& assets;
 		decltype(asset_manager)& asset_manager;
+		decltype(display_manager)& display_manager;
 		float zoom = 1.0f;
 		ImVec2 offset{};
 	} app_ctx{
-		.display_world = display_world,
 		.stage = main_stage.handle(),
 		.assets = asset_library,
 		.asset_manager =  asset_manager,
+		.display_manager = display_manager
 	};
 
 #if 0
@@ -146,20 +146,30 @@ int main(int argc, char** argv)
 		::std::filesystem::path path = paths[0];
 		// int asset_idx = ctx->assets.addOrUpdateAsset(path);
 
-		if (!ctx->stage.any_of<::aned::component::timeline_system>())
+		auto stage = ::aned::haob::movie_clip(ctx->stage);
+		if (!stage.valid())
 			return;
-		auto stage = ::aned::handle_observer::movie_clip(ctx->stage);
-
-		::entt::handle handle{};
 		if (path.filename().string().ends_with(".gif"))
 		{
-			handle = ctx->asset_manager.create_movie_clip(path.filename(),{
-				._layers{
-					{"Main Timeline", ::aned::loader::gif(ctx->display_world, path.string())}
-				}
-			});
-			handle.emplace<::aned::component::play_data>();
-
+			auto handle = ctx->display_manager.movie_clip();
+			handle.timeline_system() = &::aned::asset::accessor(&ctx->asset_manager).emplace_if().movie_clip(path.filename().string());
+			for (auto [i, image_ms] : ::aned::loader::gif(path.string()) | ::std::views::enumerate)
+			{
+				auto [image, ms] = ::std::move(image_ms);
+				auto image_handle = ctx->display_manager.image();
+				image_handle.image_component() = 
+					&::aned::asset::accessor(&ctx->asset_manager)
+						.emplace_if()
+						.folder(::std::format("{} resource", path.filename().string()))
+						.image(::std::format("{}", i));
+				*image_handle.image_component() = std::move(image);
+				auto&& layer = handle.timeline_system()->_layers.emplace_back("Main Timeline");
+				auto frame_duration = ::std::chrono::milliseconds(1000) / handle.play_data().frame_rate;
+				layer.timeline.emplace_back(::std::max(1, static_cast<int>(std::ceil(static_cast<float>(ms / frame_duration)))));
+				layer.timeline.back().keyframe->displays.emplace_back(image_handle.handle());
+				image_handle.parent() = handle.handle();
+			}
+			stage.add_child(handle.handle());
 			// for (auto&& frame : layer.timeline._data)
 			// {
 			// 	for (auto&& h : frame.keyframe.displays)
@@ -176,18 +186,14 @@ int main(int argc, char** argv)
 		}
 		else
 		{
-			handle = ctx->asset_manager.create_image(path.filename(), ::aned::loader::picture(path.string().c_str()));
-			namespace bg = ::boost::geometry;
+			// handle = ctx->asset_manager.create_image(path.filename(), ::aned::loader::picture(path.string().c_str()));
+			// namespace bg = ::boost::geometry;
 			// handle.emplace<::aned::component::hit_box>(
 			// 	::aned::component::hit_box{
 			// 		{bg::model::d2::point_xy<float>{}, bg::model::d2::point_xy<float>(img.width, img.height)}
 			// 	}
 			// );
 		}
-		BOOST_ASSERT(handle);
-		BOOST_ASSERT(stage.handle().any_of<::aned::component::play_data>());
-		stage.current_frame(stage.handle().get<::aned::component::play_data>()).keyframe->displays.push_back(handle);
-
 		// select handle
 	});
 
@@ -349,7 +355,7 @@ int main(int argc, char** argv)
 		{
 			auto&& play_data = app_ctx.stage.get<::aned::component::play_data>();
 			auto&& system = app_ctx.stage.get<::aned::component::timeline_system>();
-			auto total_frames = system.frames().size();
+			auto total_frames = system->frames().size();
 
 			if (ImGui::Button("|<<")) 
 			{

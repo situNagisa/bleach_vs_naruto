@@ -9,8 +9,6 @@
 #include <imgui.h>
 
 #include "../movie/play_data.h"
-
-#include "./system.h"
 #include "./theme.h"
 
 namespace aned::controller
@@ -39,7 +37,7 @@ namespace aned::controller
 	{
 		auto const& theme = *context.theme;
 
-		auto visible_frame_count = ::std::max<::std::size_t>(context.system->frames().size(), 1);
+		auto visible_frame_count = ::std::max<::std::size_t>((**context.system).frames().size(), 1);
 		if (ImGui::BeginTable(
 			"timeline"
 			, 1 + visible_frame_count
@@ -84,13 +82,13 @@ namespace aned::controller
 			// auto label_ms_io = ImGui::BeginMultiSelect(flags, context.selection.label.Size, context.system->layers().size());
 			// context.selection.label.ApplyRequests(label_ms_io);
 			auto frame_size = ::std::ranges::fold_left(
-				context.system->layers() | ::std::views::transform(&timeline_system::timeline_layer::timeline) | ::std::views::transform(::std::ranges::size)
+				(**context.system).layers() | ::std::views::transform(&asset::movie_clip::layer::timeline) | ::std::views::transform(::std::ranges::size)
 				, 0u
 				, ::std::plus{}
 			);
 			auto frame_ms_io = ImGui::BeginMultiSelect(flags, context.selection.frame.Size, frame_size);
 			context.selection.frame.ApplyRequests(frame_ms_io);
-			for (auto&& [idx, layer] : context.system->layers() | ::std::views::enumerate)
+			for (auto&& [idx, layer] : (**context.system).layers() | ::std::views::enumerate)
 			{
 				ImGui::TableNextRow();
 				{
@@ -144,6 +142,7 @@ namespace aned::controller
 			ImGui::EndTable();
 		}
 		return;
+		/*
 		// ===== FRAME HEADER SECTION =====
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2());
@@ -381,5 +380,6 @@ namespace aned::controller
 		}
 
 		ImGui::PopStyleVar(2);
+		*/
 	}
 }

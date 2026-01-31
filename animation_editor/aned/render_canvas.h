@@ -17,7 +17,7 @@ namespace aned::controller
 		auto matrix = parent_matrix * local_matrix;
 		if (handle.any_of<component::image>())
 		{
-			auto&& img = handle.get<component::image>();
+			auto&& img = *handle.get<component::image>();
 			auto position = matrix * ::glm::vec3(0, 0, 1);
 			auto size = matrix * ::glm::vec3(img.width, img.height, 0.f);
 
@@ -30,7 +30,7 @@ namespace aned::controller
 		}
 		if (handle.any_of<component::timeline_system>())
 		{
-			for (auto&& frames : handle.get<component::timeline_system>().frames() | join | drop(current_frame))
+			for (auto&& frames : handle.get<component::timeline_system>()->frames() | join | drop(current_frame))
 			{
 				if (!frames)
 					continue;
