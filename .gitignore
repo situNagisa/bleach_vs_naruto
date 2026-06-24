@@ -1,0 +1,14 @@
+.vs/
+.codegraph/
+bin/
+out/
+temp/
+vcpkg_installed/
+imgui.ini
+shaders/*.spv
+*.user
+*.pdb
+*.ilk
+*.obj
+*.exe
+*.dll

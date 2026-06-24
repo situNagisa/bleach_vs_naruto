@@ -1,0 +1,26 @@
+{
+  "name": "bvn",
+  "version": "0.1.0",
+  "description": "bvn — from-scratch C++ 5v5 anime MOBA engine",
+  "dependencies": [
+    {
+      "name": "sdl3",
+      "features": ["vulkan"]
+    },
+    "vulkan-headers",
+    "vulkan",
+    "vulkan-memory-allocator",
+    "vk-bootstrap",
+    "glm",
+    "entt",
+    {
+      "name": "imgui",
+      "features": ["sdl3-binding", "vulkan-binding"]
+    },
+    {
+      "name": "glslang",
+      "features": [ "tools" ]
+    },
+    "stb"
+  ]
+}

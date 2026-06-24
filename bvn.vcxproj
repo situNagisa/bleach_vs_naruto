@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{4958090E-5DC0-49B2-961E-E0A025C33594}</ProjectGuid>
+    <RootNamespace>bvn</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>bvn</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VS_PROP_ROOT)\nagisa.props" Condition="exists('$(VS_PROP_ROOT)\nagisa.props')" />
+    <Import Project="$(NAGISA_LIBRARY_ROOT)\nagisa_library.props" Condition="exists('$(NAGISA_LIBRARY_ROOT)\nagisa_library.props')" />
+    <Import Project="$(SolutionDir)\prop\solution.props" Condition="exists('$(SolutionDir)\prop\solution.props')" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VS_PROP_ROOT)\nagisa.props" Condition="exists('$(VS_PROP_ROOT)\nagisa.props')" />
+    <Import Project="$(NAGISA_LIBRARY_ROOT)\nagisa_library.props" Condition="exists('$(NAGISA_LIBRARY_ROOT)\nagisa_library.props')" />
+    <Import Project="$(SolutionDir)\prop\solution.props" Condition="exists('$(SolutionDir)\prop\solution.props')" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <VcpkgEnabled>true</VcpkgEnabled>
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)temp\compile\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)temp\compile\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="include\bvn\assets\assets.h" />
+    <ClInclude Include="include\bvn\assets\sprite_clip.h" />
+    <ClInclude Include="include\bvn\compute\compute.h" />
+    <ClInclude Include="include\bvn\display_architecture\renderable.h" />
+    <ClInclude Include="include\bvn\platform\event.h" />
+    <ClInclude Include="include\bvn\platform\platform.h" />
+    <ClInclude Include="include\bvn\platform\sdl_context.h" />
+    <ClInclude Include="include\bvn\platform\window.h" />
+    <ClInclude Include="include\bvn\render\imgui_layer.h" />
+    <ClInclude Include="include\bvn\render\render_scene.h" />
+    <ClInclude Include="include\bvn\render\vulkan_renderer.h" />
+    <ClInclude Include="include\bvn\rhi\vulkan_context.h" />
+    <ClInclude Include="include\bvn\sim\sim.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="plugins\test_basic\test_plugin.cpp" />
+    <ClCompile Include="source\assets\sprite_clip.cpp" />
+    <ClCompile Include="source\client\main.cpp" />
+    <ClCompile Include="source\platform\event.cpp" />
+    <ClCompile Include="source\platform\sdl_context.cpp" />
+    <ClCompile Include="source\platform\window.cpp" />
+    <ClCompile Include="source\render\imgui_layer.cpp" />
+    <ClCompile Include="source\render\vulkan_renderer.cpp" />
+    <ClCompile Include="source\rhi\vulkan_context.cpp" />
+    <ClCompile Include="source\sim\sim.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt" />
+    <Text Include="source\assets\CMakeLists.txt" />
+    <Text Include="source\CMakeLists.txt" />
+    <Text Include="source\client\CMakeLists.txt" />
+    <Text Include="source\compute\CMakeLists.txt" />
+    <Text Include="source\platform\CMakeLists.txt" />
+    <Text Include="source\render\CMakeLists.txt" />
+    <Text Include="source\rhi\CMakeLists.txt" />
+    <Text Include="source\sim\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="CMakePresets.json" />
+    <None Include="cmake\module.cmake" />
+    <None Include="docs\architecture.md" />
+    <None Include="docs\cpp-coding-standard.md" />
+    <None Include="docs\engine-spec.md" />
+    <None Include="docs\game-design.md" />
+    <None Include="source\render\shaders\grid.frag" />
+    <None Include="source\render\shaders\grid.vert" />
+    <None Include="source\render\shaders\sprite.frag" />
+    <None Include="source\render\shaders\sprite.vert" />
+    <None Include="vcpkg.json" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

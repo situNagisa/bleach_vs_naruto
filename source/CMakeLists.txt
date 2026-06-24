@@ -1,0 +1,7 @@
+add_subdirectory(platform)
+add_subdirectory(rhi)
+add_subdirectory(assets)
+add_subdirectory(render)
+add_subdirectory(sim)
+add_subdirectory(compute)
+add_subdirectory(client)
