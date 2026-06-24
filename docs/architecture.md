@@ -1,10 +1,7 @@
-# bvn 技术架构（架构访谈推导中 · 持续更新）
+# bvn 技术架构（T1–T9 决策日志 + 热重载详解）
 
-> 日期：2026-06-14　状态：**随 T1–T9 架构访谈逐层成形**
-> 配合 `docs/game-design.md`（那份讲"做什么"，本文讲"怎么造"）。
-> 本文由"我提问 / 你拍板"的方式逐层确定；下面按层记录已锁定决策，末尾附**热重载详解**。
->
-> ⚠️ **部分已被取代**：后续"定稿问答"修订了 **T4a（插件模型）** 与 **T6（动画 / 技能）**——最终设计是 **引擎 = 极简平台 + 英雄 = 协程 + 裸 registry + 状态二分**，引擎核心**不含"技能"概念**（时间线降为可选 SDK 库）。**以 `docs/engine-spec.md` 为准。**
+> 日期：2026-06-14（起）　状态：**决策日志**——按层记录 T1–T9 架构访谈拍板过程，末尾附**热重载详解**。
+> 
 
 ---
 
@@ -18,15 +15,13 @@
 
 ### T2 · 核心范式
 - **ECS：EnTT**（纪律：① 迭代顺序稳定；② 上 CUDA 时从 packed 组件数组抽连续数据）。
-- **内存：标准库优先** → `std::pmr`（`monotonic_buffer_resource` 当竞技场、`unsynchronized_pool_resource` 当池），自定义分配器最后。
-- **错误处理：分层**（边界 / 加载用异常或 `std::expected`；仿真热路径与插件 ABI 用错误码 / 状态，跨 ABI 零异常）。
+- **错误处理**：可恢复的运行时错误：用**异常**；程序 Bug / 逻辑错误：用**断言/契约(c++26)**，不可恢复错误：炸程序。
 - **并发：`std::execution`（senders/receivers，先用 NVIDIA stdexec）+ 协程**，线程作 scheduler 资源。
-  - **关键**：scheduler 把"并发"与"CUDA 计算后端"统一——CPU 线程池 scheduler 现在 → **nvexec CUDA scheduler** 以后；`IComputeBackend` ≈ "换 scheduler"（大幅简化 CUDA 路径）。
 
 ### T3 · 仿真与确定性
 - **tick：可配置，先 30Hz**。
-- **确定性：不强求，但守便宜的纪律留门**——随机走 sim 持有的种子 RNG（禁 `rand()` / 全局）、sim 内禁墙钟（时间 = tick）、EnTT 稳定迭代、集中封装"游戏数值运算"。将来上 lockstep 时再约束并行 + 换确定数值。
-- **sim→render：双缓冲快照 + 插值**（配合 `execution` 多线程：sim 线程写后缓冲、渲染线程读前缓冲，零锁）。
+- **确定性：不强求，但守便宜的纪律留门**——随机走 simulator持有的种子 RNG（禁 `rand()` / 全局）、sim 内禁墙钟（时间 = tick）、EnTT 稳定迭代、集中封装"游戏数值运算"。将来上 lockstep 时再约束并行 + 换确定数值。
+- **simulator→render：双缓冲快照 + 插值**（配合 `execution` 多线程：simulator线程写后缓冲、渲染线程读前缓冲，零锁）。
 
 ### T4a · 插件系统：边界与结构
 > 前提：**明确不考虑跨编译器、安全后置** → 目标 = 插件最大自由度 + 最高性能。
@@ -36,7 +31,7 @@
 - **热重载：路 0（数据 / Lua 热重载）+ 路 3（实时打补丁工具 blink → Live++）**；不走 POD 妥协（见下方详解）。
 
 ### T4b · 插件范围与策略（2026-06-15）
-- **范围：万物皆插件**（英雄 + 装备 + 地图 + 模式）。共用一套插件基建（加载 / manifest / 版本 / 热重载 / 宿主访问），各自接口不同（`IHero`/`IItem`/`IMap`/`IGameMode`）。**分阶段实现**：M2 英雄 API → M3 装备 → 之后地图 / 模式。
+- **范围：万物皆插件**（英雄 + 装备 + 地图 + 模式）。共用一套插件基建（加载 / manifest / 版本 / 热重载 / 宿主访问），各自接口不同。**分阶段实现**：M2 英雄 API → M3 装备 → 之后地图 / 模式。
 - **粒度：每英雄一个 DLL**（独立热重载 / 独立分发）。
 - **加载：扫描 `plugins/` 目录 + 每插件 manifest**（id / 版本 / 依赖 / 资源路径）。
 - **版本化：极轻量**——manifest 写引擎 ABI 整数版本，加载校验、不匹配拒载 + 日志；开放第三方 mod 时再升级到语义版本 + 依赖解析。
@@ -48,10 +43,9 @@
 - **资源：运行时直接加载 + 热重载**（直吃 BvN 精灵表 + 元数据）。
 
 ### T6 · 渲染架构（2026-06-15）
-- **RHI：务实薄抽象**（封装 Vulkan 必要概念于 `IRenderBackend`，利将来 CUDA interop；不上 bindless / render-graph）。
-- **Vulkan：现代精简**（dynamic rendering 免 render pass 样板 + 简单描述符 + volk/VMA/vk-bootstrap）。
-- **渲染读 sim：双缓冲快照 + 插值**（T3 定）；渲染侧每帧从快照提取 render scene。
-- **2D 动画 = 招式帧数据时间线 + 走位状态机**：招式写成共享"帧数据时间线"（startup/active/recovery + 逐帧 hit/hurt box + 取消窗口 + 关联 clip），**sim 与表现同源读取**（天然同步；sim 只跑极轻的时间线推进器，完整动画状态机不进 sim）；走位 / 受击 = 表现侧状态机，由参数驱动。M1–M2 用 C++ / struct 定义，M3 升 Lua / 数据 authored。**角色开发者 ~90% 填数据、~10% 写具名 C++ 钩子。**
+- **renderer：**先不考虑怎么抽象，直接先用vulkan的原生api，但清楚vulkan是作为renderer层来用的，使用vulkan的地方不能超过renderer的界定范围。利将来 CUDA interop；不上 bindless / render-graph）。
+- **渲染读 simulator：双缓冲快照 + 插值**（T3 定）；渲染侧每帧从快照提取 render scene。
+- **2D 动画 = 招式帧数据时间线 + 走位状态机**：招式写成共享"帧数据时间线"（startup/active/recovery + 逐帧 hit/hurt box + 取消窗口 + 关联 clip），**simulator与表现同源读取**（天然同步；simulator只跑极轻的时间线推进器，完整动画状态机不进 simulator）；走位 / 受击 = 表现侧状态机，由参数驱动。M1–M2 用 C++ / struct 定义，M3 升 Lua / 数据 authored。**角色开发者 ~90% 填数据、~10% 写具名 C++ 钩子。**
 - **光照：3D 场景上完整动态光 + 法线 + 阴影；2D 精灵 unlit**（平面精灵无法线、BvN 自带画风，不给精灵打动态光）。
 
 ---
@@ -101,7 +95,7 @@
 ## T9 · 工具与可观测（编辑器决策已定，2026-06-15）
 - **英雄编辑器（Fighter Factory 式，重头戏）**：**引擎内 ImGui 工具**，复用引擎渲染 + 动画系统做**所见即所得实时预览 + 热重载**（外部工具给不了的杀手锏）。功能蓝图对标 MUGEN：精灵 / clip、**逐帧 hit/hurt box（CLSN1/CLSN2）**、帧数据时间线（startup/active/recovery）、取消 / 连段窗口、状态机图、动画事件、键位路由。
   - **判定模型升级**：把"判定 radius"升级为**逐帧 hit/hurt box**（有编辑器画框才可行——真正的格斗手感来源）。
-  - **数据格式要求**：声明式数据必须**干净、可被编辑器往返（load/save/round-trip）**；独特逻辑用**具名钩子**（数据写 `onHit:"ken_mark"`，引擎绑到 C++/Lua 同名函数）——即 MUGEN"数据 + 具名控制器"。
+  - **数据格式要求**：声明式数据必须**干净、可被编辑器往返（load/save/round-trip）**；——即 MUGEN"数据 + 具名控制器"。
   - **美术桥**：Animate CC（BvN 即 Flash）→ **导出 sprite sheet** → 编辑器在其上定义玩法数据。先光栅（矢量运行时如 Rive 是另一个大坑，自研光栅更合适）。
   - **三阶段分工**：① Animate CC 做美术帧 → ② 你的编辑器做玩法数据 → ③ 引擎运行时加载。
   - **时序**：M2–M3 先手搓 1–2 英雄稳定数据格式 → M3–M4 再建编辑器量产。
@@ -109,6 +103,5 @@
 
 ---
 
-## 待续（架构访谈剩余层）
-- **T7** 网络架构（模型 / 预测、输入协议、传输抽象）
-- **T8** 计算 / CUDA（落到 T2 的 scheduler 上）
+## T7 / T8 · 已在定稿中收口（细节见 `engine-spec.md §4.7`）
+- **T7 网络**：`net_transport`(ENet) · `input_command{moveDir,aim,abilityBits,seq,tick}` · **host 权威 + 快照 + 移动预测 + 和解** · 快照演进 全量→delta→AOI(兼迷雾地基) · 可演进到专用无头服务器。
