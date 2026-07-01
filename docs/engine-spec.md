@@ -48,13 +48,13 @@
 bvn/
   CMakeLists.txt cmake/  CMakePresets.json  vcpkg.json
   include/bvn/
-    display_architecture/ platform/  rhi/  renderer/  render/  simulator/  gameplay/  net/  audio/  assets/  tools/
+    display_architecture/ platform/  renderer/  render/  simulator/  gameplay/  net/  audio/  assets/  tools/
         每个：include/bvn/<模块>/*.h（公共，外部 #include <bvn/<模块>/...>）+ source/（实现）
   heroes/                     # 自包含：每英雄一个文件夹
     kenpachi/{source, data, assets}   ichigo/{...}   ...
                              # 构建：每个 → 一个 DLL（+ 运行期拷 data/assets）
                              # 一个 mod = 一个自包含文件夹，丢进去即可
-  apps/client/  apps/server/  # 客户端 / 无头服务器（server 不链 render/rhi/platform-window）
+  apps/client/  apps/server/  # 客户端 / 无头服务器（server 不链 render/renderer/platform-window）
   assets/                     # 引擎级共享资源（大文件 gitignore）
   tests/                      # doctest（重点：sim 软确定性 / 回归）
 ```
@@ -87,7 +87,7 @@ bvn/
 // 一个英雄 = 一个协程（示意）
 hero_task kenpachi(hero_context context) {								   // 启动时传入 ctx
 	auto combo = 0;                              						   // 瞬时态 = 协程局部变量（挂起自动保留）
-    spawn(context.render_scheduler(), kenpachi_render());					// 启动渲染任务
+    context.render_scope.spawn(::stdexec::starts_on(context.render_gate.scheduler_value, render(kenpachi_view, context.renderer)));	// 启动 render(renderer) 任务
 	while (context.alive()) {
 		auto&& in = ctx.input;
 		co_await context.next_tick();									 // 挂起，将恢复点加入到英雄调度器当中，等待下一次调度
@@ -102,10 +102,10 @@ BVN_REGISTER_HERO(kenpachi, "kenpachi");
 - 英雄协程靠不断把自己append到调度器上来不断刷新自己，实现update的效果（代替了回调），期间可以通过spawn启动别的任务。
 - **`hero_context` 具体装什么 = 待定**（边界 = 那三件事 + 世界访问，不含任何"技能"概念）。
 
-### 4.5 渲染表达：英雄发起调度"渲染任务"
-- context提供`render_scheduler`，英雄自行将**渲染任务（sender / 协程）**调度在`render_scheduler`。
-- 渲染任务由`render_scheduler`调度 → 必须**闭包"快照安全"的数据**；自然落法 = **英雄在 capture 快照时产出任务、闭包当帧态**。
-- **后端切换点 `renderer`**：现在用 `vulkan`实现`renderer`；将来 `cuda`（CUDA 算图 + CUDA-Vulkan interop 呈现，呈现永远走 Vulkan）。
+### 4.5 渲染表达：`renderable + render(renderer)`
+- context 提供 render scheduler 与唯一 renderer；英雄或英雄管理的对象实现 `render(renderer)`，该函数本身就是渲染任务（sender / 协程）。
+- `render(renderer)` 的参数只有 renderer；调度器、结束信号从协程环境取。渲染任务读取已经发布的快照状态，在 render scheduler 唤醒后只向 renderer 交给它的 command buffer 录制。
+- **后端切换点 `renderer`**：现在用 Vulkan 实现 renderer；将来 CUDA 计算也只能作为 renderer / compute 的后端演进，呈现仍由 renderer 的 Vulkan 帧生命周期负责。
 
 ### 4.6 灵活属性表（三层落地）
 - **标准约定属性**（health/mana/…）→ gameplay 类型化组件（快、标准系统与 UI 直接用）。
@@ -127,11 +127,11 @@ BVN_REGISTER_HERO(kenpachi, "kenpachi");
 
 1. **输入采集** →（联网时发给 host）。
 2. **sim tick（30Hz 可配 · 固定流水线）**：
-   - **决策阶段**：resume **每个英雄协程**（ctx 喂输入 / 事件 / 世界 / 渲染 API）→ 英雄读一致世界态、发 effect / 意图、`co_yield` 渲染任务。（所有英雄看到的是上一 tick 的结算态 + 本 tick 输入，互不看对方中途改动 → 公平 / 更确定）
+   - **决策阶段**：resume **每个英雄协程**（ctx 喂输入 / 事件 / 世界）→ 英雄读一致世界态、发 effect / 意图、发布可见状态。（所有英雄看到的是上一 tick 的结算态 + 本 tick 输入，互不看对方中途改动 → 公平 / 更确定）
    - **结算阶段**：引擎统一处理 移动 / 碰撞 / 标准战斗约定（伤害 / 死亡 / status）/ effect 通道分发。
    - 随机走种子 RNG、时间 = tick。
 3. **快照**：双缓冲 capture（registry → 后缓冲；含本帧渲染任务）。
-4. **渲染（独立线程 / scheduler）**：前缓冲 + 插值 alpha → 场景渲染 + 收集英雄渲染任务 → render sender 图 → render scheduler → `IRenderer`(Vulkan) 出帧。
+4. **渲染（独立线程 / scheduler）**：前缓冲 + 插值 alpha → 各 renderable 的 `render(renderer)` 任务按 render scheduler 顺序录制 → renderer 完成 Vulkan 帧开闭、submit、present。
 5. **网络**：host 序列化快照广播；client 预测 + 和解。
 6. **重计算**：寻路 / 粒子 / 大量单位 → sender 丢 compute scheduler（CPU 现在 / CUDA 以后）。
 
