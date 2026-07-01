@@ -105,7 +105,7 @@ BVN_REGISTER_HERO(kenpachi, "kenpachi");
 ### 4.5 渲染表达：`renderable + render(renderer)`
 - context 提供 render scheduler 与唯一 renderer；英雄或英雄管理的对象实现 `render(renderer)`，该函数本身就是渲染任务（sender / 协程）。
 - `render(renderer)` 的参数只有 renderer；调度器、结束信号从协程环境取。渲染任务读取已经发布的快照状态，在 render scheduler 唤醒后只向 renderer 交给它的 command buffer 录制。
-- **后端切换点 `renderer`**：现在用 Vulkan 实现 renderer；将来 CUDA 计算也只能作为 renderer / compute 的后端演进，呈现仍由 renderer 的 Vulkan 帧生命周期负责。
+- **后端切换点 `renderer`**：现在用 Vulkan 实现 renderer；将来 CUDA 计算也只能作为 renderer / compute 的后端演进。renderer 是纯数据 context（持有 vulkan handle）；帧开闭、submit、present 归 render scheduler 的 `submit()`（见 `render-runtime.md §5`），呈现落在其内联的 Vulkan 帧命令上。
 
 ### 4.6 灵活属性表（三层落地）
 - **标准约定属性**（health/mana/…）→ gameplay 类型化组件（快、标准系统与 UI 直接用）。
@@ -131,7 +131,7 @@ BVN_REGISTER_HERO(kenpachi, "kenpachi");
    - **结算阶段**：引擎统一处理 移动 / 碰撞 / 标准战斗约定（伤害 / 死亡 / status）/ effect 通道分发。
    - 随机走种子 RNG、时间 = tick。
 3. **快照**：双缓冲 capture（registry → 后缓冲；含本帧渲染任务）。
-4. **渲染（独立线程 / scheduler）**：前缓冲 + 插值 alpha → 各 renderable 的 `render(renderer)` 任务按 render scheduler 顺序录制 → renderer 完成 Vulkan 帧开闭、submit、present。
+4. **渲染（render scheduler）**：前缓冲 + 插值 alpha → 各 renderable 的 `render(renderer)` 任务按 render scheduler 顺序录制 → render scheduler 的 `submit()` 完成 Vulkan 帧开闭、submit、present。
 5. **网络**：host 序列化快照广播；client 预测 + 和解。
 6. **重计算**：寻路 / 粒子 / 大量单位 → sender 丢 compute scheduler（CPU 现在 / CUDA 以后）。
 

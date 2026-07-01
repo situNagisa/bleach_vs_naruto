@@ -145,20 +145,26 @@ auto T::render(renderer& r) -> render_task
 void render_scheduler::submit()
 {
     sync_wait(scope.on_empty());        // 1) 等上一帧编排出去的工作收干净
-    renderer.begin_frame();             // 2) 开帧：acquire + reset + begin CB
-    renderer.begin_rendering();         //    开 dynamic rendering
+
+    // 2) 开帧 + 开 rendering：命令序列见 renderer.md §3.2，以 // + {} 内联（非具名函数），操作 renderer 持有的数据
+    {
+        // vkWaitForFences / vkAcquireNextImageKHR / … / vkCmdBeginRendering(renderer.primary_cmd, …)
+    }
+
     auto work =
         when_all(task_queue)            // 3) 放行本帧所有已挂起的 render task 去录制
         | then([&]
         {
-            renderer.end_rendering();   // 4) 收帧：end rendering + submit + present
-            renderer.end_frame();
+            // 4) 收 rendering + 收帧：命令序列见 renderer.md §3.4，同样 // + {} 内联
+            {
+                // vkCmdEndRendering(renderer.primary_cmd) / vkQueueSubmit2 / vkQueuePresentKHR / …
+            }
         });
     scope.spawn(inner_scheduler, work); // 在内部调度器上编排；scope 追踪它
 }
 ```
 
-`begin_frame` / `end_frame` 内部对应 `renderer.md §3.2 / §3.4` 的 Vulkan 帧生命周期（acquire、布局转换、`vkCmdBeginRendering` / `EndRendering`、submit、present）。**`vkCmdBeginRendering` / `EndRendering` 与 submit / present 永远归 renderer**（`renderer.md §3.2` 契约），render task 绝不自调。
+开帧 / 收帧的命令序列见 `renderer.md §3.2 / §3.4`（acquire、布局转换、`vkCmdBeginRendering` / `EndRendering`、submit、present）——它们由 `submit()` 以 `//` 注释 + `{}` 块**内联**执行、操作 renderer 持有的 vulkan 数据，**不做具名函数**（每处只用一次）；renderer 本身是纯数据 context，不定义帧生命周期函数。**`vkCmdBeginRendering` / `EndRendering` 与 submit / present 永远由 `submit()` 执行**，render task 绝不自调。
 
 于是**帧开闭在 `submit()`、render 开闭在 render task 循环体**——两者是不同层：`submit()` 负责「这一帧」（开台 / 收台 / 提交 / 呈现），render task 只负责「把自己录进这一帧」（bind / draw）。模型 A 下内部调度器保证串行，`when_all` 里各 task 就按队列顺序串行录进同一条 primary command buffer；模型 B 落地后内部调度器允许并行，各 task 并行录各自的 secondary，`submit()` 再按队列顺序 join。
 
@@ -212,9 +218,9 @@ render task 第一次 `co_await schedule(render_scheduler)` 挂进任务队列�
 
 1. 游戏主体的主循环采输入、推进 sim、算好这一帧要画的数据（位置、当前帧、相机等）。
 2. 主循环调用 `render_scheduler.submit()`：
-	- 等上一帧收干净 → `begin_frame` + `begin_rendering` 开台；
+	- 等上一帧收干净 → 开帧 + 开 rendering 开台（`submit()` 内联块）；
 	- 放行本帧所有 render task，各自把自己录进 primary command buffer（按注册顺序串行）；
-	- `end_rendering` + `end_frame` 收台：submit + present。
+	- 收 rendering + 收帧收台：submit + present。
 3. 结束信号发出时，按 §6 收尾。
 
 > 单帧 ⟂ 时间轴：render task 只管「画这一帧的样子」，怎么从 tick 推进出「这一帧的样子」是 entity / sim 的事（`display-architecture.md §4`）。
@@ -224,7 +230,7 @@ render task 第一次 `co_await schedule(render_scheduler)` 挂进任务队列�
 ## 8. 与其它文档的关系
 
 - **`display-architecture.md`**：定义 `renderable` 与 `t.render(renderer)` 这个接入面（画什么、怎么画）。本文定义这些 render task 在运行时怎么被启动、编排、收尾。
-- **`renderer.md`**：定义一帧的 Vulkan 生命周期（五阶段、并发模型、scheduler 契约）。本文 `submit()` 调用的 `begin_frame` / `end_frame` 即落在那套生命周期上。
+- **`renderer.md`**：定义一帧的 Vulkan 生命周期（五阶段、并发模型、scheduler 契约）。本文 `submit()` 内联执行的开帧 / 收帧命令即落在那套生命周期上；renderer 是纯数据 context，帧开闭的**代码**在 `submit()` 里。
 - **`engine-spec.md §4.5`**：「英雄发起调度渲染任务」「后端可换点 renderer」在此具体化为：entity 在 `main` 里向 render scheduler 注册 render task；`render` 的参数位现阶段恒为 renderer 本身（唯一的 renderer 实现）。
 
 ---
@@ -232,5 +238,5 @@ render task 第一次 `co_await schedule(render_scheduler)` 挂进任务队列�
 ## 9. 待定 / 未来
 
 - **render scheduler 固化**：把内部调度器内联进 render scheduler、消除转发，使 `co_await schedule` 回到从 env 取（§6.2 终态）；届时确定内部到底用什么执行资源。
-- **并行录制**（`renderer.md` 模型 B）落地后：把内部调度器换成允许并行的，`submit()` 的 `when_all` 天然并行录各自的 secondary command buffer，再由 renderer 按队列顺序 join。
+- **并行录制**（`renderer.md` 模型 B）落地后：把内部调度器换成允许并行的，`submit()` 的 `when_all` 天然并行录各自的 secondary command buffer，再由 `submit()` 按队列顺序 join。
 - **render context 可 dump**：`render` 依赖的 context 应可被 dump、也可从 dump 出的对象重建（服务快照 / 联网 / 离线恢复，呼应 `engine-spec §4.4` 与 `display-architecture.md §9`）——现在为控复杂度不做，方向朝此走。

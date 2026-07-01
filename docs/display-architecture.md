@@ -18,6 +18,19 @@
 struct t          { /* render_task */ render(renderer); };  // 成员，OK
 /* render_task */   render(some_context, renderer);          // ADL 自由函数，OK
 
+inline constexpr struct render_t {
+	constexpr static? decltype(auto) operator()(auto&& t, auto&& renderer) const? noexcept(?)
+		requires ...
+	{
+		if constexpr member call
+			member call
+		else if constexpr adl call
+			adl call
+		else
+			fail
+	}
+} render{}; // CPO
+
 template <class T, class Renderer>
 concept renderable = requires (T&& t, Renderer&& renderer)
 {
@@ -69,9 +82,9 @@ concept renderable = requires (T&& t, Renderer&& renderer)
 
 > 机制与帧生命周期见 **`renderer.md`**（§3 五阶段、§4 并发模型、§5 scheduler 契约）；render task 在运行时怎么被启动 / 编排 / 收尾见 **`render-runtime.md`**；Vulkan 概念背景（in-flight / 帧槽 / dynamic rendering / 模型 B 示例）见 **`vulkan-qa.md`**。本节只记与 `renderable` 直接相关的约定。
 
-- **`render(renderer)` 里的 `renderer`**：现阶段恒为唯一的 renderer 实现，它既是渲染器、又充当绘制上下文；renderable 在其上只录 draw，**不调 `begin / end_rendering`、不碰 submit / present**——帧结构归 renderer。`t.render(renderer)` 中携带上下文的是 `t`，`renderer` 这个位置不放别的东西。`render` 是一个注册一次、贯穿整个参与周期的协程（形态见 `render-runtime.md §4`）。
-- **录进哪个 command buffer 取决于并发模型**：当前实现（模型 A）下 renderable 录进 renderer 的 **primary** command buffer，串行录制；选定的演进方向（模型 B）下改录进**自己的 secondary CB** 并交回，由 renderer 用 `vkCmdExecuteCommands` 按数组顺序决定绘制先后。两种模型下 renderable 都只认交给它的 command buffer（现阶段不排序、按提交顺序；排序策略待定）。
-- **「核心不规定顺序」不变**：§3 说的是**核心 concept 不强加顺序**；顺序是 **renderer / 后端**的职责（§3「各自 / 后端负责」）。于是「自己画自己」（§1）与「跨 renderable 顺序」以**排序**调和，**不**引入单帧合成结构、也**不**引入 draw 抽象。
+- **`render(renderer)` 里的 `renderer`**：现阶段恒为唯一的 renderer 实现，它是一个**纯数据 context**（持有 vulkan handle，不定义帧生命周期函数），又充当绘制上下文；renderable 在其上只录 draw，**不调 `begin / end_rendering`、不碰 submit / present**——帧结构归 render scheduler 的 `submit()`。`t.render(renderer)` 中携带上下文的是 `t`，`renderer` 这个位置不放别的东西。`render` 是一个注册一次、贯穿整个参与周期的协程（形态见 `render-runtime.md §4`）。
+- **录进哪个 command buffer 取决于并发模型**：当前实现（模型 A）下 renderable 录进 renderer 的 **primary** command buffer，串行录制；选定的演进方向（模型 B）下改录进**自己的 secondary CB** 并交回，由 render scheduler 的 `submit()` 用 `vkCmdExecuteCommands` 按数组顺序决定绘制先后。两种模型下 renderable 都只认交给它的 command buffer（现阶段不排序、按提交顺序；排序策略待定）。
+- **「核心不规定顺序」不变**：§3 说的是**核心 concept 不强加顺序**；顺序是 **render scheduler / 后端**的职责（§3「各自 / 后端负责」）。于是「自己画自己」（§1）与「跨 renderable 顺序」以**排序**调和，**不**引入单帧合成结构、也**不**引入 draw 抽象。
 
 ## 7. 动画（单帧结构 + 时间轴）——暂缓的可选辅助件
 

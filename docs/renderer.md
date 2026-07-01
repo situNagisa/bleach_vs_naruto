@@ -26,15 +26,17 @@
 
 ### 2.2 绘制期
 
-renderable 在 `render` 里录制自己的 draw 命令（单个 task 的命令清单见 §3.3）。当前模型 A 下它录进 renderer 的 primary command buffer；模型 B 落地后改为录进自己的 secondary command buffer、每帧录完交回 renderer 统一执行（见 §4.2）。两种模型下它都只认交给它的 command buffer，不碰帧结构（begin / end rendering）与 submit / present。
+renderable 在 `render` 里录制自己的 draw 命令（单个 task 的命令清单见 §3.3）。当前模型 A 下它录进 renderer 的 primary command buffer；模型 B 落地后改为录进自己的 secondary command buffer、每帧录完交回 render scheduler 的 `submit()` 统一执行（见 §4.2）。两种模型下它都只认交给它的 command buffer，不碰帧结构（begin / end rendering）与 submit / present。
 
 ### 2.3 renderer 持有什么
 
 renderer 作为持久对象，管理所有框架级 Vulkan 状态——instance / surface / device / queue、swapchain 及其 image / view、深度图、以及每个 in-flight 帧槽的命令池 / 命令缓冲 / 同步对象。完整清单与含义见 §3.1。
 
+renderer 是一个**纯数据 context**：它只**持有**这些 Vulkan handle（**全部 in-flight 帧槽也由它持有**），**不定义** begin / end frame / rendering 之类的帧生命周期函数——帧的开闭是 render scheduler 的 `submit()` 的职责（见 §3.2 / §3.4、`render-runtime.md §5`）。
+
 ### 2.4 renderer 给 renderable 的接口边界
 
-renderer **不包装资源创建**，避免做成第二套 Vulkan API：renderable 读取 renderer 里的 Vulkan 数据、直接调用 Vulkan。renderer 不为 renderable 增加辅助函数层；现阶段只暴露框架级 Vulkan 状态与帧生命周期入口。
+renderer **不包装资源创建**，避免做成第二套 Vulkan API：renderable 读取 renderer 里的 Vulkan 数据、直接调用 Vulkan。renderer 不为 renderable 增加辅助函数层；现阶段只暴露框架级 Vulkan 数据。renderer 也**不定义帧生命周期函数**——帧开闭是 render scheduler `submit()` 的活（见 §3.2 / §3.4、`render-runtime.md §5`）。
 
 ### 2.5 渲染目标边界（现阶段约定）
 
@@ -53,7 +55,7 @@ renderer 决定渲染目标（attachment）结构（初期：单 color attachmen
 
 ### 3.1 持久环境（renderer 一次性建立，整程序持有）
 
-renderable **只读不建**，renderer 持有：
+renderable **只读不建**，renderer 持有以下持久数据（**含全部 in-flight 帧槽**）：
 
 ```cpp
 VkInstance / VkSurfaceKHR / VkPhysicalDevice / VkDevice
@@ -76,37 +78,39 @@ VkImage + VkImageView depth         // 每槽一份深度图，D32_SFLOAT
 
 深度图按帧槽持有，避免 N+1 帧清深度撞上 N 帧仍在读的 hazard。
 
-### 3.2 每帧环境（`begin_frame` + `begin_rendering`，在所有 task 之前）
+### 3.2 每帧环境（开帧 + 开 rendering，在所有 task 之前）
 
-renderer 每帧替 task 铺好台子。
-
-`begin_frame()`：
+这些命令由 render scheduler 的 `submit()` 在所有 task 之前执行——以 `//` 注释 + `{}` 块**内联**（每帧只有这一处调用，故不做具名函数），操作 renderer 持有的 vulkan 数据：
 
 ```cpp
-vkWaitForFences(in_flight[cur])
-vkAcquireNextImageKHR(swapchain, image_available[cur], &image_index)   // OUT_OF_DATE → 重建 swapchain；SUBOPTIMAL → 本帧继续、请求下帧重建
-vkResetFences(in_flight[cur])    // acquire 成功后再 reset，避免 stale swapchain 时 fence 被错误清掉
-vkResetCommandPool(command_pool[cur])
-vkBeginCommandBuffer(primary_cmd)
-// 得到本帧句柄：{ primary CB, image_index, swapchain image / view, extent }
+// begin frame：开帧（acquire + reset + 开 primary CB）
+{
+    vkWaitForFences(in_flight[cur])
+    vkAcquireNextImageKHR(swapchain, image_available[cur], &image_index)   // OUT_OF_DATE → 重建 swapchain；SUBOPTIMAL → 本帧继续、请求下帧重建
+    vkResetFences(in_flight[cur])    // acquire 成功后再 reset，避免 stale swapchain 时 fence 被错误清掉
+    vkResetCommandPool(command_pool[cur])
+    vkBeginCommandBuffer(primary_cmd)
+    // 得到本帧句柄：{ primary CB, image_index, swapchain image / view, extent }
+}
 ```
-
-`begin_rendering(frame)`：
 
 ```cpp
-// 1) 布局转换（sync2 / vkCmdPipelineBarrier2）
-swapchain_image: UNDEFINED → COLOR_ATTACHMENT_OPTIMAL
-depth_image:     UNDEFINED → DEPTH_ATTACHMENT_OPTIMAL
-// 2) 开 dynamic rendering
-vkCmdBeginRendering(primary_cmd, VkRenderingInfo{
-    color = { swapchain_view, loadOp=CLEAR, storeOp=STORE, clear=背景 },
-    depth = { depth_view,     loadOp=CLEAR, storeOp=DONT_CARE, clear=1.0 },
-    renderArea = 全 extent,
-    flags = 0,   // 当前模型 A；模型 B 落地后改为 SECONDARY_COMMAND_BUFFERS_BIT
-})
+// begin rendering：开 dynamic rendering（紧接开帧，仍在 submit() 内）
+{
+    // 1) 布局转换（sync2 / vkCmdPipelineBarrier2）
+    swapchain_image: UNDEFINED → COLOR_ATTACHMENT_OPTIMAL
+    depth_image:     UNDEFINED → DEPTH_ATTACHMENT_OPTIMAL
+    // 2) 开 dynamic rendering
+    vkCmdBeginRendering(primary_cmd, VkRenderingInfo{
+        color = { swapchain_view, loadOp=CLEAR, storeOp=STORE, clear=背景 },
+        depth = { depth_view,     loadOp=CLEAR, storeOp=DONT_CARE, clear=1.0 },
+        renderArea = 全 extent,
+        flags = 0,   // 当前模型 A；模型 B 落地后改为 SECONDARY_COMMAND_BUFFERS_BIT
+    })
+}
 ```
 
-**契约：`vkCmdBeginRendering` / `EndRendering` 永远归 renderer，render task 绝不自调**；task 只在已开启的 rendering 实例内录 draw。
+**契约：`vkCmdBeginRendering` / `EndRendering` 永远由 render scheduler 的 `submit()` 执行，render task 绝不自调**；task 只在已开启的 rendering 实例内录 draw。
 
 ### 3.3 录制期（render task）—— 详见 §4 并发模型
 
@@ -125,13 +129,18 @@ vkCmdDraw / vkCmdDrawIndexed(cmd, ...)
 
 第三方渲染后端入口（例如 ImGui Vulkan backend）可以由 renderable 直接调用，只要它同样只把 draw 命令录进这个 `cmd`，并且不接管 `vkCmdBeginRendering` / `vkCmdEndRendering` / submit / present。项目不为这类三方库再包一层。
 
-### 3.4 结束一帧（`end_rendering` + `end_frame`）
+### 3.4 结束一帧（收 rendering + 收帧）
+
+本帧全部 task 录完后，`submit()` 收这一帧——同样以 `//` + `{}` 内联块执行（操作 renderer 持有的 vulkan 数据，非具名函数）：
 
 ```cpp
-end_rendering():
+// end rendering：收 dynamic rendering
+{
     vkCmdEndRendering(primary_cmd)
+}
 
-end_frame():
+// end frame：转呈现布局 + 收 CB + 提交 + 呈现 + 轮转帧槽
+{
     barrier: swapchain_image  COLOR_ATTACHMENT_OPTIMAL → PRESENT_SRC_KHR
     vkEndCommandBuffer(primary_cmd)
     vkQueueSubmit2(graphics_queue, {
@@ -142,6 +151,7 @@ end_frame():
     })
     vkQueuePresentKHR(present_queue, { wait={render_finished}, swapchain, image_index })   // OUT_OF_DATE / SUBOPTIMAL → 重建
     cur = (cur + 1) % 帧槽数
+}
 ```
 
 要点：
@@ -185,10 +195,10 @@ end_frame():
 所有 task 录进同一个 primary command buffer；scheduler 串行、按先后依次驱动：
 
 ```cpp
-begin_rendering(frame)
+begin_rendering(frame)               // submit() 的开台括号（§3.2）
 for (task : 按既定先后排好的任务)     // 串行，FIFO
     task 录命令 into primary_cmd      // 录制顺序 == 绘制顺序（先后）
-end_rendering()
+end_rendering()                      // submit() 的收台括号（§3.4）
 ```
 
 - 「并发」仅在 CPU 侧*录制前*的活；`vkCmd*` 进 CB 那刻必须串行。
@@ -198,7 +208,7 @@ end_rendering()
 
 ### 4.2 模型 B：secondary command buffer，并行录制 + 控序 —— 演进方向
 
-每个 render task 自带 `VkCommandPool` + secondary CB（池亦外部同步，故**每并行录制单元 / 每 task 一套**），并行录制后由 renderer 按序执行：
+每个 render task 自带 `VkCommandPool` + secondary CB（池亦外部同步，故**每并行录制单元 / 每 task 一套**），并行录制后由 render scheduler 的 `submit()` 按序执行：
 
 ```cpp
 // task（可并行）
@@ -208,9 +218,9 @@ vkBeginCommandBuffer(sec, {
 })
 录 draw into sec        // ← 这些 sec 可并行录
 vkEndCommandBuffer(sec)
-把 sec 交回 renderer / scheduler
+把 sec 交回 render scheduler 的 `submit()`
 
-// renderer（串行 join）
+// submit()（串行 join；render scheduler，非 renderer）
 begin_rendering(frame, contents = SECONDARY_COMMAND_BUFFERS_BIT)
 按需要的先后排列 secondaries（现阶段 = 提交顺序）
 vkCmdExecuteCommands(primary_cmd, n, secondaries[])   // 数组顺序 == 执行顺序 == 绘制先后
@@ -224,7 +234,7 @@ end_rendering()
 - 不引入 draw_item 第二套 API ✅（呼应 §2.4「不做第二套 Vulkan API」）。
 - 代价：secondary 管理 + 每并行录制单元一池 + 少量驱动开销；secondary 须**备 frames-in-flight 份**并随帧 reset。
 
-**归位**：§2.2 所说 renderable「录进自己的 command buffer」，在模型 B 下即每帧的 **secondary**——录完交回 renderer，由 `vkCmdExecuteCommands` 按既定先后执行。
+**归位**：§2.2 所说 renderable「录进自己的 command buffer」，在模型 B 下即每帧的 **secondary**——录完交回 render scheduler 的 `submit()`，由 `vkCmdExecuteCommands` 按既定先后执行。
 
 ---
 
@@ -234,7 +244,7 @@ end_rendering()
 
 1. **每帧 FIFO 流水**：`begin_frame → begin_rendering(PRIMARY) →（按注册顺序串行驱动所有 task 录进 primary）→ end_rendering → submit → present`。submit 前必须让本帧全部 content task 跑完。（这套帧开闭在运行时由 render scheduler 的 `submit()` 驱动，见 `render-runtime.md §5`。）
 2. **顺序归属**：当前模型 A 下绘制先后 = task 被 FIFO resume 后录进 primary command buffer 的顺序。**现阶段不排序**（按注册 / 提交顺序），排序键见待定。
-3. **begin / end_rendering 归 renderer**；task 只认 `cmd`（当前 primary，未来 B 为 secondary），只录 draw，不碰 submit / present。
+3. **begin / end_rendering 归 render scheduler 的 `submit()`**；task 只认 `cmd`（当前 primary，未来 B 为 secondary），只录 draw，不碰 submit / present。
 4. **frames-in-flight**：每帧槽独立 primary CB + sync；CPU 最多领先 GPU N 帧；CPU 每帧写的 GPU buffer 备 N 份（push constant 录进 CB 内，不在此列）。未来模型 B 下，每 task 的 secondary 池亦须按帧槽拆分。
 5. **生命周期**：渲染收尾须先排空 render scope、再析构 renderable、最后拆 renderer（§3.5）。未来模型 B 下还包括 renderable 自持的 secondary 池。
 6. **A↔B 与未来 CUDA**：task 只认 `cmd`，故 A↔B 切换、乃至换 CUDA renderer，renderable 无须改动（呼应 engine-spec §4.5「后端可换」）。
