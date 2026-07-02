@@ -1,7 +1,8 @@
 # bvn 引擎架构定稿（Engine Spec v1）
 
 > 日期：2026-06-15　状态：**定稿 · 架构唯一权威**（经"模块 / 目录 / 接口 / 数据流 / 里程碑"逐项问答确定）
-> **架构冲突一律以本文为准；编码风格以 cpp-coding-standard 为准。**
+> **架构冲突一律以本文为准；编码风格以 coding-standard.md 为准。** 决策取舍见 decisions.md，文档索引见 context.md。
+> 本文是**全局架构骨架**；讨论较详的子系统（渲染 / 网络 / 插件 / 动画 / 资源 / 平台）在此只给骨架 + 指针，细节见各 theme 文档。
 > 接口为**草图**；标注"待定"的细节留到动手时再敲。
 
 ---
@@ -24,19 +25,18 @@
 
 ## 2. 模块（细粒度，各独立库；heroes 为 DLL；client/server 为可执行）
 
-| 模块 | 职责 | 关键内容 | 三方（直接用） |
-|---|---|---|---|
-| `display_architecture` | 显示架构 | 见`display-architecture.md` |  |
-| `platform` | 系统层 | 窗口 / 输入 / 计时 / fs / **动态库加载** | SDL3 |
-| `renderer`（原`rhi`） | 渲染 | 设备 / 交换链 / 缓冲 / 纹理 / 管线 / 提交 | volk·VMA·vk-bootstrap |
-| `render` | 表现 | 2D 精灵·相机·**渲染任务执行**·HUD | imgui·stb |
-| `simulator`（原`sim`） | 仿真核心 | **裸 registry 即 World**·tick/快照·**共享交互底座**（空间 / 碰撞 / effect 通道 / 属性） | EnTT |
-| `gameplay` | MOBA 规则 | 比赛流程·经济·AI·**可选标准战斗约定**·plugin host·协程英雄 runtime | — |
-| `net` | 网络 | `net_transport`·`input_command`·快照复制 | ENet |
-| `audio` | 音频 |  | miniaudio |
-| `assets` | 资源 | 加载器·热重载·精灵表·Lua（M3 起） | stb·sol2·lua |
-| `heroes/*` | 内容插件 | 每英雄一个**自包含**文件夹 → DLL | 仅 sdk |
-| `tools` | 工具 | **英雄编辑器**·Tracy·调试覆盖层·replay | imgui·Tracy |
+| 模块                     | 职责      | 关键内容                                                                | 三方（直接用）                         |
+| ---------------------- | ------- | ------------------------------------------------------------------- | ------------------------------- |
+| `display_architecture` | 显示架构    | 见 render/renderable.md                                          |                                 |
+| `platform`             | 系统层     | 窗口 / 输入 / 计时 / fs / **动态库加载**                                       | SDL3                            |
+| `renderer`（原`rhi`）     | 渲染      | 设备 / 交换链 / 缓冲 / 纹理 / 管线 / 提交，2D 精灵·相机·**渲染任务执行**·HUD                | volk·VMA·vk-bootstrap imgui·stb |
+| `simulator`（原`sim`）    | 仿真核心    | **裸 registry 即 World**·tick/快照·**共享交互底座**（空间 / 碰撞 / effect 通道 / 属性） | EnTT                            |
+| `gameplay`             | MOBA 规则 | 比赛流程·经济·AI·**可选标准战斗约定**·plugin host·协程英雄 runtime                    | —                               |
+| `net`                  | 网络      | `net_transport`·`input_command`·快照复制                                | ENet                            |
+| `audio`                | 音频      |                                                                     | miniaudio                       |
+| `assets`               | 资源      | 加载器·热重载·精灵表·Lua（M3 起）                                               | stb·sol2·lua                    |
+| `heroes/*`             | 内容插件    | 每英雄一个**自包含**文件夹 → DLL                                               | 仅 sdk                           |
+| `tools`                | 工具      | **英雄编辑器**·Tracy·调试覆盖层·replay                                        | imgui·Tracy                     |
 
 工具链：**C++26**（clang-cl 优先 / MSVC 兜底；热重载构建用 MSVC）·**vcpkg**·**CMake**（每模块独立 CMakeLists + 顶层聚合 + CMakePresets）。
 
@@ -48,7 +48,7 @@
 bvn/
   CMakeLists.txt cmake/  CMakePresets.json  vcpkg.json
   include/bvn/
-    display_architecture/ platform/  renderer/  render/  simulator/  gameplay/  net/  audio/  assets/  tools/
+    display_architecture/ platform/  renderer/  simulator/  gameplay/  net/  audio/  assets/  tools/
         每个：include/bvn/<模块>/*.h（公共，外部 #include <bvn/<模块>/...>）+ source/（实现）
   heroes/                     # 自包含：每英雄一个文件夹
     kenpachi/{source, data, assets}   ichigo/{...}   ...
@@ -87,10 +87,10 @@ bvn/
 // 一个英雄 = 一个协程（示意）
 hero_task kenpachi(hero_context context) {								   // 启动时传入 ctx
 	auto combo = 0;                              						   // 瞬时态 = 协程局部变量（挂起自动保留）
-    context.render_scope.spawn(::stdexec::starts_on(context.render_gate.scheduler_value, render(kenpachi_view, context.renderer)));	// 启动 render(renderer) 任务
+    context.render_scope.spawn(::stdexec::starts_on(::stdexec::schedule(context.render_scheduler), render(kenpachi_view, context.renderer)));	// 启动 render(renderer) 任务
 	while (context.alive()) {
 		auto&& in = ctx.input;
-		co_await context.next_tick();									 // 挂起，将恢复点加入到英雄调度器当中，等待下一次调度
+		co_await ::stdexec::schedule(context.main_scheduler)									 // 挂起，将恢复点加入到英雄调度器当中，等待下一次调度
 		if (in.pressed(key::j)) {										 // 连招 = 顺序代码，挂起点即帧推进
 			++combo;
 		}
@@ -104,8 +104,8 @@ BVN_REGISTER_HERO(kenpachi, "kenpachi");
 
 ### 4.5 渲染表达：`renderable + render(renderer)`
 - context 提供 render scheduler 与唯一 renderer；英雄或英雄管理的对象实现 `render(renderer)`，该函数本身就是渲染任务（sender / 协程）。
-- `render(renderer)` 的参数只有 renderer；调度器、结束信号从协程环境取。渲染任务读取已经发布的快照状态，在 render scheduler 唤醒后只向 renderer 交给它的 command buffer 录制。
-- **后端切换点 `renderer`**：现在用 Vulkan 实现 renderer；将来 CUDA 计算也只能作为 renderer / compute 的后端演进。renderer 是纯数据 context（持有 vulkan handle）；帧开闭、submit、present 归 render scheduler 的 `submit()`（见 `render-runtime.md §5`），呈现落在其内联的 Vulkan 帧命令上。
+- **后端切换点 `renderer`**：现在用 Vulkan 实现 renderer；将来 CUDA 计算也只能作为 renderer / compute 的后端演进。
+- 完整的显示架构见 render/ 各文档：概念 render/renderable.md、任务 render/render-task.md、renderer render/renderer.md、调度 render/render-scheduler.md、启动 render/boot.md。
 
 ### 4.6 灵活属性表（三层落地）
 - **标准约定属性**（health/mana/…）→ gameplay 类型化组件（快、标准系统与 UI 直接用）。
@@ -113,13 +113,11 @@ BVN_REGISTER_HERO(kenpachi, "kenpachi");
 - **需被别的实体 / 通用 effect 通道读写的非标准属性** → 通用 `Attributes` 组件（interned-id→值），**少量使用**。
 
 ### 4.7 计算 / 网络
-- `::std::execution`：重活（寻路 / 粒子 / 大量单位 SoA）作为 sender 提交；CPU（`inline_scheduler`） 现在 → **nvexec CUDA scheduler** 以后。
-- `net_transport`（ENet 后端）：`input_command{moveDir,aim,abilityBits,seq,tick}`；**host 权威 + 快照 + 移动预测 + 和解**；快照演进 全量 → delta → 兴趣区(AOI，兼作迷雾地基)；演进到专用服务器走同一无头 sim。
+- **计算**：`::std::execution`——重活（寻路 / 粒子 / 大量单位 SoA）作为 sender 提交；CPU（`inline_scheduler`）现在 → **nvexec CUDA scheduler** 以后。
+- **网络**：host 权威 + 快照 + 移动预测 + 和解，ENet 后端。细节见 net.md。
 
 ### 4.8 插件加载 / 可选辅助
-- 开局**扫描 `heroes/` / `plugins/`**（自包含文件夹 → DLL）+ 每插件 **manifest**（id / 版本 / 依赖 / 资源）+ **ABI 整数版本校验**（不匹配拒载 + 日志）。
-- **可选辅助库（不进引擎核心）**：招式帧数据时间线 / 动画状态机 / 逐帧 hit/hurt 框 + **Fighter Factory 式编辑器**——BvN 式连招英雄拿来用，不想用的绕开。
-- 万物皆插件：装备 / 地图 / 模式同构（共享加载基建，接口各异），**分阶段实现**（M3 装备起）。
+- 万物皆插件（英雄 / 装备 / 地图 / 模式），每英雄一个自包含文件夹 → DLL，开局扫描 + manifest + ABI 整数版本校验。细节见 plugin/spec.md；C++ 热重载见 plugin/hot-reload.md。
 
 ---
 
@@ -131,7 +129,7 @@ BVN_REGISTER_HERO(kenpachi, "kenpachi");
    - **结算阶段**：引擎统一处理 移动 / 碰撞 / 标准战斗约定（伤害 / 死亡 / status）/ effect 通道分发。
    - 随机走种子 RNG、时间 = tick。
 3. **快照**：双缓冲 capture（registry → 后缓冲；含本帧渲染任务）。
-4. **渲染（render scheduler）**：前缓冲 + 插值 alpha → 各 renderable 的 `render(renderer)` 任务按 render scheduler 顺序录制 → render scheduler 的 `submit()` 完成 Vulkan 帧开闭、submit、present。
+4. **渲染（render scheduler）**：前缓冲 + 插值 alpha → 各 renderable 的 `render(renderer)` 任务按 render scheduler 顺序录制 → render scheduler 的 `submit()` 完成帧开闭、submit、present（细节见 render/render-scheduler.md）。
 5. **网络**：host 序列化快照广播；client 预测 + 和解。
 6. **重计算**：寻路 / 粒子 / 大量单位 → sender 丢 compute scheduler（CPU 现在 / CUDA 以后）。
 
@@ -143,7 +141,7 @@ BVN_REGISTER_HERO(kenpachi, "kenpachi");
 - **simulator解耦 / 可无头**：`simulator` 不依赖 `render`/`platform`/`renderer`；`apps/server` 不链它们。
 - **软确定性纪律**：种子 RNG、禁墙钟（时间 = tick）、EnTT 稳定迭代、集中数值运算（为将来 lockstep 留门）。
 - **状态二分**：耐久 / 可见 / 联网 → ECS 组件；纯控制流 / 瞬时 → 协程局部变量。
-- **热重载 = 重启协程**：协程 + Live++ 有摩擦 → 热重载时取消旧协程、**从 ECS 当前态重启**新协程（瞬时态丢失可接受）。
+- **热重载 = 重启协程**：协程 + Live++ 有摩擦 → 热重载时取消旧协程、**从 ECS 当前态重启**新协程（瞬时态丢失可接受）。详见 plugin/hot-reload.md。
 - **最大插件自由**：英雄是自治协程 + 直接 ECS；引擎不强加"技能"概念。
 - **两个 CUDA 入口**：计算换 scheduler、渲染换 `renderer`；现在只预留，实现在 M8。
 - **内存**：禁止裸`new`/`delete`，用智能指针，容器解决，必要时设计新容器。
