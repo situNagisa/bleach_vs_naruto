@@ -1,7 +1,7 @@
 # bvn 引擎架构定稿（Engine Spec v1）
 
 > 日期：2026-06-15　状态：**定稿 · 架构唯一权威**（经"模块 / 目录 / 接口 / 数据流 / 里程碑"逐项问答确定）
-> **架构冲突一律以本文为准；编码风格以 coding-standard.md 为准。** 决策取舍见 decisions.md，文档索引见 context.md。
+> **架构冲突一律以本文为准；编码风格以 [coding-standard.md](coding-standard.md#bvn-c-代码规范-v1) 为准。** 决策取舍见 [decisions.md](decisions.md#bvn-技术架构决策日志)，文档索引见 [context.md](context.md#bvn-文档索引context)。
 > 本文是**全局架构骨架**；讨论较详的子系统（渲染 / 网络 / 插件 / 动画 / 资源 / 平台）在此只给骨架 + 指针，细节见各 theme 文档。
 > 接口为**草图**；标注"待定"的细节留到动手时再敲。
 
@@ -19,7 +19,7 @@
 两条由此长出的支柱：
 
 - **英雄 = 一个协程**（不是回调对象）。启动时传入 context，之后每 tick 反复 resume；输入 / 事件都在 context 里。连招 = 顺序代码，协程挂起点就是状态。
-- **状态二分**：**耐久 / 可见 / 要联网的状态 → ECS 组件；纯控制流 / 瞬时的状态 → 协程局部变量**。这一条同时解决快照、联网、热重载（见 §4.4 / §6）。
+- **状态二分**：**耐久 / 可见 / 要联网的状态 → ECS 组件；纯控制流 / 瞬时的状态 → 协程局部变量**。这一条同时解决快照、联网、热重载（见 [§4.4](#44-英雄-协程王牌) / [§6](#6-设计准则)）。
 
 ---
 
@@ -27,7 +27,7 @@
 
 | 模块                     | 职责      | 关键内容                                                                | 三方（直接用）                         |
 | ---------------------- | ------- | ------------------------------------------------------------------- | ------------------------------- |
-| `display_architecture` | 显示架构    | 见 render/renderable.md                                          |                                 |
+| `display_architecture` | 显示架构    | 见 [render/renderable.md](render/renderable.md#bvn-渲染renderable设计-规范)                                          |                                 |
 | `platform`             | 系统层     | 窗口 / 输入 / 计时 / fs / **动态库加载**                                       | SDL3                            |
 | `renderer`（原`rhi`）     | 渲染      | 设备 / 交换链 / 缓冲 / 纹理 / 管线 / 提交，2D 精灵·相机·**渲染任务执行**·HUD                | volk·VMA·vk-bootstrap imgui·stb |
 | `simulator`（原`sim`）    | 仿真核心    | **裸 registry 即 World**·tick/快照·**共享交互底座**（空间 / 碰撞 / effect 通道 / 属性） | EnTT                            |
@@ -74,11 +74,11 @@ bvn/
 引擎提供、英雄按需使用的**原语**（这就是"处理英雄之间的关系"）：
 - **空间查询 / 碰撞重叠检测**（英雄决定何时怎么用——怎么移动、何时生成判定框）。
 - **通用 effect / 事件通道**（一个实体对另一个施加影响的统一渠道，不预设语义）。
-- **灵活属性表**（见 §4.6 三层落地）。
+- **灵活属性表**（见 [§4.6 三层落地](#46-灵活属性表三层落地)）。
 
 ### 4.3 可选标准战斗约定（gameplay，"可选不强制"）
 一套标准 `health / damage / teams / death / status / 力` 的类型化组件 + 处理系统。
-- 英雄**自愿**用：用的省事、引擎也能渲染血条等通用 UI；不用的走 §4.2 通用机制自定义。
+- 英雄**自愿**用：用的省事、引擎也能渲染血条等通用 UI；不用的走 [§4.2 通用机制](#42-共享交互底座simulator通用机制) 自定义。
 
 ### 4.4 英雄 = 协程（王牌）⭐
 插件导出一个**工厂函数**产出英雄协程；引擎每 tick **resume** 它。无 onTick/onInput/onDamaged 回调——输入 / 事件 / 世界 / 渲染 API 全在 `ctx` 里、每次 resume 刷新。
@@ -105,7 +105,7 @@ BVN_REGISTER_HERO(kenpachi, "kenpachi");
 ### 4.5 渲染表达：`renderable + render(renderer)`
 - context 提供 render scheduler 与唯一 renderer；英雄或英雄管理的对象实现 `render(renderer)`，该函数本身就是渲染任务（sender / 协程）。
 - **后端切换点 `renderer`**：现在用 Vulkan 实现 renderer；将来 CUDA 计算也只能作为 renderer / compute 的后端演进。
-- 完整的显示架构见 render/ 各文档：概念 render/renderable.md、任务 render/render-task.md、renderer render/renderer.md、调度 render/render-scheduler.md、启动 render/boot.md。
+- 完整的显示架构见 render/ 各文档：概念 [render/renderable.md](render/renderable.md#bvn-渲染renderable设计-规范)、任务 [render/render-task.md](render/render-task.md#bvn-渲染render-task设计-规范)、renderer [render/renderer.md](render/renderer.md#bvn-渲染renderer设计-规范)、调度 [render/render-scheduler.md](render/render-scheduler.md#bvn-渲染render-scheduler设计-规范)、启动 [render/boot.md](render/boot.md#bvn-渲染启动boot)。
 
 ### 4.6 灵活属性表（三层落地）
 - **标准约定属性**（health/mana/…）→ gameplay 类型化组件（快、标准系统与 UI 直接用）。
@@ -114,10 +114,10 @@ BVN_REGISTER_HERO(kenpachi, "kenpachi");
 
 ### 4.7 计算 / 网络
 - **计算**：`::std::execution`——重活（寻路 / 粒子 / 大量单位 SoA）作为 sender 提交；CPU（`inline_scheduler`）现在 → **nvexec CUDA scheduler** 以后。
-- **网络**：host 权威 + 快照 + 移动预测 + 和解，ENet 后端。细节见 net.md。
+- **网络**：host 权威 + 快照 + 移动预测 + 和解，ENet 后端。细节见 [net.md §思路](net.md#思路)。
 
 ### 4.8 插件加载 / 可选辅助
-- 万物皆插件（英雄 / 装备 / 地图 / 模式），每英雄一个自包含文件夹 → DLL，开局扫描 + manifest + ABI 整数版本校验。细节见 plugin/spec.md；C++ 热重载见 plugin/hot-reload.md。
+- 万物皆插件（英雄 / 装备 / 地图 / 模式），每英雄一个自包含文件夹 → DLL，开局扫描 + manifest + ABI 整数版本校验。细节见 [plugin/spec.md §1 前提与哲学](plugin/spec.md#1-前提与哲学)；C++ 热重载见 [plugin/hot-reload.md §0 加载插件 ≠ 热重载](plugin/hot-reload.md#0-加载插件热重载最常见的混淆)。
 
 ---
 
@@ -129,7 +129,7 @@ BVN_REGISTER_HERO(kenpachi, "kenpachi");
    - **结算阶段**：引擎统一处理 移动 / 碰撞 / 标准战斗约定（伤害 / 死亡 / status）/ effect 通道分发。
    - 随机走种子 RNG、时间 = tick。
 3. **快照**：双缓冲 capture（registry → 后缓冲；含本帧渲染任务）。
-4. **渲染（render scheduler）**：前缓冲 + 插值 alpha → 各 renderable 的 `render(renderer)` 任务按 render scheduler 顺序录制 → render scheduler 的 `submit()` 完成帧开闭、submit、present（细节见 render/render-scheduler.md）。
+4. **渲染（render scheduler）**：前缓冲 + 插值 alpha → 各 renderable 的 `render(renderer)` 任务按 render scheduler 顺序录制 → render scheduler 的 `submit()` 完成帧开闭、submit、present（细节见 [render/render-scheduler.md §2 submit() 与一帧的编排](render/render-scheduler.md#2-submit-与一帧的编排)）。
 5. **网络**：host 序列化快照广播；client 预测 + 和解。
 6. **重计算**：寻路 / 粒子 / 大量单位 → sender 丢 compute scheduler（CPU 现在 / CUDA 以后）。
 
@@ -141,7 +141,7 @@ BVN_REGISTER_HERO(kenpachi, "kenpachi");
 - **simulator解耦 / 可无头**：`simulator` 不依赖 `render`/`platform`/`renderer`；`apps/server` 不链它们。
 - **软确定性纪律**：种子 RNG、禁墙钟（时间 = tick）、EnTT 稳定迭代、集中数值运算（为将来 lockstep 留门）。
 - **状态二分**：耐久 / 可见 / 联网 → ECS 组件；纯控制流 / 瞬时 → 协程局部变量。
-- **热重载 = 重启协程**：协程 + Live++ 有摩擦 → 热重载时取消旧协程、**从 ECS 当前态重启**新协程（瞬时态丢失可接受）。详见 plugin/hot-reload.md。
+- **热重载 = 重启协程**：协程 + Live++ 有摩擦 → 热重载时取消旧协程、**从 ECS 当前态重启**新协程（瞬时态丢失可接受）。详见 [plugin/hot-reload.md §4 结论](plugin/hot-reload.md#4-结论)。
 - **最大插件自由**：英雄是自治协程 + 直接 ECS；引擎不强加"技能"概念。
 - **两个 CUDA 入口**：计算换 scheduler、渲染换 `renderer`；现在只预留，实现在 M8。
 - **内存**：禁止裸`new`/`delete`，用智能指针，容器解决，必要时设计新容器。
@@ -151,17 +151,17 @@ BVN_REGISTER_HERO(kenpachi, "kenpachi");
 
 ## 7. 里程碑 → 模块映射
 
-| M | 目标 | 落地重点 |
-|---|---|---|
-| **M0 · 地基** | 能跑的循环 + 三角形 | CMake/vcpkg/Presets · platform(SDL3) · renderer(Vulkan 三角) · **定步长循环 + 双缓冲骨架** · `::stdexec` · ImGui |
-| **M1 · 渲染管线** | 看到 BvN 精灵在场景里 | `renderer`+`vulkan`· 3D 场景 + **2D billboard + 朝向翻转** · 侧俯视相机 · 精灵动画基础 · 资源加载+热重载 · 插值 |
-| **M2 · 仿真 + 协程英雄 + 操控** | 一个英雄你能操控着跑 | 裸 registry/ECS + 固定流水线 · **plugin host + 加载英雄 DLL + 协程 runtime + ctx(输入)** · 移动 · **渲染任务路径打通** |
-| **M3 · 战斗 + 连招** | **首个可玩：空场地英雄能跑能连招** | 共享交互底座 + 可选标准战斗约定 · 一套连招打木桩 · 瞄准指示器 · 打击感钩子 · **Lua/数据热重载 · 编辑器起步 · Live++** |
-| **M4 · MOBA 生态** | 单线小局 | 小兵 / 塔 / 野怪 / 经济(等级/装备) / 寻路 / bot（先 1 路） |
-| **M5 · 完整单机一局** | **首个惊艳里程碑** | 三线 + 野区 · 推基地 · 3 个 MVP 英雄(协程插件) · HUD/小地图/计分板 · bot 补满 5v5 |
-| **M6 · 联网 MVP** | 两端联机 | `net_transport`+ENet · host 权威快照 + 移动预测 · 房间 + bot 补位 · 无头服务器雏形 |
-| **M7 · netcode 加固** | 公网可玩 | 快照 delta/AOI · 和解打磨 · 专用服务器 |
-| **M8 · CUDA 计算** | 引擎炫技 | nvexec scheduler + interop · 为自定义 CUDA 渲染铺路 |
-| **M9 · 内容与表现** | 量产 | 编辑器量产真英雄 · 装备 · 音效 · 世界观 · 打磨 |
+| M                       | 目标                  | 落地重点                                                                                                 |
+| ----------------------- | ------------------- | ---------------------------------------------------------------------------------------------------- |
+| **M0 · 地基**             | 能跑的循环 + 三角形         | CMake/vcpkg/Presets · platform(SDL3) · renderer(Vulkan 三角) · **定步长循环 + 双缓冲骨架** · `::stdexec` · ImGui |
+| **M1 · 渲染管线**           | 看到 BvN 精灵在场景里       | `renderer`+`vulkan`· 3D 场景 + **2D billboard + 朝向翻转** · 侧俯视相机 · 精灵动画基础 · 资源加载+热重载 · 插值                |
+| **M2 · 仿真 + 协程英雄 + 操控** | 一个英雄你能操控着跑          | 裸 registry/ECS + 固定流水线 · **plugin host + 加载英雄 DLL + 协程 runtime + ctx(输入)** · 移动 · **渲染任务路径打通**       |
+| **M3 · 战斗 + 连招**        | **首个可玩：空场地英雄能跑能连招** | 共享交互底座 + 可选标准战斗约定 · 一套连招打木桩 · 瞄准指示器 · 打击感钩子 · **Lua/数据热重载 · 编辑器起步 · Live++**                         |
+| **M4 · MOBA 生态**        | 单线小局                | 小兵 / 塔 / 野怪 / 经济(等级/装备) / 寻路 / bot（先 1 路）                                                            |
+| **M5 · 完整单机一局**         | **首个惊艳里程碑**         | 三线 + 野区 · 推基地 · 3 个 MVP 英雄(协程插件) · HUD/小地图/计分板 · bot 补满 5v5                                          |
+| **M6 · 联网 MVP**         | 两端联机                | `net_transport`+ENet · host 权威快照 + 移动预测 · 房间 + bot 补位 · 无头服务器雏形                                      |
+| **M7 · netcode 加固**     | 公网可玩                | 快照 delta/AOI · 和解打磨 · 专用服务器                                                                          |
+| **M8 · CUDA 计算**        | 引擎炫技                | nvexec scheduler + interop · 为自定义 CUDA 渲染铺路                                                          |
+| **M9 · 内容与表现**          | 量产                  | 编辑器量产真英雄 · 装备 · 音效 · 世界观 · 打磨                                                                        |
 
 > 优先级：**M0–M1 先打通引擎 / 渲染 → M2 落地协程英雄 + 插件系统 → M3 首个可玩 → M5 完整一局**，再碰联网（M6+）与 CUDA（M8）。

@@ -1,7 +1,7 @@
 # bvn Vulkan 概念问答（Q&A）
 
 > 日期：2026-06-28　状态：**学习记录 · 非规范**
-> 设计 render scheduler 时澄清的 Vulkan 基础概念。**规范以 `renderer.md` 为准**；本文是其概念背景与示例，便于回顾。
+> 设计 render scheduler 时澄清的 Vulkan 基础概念。**规范以 [renderer.md](renderer.md#bvn-渲染renderer设计-规范) 为准**；本文是其概念背景与示例，便于回顾。
 
 ---
 
@@ -23,7 +23,7 @@ CPU 把命令录进 command buffer、`vkQueueSubmit` 提交；GPU **稍后**按�
 
 做 **N 份**（N=2）。第 k 帧用 `slot = k % N`。GPU 用 slot0 画第 N 帧时，CPU 用 slot1 准备第 N+1 帧——两块独立内存不冲突。复用某槽前先等它的 fence。
 
-> **关键澄清（高频坑）：帧槽 ≠ swapchain 图像。** swapchain 可能 3 张图，帧槽可能 2 个，两者解耦：画到**哪张 swapchain 图**由 `vkAcquireNextImageKHR` 每帧轮换决定；用**哪个帧槽**由 `帧号 % N` 决定。混淆二者即 `renderer-vulkan-impl.md §5`「`render_finished` 应每 swapchain image 一份」那条注意的根源。
+> **关键澄清（高频坑）：帧槽 ≠ swapchain 图像。** swapchain 可能 3 张图，帧槽可能 2 个，两者解耦：画到**哪张 swapchain 图**由 `vkAcquireNextImageKHR` 每帧轮换决定；用**哪个帧槽**由 `帧号 % N` 决定。混淆二者即 [renderer-vulkan-impl.md §5](renderer-vulkan-impl.md#5-结束一帧收-rendering-收帧)「`render_finished` 应每 swapchain image 一份」那条注意的根源。
 
 **fence vs semaphore**（in-flight 离不开它俩）：
 
@@ -210,5 +210,5 @@ void render_frame(std::vector<task_recorder>& tasks)
 
 ## 7. 与规范文档的关系
 
-- 帧生命周期五阶段、并发模型 A/B、scheduler 契约 → renderer.md（五阶段）/ renderer-vulkan-impl.md（vk 命令）/ render-scheduler/model-ab.md（并发模型）。
-- renderable 侧的约定（只认 `cmd`、不碰帧结构、顺序归后端）→ `renderable.md`。
+- 帧生命周期五阶段、并发模型 A/B、scheduler 契约 → [renderer.md §2](renderer.md#2-帧生命周期五阶段规范级)（五阶段）/ [renderer-vulkan-impl.md](renderer-vulkan-impl.md#bvn-渲染renderer-的-vulkan-实现现状-实现)（vk 命令）/ [render-scheduler/model-ab.md](render-scheduler/model-ab.md#bvn-渲染并发模型-a-b设计)（并发模型）。
+- renderable 侧的约定（只认 `cmd`、不碰帧结构、顺序归后端）→ [renderable.md §3](renderable.md#3-核心契约骨瘦如柴)。

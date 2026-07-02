@@ -1,8 +1,8 @@
 # bvn 技术架构决策日志
 
 > 日期：2026-07-01（起 2026-06-14）　状态：**决策日志·非权威**
-> 本文记录每条决策的取舍与来龙去脉（想知道「为什么是这样」看这里）；规范正文见 `engine-spec.md`。段末 `T#` 仅作架构访谈的溯源标签，不代表阅读顺序。
-> 文档分工与阅读路径见 `context.md`。
+> 本文记录每条决策的取舍与来龙去脉（想知道「为什么是这样」看这里）；规范正文见 [engine-spec.md](engine-spec.md#bvn-引擎架构定稿engine-spec-v1)。段末 `T#` 仅作架构访谈的溯源标签，不代表阅读顺序。
+> 文档分工与阅读路径见 [context.md](context.md#bvn-文档索引context)。
 
 ---
 
@@ -18,7 +18,7 @@
 ## 2. 范式与并发（T2）
 
 - **ECS：EnTT**（纪律：① 迭代顺序稳定；② 上 CUDA 时从 packed 组件数组抽连续数据）。
-- **错误处理**：可恢复的运行时错误：用**异常**；程序 Bug / 逻辑错误：用**断言 / 契约（C++26）**；不可恢复错误：炸程序。（落地例子见 `coding-standard.md` 错误处理。）
+- **错误处理**：可恢复的运行时错误：用**异常**；程序 Bug / 逻辑错误：用**断言 / 契约（C++26）**；不可恢复错误：炸程序。（落地例子见 [coding-standard.md §需要展开的几点](coding-standard.md#需要展开的几点) 的错误处理。）
 - **并发：`std::execution`（senders/receivers，先用 NVIDIA stdexec）+ 协程**，**线程作 scheduler 资源**——调度器对外只承诺串行 / 并行，线程是它内部分配的资源。
 
 ---
@@ -33,7 +33,7 @@
 
 ## 4. 渲染（T6）
 
-> 规范细节见 render/ 各文档（renderer.md / renderable.md / render-task.md / render-scheduler.md 等）。本节只记决策取舍。
+> 规范细节见 render/ 各文档（[renderer.md](render/renderer.md#bvn-渲染renderer设计-规范) / [renderable.md](render/renderable.md#bvn-渲染renderable设计-规范) / [render-task.md](render/render-task.md#bvn-渲染render-task设计-规范) / [render-scheduler.md](render/render-scheduler.md#bvn-渲染render-scheduler设计-规范) 等）。本节只记决策取舍。
 
 - **renderer**：先不考虑怎么抽象，直接先用 vulkan 的原生 API，但清楚 vulkan 是作为 renderer 层来用的，使用 vulkan 的地方不能超过 renderer 的界定范围（利将来 CUDA interop；不上 bindless / render-graph）。
 - **渲染读 simulator：双缓冲快照 + 插值**（T3 定）；渲染侧每帧从快照提取 render scene。
@@ -73,7 +73,7 @@
 
 ## 7. 网络（T7 / T8）
 
-> 思路正文见 net.md。本节只记决策取舍。
+> 思路正文见 [net.md §思路](net.md#思路)。本节只记决策取舍。
 
 - **T7 网络**：`net_transport`(ENet) · `input_command{moveDir,aim,abilityBits,seq,tick}` · **host 权威 + 快照 + 移动预测 + 和解** · 快照演进 全量→delta→AOI（兼迷雾地基）· 可演进到专用无头服务器。
 
@@ -98,4 +98,4 @@
 > 不属于某个单一领域、贯穿全项目的设计规则集中放这里（以后还会长）。
 
 - **资源所有权优先于版本对比**：当子对象依赖父对象的资源时，优先把该资源的**所有权移交给子对象**、让子对象各自独立持有；**不要**擅自在子对象里加"对比父对象版本号 → 重建"的逻辑——那是额外复杂度 + 隐式耦合。拿不准所有权归属时先讨论，别默默加版本字段。
-- **RAII 生命周期 · 瞬态资源进协程帧**：有生命周期的对象（如 GPU 句柄）用 move-only 的 RAII 拥有者管理（构造即获取、析构即释放），避免在调用点逐个判空 teardown；瞬态 GPU 资源作为**协程帧内的局部量**持有（详见 render/render-task.md 的 render task 形态；编码落地见 coding-standard.md 错误处理）。
+- **RAII 生命周期 · 瞬态资源进协程帧**：有生命周期的对象（如 GPU 句柄）用 move-only 的 RAII 拥有者管理（构造即获取、析构即释放），避免在调用点逐个判空 teardown；瞬态 GPU 资源作为**协程帧内的局部量**持有（详见 [render/render-task.md §1 render task 的形态](render/render-task.md#1-render-task-的形态)；编码落地见 [coding-standard.md §需要展开的几点](coding-standard.md#需要展开的几点) 的错误处理）。

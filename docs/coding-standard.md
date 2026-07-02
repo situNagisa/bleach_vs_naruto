@@ -1,6 +1,6 @@
 # bvn C++ 代码规范 v1
 
-> 2026-06-15 · 配合 game-design/design.md / engine-spec.md / decisions.md；文档索引见 context.md
+> 2026-06-15 · 配合 [game-design/design.md](game-design/design.md#bvn-游戏设计design) / [engine-spec.md](engine-spec.md#bvn-引擎架构定稿engine-spec-v1) / [decisions.md](decisions.md#bvn-技术架构决策日志)；文档索引见 [context.md](context.md#bvn-文档索引context)
 > 项目唯一 C++ 编码权威，约束所有 C++ 代码（引擎 / 插件 / 工具 / 测试）。
 > 总原则：**越现代越好 · 最小仪式 · 三方库直接用**。
 > 下表即完整规则；其后只展开少数需要解释的点。
@@ -56,7 +56,7 @@ auto v = make_value();     // 值，靠 RVO
 - **异常** = 运行时异常情况（资源缺失 / 加载失败 / 非法状态）。
 - **断言** = 逻辑 bug（前置 / 后置 / 不变式）：优先 C++26 `pre()/post()`，降级 `BVN_ASSERT`。
 - **初始化守卫是不变式，用断言不用 `if`**：只应初始化一次的资源，用 `assert(handle == VK_NULL_HANDLE)` 表达前置不变式、再无条件创建；不要用 `if (handle == VK_NULL_HANDLE) { create... }` 把"重复初始化"这种逻辑错误变成静默跳过。
-- **有生命周期的资源用 RAII 拥有者收尾，不在调用点逐个判空**：用 move-only 的 RAII 拥有者（构造即获取、析构即释放）管理有生命周期的对象（如 GPU 句柄），于是不必在每个调用点写 `if (handle != VK_NULL_HANDLE) destroy`——判空只写进 wrapper 的析构一次。清理期判空本身不是逻辑错误（对象可能创建到一半就抛了），但用 RAII 就根本不必在调用点写它。瞬态 GPU 资源应作为协程帧内的局部量持有（见 render/render-task.md 的 render task 形态）。
+- **有生命周期的资源用 RAII 拥有者收尾，不在调用点逐个判空**：用 move-only 的 RAII 拥有者（构造即获取、析构即释放）管理有生命周期的对象（如 GPU 句柄），于是不必在每个调用点写 `if (handle != VK_NULL_HANDLE) destroy`——判空只写进 wrapper 的析构一次。清理期判空本身不是逻辑错误（对象可能创建到一半就抛了），但用 RAII 就根本不必在调用点写它。瞬态 GPU 资源应作为协程帧内的局部量持有（见 [render/render-task.md §1 render task 的形态](render/render-task.md#1-render-task-的形态)）。
 
 ```cpp
 auto pipeline = make_pipeline(device);   // RAII 拥有者：构造即建、析构即毁
@@ -65,7 +65,7 @@ other = create_other(device);
 // 退出作用域：pipeline 自动销毁，无手动 teardown、无逐点判空
 ```
 
-> 所有权层面的决策（"优先移交所有权、不做版本对比重建"）属架构决策，见 decisions.md 的「横切工程原则」。
+> 所有权层面的决策（"优先移交所有权、不做版本对比重建"）属架构决策，见 [decisions.md §9 横切工程原则](decisions.md#9-横切工程原则)。
 
 **DLL 导出宏 —— 每模块一个**
 ```cpp
@@ -84,4 +84,4 @@ other = create_other(device);
 ## 暂缓（M0–M3 后再定）
 日志（先 `std::println`，M4+ 定框架）· pmr 内存策略（默认 new/delete，按需引入）· 测试规范（M4+）· Lua 编码规范（M3 落地时定）。
 
-> 冲突裁决：**编码风格**层面以本规范为准；**架构**层面以 `engine-spec.md` 为准。
+> 冲突裁决：**编码风格**层面以本规范为准；**架构**层面以 [engine-spec.md](engine-spec.md#bvn-引擎架构定稿engine-spec-v1) 为准。

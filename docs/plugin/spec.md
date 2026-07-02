@@ -1,6 +1,6 @@
 # bvn 插件系统（plugin·spec）
 
-> 讨论较少的 theme。承接 ../engine-spec.md 插件加载 + ../decisions.md T4a/T4b（就近）。热重载见 hot-reload.md。
+> 讨论较少的 theme。承接 [../engine-spec.md §4.8 插件加载](../engine-spec.md#48-插件加载-可选辅助) + [../decisions.md §6 插件与热重载](../decisions.md#6-插件与热重载t4a-t4b)（就近）。热重载见 [hot-reload.md](hot-reload.md#热重载详解保留教学解释)。
 
 ---
 
@@ -15,23 +15,29 @@
 - **ABI 边界：C++ 虚接口**（共享头文件、同工具链编译）。虚调用只在"每 tick 一次"的粗边界，可忽略；内层热循环插件直接碰 ECS、零虚调用。
 - **宿主 API：直接暴露 ECS / 引擎内部**（插件 = 住在 DLL 里、和引擎紧耦合的一等 C++ 模块）。
 - **实例状态：插件持有富 C++ 对象**。
-- **英雄 = 协程**：插件导出一个工厂函数产出英雄协程，引擎每 tick resume 它（无回调）。详见 ../engine-spec.md 英雄=协程。
+- **英雄 = 协程**：插件导出一个工厂函数产出英雄协程，引擎每 tick resume 它（无回调）。详见 [../engine-spec.md §4.4 英雄=协程](../engine-spec.md#44-英雄-协程王牌)。
 
 ---
 
-## 3. 范围与策略
+## 3. 范围与加载
 
 - **粒度：每英雄一个 DLL**（独立热重载 / 独立分发）；每英雄一个**自包含**文件夹 `heroes/<name>/{source, data, assets}`。
 - **加载**：开局扫描 `heroes/` / `plugins/`（自包含文件夹 → DLL）+ 每插件 **manifest**（id / 版本 / 依赖 / 资源路径）。
-- **版本化：极轻量**——manifest 写引擎 ABI 整数版本，加载校验、不匹配拒载 + 日志；开放第三方 mod 时再升级到语义版本 + 依赖解析。
-- **分阶段实现**：M2 英雄 API → M3 装备 → 之后地图 / 模式。
+- **版本校验**：manifest 写引擎 ABI 整数版本，加载校验、不匹配拒载 + 日志。
 
 ---
 
 ## 4. 可选辅助库（不进引擎核心）
 
-招式帧数据时间线 / 动画状态机 / 逐帧 hit/hurt 框 + **Fighter Factory 式编辑器**——BvN 式连招英雄拿来用，不想用的绕开。见 ../animation.md 与 ../decisions.md 工具。
+招式帧数据时间线 / 动画状态机 / 逐帧 hit/hurt 框 + **Fighter Factory 式编辑器**——BvN 式连招英雄拿来用，不想用的绕开。见 [../animation.md](../animation.md#bvn-动画系统animation) 与 [../decisions.md §8 工具与可观测](../decisions.md#8-工具与可观测t9)。
 
 ---
 
-> **加载 ≠ 热重载**：加载是开局做一次（modding 要的是这个）；热重载是运行时换 DLL 不重启（纯给开发者提速）。**不做热重载，第三方 mod 照样成立**。详见 hot-reload.md。
+## 5. 计划 / 阶段
+
+- **分阶段落地**：M2 英雄 API → M3 装备 → 之后地图 / 模式。里程碑全表见 [../engine-spec.md §7](../engine-spec.md#7-里程碑-模块映射)。
+- **版本化演进**：现阶段极轻量（ABI 整数版本）；开放第三方 mod 时再升级到语义版本 + 依赖解析。
+
+---
+
+> **加载 ≠ 热重载**：加载是开局做一次（modding 要的是这个）；热重载是运行时换 DLL 不重启（纯给开发者提速）。**不做热重载，第三方 mod 照样成立**。详见 [hot-reload.md](hot-reload.md#热重载详解保留教学解释)。

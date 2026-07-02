@@ -1,6 +1,6 @@
 # bvn 平台层（platform）
 
-> 讨论较少的 theme：native 平台处理。承接 engine-spec.md `platform` 模块。
+> 讨论较少的 theme：native 平台处理。承接 [engine-spec.md §2 模块](engine-spec.md#2-模块细粒度各独立库heroes-为-dllclientserver-为可执行) `platform` 模块。
 
 ---
 

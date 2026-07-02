@@ -1,7 +1,7 @@
 # bvn 文档规范（doc-spec）
 
-> 本文规定 docs/ 怎么组织、怎么写。分三节：§1 人和 agent 都读，§2 给人读，§3 给 agent 读。
-> 文档索引见 context.md。
+> 本文规定 docs/ 怎么组织、怎么写。分三节：[§1 人和 agent 都读](#1-人和-agent-都读结构与约定)，[§2 给人读](#2-给人读可读性)，[§3 给 agent 读](#3-给-agent-读写作约束防-agent-文档毛病)。
+> 文档索引见 [context.md](context.md#bvn-文档索引context)。
 
 ---
 
@@ -29,12 +29,12 @@
 | **计划（plan）** | 待定、未来向、固化 / 演进计划 | 归入对应 impl 或 spec 末节 |
 | **决策（decision）** | 访谈取舍、为什么这么定 | 全局 `decisions.md` + theme 就近 `decision.md` |
 
-> 例：render-scheduler 的终态设计在 `render-scheduler.md`；「因转发机制而从 context 取 scheduler」这类妥协在 `render-scheduler/impl.md`；模型 A/B 约束在 `render-scheduler/model-ab.md`。三者不混。
+> 例：render-scheduler 的终态设计在 [render-scheduler.md](render/render-scheduler.md#bvn-渲染render-scheduler设计-规范)；「因转发机制而从 context 取 scheduler」这类妥协在 [render-scheduler/impl.md §2](render/render-scheduler/impl.md#2-妥协调度器来源现阶段从-context-取而非-env)；模型 A/B 约束在 [render-scheduler/model-ab.md](render/render-scheduler/model-ab.md#bvn-渲染并发模型-a-b设计)。三者不混。
 
 ### 1.3 决策归属
 
-- **全局架构决策**（T1–T9 那套：C++ 标准、ECS、并发、确定性…）→ `decisions.md`。
-- **某 theme 内的局部决策** → 该 theme 就近的 `decision.md`（如 `game-design/decision.md`）。
+- **全局架构决策**（T1–T9 那套：C++ 标准、ECS、并发、确定性…）→ [decisions.md](decisions.md#bvn-技术架构决策日志)。
+- **某 theme 内的局部决策** → 该 theme 就近的 `decision.md`（如 [game-design/decision.md](game-design/decision.md#bvn-游戏设计决策记录decision)）。
 
 ### 1.4 命名
 
@@ -46,7 +46,7 @@
 
 - 同目录文件用**裸名**（`renderer.md §2`）；跨目录用**相对路径**（`../animation.md`、`render/boot.md`）。
 - 引用带**章节号**便于跳转。正文散文里提到某文档名（非跳转）可不带路径。
-- **权威裁决**集中在 context.md，不在每个文件头重复声明。
+- **权威裁决**集中在 [context.md §权威裁决](context.md#权威裁决冲突时听谁的)，不在每个文件头重复声明。
 
 ---
 
@@ -87,7 +87,7 @@
 
 ### 3.4 其它自查
 
-- **不复制正文到索引**：context.md / 各文件头只放指针和一句话，不搬正文。
+- **不复制正文到索引**：[context.md](context.md#bvn-文档索引context) / 各文件头只放指针和一句话，不搬正文。
 - **不重复声明**：同一事实只在一处权威落点写全，别处引用它，不到处复述（否则改一处漏一处）。
-- **拆分优先于堆叠**：当一个文件同时长出"设计 + 现状 + 计划"，按 §1.2 拆文件，而不是在一个文件里堆更多小节。
-- **交叉引用要能解析**：写 `见 X.md §N` 前确认 X.md 存在、§N 存在（改动路径 / 章节后回头修引用）。
+- **拆分优先于堆叠**：当一个文件同时长出"设计 + 现状 + 计划"，按 [§1.2](#12-四类内容分开设计-规范-现状实现-计划) 拆文件，而不是在一个文件里堆更多小节。
+- **交叉引用要能解析**：写 `见 X.md §N` 前确认 `X.md` 存在、`§N` 存在（改动路径 / 章节后回头修引用）。

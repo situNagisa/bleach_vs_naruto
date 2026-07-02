@@ -1,7 +1,7 @@
 # bvn 动画系统（animation）
 
-> 讨论不多的 theme：**消费者侧可选辅助件，当前暂缓**。承接 display-architecture 的动画讨论 + decisions.md T6。
-> 关联：渲染只读快照，见 render/render-scheduler.md；单帧概念见 render/renderable.md。
+> 讨论不多的 theme：**消费者侧可选辅助件，当前暂缓**。承接 display-architecture 的动画讨论 + [decisions.md §4 渲染（T6）](decisions.md#4-渲染t6)。
+> 关联：渲染只读快照，见 [render/render-scheduler.md §5 一帧数据流](render/render-scheduler.md#5-一帧数据流串起全文)；单帧概念见 [render/renderable.md §4 关键决策](render/renderable.md#4-关键决策就近)。
 
 ---
 
@@ -9,7 +9,7 @@
 
 游戏主体只提供渲染环境、调动各 renderable `render`，就完成了一帧。**游戏里并没有内建的"动画"概念**。renderable 允许有自己的**状态机**——靠状态机决定每帧画什么，就实现了"动画"的效果。所以动画是**消费者侧**的一层可选辅助件，不是引擎核心。
 
-**现在彻底不做**：它架在还没定型的渲染 context 上，提前做必引入意外复杂。等 renderer 清楚后再碰，且做也**极简**（只为可序列化、不强求通用、用得极少时才碰）。
+它架在还没定型的渲染 context 上，提前做必引入意外复杂——这是它作为**辅助件、且暂缓**的设计动机。做的时候也**极简**：只为可序列化、不强求通用、用得极少时才碰。
 
 ---
 
@@ -24,12 +24,14 @@
 
 ## 3. 招式帧数据时间线（2D 动画形态）
 
-招式写成共享的**帧数据时间线**：startup / active / recovery + 逐帧 hit/hurt box + 取消窗口 + 关联 clip。M1–M2 用 C++ / struct 定义，M3 升 Lua / 数据 authored。**角色开发者 ~90% 填数据、~10% 写具名 C++ 钩子。**
+招式写成共享的**帧数据时间线**：startup / active / recovery + 逐帧 hit/hurt box + 取消窗口 + 关联 clip。角色开发者以**填数据为主、写少量具名 C++ 钩子为辅**。
 
 - **光照**：3D 场景上完整动态光 + 法线 + 阴影；2D 精灵 **unlit**（平面精灵无法线、BvN 自带画风）。
 
 ---
 
-## 4. 将来的极简辅助件形态
+## 4. 计划 / 阶段
 
-将来做，形态是：可序列化**单帧合成结构**（什么图叠在什么图上、哪些图共享同一变换矩阵）+ **时间轴 / 影片**（携带时间）+（更后）逐帧 hit/hurt 框——即引擎预留的"可选辅助库"，给 Fighter-Factory 式编辑器往返保存用（编辑器见 decisions.md 工具）。**手写英雄绕开它（代码即结构）。**
+- **当前彻底不做**：等 renderer / render context 清楚后再碰。
+- **帧数据定义方式**：先用 C++ / struct 定义，随 Lua 落地升为数据 authored（Lua 阶段见 [asset.md §2](asset.md#2-计划-阶段)）。
+- **将来的极简辅助件形态**：可序列化**单帧合成结构**（什么图叠在什么图上、哪些图共享同一变换矩阵）+ **时间轴 / 影片**（携带时间）+（更后）逐帧 hit/hurt 框——即引擎预留的"可选辅助库"，给 Fighter-Factory 式编辑器往返保存用（编辑器见 [decisions.md §8 工具与可观测](decisions.md#8-工具与可观测t9)）。**手写英雄绕开它（代码即结构）。**
