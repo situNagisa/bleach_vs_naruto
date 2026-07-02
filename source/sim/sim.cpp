@@ -1,22 +1,32 @@
-#include <cmath>
+#include <glm/geometric.hpp>
 
 #include <bvn/sim/sim.h>
 
 namespace bvn::sim
 {
 
-void step(preview_simulation& simulation) noexcept
+void step(preview_simulation& simulation, glm::vec3 const& move_dir) noexcept
 {
-	auto previous_x = simulation.unit.position.x;
 	++simulation.tick;
 
-	auto period = 180.0f;
-	auto phase = std::fmod(static_cast<float>(simulation.tick), period) / period;
-	auto triangle = phase < 0.5f ? phase * 2.0f : (1.0f - phase) * 2.0f;
-	auto next_x = -3.0f + triangle * 6.0f;
+	constexpr auto move_speed = 6.0f;            // world units per second
+	constexpr auto step_seconds = 1.0f / 30.0f;  // matches the 30 Hz fixed step
 
-	simulation.unit.position = {next_x, 0.0f, 0.0f};
-	simulation.unit.facing_right = next_x >= previous_x;
+	auto horizontal = glm::vec3{move_dir.x, 0.0f, move_dir.z};
+	auto length = glm::length(horizontal);
+	auto direction = length > 1.0e-4f ? horizontal / length : glm::vec3{0.0f};
+
+	simulation.unit.velocity = direction * move_speed;
+	simulation.unit.position += simulation.unit.velocity * step_seconds;
+
+	if (direction.x > 1.0e-4f)
+	{
+		simulation.unit.facing_right = true;
+	}
+	else if (direction.x < -1.0e-4f)
+	{
+		simulation.unit.facing_right = false;
+	}
 }
 
 auto capture(preview_simulation const& simulation) noexcept -> snapshot

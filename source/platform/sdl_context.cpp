@@ -6,27 +6,14 @@
 
 #include <bvn/platform/sdl_context.h>
 
-namespace
-{
-auto sdl_error() -> ::std::string
-{
-	auto const* message = SDL_GetError();
-	if (message == nullptr || message[0] == '\0')
-	{
-		return "unknown SDL error";
-	}
-
-	return message;
-}
-}
-
 namespace bvn::platform
 {
 sdl_context::sdl_context()
 {
 	if (!SDL_Init(SDL_INIT_VIDEO))
 	{
-		throw ::std::runtime_error("SDL_Init failed: " + sdl_error());
+		auto const* message = SDL_GetError();
+		throw ::std::runtime_error{message == nullptr || message[0] == '\0' ? "SDL_Init failed: unknown SDL error" : "SDL_Init failed: " + ::std::string{message}};
 	}
 }
 

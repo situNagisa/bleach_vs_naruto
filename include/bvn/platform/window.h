@@ -13,7 +13,6 @@ namespace bvn::platform
  */
 struct window_extent
 {
-public:
 	::std::uint32_t width = 0;
 	::std::uint32_t height = 0;
 };
@@ -23,7 +22,6 @@ public:
  */
 struct window
 {
-public:
 	window(char const* title, int width, int height);
 	~window() noexcept;
 
@@ -32,11 +30,6 @@ public:
 
 	window(window&& other) noexcept;
 	auto operator=(window&& other) noexcept -> window&;
-
-	/**
-	 * Returns the owned SDL window handle.
-	 */
-	auto native() const noexcept -> SDL_Window*;
 
 	/**
 	 * Returns the Vulkan instance extensions SDL requires for this platform.
@@ -48,14 +41,13 @@ public:
 	 *
 	 * The caller owns the returned surface and must destroy it before the window.
 	 */
-	auto create_vulkan_surface(VkInstance instance) const -> VkSurfaceKHR;
+	auto vulkan_surface(VkInstance instance) const -> VkSurfaceKHR;
 
 	/**
 	 * Returns the current drawable extent in framebuffer pixels.
 	 */
 	auto drawable_extent() const -> window_extent;
 
-private:
-	SDL_Window* handle_ = nullptr;
+	SDL_Window* handle = nullptr;
 };
 }

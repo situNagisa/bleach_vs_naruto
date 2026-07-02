@@ -1,59 +1,40 @@
+#include <algorithm>
+#include <cstddef>
 #include <stdexcept>
 #include <string>
 
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_events.h>
+#include <SDL3/SDL_keyboard.h>
+#include <SDL3/SDL_mouse.h>
 
 #include <bvn/platform/event.h>
-
-namespace
-{
-auto sdl_error() -> ::std::string
-{
-	auto const* message = SDL_GetError();
-	if (message == nullptr || message[0] == '\0')
-	{
-		return "unknown SDL error";
-	}
-
-	return message;
-}
-
-auto is_resize_event(SDL_Event const& event) noexcept -> bool
-{
-	return event.type == SDL_EVENT_WINDOW_RESIZED || event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED;
-}
-}
+#include <bvn/platform/input.h>
 
 namespace bvn::platform
 {
 auto poll_events(window const& target) -> event_state
 {
-	return poll_events(target, {});
-}
+		auto state = event_state
+		{
+			.quit_requested = false,
+			.resized = false,
+			.drawable_extent = target.drawable_extent(),
+			.input = {},
+			.sdl_events = {},
+		};
 
-auto poll_events(window const& target, ::std::function<void(SDL_Event const&)> const& handle_event) -> event_state
-{
-	auto state = event_state
-	{
-		.quit_requested = false,
-		.resized = false,
-		.drawable_extent = target.drawable_extent(),
-	};
-
-	auto const target_id = SDL_GetWindowID(target.native());
+	auto const target_id = SDL_GetWindowID(target.handle);
 	if (target_id == 0)
 	{
-		throw ::std::runtime_error("SDL_GetWindowID failed: " + sdl_error());
+		auto const* message = SDL_GetError();
+		throw ::std::runtime_error{message == nullptr || message[0] == '\0' ? "SDL_GetWindowID failed: unknown SDL error" : "SDL_GetWindowID failed: " + ::std::string{message}};
 	}
 
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
 	{
-		if (handle_event)
-		{
-			handle_event(event);
-		}
+		state.sdl_events.push_back(event);
 
 		if (event.type == SDL_EVENT_QUIT)
 		{
@@ -65,9 +46,26 @@ auto poll_events(window const& target, ::std::function<void(SDL_Event const&)> c
 			state.quit_requested = true;
 		}
 
-		if (is_resize_event(event) && event.window.windowID == target_id)
+		if ((event.type == SDL_EVENT_WINDOW_RESIZED || event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) && event.window.windowID == target_id)
 		{
 			state.resized = true;
+		}
+
+		if (event.type == SDL_EVENT_MOUSE_MOTION)
+		{
+			state.input.mouse_dx += event.motion.xrel;
+			state.input.mouse_dy += event.motion.yrel;
+		}
+	}
+
+	auto key_count = int{};
+	auto const* keyboard = SDL_GetKeyboardState(&key_count);
+	if (keyboard != nullptr)
+	{
+		auto const count = ::std::min(static_cast<::std::size_t>(key_count), state.input.keys.size());
+		for (auto index = ::std::size_t{}; index < count; ++index)
+		{
+			state.input.keys[index] = keyboard[index];
 		}
 	}
 
@@ -77,5 +75,10 @@ auto poll_events(window const& target, ::std::function<void(SDL_Event const&)> c
 	}
 
 	return state;
+}
+
+void relative_mouse_mode(window const& target, bool enabled) noexcept
+{
+	SDL_SetWindowRelativeMouseMode(target.handle, enabled);
 }
 }

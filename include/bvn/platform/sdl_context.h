@@ -7,7 +7,6 @@ namespace bvn::platform
  */
 struct sdl_context
 {
-public:
 	sdl_context();
 	~sdl_context() noexcept;
 

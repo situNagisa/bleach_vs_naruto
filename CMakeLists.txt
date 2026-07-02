@@ -24,6 +24,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 			/permissive-
 			/Zc:__cplusplus
 			/utf-8
+			/wd4100
 			-clang:-std=c++2c
 		)
 		set(BVN_WARNING_AS_ERROR_FLAG /WX)
@@ -41,7 +42,9 @@ elseif(MSVC)
 		/W4
 		/permissive-
 		/Zc:__cplusplus
+		/Zc:preprocessor
 		/utf-8
+		/wd4100
 		/std:c++latest
 	)
 	set(BVN_WARNING_AS_ERROR_FLAG /WX)

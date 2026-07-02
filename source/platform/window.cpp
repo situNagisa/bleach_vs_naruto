@@ -7,30 +7,6 @@
 
 #include <bvn/platform/window.h>
 
-namespace
-{
-auto sdl_error() -> ::std::string
-{
-	auto const* message = SDL_GetError();
-	if (message == nullptr || message[0] == '\0')
-	{
-		return "unknown SDL error";
-	}
-
-	return message;
-}
-
-auto checked_extent_component(int value, char const* name) -> ::std::uint32_t
-{
-	if (value < 0)
-	{
-		throw ::std::runtime_error(::std::string("SDL returned a negative ") + name);
-	}
-
-	return static_cast<::std::uint32_t>(value);
-}
-}
-
 namespace bvn::platform
 {
 window::window(char const* title, int width, int height)
@@ -46,23 +22,24 @@ window::window(char const* title, int width, int height)
 	}
 
 	auto const flags = static_cast<SDL_WindowFlags>(SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
-	handle_ = SDL_CreateWindow(title, width, height, flags);
-	if (handle_ == nullptr)
+	handle = SDL_CreateWindow(title, width, height, flags);
+	if (handle == nullptr)
 	{
-		throw ::std::runtime_error("SDL_CreateWindow failed: " + sdl_error());
+		auto const* message = SDL_GetError();
+		throw ::std::runtime_error{message == nullptr || message[0] == '\0' ? "SDL_CreateWindow failed: unknown SDL error" : "SDL_CreateWindow failed: " + ::std::string{message}};
 	}
 }
 
 window::~window() noexcept
 {
-	if (handle_ != nullptr)
+	if (handle != nullptr)
 	{
-		SDL_DestroyWindow(handle_);
+		SDL_DestroyWindow(handle);
 	}
 }
 
 window::window(window&& other) noexcept
-	: handle_(::std::exchange(other.handle_, nullptr))
+	: handle(::std::exchange(other.handle, nullptr))
 {
 }
 
@@ -70,20 +47,15 @@ auto window::operator=(window&& other) noexcept -> window&
 {
 	if (this != &other)
 	{
-		if (handle_ != nullptr)
+		if (handle != nullptr)
 		{
-			SDL_DestroyWindow(handle_);
+			SDL_DestroyWindow(handle);
 		}
 
-		handle_ = ::std::exchange(other.handle_, nullptr);
+		handle = ::std::exchange(other.handle, nullptr);
 	}
 
 	return *this;
-}
-
-auto window::native() const noexcept -> SDL_Window*
-{
-	return handle_;
 }
 
 auto window::required_vulkan_extensions() const -> ::std::vector<char const*>
@@ -92,13 +64,14 @@ auto window::required_vulkan_extensions() const -> ::std::vector<char const*>
 	auto const* extensions = SDL_Vulkan_GetInstanceExtensions(&count);
 	if (extensions == nullptr)
 	{
-		throw ::std::runtime_error("SDL_Vulkan_GetInstanceExtensions failed: " + sdl_error());
+		auto const* message = SDL_GetError();
+		throw ::std::runtime_error{message == nullptr || message[0] == '\0' ? "SDL_Vulkan_GetInstanceExtensions failed: unknown SDL error" : "SDL_Vulkan_GetInstanceExtensions failed: " + ::std::string{message}};
 	}
 
 	return ::std::vector<char const*>(extensions, extensions + count);
 }
 
-auto window::create_vulkan_surface(VkInstance instance) const -> VkSurfaceKHR
+auto window::vulkan_surface(VkInstance instance) const -> VkSurfaceKHR
 {
 	if (instance == VK_NULL_HANDLE)
 	{
@@ -106,9 +79,10 @@ auto window::create_vulkan_surface(VkInstance instance) const -> VkSurfaceKHR
 	}
 
 	VkSurfaceKHR surface = VK_NULL_HANDLE;
-	if (!SDL_Vulkan_CreateSurface(handle_, instance, nullptr, &surface))
+	if (!SDL_Vulkan_CreateSurface(handle, instance, nullptr, &surface))
 	{
-		throw ::std::runtime_error("SDL_Vulkan_CreateSurface failed: " + sdl_error());
+		auto const* message = SDL_GetError();
+		throw ::std::runtime_error{message == nullptr || message[0] == '\0' ? "SDL_Vulkan_CreateSurface failed: unknown SDL error" : "SDL_Vulkan_CreateSurface failed: " + ::std::string{message}};
 	}
 
 	return surface;
@@ -118,15 +92,26 @@ auto window::drawable_extent() const -> window_extent
 {
 	int width = 0;
 	int height = 0;
-	if (!SDL_GetWindowSizeInPixels(handle_, &width, &height))
+	if (!SDL_GetWindowSizeInPixels(handle, &width, &height))
 	{
-		throw ::std::runtime_error("SDL_GetWindowSizeInPixels failed: " + sdl_error());
+		auto const* message = SDL_GetError();
+		throw ::std::runtime_error{message == nullptr || message[0] == '\0' ? "SDL_GetWindowSizeInPixels failed: unknown SDL error" : "SDL_GetWindowSizeInPixels failed: " + ::std::string{message}};
+	}
+
+	if (width < 0)
+	{
+		throw ::std::runtime_error{"SDL returned a negative drawable width"};
+	}
+
+	if (height < 0)
+	{
+		throw ::std::runtime_error{"SDL returned a negative drawable height"};
 	}
 
 	return window_extent
 	{
-		.width = checked_extent_component(width, "drawable width"),
-		.height = checked_extent_component(height, "drawable height"),
+		.width = static_cast<::std::uint32_t>(width),
+		.height = static_cast<::std::uint32_t>(height),
 	};
 }
 }
