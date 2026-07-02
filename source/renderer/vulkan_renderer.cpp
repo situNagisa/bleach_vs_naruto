@@ -312,14 +312,13 @@ vulkan_renderer::vulkan_renderer(::bvn::platform::window const& window, bool ena
 
 		//+ release Vulkan objects that depend on device
 		{
-				for (auto&& slot : slots)
-				{
-					slot.secondary_command_buffers.clear();
-					slot.depth_image.view = {};
-					slot.depth_image.image = {};
-					slot.depth_image.memory = {};
-					slot.depth_image.format = VK_FORMAT_UNDEFINED;
-					slot.depth_image.extent = {};
+			for (auto&& slot : slots)
+			{
+				slot.depth_image.view = {};
+				slot.depth_image.image = {};
+				slot.depth_image.memory = {};
+				slot.depth_image.format = VK_FORMAT_UNDEFINED;
+				slot.depth_image.extent = {};
 				slot.in_flight = {};
 				slot.image_available = {};
 				slot.command_pool = {};
@@ -353,14 +352,13 @@ vulkan_renderer::~vulkan_renderer() noexcept
 
 	//+ release Vulkan objects that depend on device
 	{
-			for (auto&& slot : slots)
-			{
-				slot.secondary_command_buffers.clear();
-				slot.depth_image.view = {};
-				slot.depth_image.image = {};
-				slot.depth_image.memory = {};
-				slot.depth_image.format = VK_FORMAT_UNDEFINED;
-				slot.depth_image.extent = {};
+		for (auto&& slot : slots)
+		{
+			slot.depth_image.view = {};
+			slot.depth_image.image = {};
+			slot.depth_image.memory = {};
+			slot.depth_image.format = VK_FORMAT_UNDEFINED;
+			slot.depth_image.extent = {};
 			slot.in_flight = {};
 			slot.image_available = {};
 			slot.command_pool = {};

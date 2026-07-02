@@ -93,17 +93,52 @@
   <ItemGroup>
     <ClInclude Include="include\bvn\assets\assets.h" />
     <ClInclude Include="include\bvn\assets\sprite_clip.h" />
-    <ClInclude Include="include\bvn\compute\compute.h" />
     <ClInclude Include="include\bvn\display_architecture\renderable.h" />
+    <ClInclude Include="include\bvn\gameplay\entity.h" />
+    <ClInclude Include="include\bvn\gameplay\gameplay.h" />
     <ClInclude Include="include\bvn\platform\event.h" />
     <ClInclude Include="include\bvn\platform\platform.h" />
     <ClInclude Include="include\bvn\platform\sdl_context.h" />
     <ClInclude Include="include\bvn\platform\window.h" />
-    <ClInclude Include="include\bvn\render\imgui_layer.h" />
-    <ClInclude Include="include\bvn\render\render_scene.h" />
-    <ClInclude Include="include\bvn\render\vulkan_renderer.h" />
-    <ClInclude Include="include\bvn\rhi\vulkan_context.h" />
+    <ClInclude Include="include\bvn\renderer\camera.h" />
+    <ClInclude Include="include\bvn\renderer\vulkan_renderer.h" />
     <ClInclude Include="include\bvn\sim\sim.h" />
+    <ClInclude Include="include\vkkl\buffer.h" />
+    <ClInclude Include="include\vkkl\buffer_view.h" />
+    <ClInclude Include="include\vkkl\command_buffer.h" />
+    <ClInclude Include="include\vkkl\command_pool.h" />
+    <ClInclude Include="include\vkkl\debug_utils_messenger.h" />
+    <ClInclude Include="include\vkkl\descriptor_pool.h" />
+    <ClInclude Include="include\vkkl\descriptor_set.h" />
+    <ClInclude Include="include\vkkl\descriptor_set_layout.h" />
+    <ClInclude Include="include\vkkl\device.h" />
+    <ClInclude Include="include\vkkl\device_memory.h" />
+    <ClInclude Include="include\vkkl\event.h" />
+    <ClInclude Include="include\vkkl\fence.h" />
+    <ClInclude Include="include\vkkl\framebuffer.h" />
+    <ClInclude Include="include\vkkl\image.h" />
+    <ClInclude Include="include\vkkl\image_view.h" />
+    <ClInclude Include="include\vkkl\instance.h" />
+    <ClInclude Include="include\vkkl\pipeline.h" />
+    <ClInclude Include="include\vkkl\pipeline_cache.h" />
+    <ClInclude Include="include\vkkl\pipeline_layout.h" />
+    <ClInclude Include="include\vkkl\query_pool.h" />
+    <ClInclude Include="include\vkkl\render_pass.h" />
+    <ClInclude Include="include\vkkl\result.h" />
+    <ClInclude Include="include\vkkl\sampler.h" />
+    <ClInclude Include="include\vkkl\semaphore.h" />
+    <ClInclude Include="include\vkkl\shader_module.h" />
+    <ClInclude Include="include\vkkl\surface.h" />
+    <ClInclude Include="include\vkkl\swapchain.h" />
+    <ClInclude Include="include\vkkl\vkkl.h" />
+    <ClInclude Include="source\client\arena.h" />
+    <ClInclude Include="source\client\context.h" />
+    <ClInclude Include="source\client\debug_overlay.h" />
+    <ClInclude Include="source\client\fly_camera.h" />
+    <ClInclude Include="source\client\hero.h" />
+    <ClInclude Include="source\client\preview_controller.h" />
+    <ClInclude Include="source\client\preview_state.h" />
+    <ClInclude Include="source\client\render_workflow.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="plugins\test_basic\test_plugin.cpp" />
@@ -112,9 +147,7 @@
     <ClCompile Include="source\platform\event.cpp" />
     <ClCompile Include="source\platform\sdl_context.cpp" />
     <ClCompile Include="source\platform\window.cpp" />
-    <ClCompile Include="source\render\imgui_layer.cpp" />
-    <ClCompile Include="source\render\vulkan_renderer.cpp" />
-    <ClCompile Include="source\rhi\vulkan_context.cpp" />
+    <ClCompile Include="source\renderer\vulkan_renderer.cpp" />
     <ClCompile Include="source\sim\sim.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -122,23 +155,37 @@
     <Text Include="source\assets\CMakeLists.txt" />
     <Text Include="source\CMakeLists.txt" />
     <Text Include="source\client\CMakeLists.txt" />
-    <Text Include="source\compute\CMakeLists.txt" />
+    <Text Include="source\gameplay\CMakeLists.txt" />
     <Text Include="source\platform\CMakeLists.txt" />
-    <Text Include="source\render\CMakeLists.txt" />
-    <Text Include="source\rhi\CMakeLists.txt" />
+    <Text Include="source\renderer\CMakeLists.txt" />
     <Text Include="source\sim\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CMakePresets.json" />
     <None Include="cmake\module.cmake" />
-    <None Include="docs\architecture.md" />
-    <None Include="docs\cpp-coding-standard.md" />
+    <None Include="docs\animation.md" />
+    <None Include="docs\asset.md" />
+    <None Include="docs\coding-standard.md" />
+    <None Include="docs\context.md" />
+    <None Include="docs\decisions.md" />
+    <None Include="docs\doc-spec.md" />
     <None Include="docs\engine-spec.md" />
-    <None Include="docs\game-design.md" />
-    <None Include="source\render\shaders\grid.frag" />
-    <None Include="source\render\shaders\grid.vert" />
-    <None Include="source\render\shaders\sprite.frag" />
-    <None Include="source\render\shaders\sprite.vert" />
+    <None Include="docs\game-design\decision.md" />
+    <None Include="docs\game-design\design.md" />
+    <None Include="docs\net.md" />
+    <None Include="docs\platform.md" />
+    <None Include="docs\plugin\hot-reload.md" />
+    <None Include="docs\plugin\spec.md" />
+    <None Include="docs\render\boot.md" />
+    <None Include="docs\render\render-scheduler.md" />
+    <None Include="docs\render\render-scheduler\impl.md" />
+    <None Include="docs\render\render-scheduler\model-ab.md" />
+    <None Include="docs\render\render-task.md" />
+    <None Include="docs\render\renderable.md" />
+    <None Include="docs\render\renderer-vulkan-impl.md" />
+    <None Include="docs\render\renderer.md" />
+    <None Include="docs\render\vulkan-qa.md" />
+    <None Include="include\vkkl\readme.md" />
     <None Include="vcpkg.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
