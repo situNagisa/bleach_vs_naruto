@@ -20,4 +20,4 @@
 
 - **Lua 时机**：语言现在定，深度（配置-only vs 纯 Lua 内容）随 M3 落地再定。
 - Lua 相关（脚本化数据 / sol2 / lua）自 M3 起接入；M0–M2 零 Lua（C++ 热重载已覆盖大半迭代需求）。
-- 里程碑全表见 [engine-spec.md §7](engine-spec.md#7-里程碑-模块映射)。
+- 里程碑全表见 [roadmap.md](roadmap.md#bvn-路线图roadmap)。

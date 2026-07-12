@@ -1,76 +1,72 @@
 # bvn 渲染·并发模型 A / B（设计）
 
-> 「把并发提供给多个绘制任务」在 vulkan 里只有两种合法实现，由帧生命周期的铁律逼出。本文讲两个模型的约束与设计取舍，并说明**为什么设计奔着模型 B 走**。
-> 铁律与帧生命周期见 [../renderer.md §2](../renderer.md#2-帧生命周期五阶段规范级)；render scheduler 据此对外承诺的顺序语义见 [../render-scheduler.md §1](../render-scheduler.md#1-两条-scheduler)；模型 A 作为当前基线的实现与妥协见 [./impl.md](./impl.md#bvn-渲染render-scheduler-当前实现与妥协现状-计划)。
+> Vulkan command recording 的两种并发模型及取舍；主线采用模型 B。
+> 帧生命周期见 [../renderer.md §2](../renderer.md#2-帧生命周期五阶段规范级)；render scheduler 契约见 [../render-scheduler.md](../render-scheduler.md#bvn-渲染render-scheduler设计-规范)。
 
 ---
 
-## 1. 并发事实速查
+## 1. 并发事实
 
-| 操作                                              | 能否并发                                      |
-| ----------------------------------------------- | ----------------------------------------- |
-| `vkCreate*`（pipeline / buffer / image / shader） | **能**（device 多为内部同步）→ renderable 初始化资源可并行 |
-| 录命令进**同一** CB                                   | **不能** → 要么串行（A），要么各录各的 secondary（B）      |
-| `vkQueueSubmit` / `vkQueuePresentKHR`           | **不能**（queue 外部同步）→ 提交点串行                 |
+| 操作 | 并发约束 |
+|---|---|
+| `vkCreate*`（pipeline / buffer / image / shader） | device 通常内部同步，renderable 初始化资源可并行 |
+| 向同一个 command buffer 录命令 | 需要外部同步；模型 A 串行，模型 B 各录各的 secondary |
+| 同一个 `VkCommandPool` 的 allocate / reset 等操作 | 需要外部同步 |
+| `vkQueueSubmit*` / `vkQueuePresentKHR` | queue 需要外部同步，提交点串行 |
 
-> 所以最划算的并行在**资源创建**与**录制前的 CPU 计算**（动画 resolve / 剔除 / 矩阵 / 上传）；录制本身要么串行，要么走 secondary。
-
-这张表逼出两个模型：**A** 用串行绕开"同一 CB 不能并发录"，**B** 用"各录各的 secondary"把录制也并行化。B 是设计目标（§3），A 是当前基线（§2）。
+模型 A 用串行满足同一 command buffer 的同步要求；模型 B 为每个并行 render task 提供独立 pool，并行录制 secondary，最后串行 join。
 
 ---
 
-## 2. 模型 A：单 primary CB，串行录制 —— 当前基线
-
-所有 task 录进同一个 primary command buffer；scheduler 串行、按注册序依次驱动：
+## 2. 模型 A：单 primary command buffer，串行录制
 
 ```cpp
-begin_rendering(frame)               // submit() 的开台括号
-for (task : 按注册序排好的任务)        // 串行，FIFO
-    task 录命令 into primary_cmd      // 录制顺序 == 绘制顺序
-end_rendering()                      // submit() 的收台括号
+begin_rendering(frame);
+for (auto&& task : tasks)
+{
+	task.record(primary_command_buffer);
+}
+end_rendering(frame);
 ```
 
-- 「并发」仅在 CPU 侧*录制前*的活；`vkCmd*` 进 CB 那刻必须串行。
-- 优点：零 secondary 开销、最简；是 render scheduler 顺序语义的一个退化特例（join 步骤为空）。
-- 缺点：录制不能并行。
-- **定位**：当前基线（M0/M1 走通），不是设计终态；现状与它为何先落地见 [./impl.md](./impl.md#bvn-渲染render-scheduler-当前实现与妥协现状-计划)。
+| 特性 | 结果 |
+|---|---|
+| command buffer | 所有 task 共用 primary |
+| 录制调度 | 串行 |
+| secondary 开销 | 无 |
+| 绘制顺序 | 与 task 驱动顺序一致 |
+
+模型 A 适合作为串行退化路径。
 
 ---
 
-## 3. 模型 B：secondary command buffer，并行录制 + 控序 —— 设计方向
+## 3. 模型 B：secondary command buffer，并行录制
 
-每个 render task 自带 `VkCommandPool` + secondary CB（池亦外部同步，故**每并行录制单元 / 每 task 一套**），并行录制后由 render scheduler 的 `submit()` 按序执行：
+每个 render task 持有一个 `secondary_command_pool`；pool 内 command buffer 数量按实际在途 generation 动态增长，并通过 free list 复用。task 每次只处理 `async_record(pool)` 返回的一个 generation。
 
-```cpp
-// task（可并行）
-vkBeginCommandBuffer(sec, {
-    flags       = RENDER_PASS_CONTINUE_BIT,
-    inheritance = VkCommandBufferInheritanceRenderingInfo{ color/depth 格式, rasterizationSamples }   // dynamic rendering 必填
-})
-录 draw into sec        // ← 这些 sec 可并行录
-vkEndCommandBuffer(sec)
-把 sec 交回 render scheduler 的 `submit()`
+模型 B 的数据流为：`acquire/reset + 预留未发布条目 → 录制 secondary → retirement operation 原子发布 → workflow 收集已发布条目 → primary join`。完整 task 代码只在 [../render-task.md §1](../render-task.md#1-render-task-的形态) 维护。
 
-// submit()（串行 join；render scheduler，非 renderer）
-begin_rendering(frame, contents = SECONDARY_COMMAND_BUFFERS_BIT)
-按注册序排列 secondaries
-vkCmdExecuteCommands(primary_cmd, n, secondaries[])   // 数组顺序 == 执行顺序 == 绘制先后
-end_rendering()
-```
+### 3.1 资源与同步边界
 
-**为什么 B 是设计方向（同时满足全部既有取舍）**：
-- 并发录制 ✅。
-- 控序 ✅：`vkCmdExecuteCommands` 数组顺序即绘制先后——**用排列而非抽象控制先后**（排序策略本身待定，见 [./impl.md §4 待定](./impl.md#4-待定动手时敲)）。
-- renderable 仍裸 `vkCmd` ✅：它只是录进自己的 secondary，不感知 primary。
-- 不引入 draw_item 第二套 API ✅（呼应 [../renderer.md](../renderer.md#14-renderer-给-renderable-的接口边界)「不做第二套 vulkan API」）。
-- 代价：secondary 管理 + 每并行录制单元一池 + 少量驱动开销；secondary 须**备 frames-in-flight 份**并随帧 reset。
+| 边界 | 规则 |
+|---|---|
+| task pool | 每 task 一个；该 task 负责 Vulkan pool 与全部 secondary buffer 的生命周期 |
+| task 看到的 frame | 每轮一个 `render_recording_frame`；不包含 frame slot 数量 |
+| generation secondary 集合 | workflow 持有，一个 mutex 保护预留、发布与收集 |
+| 发布事务 | 录制成功且 `stdexec::spawn` 启动 retirement operation 后才发布；未发布条目不执行 |
+| command 回收 | retirement sender 等精确 generation 完成后归还 task free list |
+| generation 完成 | queue submit 前失败时立即完成；成功提交后等 slot fence；shutdown 在 GPU idle 后完成全部在途 generation |
+| join 顺序 | 按并发预留形成，绘制顺序未定义 |
 
-> B 的完整示例代码见 [../vulkan-qa.md §5](../vulkan-qa.md#5-模型-b-示例代码示意)。
+同一 task 的 coroutine 每次只在一个线程上同步录制；retirement callback 只在 mutex 下更新 free list，不调用 `vkFreeCommandBuffers`。task close / join 全部 retirement 后，buffer owner 先析构，Vulkan pool 后析构。
 
-**归位**：renderable「录进自己的 command buffer」，在模型 B 下即每帧的 **secondary**——录完交回 `submit()`，由 `vkCmdExecuteCommands` 按注册序执行。
+### 3.2 取舍
 
----
+| 收益 | 代价 |
+|---|---|
+| 不同 task 可并行录制 | 需要 secondary inheritance 与 primary join |
+| task 不维护 frame slot 数量 | 在途 generation 增多时动态分配更多 command buffer |
+| task 数量可动态变化，销毁时只处理自己的 pool | 每 task 一个 Vulkan command pool |
+| 一个 task 每帧可产生零个或多个 command buffer | 每个 command 需要一个 retirement association |
 
-## 4. 对 render task 透明
-
-task 只调 frame-env 的 `command_buffer()`（A=primary / B=自己的 secondary，由 frame-env 解析），故 A↔B 切换、乃至将来换 CUDA renderer，render task 无须改动（呼应 renderable「后端可换」）。这条是把 A/B 差异关进 render scheduler / renderer、不外泄到内容侧的关键（frame-env 二分见 [../renderer.md §1.0](../renderer.md#10-renderer-是一个-conceptvulkan-是它的一份实现)）。
+模型 B 保持 renderable 直接使用 Vulkan `vkCmd*`，同时把 frame slot、fence 与回收时机集中在 render workflow。完整 task 形态见 [../render-task.md §1](../render-task.md#1-render-task-的形态)。

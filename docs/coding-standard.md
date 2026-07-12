@@ -10,7 +10,7 @@
 | 项目                          | 决策                                                                                                                                                        |
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 命名                          | 全 **snake_case**；仅宏 UPPER_SNAKE（`BVN_REGISTER_HERO`）。无匈牙利 / 类型前缀 / 成员前后缀。行业缩写（ECS/GPU/RNG）可用，其余不缩写。最外层命名空间需要用全局命名空间限定符，如`::std`，第三方库也是，如`::boost`，`::bvn` |
-| 缩进 / 大括号 / 行长               | **Tab**；**Allman**（大括号独占一行，无例外）；行长不设硬限。                                                                                                                   |
+| 缩进 / 大括号 / 行长               | **Tab**；视情况，不丑即可；行长不设硬限。                                                                                                                                  |
 | 空格 / 空行                     | `if (x)`、`a + b`、`foo(a, b)`、`a : b`；命名空间内**不缩进**；函数间 / 逻辑段间一空行。                                                                                          |
 | 文件                          | 按目录功能聚合（不强制一类型一文件）；`.h`/`.cpp`；`#pragma once`；**禁前向声明**（要啥 include 啥）。                                                                                    |
 | Include                     | 模块内 `"rel.h"`，跨模块 `<bvn/mod/h.h>`；顺序 标准库 → 三方 → 本项目跨模块 → 本模块，层间空行、层内不排序。                                                                                  |
@@ -21,10 +21,10 @@
 | explicit / 隐式转换             | 语义驱动：有意的隐式（如 `vec3`→`vec4`）不加，无意的加 `explicit`。                                                                                                            |
 | noexcept                    | 不抛的函数广泛标注。                                                                                                                                                |
 | `[[nodiscard]]`             | 标准库风：忽略即 bug 时才加。                                                                                                                                         |
-| 类型声明                        | 统一 `struct`；成员默认公开，不写 `public:` / `private:` / `protected:` 访问限定。                                                                                         |
+| 类型声明                        | 统一 `struct`；成员默认公开，不写 `public:` / `private:` / `protected:` 访问限定，用`_` 前缀代替私有成员。                                                                           |
 | 枚举                          | 全 `enum class`（位标记也是，配手写 / 宏生成运算符）。                                                                                                                       |
-| 类型别名                        | 标准库优先（`std::uint32_t`/`std::byte`/`std::size_t`…）；整数符号按语义（非负 `unsigned`，可负 `signed`）。                                                                     |
-| 特殊成员                        | Rule of Zero + 不需要的 `= delete`。                                                                                                                           |
+| 类型别名                        | 标准库优先（`::std::uint32_t`/`::std::byte`/`::std::size_t`…）；整数符号按语义（非负 `unsigned`，可负 `signed`）。                                                               |
+| 特殊成员                        | 如果可以平凡则让其平凡，不声明不影响语义则不声明。                                                                                                                                 |
 | 成员排列                        | 随意，按可读性。                                                                                                                                                  |
 | 类型转换                        | 仅 C++ 风格（`static_cast` / `reinterpret_cast` / `const_cast`），禁 C 风格 `(T)x`。                                                                                |
 | 迭代                          | 优先 `ranges`/`views`（兼容 EnTT view）。                                                                                                                        |
@@ -32,16 +32,16 @@
 | `[[likely]]`/`[[unlikely]]` | sim 热路径积极标注。                                                                                                                                              |
 | `using namespace`           | 仅函数体内局部；别名（`namespace fs = …`）可在 `.cpp` 顶层。                                                                                                               |
 | 值语义                         | 默认值传 / 值返回靠 RVO（**别对返回值 `std::move`**）；参数传递语义驱动（指针=可空 / 引用=非空 / 值=sink）。                                                                                  |
-| 现代习语                        | CTAD、指定初始化、结构化绑定、if/for 初始化语句、`using enum` 积极用；尾置返回类型自由。                                                                                                  |
+| 现代习语                        | CTAD、指定初始化、结构化绑定、if/for 初始化语句、`using enum` 积极用。                                                                                                           |
 | API 可见性                     | 头文件全公开，不分 public/private API；模板 / concept / constexpr 在头，其余在 `.cpp`。                                                                                      |
 | 错误处理                        | **纯异常**（不用 `expected` / 错误码）；异常处理运行时情况、断言查逻辑 bug，二者不互替（见下）。                                                                                               |
 | 三方库                         | 直接 include、直接用、**不包一层**；唯一例外是为"后端可换"的设计抽象（见下）。                                                                                                            |
-| ECS                         | 组件 = 裸名 + 模块 namespace，struct 形式自由；**裸 `entt::registry` 即世界**，全局态放 `reg.ctx()`；系统固定流水线，插件走协程。                                                             |
+| ECS                         | 组件 = 裸名 + 模块 namespace，struct 形式自由；**裸 `::entt::registry` 即世界**，全局态放 `reg.ctx()`；系统固定流水线，插件走协程。                                                           |
 | 并发                          | 全面 sender/receiver 图（加载 / 计算 / 渲染任务），M0 起。                                                                                                                |
 | DLL 导出                      | 每模块独立宏 `BVN_<MODULE>_API`（见下）。                                                                                                                            |
 | CMake                       | Modern（target 属性为主）、命令小写、变量 UPPER_SNAKE；≥ 3.28。                                                                                                           |
 | 文档                          | 公有接口 Doxygen；实现内 `//` 说明 **why**。                                                                                                                         |
-| C++26                       | 全面铺开：contracts / 静态反射 / `std::execution` / `std::println` / `[[indeterminate]]`。                                                                          |
+| C++26                       | 全面铺开：contracts / 静态反射 / `::std::execution` / `::std::println` / `[[indeterminate]]`。                                                                      |
 
 ## 需要展开的几点
 

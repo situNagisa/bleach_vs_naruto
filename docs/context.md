@@ -16,9 +16,11 @@
 
 | 文件                                                        | 讲什么                                                    | 不讲什么                                                              | 何时读             |
 | --------------------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------- | --------------- |
-| [engine-spec.md](engine-spec.md#bvn-引擎架构定稿engine-spec-v1) | **架构骨架唯一权威**：核心哲学、模块表、目录、关键接口契约、一帧数据流、设计准则、里程碑         | 子系统细节（只给指针）                                                       | 想了解整体架构 / 动手前定位 |
+| [engine-spec.md](engine-spec.md#bvn-引擎架构定稿engine-spec-v1) | **架构骨架唯一权威**：核心哲学、模块表、目录、一帧数据流、设计准则         | 子系统细节（只给指针）、里程碑（在 [roadmap.md](roadmap.md#bvn-路线图roadmap)）                                                       | 想了解整体架构 / 动手前定位 |
+| [roadmap.md](roadmap.md#bvn-路线图roadmap) | 里程碑 M0–M9 → 模块映射 + 优先级 | 架构（在 [engine-spec.md](engine-spec.md#bvn-引擎架构定稿engine-spec-v1)） | 想知道当前阶段 / 下一步做什么 |
 | [coding-standard.md](coding-standard.md#bvn-c-代码规范-v1)    | **C++ 编码唯一权威**：命名 / 错误处理 / RAII / DLL 宏 / C++26 等决策速查表 | 架构、玩法                                                             | 写任何 C++ 代码前     |
 | [decisions.md](decisions.md#bvn-技术架构决策日志)                 | 全局架构决策日志（T1–T9）：每条取舍与来龙去脉                              | 规范正文（在 [engine-spec.md](engine-spec.md#bvn-引擎架构定稿engine-spec-v1)） | 想知道「为什么这么定」     |
+| [simulator.md](simulator.md#bvn-仿真核心simulator)            | 仿真核心契约（规范草图）：裸 registry 即 World、共享交互底座、灵活属性表          | 玩法规则、渲染                                                           | 碰 sim / ECS / 英雄交互时 |
 | [net.md](net.md#bvn-网络net)                                | 网络思路：host 权威 + 快照 + 预测和解，ENet，演进路线（讨论浅）                | 实现细节（未开工）                                                         | 碰联网时（M6+）       |
 | [asset.md](asset.md#bvn-资源系统asset)                        | 资源系统思路：运行时加载 + 热重载、Lua 数据（讨论浅）                         | 加载器接口细节                                                           | 碰资源 / Lua 时     |
 | [animation.md](animation.md#bvn-动画系统animation)            | 动画：可选辅助件、暂缓；权威动画态进 sim/快照、帧数据时间线                       | 通用动画引擎（不做）                                                        | 碰 2D 动画 / 帧数据时  |

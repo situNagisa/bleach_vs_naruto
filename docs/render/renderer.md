@@ -1,95 +1,233 @@
 # bvn 渲染·renderer（设计 + 规范）
 
-> renderer 的设计、形态、职责，以及该如何使用（写给 render task 的示范）。
-> 本文只讲**规范级**：renderer 是什么、持有什么、给 renderable 什么边界、一帧分几阶段。
-> 具体 vulkan 命令序列、以及"为什么现在用 vulkan 充当 renderer 规范"见 [renderer-vulkan-impl.md](renderer-vulkan-impl.md#bvn-渲染renderer-的-vulkan-实现现状-实现)；vulkan 基础概念见 [vulkan-qa.md](vulkan-qa.md#bvn-vulkan-概念问答qa)。
-> 帧的开闭由谁驱动见 [render-scheduler.md §2](render-scheduler.md#2-submit-与一帧的编排)；并发模型 A/B 见 [render-scheduler/model-ab.md](render-scheduler/model-ab.md#bvn-渲染并发模型-a-b设计)。
+> renderer 的设计、形态、职责，以及给 render task 的接口边界。
+> 本文只讲规范级；一帧命令编排与 generation 生命周期见 [render-scheduler.md](render-scheduler.md#bvn-渲染render-scheduler设计-规范)。
 
 ---
 
 ## 1. renderer 的形态与职责划分
 
-### 1.0 renderer 是一个 concept，vulkan 是它的一份实现
+renderer 不是一个具体类型，而是一组 **concept**：它约束「一个东西要能当 renderer，得能读出哪些渲染环境」，而不规定这些环境背后是谁。
 
-renderer 不是一个具体类型，而是一组 **concept**：它约束「一个东西要能当 renderer，得能读出哪些渲染环境」，而不规定这些环境背后是谁。凭空设计一个足够优秀的 renderer 不可能（见 [renderer-vulkan-impl.md §1](renderer-vulkan-impl.md#1-现状初期用-vulkan后期萃取规范)），所以现阶段唯一的实现直接用 vulkan——但 render task 依赖的是 **concept**，不是那份 vulkan 实现，故 A↔B 切换、乃至将来换 CUDA renderer，内容侧无须改动。
+renderer 携带 render task 所需的渲染上下文。render task 是长期协程，参数只在创建时传入一次；因此 renderer 按生命周期拆成两部分：global env 在协程启动时传入，每帧变化的观察值随 `async_record(pool)` 的结果取得。frame slot 的选择与轮转留在 render workflow 内部。
 
-concept 按 render task 的**两种依赖时机**二分：
+现阶段实现直接使用 Vulkan，并从实际需求萃取 renderer concept；render task 依赖 concept，而不是资源 owner 的具体类型。
 
-| concept | 读出什么 | render task 何时用 |
-|---|---|---|
-| **global-env renderer** | 框架级、整程序不变的环境（instance / device / queue / swapchain 等） | 初始化期：建 pipeline / buffer / texture |
-| **frame-env renderer** | 每帧变的绘制环境（**当帧交给本 task 的 command buffer** 等） | 录制期：把 draw 录进去 |
+### 1.0 两个 env renderer
 
+renderer 边界按生命周期拆成两个独立 concept：
+
+| concept               | 生命周期                  | render task 何时用                   | 典型访问器                                                                                                                             |
+| --------------------- | --------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `global_env_renderer` | 整段 render task 生命周期稳定 | 初始化期建 pipeline / buffer / texture | `device()` / `physical_device()` / `graphics_queue()` / `graphics_queue_family()` / `swapchain_image_format()` / `depth_format()` |
+| `frame_env_renderer`  | 某一帧、某个 task 被放行录制时有效  | 读取本帧 image / depth 等观察值           | `in_flight()` / `image_available()` / `active_image_index()` / `depth_image()`                                                     |
+
+### 1.1 `global_env_renderer` concept
+
+参考实现：
+```cpp
+template <class R>
+concept global_env_renderer = requires(R const& r)
+{
+	{ r.instance() } -> ::std::convertible_to<VkInstance const&>;
+	{ r.physical_device() } -> ::std::convertible_to<VkPhysicalDevice const&>;
+	{ r.device() } -> ::std::convertible_to<VkDevice const&>;
+	{ r.graphics_queue() } -> ::std::convertible_to<VkQueue const&>;
+	{ r.graphics_queue_family() } -> ::std::convertible_to<::std::uint32_t>;
+	{ r.swapchain() } -> ::std::convertible_to<VkSwapchainKHR const&>;
+	...
+};
 ```
-renderer = global-env renderer && frame-env renderer
+### 1.2 `frame_env_renderer` concept
+参考实现：
+```cpp
+template <class R>
+concept frame_env_renderer = requires(R const& r)
+{
+	{ r.in_flight() } -> ::std::convertible_to<VkFence const&>;
+	{ r.image_available() } -> ::std::convertible_to<VkSemaphore const&>;
+	{ r.active_image_index() } -> ::std::convertible_to<::std::uint32_t>;
+	{ r.depth_image() } -> ::std::convertible_to<VkImage const&>;
+	{ r.depth_image_view() } -> ::std::convertible_to<VkImageView const&>;
+	...
+};
 ```
 
-render task 只依赖 `global-env && frame-env` 这个并集，不依赖任何具体类型。
+### 1.3  满足concept的类（vulkan参考实现）
 
-#### 为什么二分 + 转发：submit() 按帧组装 renderer 递给每个 task
+比较推荐的实现思路是用一个纯数据结构作资源owner，再由他产生一个轻量的类型`T`，由这个类型`T`去实现`global/frame_env_renderer`概念
+#### 1.3.1 `global_env_renderer`
 
-二分不是为了整洁，而是为了让 renderer **可组装**：一个完整 renderer = 一份全程不变的 global-env + 一份**每 task、每帧现攒**的 frame-env。`submit()` 放行某个 task 时，把「不变的 global-env」和「本帧本 task 专属的 frame-env」组装成一个完整 renderer 递给它——task 于是拿到的是「为它这一次录制量身拼好的 renderer」。frame-env 里最关键的一格就是 `command_buffer()`：模型 B 下每 task 各录各的 secondary，具体哪一条由这次组装填入，task 不再需要额外接一个索引参数来自己挑（见 [render-scheduler/model-ab.md §3](render-scheduler/model-ab.md#3-模型-bsecondary-command-buffer并行录制-控序-设计方向)）。
+```cpp
+// 纯数据结构，掌管成员的生命周期（拥有所有权）
+struct vulkan_context
+{
+	// 存储对象实体
+	instance;
+	device;
+	...
+};
 
-组装靠**转发实现**：一层薄壳，持有指向内层环境的指针，逐访问器转发到内层；要换某一格（如 `command_buffer()` 的来源）就继承薄壳、只改那一格，其余照转。转发壳因此既**传递轻**（只是指针，可按值传 renderer），又**可局部特化**（不必重写整份实现）。
+// 轻量的转发对象，满足concept
+struct global_vulkan_env_renderer
+{
+	vulkan_context const* _context = nullptr;
 
-**跨开发者 → 转发须是动态的**：各 entity 由不同开发者独立开发、分别编译，render task 落在编译边界之外。`submit()` 要把组装好的 renderer 从自己这边**传到编译边界另一侧的 task**，转发壳就不能是「编译期定死内层类型」的模板，而须是**动态转发**（对内层做类型擦除）：`submit()` 侧把当帧真实 renderer 塞进壳，task 侧只对着 concept 编程、调访问器即拿到真身的数据。这样 renderer 才能从 `submit()` 流到任意第三方 task。
+	auto instance() const noexcept -> VkInstance;
+	auto physical_device() const noexcept -> VkPhysicalDevice;
+	auto device() const noexcept -> VkDevice;
+	auto graphics_queue() const noexcept -> VkQueue;
+	auto graphics_queue_family() const noexcept -> ::std::uint32_t;
+	auto swapchain() const noexcept -> VkSwapchainKHR;
+};
+static_assert(global_env_renderer<global_vulkan_env_renderer>);
+```
 
-### 1.1 初始化
+`vulkan_context::global_env()` 返回上述轻量 observer；frame observer 由 workflow 按本轮 slot / image 直接构造。
+#### 1.3.2 `frame_env_renderer`
 
-游戏主体在合适时机初始化那份 vulkan 实现（满足 global-env + frame-env 两个 concept）。现阶段只有一个实现，所以不再抽象 `rhi` / `context` 层；实现自己持有 instance / device / swapchain 等框架级状态，经 global-env concept 读出。render task 直接读取这些 handle，并用底层 API 创建自己的 pipeline / buffer / texture 等 GPU 资源——怎么定 vertex 格式、要不要透明混合（2D sprite 的核心需求），全是它自己的事。
+frame 侧按 owner / observer 分工：
 
-### 1.2 绘制期
+| 类型 | 角色 |
+|---|---|
+| `vulkan_context` | 拥有 device、swapchain、primary frame slot 等 Vulkan 数据 |
+| `render_workflow` | 拥有一帧编排状态、frame generation 与完成通知 |
+| render task 的 `secondary_command_pool` | 拥有该 task 的 secondary Vulkan pool 与全部 secondary buffer |
+| `frame_vulkan_env_renderer` | 观察 `vulkan_context` 的当前 slot / image，不拥有资源 |
+| `render_recording_frame` | 组合 frame renderer observer、generation shared state 与 task pool observer |
 
-render task 在 `render` 里录制自己的 draw 命令。它从 **frame-env** 读出当帧交给它的 command buffer（`command_buffer()`），只认这个 command buffer，不碰帧结构（begin / end rendering）与 submit / present。这个 command buffer 是 primary 还是 secondary、模型 B 下具体是哪一个 secondary，都由 frame-env 解析，task 不感知（见 [render-scheduler/model-ab.md](render-scheduler/model-ab.md#bvn-渲染并发模型-a-b设计)）。
+`async_record(pool)` 返回 `render_recording_frame`。它满足 `frame_env_renderer` concept，同时提供本轮 command 分配与 retirement 入口：
 
-### 1.3 renderer 持有什么
+```cpp
+struct frame_vulkan_env_renderer
+{
+	vulkan_context const* _context = nullptr;
+	::std::uint32_t _slot_index = 0;
+	::std::uint32_t _active_image_index = 0;
 
-那份 vulkan 实现作为持久对象，管理所有框架级状态——instance / surface / device / queue、swapchain 及其 image / view、深度图、以及每个 in-flight 帧槽的命令池 / 命令缓冲 / 同步对象。完整清单见 [renderer-vulkan-impl.md §2 持久环境](renderer-vulkan-impl.md#2-持久环境renderer-一次性建立整程序持有)；这些数据经 global-env（框架级）与 frame-env（当帧级）两个 concept 读出，两个 concept 各要求哪些访问器见 [renderer-vulkan-impl.md §7](renderer-vulkan-impl.md#7-两个-concept-的访问器vulkan-实现)。
+	auto in_flight() const noexcept -> VkFence;
+	auto active_image_index() const noexcept -> ::std::uint32_t;
+	auto depth_image() const noexcept -> VkImage;
+};
 
-实现是一个**纯数据 context**：它只**持有**这些 handle（**全部 in-flight 帧槽也由它持有**），**不定义** begin / end frame / rendering 之类的帧生命周期函数——帧的开闭是 render scheduler 的 `submit()` 的职责（见 [render-scheduler.md §2](render-scheduler.md#2-submit-与一帧的编排)）。
+struct render_recording_frame : frame_vulkan_env_renderer
+{
+	::std::shared_ptr<render_frame_state> _state;
+	secondary_command_pool* _commands = nullptr;
 
-### 1.4 renderer 给 renderable 的接口边界
+	auto allocate() const -> secondary_command_recording;
+	auto retire(secondary_command_recording command) const noexcept
+		-> secondary_command_retirement;
+};
+```
 
-renderer **不包装资源创建**，避免做成第二套底层 API：renderable 读取 renderer 里的数据、直接调用底层 API。renderer 不为 renderable 增加辅助函数层；现阶段只暴露框架级数据。renderer 也**不定义帧生命周期函数**——帧开闭是 render scheduler `submit()` 的活。
+`render_recording_frame` 是短生命周期观察值；资源所有权仍分别留在 renderer、workflow 与 render task。精确回收契约见 [render-scheduler.md §3](render-scheduler.md#3-帧录制与回收)。
 
-### 1.5 渲染目标边界（现阶段约定）
+### 1.4 转发
 
-renderer 决定渲染目标（attachment）结构（现阶段：单 color attachment + 单 depth，dynamic rendering，无多 pass / MSAA）；renderable 在此框架内自由决定 pipeline 的其余所有状态。需要多 pass 效果（描边、后处理）时再扩展 renderer 暴露相应能力。
+render task 可能跨 DLL。模块内部优先使用静态转发保留具体类型；跨 ABI 边界时使用动态转发擦除类型。两者暴露同一组 renderer accessor，返回容器值时直接返回 `vector`。
+
+#### 1.4.1 静态转发
+
+```cpp
+template <class R>
+struct global_forward_env_renderer
+{
+	R _inner;
+
+	constexpr auto instance() const noexcept -> decltype(auto)
+	{
+		return renderer_forward::dereference(_inner).instance();
+	}
+	...
+};
+```
+
+`frame_forward_env_renderer<R>` 使用相同结构转发 frame accessor。具体 Vulkan observer 使用 §1.3.1 的 `global_vulkan_env_renderer`；静态转发模板用于其余需要转发的 renderer wrapper。
+
+#### 1.4.2 动态转发
+
+```cpp
+namespace renderer_dynamic_forward
+{
+	struct basic_global_env_renderer
+	{
+		virtual ~basic_global_env_renderer() noexcept = default;
+		virtual auto instance() const noexcept -> VkInstance = 0;
+		virtual auto swapchain_images() const -> ::std::vector<VkImage> = 0;
+		...
+	};
+
+	template <class R>
+	struct global_env_renderer_eraser : basic_global_env_renderer
+	{
+		R _inner;
+
+		auto instance() const noexcept -> VkInstance override
+		{
+			return renderer_forward::dereference(_inner).instance();
+		}
+		...
+	};
+}
+
+struct global_dynamic_forward_env_renderer
+{
+	::std::unique_ptr<renderer_dynamic_forward::basic_global_env_renderer> _inner;
+
+	auto instance() const noexcept -> VkInstance
+	{
+		return _inner->instance();
+	}
+	...
+};
+
+template <global_env_renderer R>
+auto dynamic_forward_global_env_renderer(R&& renderer)
+	-> global_dynamic_forward_env_renderer;
+```
+
+frame dynamic forwarding 使用同一层次；两组 dynamic wrapper 都按值持有 `unique_ptr`，是 type-erased renderer 的 owner。
 
 ---
 
 ## 2. 帧生命周期（五阶段·规范级）
 
-> 按「持久环境 → 每帧环境 → 录制 → 结束一帧 → 结束全部」五段描述。这里只列**规范级职责与约束**；每阶段的具体命令序列见 [renderer-vulkan-impl.md](renderer-vulkan-impl.md#bvn-渲染renderer-的-vulkan-实现现状-实现)。
+### 2.1 持久环境
 
-贯穿全篇的**铁律**：
+程序启动时建立`global_env_renderer`所需要的资源（ 例如初始化`vulkan_context`）。
+### 2.2 每帧环境
 
-> command buffer 及其所属 command pool 是**外部同步**对象——**同一个 command buffer 不能被并发录制**；queue 的提交 / 呈现亦然。这条铁律单独决定了并发模型（[render-scheduler/model-ab.md](render-scheduler/model-ab.md#bvn-渲染并发模型-a-b设计)）。
+`render_workflow::submit()` 在所有 task 前执行 wait slot fence、完成该 slot 的上一 generation、acquire / reset / begin primary、layout barrier 与 `vkCmdBeginRendering`。
 
-### 2.1 持久环境（renderer 一次性建立，整程序持有）
+当前 primary 以 secondary contents 模式开启 dynamic rendering：
 
-renderable **只读不建**。renderer 持有框架级 + 每个 in-flight 帧槽的资源（含每帧槽一份深度图，避免跨帧清深度的 hazard）。**frames-in-flight 的含义**：让 CPU 录第 N+1 帧时 GPU 仍在跑第 N 帧；代价是任何「CPU 每帧写、GPU 每帧读」的资源须备 N 份。清单与命令见 [renderer-vulkan-impl.md §2](renderer-vulkan-impl.md#2-持久环境renderer-一次性建立整程序持有)；概念见 [vulkan-qa.md §1](vulkan-qa.md#1-inflight是什么为什么需要)。
+```cpp
+VK_RENDERING_CONTENTS_SECONDARY_COMMAND_BUFFERS_BIT
+```
 
-### 2.2 每帧环境（开帧 + 开 rendering，在所有 task 之前）
+### 2.3 录制期
 
-由 render scheduler 的 `submit()` 在所有 task 之前执行：acquire、reset、开命令缓冲、布局转换、开 dynamic rendering。**契约：开 / 收 rendering 永远由 `submit()` 执行，render task 绝不自调**；task 只在已开启的 rendering 实例内录 draw。命令序列见 [renderer-vulkan-impl.md §3](renderer-vulkan-impl.md#3-每帧环境开帧-开-rendering在所有-task-之前)。
+每个等待中的 render task 由 `async_record(task_pool)` 恢复，得到一个 `render_recording_frame`。task 通过 `frame.allocate()` 从自己的 pool 取得 secondary command buffer 并预留未发布条目，再录制：
 
-### 2.3 录制期（render task）
+```cpp
+vkCmdBindPipeline(secondary_cmd, ...);
+vkCmdSetViewport(secondary_cmd, ...);
+vkCmdSetScissor(secondary_cmd, ...);
+vkCmdBindVertexBuffers(secondary_cmd, ...);
+vkCmdBindDescriptorSets(secondary_cmd, ...);
+vkCmdPushConstants(secondary_cmd, ...);
+vkCmdDraw(secondary_cmd, ...);
+```
 
-单个 task 的命令清单（首参皆 `cmd`）：bind pipeline / set viewport·scissor / bind vertex·index·descriptor / push constants / draw。这里的 `cmd` 就是 task 从 frame-env 读出的 `command_buffer()`——它是自己的 secondary（模型 B）还是共享的 primary（模型 A 基线），由 frame-env 解析，task 不感知（见 [render-scheduler/model-ab.md §4](render-scheduler/model-ab.md#4-对-render-task-透明)）。第三方渲染后端入口（如 ImGui backend）可由 renderable 直接调用，只要它同样只把 draw 录进这个 `cmd`，不接管帧结构 / submit / present。命令细节见 [renderer-vulkan-impl.md §4](renderer-vulkan-impl.md#4-录制期render-task)。
+第三方后端（如 ImGui Vulkan backend）也必须只把 draw 录进该 secondary command buffer。
 
-### 2.4 结束一帧（收 rendering + 收帧）
+录制成功后，`frame.retire()` 的 operation start 原子发布 command 并绑定本 generation；task 自身不维护或轮转 frame slot。资源归属与完整代码形态见 [render-task.md §1](render-task.md#1-render-task-的形态)。
 
-本帧全部 task 录完后，`submit()` 收这一帧：转呈现布局、收命令缓冲、提交、呈现、轮转帧槽。**submit 是每帧的 join 点**。命令序列见 [renderer-vulkan-impl.md §5](renderer-vulkan-impl.md#5-结束一帧收-rendering-收帧)。
+### 2.4 结束一帧
 
-### 2.5 结束全部（关机）
+本帧全部 task 录完后，`submit()` 在 primary 中执行 generation 收集的 secondaries，然后 end rendering、转 present layout、submit、present、轮转 frame slot。成功提交的 generation 绑定到实际 slot，等待其 fence 后才完成。
 
-次序为硬约束（GPU 在用的不能毁、device 不能先于其资源毁）：
+### 2.5 结束全部
 
-1. 排空 render scope（确保无 task 在录 / 在飞）
-2. device wait idle
-3. 各 renderable 析构 → 毁自建的 pipeline / buffer / image / descriptor pool / sampler / shader module
-4. renderer 毁自有 per-frame / swapchain 资源
-5. device → surface → debug messenger → instance
-
-**第 1→3 步次序对协程架构是硬约束**：render scope 先排空、renderable 先析构，renderer 才能拆，否则 renderable 持有的 handle 在 device 销毁后变野指针。收尾在运行时怎么编排见 [render-scheduler.md §4 收尾次序](render-scheduler.md#4-收尾次序)。
+GPU 停止使用 task 自建 Vulkan 资源后，workflow 先完成在途 generation，task 再 join retirement scope 并析构资源，device 最后析构。完整收尾编排见 [render-scheduler.md §5](render-scheduler.md#5-收尾次序)。

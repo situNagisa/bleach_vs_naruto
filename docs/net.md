@@ -18,4 +18,4 @@
 - 联网整体排在 M6+，**M5 前不碰**（先一路打通单机）。
 - M6 联网 MVP：host 权威快照 + 移动预测 + 房间 + bot 补位 + 无头服务器雏形。
 - M7 加固：快照 delta / AOI + 和解打磨 + 专用服务器。
-- 里程碑全表见 [engine-spec.md §7](engine-spec.md#7-里程碑-模块映射)。
+- 里程碑全表见 [roadmap.md](roadmap.md#bvn-路线图roadmap)。

@@ -21,15 +21,15 @@
 
 **不要把 最终目标、设计思路、当前实现、计划 混在一个文件里**——混在一起难改、交叉引用爆炸、agent 难读。对讨论较详的 theme，按内容分开：
 
-| 类别 | 是什么 | 落点约定 |
-|---|---|---|
-| **设计（design）** | 最终想成为的样子、思路、取舍动机 | `*.md` 正文 / `design.md` |
-| **规范（spec）** | 终态契约（接口、职责、约束） | 与设计同文件或 `spec.md` |
-| **现状实现（impl）** | 当前阶段实现、为控复杂度的妥协 | `*-impl.md` / `impl.md` |
-| **计划（plan）** | 待定、未来向、固化 / 演进计划 | 归入对应 impl 或 spec 末节 |
-| **决策（decision）** | 访谈取舍、为什么这么定 | 全局 `decisions.md` + theme 就近 `decision.md` |
+| 类别               | 是什么              | 落点约定                                       |
+| ---------------- | ---------------- | ------------------------------------------ |
+| **设计（design）**   | 最终想成为的样子、思路、取舍动机 | `*.md` 正文 / `design.md`                    |
+| **规范（spec）**     | 终态契约（接口、职责、约束）   | 与设计同文件或 `spec.md`                          |
+| **现状实现（impl）**   | 当前阶段实现、为控复杂度的妥协  | `*-impl.md` / `impl.md`                    |
+| **计划（plan）**     | 待定、未来向、固化 / 演进计划 | 归入对应 impl 或 spec 末节                        |
+| **决策（decision）** | 访谈取舍、为什么这么定      | 全局 `decisions.md` + theme 就近 `decision.md` |
 
-> 例：render-scheduler 的终态设计在 [render-scheduler.md](render/render-scheduler.md#bvn-渲染render-scheduler设计-规范)；「因转发机制而从 context 取 scheduler」这类妥协在 [render-scheduler/impl.md §2](render/render-scheduler/impl.md#2-妥协调度器来源现阶段从-context-取而非-env)；模型 A/B 约束在 [render-scheduler/model-ab.md](render/render-scheduler/model-ab.md#bvn-渲染并发模型-a-b设计)。三者不混。
+> 例：render-scheduler 的终态设计在 [render-scheduler.md](render/render-scheduler.md#bvn-渲染render-scheduler设计-规范)；模型 A/B 约束在 [render-scheduler/model-ab.md](render/render-scheduler/model-ab.md#bvn-渲染并发模型-a-b设计)。阶段性实现妥协应单独落在仍有效的 impl 文档中，不写回终态规范。
 
 ### 1.3 决策归属
 

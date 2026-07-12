@@ -1,6 +1,6 @@
 # bvn 插件系统（plugin·spec）
 
-> 讨论较少的 theme。承接 [../engine-spec.md §4.8 插件加载](../engine-spec.md#48-插件加载-可选辅助) + [../decisions.md §6 插件与热重载](../decisions.md#6-插件与热重载t4a-t4b)（就近）。热重载见 [hot-reload.md](hot-reload.md#热重载详解保留教学解释)。
+> 讨论较少的 theme。决策取舍见 [../decisions.md §6 插件与热重载](../decisions.md#6-插件与热重载t4a-t4b)（就近）。热重载见 [hot-reload.md](hot-reload.md#热重载详解保留教学解释)。
 
 ---
 
@@ -15,7 +15,7 @@
 - **ABI 边界：C++ 虚接口**（共享头文件、同工具链编译）。虚调用只在"每 tick 一次"的粗边界，可忽略；内层热循环插件直接碰 ECS、零虚调用。
 - **宿主 API：直接暴露 ECS / 引擎内部**（插件 = 住在 DLL 里、和引擎紧耦合的一等 C++ 模块）。
 - **实例状态：插件持有富 C++ 对象**。
-- **英雄 = 协程**：插件导出一个工厂函数产出英雄协程，引擎每 tick resume 它（无回调）。详见 [../engine-spec.md §4.4 英雄=协程](../engine-spec.md#44-英雄-协程王牌)。
+- **英雄 = 协程**：插件导出一个工厂函数产出英雄协程，引擎每 tick resume 它（无回调）。详见 [../engine-spec.md §1 核心哲学](../engine-spec.md#1-核心哲学一切的定调)。
 
 ---
 
@@ -35,7 +35,7 @@
 
 ## 5. 计划 / 阶段
 
-- **分阶段落地**：M2 英雄 API → M3 装备 → 之后地图 / 模式。里程碑全表见 [../engine-spec.md §7](../engine-spec.md#7-里程碑-模块映射)。
+- **分阶段落地**：M2 英雄 API → M3 装备 → 之后地图 / 模式。里程碑全表见 [../roadmap.md](../roadmap.md#bvn-路线图roadmap)。
 - **版本化演进**：现阶段极轻量（ABI 整数版本）；开放第三方 mod 时再升级到语义版本 + 依赖解析。
 
 ---

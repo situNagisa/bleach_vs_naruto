@@ -1,81 +1,132 @@
 # bvn 渲染·render task（设计 + 规范）
 
-> render task 的实现规范：它就是 `render` 协程本身——协程内部结构、逐帧录制循环、结束信号的来源、render context dump（未来向）。
-> 关联：renderable 概念见 [renderable.md](renderable.md#bvn-渲染renderable设计-规范)；submit() 一帧编排与 render scheduler 见 [render-scheduler.md §2](render-scheduler.md#2-submit-与一帧的编排)；renderer 上下文见 [renderer.md §1](renderer.md#1-renderer-的形态与职责划分)。
+> render task 的协程形态、secondary command 所有权与结束契约。
+> renderable 概念见 [renderable.md](renderable.md#bvn-渲染renderable设计-规范)；一帧编排见 [render-scheduler.md §2](render-scheduler.md#2-submit-与一帧编排)；renderer 上下文见 [renderer.md §1](renderer.md#1-renderer-的形态与职责划分)。
 
 ---
 
 ## 1. render task 的形态
 
-一个 **render task** 就是 `t.render(renderer)` **本身**——[renderable.md §3 核心契约](renderable.md#3-核心契约骨瘦如柴) 那个接入面返回的协程（sender），跑在 render scheduler 上，代表「`t` 参与每一帧的绘制」。它**注册一次**，自己在内部完成 初始化 → 逐帧录制循环 → 收尾；render task 就等于 `render` 这个协程。
+以下称呼指同一个运行实体：
 
-> `render` **只有一个参数 `renderer`**。现阶段 `renderer` 就是那个唯一的 renderer 实现，本质是一个保存 vulkan 上下文（instance / device / 当帧 command buffer 等）的 context。`render` 体内的**正确用法 = 直接调 vulkan 函数，把 renderer 携带的这些 handle 传进去**。整个游戏环境（结束信号、scheduler 那些设施）不放进这个参数位——那些从协程自身的 env 取（[§2](#2-结束信号恒从-env-取)）；`t` 才是携带上下文的一方。用 `t`（而非 entity 本身）当主语，是为了不强求 `render` 必须由 entity 实现：entity 可以让它管理的另一个对象去实现 `render`。
+| 称呼 | 场景 |
+|---|---|
+| render task | 文档中的概念 |
+| `graphics::render(...)` 返回的协程 / sender | 代码中的实体 |
 
-### 常见形态：持续参与每一帧
+render task 启动一次，在协程帧内完成：
 
-render task 最常见的形态（伪代码；`render` 即 `t` 的 `render` 成员，函数本身就是协程）：
+1. 初始化 pipeline、buffer、texture 与一个 `secondary_command_pool`；
+2. 循环通过 `async_record(pool)` 等待下一帧；
+3. 每帧按需分配零个、一个或多个 secondary command buffer 并录制 draw；
+4. 用 `::stdexec::spawn` 把每个 command 的回收绑定到本帧 generation；
+5. 结束时关闭并 join retirement scope，随后由 RAII 析构资源。
+
+`render(...)` 的唯一 renderer 参数是 global env renderer。每帧变化的数据和 recording generation 由 `async_record(pool)` 返回：
 
 ```cpp
-auto T::render(renderer& r) -> render_task
+auto T::render(::bvn::graphics::global_dynamic_forward_env_renderer global)
+	-> ::bvn::gameplay::task
 {
-    auto env  = co_await environment();
-    auto stop = get_stop_token(env);      // 结束信号：恒从自身 env 取（§2）
-    auto sched = /* t / context 携带的 render scheduler（现阶段临时从 context 取，见 render-scheduler/impl.md） */;
+	auto env = co_await ::nagisa::concurrency::environment();
+	auto stop = ::stdexec::get_stop_token(env);
+	auto scheduler = ::stdexec::get_scheduler(env);
 
-    // 初始化：GPU 资源作为协程帧内的局部量，用 RAII 拥有者持有（构造即建、析构即毁）。
-    // 就是一串 vkCreate*，首参是 r 携带的 device；活过整个循环。
-    auto pipeline = make_pipeline(r);
-    auto vertices = make_buffer(r);
-    // 只该建一次，不写 if (== VK_NULL_HANDLE) 守卫；要表达不变式用 assert。
+	auto pipeline = make_pipeline(global);
+	auto vertices = make_buffer(global);
+	auto commands = ::bvn::graphics::secondary_command_pool{
+		global.device(),
+		global.graphics_queue_family(),
+	};
+	auto retirements = ::stdexec::simple_counting_scope{};
+	auto render_error = ::std::exception_ptr{};
 
-    while (!stop.stop_requested())
-    {
-        co_await schedule(sched);         // 挂起，等下一帧 submit() 放行自己
-        // 醒来时一定在「帧已开启」窗口内（render-scheduler.md 保证）：取 r 携带的当帧 command buffer，
-        // 直接调 vkCmd* 把自己的 draw 录进去。
-        auto cmd = /* r 携带的当帧 command buffer */;
-        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, /* 自己的 pipeline */);
-        vkCmdBindVertexBuffers(cmd, /* … */);
-        vkCmdDraw(cmd, /* … */);
-    }
-    // 退出循环：pipeline / vertices 随协程帧析构自动释放，无手动 teardown、无逐点判空。
+	try
+	{
+		while (!stop.stop_requested())
+		{
+			auto frame = co_await render_workflow->async_record(commands);
+			if (!frame || stop.stop_requested())
+				break;
+
+			auto command = frame.allocate();
+			auto raw_command = command.get();
+			auto color_format = global.swapchain_image_format();
+			auto begin_info = ...;
+
+			if(::vkBeginCommandBuffer(raw_command, &begin_info)) throw;
+			::vkCmdBindPipeline(raw_command, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.handle);
+			::vkCmdBindVertexBuffers(raw_command, /* ... */);
+			::vkCmdDraw(raw_command, /* ... */);
+			if (::vkEndCommandBuffer(raw_command) != ::VK_SUCCESS) throw;
+
+			::stdexec::spawn(
+				frame.retire(::std::move(command)),
+				retirements.get_token()
+			);
+		}
+	}
+	catch (...)
+	{
+		render_error = ::std::current_exception();
+	}
+
+	retirements.close();
+	co_await ::stdexec::unstoppable(
+		::stdexec::starts_on(scheduler, retirements.join())
+	);
+	if (render_error)
+	{
+		::std::rethrow_exception(render_error);
+	}
 }
 ```
 
-要点：
+### 1.1 所有权与帧槽
 
-- **render task 就是 `render` 协程**：注册一次，自己跑完 init → 逐帧录制 → 收尾；体内直接调 vulkan，参数只有 `renderer`。
-- **初始化在循环前**：用 `renderer` 携带的 vulkan 上下文（device 等）建好自建资源，作为**协程帧内的局部量**持有（瞬态态 → 协程局部）。因为只建一次，不写 `if (handle == VK_NULL_HANDLE)` 初始化守卫；要表达"此处应为空"用 `assert`。
-- **循环体每帧录一次**：`co_await schedule(sched)` 挂起到下一帧；醒来后调 `vkCmd*` 把 draw 录进 renderer 交给的当帧 command buffer。录进哪个 command buffer（primary / secondary）取决于并发模型，见 [render-scheduler/model-ab.md](render-scheduler/model-ab.md#bvn-渲染并发模型-a-b设计)。
-- **清理在循环后**：观察到结束信号、退出循环，帧内局部量随协程帧析构自动释放——无需手动 teardown。
+| 对象                                   | owner                                  | 生命周期 / 职责                                         |
+| ------------------------------------ | -------------------------------------- | ------------------------------------------------- |
+| secondary Vulkan command pool        | render task                            | 整段 render task 生命周期                               |
+| 从该 pool 分配的 secondary command buffer | render task 的 `secondary_command_pool` | 动态增长，由 free list 复用                               |
+| command lease                        | 当轮 task 局部值，随后移交 retirement sender     | 从 acquire 到 generation 完成                         |
+| primary frame slot Vulkan 资源         | `vulkan_context`                       | primary pool / command、fence、semaphore 与 depth 资源 |
+| frame slot 选择 / 轮转与 generation state | render workflow                        | slot 编排、secondary 集合与完成通知                         |
+| `render_recording_frame`             | task 的当轮局部值                            | 观察当前 generation 与 task pool                       |
 
-### 高度自定义留有的口子
+task 不保存 frame slot 数量，也不自行轮转槽号。若上一批 command 仍在 GPU 上，pool 就分配新 buffer；对应 generation 完成后，retirement sender 把旧 index 放回 free list。动态 task 数量只影响各 task 自己实际分配的 buffer 数量。
 
-这个形态只是**预设的常见写法**，不是约束：
+### 1.2 每帧约束
 
-- **一次性绘制**：可以不写循环，借别人的 pipeline 画一次就销毁——pipeline 仍归别人持有。
-- **多个 render task**：一个 entity 可以在不同时机注册很多个 render task。绘制粒度落在 **render task** 上，不是 entity——这样「A 的剑要盖在更近的 B 前面」这种跨深度情形也能用多个 task 表达。
-- **谁来实现 `render`**：可以是 entity 本身，也可以是 entity 管理的另一个对象。
+- `async_record(pool)` 每轮返回一个精确 generation；停止恢复返回空 frame，task 必须在访问 frame 前检查 `!frame` 或 stop token。
+- `frame.allocate()` 完成 acquire / reset，并在 generation 中预留一个未发布条目。
+- `vkEndCommandBuffer` 成功后，task 把 lease 交给 `frame.retire()`，并在仍开放的 `simple_counting_scope` 上 spawn。
+- retirement operation start 原子地发布 raw handle，并注册 completion callback；`submit()` 只执行已发布条目。
+- 录制或 spawn 失败时，尚未发布的 lease 由析构立即归还 free list，对应条目不会进入 `vkCmdExecuteCommands`。
+- 一个 task 每帧可调用 `allocate()` 任意次数，也可以不产生 command。
 
-> render task 怎么被注册（entity.main → render scheduler）见 [boot.md §3](boot.md#3-entity-怎么注册-render-task)。
+### 1.3 自定义形态
+
+- **一次性绘制**：task 可以只等待和录制一次，随后 close / join retirement scope 并退出。
+- **多个 render task**：一个 entity 可以注册多个 render task；绘制粒度落在 task 上。
+- **实现位置**：`render` 可以由 entity 或 entity 管理的其他对象实现。
+
+注册路径见 [boot.md §3](boot.md#3-entity-怎么启动-render-task)。
 
 ---
 
 ## 2. 结束信号：恒从 env 取
 
-结束信号通过**协程自己的 stop token** 传递，从 env 取，**不通过 context**。
+结束信号通过协程 env 的 stop token 传递：
 
-- 协程在自己的 stdexec 环境（env）里查询 stop token：`stdexec::get_stop_token(env)`，循环条件就是 `!stop.stop_requested()`。
-- stop token 沿调度链从上游传到协程的 env——上游（scheduler / scope / 父任务）持有 stop source，请求停止时，协程下次醒来即看到 `stop_requested() == true`，退出循环、跑清理、结束。
-- 这样 render task 的「该退出了」是它**自己从环境读出来的**，而不是去翻一个共享的全局标志。各 task 互不依赖同一个全局标志，结束信号的来源是统一的、标准的。
+- task 用 `stdexec::get_stop_token(env)` 取得 token，循环条件为 `!stop.stop_requested()`；
+- 全局收尾按 [render-scheduler.md §5](render-scheduler.md#5-收尾次序) 先排空 GPU、完成在途 generation，再传播 stop 并恢复停靠 task；
+- task 观察 stop 后退出循环，先 `close()` retirement scope，再以 `unstoppable(starts_on(scheduler, join()))` 等待全部 command 回收；
+- join 完成后，secondary pool 与其余协程局部 RAII 资源才可析构。
 
-> 调度器（`schedule` 的来源）本应同样从 env 取，但现阶段因转发调度器有妥协——见 [render-scheduler/impl.md §2](render-scheduler/impl.md#2-妥协调度器来源现阶段从-context-取而非-env)。
+异常路径使用同一收尾段：先保存 `exception_ptr`，close / join 后再重抛，保证异常不会越过 command 生命周期收尾。
 
 ---
 
 ## 3. render context 可 dump（未来向）
 
-`render` 依赖的 context 应可被 **dump**、也可从 dump 出的对象**重建**（服务快照 / 联网 / 离线恢复，呼应 [../engine-spec.md §4.4 英雄=协程](../engine-spec.md#44-英雄-协程王牌) 与快照）。
-
-- 现阶段为控复杂度**不做**，但方向朝此走。
-- 瞬态 GPU 资源作为协程帧局部量持有（[§1](#1-render-task-的形态)），恰好使 dump / 恢复只需重建**耐久 context**——瞬态部分由重启协程自然重建。
+`render` 依赖的 context 应可 dump，也可从 dump 对象重建，用于快照、联网与离线恢复。现阶段只保留该方向。
