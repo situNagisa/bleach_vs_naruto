@@ -35,10 +35,10 @@ add_dependencies(bvn_client bvn_client_shaders)
 target_link_libraries(bvn_client
 	PRIVATE
 		bvn_platform
+		bvn_graphics
 		bvn_renderer
 		bvn_assets
 		bvn_sim
-		bvn_compute
 		bvn_gameplay
 		EnTT::EnTT
 		glm::glm

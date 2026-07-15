@@ -1,5 +1,6 @@
 add_subdirectory(platform)
 add_subdirectory(assets)
+add_subdirectory(graphics)
 add_subdirectory(renderer)
 add_subdirectory(sim)
 add_subdirectory(gameplay)

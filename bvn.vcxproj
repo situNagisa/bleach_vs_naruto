@@ -91,17 +91,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\bvn\animations\environment.h" />
+    <ClInclude Include="include\bvn\animations\keyframe.h" />
     <ClInclude Include="include\bvn\assets\assets.h" />
     <ClInclude Include="include\bvn\assets\sprite_clip.h" />
-    <ClInclude Include="include\bvn\display_architecture\renderable.h" />
+    <ClInclude Include="include\bvn\graphics\environment.h" />
+    <ClInclude Include="include\bvn\graphics\graphics.h" />
+    <ClInclude Include="include\bvn\graphics\renderable.h" />
+    <ClInclude Include="include\bvn\graphics\render_workflow.h" />
+    <ClInclude Include="include\bvn\graphics\secondary_command_buffer.h" />
+    <ClInclude Include="include\bvn\graphics\vulkan_renderer.h" />
+    <ClInclude Include="include\bvn\environment.h" />
     <ClInclude Include="include\bvn\gameplay\entity.h" />
     <ClInclude Include="include\bvn\gameplay\gameplay.h" />
+    <ClInclude Include="include\bvn\graphics\renderer.h" />
     <ClInclude Include="include\bvn\platform\event.h" />
     <ClInclude Include="include\bvn\platform\platform.h" />
     <ClInclude Include="include\bvn\platform\sdl_context.h" />
     <ClInclude Include="include\bvn\platform\window.h" />
     <ClInclude Include="include\bvn\renderer\camera.h" />
-    <ClInclude Include="include\bvn\renderer\vulkan_renderer.h" />
     <ClInclude Include="include\bvn\sim\sim.h" />
     <ClInclude Include="include\vkkl\buffer.h" />
     <ClInclude Include="include\vkkl\buffer_view.h" />
@@ -144,10 +152,11 @@
     <ClCompile Include="plugins\test_basic\test_plugin.cpp" />
     <ClCompile Include="source\assets\sprite_clip.cpp" />
     <ClCompile Include="source\client\main.cpp" />
+    <ClCompile Include="source\graphics\render_workflow.cpp" />
+    <ClCompile Include="source\graphics\secondary_command_buffer.cpp" />
     <ClCompile Include="source\platform\event.cpp" />
     <ClCompile Include="source\platform\sdl_context.cpp" />
     <ClCompile Include="source\platform\window.cpp" />
-    <ClCompile Include="source\renderer\vulkan_renderer.cpp" />
     <ClCompile Include="source\sim\sim.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -156,6 +165,7 @@
     <Text Include="source\CMakeLists.txt" />
     <Text Include="source\client\CMakeLists.txt" />
     <Text Include="source\gameplay\CMakeLists.txt" />
+    <Text Include="source\graphics\CMakeLists.txt" />
     <Text Include="source\platform\CMakeLists.txt" />
     <Text Include="source\renderer\CMakeLists.txt" />
     <Text Include="source\sim\CMakeLists.txt" />

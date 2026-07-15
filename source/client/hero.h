@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <exception>
 #include <filesystem>
 #include <fstream>
 #include <mutex>
@@ -22,10 +23,11 @@
 
 #include <bvn/assets/resource_cache.h>
 #include <bvn/assets/sprite_clip.h>
-#include <bvn/display_architecture/renderable.h>
+#include <bvn/graphics/render_workflow.h>
+#include <bvn/graphics/renderable.h>
+#include <bvn/graphics/vulkan_renderer.h>
 #include <bvn/gameplay/entity.h>
 #include <bvn/renderer/camera.h>
-#include <bvn/renderer/vulkan_renderer.h>
 #include <vkkl/vkkl.h>
 
 #include "context.h"
@@ -87,8 +89,7 @@ struct hero
 
 	auto main(context &game_context) -> ::bvn::gameplay::task
 	{
-		owner = &game_context.renderer;
-		render_workflow_scheduler = ::stdexec::get_scheduler(game_context.render_workflow);
+		render_workflow = &game_context.render_workflow;
 		if (auto existing = game_context.registry.ctx().find<preview_state>(); existing != nullptr)
 		{
 			preview = existing;
@@ -101,15 +102,15 @@ struct hero
 		clips[static_cast<::std::size_t>(hero_action::idle)].source = sprite_clips.load(asset_root / "source/stand.gif");
 		clips[static_cast<::std::size_t>(hero_action::walk)].source = sprite_clips.load(asset_root / "source/walk.gif");
 		clips[static_cast<::std::size_t>(hero_action::run)].source = sprite_clips.load(asset_root / "source/run.gif");
-		game_context.render_scope.spawn(::stdexec::starts_on(::stdexec::get_scheduler(game_context.render_workflow), ::bvn::display_architecture::render(*this, game_context.renderer)));
+		game_context.render_scope.spawn(::stdexec::starts_on(game_context.render_workflow.get_scheduler(), ::bvn::graphics::render(*this, ::bvn::graphics::dynamic_forward_global_env_renderer(game_context.renderer.global_env()))));
 		co_return;
 	}
 
-	auto render(::bvn::renderer::vulkan_renderer &renderer) -> ::bvn::gameplay::task
+	auto render(::bvn::graphics::global_dynamic_forward_env_renderer global) -> ::bvn::gameplay::task
 	{
-		assert(owner == &renderer);
 		auto env = co_await ::nagisa::concurrency::environment();
 		auto stop = ::stdexec::get_stop_token(env);
+		auto scheduler = ::stdexec::get_scheduler(env);
 
 		sprite_clips.poll();
 
@@ -138,11 +139,11 @@ struct hero
 			descriptor_layout_info.pBindings = &sampler_binding;
 
 			auto raw_descriptor_set_layout = VkDescriptorSetLayout{};
-			if (::vkCreateDescriptorSetLayout(renderer.device.handle, &descriptor_layout_info, nullptr, &raw_descriptor_set_layout) != ::VK_SUCCESS)
+			if (::vkCreateDescriptorSetLayout(global.device(), &descriptor_layout_info, nullptr, &raw_descriptor_set_layout) != ::VK_SUCCESS)
 			{
 				throw ::std::runtime_error{"failed to create hero descriptor set layout"};
 			}
-			descriptor_set_layout = ::vkkl::descriptor_set_layout{renderer.device.handle, raw_descriptor_set_layout};
+			descriptor_set_layout = ::vkkl::descriptor_set_layout{global.device(), raw_descriptor_set_layout};
 
 			auto descriptor_pool_size = VkDescriptorPoolSize{};
 			descriptor_pool_size.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -156,11 +157,11 @@ struct hero
 			descriptor_pool_info.pPoolSizes = &descriptor_pool_size;
 
 			auto raw_descriptor_pool = VkDescriptorPool{};
-			if (::vkCreateDescriptorPool(renderer.device.handle, &descriptor_pool_info, nullptr, &raw_descriptor_pool) != ::VK_SUCCESS)
+			if (::vkCreateDescriptorPool(global.device(), &descriptor_pool_info, nullptr, &raw_descriptor_pool) != ::VK_SUCCESS)
 			{
 				throw ::std::runtime_error{"failed to create hero descriptor pool"};
 			}
-			descriptor_pool = ::vkkl::descriptor_pool{renderer.device.handle, raw_descriptor_pool};
+			descriptor_pool = ::vkkl::descriptor_pool{global.device(), raw_descriptor_pool};
 
 			auto sampler_info = VkSamplerCreateInfo{};
 			sampler_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -175,23 +176,23 @@ struct hero
 			sampler_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 
 			auto raw_sampler = VkSampler{};
-			if (::vkCreateSampler(renderer.device.handle, &sampler_info, nullptr, &raw_sampler) != ::VK_SUCCESS)
+			if (::vkCreateSampler(global.device(), &sampler_info, nullptr, &raw_sampler) != ::VK_SUCCESS)
 			{
 				throw ::std::runtime_error{"failed to create hero texture sampler"};
 			}
-			texture_sampler = ::vkkl::sampler{renderer.device.handle, raw_sampler};
+			texture_sampler = ::vkkl::sampler{global.device(), raw_sampler};
 
 			auto upload_pool_info = VkCommandPoolCreateInfo{};
 			upload_pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 			upload_pool_info.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
-			upload_pool_info.queueFamilyIndex = renderer.graphics_queue_family;
+			upload_pool_info.queueFamilyIndex = global.graphics_queue_family();
 
 			auto raw_upload_command_pool = VkCommandPool{};
-			if (::vkCreateCommandPool(renderer.device.handle, &upload_pool_info, nullptr, &raw_upload_command_pool) != ::VK_SUCCESS)
+			if (::vkCreateCommandPool(global.device(), &upload_pool_info, nullptr, &raw_upload_command_pool) != ::VK_SUCCESS)
 			{
 				throw ::std::runtime_error{"failed to create hero upload command pool"};
 			}
-			upload_command_pool = ::vkkl::command_pool{renderer.device.handle, raw_upload_command_pool};
+			upload_command_pool = ::vkkl::command_pool{global.device(), raw_upload_command_pool};
 
 			auto upload_allocate_info = VkCommandBufferAllocateInfo{};
 			upload_allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -200,11 +201,11 @@ struct hero
 			upload_allocate_info.commandBufferCount = 1;
 
 			auto raw_upload_command_buffer = VkCommandBuffer{};
-			if (::vkAllocateCommandBuffers(renderer.device.handle, &upload_allocate_info, &raw_upload_command_buffer) != ::VK_SUCCESS)
+			if (::vkAllocateCommandBuffers(global.device(), &upload_allocate_info, &raw_upload_command_buffer) != ::VK_SUCCESS)
 			{
 				throw ::std::runtime_error{"failed to allocate hero upload command buffer"};
 			}
-			upload_command_buffer = ::vkkl::command_buffer{renderer.device.handle, upload_command_pool.handle, raw_upload_command_buffer};
+			upload_command_buffer = ::vkkl::command_buffer{global.device(), upload_command_pool.handle, raw_upload_command_buffer};
 
 			auto push_range = VkPushConstantRange{};
 			push_range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
@@ -219,11 +220,11 @@ struct hero
 			layout_info.pPushConstantRanges = &push_range;
 
 			auto raw_pipeline_layout = VkPipelineLayout{};
-			if (::vkCreatePipelineLayout(renderer.device.handle, &layout_info, nullptr, &raw_pipeline_layout) != ::VK_SUCCESS)
+			if (::vkCreatePipelineLayout(global.device(), &layout_info, nullptr, &raw_pipeline_layout) != ::VK_SUCCESS)
 			{
 				throw ::std::runtime_error{"failed to create hero pipeline layout"};
 			}
-			pipeline_layout = ::vkkl::pipeline_layout{renderer.device.handle, raw_pipeline_layout};
+			pipeline_layout = ::vkkl::pipeline_layout{global.device(), raw_pipeline_layout};
 
 			auto buffer_info = VkBufferCreateInfo{};
 			buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -232,20 +233,20 @@ struct hero
 			buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
 			auto raw_buffer = VkBuffer{};
-			if (::vkCreateBuffer(renderer.device.handle, &buffer_info, nullptr, &raw_buffer) != ::VK_SUCCESS)
+			if (::vkCreateBuffer(global.device(), &buffer_info, nullptr, &raw_buffer) != ::VK_SUCCESS)
 			{
 				throw ::std::runtime_error{"failed to create hero vertex buffer"};
 			}
-			vertex_buffer = ::vkkl::buffer{renderer.device.handle, raw_buffer};
+			vertex_buffer = ::vkkl::buffer{global.device(), raw_buffer};
 
 			auto requirements = VkMemoryRequirements{};
-			::vkGetBufferMemoryRequirements(renderer.device.handle, vertex_buffer.handle, &requirements);
+			::vkGetBufferMemoryRequirements(global.device(), vertex_buffer.handle, &requirements);
 
 			auto allocate_info = VkMemoryAllocateInfo{};
 			allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 			allocate_info.allocationSize = requirements.size;
 			auto memory_properties = VkPhysicalDeviceMemoryProperties{};
-			::vkGetPhysicalDeviceMemoryProperties(renderer.physical_device, &memory_properties);
+			::vkGetPhysicalDeviceMemoryProperties(global.physical_device(), &memory_properties);
 			auto found_memory_type = false;
 
 			for (auto index = ::std::uint32_t{}; index < memory_properties.memoryTypeCount; ++index)
@@ -264,13 +265,13 @@ struct hero
 			}
 
 			auto raw_memory = VkDeviceMemory{};
-			if (::vkAllocateMemory(renderer.device.handle, &allocate_info, nullptr, &raw_memory) != ::VK_SUCCESS)
+			if (::vkAllocateMemory(global.device(), &allocate_info, nullptr, &raw_memory) != ::VK_SUCCESS)
 			{
 				throw ::std::runtime_error{"failed to allocate hero vertex buffer memory"};
 			}
-			vertex_memory = ::vkkl::device_memory{renderer.device.handle, raw_memory};
+			vertex_memory = ::vkkl::device_memory{global.device(), raw_memory};
 
-			if (::vkBindBufferMemory(renderer.device.handle, vertex_buffer.handle, vertex_memory.handle, 0) != ::VK_SUCCESS)
+			if (::vkBindBufferMemory(global.device(), vertex_buffer.handle, vertex_memory.handle, 0) != ::VK_SUCCESS)
 			{
 				throw ::std::runtime_error{"failed to bind hero vertex buffer memory"};
 			}
@@ -284,13 +285,13 @@ struct hero
 				vertex{.position = {0.5f, 1.0f, 0.0f}, .uv = {1.0f, 0.0f}},
 			};
 
-			auto mapped = static_cast<void *>(nullptr);
-			if (::vkMapMemory(renderer.device.handle, vertex_memory.handle, 0, static_cast<VkDeviceSize>(vertices.size() * sizeof(vertex)), 0, &mapped) != ::VK_SUCCESS)
+			auto mapped = static_cast<void*>(nullptr);
+			if (::vkMapMemory(global.device(), vertex_memory.handle, 0, static_cast<VkDeviceSize>(vertices.size() * sizeof(vertex)), 0, &mapped) != ::VK_SUCCESS)
 			{
 				throw ::std::runtime_error{"failed to map hero vertex buffer"};
 			}
 			::std::memcpy(mapped, vertices.data(), vertices.size() * sizeof(vertex));
-			::vkUnmapMemory(renderer.device.handle, vertex_memory.handle);
+			::vkUnmapMemory(global.device(), vertex_memory.handle);
 		}
 
 		auto vertex_shader_words = ::std::vector<::std::uint32_t>{};
@@ -312,7 +313,7 @@ struct hero
 
 			vertex_shader_words.resize(static_cast<::std::size_t>(size) / sizeof(::std::uint32_t));
 			file.seekg(0, ::std::ios::beg);
-			file.read(reinterpret_cast<char *>(vertex_shader_words.data()), size);
+			file.read(reinterpret_cast<char*>(vertex_shader_words.data()), size);
 		}
 
 		//+ read hero fragment shader SPIR-V
@@ -331,7 +332,7 @@ struct hero
 
 			fragment_shader_words.resize(static_cast<::std::size_t>(size) / sizeof(::std::uint32_t));
 			file.seekg(0, ::std::ios::beg);
-			file.read(reinterpret_cast<char *>(fragment_shader_words.data()), size);
+			file.read(reinterpret_cast<char*>(fragment_shader_words.data()), size);
 		}
 
 		auto vertex_shader = ::vkkl::shader_module{};
@@ -346,21 +347,21 @@ struct hero
 			shader_info.pCode = vertex_shader_words.data();
 
 			auto raw_vertex_shader = VkShaderModule{};
-			if (::vkCreateShaderModule(renderer.device.handle, &shader_info, nullptr, &raw_vertex_shader) != ::VK_SUCCESS)
+			if (::vkCreateShaderModule(global.device(), &shader_info, nullptr, &raw_vertex_shader) != ::VK_SUCCESS)
 			{
 				throw ::std::runtime_error{"failed to create hero vertex shader module"};
 			}
-			vertex_shader = ::vkkl::shader_module{renderer.device.handle, raw_vertex_shader};
+			vertex_shader = ::vkkl::shader_module{global.device(), raw_vertex_shader};
 
 			shader_info.codeSize = fragment_shader_words.size() * sizeof(::std::uint32_t);
 			shader_info.pCode = fragment_shader_words.data();
 
 			auto raw_fragment_shader = VkShaderModule{};
-			if (::vkCreateShaderModule(renderer.device.handle, &shader_info, nullptr, &raw_fragment_shader) != ::VK_SUCCESS)
+			if (::vkCreateShaderModule(global.device(), &shader_info, nullptr, &raw_fragment_shader) != ::VK_SUCCESS)
 			{
 				throw ::std::runtime_error{"failed to create hero fragment shader module"};
 			}
-			fragment_shader = ::vkkl::shader_module{renderer.device.handle, raw_fragment_shader};
+			fragment_shader = ::vkkl::shader_module{global.device(), raw_fragment_shader};
 
 			auto binding = VkVertexInputBindingDescription{};
 			binding.binding = 0;
@@ -413,12 +414,12 @@ struct hero
 
 			auto stages = ::std::array{vertex_stage, fragment_stage};
 
-			auto color_format = renderer.swapchain_image_format;
+			auto color_format = global.swapchain_image_format();
 			auto rendering_info = VkPipelineRenderingCreateInfo{};
 			rendering_info.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
 			rendering_info.colorAttachmentCount = 1;
 			rendering_info.pColorAttachmentFormats = &color_format;
-			rendering_info.depthAttachmentFormat = renderer.depth_format;
+			rendering_info.depthAttachmentFormat = global.depth_format();
 
 			auto dynamic_states = ::std::array{VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
 			auto dynamic_state = VkPipelineDynamicStateCreateInfo{};
@@ -463,24 +464,21 @@ struct hero
 			pipeline_info.layout = pipeline_layout.handle;
 
 			auto raw_pipeline = VkPipeline{};
-			if (::vkCreateGraphicsPipelines(renderer.device.handle, VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &raw_pipeline) != ::VK_SUCCESS)
+			if (::vkCreateGraphicsPipelines(global.device(), VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &raw_pipeline) != ::VK_SUCCESS)
 			{
 				throw ::std::runtime_error{"failed to create hero pipeline"};
 			}
-			pipeline = ::vkkl::pipeline{renderer.device.handle, raw_pipeline};
+			pipeline = ::vkkl::pipeline{global.device(), raw_pipeline};
 		}
+
+		auto secondary_commands = ::bvn::graphics::secondary_command_pool{global.device(), global.graphics_queue_family()};
+		auto retirements = ::stdexec::simple_counting_scope{};
+		auto render_error = ::std::exception_ptr{};
 
 		try
 		{
-			while (!stop.stop_requested())
+			//+ synchronize initial hero sprite textures
 			{
-				co_await ::stdexec::schedule(render_workflow_scheduler);
-
-				if (stop.stop_requested())
-				{
-					break;
-				}
-
 				sprite_clips.poll();
 
 				for (auto clip_index = ::std::size_t{}; clip_index < clips.size(); ++clip_index)
@@ -510,11 +508,11 @@ struct hero
 						descriptor_allocate_info.pSetLayouts = &descriptor_set_layout.handle;
 
 						auto raw_descriptor_set = VkDescriptorSet{};
-						if (::vkAllocateDescriptorSets(renderer.device.handle, &descriptor_allocate_info, &raw_descriptor_set) != ::VK_SUCCESS)
+						if (::vkAllocateDescriptorSets(global.device(), &descriptor_allocate_info, &raw_descriptor_set) != ::VK_SUCCESS)
 						{
 							throw ::std::runtime_error{"failed to allocate hero texture descriptor set"};
 						}
-						clip_texture.descriptor_set = ::vkkl::descriptor_set{renderer.device.handle, descriptor_pool.handle, raw_descriptor_set};
+						clip_texture.descriptor_set = ::vkkl::descriptor_set{global.device(), descriptor_pool.handle, raw_descriptor_set};
 					}
 
 					auto staging_memory = ::vkkl::device_memory{};
@@ -534,21 +532,21 @@ struct hero
 						staging_buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
 						auto raw_staging_buffer = VkBuffer{};
-						if (::vkCreateBuffer(renderer.device.handle, &staging_buffer_info, nullptr, &raw_staging_buffer) != ::VK_SUCCESS)
+						if (::vkCreateBuffer(global.device(), &staging_buffer_info, nullptr, &raw_staging_buffer) != ::VK_SUCCESS)
 						{
 							throw ::std::runtime_error{"failed to create hero texture staging buffer"};
 						}
-						staging_buffer = ::vkkl::buffer{renderer.device.handle, raw_staging_buffer};
+						staging_buffer = ::vkkl::buffer{global.device(), raw_staging_buffer};
 
 						auto requirements = VkMemoryRequirements{};
-						::vkGetBufferMemoryRequirements(renderer.device.handle, staging_buffer.handle, &requirements);
+						::vkGetBufferMemoryRequirements(global.device(), staging_buffer.handle, &requirements);
 
 						auto allocate_info = VkMemoryAllocateInfo{};
 						allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 						allocate_info.allocationSize = requirements.size;
 
 						auto memory_properties = VkPhysicalDeviceMemoryProperties{};
-						::vkGetPhysicalDeviceMemoryProperties(renderer.physical_device, &memory_properties);
+						::vkGetPhysicalDeviceMemoryProperties(global.physical_device(), &memory_properties);
 						auto found_memory_type = false;
 
 						for (auto index = ::std::uint32_t{}; index < memory_properties.memoryTypeCount; ++index)
@@ -567,24 +565,24 @@ struct hero
 						}
 
 						auto raw_staging_memory = VkDeviceMemory{};
-						if (::vkAllocateMemory(renderer.device.handle, &allocate_info, nullptr, &raw_staging_memory) != ::VK_SUCCESS)
+						if (::vkAllocateMemory(global.device(), &allocate_info, nullptr, &raw_staging_memory) != ::VK_SUCCESS)
 						{
 							throw ::std::runtime_error{"failed to allocate hero texture staging memory"};
 						}
-						staging_memory = ::vkkl::device_memory{renderer.device.handle, raw_staging_memory};
+						staging_memory = ::vkkl::device_memory{global.device(), raw_staging_memory};
 
-						if (::vkBindBufferMemory(renderer.device.handle, staging_buffer.handle, staging_memory.handle, 0) != ::VK_SUCCESS)
+						if (::vkBindBufferMemory(global.device(), staging_buffer.handle, staging_memory.handle, 0) != ::VK_SUCCESS)
 						{
 							throw ::std::runtime_error{"failed to bind hero texture staging memory"};
 						}
 
-						auto mapped = static_cast<void *>(nullptr);
-						if (::vkMapMemory(renderer.device.handle, staging_memory.handle, 0, upload_size, 0, &mapped) != ::VK_SUCCESS)
+						auto mapped = static_cast<void*>(nullptr);
+						if (::vkMapMemory(global.device(), staging_memory.handle, 0, upload_size, 0, &mapped) != ::VK_SUCCESS)
 						{
 							throw ::std::runtime_error{"failed to map hero texture staging memory"};
 						}
 						::std::memcpy(mapped, atlas.pixels.data(), atlas.pixels.size());
-						::vkUnmapMemory(renderer.device.handle, staging_memory.handle);
+						::vkUnmapMemory(global.device(), staging_memory.handle);
 
 						auto image_info = VkImageCreateInfo{};
 						image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -600,13 +598,13 @@ struct hero
 						image_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
 						auto raw_image = VkImage{};
-						if (::vkCreateImage(renderer.device.handle, &image_info, nullptr, &raw_image) != ::VK_SUCCESS)
+						if (::vkCreateImage(global.device(), &image_info, nullptr, &raw_image) != ::VK_SUCCESS)
 						{
 							throw ::std::runtime_error{"failed to create hero texture image"};
 						}
-						next_image = ::vkkl::image{renderer.device.handle, raw_image};
+						next_image = ::vkkl::image{global.device(), raw_image};
 
-						::vkGetImageMemoryRequirements(renderer.device.handle, next_image.handle, &requirements);
+						::vkGetImageMemoryRequirements(global.device(), next_image.handle, &requirements);
 
 						allocate_info = {};
 						allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -629,13 +627,13 @@ struct hero
 						}
 
 						auto raw_image_memory = VkDeviceMemory{};
-						if (::vkAllocateMemory(renderer.device.handle, &allocate_info, nullptr, &raw_image_memory) != ::VK_SUCCESS)
+						if (::vkAllocateMemory(global.device(), &allocate_info, nullptr, &raw_image_memory) != ::VK_SUCCESS)
 						{
 							throw ::std::runtime_error{"failed to allocate hero texture image memory"};
 						}
-						next_image_memory = ::vkkl::device_memory{renderer.device.handle, raw_image_memory};
+						next_image_memory = ::vkkl::device_memory{global.device(), raw_image_memory};
 
-						if (::vkBindImageMemory(renderer.device.handle, next_image.handle, next_image_memory.handle, 0) != ::VK_SUCCESS)
+						if (::vkBindImageMemory(global.device(), next_image.handle, next_image_memory.handle, 0) != ::VK_SUCCESS)
 						{
 							throw ::std::runtime_error{"failed to bind hero texture image memory"};
 						}
@@ -652,13 +650,13 @@ struct hero
 						view_info.subresourceRange.layerCount = 1;
 
 						auto raw_image_view = VkImageView{};
-						if (::vkCreateImageView(renderer.device.handle, &view_info, nullptr, &raw_image_view) != ::VK_SUCCESS)
+						if (::vkCreateImageView(global.device(), &view_info, nullptr, &raw_image_view) != ::VK_SUCCESS)
 						{
 							throw ::std::runtime_error{"failed to create hero texture image view"};
 						}
-						next_image_view = ::vkkl::image_view{renderer.device.handle, raw_image_view};
+						next_image_view = ::vkkl::image_view{global.device(), raw_image_view};
 
-						if (::vkResetCommandPool(renderer.device.handle, upload_command_pool.handle, 0) != ::VK_SUCCESS)
+						if (::vkResetCommandPool(global.device(), upload_command_pool.handle, 0) != ::VK_SUCCESS)
 						{
 							throw ::std::runtime_error{"failed to reset hero upload command pool"};
 						}
@@ -724,14 +722,14 @@ struct hero
 						submit_info.commandBufferInfoCount = 1;
 						submit_info.pCommandBufferInfos = &command_info;
 
-						if (::vkQueueSubmit2(renderer.graphics_queue, 1, &submit_info, VK_NULL_HANDLE) != ::VK_SUCCESS)
+						if (::vkQueueSubmit2(global.graphics_queue(), 1, &submit_info, VK_NULL_HANDLE) != ::VK_SUCCESS)
 						{
 							throw ::std::runtime_error{"failed to submit hero texture upload"};
 						}
 
-						if (::vkQueueWaitIdle(renderer.graphics_queue) != ::VK_SUCCESS)
+						if (::vkQueueWaitIdle(global.graphics_queue()) != ::VK_SUCCESS)
 						{
-							(void)::vkDeviceWaitIdle(renderer.device.handle);
+							(void)::vkDeviceWaitIdle(global.device());
 							throw ::std::runtime_error{"failed to wait for hero texture upload"};
 						}
 					}
@@ -748,7 +746,7 @@ struct hero
 					descriptor_write.descriptorCount = 1;
 					descriptor_write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 					descriptor_write.pImageInfo = &descriptor_image;
-					::vkUpdateDescriptorSets(renderer.device.handle, 1, &descriptor_write, 0, nullptr);
+					::vkUpdateDescriptorSets(global.device(), 1, &descriptor_write, 0, nullptr);
 
 					clip_texture.image_view = ::std::move(next_image_view);
 					clip_texture.image = ::std::move(next_image);
@@ -759,6 +757,41 @@ struct hero
 					clip.frame_height = clip_data.frame_height;
 					clip.frame_count = static_cast<::std::uint32_t>(clip_data.frame_count);
 					clip.uploaded_revision = clip.source->revision;
+				}
+			}
+
+			while (!stop.stop_requested())
+			{
+				auto frame = co_await render_workflow->async_record(secondary_commands);
+
+				if (!frame || stop.stop_requested())
+				{
+					break;
+				}
+
+				auto command_buffer = frame.allocate();
+				auto command = command_buffer.get();
+
+				auto color_format = global.swapchain_image_format();
+				auto rendering_info = VkCommandBufferInheritanceRenderingInfo{};
+				rendering_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_RENDERING_INFO;
+				rendering_info.colorAttachmentCount = 1;
+				rendering_info.pColorAttachmentFormats = &color_format;
+				rendering_info.depthAttachmentFormat = global.depth_format();
+				rendering_info.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+
+				auto inheritance_info = VkCommandBufferInheritanceInfo{};
+				inheritance_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
+				inheritance_info.pNext = &rendering_info;
+
+				auto begin_info = VkCommandBufferBeginInfo{};
+				begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+				begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT | VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+				begin_info.pInheritanceInfo = &inheritance_info;
+
+				if (::vkBeginCommandBuffer(command, &begin_info) != ::VK_SUCCESS)
+				{
+					throw ::std::runtime_error{"failed to begin hero secondary command buffer"};
 				}
 
 				auto unit = preview_unit_state{};
@@ -785,12 +818,12 @@ struct hero
 					.animation_tick = unit.simulation_tick,
 					.action = action,
 				};
-				auto &&active = clips[static_cast<::std::size_t>(frame_snapshot.action)];
-				auto &&active_texture = clip_textures[static_cast<::std::size_t>(frame_snapshot.action)];
+				auto&& active = clips[static_cast<::std::size_t>(frame_snapshot.action)];
+				auto&& active_texture = clip_textures[static_cast<::std::size_t>(frame_snapshot.action)];
 
 				if (active.frame_count > 0 && active_texture.descriptor_set.handle != VK_NULL_HANDLE)
 				{
-					//+ record active sprite quad into renderer primary command buffer
+					//+ record active sprite quad into this task's secondary command buffer
 					{
 						auto camera = ::bvn::renderer::camera{};
 						{
@@ -810,20 +843,20 @@ struct hero
 							.view_projection = camera.projection * camera.view * model,
 							.uv_rect = {static_cast<float>(frame_index) * frame_width_uv, 0.0f, frame_width_uv, 1.0f},
 						};
-						auto command = renderer.command_buffer;
 						auto descriptor_set = active_texture.descriptor_set.handle;
+						auto extent = global.swapchain_extent();
 
 						auto viewport = VkViewport{};
 						viewport.x = 0.0f;
 						viewport.y = 0.0f;
-						viewport.width = static_cast<float>(renderer.swapchain_extent.width);
-						viewport.height = static_cast<float>(renderer.swapchain_extent.height);
+						viewport.width = static_cast<float>(extent.width);
+						viewport.height = static_cast<float>(extent.height);
 						viewport.minDepth = 0.0f;
 						viewport.maxDepth = 1.0f;
 
 						auto scissor = VkRect2D{};
 						scissor.offset = {0, 0};
-						scissor.extent = renderer.swapchain_extent;
+						scissor.extent = extent;
 
 						::vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.handle);
 						::vkCmdSetViewport(command, 0, 1, &viewport);
@@ -834,21 +867,25 @@ struct hero
 						::vkCmdDraw(command, vertex_count, 1, 0, 0);
 					}
 				}
+
+				if (::vkEndCommandBuffer(command) != ::VK_SUCCESS)
+				{
+					throw ::std::runtime_error{"failed to end hero secondary command buffer"};
+				}
+
+				::stdexec::spawn(frame.retire(::std::move(command_buffer)), retirements.get_token());
 			}
 		}
 		catch (...)
 		{
-			if (renderer.device.handle != VK_NULL_HANDLE)
-			{
-				(void)::vkDeviceWaitIdle(renderer.device.handle);
-			}
-
-			throw;
+			render_error = ::std::current_exception();
 		}
 
-		if (renderer.device.handle != VK_NULL_HANDLE)
+		retirements.close();
+		co_await ::stdexec::unstoppable(::stdexec::starts_on(scheduler, retirements.join()));
+		if (render_error)
 		{
-			(void)::vkDeviceWaitIdle(renderer.device.handle);
+			::std::rethrow_exception(render_error);
 		}
 	}
 
@@ -859,11 +896,10 @@ struct hero
 
 	::std::filesystem::path asset_root;
 	::bvn::assets::resource_cache<::bvn::assets::sprite_clip_data> sprite_clips{::bvn::assets::load_sprite_clip};
-	preview_state *preview = nullptr;
-	::bvn::renderer::vulkan_renderer *owner = nullptr;
-	render_workflow::scheduler render_workflow_scheduler{};
+	preview_state* preview = nullptr;
+	::bvn::graphics::render_workflow* render_workflow = nullptr;
 	::std::array<clip_resource, hero_action_count> clips;
 };
 
-static_assert(::bvn::display_architecture::renderable<hero &, ::bvn::renderer::vulkan_renderer &>);
+static_assert(::bvn::graphics::renderable<hero &, ::bvn::graphics::global_dynamic_forward_env_renderer>);
 } // namespace

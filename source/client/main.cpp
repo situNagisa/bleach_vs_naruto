@@ -40,9 +40,13 @@ auto main() -> int
 			auto frame_time = ::std::chrono::duration_cast<::std::chrono::milliseconds>(now - ::std::exchange(previous_time, now));
 			auto events = ::bvn::platform::poll_events(game_context.window);
 			quit_requested = events.quit_requested;
+			if (quit_requested)
+			{
+				break;
+			}
 
 			{
-				auto lock = ::std::lock_guard{game_context.events_mutex};
+				auto lock = ::std::scoped_lock{game_context.events_mutex};
 				game_context.frame_time = frame_time;
 				game_context.events = events;
 				++game_context.events_revision;
@@ -50,8 +54,8 @@ auto main() -> int
 
 			if (events.resized)
 			{
-				game_context.renderer.requested_extent = events.drawable_extent;
-				game_context.renderer.resize_requested.store(true, ::std::memory_order_release);
+				game_context.renderer._requested_extent = events.drawable_extent;
+				game_context.renderer._resize_requested.store(true, ::std::memory_order_release);
 			}
 
 			if (events.drawable_extent.width == 0 || events.drawable_extent.height == 0)
