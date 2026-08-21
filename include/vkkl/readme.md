@@ -8,3 +8,4 @@ vulkan那些有生命周期的对象，封装成一个xxx_observer（持有句�
     b）exchange(other)；移动构造实现为exchange；
 5. 不允许有任何辅助函数！！！ 
 6. 任何构造函数如果可以是平凡的，那么就让它是平凡的
+7. 特许vkkl的create用expected实现，但是外部不允许用这个接口，expected版本只被对应的throw版本调用

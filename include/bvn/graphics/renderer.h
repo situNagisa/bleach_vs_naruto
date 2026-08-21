@@ -36,10 +36,16 @@ template <class R>
 concept frame_env_renderer = requires(R const& r)
 {
 	{ r.in_flight() } -> ::std::convertible_to<VkFence const&>;
+	{ r.primary_command_pool() } -> ::std::convertible_to<VkCommandPool const&>;
+	{ r.primary_command_buffer() } -> ::std::convertible_to<VkCommandBuffer const&>;
 	{ r.image_available() } -> ::std::convertible_to<VkSemaphore const&>;
+	{ r.render_finished() } -> ::std::convertible_to<VkSemaphore const&>;
 	{ r.active_image_index() } -> ::std::convertible_to<::std::uint32_t>;
+	{ r.active_image() } -> ::std::convertible_to<VkImage const&>;
+	{ r.active_image_view() } -> ::std::convertible_to<VkImageView const&>;
 	{ r.depth_image() } -> ::std::convertible_to<VkImage const&>;
 	{ r.depth_image_view() } -> ::std::convertible_to<VkImageView const&>;
+	{ r.extent() } -> ::std::convertible_to<VkExtent2D const&>;
 };
 
 namespace renderer_forward
@@ -68,75 +74,20 @@ struct global_forward_env_renderer
 		: _inner(::std::forward<R>(inner))
 	{}
 
-	constexpr auto instance() const noexcept -> decltype(auto)
-	{
-		return renderer_forward::dereference(_inner).instance();
-	}
-
-	constexpr auto physical_device() const noexcept -> decltype(auto)
-	{
-		return renderer_forward::dereference(_inner).physical_device();
-	}
-
-	constexpr auto device() const noexcept -> decltype(auto)
-	{
-		return renderer_forward::dereference(_inner).device();
-	}
-
-	constexpr auto graphics_queue() const noexcept -> decltype(auto)
-	{
-		return renderer_forward::dereference(_inner).graphics_queue();
-	}
-
-	constexpr auto graphics_queue_family() const noexcept -> decltype(auto)
-	{
-		return renderer_forward::dereference(_inner).graphics_queue_family();
-	}
-
-	constexpr auto swapchain() const noexcept -> decltype(auto)
-	{
-		return renderer_forward::dereference(_inner).swapchain();
-	}
-
-	constexpr auto swapchain_extent() const noexcept -> decltype(auto)
-	{
-		return renderer_forward::dereference(_inner).swapchain_extent();
-	}
-
-	constexpr auto swapchain_image_format() const noexcept -> decltype(auto)
-	{
-		return renderer_forward::dereference(_inner).swapchain_image_format();
-	}
-
-	constexpr auto swapchain_image_count() const noexcept -> decltype(auto)
-	{
-		return renderer_forward::dereference(_inner).swapchain_image_count();
-	}
-
-	constexpr auto swapchain_images() const -> decltype(auto)
-	{
-		return renderer_forward::dereference(_inner).swapchain_images();
-	}
-
-	constexpr auto swapchain_image_views() const -> decltype(auto)
-	{
-		return renderer_forward::dereference(_inner).swapchain_image_views();
-	}
-
-	constexpr auto swapchain_render_finished() const -> decltype(auto)
-	{
-		return renderer_forward::dereference(_inner).swapchain_render_finished();
-	}
-
-	constexpr auto depth_format() const noexcept -> decltype(auto)
-	{
-		return renderer_forward::dereference(_inner).depth_format();
-	}
-
-	constexpr auto device_name() const noexcept -> decltype(auto)
-	{
-		return renderer_forward::dereference(_inner).device_name();
-	}
+	constexpr decltype(auto) instance() const noexcept requires requires { renderer_forward::dereference(_inner).instance(); } { return renderer_forward::dereference(_inner).instance(); }
+	constexpr decltype(auto) physical_device() const noexcept requires requires { renderer_forward::dereference(_inner).physical_device(); } { return renderer_forward::dereference(_inner).physical_device(); }
+	constexpr decltype(auto) device() const noexcept requires requires { renderer_forward::dereference(_inner).device(); } { return renderer_forward::dereference(_inner).device(); }
+	constexpr decltype(auto) graphics_queue() const noexcept requires requires { renderer_forward::dereference(_inner).graphics_queue(); } { return renderer_forward::dereference(_inner).graphics_queue(); }
+	constexpr decltype(auto) graphics_queue_family() const noexcept requires requires { renderer_forward::dereference(_inner).graphics_queue_family(); } { return renderer_forward::dereference(_inner).graphics_queue_family(); }
+	constexpr decltype(auto) swapchain() const noexcept requires requires { renderer_forward::dereference(_inner).swapchain(); } { return renderer_forward::dereference(_inner).swapchain(); }
+	constexpr decltype(auto) swapchain_extent() const noexcept requires requires { renderer_forward::dereference(_inner).swapchain_extent(); } { return renderer_forward::dereference(_inner).swapchain_extent(); }
+	constexpr decltype(auto) swapchain_image_format() const noexcept requires requires { renderer_forward::dereference(_inner).swapchain_image_format(); } { return renderer_forward::dereference(_inner).swapchain_image_format(); }
+	constexpr decltype(auto) swapchain_image_count() const noexcept requires requires { renderer_forward::dereference(_inner).swapchain_image_count(); } { return renderer_forward::dereference(_inner).swapchain_image_count(); }
+	constexpr decltype(auto) swapchain_images() const requires requires { renderer_forward::dereference(_inner).swapchain_images(); } { return renderer_forward::dereference(_inner).swapchain_images(); }
+	constexpr decltype(auto) swapchain_image_views() const requires requires { renderer_forward::dereference(_inner).swapchain_image_views(); } { return renderer_forward::dereference(_inner).swapchain_image_views(); }
+	constexpr decltype(auto) swapchain_render_finished() const requires requires { renderer_forward::dereference(_inner).swapchain_render_finished(); } { return renderer_forward::dereference(_inner).swapchain_render_finished(); }
+	constexpr decltype(auto) depth_format() const noexcept requires requires { renderer_forward::dereference(_inner).depth_format(); } { return renderer_forward::dereference(_inner).depth_format(); }
+	constexpr decltype(auto) device_name() const noexcept requires requires { renderer_forward::dereference(_inner).device_name(); } { return renderer_forward::dereference(_inner).device_name(); }
 };
 
 template <class R>
@@ -149,30 +100,21 @@ struct frame_forward_env_renderer
 		: _inner(::std::forward<R>(inner))
 	{}
 
-	constexpr auto in_flight() const noexcept -> decltype(auto)
-	{
-		return renderer_forward::dereference(_inner).in_flight();
-	}
+	constexpr auto&& handle() const noexcept
+	requires requires { _inner; }
+	{ return _inner; }
 
-	constexpr auto image_available() const noexcept -> decltype(auto)
-	{
-		return renderer_forward::dereference(_inner).image_available();
-	}
-
-	constexpr auto active_image_index() const noexcept -> decltype(auto)
-	{
-		return renderer_forward::dereference(_inner).active_image_index();
-	}
-
-	constexpr auto depth_image() const noexcept -> decltype(auto)
-	{
-		return renderer_forward::dereference(_inner).depth_image();
-	}
-
-	constexpr auto depth_image_view() const noexcept -> decltype(auto)
-	{
-		return renderer_forward::dereference(_inner).depth_image_view();
-	}
+	constexpr decltype(auto) in_flight() const noexcept requires requires { renderer_forward::dereference(_inner).in_flight(); } { return renderer_forward::dereference(_inner).in_flight(); }
+	constexpr decltype(auto) primary_command_pool() const noexcept requires requires { renderer_forward::dereference(_inner).primary_command_pool(); } { return renderer_forward::dereference(_inner).primary_command_pool(); }
+	constexpr decltype(auto) primary_command_buffer() const noexcept requires requires { renderer_forward::dereference(_inner).primary_command_buffer(); } { return renderer_forward::dereference(_inner).primary_command_buffer(); }
+	constexpr decltype(auto) image_available() const noexcept requires requires { renderer_forward::dereference(_inner).image_available(); } { return renderer_forward::dereference(_inner).image_available(); }
+	constexpr decltype(auto) render_finished() const noexcept requires requires { renderer_forward::dereference(_inner).render_finished(); } { return renderer_forward::dereference(_inner).render_finished(); }
+	constexpr decltype(auto) active_image_index() const noexcept requires requires { renderer_forward::dereference(_inner).active_image_index(); } { return renderer_forward::dereference(_inner).active_image_index(); }
+	constexpr decltype(auto) active_image() const noexcept requires requires { renderer_forward::dereference(_inner).active_image(); } { return renderer_forward::dereference(_inner).active_image(); }
+	constexpr decltype(auto) active_image_view() const noexcept requires requires { renderer_forward::dereference(_inner).active_image_view(); } { return renderer_forward::dereference(_inner).active_image_view(); }
+	constexpr decltype(auto) depth_image() const noexcept requires requires { renderer_forward::dereference(_inner).depth_image(); } { return renderer_forward::dereference(_inner).depth_image(); }
+	constexpr decltype(auto) depth_image_view() const noexcept requires requires { renderer_forward::dereference(_inner).depth_image_view(); } { return renderer_forward::dereference(_inner).depth_image_view(); }
+	constexpr decltype(auto) extent() const noexcept requires requires { renderer_forward::dereference(_inner).extent(); } { return renderer_forward::dereference(_inner).extent(); }
 };
 
 namespace renderer_dynamic_forward
@@ -201,14 +143,21 @@ namespace renderer_dynamic_forward
 	{
 		virtual ~basic_frame_env_renderer() noexcept = default;
 
-		virtual auto in_flight() const noexcept -> VkFence = 0;
-		virtual auto image_available() const noexcept -> VkSemaphore = 0;
-		virtual auto active_image_index() const noexcept -> ::std::uint32_t = 0;
-		virtual auto depth_image() const noexcept -> VkImage = 0;
-		virtual auto depth_image_view() const noexcept -> VkImageView = 0;
+		virtual VkFence in_flight() const noexcept = 0;
+		virtual VkCommandPool primary_command_pool() const noexcept = 0;
+		virtual VkCommandBuffer primary_command_buffer() const noexcept = 0;
+		virtual VkSemaphore image_available() const noexcept = 0;
+		virtual VkSemaphore render_finished() const noexcept = 0;
+		virtual ::std::uint32_t active_image_index() const noexcept = 0;
+		virtual VkImage active_image() const noexcept = 0;
+		virtual VkImageView active_image_view() const noexcept = 0;
+		virtual VkImage depth_image() const noexcept = 0;
+		virtual VkImageView depth_image_view() const noexcept = 0;
+		virtual VkExtent2D extent() const noexcept = 0;
 	};
 
 	template <class R>
+		requires requires(R r) { { renderer_forward::dereference(r) } -> global_env_renderer; }
 	struct global_env_renderer_eraser : basic_global_env_renderer
 	{
 		R _inner;
@@ -218,78 +167,24 @@ namespace renderer_dynamic_forward
 			: _inner(::std::forward<R>(inner))
 		{}
 
-		auto instance() const noexcept -> VkInstance override
-		{
-			return renderer_forward::dereference(_inner).instance();
-		}
-
-		auto physical_device() const noexcept -> VkPhysicalDevice override
-		{
-			return renderer_forward::dereference(_inner).physical_device();
-		}
-
-		auto device() const noexcept -> VkDevice override
-		{
-			return renderer_forward::dereference(_inner).device();
-		}
-
-		auto graphics_queue() const noexcept -> VkQueue override
-		{
-			return renderer_forward::dereference(_inner).graphics_queue();
-		}
-
-		auto graphics_queue_family() const noexcept -> ::std::uint32_t override
-		{
-			return renderer_forward::dereference(_inner).graphics_queue_family();
-		}
-
-		auto swapchain() const noexcept -> VkSwapchainKHR override
-		{
-			return renderer_forward::dereference(_inner).swapchain();
-		}
-
-		auto swapchain_extent() const noexcept -> VkExtent2D override
-		{
-			return renderer_forward::dereference(_inner).swapchain_extent();
-		}
-
-		auto swapchain_image_format() const noexcept -> VkFormat override
-		{
-			return renderer_forward::dereference(_inner).swapchain_image_format();
-		}
-
-		auto swapchain_image_count() const noexcept -> ::std::uint32_t override
-		{
-			return renderer_forward::dereference(_inner).swapchain_image_count();
-		}
-
-		auto swapchain_images() const -> ::std::vector<VkImage> override
-		{
-			return renderer_forward::dereference(_inner).swapchain_images();
-		}
-
-		auto swapchain_image_views() const -> ::std::vector<VkImageView> override
-		{
-			return renderer_forward::dereference(_inner).swapchain_image_views();
-		}
-
-		auto swapchain_render_finished() const -> ::std::vector<VkSemaphore> override
-		{
-			return renderer_forward::dereference(_inner).swapchain_render_finished();
-		}
-
-		auto depth_format() const noexcept -> VkFormat override
-		{
-			return renderer_forward::dereference(_inner).depth_format();
-		}
-
-		auto device_name() const noexcept -> char const* override
-		{
-			return renderer_forward::dereference(_inner).device_name();
-		}
+		constexpr virtual auto instance() const noexcept -> VkInstance override { return renderer_forward::dereference(_inner).instance(); }
+		constexpr virtual auto physical_device() const noexcept -> VkPhysicalDevice override { return renderer_forward::dereference(_inner).physical_device(); }
+		constexpr virtual auto device() const noexcept -> VkDevice override { return renderer_forward::dereference(_inner).device(); }
+		constexpr virtual auto graphics_queue() const noexcept -> VkQueue override { return renderer_forward::dereference(_inner).graphics_queue(); }
+		constexpr virtual auto graphics_queue_family() const noexcept -> ::std::uint32_t override { return renderer_forward::dereference(_inner).graphics_queue_family(); }
+		constexpr virtual auto swapchain() const noexcept -> VkSwapchainKHR override { return renderer_forward::dereference(_inner).swapchain(); }
+		constexpr virtual auto swapchain_extent() const noexcept -> VkExtent2D override { return renderer_forward::dereference(_inner).swapchain_extent(); }
+		constexpr virtual auto swapchain_image_format() const noexcept -> VkFormat override { return renderer_forward::dereference(_inner).swapchain_image_format(); }
+		constexpr virtual auto swapchain_image_count() const noexcept -> ::std::uint32_t override { return renderer_forward::dereference(_inner).swapchain_image_count(); }
+		constexpr virtual auto swapchain_images() const -> ::std::vector<VkImage> override { return renderer_forward::dereference(_inner).swapchain_images(); }
+		constexpr virtual auto swapchain_image_views() const -> ::std::vector<VkImageView> override { return renderer_forward::dereference(_inner).swapchain_image_views(); }
+		constexpr virtual auto swapchain_render_finished() const -> ::std::vector<VkSemaphore> override { return renderer_forward::dereference(_inner).swapchain_render_finished(); }
+		constexpr virtual auto depth_format() const noexcept -> VkFormat override { return renderer_forward::dereference(_inner).depth_format(); }
+		constexpr virtual auto device_name() const noexcept -> char const* override { return renderer_forward::dereference(_inner).device_name(); }
 	};
 
 	template <class R>
+		requires requires(R r) { { renderer_forward::dereference(r) } -> frame_env_renderer; }
 	struct frame_env_renderer_eraser : basic_frame_env_renderer
 	{
 		R _inner;
@@ -299,30 +194,17 @@ namespace renderer_dynamic_forward
 			: _inner(::std::forward<R>(inner))
 		{}
 
-		auto in_flight() const noexcept -> VkFence override
-		{
-			return renderer_forward::dereference(_inner).in_flight();
-		}
-
-		auto image_available() const noexcept -> VkSemaphore override
-		{
-			return renderer_forward::dereference(_inner).image_available();
-		}
-
-		auto active_image_index() const noexcept -> ::std::uint32_t override
-		{
-			return renderer_forward::dereference(_inner).active_image_index();
-		}
-
-		auto depth_image() const noexcept -> VkImage override
-		{
-			return renderer_forward::dereference(_inner).depth_image();
-		}
-
-		auto depth_image_view() const noexcept -> VkImageView override
-		{
-			return renderer_forward::dereference(_inner).depth_image_view();
-		}
+		constexpr virtual auto in_flight() const noexcept -> VkFence override { return renderer_forward::dereference(_inner).in_flight(); }
+		constexpr virtual auto primary_command_pool() const noexcept -> VkCommandPool override { return renderer_forward::dereference(_inner).primary_command_pool(); }
+		constexpr virtual auto primary_command_buffer() const noexcept -> VkCommandBuffer override { return renderer_forward::dereference(_inner).primary_command_buffer(); }
+		constexpr virtual auto image_available() const noexcept -> VkSemaphore override { return renderer_forward::dereference(_inner).image_available(); }
+		constexpr virtual auto render_finished() const noexcept -> VkSemaphore override { return renderer_forward::dereference(_inner).render_finished(); }
+		constexpr virtual auto active_image_index() const noexcept -> ::std::uint32_t override { return renderer_forward::dereference(_inner).active_image_index(); }
+		constexpr virtual auto active_image() const noexcept -> VkImage override { return renderer_forward::dereference(_inner).active_image(); }
+		constexpr virtual auto active_image_view() const noexcept -> VkImageView override { return renderer_forward::dereference(_inner).active_image_view(); }
+		constexpr virtual auto depth_image() const noexcept -> VkImage override { return renderer_forward::dereference(_inner).depth_image(); }
+		constexpr virtual auto depth_image_view() const noexcept -> VkImageView override { return renderer_forward::dereference(_inner).depth_image_view(); }
+		constexpr virtual auto extent() const noexcept -> VkExtent2D override { return renderer_forward::dereference(_inner).extent(); }
 	};
 }
 
@@ -342,75 +224,20 @@ struct global_dynamic_forward_env_renderer
 	auto operator=(global_dynamic_forward_env_renderer&&) noexcept -> global_dynamic_forward_env_renderer& = default;
 	~global_dynamic_forward_env_renderer() noexcept = default;
 
-	auto instance() const noexcept -> VkInstance
-	{
-		return _inner->instance();
-	}
-
-	auto physical_device() const noexcept -> VkPhysicalDevice
-	{
-		return _inner->physical_device();
-	}
-
-	auto device() const noexcept -> VkDevice
-	{
-		return _inner->device();
-	}
-
-	auto graphics_queue() const noexcept -> VkQueue
-	{
-		return _inner->graphics_queue();
-	}
-
-	auto graphics_queue_family() const noexcept -> ::std::uint32_t
-	{
-		return _inner->graphics_queue_family();
-	}
-
-	auto swapchain() const noexcept -> VkSwapchainKHR
-	{
-		return _inner->swapchain();
-	}
-
-	auto swapchain_extent() const noexcept -> VkExtent2D
-	{
-		return _inner->swapchain_extent();
-	}
-
-	auto swapchain_image_format() const noexcept -> VkFormat
-	{
-		return _inner->swapchain_image_format();
-	}
-
-	auto swapchain_image_count() const noexcept -> ::std::uint32_t
-	{
-		return _inner->swapchain_image_count();
-	}
-
-	auto swapchain_images() const -> ::std::vector<VkImage>
-	{
-		return _inner->swapchain_images();
-	}
-
-	auto swapchain_image_views() const -> ::std::vector<VkImageView>
-	{
-		return _inner->swapchain_image_views();
-	}
-
-	auto swapchain_render_finished() const -> ::std::vector<VkSemaphore>
-	{
-		return _inner->swapchain_render_finished();
-	}
-
-	auto depth_format() const noexcept -> VkFormat
-	{
-		return _inner->depth_format();
-	}
-
-	auto device_name() const noexcept -> char const*
-	{
-		return _inner->device_name();
-	}
+	constexpr virtual auto instance() const noexcept -> VkInstance { return _inner->instance(); }
+	constexpr virtual auto physical_device() const noexcept -> VkPhysicalDevice { return _inner->physical_device(); }
+	constexpr virtual auto device() const noexcept -> VkDevice { return _inner->device(); }
+	constexpr virtual auto graphics_queue() const noexcept -> VkQueue { return _inner->graphics_queue(); }
+	constexpr virtual auto graphics_queue_family() const noexcept -> ::std::uint32_t { return _inner->graphics_queue_family(); }
+	constexpr virtual auto swapchain() const noexcept -> VkSwapchainKHR { return _inner->swapchain(); }
+	constexpr virtual auto swapchain_extent() const noexcept -> VkExtent2D { return _inner->swapchain_extent(); }
+	constexpr virtual auto swapchain_image_format() const noexcept -> VkFormat { return _inner->swapchain_image_format(); }
+	constexpr virtual auto swapchain_image_count() const noexcept -> ::std::uint32_t { return _inner->swapchain_image_count(); }
+	constexpr virtual auto swapchain_images() const -> ::std::vector<VkImage> { return _inner->swapchain_images(); }
+	constexpr virtual auto swapchain_image_views() const -> ::std::vector<VkImageView> { return _inner->swapchain_image_views(); }
+	constexpr virtual auto swapchain_render_finished() const -> ::std::vector<VkSemaphore> { return _inner->swapchain_render_finished(); }
+	constexpr virtual auto depth_format() const noexcept -> VkFormat { return _inner->depth_format(); }
+	constexpr virtual auto device_name() const noexcept -> char const* { return _inner->device_name(); }
 };
 
 struct frame_dynamic_forward_env_renderer
@@ -429,44 +256,45 @@ struct frame_dynamic_forward_env_renderer
 	auto operator=(frame_dynamic_forward_env_renderer&&) noexcept -> frame_dynamic_forward_env_renderer& = default;
 	~frame_dynamic_forward_env_renderer() noexcept = default;
 
-	auto in_flight() const noexcept -> VkFence
-	{
-		return _inner->in_flight();
-	}
-
-	auto image_available() const noexcept -> VkSemaphore
-	{
-		return _inner->image_available();
-	}
-
-	auto active_image_index() const noexcept -> ::std::uint32_t
-	{
-		return _inner->active_image_index();
-	}
-
-	auto depth_image() const noexcept -> VkImage
-	{
-		return _inner->depth_image();
-	}
-
-	auto depth_image_view() const noexcept -> VkImageView
-	{
-		return _inner->depth_image_view();
-	}
+	auto in_flight() const noexcept -> VkFence { return _inner->in_flight(); }
+	auto primary_command_pool() const noexcept -> VkCommandPool { return _inner->primary_command_pool(); }
+	auto primary_command_buffer() const noexcept -> VkCommandBuffer { return _inner->primary_command_buffer(); }
+	auto image_available() const noexcept -> VkSemaphore { return _inner->image_available(); }
+	auto render_finished() const noexcept -> VkSemaphore { return _inner->render_finished(); }
+	auto active_image_index() const noexcept -> ::std::uint32_t { return _inner->active_image_index(); }
+	auto active_image() const noexcept -> VkImage { return _inner->active_image(); }
+	auto active_image_view() const noexcept -> VkImageView { return _inner->active_image_view(); }
+	auto depth_image() const noexcept -> VkImage { return _inner->depth_image(); }
+	auto depth_image_view() const noexcept -> VkImageView { return _inner->depth_image_view(); }
+	auto extent() const noexcept -> VkExtent2D { return _inner->extent(); }
 };
 
-template <global_env_renderer R>
-auto dynamic_forward_global_env_renderer(R&& renderer) -> global_dynamic_forward_env_renderer
+template <class R>
+	requires ::std::constructible_from<renderer_dynamic_forward::global_env_renderer_eraser<R>, R&&>
+auto dynamic_forward_global_env_renderer(R&& renderer)
 {
-	using renderer_type = ::std::remove_cvref_t<R>;
-	return {::std::make_unique<renderer_dynamic_forward::global_env_renderer_eraser<renderer_type>>(::std::forward<R>(renderer))};
+	if constexpr (::std::is_pointer_v<::std::remove_cvref_t<R>>)
+	{
+		return global_dynamic_forward_env_renderer{ ::std::make_unique<renderer_dynamic_forward::global_env_renderer_eraser<::std::remove_cvref_t<R>>>(renderer) };
+	}
+	else
+	{
+		return global_dynamic_forward_env_renderer{ ::std::make_unique<renderer_dynamic_forward::global_env_renderer_eraser<R>>(::std::forward<R>(renderer)) };
+	}
 }
 
-template <frame_env_renderer R>
-auto dynamic_forward_frame_env_renderer(R&& renderer) -> frame_dynamic_forward_env_renderer
+template <class R>
+	requires ::std::constructible_from<renderer_dynamic_forward::frame_env_renderer_eraser<R>, R>
+auto dynamic_forward_frame_env_renderer(R&& renderer)
 {
-	using renderer_type = ::std::remove_cvref_t<R>;
-	return {::std::make_unique<renderer_dynamic_forward::frame_env_renderer_eraser<renderer_type>>(::std::forward<R>(renderer))};
+	if constexpr (::std::is_pointer_v<::std::remove_cvref_t<R>>)
+	{
+		return frame_dynamic_forward_env_renderer{ ::std::make_unique<renderer_dynamic_forward::frame_env_renderer_eraser<::std::remove_cvref_t<R>>>(renderer) };
+	}
+	else
+	{
+		return frame_dynamic_forward_env_renderer{ ::std::make_unique<renderer_dynamic_forward::frame_env_renderer_eraser<R>>(::std::forward<R>(renderer)) };
+	}
 }
 
 static_assert(global_env_renderer<global_dynamic_forward_env_renderer>);

@@ -91,6 +91,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="demo\consumer-arch\barrier.h" />
+    <ClInclude Include="demo\consumer-arch\consumer_task.h" />
+    <ClInclude Include="demo\consumer-arch\demo_vulkan.h" />
     <ClInclude Include="include\bvn\animations\environment.h" />
     <ClInclude Include="include\bvn\animations\keyframe.h" />
     <ClInclude Include="include\bvn\assets\assets.h" />
@@ -149,11 +152,9 @@
     <ClInclude Include="source\client\render_workflow.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="demo\consumer-arch\demo.cpp" />
     <ClCompile Include="plugins\test_basic\test_plugin.cpp" />
     <ClCompile Include="source\assets\sprite_clip.cpp" />
-    <ClCompile Include="source\client\main.cpp" />
-    <ClCompile Include="source\graphics\render_workflow.cpp" />
-    <ClCompile Include="source\graphics\secondary_command_buffer.cpp" />
     <ClCompile Include="source\platform\event.cpp" />
     <ClCompile Include="source\platform\sdl_context.cpp" />
     <ClCompile Include="source\platform\window.cpp" />

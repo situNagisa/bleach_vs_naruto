@@ -11,6 +11,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 option(BVN_WARNINGS_AS_ERRORS "Treat compiler warnings as errors." OFF)
+option(BVN_BUILD_DEMOS "Build standalone architecture demos." ON)
 
 add_library(bvn_build_settings INTERFACE)
 target_compile_features(bvn_build_settings INTERFACE cxx_std_23)
@@ -99,3 +100,7 @@ target_include_directories(bvn_nagisa_headers SYSTEM INTERFACE
 include("./cmake/module.cmake")
 
 add_subdirectory(source)
+
+if(BVN_BUILD_DEMOS)
+	add_subdirectory(demo/consumer-arch)
+endif()

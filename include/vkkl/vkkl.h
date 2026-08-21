@@ -16,9 +16,11 @@
 #include <vkkl/image.h>
 #include <vkkl/image_view.h>
 #include <vkkl/instance.h>
+#include <vkkl/physical_device.h>
 #include <vkkl/pipeline.h>
 #include <vkkl/pipeline_cache.h>
 #include <vkkl/pipeline_layout.h>
+#include <vkkl/queue.h>
 #include <vkkl/query_pool.h>
 #include <vkkl/render_pass.h>
 #include <vkkl/sampler.h>
