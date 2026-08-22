@@ -1,5 +1,6 @@
 #pragma once
 
+#include <concepts>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -10,6 +11,12 @@
 
 namespace vkfu
 {
+template<class Tag, class Features>
+inline constexpr auto _contains_vulkan_tag_v = false;
+
+template<class Tag, class... Features>
+inline constexpr auto _contains_vulkan_tag_v<Tag, ::std::tuple<Features...>> = (::std::same_as<Tag, expression_vulkan_tag_t<Features>> || ...);
+
 template<branch_expression Branch, expression... Features>
 struct branch_pipe_expression
 {
@@ -78,6 +85,23 @@ struct choice_result
 	bool nothrow;
 };
 
+// A feature that is not marked allow_duplicate may appear at most once per
+// branch. The check is local to this level: a nested branch carries its own
+// feature list, so it is not flattened into its parent's.
+template<class Branch, class Feature>
+consteval auto duplicates_feature() noexcept -> bool
+{
+	using tag_type = expression_vulkan_tag_t<Feature>;
+	if constexpr (duplicatable_vulkan_object<tag_type>)
+	{
+		return false;
+	}
+	else
+	{
+		return _contains_vulkan_tag_v<tag_type, typename ::std::remove_cvref_t<Branch>::features_type>;
+	}
+}
+
 template<class Branch, class Feature>
 consteval auto choose_branch_pipe() noexcept -> choice_result
 {
@@ -87,7 +111,14 @@ consteval auto choose_branch_pipe() noexcept -> choice_result
 	}
 	else if constexpr (_derived_from_branch_pipe_expression<Branch>)
 	{
-		return {choice::append, noexcept(::std::declval<Branch>().append(::std::declval<Feature>()))};
+		if constexpr (duplicates_feature<Branch, Feature>())
+		{
+			return { choice::none, true };
+		}
+		else
+		{
+			return {choice::append, noexcept(::std::declval<Branch>().append(::std::declval<Feature>()))};
+		}
 	}
 	else
 	{

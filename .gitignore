@@ -12,3 +12,7 @@ shaders/*.spv
 *.obj
 *.exe
 *.dll
+vkfu/tools/naming.suggested.toml
+vkfu/tools/ir.json
+vkfu/tools/__pycache__/
+vkfu/tools/vkfu_gen/__pycache__/

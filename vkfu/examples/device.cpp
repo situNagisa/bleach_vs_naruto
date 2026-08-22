@@ -20,10 +20,11 @@ int main()
 	};
 	char const* extensions[]{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
-	auto features = feature2{}
-		| timeline_semaphore{.timeline_semaphore = true}
-		| host_query_reset{.host_query_reset = true}
-		| (cluster_culling{.cluster_culling_shader = true} | cluster_culling_vrs{.cluster_shading_rate = true});
+	auto features = feature::core{}
+		| feature::timeline_semaphore{.enable = true}
+		| feature::host_query_reset{.enable = true}
+		| (feature::cluster_culling_shader{.enable = true}
+			| feature::cluster_culling_shader_vrs{.cluster_shading_rate = true});
 	auto expression = device{
 		.queue_create_infos = ::std::span{&queue_info, 1u},
 		.enabled_extension_names = extensions,

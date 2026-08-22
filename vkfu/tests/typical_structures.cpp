@@ -6,77 +6,92 @@
 
 #include "../include/vkfu/generated/vulkan-v1.4.328.h"
 
-static_assert(vkfu::vulkan_root_object<vkfu::obj::device>);
-static_assert(vkfu::vulkan_branch_object<vkfu::obj::device>);
-static_assert(vkfu::vulkan_branch_object<vkfu::obj::feature2>);
-static_assert(vkfu::vulkan_branch_object<vkfu::obj::cluster_culling>);
-static_assert(vkfu::duplicatable_vulkan_object<vkfu::obj::device_private_data>);
-static_assert(vkfu::vulkan_root_object<vkfu::obj::property2>);
-static_assert(vkfu::vulkan_branch_object<vkfu::obj::property2>);
+namespace obj = vkfu::obj;
+namespace param = vkfu::param;
 
-static_assert(vkfu::vulkan_object_compatible_with<vkfu::obj::device, vkfu::obj::feature2>);
-static_assert(vkfu::vulkan_object_compatible_with<vkfu::obj::feature2, vkfu::obj::timeline_semaphore>);
-static_assert(vkfu::vulkan_object_compatible_with<vkfu::obj::feature2, vkfu::obj::host_query_reset>);
-static_assert(vkfu::vulkan_object_compatible_with<vkfu::obj::feature2, vkfu::obj::cluster_culling>);
-static_assert(vkfu::vulkan_object_compatible_with<vkfu::obj::cluster_culling, vkfu::obj::cluster_culling_vrs>);
-static_assert(vkfu::vulkan_object_compatible_with<vkfu::obj::device, vkfu::obj::device_private_data>);
-static_assert(vkfu::vulkan_object_compatible_with<vkfu::obj::property2, vkfu::obj::id>);
-static_assert(!vkfu::vulkan_object_compatible_with<vkfu::obj::feature2, vkfu::obj::id>);
+static_assert(vkfu::vulkan_root_object<obj::device>);
+static_assert(vkfu::vulkan_branch_object<obj::device>);
+static_assert(vkfu::vulkan_branch_object<obj::feature::core>);
+static_assert(vkfu::vulkan_branch_object<obj::feature::cluster_culling_shader>);
+static_assert(vkfu::duplicatable_vulkan_object<obj::option::device_private_data>);
+static_assert(!vkfu::duplicatable_vulkan_object<obj::feature::timeline_semaphore>);
 
-static_assert(vkfu::expression<vkfu::param::device>);
-static_assert(vkfu::expression<vkfu::param::feature2>);
-static_assert(vkfu::expression<vkfu::param::timeline_semaphore>);
-static_assert(vkfu::expression<vkfu::param::host_query_reset>);
-static_assert(vkfu::expression<vkfu::param::cluster_culling>);
-static_assert(vkfu::expression<vkfu::param::cluster_culling_vrs>);
-static_assert(vkfu::expression<vkfu::param::device_private_data>);
-static_assert(vkfu::expression<vkfu::param::property2>);
-static_assert(vkfu::expression<vkfu::param::id>);
+static_assert(vkfu::vulkan_object_compatible_with<obj::device, obj::feature::core>);
+static_assert(vkfu::vulkan_object_compatible_with<obj::feature::core, obj::feature::timeline_semaphore>);
+static_assert(vkfu::vulkan_object_compatible_with<obj::feature::core, obj::feature::host_query_reset>);
+static_assert(vkfu::vulkan_object_compatible_with<obj::feature::core, obj::feature::cluster_culling_shader>);
+static_assert(vkfu::vulkan_object_compatible_with<obj::feature::cluster_culling_shader, obj::feature::cluster_culling_shader_vrs>);
+static_assert(vkfu::vulkan_object_compatible_with<obj::device, obj::option::device_private_data>);
+// vk.xml has no structextends edge here, so the pipe must not compile.
+static_assert(!vkfu::vulkan_object_compatible_with<obj::feature::core, obj::option::device_private_data>);
+
+static_assert(vkfu::expression<param::device>);
+static_assert(vkfu::expression<param::feature::core>);
+static_assert(vkfu::expression<param::feature::timeline_semaphore>);
+static_assert(vkfu::expression<param::command_pool>);
 
 static_assert(vkfu::storable<VkDeviceCreateInfo>);
 static_assert(vkfu::storable<VkPhysicalDeviceFeatures2>);
-static_assert(vkfu::storable<VkPhysicalDeviceTimelineSemaphoreFeatures>);
-static_assert(vkfu::storable<VkPhysicalDeviceHostQueryResetFeatures>);
 static_assert(vkfu::storable<VkPhysicalDeviceClusterCullingShaderFeaturesHUAWEI>);
-static_assert(vkfu::storable<VkPhysicalDeviceClusterCullingShaderVrsFeaturesHUAWEI>);
-static_assert(vkfu::storable<VkDevicePrivateDataCreateInfo>);
-static_assert(vkfu::storable<VkPhysicalDeviceProperties2>);
-static_assert(vkfu::storable<VkPhysicalDeviceIDProperties>);
+
+// A non-repeatable feature may appear once per branch.
+static_assert(requires {
+	param::feature::core{} | param::feature::timeline_semaphore{};
+});
+static_assert(!requires {
+	param::feature::core{}
+		| param::feature::timeline_semaphore{}
+		| param::feature::timeline_semaphore{};
+});
+// allow_duplicate lifts that restriction.
+static_assert(requires {
+	param::device{}
+		| param::option::device_private_data{}
+		| param::option::device_private_data{};
+});
+// The check is per level: the nested branch has its own feature list, so the
+// same object may appear once inside it and once outside.
+static_assert(requires {
+	param::device{}
+		| param::feature::timeline_semaphore{}
+		| (param::feature::core{} | param::feature::timeline_semaphore{});
+});
+// An object that does not extend the branch is rejected regardless.
+static_assert(!requires {
+	param::feature::core{} | param::option::device_private_data{};
+});
 
 template<class Storage>
 void check_device_feature_chain(Storage& storage, VkDeviceQueueCreateInfo const* queue_info, char const* const* extensions)
 {
 	auto&& device = ::std::get<0>(storage.storages);
 	auto&& features = ::std::get<1>(storage.storages);
-	auto&& features2 = ::std::get<0>(features.storages);
+	auto&& core = ::std::get<0>(features.storages);
 	auto&& timeline = ::std::get<1>(features.storages);
 	auto&& host_query = ::std::get<2>(features.storages);
 	auto&& cluster = ::std::get<3>(features.storages);
-	auto&& cluster_culling_info = ::std::get<0>(cluster.storages);
-	auto&& cluster_culling_vrs_info = ::std::get<1>(cluster.storages);
+	auto&& cluster_info = ::std::get<0>(cluster.storages);
+	auto&& cluster_vrs_info = ::std::get<1>(cluster.storages);
 
 	assert(device.queueCreateInfoCount == 1);
 	assert(device.pQueueCreateInfos == queue_info);
 	assert(device.enabledExtensionCount == 1);
 	assert(device.ppEnabledExtensionNames == extensions);
 	assert(device.pNext == vkfu::address(features));
-	assert(features2.pNext == vkfu::address(timeline));
+	assert(core.pNext == vkfu::address(timeline));
 	assert(timeline.timelineSemaphore == VK_TRUE);
 	assert(timeline.pNext == vkfu::address(host_query));
 	assert(host_query.hostQueryReset == VK_TRUE);
 	assert(host_query.pNext == vkfu::address(cluster));
-	assert(cluster_culling_info.clustercullingShader == VK_TRUE);
-	assert(cluster_culling_info.multiviewClusterCullingShader == VK_FALSE);
-	assert(cluster_culling_info.pNext == vkfu::address(cluster_culling_vrs_info));
-	assert(cluster_culling_vrs_info.clusterShadingRate == VK_TRUE);
-	assert(cluster_culling_vrs_info.pNext == nullptr);
+	assert(cluster_info.clustercullingShader == VK_TRUE);
+	assert(cluster_info.multiviewClusterCullingShader == VK_FALSE);
+	assert(cluster_info.pNext == vkfu::address(cluster_vrs_info));
+	assert(cluster_vrs_info.clusterShadingRate == VK_TRUE);
+	assert(cluster_vrs_info.pNext == nullptr);
 }
 
 void test_device_feature_chain()
 {
-	using namespace vkfu;
-	using namespace vkfu::param;
-
 	auto queue_priority = 1.0f;
 	auto queue_info = VkDeviceQueueCreateInfo{
 		.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
@@ -88,11 +103,12 @@ void test_device_feature_chain()
 	};
 	char const* extensions[]{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
-	auto feature_expression = feature2{}
-		| timeline_semaphore{.timeline_semaphore = true}
-		| host_query_reset{.host_query_reset = true}
-		| (cluster_culling{.cluster_culling_shader = true} | cluster_culling_vrs{.cluster_shading_rate = true});
-	auto expression = device{
+	auto feature_expression = param::feature::core{}
+		| param::feature::timeline_semaphore{.enable = true}
+		| param::feature::host_query_reset{.enable = true}
+		| (param::feature::cluster_culling_shader{.enable = true}
+			| param::feature::cluster_culling_shader_vrs{.cluster_shading_rate = true});
+	auto expression = param::device{
 		.queue_create_infos = ::std::span{&queue_info, 1u},
 		.enabled_extension_names = extensions,
 	} | feature_expression;
@@ -114,12 +130,9 @@ void test_device_feature_chain()
 
 void test_duplicatable_object()
 {
-	using namespace vkfu;
-	using namespace vkfu::param;
-
-	auto expression = device{}
-		| device_private_data{.private_data_slot_request_count = 2}
-		| device_private_data{.private_data_slot_request_count = 5};
+	auto expression = param::device{}
+		| param::option::device_private_data{.private_data_slot_request_count = 2}
+		| param::option::device_private_data{.private_data_slot_request_count = 5};
 	auto storage = vkfu::evaluate(expression);
 	auto&& device_info = ::std::get<0>(storage.storages);
 	auto&& first = ::std::get<1>(storage.storages);
@@ -134,45 +147,33 @@ void test_duplicatable_object()
 
 void test_fixed_arrays()
 {
-	using namespace vkfu;
-	using namespace vkfu::param;
-
-	auto identifier = id{
-		.device_node_mask = 7,
-		.device_luid_valid = true,
+	auto state = param::option::pipeline_fragment_shading_rate_state{
+		.fragment_size = VkExtent2D{.width = 2, .height = 4},
+		.combiner_ops = {VK_FRAGMENT_SHADING_RATE_COMBINER_OP_KEEP_KHR, VK_FRAGMENT_SHADING_RATE_COMBINER_OP_MAX_KHR},
 	};
-	for (::std::size_t index = 0; index < VK_UUID_SIZE; ++index)
-	{
-		identifier.device_uuid[index] = static_cast<::std::uint8_t>(index);
-		identifier.driver_uuid[index] = static_cast<::std::uint8_t>(index + VK_UUID_SIZE);
-	}
-	for (::std::size_t index = 0; index < VK_LUID_SIZE; ++index)
-	{
-		identifier.device_luid[index] = static_cast<::std::uint8_t>(index + 1);
-	}
+	auto native = vkfu::evaluate(state);
+	assert(native.sType == VK_STRUCTURE_TYPE_PIPELINE_FRAGMENT_SHADING_RATE_STATE_CREATE_INFO_KHR);
+	assert(native.pNext == nullptr);
+	assert(native.fragmentSize.width == 2);
+	assert(native.fragmentSize.height == 4);
+	assert(native.combinerOps[0] == VK_FRAGMENT_SHADING_RATE_COMBINER_OP_KEEP_KHR);
+	assert(native.combinerOps[1] == VK_FRAGMENT_SHADING_RATE_COMBINER_OP_MAX_KHR);
+}
 
-	auto storage = vkfu::evaluate(property2{} | identifier);
-	auto&& properties = ::std::get<0>(storage.storages);
-	auto&& stored_id = ::std::get<1>(storage.storages);
-	assert(properties.pNext == vkfu::address(stored_id));
-	assert(stored_id.deviceNodeMask == 7);
-	assert(stored_id.deviceLUIDValid == VK_TRUE);
-	for (::std::size_t index = 0; index < VK_UUID_SIZE; ++index)
-	{
-		assert(stored_id.deviceUUID[index] == identifier.device_uuid[index]);
-		assert(stored_id.driverUUID[index] == identifier.driver_uuid[index]);
-	}
-	for (::std::size_t index = 0; index < VK_LUID_SIZE; ++index)
-	{
-		assert(stored_id.deviceLUID[index] == identifier.device_luid[index]);
-	}
+void test_flag_bits()
+{
+	// The generated header already static_asserts that each bit-field sits on
+	// the right bit; this only checks that a whole word round-trips.
+	auto pool = param::command_pool{
+		.flags = {.transient = 1, .protected_ = 1},
+		.queue_family_index = 7,
+	};
+	auto native = vkfu::evaluate(pool);
+	assert(native.flags == (VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_PROTECTED_BIT));
+	assert(native.queueFamilyIndex == 7);
 
-	auto copied = storage;
-	auto moved = ::std::move(copied);
-	auto&& moved_properties = ::std::get<0>(moved.storages);
-	auto&& moved_id = ::std::get<1>(moved.storages);
-	assert(moved_properties.pNext == vkfu::address(moved_id));
-	assert(moved_id.pNext == nullptr);
+	auto empty = vkfu::evaluate(param::command_pool{});
+	assert(empty.flags == 0);
 }
 
 int main()
@@ -180,4 +181,5 @@ int main()
 	test_device_feature_chain();
 	test_duplicatable_object();
 	test_fixed_arrays();
+	test_flag_bits();
 }

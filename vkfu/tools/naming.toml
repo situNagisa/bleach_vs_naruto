@@ -1,0 +1,3321 @@
+# vkfu naming table -- the sole authority for every name in generated code.
+#
+# Keys are verbatim vk.xml identifiers. Values are what you want to type. There
+# is no algorithm behind this file and therefore no exceptions to one: an
+# identifier that is absent is simply not generated, and `gen --scope closure`
+# fails on it.
+#
+# Entries arrive here by review: `vkfu_gen suggest` writes candidates with
+# REVIEW tags, a human reads them, and `vkfu_gen promote` folds the reviewed
+# file in. Editing a name afterwards is normal -- nothing derives these.
+
+[struct."VkAccelerationStructureCreateInfoKHR"]
+name = "acceleration_structure_khr"
+[struct."VkAccelerationStructureCreateInfoKHR".members]
+createFlags = "create_flags"
+buffer = "buffer"
+offset = "offset"
+size = "size"
+type = "type"
+deviceAddress = "device_address"
+
+[struct."VkAccelerationStructureCreateInfoNV"]
+name = "acceleration_structure_nv"
+[struct."VkAccelerationStructureCreateInfoNV".members]
+compactedSize = "compacted_size"
+info = "info"
+
+[struct."VkAccelerationStructureMotionInfoNV"]
+name = "option::acceleration_structure_motion"
+[struct."VkAccelerationStructureMotionInfoNV".members]
+maxInstances = "max_instances"
+flags = "flags"
+
+[struct."VkAndroidSurfaceCreateInfoKHR"]
+name = "android_surface"
+[struct."VkAndroidSurfaceCreateInfoKHR".members]
+flags = "flags"
+window = "window"
+
+[struct."VkAttachmentSampleCountInfoAMD"]
+name = "option::attachment_sample_count"
+[struct."VkAttachmentSampleCountInfoAMD".members]
+pColorAttachmentSamples = "color_attachment_samples"
+depthStencilAttachmentSamples = "depth_stencil_attachment_samples"
+
+[struct."VkBufferCollectionBufferCreateInfoFUCHSIA"]
+name = "option::buffer_collection_buffer"
+[struct."VkBufferCollectionBufferCreateInfoFUCHSIA".members]
+collection = "collection"
+index = "index"
+
+[struct."VkBufferCollectionCreateInfoFUCHSIA"]
+name = "buffer_collection"
+[struct."VkBufferCollectionCreateInfoFUCHSIA".members]
+collectionToken = "collection_token"
+
+[struct."VkBufferCollectionImageCreateInfoFUCHSIA"]
+name = "option::buffer_collection_image"
+[struct."VkBufferCollectionImageCreateInfoFUCHSIA".members]
+collection = "collection"
+index = "index"
+
+[struct."VkBufferCreateInfo"]
+name = "buffer"
+[struct."VkBufferCreateInfo".members]
+flags = "flags"
+size = "size"
+usage = "usage"
+sharingMode = "sharing_mode"
+pQueueFamilyIndices = "queue_family_indices"
+
+[struct."VkBufferDeviceAddressCreateInfoEXT"]
+name = "option::buffer_device_address"
+[struct."VkBufferDeviceAddressCreateInfoEXT".members]
+deviceAddress = "device_address"
+
+[struct."VkBufferOpaqueCaptureAddressCreateInfo"]
+name = "option::buffer_opaque_capture_address"
+[struct."VkBufferOpaqueCaptureAddressCreateInfo".members]
+opaqueCaptureAddress = "opaque_capture_address"
+
+[struct."VkBufferUsageFlags2CreateInfo"]
+name = "option::buffer_usage_flags2"
+[struct."VkBufferUsageFlags2CreateInfo".members]
+usage = "usage"
+
+[struct."VkBufferViewCreateInfo"]
+name = "buffer_view"
+[struct."VkBufferViewCreateInfo".members]
+flags = "flags"
+buffer = "buffer"
+format = "format"
+offset = "offset"
+range = "range"
+
+[struct."VkCommandPoolCreateInfo"]
+name = "command_pool"
+[struct."VkCommandPoolCreateInfo".members]
+flags = "flags"
+queueFamilyIndex = "queue_family_index"
+
+[struct."VkComputePipelineCreateInfo"]
+name = "compute_pipeline"
+[struct."VkComputePipelineCreateInfo".members]
+flags = "flags"
+stage = "stage"
+layout = "layout"
+basePipelineHandle = "base_pipeline_handle"
+basePipelineIndex = "base_pipeline_index"
+
+[struct."VkComputePipelineIndirectBufferInfoNV"]
+name = "option::compute_pipeline_indirect_buffer"
+[struct."VkComputePipelineIndirectBufferInfoNV".members]
+deviceAddress = "device_address"
+size = "size"
+pipelineDeviceAddressCaptureReplay = "pipeline_device_address_capture_replay"
+
+[struct."VkCuFunctionCreateInfoNVX"]
+name = "cu_function"
+[struct."VkCuFunctionCreateInfoNVX".members]
+module = "module"
+pName = "name"
+
+[struct."VkCuModuleCreateInfoNVX"]
+name = "cu_module"
+[struct."VkCuModuleCreateInfoNVX".members]
+dataSize = "data_size"
+pData = "data"
+
+[struct."VkCuModuleTexturingModeCreateInfoNVX"]
+name = "option::cu_module_texturing_mode"
+[struct."VkCuModuleTexturingModeCreateInfoNVX".members]
+use64bitTexturing = "use64_bit_texturing"
+
+[struct."VkCudaFunctionCreateInfoNV"]
+name = "cuda_function"
+[struct."VkCudaFunctionCreateInfoNV".members]
+module = "module"
+pName = "name"
+
+[struct."VkCudaModuleCreateInfoNV"]
+name = "cuda_module"
+[struct."VkCudaModuleCreateInfoNV".members]
+dataSize = "data_size"
+pData = "data"
+
+[struct."VkDataGraphPipelineCompilerControlCreateInfoARM"]
+name = "option::data_graph_pipeline_compiler_control"
+[struct."VkDataGraphPipelineCompilerControlCreateInfoARM".members]
+pVendorOptions = "vendor_options"
+
+[struct."VkDataGraphPipelineCreateInfoARM"]
+name = "data_graph_pipeline"
+[struct."VkDataGraphPipelineCreateInfoARM".members]
+flags = "flags"
+layout = "layout"
+pResourceInfos = "resource_infos"
+
+[struct."VkDataGraphPipelineIdentifierCreateInfoARM"]
+name = "option::data_graph_pipeline_identifier"
+[struct."VkDataGraphPipelineIdentifierCreateInfoARM".members]
+pIdentifier = "identifier"
+
+[struct."VkDataGraphPipelineSessionCreateInfoARM"]
+name = "data_graph_pipeline_session"
+[struct."VkDataGraphPipelineSessionCreateInfoARM".members]
+flags = "flags"
+dataGraphPipeline = "data_graph_pipeline"
+
+[struct."VkDataGraphPipelineShaderModuleCreateInfoARM"]
+name = "option::data_graph_pipeline_shader_module"
+[struct."VkDataGraphPipelineShaderModuleCreateInfoARM".members]
+module = "module"
+pName = "name"
+pSpecializationInfo = "specialization_info"
+pConstants = "constants"
+
+[struct."VkDataGraphProcessingEngineCreateInfoARM"]
+name = "option::data_graph_processing_engine"
+[struct."VkDataGraphProcessingEngineCreateInfoARM".members]
+pProcessingEngines = "processing_engines"
+
+[struct."VkDebugReportCallbackCreateInfoEXT"]
+name = "debug_report_callback"
+[struct."VkDebugReportCallbackCreateInfoEXT".members]
+flags = "flags"
+pfnCallback = "callback"
+pUserData = "user_data"
+
+[struct."VkDebugUtilsMessengerCreateInfoEXT"]
+name = "debug_utils_messenger"
+[struct."VkDebugUtilsMessengerCreateInfoEXT".members]
+flags = "flags"
+messageSeverity = "message_severity"
+messageType = "message_type"
+pfnUserCallback = "user_callback"
+pUserData = "user_data"
+
+[struct."VkDedicatedAllocationBufferCreateInfoNV"]
+name = "option::dedicated_allocation_buffer"
+[struct."VkDedicatedAllocationBufferCreateInfoNV".members]
+dedicatedAllocation = "dedicated_allocation"
+
+[struct."VkDedicatedAllocationImageCreateInfoNV"]
+name = "option::dedicated_allocation_image"
+[struct."VkDedicatedAllocationImageCreateInfoNV".members]
+dedicatedAllocation = "dedicated_allocation"
+
+[struct."VkDescriptorPoolCreateInfo"]
+name = "descriptor_pool"
+[struct."VkDescriptorPoolCreateInfo".members]
+flags = "flags"
+maxSets = "max_sets"
+pPoolSizes = "pool_sizes"
+
+[struct."VkDescriptorPoolInlineUniformBlockCreateInfo"]
+name = "option::descriptor_pool_inline_uniform_block"
+[struct."VkDescriptorPoolInlineUniformBlockCreateInfo".members]
+maxInlineUniformBlockBindings = "max_inline_uniform_block_bindings"
+
+[struct."VkDescriptorSetLayoutBindingFlagsCreateInfo"]
+name = "option::descriptor_set_layout_binding_flags"
+[struct."VkDescriptorSetLayoutBindingFlagsCreateInfo".members]
+pBindingFlags = "binding_flags"
+
+[struct."VkDescriptorSetLayoutCreateInfo"]
+name = "descriptor_set_layout"
+[struct."VkDescriptorSetLayoutCreateInfo".members]
+flags = "flags"
+pBindings = "bindings"
+
+[struct."VkDescriptorUpdateTemplateCreateInfo"]
+name = "descriptor_update_template"
+[struct."VkDescriptorUpdateTemplateCreateInfo".members]
+flags = "flags"
+pDescriptorUpdateEntries = "descriptor_update_entries"
+templateType = "template_type"
+descriptorSetLayout = "descriptor_set_layout"
+pipelineBindPoint = "pipeline_bind_point"
+pipelineLayout = "pipeline_layout"
+set = "set"
+
+[struct."VkDeviceCreateInfo"]
+name = "device"
+[struct."VkDeviceCreateInfo".members]
+flags = "flags"
+pQueueCreateInfos = "queue_create_infos"
+ppEnabledLayerNames = "enabled_layer_names"
+ppEnabledExtensionNames = "enabled_extension_names"
+pEnabledFeatures = "enabled_features"
+
+[struct."VkDeviceDeviceMemoryReportCreateInfoEXT"]
+name = "option::device_device_memory_report"
+[struct."VkDeviceDeviceMemoryReportCreateInfoEXT".members]
+flags = "flags"
+pfnUserCallback = "user_callback"
+pUserData = "user_data"
+
+[struct."VkDeviceDiagnosticsConfigCreateInfoNV"]
+name = "option::device_diagnostics_config"
+[struct."VkDeviceDiagnosticsConfigCreateInfoNV".members]
+flags = "flags"
+
+[struct."VkDeviceGroupDeviceCreateInfo"]
+name = "option::device_group_device"
+[struct."VkDeviceGroupDeviceCreateInfo".members]
+pPhysicalDevices = "physical_devices"
+
+[struct."VkDeviceGroupSwapchainCreateInfoKHR"]
+name = "option::device_group_swapchain"
+[struct."VkDeviceGroupSwapchainCreateInfoKHR".members]
+modes = "modes"
+
+[struct."VkDeviceMemoryOverallocationCreateInfoAMD"]
+name = "option::device_memory_overallocation"
+[struct."VkDeviceMemoryOverallocationCreateInfoAMD".members]
+overallocationBehavior = "overallocation_behavior"
+
+[struct."VkDevicePipelineBinaryInternalCacheControlKHR"]
+name = "option::device_pipeline_binary_internal_cache_control"
+[struct."VkDevicePipelineBinaryInternalCacheControlKHR".members]
+disableInternalCache = "disable_internal_cache"
+
+[struct."VkDevicePrivateDataCreateInfo"]
+name = "option::device_private_data"
+[struct."VkDevicePrivateDataCreateInfo".members]
+privateDataSlotRequestCount = "private_data_slot_request_count"
+
+[struct."VkDeviceQueueShaderCoreControlCreateInfoARM"]
+name = "option::device_queue_shader_core_control"
+[struct."VkDeviceQueueShaderCoreControlCreateInfoARM".members]
+shaderCoreCount = "shader_core_count"
+
+[struct."VkDirectDriverLoadingListLUNARG"]
+name = "option::direct_driver_loading_list"
+[struct."VkDirectDriverLoadingListLUNARG".members]
+mode = "mode"
+pDrivers = "drivers"
+
+[struct."VkDirectFBSurfaceCreateInfoEXT"]
+name = "directfb_surface"
+[struct."VkDirectFBSurfaceCreateInfoEXT".members]
+flags = "flags"
+dfb = "dfb"
+surface = "surface"
+
+[struct."VkDisplayModeCreateInfoKHR"]
+name = "display_mode"
+[struct."VkDisplayModeCreateInfoKHR".members]
+flags = "flags"
+parameters = "parameters"
+
+[struct."VkDisplaySurfaceCreateInfoKHR"]
+name = "display_surface"
+[struct."VkDisplaySurfaceCreateInfoKHR".members]
+flags = "flags"
+displayMode = "display_mode"
+planeIndex = "plane_index"
+planeStackIndex = "plane_stack_index"
+transform = "transform"
+globalAlpha = "global_alpha"
+alphaMode = "alpha_mode"
+imageExtent = "image_extent"
+
+[struct."VkDisplaySurfaceStereoCreateInfoNV"]
+name = "option::display_surface_stereo"
+[struct."VkDisplaySurfaceStereoCreateInfoNV".members]
+stereoType = "stereo_type"
+
+[struct."VkEventCreateInfo"]
+name = "event"
+[struct."VkEventCreateInfo".members]
+flags = "flags"
+
+[struct."VkExecutionGraphPipelineCreateInfoAMDX"]
+name = "execution_graph_pipeline"
+[struct."VkExecutionGraphPipelineCreateInfoAMDX".members]
+flags = "flags"
+pStages = "stages"
+pLibraryInfo = "library_info"
+layout = "layout"
+basePipelineHandle = "base_pipeline_handle"
+basePipelineIndex = "base_pipeline_index"
+
+[struct."VkExportFenceCreateInfo"]
+name = "option::export_fence"
+[struct."VkExportFenceCreateInfo".members]
+handleTypes = "handle_types"
+
+[struct."VkExportFenceWin32HandleInfoKHR"]
+name = "option::export_fence_win32_handle"
+[struct."VkExportFenceWin32HandleInfoKHR".members]
+pAttributes = "attributes"
+dwAccess = "dw_access"
+name = "name"
+
+[struct."VkExportMetalObjectCreateInfoEXT"]
+name = "option::export_metal_object"
+[struct."VkExportMetalObjectCreateInfoEXT".members]
+exportObjectType = "export_object_type"
+
+[struct."VkExportSemaphoreCreateInfo"]
+name = "option::export_semaphore"
+[struct."VkExportSemaphoreCreateInfo".members]
+handleTypes = "handle_types"
+
+[struct."VkExportSemaphoreWin32HandleInfoKHR"]
+name = "option::export_semaphore_win32_handle"
+[struct."VkExportSemaphoreWin32HandleInfoKHR".members]
+pAttributes = "attributes"
+dwAccess = "dw_access"
+name = "name"
+
+[struct."VkExternalComputeQueueCreateInfoNV"]
+name = "external_compute_queue"
+[struct."VkExternalComputeQueueCreateInfoNV".members]
+preferredQueue = "preferred_queue"
+
+[struct."VkExternalComputeQueueDeviceCreateInfoNV"]
+name = "option::external_compute_queue_device"
+[struct."VkExternalComputeQueueDeviceCreateInfoNV".members]
+reservedExternalQueues = "reserved_external_queues"
+
+[struct."VkExternalFormatANDROID"]
+name = "option::external_format_android"
+[struct."VkExternalFormatANDROID".members]
+externalFormat = "external_format"
+
+[struct."VkExternalFormatQNX"]
+name = "option::external_format_qnx"
+[struct."VkExternalFormatQNX".members]
+externalFormat = "external_format"
+
+[struct."VkExternalMemoryBufferCreateInfo"]
+name = "option::external_memory_buffer"
+[struct."VkExternalMemoryBufferCreateInfo".members]
+handleTypes = "handle_types"
+
+[struct."VkExternalMemoryImageCreateInfo"]
+name = "option::external_memory_image"
+[struct."VkExternalMemoryImageCreateInfo".members]
+handleTypes = "handle_types"
+
+[struct."VkExternalMemoryImageCreateInfoNV"]
+name = "option::external_memory_image_nv"
+[struct."VkExternalMemoryImageCreateInfoNV".members]
+handleTypes = "handle_types"
+
+[struct."VkExternalMemoryTensorCreateInfoARM"]
+name = "option::external_memory_tensor"
+[struct."VkExternalMemoryTensorCreateInfoARM".members]
+handleTypes = "handle_types"
+
+[struct."VkFenceCreateInfo"]
+name = "fence"
+[struct."VkFenceCreateInfo".members]
+flags = "flags"
+
+[struct."VkFramebufferAttachmentsCreateInfo"]
+name = "option::framebuffer_attachments"
+[struct."VkFramebufferAttachmentsCreateInfo".members]
+pAttachmentImageInfos = "attachment_image_infos"
+
+[struct."VkFramebufferCreateInfo"]
+name = "framebuffer"
+[struct."VkFramebufferCreateInfo".members]
+flags = "flags"
+renderPass = "render_pass"
+pAttachments = "attachments"
+width = "width"
+height = "height"
+layers = "layers"
+
+[struct."VkGraphicsPipelineCreateInfo"]
+name = "graphics_pipeline"
+[struct."VkGraphicsPipelineCreateInfo".members]
+flags = "flags"
+pStages = "stages"
+pVertexInputState = "vertex_input_state"
+pInputAssemblyState = "input_assembly_state"
+pTessellationState = "tessellation_state"
+pViewportState = "viewport_state"
+pRasterizationState = "rasterization_state"
+pMultisampleState = "multisample_state"
+pDepthStencilState = "depth_stencil_state"
+pColorBlendState = "color_blend_state"
+pDynamicState = "dynamic_state"
+layout = "layout"
+renderPass = "render_pass"
+subpass = "subpass"
+basePipelineHandle = "base_pipeline_handle"
+basePipelineIndex = "base_pipeline_index"
+
+[struct."VkGraphicsPipelineLibraryCreateInfoEXT"]
+name = "option::graphics_pipeline_library"
+[struct."VkGraphicsPipelineLibraryCreateInfoEXT".members]
+flags = "flags"
+
+[struct."VkGraphicsPipelineShaderGroupsCreateInfoNV"]
+name = "option::graphics_pipeline_shader_groups"
+[struct."VkGraphicsPipelineShaderGroupsCreateInfoNV".members]
+pGroups = "groups"
+pPipelines = "pipelines"
+
+[struct."VkHeadlessSurfaceCreateInfoEXT"]
+name = "headless_surface"
+[struct."VkHeadlessSurfaceCreateInfoEXT".members]
+flags = "flags"
+
+[struct."VkIOSSurfaceCreateInfoMVK"]
+name = "ios_surface"
+[struct."VkIOSSurfaceCreateInfoMVK".members]
+flags = "flags"
+pView = "view"
+
+[struct."VkImageAlignmentControlCreateInfoMESA"]
+name = "option::image_alignment_control"
+[struct."VkImageAlignmentControlCreateInfoMESA".members]
+maximumRequestedAlignment = "maximum_requested_alignment"
+
+[struct."VkImageCompressionControlEXT"]
+name = "option::image_compression_control"
+[struct."VkImageCompressionControlEXT".members]
+flags = "flags"
+pFixedRateFlags = "fixed_rate_flags"
+
+[struct."VkImageCreateInfo"]
+name = "image"
+[struct."VkImageCreateInfo".members]
+flags = "flags"
+imageType = "type"
+format = "format"
+extent = "extent"
+mipLevels = "mip_levels"
+arrayLayers = "array_layers"
+samples = "samples"
+tiling = "tiling"
+usage = "usage"
+sharingMode = "sharing_mode"
+pQueueFamilyIndices = "queue_family_indices"
+initialLayout = "initial_layout"
+
+[struct."VkImageDrmFormatModifierExplicitCreateInfoEXT"]
+name = "option::image_drm_format_modifier_explicit"
+[struct."VkImageDrmFormatModifierExplicitCreateInfoEXT".members]
+drmFormatModifier = "drm_format_modifier"
+pPlaneLayouts = "plane_layouts"
+
+[struct."VkImageDrmFormatModifierListCreateInfoEXT"]
+name = "option::image_drm_format_modifier_list"
+[struct."VkImageDrmFormatModifierListCreateInfoEXT".members]
+pDrmFormatModifiers = "drm_format_modifiers"
+
+[struct."VkImageFormatListCreateInfo"]
+name = "option::image_format_list"
+[struct."VkImageFormatListCreateInfo".members]
+pViewFormats = "view_formats"
+
+[struct."VkImagePipeSurfaceCreateInfoFUCHSIA"]
+name = "imagepipe_surface"
+[struct."VkImagePipeSurfaceCreateInfoFUCHSIA".members]
+flags = "flags"
+imagePipeHandle = "imagepipe_handle"
+
+[struct."VkImageStencilUsageCreateInfo"]
+name = "option::image_stencil_usage"
+[struct."VkImageStencilUsageCreateInfo".members]
+stencilUsage = "stencil_usage"
+
+[struct."VkImageSwapchainCreateInfoKHR"]
+name = "option::image_swapchain"
+[struct."VkImageSwapchainCreateInfoKHR".members]
+swapchain = "swapchain"
+
+[struct."VkImageViewASTCDecodeModeEXT"]
+name = "option::image_view_astc_decode_mode"
+[struct."VkImageViewASTCDecodeModeEXT".members]
+decodeMode = "decode_mode"
+
+[struct."VkImageViewCreateInfo"]
+name = "image_view"
+[struct."VkImageViewCreateInfo".members]
+flags = "flags"
+image = "image"
+viewType = "view_type"
+format = "format"
+components = "components"
+subresourceRange = "subresource_range"
+
+[struct."VkImageViewMinLodCreateInfoEXT"]
+name = "option::image_view_min_lod"
+[struct."VkImageViewMinLodCreateInfoEXT".members]
+minLod = "min_lod"
+
+[struct."VkImageViewSampleWeightCreateInfoQCOM"]
+name = "option::image_view_sample_weight"
+[struct."VkImageViewSampleWeightCreateInfoQCOM".members]
+filterCenter = "filter_center"
+filterSize = "filter_size"
+numPhases = "num_phases"
+
+[struct."VkImageViewSlicedCreateInfoEXT"]
+name = "option::image_view_sliced"
+[struct."VkImageViewSlicedCreateInfoEXT".members]
+sliceOffset = "slice_offset"
+sliceCount = "slice_count"
+
+[struct."VkImageViewUsageCreateInfo"]
+name = "option::image_view_usage"
+[struct."VkImageViewUsageCreateInfo".members]
+usage = "usage"
+
+[struct."VkImportMetalIOSurfaceInfoEXT"]
+name = "option::import_metal_io_surface"
+[struct."VkImportMetalIOSurfaceInfoEXT".members]
+ioSurface = "io_surface"
+
+[struct."VkImportMetalSharedEventInfoEXT"]
+name = "option::import_metal_shared_event"
+[struct."VkImportMetalSharedEventInfoEXT".members]
+mtlSharedEvent = "mtl_shared_event"
+
+[struct."VkImportMetalTextureInfoEXT"]
+name = "option::import_metal_texture"
+[struct."VkImportMetalTextureInfoEXT".members]
+plane = "plane"
+mtlTexture = "mtl_texture"
+
+[struct."VkIndirectCommandsLayoutCreateInfoEXT"]
+name = "indirect_commands_layout_ext"
+[struct."VkIndirectCommandsLayoutCreateInfoEXT".members]
+flags = "flags"
+shaderStages = "shader_stages"
+indirectStride = "indirect_stride"
+pipelineLayout = "pipeline_layout"
+pTokens = "tokens"
+
+[struct."VkIndirectCommandsLayoutCreateInfoNV"]
+name = "indirect_commands_layout_nv"
+[struct."VkIndirectCommandsLayoutCreateInfoNV".members]
+flags = "flags"
+pipelineBindPoint = "pipeline_bind_point"
+pTokens = "tokens"
+pStreamStrides = "stream_strides"
+
+[struct."VkIndirectExecutionSetCreateInfoEXT"]
+name = "indirect_execution_set"
+[struct."VkIndirectExecutionSetCreateInfoEXT".members]
+type = "type"
+info = "info"
+
+[struct."VkInstanceCreateInfo"]
+name = "instance"
+[struct."VkInstanceCreateInfo".members]
+flags = "flags"
+pApplicationInfo = "application_info"
+ppEnabledLayerNames = "enabled_layer_names"
+ppEnabledExtensionNames = "enabled_extension_names"
+
+[struct."VkLayerSettingsCreateInfoEXT"]
+name = "option::layer_settings"
+[struct."VkLayerSettingsCreateInfoEXT".members]
+pSettings = "settings"
+
+[struct."VkMacOSSurfaceCreateInfoMVK"]
+name = "macos_surface"
+[struct."VkMacOSSurfaceCreateInfoMVK".members]
+flags = "flags"
+pView = "view"
+
+[struct."VkMetalSurfaceCreateInfoEXT"]
+name = "metal_surface"
+[struct."VkMetalSurfaceCreateInfoEXT".members]
+flags = "flags"
+pLayer = "layer"
+
+[struct."VkMicromapCreateInfoEXT"]
+name = "micromap"
+[struct."VkMicromapCreateInfoEXT".members]
+createFlags = "create_flags"
+buffer = "buffer"
+offset = "offset"
+size = "size"
+type = "type"
+deviceAddress = "device_address"
+
+[struct."VkMultiviewPerViewAttributesInfoNVX"]
+name = "option::multiview_per_view_attributes"
+[struct."VkMultiviewPerViewAttributesInfoNVX".members]
+perViewAttributes = "per_view_attributes"
+perViewAttributesPositionXOnly = "per_view_attributes_position_x_only"
+
+[struct."VkMutableDescriptorTypeCreateInfoEXT"]
+name = "option::mutable_descriptor_type"
+[struct."VkMutableDescriptorTypeCreateInfoEXT".members]
+pMutableDescriptorTypeLists = "lists"
+
+[struct."VkOpaqueCaptureDescriptorDataCreateInfoEXT"]
+name = "option::opaque_capture_descriptor_data"
+[struct."VkOpaqueCaptureDescriptorDataCreateInfoEXT".members]
+opaqueCaptureDescriptorData = "data"
+
+[struct."VkOpticalFlowImageFormatInfoNV"]
+name = "option::optical_flow_image_format"
+[struct."VkOpticalFlowImageFormatInfoNV".members]
+usage = "usage"
+
+[struct."VkOpticalFlowSessionCreateInfoNV"]
+name = "optical_flow_session"
+[struct."VkOpticalFlowSessionCreateInfoNV".members]
+width = "width"
+height = "height"
+imageFormat = "image_format"
+flowVectorFormat = "flow_vector_format"
+costFormat = "cost_format"
+outputGridSize = "output_grid_size"
+hintGridSize = "hint_grid_size"
+performanceLevel = "performance_level"
+flags = "flags"
+
+[struct."VkOpticalFlowSessionCreatePrivateDataInfoNV"]
+name = "option::optical_flow_session_create_private_data"
+[struct."VkOpticalFlowSessionCreatePrivateDataInfoNV".members]
+id = "id"
+size = "size"
+pPrivateData = "private_data"
+
+[struct."VkPhysicalDevice16BitStorageFeatures"]
+name = "feature::storage_16bit"
+[struct."VkPhysicalDevice16BitStorageFeatures".members]
+storageBuffer16BitAccess = "storage_buffer"
+uniformAndStorageBuffer16BitAccess = "uniform_and_storage_buffer"
+storagePushConstant16 = "push_constant"
+storageInputOutput16 = "input_output"
+
+[struct."VkPhysicalDevice4444FormatsFeaturesEXT"]
+name = "feature::format_4444"
+[struct."VkPhysicalDevice4444FormatsFeaturesEXT".members]
+formatA4R4G4B4 = "format_a4r4g4b4"
+formatA4B4G4R4 = "format_a4b4g4r4"
+
+[struct."VkPhysicalDevice8BitStorageFeatures"]
+name = "feature::storage_8bit"
+[struct."VkPhysicalDevice8BitStorageFeatures".members]
+storageBuffer8BitAccess = "storage_buffer"
+uniformAndStorageBuffer8BitAccess = "uniform_and_storage_buffer"
+storagePushConstant8 = "push_constant"
+
+[struct."VkPhysicalDeviceASTCDecodeFeaturesEXT"]
+name = "feature::astc_decode"
+[struct."VkPhysicalDeviceASTCDecodeFeaturesEXT".members]
+decodeModeSharedExponent = "decode_mode_shared_exponent"
+
+[struct."VkPhysicalDeviceAccelerationStructureFeaturesKHR"]
+name = "feature::acceleration_structure"
+[struct."VkPhysicalDeviceAccelerationStructureFeaturesKHR".members]
+accelerationStructure = "enable"
+accelerationStructureCaptureReplay = "capture_replay"
+accelerationStructureIndirectBuild = "indirect_build"
+accelerationStructureHostCommands = "host_commands"
+descriptorBindingAccelerationStructureUpdateAfterBind = "descriptor_binding_acceleration_structure_update_after_bind"
+
+[struct."VkPhysicalDeviceAddressBindingReportFeaturesEXT"]
+name = "feature::address_binding_report"
+[struct."VkPhysicalDeviceAddressBindingReportFeaturesEXT".members]
+reportAddressBinding = "report_address_binding"
+
+[struct."VkPhysicalDeviceAmigoProfilingFeaturesSEC"]
+name = "feature::amigo_profiling"
+[struct."VkPhysicalDeviceAmigoProfilingFeaturesSEC".members]
+amigoProfiling = "enable"
+
+[struct."VkPhysicalDeviceAntiLagFeaturesAMD"]
+name = "feature::anti_lag"
+[struct."VkPhysicalDeviceAntiLagFeaturesAMD".members]
+antiLag = "enable"
+
+[struct."VkPhysicalDeviceAttachmentFeedbackLoopDynamicStateFeaturesEXT"]
+name = "feature::attachment_feedback_loop_dynamic_state"
+[struct."VkPhysicalDeviceAttachmentFeedbackLoopDynamicStateFeaturesEXT".members]
+attachmentFeedbackLoopDynamicState = "enable"
+
+[struct."VkPhysicalDeviceAttachmentFeedbackLoopLayoutFeaturesEXT"]
+name = "feature::attachment_feedback_loop_layout"
+[struct."VkPhysicalDeviceAttachmentFeedbackLoopLayoutFeaturesEXT".members]
+attachmentFeedbackLoopLayout = "enable"
+
+[struct."VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT"]
+name = "feature::blend_operation_advanced"
+[struct."VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT".members]
+advancedBlendCoherentOperations = "advanced_blend_coherent_operations"
+
+[struct."VkPhysicalDeviceBorderColorSwizzleFeaturesEXT"]
+name = "feature::border_color_swizzle"
+[struct."VkPhysicalDeviceBorderColorSwizzleFeaturesEXT".members]
+borderColorSwizzle = "enable"
+borderColorSwizzleFromImage = "from_image"
+
+[struct."VkPhysicalDeviceBufferDeviceAddressFeatures"]
+name = "feature::buffer_device_address"
+[struct."VkPhysicalDeviceBufferDeviceAddressFeatures".members]
+bufferDeviceAddress = "enable"
+bufferDeviceAddressCaptureReplay = "capture_replay"
+bufferDeviceAddressMultiDevice = "multi_device"
+
+[struct."VkPhysicalDeviceBufferDeviceAddressFeaturesEXT"]
+name = "feature::buffer_device_address_ext"
+[struct."VkPhysicalDeviceBufferDeviceAddressFeaturesEXT".members]
+bufferDeviceAddress = "buffer_device_address"
+bufferDeviceAddressCaptureReplay = "buffer_device_address_capture_replay"
+bufferDeviceAddressMultiDevice = "buffer_device_address_multi_device"
+
+[struct."VkPhysicalDeviceClusterAccelerationStructureFeaturesNV"]
+name = "feature::cluster_acceleration_structure"
+[struct."VkPhysicalDeviceClusterAccelerationStructureFeaturesNV".members]
+clusterAccelerationStructure = "enable"
+
+[struct."VkPhysicalDeviceClusterCullingShaderFeaturesHUAWEI"]
+name = "feature::cluster_culling_shader"
+[struct."VkPhysicalDeviceClusterCullingShaderFeaturesHUAWEI".members]
+clustercullingShader = "enable"
+multiviewClusterCullingShader = "multiview_cluster_culling_shader"
+
+[struct."VkPhysicalDeviceClusterCullingShaderVrsFeaturesHUAWEI"]
+name = "feature::cluster_culling_shader_vrs"
+[struct."VkPhysicalDeviceClusterCullingShaderVrsFeaturesHUAWEI".members]
+clusterShadingRate = "cluster_shading_rate"
+
+[struct."VkPhysicalDeviceCoherentMemoryFeaturesAMD"]
+name = "feature::coherent_memory"
+[struct."VkPhysicalDeviceCoherentMemoryFeaturesAMD".members]
+deviceCoherentMemory = "device_coherent_memory"
+
+[struct."VkPhysicalDeviceColorWriteEnableFeaturesEXT"]
+name = "feature::color_write_enable"
+[struct."VkPhysicalDeviceColorWriteEnableFeaturesEXT".members]
+colorWriteEnable = "enable"
+
+[struct."VkPhysicalDeviceCommandBufferInheritanceFeaturesNV"]
+name = "feature::command_buffer_inheritance"
+[struct."VkPhysicalDeviceCommandBufferInheritanceFeaturesNV".members]
+commandBufferInheritance = "enable"
+
+[struct."VkPhysicalDeviceComputeShaderDerivativesFeaturesKHR"]
+name = "feature::compute_shader_derivatives"
+[struct."VkPhysicalDeviceComputeShaderDerivativesFeaturesKHR".members]
+computeDerivativeGroupQuads = "compute_derivative_group_quads"
+computeDerivativeGroupLinear = "compute_derivative_group_linear"
+
+[struct."VkPhysicalDeviceConditionalRenderingFeaturesEXT"]
+name = "feature::conditional_rendering"
+[struct."VkPhysicalDeviceConditionalRenderingFeaturesEXT".members]
+conditionalRendering = "enable"
+inheritedConditionalRendering = "inherited_conditional_rendering"
+
+[struct."VkPhysicalDeviceCooperativeMatrix2FeaturesNV"]
+name = "feature::cooperative_matrix2"
+[struct."VkPhysicalDeviceCooperativeMatrix2FeaturesNV".members]
+cooperativeMatrixWorkgroupScope = "cooperative_matrix_workgroup_scope"
+cooperativeMatrixFlexibleDimensions = "cooperative_matrix_flexible_dimensions"
+cooperativeMatrixReductions = "cooperative_matrix_reductions"
+cooperativeMatrixConversions = "cooperative_matrix_conversions"
+cooperativeMatrixPerElementOperations = "cooperative_matrix_per_element_operations"
+cooperativeMatrixTensorAddressing = "cooperative_matrix_tensor_addressing"
+cooperativeMatrixBlockLoads = "cooperative_matrix_block_loads"
+
+[struct."VkPhysicalDeviceCooperativeMatrixFeaturesKHR"]
+name = "feature::cooperative_matrix_khr"
+[struct."VkPhysicalDeviceCooperativeMatrixFeaturesKHR".members]
+cooperativeMatrix = "cooperative_matrix"
+cooperativeMatrixRobustBufferAccess = "cooperative_matrix_robust_buffer_access"
+
+[struct."VkPhysicalDeviceCooperativeMatrixFeaturesNV"]
+name = "feature::cooperative_matrix_nv"
+[struct."VkPhysicalDeviceCooperativeMatrixFeaturesNV".members]
+cooperativeMatrix = "cooperative_matrix"
+cooperativeMatrixRobustBufferAccess = "cooperative_matrix_robust_buffer_access"
+
+[struct."VkPhysicalDeviceCooperativeVectorFeaturesNV"]
+name = "feature::cooperative_vector"
+[struct."VkPhysicalDeviceCooperativeVectorFeaturesNV".members]
+cooperativeVector = "enable"
+cooperativeVectorTraining = "training"
+
+[struct."VkPhysicalDeviceCopyMemoryIndirectFeaturesKHR"]
+name = "feature::copy_memory_indirect_khr"
+[struct."VkPhysicalDeviceCopyMemoryIndirectFeaturesKHR".members]
+indirectMemoryCopy = "indirect_memory_copy"
+indirectMemoryToImageCopy = "indirect_memory_to_image_copy"
+
+[struct."VkPhysicalDeviceCopyMemoryIndirectFeaturesNV"]
+name = "feature::copy_memory_indirect_nv"
+[struct."VkPhysicalDeviceCopyMemoryIndirectFeaturesNV".members]
+indirectCopy = "indirect_copy"
+
+[struct."VkPhysicalDeviceCornerSampledImageFeaturesNV"]
+name = "feature::corner_sampled_image"
+[struct."VkPhysicalDeviceCornerSampledImageFeaturesNV".members]
+cornerSampledImage = "enable"
+
+[struct."VkPhysicalDeviceCoverageReductionModeFeaturesNV"]
+name = "feature::coverage_reduction_mode"
+[struct."VkPhysicalDeviceCoverageReductionModeFeaturesNV".members]
+coverageReductionMode = "enable"
+
+[struct."VkPhysicalDeviceCubicClampFeaturesQCOM"]
+name = "feature::cubic_clamp"
+[struct."VkPhysicalDeviceCubicClampFeaturesQCOM".members]
+cubicRangeClamp = "cubic_range_clamp"
+
+[struct."VkPhysicalDeviceCubicWeightsFeaturesQCOM"]
+name = "feature::cubic_weights"
+[struct."VkPhysicalDeviceCubicWeightsFeaturesQCOM".members]
+selectableCubicWeights = "selectable_cubic_weights"
+
+[struct."VkPhysicalDeviceCudaKernelLaunchFeaturesNV"]
+name = "feature::cuda_kernel_launch"
+[struct."VkPhysicalDeviceCudaKernelLaunchFeaturesNV".members]
+cudaKernelLaunchFeatures = "features"
+
+[struct."VkPhysicalDeviceCustomBorderColorFeaturesEXT"]
+name = "feature::custom_border_color"
+[struct."VkPhysicalDeviceCustomBorderColorFeaturesEXT".members]
+customBorderColors = "custom_border_colors"
+customBorderColorWithoutFormat = "without_format"
+
+[struct."VkPhysicalDeviceDataGraphFeaturesARM"]
+name = "feature::data_graph"
+[struct."VkPhysicalDeviceDataGraphFeaturesARM".members]
+dataGraph = "enable"
+dataGraphUpdateAfterBind = "update_after_bind"
+dataGraphSpecializationConstants = "specialization_constants"
+dataGraphDescriptorBuffer = "descriptor_buffer"
+dataGraphShaderModule = "shader_module"
+
+[struct."VkPhysicalDeviceDedicatedAllocationImageAliasingFeaturesNV"]
+name = "feature::dedicated_allocation_image_aliasing"
+[struct."VkPhysicalDeviceDedicatedAllocationImageAliasingFeaturesNV".members]
+dedicatedAllocationImageAliasing = "enable"
+
+[struct."VkPhysicalDeviceDenseGeometryFormatFeaturesAMDX"]
+name = "feature::dense_geometry_format"
+[struct."VkPhysicalDeviceDenseGeometryFormatFeaturesAMDX".members]
+denseGeometryFormat = "enable"
+
+[struct."VkPhysicalDeviceDepthBiasControlFeaturesEXT"]
+name = "feature::depth_bias_control"
+[struct."VkPhysicalDeviceDepthBiasControlFeaturesEXT".members]
+depthBiasControl = "enable"
+leastRepresentableValueForceUnormRepresentation = "least_representable_value_force_unorm_representation"
+floatRepresentation = "float_representation"
+depthBiasExact = "depth_bias_exact"
+
+[struct."VkPhysicalDeviceDepthClampControlFeaturesEXT"]
+name = "feature::depth_clamp_control"
+[struct."VkPhysicalDeviceDepthClampControlFeaturesEXT".members]
+depthClampControl = "enable"
+
+[struct."VkPhysicalDeviceDepthClampZeroOneFeaturesKHR"]
+name = "feature::depth_clamp_zero_one"
+[struct."VkPhysicalDeviceDepthClampZeroOneFeaturesKHR".members]
+depthClampZeroOne = "enable"
+
+[struct."VkPhysicalDeviceDepthClipControlFeaturesEXT"]
+name = "feature::depth_clip_control"
+[struct."VkPhysicalDeviceDepthClipControlFeaturesEXT".members]
+depthClipControl = "enable"
+
+[struct."VkPhysicalDeviceDepthClipEnableFeaturesEXT"]
+name = "feature::depth_clip_enable"
+[struct."VkPhysicalDeviceDepthClipEnableFeaturesEXT".members]
+depthClipEnable = "enable"
+
+[struct."VkPhysicalDeviceDescriptorBufferFeaturesEXT"]
+name = "feature::descriptor_buffer"
+[struct."VkPhysicalDeviceDescriptorBufferFeaturesEXT".members]
+descriptorBuffer = "enable"
+descriptorBufferCaptureReplay = "capture_replay"
+descriptorBufferImageLayoutIgnored = "image_layout_ignored"
+descriptorBufferPushDescriptors = "push_descriptors"
+
+[struct."VkPhysicalDeviceDescriptorBufferTensorFeaturesARM"]
+name = "feature::descriptor_buffer_tensor"
+[struct."VkPhysicalDeviceDescriptorBufferTensorFeaturesARM".members]
+descriptorBufferTensorDescriptors = "descriptors"
+
+[struct."VkPhysicalDeviceDescriptorIndexingFeatures"]
+name = "feature::descriptor_indexing"
+[struct."VkPhysicalDeviceDescriptorIndexingFeatures".members]
+shaderInputAttachmentArrayDynamicIndexing = "shader_input_attachment_array_dynamic_indexing"
+shaderUniformTexelBufferArrayDynamicIndexing = "shader_uniform_texel_buffer_array_dynamic_indexing"
+shaderStorageTexelBufferArrayDynamicIndexing = "shader_storage_texel_buffer_array_dynamic_indexing"
+shaderUniformBufferArrayNonUniformIndexing = "shader_uniform_buffer_array_non_uniform_indexing"
+shaderSampledImageArrayNonUniformIndexing = "shader_sampled_image_array_non_uniform_indexing"
+shaderStorageBufferArrayNonUniformIndexing = "shader_storage_buffer_array_non_uniform_indexing"
+shaderStorageImageArrayNonUniformIndexing = "shader_storage_image_array_non_uniform_indexing"
+shaderInputAttachmentArrayNonUniformIndexing = "shader_input_attachment_array_non_uniform_indexing"
+shaderUniformTexelBufferArrayNonUniformIndexing = "shader_uniform_texel_buffer_array_non_uniform_indexing"
+shaderStorageTexelBufferArrayNonUniformIndexing = "shader_storage_texel_buffer_array_non_uniform_indexing"
+descriptorBindingUniformBufferUpdateAfterBind = "descriptor_binding_uniform_buffer_update_after_bind"
+descriptorBindingSampledImageUpdateAfterBind = "descriptor_binding_sampled_image_update_after_bind"
+descriptorBindingStorageImageUpdateAfterBind = "descriptor_binding_storage_image_update_after_bind"
+descriptorBindingStorageBufferUpdateAfterBind = "descriptor_binding_storage_buffer_update_after_bind"
+descriptorBindingUniformTexelBufferUpdateAfterBind = "descriptor_binding_uniform_texel_buffer_update_after_bind"
+descriptorBindingStorageTexelBufferUpdateAfterBind = "descriptor_binding_storage_texel_buffer_update_after_bind"
+descriptorBindingUpdateUnusedWhilePending = "descriptor_binding_update_unused_while_pending"
+descriptorBindingPartiallyBound = "descriptor_binding_partially_bound"
+descriptorBindingVariableDescriptorCount = "descriptor_binding_variable_descriptor_count"
+runtimeDescriptorArray = "runtime_descriptor_array"
+
+[struct."VkPhysicalDeviceDescriptorPoolOverallocationFeaturesNV"]
+name = "feature::descriptor_pool_overallocation"
+[struct."VkPhysicalDeviceDescriptorPoolOverallocationFeaturesNV".members]
+descriptorPoolOverallocation = "enable"
+
+[struct."VkPhysicalDeviceDescriptorSetHostMappingFeaturesVALVE"]
+name = "feature::descriptor_set_host_mapping"
+[struct."VkPhysicalDeviceDescriptorSetHostMappingFeaturesVALVE".members]
+descriptorSetHostMapping = "enable"
+
+[struct."VkPhysicalDeviceDeviceGeneratedCommandsComputeFeaturesNV"]
+name = "feature::device_generated_commands_compute"
+[struct."VkPhysicalDeviceDeviceGeneratedCommandsComputeFeaturesNV".members]
+deviceGeneratedCompute = "device_generated_compute"
+deviceGeneratedComputePipelines = "device_generated_compute_pipelines"
+deviceGeneratedComputeCaptureReplay = "device_generated_compute_capture_replay"
+
+[struct."VkPhysicalDeviceDeviceGeneratedCommandsFeaturesEXT"]
+name = "feature::device_generated_commands_ext"
+[struct."VkPhysicalDeviceDeviceGeneratedCommandsFeaturesEXT".members]
+deviceGeneratedCommands = "device_generated_commands"
+dynamicGeneratedPipelineLayout = "dynamic_generated_pipeline_layout"
+
+[struct."VkPhysicalDeviceDeviceGeneratedCommandsFeaturesNV"]
+name = "feature::device_generated_commands_nv"
+[struct."VkPhysicalDeviceDeviceGeneratedCommandsFeaturesNV".members]
+deviceGeneratedCommands = "device_generated_commands"
+
+[struct."VkPhysicalDeviceDeviceMemoryReportFeaturesEXT"]
+name = "feature::device_memory_report"
+[struct."VkPhysicalDeviceDeviceMemoryReportFeaturesEXT".members]
+deviceMemoryReport = "enable"
+
+[struct."VkPhysicalDeviceDiagnosticsConfigFeaturesNV"]
+name = "feature::diagnostics_config"
+[struct."VkPhysicalDeviceDiagnosticsConfigFeaturesNV".members]
+diagnosticsConfig = "enable"
+
+[struct."VkPhysicalDeviceDisplacementMicromapFeaturesNV"]
+name = "feature::displacement_micromap"
+[struct."VkPhysicalDeviceDisplacementMicromapFeaturesNV".members]
+displacementMicromap = "enable"
+
+[struct."VkPhysicalDeviceDynamicRenderingFeatures"]
+name = "feature::dynamic_rendering"
+[struct."VkPhysicalDeviceDynamicRenderingFeatures".members]
+dynamicRendering = "enable"
+
+[struct."VkPhysicalDeviceDynamicRenderingLocalReadFeatures"]
+name = "feature::dynamic_rendering_local_read"
+[struct."VkPhysicalDeviceDynamicRenderingLocalReadFeatures".members]
+dynamicRenderingLocalRead = "enable"
+
+[struct."VkPhysicalDeviceDynamicRenderingUnusedAttachmentsFeaturesEXT"]
+name = "feature::dynamic_rendering_unused_attachments"
+[struct."VkPhysicalDeviceDynamicRenderingUnusedAttachmentsFeaturesEXT".members]
+dynamicRenderingUnusedAttachments = "enable"
+
+[struct."VkPhysicalDeviceExclusiveScissorFeaturesNV"]
+name = "feature::exclusive_scissor"
+[struct."VkPhysicalDeviceExclusiveScissorFeaturesNV".members]
+exclusiveScissor = "enable"
+
+[struct."VkPhysicalDeviceExtendedDynamicState2FeaturesEXT"]
+name = "feature::extended_dynamic_state2"
+[struct."VkPhysicalDeviceExtendedDynamicState2FeaturesEXT".members]
+extendedDynamicState2 = "enable"
+extendedDynamicState2LogicOp = "logic_op"
+extendedDynamicState2PatchControlPoints = "patch_control_points"
+
+[struct."VkPhysicalDeviceExtendedDynamicState3FeaturesEXT"]
+name = "feature::extended_dynamic_state3"
+[struct."VkPhysicalDeviceExtendedDynamicState3FeaturesEXT".members]
+extendedDynamicState3TessellationDomainOrigin = "tessellation_domain_origin"
+extendedDynamicState3DepthClampEnable = "depth_clamp_enable"
+extendedDynamicState3PolygonMode = "polygon_mode"
+extendedDynamicState3RasterizationSamples = "rasterization_samples"
+extendedDynamicState3SampleMask = "sample_mask"
+extendedDynamicState3AlphaToCoverageEnable = "alpha_to_coverage_enable"
+extendedDynamicState3AlphaToOneEnable = "alpha_to_one_enable"
+extendedDynamicState3LogicOpEnable = "logic_op_enable"
+extendedDynamicState3ColorBlendEnable = "color_blend_enable"
+extendedDynamicState3ColorBlendEquation = "color_blend_equation"
+extendedDynamicState3ColorWriteMask = "color_write_mask"
+extendedDynamicState3RasterizationStream = "rasterization_stream"
+extendedDynamicState3ConservativeRasterizationMode = "conservative_rasterization_mode"
+extendedDynamicState3ExtraPrimitiveOverestimationSize = "extra_primitive_overestimation_size"
+extendedDynamicState3DepthClipEnable = "depth_clip_enable"
+extendedDynamicState3SampleLocationsEnable = "sample_locations_enable"
+extendedDynamicState3ColorBlendAdvanced = "color_blend_advanced"
+extendedDynamicState3ProvokingVertexMode = "provoking_vertex_mode"
+extendedDynamicState3LineRasterizationMode = "line_rasterization_mode"
+extendedDynamicState3LineStippleEnable = "line_stipple_enable"
+extendedDynamicState3DepthClipNegativeOneToOne = "depth_clip_negative_one_to_one"
+extendedDynamicState3ViewportWScalingEnable = "viewport_w_scaling_enable"
+extendedDynamicState3ViewportSwizzle = "viewport_swizzle"
+extendedDynamicState3CoverageToColorEnable = "coverage_to_color_enable"
+extendedDynamicState3CoverageToColorLocation = "coverage_to_color_location"
+extendedDynamicState3CoverageModulationMode = "coverage_modulation_mode"
+extendedDynamicState3CoverageModulationTableEnable = "coverage_modulation_table_enable"
+extendedDynamicState3CoverageModulationTable = "coverage_modulation_table"
+extendedDynamicState3CoverageReductionMode = "coverage_reduction_mode"
+extendedDynamicState3RepresentativeFragmentTestEnable = "representative_fragment_test_enable"
+extendedDynamicState3ShadingRateImageEnable = "shading_rate_image_enable"
+
+[struct."VkPhysicalDeviceExtendedDynamicStateFeaturesEXT"]
+name = "feature::extended_dynamic_state"
+[struct."VkPhysicalDeviceExtendedDynamicStateFeaturesEXT".members]
+extendedDynamicState = "enable"
+
+[struct."VkPhysicalDeviceExtendedSparseAddressSpaceFeaturesNV"]
+name = "feature::extended_sparse_address_space"
+[struct."VkPhysicalDeviceExtendedSparseAddressSpaceFeaturesNV".members]
+extendedSparseAddressSpace = "enable"
+
+[struct."VkPhysicalDeviceExternalFormatResolveFeaturesANDROID"]
+name = "feature::external_format_resolve"
+[struct."VkPhysicalDeviceExternalFormatResolveFeaturesANDROID".members]
+externalFormatResolve = "enable"
+
+[struct."VkPhysicalDeviceExternalMemoryRDMAFeaturesNV"]
+name = "feature::external_memory_rdma"
+[struct."VkPhysicalDeviceExternalMemoryRDMAFeaturesNV".members]
+externalMemoryRDMA = "enable"
+
+[struct."VkPhysicalDeviceExternalMemoryScreenBufferFeaturesQNX"]
+name = "feature::external_memory_screen_buffer"
+[struct."VkPhysicalDeviceExternalMemoryScreenBufferFeaturesQNX".members]
+screenBufferImport = "screen_buffer_import"
+
+[struct."VkPhysicalDeviceFaultFeaturesEXT"]
+name = "feature::fault"
+[struct."VkPhysicalDeviceFaultFeaturesEXT".members]
+deviceFault = "device_fault"
+deviceFaultVendorBinary = "device_fault_vendor_binary"
+
+[struct."VkPhysicalDeviceFeatures2"]
+name = "feature::core"
+[struct."VkPhysicalDeviceFeatures2".members]
+features = "features"
+
+[struct."VkPhysicalDeviceFormatPackFeaturesARM"]
+name = "feature::format_pack"
+[struct."VkPhysicalDeviceFormatPackFeaturesARM".members]
+formatPack = "enable"
+
+[struct."VkPhysicalDeviceFragmentDensityMap2FeaturesEXT"]
+name = "feature::fragment_density_map2"
+[struct."VkPhysicalDeviceFragmentDensityMap2FeaturesEXT".members]
+fragmentDensityMapDeferred = "fragment_density_map_deferred"
+
+[struct."VkPhysicalDeviceFragmentDensityMapFeaturesEXT"]
+name = "feature::fragment_density_map"
+[struct."VkPhysicalDeviceFragmentDensityMapFeaturesEXT".members]
+fragmentDensityMap = "enable"
+fragmentDensityMapDynamic = "dynamic"
+fragmentDensityMapNonSubsampledImages = "non_subsampled_images"
+
+[struct."VkPhysicalDeviceFragmentDensityMapLayeredFeaturesVALVE"]
+name = "feature::fragment_density_map_layered"
+[struct."VkPhysicalDeviceFragmentDensityMapLayeredFeaturesVALVE".members]
+fragmentDensityMapLayered = "enable"
+
+[struct."VkPhysicalDeviceFragmentDensityMapOffsetFeaturesEXT"]
+name = "feature::fragment_density_map_offset"
+[struct."VkPhysicalDeviceFragmentDensityMapOffsetFeaturesEXT".members]
+fragmentDensityMapOffset = "enable"
+
+[struct."VkPhysicalDeviceFragmentShaderBarycentricFeaturesKHR"]
+name = "feature::fragment_shader_barycentric"
+[struct."VkPhysicalDeviceFragmentShaderBarycentricFeaturesKHR".members]
+fragmentShaderBarycentric = "enable"
+
+[struct."VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT"]
+name = "feature::fragment_shader_interlock"
+[struct."VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT".members]
+fragmentShaderSampleInterlock = "fragment_shader_sample_interlock"
+fragmentShaderPixelInterlock = "fragment_shader_pixel_interlock"
+fragmentShaderShadingRateInterlock = "fragment_shader_shading_rate_interlock"
+
+[struct."VkPhysicalDeviceFragmentShadingRateEnumsFeaturesNV"]
+name = "feature::fragment_shading_rate_enums"
+[struct."VkPhysicalDeviceFragmentShadingRateEnumsFeaturesNV".members]
+fragmentShadingRateEnums = "enable"
+supersampleFragmentShadingRates = "supersample_fragment_shading_rates"
+noInvocationFragmentShadingRates = "no_invocation_fragment_shading_rates"
+
+[struct."VkPhysicalDeviceFragmentShadingRateFeaturesKHR"]
+name = "feature::fragment_shading_rate"
+[struct."VkPhysicalDeviceFragmentShadingRateFeaturesKHR".members]
+pipelineFragmentShadingRate = "pipeline_fragment_shading_rate"
+primitiveFragmentShadingRate = "primitive_fragment_shading_rate"
+attachmentFragmentShadingRate = "attachment_fragment_shading_rate"
+
+[struct."VkPhysicalDeviceFrameBoundaryFeaturesEXT"]
+name = "feature::frame_boundary"
+[struct."VkPhysicalDeviceFrameBoundaryFeaturesEXT".members]
+frameBoundary = "enable"
+
+[struct."VkPhysicalDeviceGlobalPriorityQueryFeatures"]
+name = "feature::global_priority_query"
+[struct."VkPhysicalDeviceGlobalPriorityQueryFeatures".members]
+globalPriorityQuery = "enable"
+
+[struct."VkPhysicalDeviceGraphicsPipelineLibraryFeaturesEXT"]
+name = "feature::graphics_pipeline_library"
+[struct."VkPhysicalDeviceGraphicsPipelineLibraryFeaturesEXT".members]
+graphicsPipelineLibrary = "enable"
+
+[struct."VkPhysicalDeviceHdrVividFeaturesHUAWEI"]
+name = "feature::hdr_vivid"
+[struct."VkPhysicalDeviceHdrVividFeaturesHUAWEI".members]
+hdrVivid = "enable"
+
+[struct."VkPhysicalDeviceHostImageCopyFeatures"]
+name = "feature::host_image_copy"
+[struct."VkPhysicalDeviceHostImageCopyFeatures".members]
+hostImageCopy = "enable"
+
+[struct."VkPhysicalDeviceHostQueryResetFeatures"]
+name = "feature::host_query_reset"
+[struct."VkPhysicalDeviceHostQueryResetFeatures".members]
+hostQueryReset = "enable"
+
+[struct."VkPhysicalDeviceImage2DViewOf3DFeaturesEXT"]
+name = "feature::image_2d_view_of_3d"
+[struct."VkPhysicalDeviceImage2DViewOf3DFeaturesEXT".members]
+image2DViewOf3D = "enable"
+sampler2DViewOf3D = "sampler_2d_view_of_3d"
+
+[struct."VkPhysicalDeviceImageAlignmentControlFeaturesMESA"]
+name = "feature::image_alignment_control"
+[struct."VkPhysicalDeviceImageAlignmentControlFeaturesMESA".members]
+imageAlignmentControl = "enable"
+
+[struct."VkPhysicalDeviceImageCompressionControlFeaturesEXT"]
+name = "feature::image_compression_control"
+[struct."VkPhysicalDeviceImageCompressionControlFeaturesEXT".members]
+imageCompressionControl = "enable"
+
+[struct."VkPhysicalDeviceImageCompressionControlSwapchainFeaturesEXT"]
+name = "feature::image_compression_control_swapchain"
+[struct."VkPhysicalDeviceImageCompressionControlSwapchainFeaturesEXT".members]
+imageCompressionControlSwapchain = "enable"
+
+[struct."VkPhysicalDeviceImageProcessing2FeaturesQCOM"]
+name = "feature::image_processing2"
+[struct."VkPhysicalDeviceImageProcessing2FeaturesQCOM".members]
+textureBlockMatch2 = "texture_block_match2"
+
+[struct."VkPhysicalDeviceImageProcessingFeaturesQCOM"]
+name = "feature::image_processing"
+[struct."VkPhysicalDeviceImageProcessingFeaturesQCOM".members]
+textureSampleWeighted = "texture_sample_weighted"
+textureBoxFilter = "texture_box_filter"
+textureBlockMatch = "texture_block_match"
+
+[struct."VkPhysicalDeviceImageRobustnessFeatures"]
+name = "feature::image_robustness"
+[struct."VkPhysicalDeviceImageRobustnessFeatures".members]
+robustImageAccess = "robust_image_access"
+
+[struct."VkPhysicalDeviceImageSlicedViewOf3DFeaturesEXT"]
+name = "feature::image_sliced_view_of_3d"
+[struct."VkPhysicalDeviceImageSlicedViewOf3DFeaturesEXT".members]
+imageSlicedViewOf3D = "enable"
+
+[struct."VkPhysicalDeviceImageViewMinLodFeaturesEXT"]
+name = "feature::image_view_min_lod"
+[struct."VkPhysicalDeviceImageViewMinLodFeaturesEXT".members]
+minLod = "min_lod"
+
+[struct."VkPhysicalDeviceImagelessFramebufferFeatures"]
+name = "feature::imageless_framebuffer"
+[struct."VkPhysicalDeviceImagelessFramebufferFeatures".members]
+imagelessFramebuffer = "enable"
+
+[struct."VkPhysicalDeviceIndexTypeUint8Features"]
+name = "feature::index_type_uint8"
+[struct."VkPhysicalDeviceIndexTypeUint8Features".members]
+indexTypeUint8 = "enable"
+
+[struct."VkPhysicalDeviceInheritedViewportScissorFeaturesNV"]
+name = "feature::inherited_viewport_scissor"
+[struct."VkPhysicalDeviceInheritedViewportScissorFeaturesNV".members]
+inheritedViewportScissor2D = "inherited_viewport_scissor_2d"
+
+[struct."VkPhysicalDeviceInlineUniformBlockFeatures"]
+name = "feature::inline_uniform_block"
+[struct."VkPhysicalDeviceInlineUniformBlockFeatures".members]
+inlineUniformBlock = "enable"
+descriptorBindingInlineUniformBlockUpdateAfterBind = "descriptor_binding_inline_uniform_block_update_after_bind"
+
+[struct."VkPhysicalDeviceInvocationMaskFeaturesHUAWEI"]
+name = "feature::invocation_mask"
+[struct."VkPhysicalDeviceInvocationMaskFeaturesHUAWEI".members]
+invocationMask = "enable"
+
+[struct."VkPhysicalDeviceLegacyDitheringFeaturesEXT"]
+name = "feature::legacy_dithering"
+[struct."VkPhysicalDeviceLegacyDitheringFeaturesEXT".members]
+legacyDithering = "enable"
+
+[struct."VkPhysicalDeviceLegacyVertexAttributesFeaturesEXT"]
+name = "feature::legacy_vertex_attributes"
+[struct."VkPhysicalDeviceLegacyVertexAttributesFeaturesEXT".members]
+legacyVertexAttributes = "enable"
+
+[struct."VkPhysicalDeviceLineRasterizationFeatures"]
+name = "feature::line_rasterization"
+[struct."VkPhysicalDeviceLineRasterizationFeatures".members]
+rectangularLines = "rectangular_lines"
+bresenhamLines = "bresenham_lines"
+smoothLines = "smooth_lines"
+stippledRectangularLines = "stippled_rectangular_lines"
+stippledBresenhamLines = "stippled_bresenham_lines"
+stippledSmoothLines = "stippled_smooth_lines"
+
+[struct."VkPhysicalDeviceLinearColorAttachmentFeaturesNV"]
+name = "feature::linear_color_attachment"
+[struct."VkPhysicalDeviceLinearColorAttachmentFeaturesNV".members]
+linearColorAttachment = "enable"
+
+[struct."VkPhysicalDeviceMaintenance4Features"]
+name = "feature::maintenance4"
+[struct."VkPhysicalDeviceMaintenance4Features".members]
+maintenance4 = "enable"
+
+[struct."VkPhysicalDeviceMaintenance5Features"]
+name = "feature::maintenance5"
+[struct."VkPhysicalDeviceMaintenance5Features".members]
+maintenance5 = "enable"
+
+[struct."VkPhysicalDeviceMaintenance6Features"]
+name = "feature::maintenance6"
+[struct."VkPhysicalDeviceMaintenance6Features".members]
+maintenance6 = "enable"
+
+[struct."VkPhysicalDeviceMaintenance7FeaturesKHR"]
+name = "feature::maintenance7"
+[struct."VkPhysicalDeviceMaintenance7FeaturesKHR".members]
+maintenance7 = "enable"
+
+[struct."VkPhysicalDeviceMaintenance8FeaturesKHR"]
+name = "feature::maintenance8"
+[struct."VkPhysicalDeviceMaintenance8FeaturesKHR".members]
+maintenance8 = "enable"
+
+[struct."VkPhysicalDeviceMaintenance9FeaturesKHR"]
+name = "feature::maintenance9"
+[struct."VkPhysicalDeviceMaintenance9FeaturesKHR".members]
+maintenance9 = "enable"
+
+[struct."VkPhysicalDeviceMapMemoryPlacedFeaturesEXT"]
+name = "feature::map_memory_placed"
+[struct."VkPhysicalDeviceMapMemoryPlacedFeaturesEXT".members]
+memoryMapPlaced = "memory_map_placed"
+memoryMapRangePlaced = "memory_map_range_placed"
+memoryUnmapReserve = "memory_unmap_reserve"
+
+[struct."VkPhysicalDeviceMemoryDecompressionFeaturesNV"]
+name = "feature::memory_decompression"
+[struct."VkPhysicalDeviceMemoryDecompressionFeaturesNV".members]
+memoryDecompression = "enable"
+
+[struct."VkPhysicalDeviceMemoryPriorityFeaturesEXT"]
+name = "feature::memory_priority"
+[struct."VkPhysicalDeviceMemoryPriorityFeaturesEXT".members]
+memoryPriority = "enable"
+
+[struct."VkPhysicalDeviceMeshShaderFeaturesEXT"]
+name = "feature::mesh_shader_ext"
+[struct."VkPhysicalDeviceMeshShaderFeaturesEXT".members]
+taskShader = "task_shader"
+meshShader = "mesh_shader"
+multiviewMeshShader = "multiview_mesh_shader"
+primitiveFragmentShadingRateMeshShader = "primitive_fragment_shading_rate_mesh_shader"
+meshShaderQueries = "mesh_shader_queries"
+
+[struct."VkPhysicalDeviceMeshShaderFeaturesNV"]
+name = "feature::mesh_shader_nv"
+[struct."VkPhysicalDeviceMeshShaderFeaturesNV".members]
+taskShader = "task_shader"
+meshShader = "mesh_shader"
+
+[struct."VkPhysicalDeviceMultiDrawFeaturesEXT"]
+name = "feature::multi_draw"
+[struct."VkPhysicalDeviceMultiDrawFeaturesEXT".members]
+multiDraw = "enable"
+
+[struct."VkPhysicalDeviceMultisampledRenderToSingleSampledFeaturesEXT"]
+name = "feature::multisampled_render_to_single_sampled"
+[struct."VkPhysicalDeviceMultisampledRenderToSingleSampledFeaturesEXT".members]
+multisampledRenderToSingleSampled = "enable"
+
+[struct."VkPhysicalDeviceMultiviewFeatures"]
+name = "feature::multiview"
+[struct."VkPhysicalDeviceMultiviewFeatures".members]
+multiview = "enable"
+multiviewGeometryShader = "geometry_shader"
+multiviewTessellationShader = "tessellation_shader"
+
+[struct."VkPhysicalDeviceMultiviewPerViewRenderAreasFeaturesQCOM"]
+name = "feature::multiview_per_view_render_areas"
+[struct."VkPhysicalDeviceMultiviewPerViewRenderAreasFeaturesQCOM".members]
+multiviewPerViewRenderAreas = "enable"
+
+[struct."VkPhysicalDeviceMultiviewPerViewViewportsFeaturesQCOM"]
+name = "feature::multiview_per_view_viewports"
+[struct."VkPhysicalDeviceMultiviewPerViewViewportsFeaturesQCOM".members]
+multiviewPerViewViewports = "enable"
+
+[struct."VkPhysicalDeviceMutableDescriptorTypeFeaturesEXT"]
+name = "feature::mutable_descriptor_type"
+[struct."VkPhysicalDeviceMutableDescriptorTypeFeaturesEXT".members]
+mutableDescriptorType = "enable"
+
+[struct."VkPhysicalDeviceNestedCommandBufferFeaturesEXT"]
+name = "feature::nested_command_buffer"
+[struct."VkPhysicalDeviceNestedCommandBufferFeaturesEXT".members]
+nestedCommandBuffer = "enable"
+nestedCommandBufferRendering = "rendering"
+nestedCommandBufferSimultaneousUse = "simultaneous_use"
+
+[struct."VkPhysicalDeviceNonSeamlessCubeMapFeaturesEXT"]
+name = "feature::non_seamless_cube_map"
+[struct."VkPhysicalDeviceNonSeamlessCubeMapFeaturesEXT".members]
+nonSeamlessCubeMap = "enable"
+
+[struct."VkPhysicalDeviceOpacityMicromapFeaturesEXT"]
+name = "feature::opacity_micromap"
+[struct."VkPhysicalDeviceOpacityMicromapFeaturesEXT".members]
+micromap = "micromap"
+micromapCaptureReplay = "micromap_capture_replay"
+micromapHostCommands = "micromap_host_commands"
+
+[struct."VkPhysicalDeviceOpticalFlowFeaturesNV"]
+name = "feature::optical_flow"
+[struct."VkPhysicalDeviceOpticalFlowFeaturesNV".members]
+opticalFlow = "enable"
+
+[struct."VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT"]
+name = "feature::pageable_device_local_memory"
+[struct."VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT".members]
+pageableDeviceLocalMemory = "enable"
+
+[struct."VkPhysicalDevicePartitionedAccelerationStructureFeaturesNV"]
+name = "feature::partitioned_acceleration_structure"
+[struct."VkPhysicalDevicePartitionedAccelerationStructureFeaturesNV".members]
+partitionedAccelerationStructure = "enable"
+
+[struct."VkPhysicalDevicePerStageDescriptorSetFeaturesNV"]
+name = "feature::per_stage_descriptor_set"
+[struct."VkPhysicalDevicePerStageDescriptorSetFeaturesNV".members]
+perStageDescriptorSet = "enable"
+dynamicPipelineLayout = "dynamic_pipeline_layout"
+
+[struct."VkPhysicalDevicePerformanceQueryFeaturesKHR"]
+name = "feature::performance_query"
+[struct."VkPhysicalDevicePerformanceQueryFeaturesKHR".members]
+performanceCounterQueryPools = "performance_counter_query_pools"
+performanceCounterMultipleQueryPools = "performance_counter_multiple_query_pools"
+
+[struct."VkPhysicalDevicePipelineBinaryFeaturesKHR"]
+name = "feature::pipeline_binary"
+[struct."VkPhysicalDevicePipelineBinaryFeaturesKHR".members]
+pipelineBinaries = "pipeline_binaries"
+
+[struct."VkPhysicalDevicePipelineCacheIncrementalModeFeaturesSEC"]
+name = "feature::pipeline_cache_incremental_mode"
+[struct."VkPhysicalDevicePipelineCacheIncrementalModeFeaturesSEC".members]
+pipelineCacheIncrementalMode = "enable"
+
+[struct."VkPhysicalDevicePipelineCreationCacheControlFeatures"]
+name = "feature::pipeline_creation_cache_control"
+[struct."VkPhysicalDevicePipelineCreationCacheControlFeatures".members]
+pipelineCreationCacheControl = "enable"
+
+[struct."VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR"]
+name = "feature::pipeline_executable_properties"
+[struct."VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR".members]
+pipelineExecutableInfo = "pipeline_executable_info"
+
+[struct."VkPhysicalDevicePipelineLibraryGroupHandlesFeaturesEXT"]
+name = "feature::pipeline_library_group_handles"
+[struct."VkPhysicalDevicePipelineLibraryGroupHandlesFeaturesEXT".members]
+pipelineLibraryGroupHandles = "enable"
+
+[struct."VkPhysicalDevicePipelineOpacityMicromapFeaturesARM"]
+name = "feature::pipeline_opacity_micromap"
+[struct."VkPhysicalDevicePipelineOpacityMicromapFeaturesARM".members]
+pipelineOpacityMicromap = "enable"
+
+[struct."VkPhysicalDevicePipelinePropertiesFeaturesEXT"]
+name = "feature::pipeline_properties"
+[struct."VkPhysicalDevicePipelinePropertiesFeaturesEXT".members]
+pipelinePropertiesIdentifier = "identifier"
+
+[struct."VkPhysicalDevicePipelineProtectedAccessFeatures"]
+name = "feature::pipeline_protected_access"
+[struct."VkPhysicalDevicePipelineProtectedAccessFeatures".members]
+pipelineProtectedAccess = "enable"
+
+[struct."VkPhysicalDevicePipelineRobustnessFeatures"]
+name = "feature::pipeline_robustness"
+[struct."VkPhysicalDevicePipelineRobustnessFeatures".members]
+pipelineRobustness = "enable"
+
+[struct."VkPhysicalDevicePortabilitySubsetFeaturesKHR"]
+name = "feature::portability_subset"
+[struct."VkPhysicalDevicePortabilitySubsetFeaturesKHR".members]
+constantAlphaColorBlendFactors = "constant_alpha_color_blend_factors"
+events = "events"
+imageViewFormatReinterpretation = "image_view_format_reinterpretation"
+imageViewFormatSwizzle = "image_view_format_swizzle"
+imageView2DOn3DImage = "image_view_2d_on_3d_image"
+multisampleArrayImage = "multisample_array_image"
+mutableComparisonSamplers = "mutable_comparison_samplers"
+pointPolygons = "point_polygons"
+samplerMipLodBias = "sampler_mip_lod_bias"
+separateStencilMaskRef = "separate_stencil_mask_ref"
+shaderSampleRateInterpolationFunctions = "shader_sample_rate_interpolation_functions"
+tessellationIsolines = "tessellation_isolines"
+tessellationPointMode = "tessellation_point_mode"
+triangleFans = "triangle_fans"
+vertexAttributeAccessBeyondStride = "vertex_attribute_access_beyond_stride"
+
+[struct."VkPhysicalDevicePresentBarrierFeaturesNV"]
+name = "feature::present_barrier"
+[struct."VkPhysicalDevicePresentBarrierFeaturesNV".members]
+presentBarrier = "enable"
+
+[struct."VkPhysicalDevicePresentId2FeaturesKHR"]
+name = "feature::present_id2"
+[struct."VkPhysicalDevicePresentId2FeaturesKHR".members]
+presentId2 = "enable"
+
+[struct."VkPhysicalDevicePresentIdFeaturesKHR"]
+name = "feature::present_id"
+[struct."VkPhysicalDevicePresentIdFeaturesKHR".members]
+presentId = "enable"
+
+[struct."VkPhysicalDevicePresentMeteringFeaturesNV"]
+name = "feature::present_metering"
+[struct."VkPhysicalDevicePresentMeteringFeaturesNV".members]
+presentMetering = "enable"
+
+[struct."VkPhysicalDevicePresentModeFifoLatestReadyFeaturesKHR"]
+name = "feature::present_mode_fifo_latest_ready"
+[struct."VkPhysicalDevicePresentModeFifoLatestReadyFeaturesKHR".members]
+presentModeFifoLatestReady = "enable"
+
+[struct."VkPhysicalDevicePresentWait2FeaturesKHR"]
+name = "feature::present_wait2"
+[struct."VkPhysicalDevicePresentWait2FeaturesKHR".members]
+presentWait2 = "enable"
+
+[struct."VkPhysicalDevicePresentWaitFeaturesKHR"]
+name = "feature::present_wait"
+[struct."VkPhysicalDevicePresentWaitFeaturesKHR".members]
+presentWait = "enable"
+
+[struct."VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT"]
+name = "feature::primitive_topology_list_restart"
+[struct."VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT".members]
+primitiveTopologyListRestart = "enable"
+primitiveTopologyPatchListRestart = "primitive_topology_patch_list_restart"
+
+[struct."VkPhysicalDevicePrimitivesGeneratedQueryFeaturesEXT"]
+name = "feature::primitives_generated_query"
+[struct."VkPhysicalDevicePrimitivesGeneratedQueryFeaturesEXT".members]
+primitivesGeneratedQuery = "enable"
+primitivesGeneratedQueryWithRasterizerDiscard = "with_rasterizer_discard"
+primitivesGeneratedQueryWithNonZeroStreams = "with_non_zero_streams"
+
+[struct."VkPhysicalDevicePrivateDataFeatures"]
+name = "feature::private_data"
+[struct."VkPhysicalDevicePrivateDataFeatures".members]
+privateData = "enable"
+
+[struct."VkPhysicalDeviceProtectedMemoryFeatures"]
+name = "feature::protected_memory"
+[struct."VkPhysicalDeviceProtectedMemoryFeatures".members]
+protectedMemory = "enable"
+
+[struct."VkPhysicalDeviceProvokingVertexFeaturesEXT"]
+name = "feature::provoking_vertex"
+[struct."VkPhysicalDeviceProvokingVertexFeaturesEXT".members]
+provokingVertexLast = "last"
+transformFeedbackPreservesProvokingVertex = "transform_feedback_preserves_provoking_vertex"
+
+[struct."VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT"]
+name = "feature::rgba10x6_formats"
+[struct."VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT".members]
+formatRgba10x6WithoutYCbCrSampler = "format_rgba10x6_without_ycbcr_sampler"
+
+[struct."VkPhysicalDeviceRasterizationOrderAttachmentAccessFeaturesEXT"]
+name = "feature::rasterization_order_attachment_access"
+[struct."VkPhysicalDeviceRasterizationOrderAttachmentAccessFeaturesEXT".members]
+rasterizationOrderColorAttachmentAccess = "rasterization_order_color_attachment_access"
+rasterizationOrderDepthAttachmentAccess = "rasterization_order_depth_attachment_access"
+rasterizationOrderStencilAttachmentAccess = "rasterization_order_stencil_attachment_access"
+
+[struct."VkPhysicalDeviceRawAccessChainsFeaturesNV"]
+name = "feature::raw_access_chains"
+[struct."VkPhysicalDeviceRawAccessChainsFeaturesNV".members]
+shaderRawAccessChains = "shader_raw_access_chains"
+
+[struct."VkPhysicalDeviceRayQueryFeaturesKHR"]
+name = "feature::ray_query"
+[struct."VkPhysicalDeviceRayQueryFeaturesKHR".members]
+rayQuery = "enable"
+
+[struct."VkPhysicalDeviceRayTracingInvocationReorderFeaturesNV"]
+name = "feature::ray_tracing_invocation_reorder"
+[struct."VkPhysicalDeviceRayTracingInvocationReorderFeaturesNV".members]
+rayTracingInvocationReorder = "enable"
+
+[struct."VkPhysicalDeviceRayTracingLinearSweptSpheresFeaturesNV"]
+name = "feature::ray_tracing_linear_swept_spheres"
+[struct."VkPhysicalDeviceRayTracingLinearSweptSpheresFeaturesNV".members]
+spheres = "spheres"
+linearSweptSpheres = "linear_swept_spheres"
+
+[struct."VkPhysicalDeviceRayTracingMaintenance1FeaturesKHR"]
+name = "feature::ray_tracing_maintenance1"
+[struct."VkPhysicalDeviceRayTracingMaintenance1FeaturesKHR".members]
+rayTracingMaintenance1 = "enable"
+rayTracingPipelineTraceRaysIndirect2 = "ray_tracing_pipeline_trace_rays_indirect2"
+
+[struct."VkPhysicalDeviceRayTracingMotionBlurFeaturesNV"]
+name = "feature::ray_tracing_motion_blur"
+[struct."VkPhysicalDeviceRayTracingMotionBlurFeaturesNV".members]
+rayTracingMotionBlur = "enable"
+rayTracingMotionBlurPipelineTraceRaysIndirect = "pipeline_trace_rays_indirect"
+
+[struct."VkPhysicalDeviceRayTracingPipelineFeaturesKHR"]
+name = "feature::ray_tracing_pipeline"
+[struct."VkPhysicalDeviceRayTracingPipelineFeaturesKHR".members]
+rayTracingPipeline = "enable"
+rayTracingPipelineShaderGroupHandleCaptureReplay = "shader_group_handle_capture_replay"
+rayTracingPipelineShaderGroupHandleCaptureReplayMixed = "shader_group_handle_capture_replay_mixed"
+rayTracingPipelineTraceRaysIndirect = "trace_rays_indirect"
+rayTraversalPrimitiveCulling = "ray_traversal_primitive_culling"
+
+[struct."VkPhysicalDeviceRayTracingPositionFetchFeaturesKHR"]
+name = "feature::ray_tracing_position_fetch"
+[struct."VkPhysicalDeviceRayTracingPositionFetchFeaturesKHR".members]
+rayTracingPositionFetch = "enable"
+
+[struct."VkPhysicalDeviceRayTracingValidationFeaturesNV"]
+name = "feature::ray_tracing_validation"
+[struct."VkPhysicalDeviceRayTracingValidationFeaturesNV".members]
+rayTracingValidation = "enable"
+
+[struct."VkPhysicalDeviceRelaxedLineRasterizationFeaturesIMG"]
+name = "feature::relaxed_line_rasterization"
+[struct."VkPhysicalDeviceRelaxedLineRasterizationFeaturesIMG".members]
+relaxedLineRasterization = "enable"
+
+[struct."VkPhysicalDeviceRenderPassStripedFeaturesARM"]
+name = "feature::render_pass_striped"
+[struct."VkPhysicalDeviceRenderPassStripedFeaturesARM".members]
+renderPassStriped = "enable"
+
+[struct."VkPhysicalDeviceRepresentativeFragmentTestFeaturesNV"]
+name = "feature::representative_fragment_test"
+[struct."VkPhysicalDeviceRepresentativeFragmentTestFeaturesNV".members]
+representativeFragmentTest = "enable"
+
+[struct."VkPhysicalDeviceRobustness2FeaturesKHR"]
+name = "feature::robustness2"
+[struct."VkPhysicalDeviceRobustness2FeaturesKHR".members]
+robustBufferAccess2 = "robust_buffer_access2"
+robustImageAccess2 = "robust_image_access2"
+nullDescriptor = "null_descriptor"
+
+[struct."VkPhysicalDeviceSamplerYcbcrConversionFeatures"]
+name = "feature::sampler_ycbcr_conversion"
+[struct."VkPhysicalDeviceSamplerYcbcrConversionFeatures".members]
+samplerYcbcrConversion = "enable"
+
+[struct."VkPhysicalDeviceScalarBlockLayoutFeatures"]
+name = "feature::scalar_block_layout"
+[struct."VkPhysicalDeviceScalarBlockLayoutFeatures".members]
+scalarBlockLayout = "enable"
+
+[struct."VkPhysicalDeviceSchedulingControlsFeaturesARM"]
+name = "feature::scheduling_controls"
+[struct."VkPhysicalDeviceSchedulingControlsFeaturesARM".members]
+schedulingControls = "enable"
+
+[struct."VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures"]
+name = "feature::separate_depth_stencil_layouts"
+[struct."VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures".members]
+separateDepthStencilLayouts = "enable"
+
+[struct."VkPhysicalDeviceShaderAtomicFloat16VectorFeaturesNV"]
+name = "feature::shader_atomic_float16_vector"
+[struct."VkPhysicalDeviceShaderAtomicFloat16VectorFeaturesNV".members]
+shaderFloat16VectorAtomics = "shader_float16_vector_atomics"
+
+[struct."VkPhysicalDeviceShaderAtomicFloat2FeaturesEXT"]
+name = "feature::shader_atomic_float2"
+[struct."VkPhysicalDeviceShaderAtomicFloat2FeaturesEXT".members]
+shaderBufferFloat16Atomics = "shader_buffer_float16_atomics"
+shaderBufferFloat16AtomicAdd = "shader_buffer_float16_atomic_add"
+shaderBufferFloat16AtomicMinMax = "shader_buffer_float16_atomic_min_max"
+shaderBufferFloat32AtomicMinMax = "shader_buffer_float32_atomic_min_max"
+shaderBufferFloat64AtomicMinMax = "shader_buffer_float64_atomic_min_max"
+shaderSharedFloat16Atomics = "shader_shared_float16_atomics"
+shaderSharedFloat16AtomicAdd = "shader_shared_float16_atomic_add"
+shaderSharedFloat16AtomicMinMax = "shader_shared_float16_atomic_min_max"
+shaderSharedFloat32AtomicMinMax = "shader_shared_float32_atomic_min_max"
+shaderSharedFloat64AtomicMinMax = "shader_shared_float64_atomic_min_max"
+shaderImageFloat32AtomicMinMax = "shader_image_float32_atomic_min_max"
+sparseImageFloat32AtomicMinMax = "sparse_image_float32_atomic_min_max"
+
+[struct."VkPhysicalDeviceShaderAtomicFloatFeaturesEXT"]
+name = "feature::shader_atomic_float"
+[struct."VkPhysicalDeviceShaderAtomicFloatFeaturesEXT".members]
+shaderBufferFloat32Atomics = "shader_buffer_float32_atomics"
+shaderBufferFloat32AtomicAdd = "shader_buffer_float32_atomic_add"
+shaderBufferFloat64Atomics = "shader_buffer_float64_atomics"
+shaderBufferFloat64AtomicAdd = "shader_buffer_float64_atomic_add"
+shaderSharedFloat32Atomics = "shader_shared_float32_atomics"
+shaderSharedFloat32AtomicAdd = "shader_shared_float32_atomic_add"
+shaderSharedFloat64Atomics = "shader_shared_float64_atomics"
+shaderSharedFloat64AtomicAdd = "shader_shared_float64_atomic_add"
+shaderImageFloat32Atomics = "shader_image_float32_atomics"
+shaderImageFloat32AtomicAdd = "shader_image_float32_atomic_add"
+sparseImageFloat32Atomics = "sparse_image_float32_atomics"
+sparseImageFloat32AtomicAdd = "sparse_image_float32_atomic_add"
+
+[struct."VkPhysicalDeviceShaderAtomicInt64Features"]
+name = "feature::shader_atomic_int64"
+[struct."VkPhysicalDeviceShaderAtomicInt64Features".members]
+shaderBufferInt64Atomics = "shader_buffer_int64_atomics"
+shaderSharedInt64Atomics = "shader_shared_int64_atomics"
+
+[struct."VkPhysicalDeviceShaderBfloat16FeaturesKHR"]
+name = "feature::shader_bfloat16"
+[struct."VkPhysicalDeviceShaderBfloat16FeaturesKHR".members]
+shaderBFloat16Type = "type"
+shaderBFloat16DotProduct = "dot_product"
+shaderBFloat16CooperativeMatrix = "cooperative_matrix"
+
+[struct."VkPhysicalDeviceShaderClockFeaturesKHR"]
+name = "feature::shader_clock"
+[struct."VkPhysicalDeviceShaderClockFeaturesKHR".members]
+shaderSubgroupClock = "shader_subgroup_clock"
+shaderDeviceClock = "shader_device_clock"
+
+[struct."VkPhysicalDeviceShaderCoreBuiltinsFeaturesARM"]
+name = "feature::shader_core_builtins"
+[struct."VkPhysicalDeviceShaderCoreBuiltinsFeaturesARM".members]
+shaderCoreBuiltins = "enable"
+
+[struct."VkPhysicalDeviceShaderDemoteToHelperInvocationFeatures"]
+name = "feature::shader_demote_to_helper_invocation"
+[struct."VkPhysicalDeviceShaderDemoteToHelperInvocationFeatures".members]
+shaderDemoteToHelperInvocation = "enable"
+
+[struct."VkPhysicalDeviceShaderDrawParametersFeatures"]
+name = "feature::shader_draw_parameters"
+[struct."VkPhysicalDeviceShaderDrawParametersFeatures".members]
+shaderDrawParameters = "enable"
+
+[struct."VkPhysicalDeviceShaderEarlyAndLateFragmentTestsFeaturesAMD"]
+name = "feature::shader_early_and_late_fragment_tests"
+[struct."VkPhysicalDeviceShaderEarlyAndLateFragmentTestsFeaturesAMD".members]
+shaderEarlyAndLateFragmentTests = "enable"
+
+[struct."VkPhysicalDeviceShaderEnqueueFeaturesAMDX"]
+name = "feature::shader_enqueue"
+[struct."VkPhysicalDeviceShaderEnqueueFeaturesAMDX".members]
+shaderEnqueue = "enable"
+shaderMeshEnqueue = "shader_mesh_enqueue"
+
+[struct."VkPhysicalDeviceShaderExpectAssumeFeatures"]
+name = "feature::shader_expect_assume"
+[struct."VkPhysicalDeviceShaderExpectAssumeFeatures".members]
+shaderExpectAssume = "enable"
+
+[struct."VkPhysicalDeviceShaderFloat16Int8Features"]
+name = "feature::shader_float16_int8"
+[struct."VkPhysicalDeviceShaderFloat16Int8Features".members]
+shaderFloat16 = "shader_float16"
+shaderInt8 = "shader_int8"
+
+[struct."VkPhysicalDeviceShaderFloat8FeaturesEXT"]
+name = "feature::shader_float8"
+[struct."VkPhysicalDeviceShaderFloat8FeaturesEXT".members]
+shaderFloat8 = "enable"
+shaderFloat8CooperativeMatrix = "cooperative_matrix"
+
+[struct."VkPhysicalDeviceShaderFloatControls2Features"]
+name = "feature::shader_float_controls2"
+[struct."VkPhysicalDeviceShaderFloatControls2Features".members]
+shaderFloatControls2 = "enable"
+
+[struct."VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT"]
+name = "feature::shader_image_atomic_int64"
+[struct."VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT".members]
+shaderImageInt64Atomics = "shader_image_int64_atomics"
+sparseImageInt64Atomics = "sparse_image_int64_atomics"
+
+[struct."VkPhysicalDeviceShaderImageFootprintFeaturesNV"]
+name = "feature::shader_image_footprint"
+[struct."VkPhysicalDeviceShaderImageFootprintFeaturesNV".members]
+imageFootprint = "image_footprint"
+
+[struct."VkPhysicalDeviceShaderIntegerDotProductFeatures"]
+name = "feature::shader_integer_dot_product"
+[struct."VkPhysicalDeviceShaderIntegerDotProductFeatures".members]
+shaderIntegerDotProduct = "enable"
+
+[struct."VkPhysicalDeviceShaderIntegerFunctions2FeaturesINTEL"]
+name = "feature::shader_integer_functions2"
+[struct."VkPhysicalDeviceShaderIntegerFunctions2FeaturesINTEL".members]
+shaderIntegerFunctions2 = "enable"
+
+[struct."VkPhysicalDeviceShaderMaximalReconvergenceFeaturesKHR"]
+name = "feature::shader_maximal_reconvergence"
+[struct."VkPhysicalDeviceShaderMaximalReconvergenceFeaturesKHR".members]
+shaderMaximalReconvergence = "enable"
+
+[struct."VkPhysicalDeviceShaderModuleIdentifierFeaturesEXT"]
+name = "feature::shader_module_identifier"
+[struct."VkPhysicalDeviceShaderModuleIdentifierFeaturesEXT".members]
+shaderModuleIdentifier = "enable"
+
+[struct."VkPhysicalDeviceShaderObjectFeaturesEXT"]
+name = "feature::shader_object"
+[struct."VkPhysicalDeviceShaderObjectFeaturesEXT".members]
+shaderObject = "enable"
+
+[struct."VkPhysicalDeviceShaderQuadControlFeaturesKHR"]
+name = "feature::shader_quad_control"
+[struct."VkPhysicalDeviceShaderQuadControlFeaturesKHR".members]
+shaderQuadControl = "enable"
+
+[struct."VkPhysicalDeviceShaderRelaxedExtendedInstructionFeaturesKHR"]
+name = "feature::shader_relaxed_extended_instruction"
+[struct."VkPhysicalDeviceShaderRelaxedExtendedInstructionFeaturesKHR".members]
+shaderRelaxedExtendedInstruction = "enable"
+
+[struct."VkPhysicalDeviceShaderReplicatedCompositesFeaturesEXT"]
+name = "feature::shader_replicated_composites"
+[struct."VkPhysicalDeviceShaderReplicatedCompositesFeaturesEXT".members]
+shaderReplicatedComposites = "enable"
+
+[struct."VkPhysicalDeviceShaderSMBuiltinsFeaturesNV"]
+name = "feature::shader_sm_builtins"
+[struct."VkPhysicalDeviceShaderSMBuiltinsFeaturesNV".members]
+shaderSMBuiltins = "enable"
+
+[struct."VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures"]
+name = "feature::shader_subgroup_extended_types"
+[struct."VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures".members]
+shaderSubgroupExtendedTypes = "enable"
+
+[struct."VkPhysicalDeviceShaderSubgroupRotateFeatures"]
+name = "feature::shader_subgroup_rotate"
+[struct."VkPhysicalDeviceShaderSubgroupRotateFeatures".members]
+shaderSubgroupRotate = "enable"
+shaderSubgroupRotateClustered = "clustered"
+
+[struct."VkPhysicalDeviceShaderSubgroupUniformControlFlowFeaturesKHR"]
+name = "feature::shader_subgroup_uniform_control_flow"
+[struct."VkPhysicalDeviceShaderSubgroupUniformControlFlowFeaturesKHR".members]
+shaderSubgroupUniformControlFlow = "enable"
+
+[struct."VkPhysicalDeviceShaderTerminateInvocationFeatures"]
+name = "feature::shader_terminate_invocation"
+[struct."VkPhysicalDeviceShaderTerminateInvocationFeatures".members]
+shaderTerminateInvocation = "enable"
+
+[struct."VkPhysicalDeviceShaderTileImageFeaturesEXT"]
+name = "feature::shader_tile_image"
+[struct."VkPhysicalDeviceShaderTileImageFeaturesEXT".members]
+shaderTileImageColorReadAccess = "color_read_access"
+shaderTileImageDepthReadAccess = "depth_read_access"
+shaderTileImageStencilReadAccess = "stencil_read_access"
+
+[struct."VkPhysicalDeviceShaderUntypedPointersFeaturesKHR"]
+name = "feature::shader_untyped_pointers"
+[struct."VkPhysicalDeviceShaderUntypedPointersFeaturesKHR".members]
+shaderUntypedPointers = "enable"
+
+[struct."VkPhysicalDeviceShadingRateImageFeaturesNV"]
+name = "feature::shading_rate_image"
+[struct."VkPhysicalDeviceShadingRateImageFeaturesNV".members]
+shadingRateImage = "enable"
+shadingRateCoarseSampleOrder = "shading_rate_coarse_sample_order"
+
+[struct."VkPhysicalDeviceSubgroupSizeControlFeatures"]
+name = "feature::subgroup_size_control"
+[struct."VkPhysicalDeviceSubgroupSizeControlFeatures".members]
+subgroupSizeControl = "enable"
+computeFullSubgroups = "compute_full_subgroups"
+
+[struct."VkPhysicalDeviceSubpassMergeFeedbackFeaturesEXT"]
+name = "feature::subpass_merge_feedback"
+[struct."VkPhysicalDeviceSubpassMergeFeedbackFeaturesEXT".members]
+subpassMergeFeedback = "enable"
+
+[struct."VkPhysicalDeviceSubpassShadingFeaturesHUAWEI"]
+name = "feature::subpass_shading"
+[struct."VkPhysicalDeviceSubpassShadingFeaturesHUAWEI".members]
+subpassShading = "enable"
+
+[struct."VkPhysicalDeviceSwapchainMaintenance1FeaturesKHR"]
+name = "feature::swapchain_maintenance1"
+[struct."VkPhysicalDeviceSwapchainMaintenance1FeaturesKHR".members]
+swapchainMaintenance1 = "enable"
+
+[struct."VkPhysicalDeviceSynchronization2Features"]
+name = "feature::synchronization2"
+[struct."VkPhysicalDeviceSynchronization2Features".members]
+synchronization2 = "enable"
+
+[struct."VkPhysicalDeviceTensorFeaturesARM"]
+name = "feature::tensor"
+[struct."VkPhysicalDeviceTensorFeaturesARM".members]
+tensorNonPacked = "non_packed"
+shaderTensorAccess = "shader_tensor_access"
+shaderStorageTensorArrayDynamicIndexing = "shader_storage_tensor_array_dynamic_indexing"
+shaderStorageTensorArrayNonUniformIndexing = "shader_storage_tensor_array_non_uniform_indexing"
+descriptorBindingStorageTensorUpdateAfterBind = "descriptor_binding_storage_tensor_update_after_bind"
+tensors = "tensors"
+
+[struct."VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT"]
+name = "feature::texel_buffer_alignment"
+[struct."VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT".members]
+texelBufferAlignment = "enable"
+
+[struct."VkPhysicalDeviceTextureCompressionASTCHDRFeatures"]
+name = "feature::texture_compression_astc_hdr"
+[struct."VkPhysicalDeviceTextureCompressionASTCHDRFeatures".members]
+textureCompressionASTC_HDR = "enable"
+
+[struct."VkPhysicalDeviceTileMemoryHeapFeaturesQCOM"]
+name = "feature::tile_memory_heap"
+[struct."VkPhysicalDeviceTileMemoryHeapFeaturesQCOM".members]
+tileMemoryHeap = "enable"
+
+[struct."VkPhysicalDeviceTilePropertiesFeaturesQCOM"]
+name = "feature::tile_properties"
+[struct."VkPhysicalDeviceTilePropertiesFeaturesQCOM".members]
+tileProperties = "enable"
+
+[struct."VkPhysicalDeviceTileShadingFeaturesQCOM"]
+name = "feature::tile_shading"
+[struct."VkPhysicalDeviceTileShadingFeaturesQCOM".members]
+tileShading = "enable"
+tileShadingFragmentStage = "fragment_stage"
+tileShadingColorAttachments = "color_attachments"
+tileShadingDepthAttachments = "depth_attachments"
+tileShadingStencilAttachments = "stencil_attachments"
+tileShadingInputAttachments = "input_attachments"
+tileShadingSampledAttachments = "sampled_attachments"
+tileShadingPerTileDraw = "per_tile_draw"
+tileShadingPerTileDispatch = "per_tile_dispatch"
+tileShadingDispatchTile = "dispatch_tile"
+tileShadingApron = "apron"
+tileShadingAnisotropicApron = "anisotropic_apron"
+tileShadingAtomicOps = "atomic_ops"
+tileShadingImageProcessing = "image_processing"
+
+[struct."VkPhysicalDeviceTimelineSemaphoreFeatures"]
+name = "feature::timeline_semaphore"
+[struct."VkPhysicalDeviceTimelineSemaphoreFeatures".members]
+timelineSemaphore = "enable"
+
+[struct."VkPhysicalDeviceTransformFeedbackFeaturesEXT"]
+name = "feature::transform_feedback"
+[struct."VkPhysicalDeviceTransformFeedbackFeaturesEXT".members]
+transformFeedback = "enable"
+geometryStreams = "geometry_streams"
+
+[struct."VkPhysicalDeviceUnifiedImageLayoutsFeaturesKHR"]
+name = "feature::unified_image_layouts"
+[struct."VkPhysicalDeviceUnifiedImageLayoutsFeaturesKHR".members]
+unifiedImageLayouts = "enable"
+unifiedImageLayoutsVideo = "video"
+
+[struct."VkPhysicalDeviceUniformBufferStandardLayoutFeatures"]
+name = "feature::uniform_buffer_standard_layout"
+[struct."VkPhysicalDeviceUniformBufferStandardLayoutFeatures".members]
+uniformBufferStandardLayout = "enable"
+
+[struct."VkPhysicalDeviceVariablePointersFeatures"]
+name = "feature::variable_pointers"
+[struct."VkPhysicalDeviceVariablePointersFeatures".members]
+variablePointersStorageBuffer = "storage_buffer"
+variablePointers = "enable"
+
+[struct."VkPhysicalDeviceVertexAttributeDivisorFeatures"]
+name = "feature::vertex_attribute_divisor"
+[struct."VkPhysicalDeviceVertexAttributeDivisorFeatures".members]
+vertexAttributeInstanceRateDivisor = "vertex_attribute_instance_rate_divisor"
+vertexAttributeInstanceRateZeroDivisor = "vertex_attribute_instance_rate_zero_divisor"
+
+[struct."VkPhysicalDeviceVertexAttributeRobustnessFeaturesEXT"]
+name = "feature::vertex_attribute_robustness"
+[struct."VkPhysicalDeviceVertexAttributeRobustnessFeaturesEXT".members]
+vertexAttributeRobustness = "enable"
+
+[struct."VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT"]
+name = "feature::vertex_input_dynamic_state"
+[struct."VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT".members]
+vertexInputDynamicState = "enable"
+
+[struct."VkPhysicalDeviceVideoDecodeVP9FeaturesKHR"]
+name = "feature::video_decode_vp9"
+[struct."VkPhysicalDeviceVideoDecodeVP9FeaturesKHR".members]
+videoDecodeVP9 = "enable"
+
+[struct."VkPhysicalDeviceVideoEncodeAV1FeaturesKHR"]
+name = "feature::video_encode_av1"
+[struct."VkPhysicalDeviceVideoEncodeAV1FeaturesKHR".members]
+videoEncodeAV1 = "enable"
+
+[struct."VkPhysicalDeviceVideoEncodeIntraRefreshFeaturesKHR"]
+name = "feature::video_encode_intra_refresh"
+[struct."VkPhysicalDeviceVideoEncodeIntraRefreshFeaturesKHR".members]
+videoEncodeIntraRefresh = "enable"
+
+[struct."VkPhysicalDeviceVideoEncodeQuantizationMapFeaturesKHR"]
+name = "feature::video_encode_quantization_map"
+[struct."VkPhysicalDeviceVideoEncodeQuantizationMapFeaturesKHR".members]
+videoEncodeQuantizationMap = "enable"
+
+[struct."VkPhysicalDeviceVideoEncodeRgbConversionFeaturesVALVE"]
+name = "feature::video_encode_rgb_conversion"
+[struct."VkPhysicalDeviceVideoEncodeRgbConversionFeaturesVALVE".members]
+videoEncodeRgbConversion = "enable"
+
+[struct."VkPhysicalDeviceVideoMaintenance1FeaturesKHR"]
+name = "feature::video_maintenance1"
+[struct."VkPhysicalDeviceVideoMaintenance1FeaturesKHR".members]
+videoMaintenance1 = "enable"
+
+[struct."VkPhysicalDeviceVideoMaintenance2FeaturesKHR"]
+name = "feature::video_maintenance2"
+[struct."VkPhysicalDeviceVideoMaintenance2FeaturesKHR".members]
+videoMaintenance2 = "enable"
+
+[struct."VkPhysicalDeviceVulkan11Features"]
+name = "feature::vulkan11"
+[struct."VkPhysicalDeviceVulkan11Features".members]
+storageBuffer16BitAccess = "storage_buffer16_bit_access"
+uniformAndStorageBuffer16BitAccess = "uniform_and_storage_buffer16_bit_access"
+storagePushConstant16 = "storage_push_constant16"
+storageInputOutput16 = "storage_input_output16"
+multiview = "multiview"
+multiviewGeometryShader = "multiview_geometry_shader"
+multiviewTessellationShader = "multiview_tessellation_shader"
+variablePointersStorageBuffer = "variable_pointers_storage_buffer"
+variablePointers = "variable_pointers"
+protectedMemory = "protected_memory"
+samplerYcbcrConversion = "sampler_ycbcr_conversion"
+shaderDrawParameters = "shader_draw_parameters"
+
+[struct."VkPhysicalDeviceVulkan12Features"]
+name = "feature::vulkan12"
+[struct."VkPhysicalDeviceVulkan12Features".members]
+samplerMirrorClampToEdge = "sampler_mirror_clamp_to_edge"
+drawIndirectCount = "draw_indirect_count"
+storageBuffer8BitAccess = "storage_buffer8_bit_access"
+uniformAndStorageBuffer8BitAccess = "uniform_and_storage_buffer8_bit_access"
+storagePushConstant8 = "storage_push_constant8"
+shaderBufferInt64Atomics = "shader_buffer_int64_atomics"
+shaderSharedInt64Atomics = "shader_shared_int64_atomics"
+shaderFloat16 = "shader_float16"
+shaderInt8 = "shader_int8"
+descriptorIndexing = "descriptor_indexing"
+shaderInputAttachmentArrayDynamicIndexing = "shader_input_attachment_array_dynamic_indexing"
+shaderUniformTexelBufferArrayDynamicIndexing = "shader_uniform_texel_buffer_array_dynamic_indexing"
+shaderStorageTexelBufferArrayDynamicIndexing = "shader_storage_texel_buffer_array_dynamic_indexing"
+shaderUniformBufferArrayNonUniformIndexing = "shader_uniform_buffer_array_non_uniform_indexing"
+shaderSampledImageArrayNonUniformIndexing = "shader_sampled_image_array_non_uniform_indexing"
+shaderStorageBufferArrayNonUniformIndexing = "shader_storage_buffer_array_non_uniform_indexing"
+shaderStorageImageArrayNonUniformIndexing = "shader_storage_image_array_non_uniform_indexing"
+shaderInputAttachmentArrayNonUniformIndexing = "shader_input_attachment_array_non_uniform_indexing"
+shaderUniformTexelBufferArrayNonUniformIndexing = "shader_uniform_texel_buffer_array_non_uniform_indexing"
+shaderStorageTexelBufferArrayNonUniformIndexing = "shader_storage_texel_buffer_array_non_uniform_indexing"
+descriptorBindingUniformBufferUpdateAfterBind = "descriptor_binding_uniform_buffer_update_after_bind"
+descriptorBindingSampledImageUpdateAfterBind = "descriptor_binding_sampled_image_update_after_bind"
+descriptorBindingStorageImageUpdateAfterBind = "descriptor_binding_storage_image_update_after_bind"
+descriptorBindingStorageBufferUpdateAfterBind = "descriptor_binding_storage_buffer_update_after_bind"
+descriptorBindingUniformTexelBufferUpdateAfterBind = "descriptor_binding_uniform_texel_buffer_update_after_bind"
+descriptorBindingStorageTexelBufferUpdateAfterBind = "descriptor_binding_storage_texel_buffer_update_after_bind"
+descriptorBindingUpdateUnusedWhilePending = "descriptor_binding_update_unused_while_pending"
+descriptorBindingPartiallyBound = "descriptor_binding_partially_bound"
+descriptorBindingVariableDescriptorCount = "descriptor_binding_variable_descriptor_count"
+runtimeDescriptorArray = "runtime_descriptor_array"
+samplerFilterMinmax = "sampler_filter_minmax"
+scalarBlockLayout = "scalar_block_layout"
+imagelessFramebuffer = "imageless_framebuffer"
+uniformBufferStandardLayout = "uniform_buffer_standard_layout"
+shaderSubgroupExtendedTypes = "shader_subgroup_extended_types"
+separateDepthStencilLayouts = "separate_depth_stencil_layouts"
+hostQueryReset = "host_query_reset"
+timelineSemaphore = "timeline_semaphore"
+bufferDeviceAddress = "buffer_device_address"
+bufferDeviceAddressCaptureReplay = "buffer_device_address_capture_replay"
+bufferDeviceAddressMultiDevice = "buffer_device_address_multi_device"
+vulkanMemoryModel = "vulkan_memory_model"
+vulkanMemoryModelDeviceScope = "vulkan_memory_model_device_scope"
+vulkanMemoryModelAvailabilityVisibilityChains = "vulkan_memory_model_availability_visibility_chains"
+shaderOutputViewportIndex = "shader_output_viewport_index"
+shaderOutputLayer = "shader_output_layer"
+subgroupBroadcastDynamicId = "subgroup_broadcast_dynamic_id"
+
+[struct."VkPhysicalDeviceVulkan13Features"]
+name = "feature::vulkan13"
+[struct."VkPhysicalDeviceVulkan13Features".members]
+robustImageAccess = "robust_image_access"
+inlineUniformBlock = "inline_uniform_block"
+descriptorBindingInlineUniformBlockUpdateAfterBind = "descriptor_binding_inline_uniform_block_update_after_bind"
+pipelineCreationCacheControl = "pipeline_creation_cache_control"
+privateData = "private_data"
+shaderDemoteToHelperInvocation = "shader_demote_to_helper_invocation"
+shaderTerminateInvocation = "shader_terminate_invocation"
+subgroupSizeControl = "subgroup_size_control"
+computeFullSubgroups = "compute_full_subgroups"
+synchronization2 = "synchronization2"
+textureCompressionASTC_HDR = "texture_compression_astc_hdr"
+shaderZeroInitializeWorkgroupMemory = "shader_zero_initialize_workgroup_memory"
+dynamicRendering = "dynamic_rendering"
+shaderIntegerDotProduct = "shader_integer_dot_product"
+maintenance4 = "maintenance4"
+
+[struct."VkPhysicalDeviceVulkan14Features"]
+name = "feature::vulkan14"
+[struct."VkPhysicalDeviceVulkan14Features".members]
+globalPriorityQuery = "global_priority_query"
+shaderSubgroupRotate = "shader_subgroup_rotate"
+shaderSubgroupRotateClustered = "shader_subgroup_rotate_clustered"
+shaderFloatControls2 = "shader_float_controls2"
+shaderExpectAssume = "shader_expect_assume"
+rectangularLines = "rectangular_lines"
+bresenhamLines = "bresenham_lines"
+smoothLines = "smooth_lines"
+stippledRectangularLines = "stippled_rectangular_lines"
+stippledBresenhamLines = "stippled_bresenham_lines"
+stippledSmoothLines = "stippled_smooth_lines"
+vertexAttributeInstanceRateDivisor = "vertex_attribute_instance_rate_divisor"
+vertexAttributeInstanceRateZeroDivisor = "vertex_attribute_instance_rate_zero_divisor"
+indexTypeUint8 = "index_type_uint8"
+dynamicRenderingLocalRead = "dynamic_rendering_local_read"
+maintenance5 = "maintenance5"
+maintenance6 = "maintenance6"
+pipelineProtectedAccess = "pipeline_protected_access"
+pipelineRobustness = "pipeline_robustness"
+hostImageCopy = "host_image_copy"
+pushDescriptor = "push_descriptor"
+
+[struct."VkPhysicalDeviceVulkanMemoryModelFeatures"]
+name = "feature::vulkan_memory_model"
+[struct."VkPhysicalDeviceVulkanMemoryModelFeatures".members]
+vulkanMemoryModel = "enable"
+vulkanMemoryModelDeviceScope = "device_scope"
+vulkanMemoryModelAvailabilityVisibilityChains = "availability_visibility_chains"
+
+[struct."VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR"]
+name = "feature::workgroup_memory_explicit_layout"
+[struct."VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR".members]
+workgroupMemoryExplicitLayout = "enable"
+workgroupMemoryExplicitLayoutScalarBlockLayout = "scalar_block_layout"
+workgroupMemoryExplicitLayout8BitAccess = "access_8bit"
+workgroupMemoryExplicitLayout16BitAccess = "access_16bit"
+
+[struct."VkPhysicalDeviceYcbcr2Plane444FormatsFeaturesEXT"]
+name = "feature::ycbcr2_plane444_formats"
+[struct."VkPhysicalDeviceYcbcr2Plane444FormatsFeaturesEXT".members]
+ycbcr2plane444Formats = "enable"
+
+[struct."VkPhysicalDeviceYcbcrDegammaFeaturesQCOM"]
+name = "feature::ycbcr_degamma"
+[struct."VkPhysicalDeviceYcbcrDegammaFeaturesQCOM".members]
+ycbcrDegamma = "enable"
+
+[struct."VkPhysicalDeviceYcbcrImageArraysFeaturesEXT"]
+name = "feature::ycbcr_image_arrays"
+[struct."VkPhysicalDeviceYcbcrImageArraysFeaturesEXT".members]
+ycbcrImageArrays = "enable"
+
+[struct."VkPhysicalDeviceZeroInitializeDeviceMemoryFeaturesEXT"]
+name = "feature::zero_initialize_device_memory"
+[struct."VkPhysicalDeviceZeroInitializeDeviceMemoryFeaturesEXT".members]
+zeroInitializeDeviceMemory = "enable"
+
+[struct."VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeatures"]
+name = "feature::zero_initialize_workgroup_memory"
+[struct."VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeatures".members]
+shaderZeroInitializeWorkgroupMemory = "shader_zero_initialize_workgroup_memory"
+
+[struct."VkPipelineBinaryCreateInfoKHR"]
+name = "pipeline_binary"
+[struct."VkPipelineBinaryCreateInfoKHR".members]
+pKeysAndDataInfo = "keys_and_data_info"
+pipeline = "pipeline"
+pPipelineCreateInfo = "pipeline_create_info"
+
+[struct."VkPipelineBinaryInfoKHR"]
+name = "option::pipeline_binaries"
+[struct."VkPipelineBinaryInfoKHR".members]
+pPipelineBinaries = "binaries"
+
+[struct."VkPipelineCacheCreateInfo"]
+name = "pipeline_cache"
+[struct."VkPipelineCacheCreateInfo".members]
+flags = "flags"
+initialDataSize = "initial_data_size"
+pInitialData = "initial_data"
+
+[struct."VkPipelineCompilerControlCreateInfoAMD"]
+name = "option::pipeline_compiler_control"
+[struct."VkPipelineCompilerControlCreateInfoAMD".members]
+compilerControlFlags = "compiler_control_flags"
+
+[struct."VkPipelineCreateFlags2CreateInfo"]
+name = "option::pipeline_create_flags2"
+[struct."VkPipelineCreateFlags2CreateInfo".members]
+flags = "flags"
+
+[struct."VkPipelineCreationFeedbackCreateInfo"]
+name = "option::pipeline_creation_feedback"
+[struct."VkPipelineCreationFeedbackCreateInfo".members]
+pPipelineCreationFeedback = "pipeline"
+pPipelineStageCreationFeedbacks = "stages"
+
+[struct."VkPipelineDiscardRectangleStateCreateInfoEXT"]
+name = "option::pipeline_discard_rectangle_state"
+[struct."VkPipelineDiscardRectangleStateCreateInfoEXT".members]
+flags = "flags"
+discardRectangleMode = "discard_rectangle_mode"
+pDiscardRectangles = "discard_rectangles"
+
+[struct."VkPipelineFragmentDensityMapLayeredCreateInfoVALVE"]
+name = "option::pipeline_fragment_density_map_layered"
+[struct."VkPipelineFragmentDensityMapLayeredCreateInfoVALVE".members]
+maxFragmentDensityMapLayers = "max_fragment_density_map_layers"
+
+[struct."VkPipelineFragmentShadingRateEnumStateCreateInfoNV"]
+name = "option::pipeline_fragment_shading_rate_enum_state"
+[struct."VkPipelineFragmentShadingRateEnumStateCreateInfoNV".members]
+shadingRateType = "shading_rate_type"
+shadingRate = "shading_rate"
+combinerOps = "combiner_ops"
+
+[struct."VkPipelineFragmentShadingRateStateCreateInfoKHR"]
+name = "option::pipeline_fragment_shading_rate_state"
+[struct."VkPipelineFragmentShadingRateStateCreateInfoKHR".members]
+fragmentSize = "fragment_size"
+combinerOps = "combiner_ops"
+
+[struct."VkPipelineLayoutCreateInfo"]
+name = "pipeline_layout"
+[struct."VkPipelineLayoutCreateInfo".members]
+flags = "flags"
+pSetLayouts = "set_layouts"
+pPushConstantRanges = "push_constant_ranges"
+
+[struct."VkPipelineLibraryCreateInfoKHR"]
+name = "option::pipeline_library"
+[struct."VkPipelineLibraryCreateInfoKHR".members]
+pLibraries = "libraries"
+
+[struct."VkPipelineRenderingCreateInfo"]
+name = "option::pipeline_rendering"
+[struct."VkPipelineRenderingCreateInfo".members]
+viewMask = "view_mask"
+pColorAttachmentFormats = "color_attachment_formats"
+depthAttachmentFormat = "depth_attachment_format"
+stencilAttachmentFormat = "stencil_attachment_format"
+
+[struct."VkPipelineRepresentativeFragmentTestStateCreateInfoNV"]
+name = "option::pipeline_representative_fragment_test_state"
+[struct."VkPipelineRepresentativeFragmentTestStateCreateInfoNV".members]
+representativeFragmentTestEnable = "representative_fragment_test_enable"
+
+[struct."VkPipelineRobustnessCreateInfo"]
+name = "option::pipeline_robustness"
+[struct."VkPipelineRobustnessCreateInfo".members]
+storageBuffers = "storage_buffers"
+uniformBuffers = "uniform_buffers"
+vertexInputs = "vertex_inputs"
+images = "images"
+
+[struct."VkPipelineShaderStageRequiredSubgroupSizeCreateInfo"]
+name = "option::pipeline_shader_stage_required_subgroup_size"
+[struct."VkPipelineShaderStageRequiredSubgroupSizeCreateInfo".members]
+requiredSubgroupSize = "required_subgroup_size"
+
+[struct."VkPrivateDataSlotCreateInfo"]
+name = "private_data_slot"
+[struct."VkPrivateDataSlotCreateInfo".members]
+flags = "flags"
+
+[struct."VkQueryLowLatencySupportNV"]
+name = "option::query_low_latency_support"
+[struct."VkQueryLowLatencySupportNV".members]
+pQueriedLowLatencyData = "queried_low_latency_data"
+
+[struct."VkQueryPoolCreateInfo"]
+name = "query_pool"
+[struct."VkQueryPoolCreateInfo".members]
+flags = "flags"
+queryType = "query_type"
+queryCount = "query_count"
+pipelineStatistics = "pipeline_statistics"
+
+[struct."VkQueryPoolPerformanceCreateInfoKHR"]
+name = "option::query_pool_performance"
+[struct."VkQueryPoolPerformanceCreateInfoKHR".members]
+queueFamilyIndex = "queue_family_index"
+pCounterIndices = "counter_indices"
+
+[struct."VkQueryPoolPerformanceQueryCreateInfoINTEL"]
+name = "option::query_pool_performance_query"
+[struct."VkQueryPoolPerformanceQueryCreateInfoINTEL".members]
+performanceCountersSampling = "performance_counters_sampling"
+
+[struct."VkQueryPoolVideoEncodeFeedbackCreateInfoKHR"]
+name = "option::query_pool_video_encode_feedback"
+[struct."VkQueryPoolVideoEncodeFeedbackCreateInfoKHR".members]
+encodeFeedbackFlags = "encode_feedback_flags"
+
+[struct."VkRayTracingPipelineClusterAccelerationStructureCreateInfoNV"]
+name = "option::ray_tracing_pipeline_cluster_acceleration_structure"
+[struct."VkRayTracingPipelineClusterAccelerationStructureCreateInfoNV".members]
+allowClusterAccelerationStructure = "allow_cluster_acceleration_structure"
+
+[struct."VkRayTracingPipelineCreateInfoKHR"]
+name = "ray_tracing_pipeline_khr"
+[struct."VkRayTracingPipelineCreateInfoKHR".members]
+flags = "flags"
+pStages = "stages"
+pGroups = "groups"
+maxPipelineRayRecursionDepth = "max_pipeline_ray_recursion_depth"
+pLibraryInfo = "library_info"
+pLibraryInterface = "library_interface"
+pDynamicState = "dynamic_state"
+layout = "layout"
+basePipelineHandle = "base_pipeline_handle"
+basePipelineIndex = "base_pipeline_index"
+
+[struct."VkRayTracingPipelineCreateInfoNV"]
+name = "ray_tracing_pipeline_nv"
+[struct."VkRayTracingPipelineCreateInfoNV".members]
+flags = "flags"
+pStages = "stages"
+pGroups = "groups"
+maxRecursionDepth = "max_recursion_depth"
+layout = "layout"
+basePipelineHandle = "base_pipeline_handle"
+basePipelineIndex = "base_pipeline_index"
+
+[struct."VkRenderPassCreateInfo"]
+name = "render_pass"
+[struct."VkRenderPassCreateInfo".members]
+flags = "flags"
+pAttachments = "attachments"
+pSubpasses = "subpasses"
+pDependencies = "dependencies"
+
+[struct."VkRenderPassCreateInfo2"]
+name = "render_pass2"
+[struct."VkRenderPassCreateInfo2".members]
+flags = "flags"
+pAttachments = "attachments"
+pSubpasses = "subpasses"
+pDependencies = "dependencies"
+pCorrelatedViewMasks = "correlated_view_masks"
+
+[struct."VkRenderPassCreationControlEXT"]
+name = "option::render_pass_creation_control"
+[struct."VkRenderPassCreationControlEXT".members]
+disallowMerging = "disallow_merging"
+
+[struct."VkRenderPassCreationFeedbackCreateInfoEXT"]
+name = "option::render_pass_creation_feedback"
+[struct."VkRenderPassCreationFeedbackCreateInfoEXT".members]
+pRenderPassFeedback = "render_pass_feedback"
+
+[struct."VkRenderPassFragmentDensityMapCreateInfoEXT"]
+name = "option::render_pass_fragment_density_map"
+[struct."VkRenderPassFragmentDensityMapCreateInfoEXT".members]
+fragmentDensityMapAttachment = "fragment_density_map_attachment"
+
+[struct."VkRenderPassInputAttachmentAspectCreateInfo"]
+name = "option::render_pass_input_attachment_aspect"
+[struct."VkRenderPassInputAttachmentAspectCreateInfo".members]
+pAspectReferences = "aspect_references"
+
+[struct."VkRenderPassMultiviewCreateInfo"]
+name = "option::render_pass_multiview"
+[struct."VkRenderPassMultiviewCreateInfo".members]
+pViewMasks = "view_masks"
+pViewOffsets = "view_offsets"
+pCorrelationMasks = "correlation_masks"
+
+[struct."VkRenderPassTileShadingCreateInfoQCOM"]
+name = "option::render_pass_tile_shading"
+[struct."VkRenderPassTileShadingCreateInfoQCOM".members]
+flags = "flags"
+tileApronSize = "tile_apron_size"
+
+[struct."VkRenderingAttachmentLocationInfo"]
+name = "option::rendering_attachment_location"
+[struct."VkRenderingAttachmentLocationInfo".members]
+pColorAttachmentLocations = "color_attachment_locations"
+
+[struct."VkRenderingInputAttachmentIndexInfo"]
+name = "option::rendering_input_attachment_index"
+[struct."VkRenderingInputAttachmentIndexInfo".members]
+pColorAttachmentInputIndices = "color_attachment_input_indices"
+pDepthInputAttachmentIndex = "depth_input_attachment_index"
+pStencilInputAttachmentIndex = "stencil_input_attachment_index"
+
+[struct."VkSamplerBlockMatchWindowCreateInfoQCOM"]
+name = "option::sampler_block_match_window"
+[struct."VkSamplerBlockMatchWindowCreateInfoQCOM".members]
+windowExtent = "window_extent"
+windowCompareMode = "window_compare_mode"
+
+[struct."VkSamplerBorderColorComponentMappingCreateInfoEXT"]
+name = "option::sampler_border_color_component_mapping"
+[struct."VkSamplerBorderColorComponentMappingCreateInfoEXT".members]
+components = "components"
+srgb = "srgb"
+
+[struct."VkSamplerCreateInfo"]
+name = "sampler"
+[struct."VkSamplerCreateInfo".members]
+flags = "flags"
+magFilter = "mag_filter"
+minFilter = "min_filter"
+mipmapMode = "mipmap_mode"
+addressModeU = "address_mode_u"
+addressModeV = "address_mode_v"
+addressModeW = "address_mode_w"
+mipLodBias = "mip_lod_bias"
+anisotropyEnable = "anisotropy_enable"
+maxAnisotropy = "max_anisotropy"
+compareEnable = "compare_enable"
+compareOp = "compare_op"
+minLod = "min_lod"
+maxLod = "max_lod"
+borderColor = "border_color"
+unnormalizedCoordinates = "unnormalized_coordinates"
+
+[struct."VkSamplerCubicWeightsCreateInfoQCOM"]
+name = "option::sampler_cubic_weights"
+[struct."VkSamplerCubicWeightsCreateInfoQCOM".members]
+cubicWeights = "cubic_weights"
+
+[struct."VkSamplerCustomBorderColorCreateInfoEXT"]
+name = "option::sampler_custom_border_color"
+[struct."VkSamplerCustomBorderColorCreateInfoEXT".members]
+customBorderColor = "custom_border_color"
+format = "format"
+
+[struct."VkSamplerReductionModeCreateInfo"]
+name = "option::sampler_reduction_mode"
+[struct."VkSamplerReductionModeCreateInfo".members]
+reductionMode = "reduction_mode"
+
+[struct."VkSamplerYcbcrConversionCreateInfo"]
+name = "sampler_ycbcr_conversion"
+[struct."VkSamplerYcbcrConversionCreateInfo".members]
+format = "format"
+ycbcrModel = "ycbcr_model"
+ycbcrRange = "ycbcr_range"
+components = "components"
+xChromaOffset = "x_chroma_offset"
+yChromaOffset = "y_chroma_offset"
+chromaFilter = "chroma_filter"
+forceExplicitReconstruction = "force_explicit_reconstruction"
+
+[struct."VkSamplerYcbcrConversionInfo"]
+name = "option::ycbcr_conversion"
+[struct."VkSamplerYcbcrConversionInfo".members]
+conversion = "conversion"
+
+[struct."VkSamplerYcbcrConversionYcbcrDegammaCreateInfoQCOM"]
+name = "option::sampler_ycbcr_conversion_ycbcr_degamma"
+[struct."VkSamplerYcbcrConversionYcbcrDegammaCreateInfoQCOM".members]
+enableYDegamma = "enable_y_degamma"
+enableCbCrDegamma = "enable_cb_cr_degamma"
+
+[struct."VkScreenSurfaceCreateInfoQNX"]
+name = "screen_surface"
+[struct."VkScreenSurfaceCreateInfoQNX".members]
+flags = "flags"
+context = "context"
+window = "window"
+
+[struct."VkSemaphoreCreateInfo"]
+name = "semaphore"
+[struct."VkSemaphoreCreateInfo".members]
+flags = "flags"
+
+[struct."VkSemaphoreTypeCreateInfo"]
+name = "option::semaphore_type"
+[struct."VkSemaphoreTypeCreateInfo".members]
+semaphoreType = "type"
+initialValue = "initial_value"
+
+[struct."VkShaderCreateInfoEXT"]
+name = "shader"
+[struct."VkShaderCreateInfoEXT".members]
+flags = "flags"
+stage = "stage"
+nextStage = "next_stage"
+codeType = "code_type"
+codeSize = "code_size"
+pCode = "code"
+pName = "name"
+pSetLayouts = "set_layouts"
+pPushConstantRanges = "push_constant_ranges"
+pSpecializationInfo = "specialization_info"
+
+[struct."VkShaderModuleCreateInfo"]
+name = "shader_module"
+[struct."VkShaderModuleCreateInfo".members]
+flags = "flags"
+codeSize = "code_size"
+pCode = "code"
+
+[struct."VkShaderModuleValidationCacheCreateInfoEXT"]
+name = "option::shader_module_validation_cache"
+[struct."VkShaderModuleValidationCacheCreateInfoEXT".members]
+validationCache = "validation_cache"
+
+[struct."VkStreamDescriptorSurfaceCreateInfoGGP"]
+name = "stream_descriptor_surface"
+[struct."VkStreamDescriptorSurfaceCreateInfoGGP".members]
+flags = "flags"
+streamDescriptor = "stream_descriptor"
+
+[struct."VkSubpassShadingPipelineCreateInfoHUAWEI"]
+name = "option::subpass_shading_pipeline"
+[struct."VkSubpassShadingPipelineCreateInfoHUAWEI".members]
+renderPass = "render_pass"
+subpass = "subpass"
+
+[struct."VkSurfaceCreateInfoOHOS"]
+name = "surface"
+[struct."VkSurfaceCreateInfoOHOS".members]
+flags = "flags"
+window = "window"
+
+[struct."VkSurfaceFullScreenExclusiveInfoEXT"]
+name = "option::surface_full_screen_exclusive"
+[struct."VkSurfaceFullScreenExclusiveInfoEXT".members]
+fullScreenExclusive = "full_screen_exclusive"
+
+[struct."VkSurfaceFullScreenExclusiveWin32InfoEXT"]
+name = "option::surface_full_screen_exclusive_win32"
+[struct."VkSurfaceFullScreenExclusiveWin32InfoEXT".members]
+hmonitor = "hmonitor"
+
+[struct."VkSwapchainCounterCreateInfoEXT"]
+name = "option::swapchain_counter"
+[struct."VkSwapchainCounterCreateInfoEXT".members]
+surfaceCounters = "surface_counters"
+
+[struct."VkSwapchainCreateInfoKHR"]
+name = "swapchain"
+[struct."VkSwapchainCreateInfoKHR".members]
+flags = "flags"
+surface = "surface"
+minImageCount = "min_image_count"
+imageFormat = "image_format"
+imageColorSpace = "image_color_space"
+imageExtent = "image_extent"
+imageArrayLayers = "image_array_layers"
+imageUsage = "image_usage"
+imageSharingMode = "image_sharing_mode"
+pQueueFamilyIndices = "queue_family_indices"
+preTransform = "pre_transform"
+compositeAlpha = "composite_alpha"
+presentMode = "present_mode"
+clipped = "clipped"
+oldSwapchain = "old_swapchain"
+
+[struct."VkSwapchainDisplayNativeHdrCreateInfoAMD"]
+name = "option::swapchain_display_native_hdr"
+[struct."VkSwapchainDisplayNativeHdrCreateInfoAMD".members]
+localDimmingEnable = "local_dimming_enable"
+
+[struct."VkSwapchainLatencyCreateInfoNV"]
+name = "option::swapchain_latency"
+[struct."VkSwapchainLatencyCreateInfoNV".members]
+latencyModeEnable = "latency_mode_enable"
+
+[struct."VkSwapchainPresentBarrierCreateInfoNV"]
+name = "option::swapchain_present_barrier"
+[struct."VkSwapchainPresentBarrierCreateInfoNV".members]
+presentBarrierEnable = "present_barrier_enable"
+
+[struct."VkSwapchainPresentModesCreateInfoKHR"]
+name = "option::swapchain_present_modes"
+[struct."VkSwapchainPresentModesCreateInfoKHR".members]
+pPresentModes = "present_modes"
+
+[struct."VkSwapchainPresentScalingCreateInfoKHR"]
+name = "option::swapchain_present_scaling"
+[struct."VkSwapchainPresentScalingCreateInfoKHR".members]
+scalingBehavior = "scaling_behavior"
+presentGravityX = "present_gravity_x"
+presentGravityY = "present_gravity_y"
+
+[struct."VkTensorCreateInfoARM"]
+name = "tensor"
+[struct."VkTensorCreateInfoARM".members]
+flags = "flags"
+pDescription = "description"
+sharingMode = "sharing_mode"
+pQueueFamilyIndices = "queue_family_indices"
+
+[struct."VkTensorViewCreateInfoARM"]
+name = "tensor_view"
+[struct."VkTensorViewCreateInfoARM".members]
+flags = "flags"
+tensor = "tensor"
+format = "format"
+
+[struct."VkTileMemorySizeInfoQCOM"]
+name = "option::tile_memory_size"
+[struct."VkTileMemorySizeInfoQCOM".members]
+size = "size"
+
+[struct."VkValidationCacheCreateInfoEXT"]
+name = "validation_cache"
+[struct."VkValidationCacheCreateInfoEXT".members]
+flags = "flags"
+initialDataSize = "initial_data_size"
+pInitialData = "initial_data"
+
+[struct."VkValidationFeaturesEXT"]
+name = "option::validation_features"
+[struct."VkValidationFeaturesEXT".members]
+pEnabledValidationFeatures = "enabled_validation_features"
+pDisabledValidationFeatures = "disabled_validation_features"
+
+[struct."VkValidationFlagsEXT"]
+name = "option::validation_flags"
+[struct."VkValidationFlagsEXT".members]
+pDisabledValidationChecks = "disabled_validation_checks"
+
+[struct."VkViSurfaceCreateInfoNN"]
+name = "vi_surface"
+[struct."VkViSurfaceCreateInfoNN".members]
+flags = "flags"
+window = "window"
+
+[struct."VkVideoDecodeAV1ProfileInfoKHR"]
+name = "option::video_decode_av1_profile"
+[struct."VkVideoDecodeAV1ProfileInfoKHR".members]
+stdProfile = "std_profile"
+filmGrainSupport = "film_grain_support"
+
+[struct."VkVideoDecodeAV1SessionParametersCreateInfoKHR"]
+name = "option::video_decode_av1_session_parameters"
+[struct."VkVideoDecodeAV1SessionParametersCreateInfoKHR".members]
+pStdSequenceHeader = "std_sequence_header"
+
+[struct."VkVideoDecodeH264ProfileInfoKHR"]
+name = "option::video_decode_h264_profile"
+[struct."VkVideoDecodeH264ProfileInfoKHR".members]
+stdProfileIdc = "std_profile_idc"
+pictureLayout = "picture_layout"
+
+[struct."VkVideoDecodeH264SessionParametersCreateInfoKHR"]
+name = "option::video_decode_h264_session_parameters"
+[struct."VkVideoDecodeH264SessionParametersCreateInfoKHR".members]
+maxStdSPSCount = "max_std_sps_count"
+maxStdPPSCount = "max_std_pps_count"
+pParametersAddInfo = "parameters_add_info"
+
+[struct."VkVideoDecodeH265ProfileInfoKHR"]
+name = "option::video_decode_h265_profile"
+[struct."VkVideoDecodeH265ProfileInfoKHR".members]
+stdProfileIdc = "std_profile_idc"
+
+[struct."VkVideoDecodeH265SessionParametersCreateInfoKHR"]
+name = "option::video_decode_h265_session_parameters"
+[struct."VkVideoDecodeH265SessionParametersCreateInfoKHR".members]
+maxStdVPSCount = "max_std_vps_count"
+maxStdSPSCount = "max_std_sps_count"
+maxStdPPSCount = "max_std_pps_count"
+pParametersAddInfo = "parameters_add_info"
+
+[struct."VkVideoDecodeUsageInfoKHR"]
+name = "option::video_decode_usage"
+[struct."VkVideoDecodeUsageInfoKHR".members]
+videoUsageHints = "video_usage_hints"
+
+[struct."VkVideoDecodeVP9ProfileInfoKHR"]
+name = "option::video_decode_vp9_profile"
+[struct."VkVideoDecodeVP9ProfileInfoKHR".members]
+stdProfile = "std_profile"
+
+[struct."VkVideoEncodeAV1ProfileInfoKHR"]
+name = "option::video_encode_av1_profile"
+[struct."VkVideoEncodeAV1ProfileInfoKHR".members]
+stdProfile = "std_profile"
+
+[struct."VkVideoEncodeAV1SessionCreateInfoKHR"]
+name = "option::video_encode_av1_session"
+[struct."VkVideoEncodeAV1SessionCreateInfoKHR".members]
+useMaxLevel = "use_max_level"
+maxLevel = "max_level"
+
+[struct."VkVideoEncodeAV1SessionParametersCreateInfoKHR"]
+name = "option::video_encode_av1_session_parameters"
+[struct."VkVideoEncodeAV1SessionParametersCreateInfoKHR".members]
+pStdSequenceHeader = "std_sequence_header"
+pStdDecoderModelInfo = "std_decoder_model_info"
+pStdOperatingPoints = "std_operating_points"
+
+[struct."VkVideoEncodeH264ProfileInfoKHR"]
+name = "option::video_encode_h264_profile"
+[struct."VkVideoEncodeH264ProfileInfoKHR".members]
+stdProfileIdc = "std_profile_idc"
+
+[struct."VkVideoEncodeH264SessionCreateInfoKHR"]
+name = "option::video_encode_h264_session"
+[struct."VkVideoEncodeH264SessionCreateInfoKHR".members]
+useMaxLevelIdc = "use_max_level_idc"
+maxLevelIdc = "max_level_idc"
+
+[struct."VkVideoEncodeH264SessionParametersCreateInfoKHR"]
+name = "option::video_encode_h264_session_parameters"
+[struct."VkVideoEncodeH264SessionParametersCreateInfoKHR".members]
+maxStdSPSCount = "max_std_sps_count"
+maxStdPPSCount = "max_std_pps_count"
+pParametersAddInfo = "parameters_add_info"
+
+[struct."VkVideoEncodeH265ProfileInfoKHR"]
+name = "option::video_encode_h265_profile"
+[struct."VkVideoEncodeH265ProfileInfoKHR".members]
+stdProfileIdc = "std_profile_idc"
+
+[struct."VkVideoEncodeH265SessionCreateInfoKHR"]
+name = "option::video_encode_h265_session"
+[struct."VkVideoEncodeH265SessionCreateInfoKHR".members]
+useMaxLevelIdc = "use_max_level_idc"
+maxLevelIdc = "max_level_idc"
+
+[struct."VkVideoEncodeH265SessionParametersCreateInfoKHR"]
+name = "option::video_encode_h265_session_parameters"
+[struct."VkVideoEncodeH265SessionParametersCreateInfoKHR".members]
+maxStdVPSCount = "max_std_vps_count"
+maxStdSPSCount = "max_std_sps_count"
+maxStdPPSCount = "max_std_pps_count"
+pParametersAddInfo = "parameters_add_info"
+
+[struct."VkVideoEncodeProfileRgbConversionInfoVALVE"]
+name = "option::video_encode_profile_rgb_conversion"
+[struct."VkVideoEncodeProfileRgbConversionInfoVALVE".members]
+performEncodeRgbConversion = "perform_encode_rgb_conversion"
+
+[struct."VkVideoEncodeQualityLevelInfoKHR"]
+name = "option::video_encode_quality_level"
+[struct."VkVideoEncodeQualityLevelInfoKHR".members]
+qualityLevel = "quality_level"
+
+[struct."VkVideoEncodeQuantizationMapSessionParametersCreateInfoKHR"]
+name = "option::video_encode_quantization_map_session_parameters"
+[struct."VkVideoEncodeQuantizationMapSessionParametersCreateInfoKHR".members]
+quantizationMapTexelSize = "quantization_map_texel_size"
+
+[struct."VkVideoEncodeSessionIntraRefreshCreateInfoKHR"]
+name = "option::video_encode_session_intra_refresh"
+[struct."VkVideoEncodeSessionIntraRefreshCreateInfoKHR".members]
+intraRefreshMode = "intra_refresh_mode"
+
+[struct."VkVideoEncodeSessionRgbConversionCreateInfoVALVE"]
+name = "option::video_encode_session_rgb_conversion"
+[struct."VkVideoEncodeSessionRgbConversionCreateInfoVALVE".members]
+rgbModel = "rgb_model"
+rgbRange = "rgb_range"
+xChromaOffset = "x_chroma_offset"
+yChromaOffset = "y_chroma_offset"
+
+[struct."VkVideoEncodeUsageInfoKHR"]
+name = "option::video_encode_usage"
+[struct."VkVideoEncodeUsageInfoKHR".members]
+videoUsageHints = "video_usage_hints"
+videoContentHints = "video_content_hints"
+tuningMode = "tuning_mode"
+
+[struct."VkVideoProfileInfoKHR"]
+name = "option::video_profile"
+[struct."VkVideoProfileInfoKHR".members]
+videoCodecOperation = "video_codec_operation"
+chromaSubsampling = "chroma_subsampling"
+lumaBitDepth = "luma_bit_depth"
+chromaBitDepth = "chroma_bit_depth"
+
+[struct."VkVideoProfileListInfoKHR"]
+name = "option::video_profile_list"
+[struct."VkVideoProfileListInfoKHR".members]
+pProfiles = "profiles"
+
+[struct."VkVideoSessionCreateInfoKHR"]
+name = "video_session"
+[struct."VkVideoSessionCreateInfoKHR".members]
+queueFamilyIndex = "queue_family_index"
+flags = "flags"
+pVideoProfile = "video_profile"
+pictureFormat = "picture_format"
+maxCodedExtent = "max_coded_extent"
+referencePictureFormat = "reference_picture_format"
+maxDpbSlots = "max_dpb_slots"
+maxActiveReferencePictures = "max_active_reference_pictures"
+pStdHeaderVersion = "std_header_version"
+
+[struct."VkVideoSessionParametersCreateInfoKHR"]
+name = "video_session_parameters"
+[struct."VkVideoSessionParametersCreateInfoKHR".members]
+flags = "flags"
+videoSessionParametersTemplate = "template_"
+videoSession = "video_session"
+
+[struct."VkWaylandSurfaceCreateInfoKHR"]
+name = "wayland_surface"
+[struct."VkWaylandSurfaceCreateInfoKHR".members]
+flags = "flags"
+display = "display"
+surface = "surface"
+
+[struct."VkWin32SurfaceCreateInfoKHR"]
+name = "win32_surface"
+[struct."VkWin32SurfaceCreateInfoKHR".members]
+flags = "flags"
+hinstance = "hinstance"
+hwnd = "hwnd"
+
+[struct."VkXcbSurfaceCreateInfoKHR"]
+name = "xcb_surface"
+[struct."VkXcbSurfaceCreateInfoKHR".members]
+flags = "flags"
+connection = "connection"
+window = "window"
+
+[struct."VkXlibSurfaceCreateInfoKHR"]
+name = "xlib_surface"
+[struct."VkXlibSurfaceCreateInfoKHR".members]
+flags = "flags"
+dpy = "dpy"
+window = "window"
+
+[bits."VkAccelerationStructureCreateFlagBitsKHR"]
+VK_ACCELERATION_STRUCTURE_CREATE_DEVICE_ADDRESS_CAPTURE_REPLAY_BIT_KHR = "device_address_capture_replay"
+VK_ACCELERATION_STRUCTURE_CREATE_MOTION_BIT_NV = "motion"
+VK_ACCELERATION_STRUCTURE_CREATE_DESCRIPTOR_BUFFER_CAPTURE_REPLAY_BIT_EXT = "descriptor_buffer_capture_replay"
+
+[bits."VkBufferCreateFlagBits"]
+VK_BUFFER_CREATE_SPARSE_BINDING_BIT = "sparse_binding"
+VK_BUFFER_CREATE_SPARSE_RESIDENCY_BIT = "sparse_residency"
+VK_BUFFER_CREATE_SPARSE_ALIASED_BIT = "sparse_aliased"
+VK_BUFFER_CREATE_PROTECTED_BIT = "protected_"
+VK_BUFFER_CREATE_DEVICE_ADDRESS_CAPTURE_REPLAY_BIT = "device_address_capture_replay"
+VK_BUFFER_CREATE_DESCRIPTOR_BUFFER_CAPTURE_REPLAY_BIT_EXT = "descriptor_buffer_capture_replay"
+VK_BUFFER_CREATE_VIDEO_PROFILE_INDEPENDENT_BIT_KHR = "video_profile_independent"
+
+[bits."VkBufferUsageFlagBits"]
+VK_BUFFER_USAGE_TRANSFER_SRC_BIT = "transfer_src"
+VK_BUFFER_USAGE_TRANSFER_DST_BIT = "transfer_dst"
+VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT = "uniform_texel_buffer"
+VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT = "storage_texel_buffer"
+VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT = "uniform_buffer"
+VK_BUFFER_USAGE_STORAGE_BUFFER_BIT = "storage_buffer"
+VK_BUFFER_USAGE_INDEX_BUFFER_BIT = "index_buffer"
+VK_BUFFER_USAGE_VERTEX_BUFFER_BIT = "vertex_buffer"
+VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT = "indirect_buffer"
+VK_BUFFER_USAGE_CONDITIONAL_RENDERING_BIT_EXT = "conditional_rendering"
+VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR = "shader_binding_table"
+VK_BUFFER_USAGE_TRANSFORM_FEEDBACK_BUFFER_BIT_EXT = "transform_feedback_buffer"
+VK_BUFFER_USAGE_TRANSFORM_FEEDBACK_COUNTER_BUFFER_BIT_EXT = "transform_feedback_counter_buffer"
+VK_BUFFER_USAGE_VIDEO_DECODE_SRC_BIT_KHR = "video_decode_src"
+VK_BUFFER_USAGE_VIDEO_DECODE_DST_BIT_KHR = "video_decode_dst"
+VK_BUFFER_USAGE_VIDEO_ENCODE_DST_BIT_KHR = "video_encode_dst"
+VK_BUFFER_USAGE_VIDEO_ENCODE_SRC_BIT_KHR = "video_encode_src"
+VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT = "shader_device_address"
+VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR = "acceleration_structure_build_input_read_only"
+VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR = "acceleration_structure_storage"
+VK_BUFFER_USAGE_SAMPLER_DESCRIPTOR_BUFFER_BIT_EXT = "sampler_descriptor_buffer"
+VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT = "resource_descriptor_buffer"
+VK_BUFFER_USAGE_MICROMAP_BUILD_INPUT_READ_ONLY_BIT_EXT = "micromap_build_input_read_only"
+VK_BUFFER_USAGE_MICROMAP_STORAGE_BIT_EXT = "micromap_storage"
+VK_BUFFER_USAGE_EXECUTION_GRAPH_SCRATCH_BIT_AMDX = "execution_graph_scratch"
+VK_BUFFER_USAGE_PUSH_DESCRIPTORS_DESCRIPTOR_BUFFER_BIT_EXT = "push_descriptors_descriptor_buffer"
+VK_BUFFER_USAGE_TILE_MEMORY_BIT_QCOM = "tile_memory"
+
+[bits."VkBufferUsageFlagBits2"]
+VK_BUFFER_USAGE_2_TRANSFER_SRC_BIT = "transfer_src"
+VK_BUFFER_USAGE_2_TRANSFER_DST_BIT = "transfer_dst"
+VK_BUFFER_USAGE_2_UNIFORM_TEXEL_BUFFER_BIT = "uniform_texel_buffer"
+VK_BUFFER_USAGE_2_STORAGE_TEXEL_BUFFER_BIT = "storage_texel_buffer"
+VK_BUFFER_USAGE_2_UNIFORM_BUFFER_BIT = "uniform_buffer"
+VK_BUFFER_USAGE_2_STORAGE_BUFFER_BIT = "storage_buffer"
+VK_BUFFER_USAGE_2_INDEX_BUFFER_BIT = "index_buffer"
+VK_BUFFER_USAGE_2_VERTEX_BUFFER_BIT = "vertex_buffer"
+VK_BUFFER_USAGE_2_INDIRECT_BUFFER_BIT = "indirect_buffer"
+VK_BUFFER_USAGE_2_CONDITIONAL_RENDERING_BIT_EXT = "conditional_rendering"
+VK_BUFFER_USAGE_2_SHADER_BINDING_TABLE_BIT_KHR = "shader_binding_table"
+VK_BUFFER_USAGE_2_TRANSFORM_FEEDBACK_BUFFER_BIT_EXT = "transform_feedback_buffer"
+VK_BUFFER_USAGE_2_TRANSFORM_FEEDBACK_COUNTER_BUFFER_BIT_EXT = "transform_feedback_counter_buffer"
+VK_BUFFER_USAGE_2_VIDEO_DECODE_SRC_BIT_KHR = "video_decode_src"
+VK_BUFFER_USAGE_2_VIDEO_DECODE_DST_BIT_KHR = "video_decode_dst"
+VK_BUFFER_USAGE_2_VIDEO_ENCODE_DST_BIT_KHR = "video_encode_dst"
+VK_BUFFER_USAGE_2_VIDEO_ENCODE_SRC_BIT_KHR = "video_encode_src"
+VK_BUFFER_USAGE_2_SHADER_DEVICE_ADDRESS_BIT = "shader_device_address"
+VK_BUFFER_USAGE_2_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR = "acceleration_structure_build_input_read_only"
+VK_BUFFER_USAGE_2_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR = "acceleration_structure_storage"
+VK_BUFFER_USAGE_2_SAMPLER_DESCRIPTOR_BUFFER_BIT_EXT = "sampler_descriptor_buffer"
+VK_BUFFER_USAGE_2_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT = "resource_descriptor_buffer"
+VK_BUFFER_USAGE_2_MICROMAP_BUILD_INPUT_READ_ONLY_BIT_EXT = "micromap_build_input_read_only"
+VK_BUFFER_USAGE_2_MICROMAP_STORAGE_BIT_EXT = "micromap_storage"
+VK_BUFFER_USAGE_2_EXECUTION_GRAPH_SCRATCH_BIT_AMDX = "execution_graph_scratch"
+VK_BUFFER_USAGE_2_PUSH_DESCRIPTORS_DESCRIPTOR_BUFFER_BIT_EXT = "push_descriptors_descriptor_buffer"
+VK_BUFFER_USAGE_2_TILE_MEMORY_BIT_QCOM = "tile_memory"
+VK_BUFFER_USAGE_2_DATA_GRAPH_FOREIGN_DESCRIPTOR_BIT_ARM = "data_graph_foreign_descriptor"
+VK_BUFFER_USAGE_2_PREPROCESS_BUFFER_BIT_EXT = "preprocess_buffer"
+VK_BUFFER_USAGE_2_COMPRESSED_DATA_DGF1_BIT_AMDX = "compressed_data_dgf1"
+
+[bits."VkCommandPoolCreateFlagBits"]
+VK_COMMAND_POOL_CREATE_TRANSIENT_BIT = "transient"
+VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT = "reset_command_buffer"
+VK_COMMAND_POOL_CREATE_PROTECTED_BIT = "protected_"
+
+[bits."VkDataGraphPipelineSessionCreateFlagBitsARM"]
+VK_DATA_GRAPH_PIPELINE_SESSION_CREATE_PROTECTED_BIT_ARM = "protected_"
+
+[bits."VkDebugReportFlagBitsEXT"]
+VK_DEBUG_REPORT_INFORMATION_BIT_EXT = "information"
+VK_DEBUG_REPORT_WARNING_BIT_EXT = "warning"
+VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT = "performance_warning"
+VK_DEBUG_REPORT_ERROR_BIT_EXT = "error"
+VK_DEBUG_REPORT_DEBUG_BIT_EXT = "debug"
+
+[bits."VkDebugUtilsMessageSeverityFlagBitsEXT"]
+VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT = "verbose"
+VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT = "info"
+VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT = "warning"
+VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT = "error"
+
+[bits."VkDebugUtilsMessageTypeFlagBitsEXT"]
+VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT = "general"
+VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT = "validation"
+VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT = "performance"
+VK_DEBUG_UTILS_MESSAGE_TYPE_DEVICE_ADDRESS_BINDING_BIT_EXT = "device_address_binding"
+
+[bits."VkDescriptorPoolCreateFlagBits"]
+VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT = "free_descriptor_set"
+VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT = "update_after_bind"
+VK_DESCRIPTOR_POOL_CREATE_HOST_ONLY_BIT_EXT = "host_only"
+VK_DESCRIPTOR_POOL_CREATE_ALLOW_OVERALLOCATION_SETS_BIT_NV = "allow_overallocation_sets"
+VK_DESCRIPTOR_POOL_CREATE_ALLOW_OVERALLOCATION_POOLS_BIT_NV = "allow_overallocation_pools"
+
+[bits."VkDescriptorSetLayoutCreateFlagBits"]
+VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT = "push_descriptor"
+VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT = "update_after_bind_pool"
+VK_DESCRIPTOR_SET_LAYOUT_CREATE_HOST_ONLY_POOL_BIT_EXT = "host_only_pool"
+VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT = "descriptor_buffer"
+VK_DESCRIPTOR_SET_LAYOUT_CREATE_EMBEDDED_IMMUTABLE_SAMPLERS_BIT_EXT = "embedded_immutable_samplers"
+VK_DESCRIPTOR_SET_LAYOUT_CREATE_PER_STAGE_BIT_NV = "per_stage"
+VK_DESCRIPTOR_SET_LAYOUT_CREATE_INDIRECT_BINDABLE_BIT_NV = "indirect_bindable"
+
+[bits."VkDeviceDiagnosticsConfigFlagBitsNV"]
+VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_SHADER_DEBUG_INFO_BIT_NV = "shader_debug_info"
+VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_RESOURCE_TRACKING_BIT_NV = "resource_tracking"
+VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_AUTOMATIC_CHECKPOINTS_BIT_NV = "automatic_checkpoints"
+VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_SHADER_ERROR_REPORTING_BIT_NV = "shader_error_reporting"
+
+[bits."VkDeviceGroupPresentModeFlagBitsKHR"]
+VK_DEVICE_GROUP_PRESENT_MODE_LOCAL_BIT_KHR = "local"
+VK_DEVICE_GROUP_PRESENT_MODE_REMOTE_BIT_KHR = "remote"
+VK_DEVICE_GROUP_PRESENT_MODE_SUM_BIT_KHR = "sum"
+VK_DEVICE_GROUP_PRESENT_MODE_LOCAL_MULTI_DEVICE_BIT_KHR = "local_multi_device"
+
+[bits."VkEventCreateFlagBits"]
+VK_EVENT_CREATE_DEVICE_ONLY_BIT = "device_only"
+
+[bits."VkExternalFenceHandleTypeFlagBits"]
+VK_EXTERNAL_FENCE_HANDLE_TYPE_OPAQUE_FD_BIT = "opaque_fd"
+VK_EXTERNAL_FENCE_HANDLE_TYPE_OPAQUE_WIN32_BIT = "opaque_win32"
+VK_EXTERNAL_FENCE_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT = "opaque_win32_kmt"
+VK_EXTERNAL_FENCE_HANDLE_TYPE_SYNC_FD_BIT = "sync_fd"
+
+[bits."VkExternalMemoryHandleTypeFlagBits"]
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT = "opaque_fd"
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT = "opaque_win32"
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT = "opaque_win32_kmt"
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_TEXTURE_BIT = "d3d11_texture"
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_TEXTURE_KMT_BIT = "d3d11_texture_kmt"
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D12_HEAP_BIT = "d3d12_heap"
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D12_RESOURCE_BIT = "d3d12_resource"
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_HOST_ALLOCATION_BIT_EXT = "host_allocation"
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_HOST_MAPPED_FOREIGN_MEMORY_BIT_EXT = "host_mapped_foreign_memory"
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT = "dma_buf"
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID = "android_hardware_buffer"
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_ZIRCON_VMO_BIT_FUCHSIA = "zircon_vmo"
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_RDMA_ADDRESS_BIT_NV = "rdma_address"
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_SCREEN_BUFFER_BIT_QNX = "screen_buffer"
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_MTLBUFFER_BIT_EXT = "mtlbuffer"
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_MTLTEXTURE_BIT_EXT = "mtltexture"
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_MTLHEAP_BIT_EXT = "mtlheap"
+
+[bits."VkExternalMemoryHandleTypeFlagBitsNV"]
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT_NV = "opaque_win32"
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT_NV = "opaque_win32_kmt"
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_IMAGE_BIT_NV = "d3d11_image"
+VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_IMAGE_KMT_BIT_NV = "d3d11_image_kmt"
+
+[bits."VkExternalSemaphoreHandleTypeFlagBits"]
+VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT = "opaque_fd"
+VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT = "opaque_win32"
+VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT = "opaque_win32_kmt"
+VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_D3D12_FENCE_BIT = "d3d12_fence"
+VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT = "sync_fd"
+VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_ZIRCON_EVENT_BIT_FUCHSIA = "zircon_event"
+
+[bits."VkFenceCreateFlagBits"]
+VK_FENCE_CREATE_SIGNALED_BIT = "signaled"
+
+[bits."VkFramebufferCreateFlagBits"]
+VK_FRAMEBUFFER_CREATE_IMAGELESS_BIT = "imageless"
+
+[bits."VkGraphicsPipelineLibraryFlagBitsEXT"]
+VK_GRAPHICS_PIPELINE_LIBRARY_VERTEX_INPUT_INTERFACE_BIT_EXT = "vertex_input_interface"
+VK_GRAPHICS_PIPELINE_LIBRARY_PRE_RASTERIZATION_SHADERS_BIT_EXT = "pre_rasterization_shaders"
+VK_GRAPHICS_PIPELINE_LIBRARY_FRAGMENT_SHADER_BIT_EXT = "fragment_shader"
+VK_GRAPHICS_PIPELINE_LIBRARY_FRAGMENT_OUTPUT_INTERFACE_BIT_EXT = "fragment_output_interface"
+
+[bits."VkImageCompressionFlagBitsEXT"]
+VK_IMAGE_COMPRESSION_FIXED_RATE_DEFAULT_EXT = "fixed_rate_default_ext"
+VK_IMAGE_COMPRESSION_FIXED_RATE_EXPLICIT_EXT = "fixed_rate_explicit_ext"
+VK_IMAGE_COMPRESSION_DISABLED_EXT = "disabled_ext"
+
+[bits."VkImageCreateFlagBits"]
+VK_IMAGE_CREATE_SPARSE_BINDING_BIT = "sparse_binding"
+VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT = "sparse_residency"
+VK_IMAGE_CREATE_SPARSE_ALIASED_BIT = "sparse_aliased"
+VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT = "mutable_format"
+VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT = "cube_compatible"
+VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT = "view_2d_array_compatible"
+VK_IMAGE_CREATE_SPLIT_INSTANCE_BIND_REGIONS_BIT = "split_instance_bind_regions"
+VK_IMAGE_CREATE_BLOCK_TEXEL_VIEW_COMPATIBLE_BIT = "block_texel_view_compatible"
+VK_IMAGE_CREATE_EXTENDED_USAGE_BIT = "extended_usage"
+VK_IMAGE_CREATE_DISJOINT_BIT = "disjoint"
+VK_IMAGE_CREATE_ALIAS_BIT = "alias"
+VK_IMAGE_CREATE_PROTECTED_BIT = "protected_"
+VK_IMAGE_CREATE_SAMPLE_LOCATIONS_COMPATIBLE_DEPTH_BIT_EXT = "sample_locations_compatible_depth"
+VK_IMAGE_CREATE_CORNER_SAMPLED_BIT_NV = "corner_sampled"
+VK_IMAGE_CREATE_SUBSAMPLED_BIT_EXT = "subsampled"
+VK_IMAGE_CREATE_FRAGMENT_DENSITY_MAP_OFFSET_BIT_EXT = "fragment_density_map_offset"
+VK_IMAGE_CREATE_DESCRIPTOR_BUFFER_CAPTURE_REPLAY_BIT_EXT = "descriptor_buffer_capture_replay"
+VK_IMAGE_CREATE_2D_VIEW_COMPATIBLE_BIT_EXT = "view_2d_compatible"
+VK_IMAGE_CREATE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_BIT_EXT = "multisampled_render_to_single_sampled"
+VK_IMAGE_CREATE_VIDEO_PROFILE_INDEPENDENT_BIT_KHR = "video_profile_independent"
+
+[bits."VkImageUsageFlagBits"]
+VK_IMAGE_USAGE_TRANSFER_SRC_BIT = "transfer_src"
+VK_IMAGE_USAGE_TRANSFER_DST_BIT = "transfer_dst"
+VK_IMAGE_USAGE_SAMPLED_BIT = "sampled"
+VK_IMAGE_USAGE_STORAGE_BIT = "storage"
+VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT = "color_attachment"
+VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT = "depth_stencil_attachment"
+VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT = "transient_attachment"
+VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT = "input_attachment"
+VK_IMAGE_USAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR = "fragment_shading_rate_attachment"
+VK_IMAGE_USAGE_FRAGMENT_DENSITY_MAP_BIT_EXT = "fragment_density_map"
+VK_IMAGE_USAGE_VIDEO_DECODE_DST_BIT_KHR = "video_decode_dst"
+VK_IMAGE_USAGE_VIDEO_DECODE_SRC_BIT_KHR = "video_decode_src"
+VK_IMAGE_USAGE_VIDEO_DECODE_DPB_BIT_KHR = "video_decode_dpb"
+VK_IMAGE_USAGE_VIDEO_ENCODE_DST_BIT_KHR = "video_encode_dst"
+VK_IMAGE_USAGE_VIDEO_ENCODE_SRC_BIT_KHR = "video_encode_src"
+VK_IMAGE_USAGE_VIDEO_ENCODE_DPB_BIT_KHR = "video_encode_dpb"
+VK_IMAGE_USAGE_INVOCATION_MASK_BIT_HUAWEI = "invocation_mask"
+VK_IMAGE_USAGE_ATTACHMENT_FEEDBACK_LOOP_BIT_EXT = "attachment_feedback_loop"
+VK_IMAGE_USAGE_SAMPLE_WEIGHT_BIT_QCOM = "sample_weight"
+VK_IMAGE_USAGE_SAMPLE_BLOCK_MATCH_BIT_QCOM = "sample_block_match"
+VK_IMAGE_USAGE_HOST_TRANSFER_BIT = "host_transfer"
+VK_IMAGE_USAGE_TENSOR_ALIASING_BIT_ARM = "tensor_aliasing"
+VK_IMAGE_USAGE_VIDEO_ENCODE_QUANTIZATION_DELTA_MAP_BIT_KHR = "video_encode_quantization_delta_map"
+VK_IMAGE_USAGE_VIDEO_ENCODE_EMPHASIS_MAP_BIT_KHR = "video_encode_emphasis_map"
+VK_IMAGE_USAGE_TILE_MEMORY_BIT_QCOM = "tile_memory"
+
+[bits."VkImageViewCreateFlagBits"]
+VK_IMAGE_VIEW_CREATE_FRAGMENT_DENSITY_MAP_DYNAMIC_BIT_EXT = "fragment_density_map_dynamic"
+VK_IMAGE_VIEW_CREATE_FRAGMENT_DENSITY_MAP_DEFERRED_BIT_EXT = "fragment_density_map_deferred"
+VK_IMAGE_VIEW_CREATE_DESCRIPTOR_BUFFER_CAPTURE_REPLAY_BIT_EXT = "descriptor_buffer_capture_replay"
+
+[bits."VkIndirectCommandsLayoutUsageFlagBitsEXT"]
+VK_INDIRECT_COMMANDS_LAYOUT_USAGE_EXPLICIT_PREPROCESS_BIT_EXT = "explicit_preprocess"
+VK_INDIRECT_COMMANDS_LAYOUT_USAGE_UNORDERED_SEQUENCES_BIT_EXT = "unordered_sequences"
+
+[bits."VkIndirectCommandsLayoutUsageFlagBitsNV"]
+VK_INDIRECT_COMMANDS_LAYOUT_USAGE_EXPLICIT_PREPROCESS_BIT_NV = "explicit_preprocess"
+VK_INDIRECT_COMMANDS_LAYOUT_USAGE_INDEXED_SEQUENCES_BIT_NV = "indexed_sequences"
+VK_INDIRECT_COMMANDS_LAYOUT_USAGE_UNORDERED_SEQUENCES_BIT_NV = "unordered_sequences"
+
+[bits."VkInstanceCreateFlagBits"]
+VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR = "enumerate_portability"
+
+[bits."VkMicromapCreateFlagBitsEXT"]
+VK_MICROMAP_CREATE_DEVICE_ADDRESS_CAPTURE_REPLAY_BIT_EXT = "device_address_capture_replay"
+
+[bits."VkOpticalFlowGridSizeFlagBitsNV"]
+VK_OPTICAL_FLOW_GRID_SIZE_1X1_BIT_NV = "size_1x1"
+VK_OPTICAL_FLOW_GRID_SIZE_2X2_BIT_NV = "size_2x2"
+VK_OPTICAL_FLOW_GRID_SIZE_4X4_BIT_NV = "size_4x4"
+VK_OPTICAL_FLOW_GRID_SIZE_8X8_BIT_NV = "size_8x8"
+
+[bits."VkOpticalFlowSessionCreateFlagBitsNV"]
+VK_OPTICAL_FLOW_SESSION_CREATE_ENABLE_HINT_BIT_NV = "enable_hint"
+VK_OPTICAL_FLOW_SESSION_CREATE_ENABLE_COST_BIT_NV = "enable_cost"
+VK_OPTICAL_FLOW_SESSION_CREATE_ENABLE_GLOBAL_FLOW_BIT_NV = "enable_global_flow"
+VK_OPTICAL_FLOW_SESSION_CREATE_ALLOW_REGIONS_BIT_NV = "allow_regions"
+VK_OPTICAL_FLOW_SESSION_CREATE_BOTH_DIRECTIONS_BIT_NV = "both_directions"
+
+[bits."VkOpticalFlowUsageFlagBitsNV"]
+VK_OPTICAL_FLOW_USAGE_INPUT_BIT_NV = "input"
+VK_OPTICAL_FLOW_USAGE_OUTPUT_BIT_NV = "output"
+VK_OPTICAL_FLOW_USAGE_HINT_BIT_NV = "hint"
+VK_OPTICAL_FLOW_USAGE_COST_BIT_NV = "cost"
+VK_OPTICAL_FLOW_USAGE_GLOBAL_FLOW_BIT_NV = "global_flow"
+
+[bits."VkPipelineCacheCreateFlagBits"]
+VK_PIPELINE_CACHE_CREATE_EXTERNALLY_SYNCHRONIZED_BIT = "externally_synchronized"
+VK_PIPELINE_CACHE_CREATE_INTERNALLY_SYNCHRONIZED_MERGE_BIT_KHR = "internally_synchronized_merge"
+
+[bits."VkPipelineCreateFlagBits"]
+VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT = "disable_optimization"
+VK_PIPELINE_CREATE_ALLOW_DERIVATIVES_BIT = "allow_derivatives"
+VK_PIPELINE_CREATE_DERIVATIVE_BIT = "derivative"
+VK_PIPELINE_CREATE_VIEW_INDEX_FROM_DEVICE_INDEX_BIT = "view_index_from_device_index"
+VK_PIPELINE_CREATE_DISPATCH_BASE_BIT = "dispatch_base"
+VK_PIPELINE_CREATE_DEFER_COMPILE_BIT_NV = "defer_compile"
+VK_PIPELINE_CREATE_CAPTURE_STATISTICS_BIT_KHR = "capture_statistics"
+VK_PIPELINE_CREATE_CAPTURE_INTERNAL_REPRESENTATIONS_BIT_KHR = "capture_internal_representations"
+VK_PIPELINE_CREATE_FAIL_ON_PIPELINE_COMPILE_REQUIRED_BIT = "fail_on_pipeline_compile_required"
+VK_PIPELINE_CREATE_EARLY_RETURN_ON_FAILURE_BIT = "early_return_on_failure"
+VK_PIPELINE_CREATE_LINK_TIME_OPTIMIZATION_BIT_EXT = "link_time_optimization"
+VK_PIPELINE_CREATE_LIBRARY_BIT_KHR = "library"
+VK_PIPELINE_CREATE_RAY_TRACING_SKIP_TRIANGLES_BIT_KHR = "ray_tracing_skip_triangles"
+VK_PIPELINE_CREATE_RAY_TRACING_SKIP_AABBS_BIT_KHR = "ray_tracing_skip_aabbs"
+VK_PIPELINE_CREATE_RAY_TRACING_NO_NULL_ANY_HIT_SHADERS_BIT_KHR = "ray_tracing_no_null_any_hit_shaders"
+VK_PIPELINE_CREATE_RAY_TRACING_NO_NULL_CLOSEST_HIT_SHADERS_BIT_KHR = "ray_tracing_no_null_closest_hit_shaders"
+VK_PIPELINE_CREATE_RAY_TRACING_NO_NULL_MISS_SHADERS_BIT_KHR = "ray_tracing_no_null_miss_shaders"
+VK_PIPELINE_CREATE_RAY_TRACING_NO_NULL_INTERSECTION_SHADERS_BIT_KHR = "ray_tracing_no_null_intersection_shaders"
+VK_PIPELINE_CREATE_INDIRECT_BINDABLE_BIT_NV = "indirect_bindable"
+VK_PIPELINE_CREATE_RAY_TRACING_SHADER_GROUP_HANDLE_CAPTURE_REPLAY_BIT_KHR = "ray_tracing_shader_group_handle_capture_replay"
+VK_PIPELINE_CREATE_RAY_TRACING_ALLOW_MOTION_BIT_NV = "ray_tracing_allow_motion"
+VK_PIPELINE_CREATE_RENDERING_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR = "rendering_fragment_shading_rate_attachment"
+VK_PIPELINE_CREATE_RENDERING_FRAGMENT_DENSITY_MAP_ATTACHMENT_BIT_EXT = "rendering_fragment_density_map_attachment"
+VK_PIPELINE_CREATE_RETAIN_LINK_TIME_OPTIMIZATION_INFO_BIT_EXT = "retain_link_time_optimization_info"
+VK_PIPELINE_CREATE_RAY_TRACING_OPACITY_MICROMAP_BIT_EXT = "ray_tracing_opacity_micromap"
+VK_PIPELINE_CREATE_COLOR_ATTACHMENT_FEEDBACK_LOOP_BIT_EXT = "color_attachment_feedback_loop"
+VK_PIPELINE_CREATE_DEPTH_STENCIL_ATTACHMENT_FEEDBACK_LOOP_BIT_EXT = "depth_stencil_attachment_feedback_loop"
+VK_PIPELINE_CREATE_NO_PROTECTED_ACCESS_BIT = "no_protected_access"
+VK_PIPELINE_CREATE_RAY_TRACING_DISPLACEMENT_MICROMAP_BIT_NV = "ray_tracing_displacement_micromap"
+VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT = "descriptor_buffer"
+VK_PIPELINE_CREATE_PROTECTED_ACCESS_ONLY_BIT = "protected_access_only"
+
+[bits."VkPipelineCreateFlagBits2"]
+VK_PIPELINE_CREATE_2_DISABLE_OPTIMIZATION_BIT = "disable_optimization"
+VK_PIPELINE_CREATE_2_ALLOW_DERIVATIVES_BIT = "allow_derivatives"
+VK_PIPELINE_CREATE_2_DERIVATIVE_BIT = "derivative"
+VK_PIPELINE_CREATE_2_VIEW_INDEX_FROM_DEVICE_INDEX_BIT = "view_index_from_device_index"
+VK_PIPELINE_CREATE_2_DISPATCH_BASE_BIT = "dispatch_base"
+VK_PIPELINE_CREATE_2_DEFER_COMPILE_BIT_NV = "defer_compile"
+VK_PIPELINE_CREATE_2_CAPTURE_STATISTICS_BIT_KHR = "capture_statistics"
+VK_PIPELINE_CREATE_2_CAPTURE_INTERNAL_REPRESENTATIONS_BIT_KHR = "capture_internal_representations"
+VK_PIPELINE_CREATE_2_FAIL_ON_PIPELINE_COMPILE_REQUIRED_BIT = "fail_on_pipeline_compile_required"
+VK_PIPELINE_CREATE_2_EARLY_RETURN_ON_FAILURE_BIT = "early_return_on_failure"
+VK_PIPELINE_CREATE_2_LINK_TIME_OPTIMIZATION_BIT_EXT = "link_time_optimization"
+VK_PIPELINE_CREATE_2_LIBRARY_BIT_KHR = "library"
+VK_PIPELINE_CREATE_2_RAY_TRACING_SKIP_TRIANGLES_BIT_KHR = "ray_tracing_skip_triangles"
+VK_PIPELINE_CREATE_2_RAY_TRACING_SKIP_AABBS_BIT_KHR = "ray_tracing_skip_aabbs"
+VK_PIPELINE_CREATE_2_RAY_TRACING_NO_NULL_ANY_HIT_SHADERS_BIT_KHR = "ray_tracing_no_null_any_hit_shaders"
+VK_PIPELINE_CREATE_2_RAY_TRACING_NO_NULL_CLOSEST_HIT_SHADERS_BIT_KHR = "ray_tracing_no_null_closest_hit_shaders"
+VK_PIPELINE_CREATE_2_RAY_TRACING_NO_NULL_MISS_SHADERS_BIT_KHR = "ray_tracing_no_null_miss_shaders"
+VK_PIPELINE_CREATE_2_RAY_TRACING_NO_NULL_INTERSECTION_SHADERS_BIT_KHR = "ray_tracing_no_null_intersection_shaders"
+VK_PIPELINE_CREATE_2_INDIRECT_BINDABLE_BIT_NV = "indirect_bindable"
+VK_PIPELINE_CREATE_2_RAY_TRACING_SHADER_GROUP_HANDLE_CAPTURE_REPLAY_BIT_KHR = "ray_tracing_shader_group_handle_capture_replay"
+VK_PIPELINE_CREATE_2_RAY_TRACING_ALLOW_MOTION_BIT_NV = "ray_tracing_allow_motion"
+VK_PIPELINE_CREATE_2_RENDERING_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR = "rendering_fragment_shading_rate_attachment"
+VK_PIPELINE_CREATE_2_RENDERING_FRAGMENT_DENSITY_MAP_ATTACHMENT_BIT_EXT = "rendering_fragment_density_map_attachment"
+VK_PIPELINE_CREATE_2_RETAIN_LINK_TIME_OPTIMIZATION_INFO_BIT_EXT = "retain_link_time_optimization_info"
+VK_PIPELINE_CREATE_2_RAY_TRACING_OPACITY_MICROMAP_BIT_EXT = "ray_tracing_opacity_micromap"
+VK_PIPELINE_CREATE_2_COLOR_ATTACHMENT_FEEDBACK_LOOP_BIT_EXT = "color_attachment_feedback_loop"
+VK_PIPELINE_CREATE_2_DEPTH_STENCIL_ATTACHMENT_FEEDBACK_LOOP_BIT_EXT = "depth_stencil_attachment_feedback_loop"
+VK_PIPELINE_CREATE_2_NO_PROTECTED_ACCESS_BIT = "no_protected_access"
+VK_PIPELINE_CREATE_2_RAY_TRACING_DISPLACEMENT_MICROMAP_BIT_NV = "ray_tracing_displacement_micromap"
+VK_PIPELINE_CREATE_2_DESCRIPTOR_BUFFER_BIT_EXT = "descriptor_buffer"
+VK_PIPELINE_CREATE_2_PROTECTED_ACCESS_ONLY_BIT = "protected_access_only"
+VK_PIPELINE_CREATE_2_CAPTURE_DATA_BIT_KHR = "capture_data"
+VK_PIPELINE_CREATE_2_EXECUTION_GRAPH_BIT_AMDX = "execution_graph"
+VK_PIPELINE_CREATE_2_RAY_TRACING_ALLOW_SPHERES_AND_LINEAR_SWEPT_SPHERES_BIT_NV = "ray_tracing_allow_spheres_and_linear_swept_spheres"
+VK_PIPELINE_CREATE_2_ENABLE_LEGACY_DITHERING_BIT_EXT = "enable_legacy_dithering"
+VK_PIPELINE_CREATE_2_DISALLOW_OPACITY_MICROMAP_BIT_ARM = "disallow_opacity_micromap"
+VK_PIPELINE_CREATE_2_INDIRECT_BINDABLE_BIT_EXT = "indirect_bindable"
+VK_PIPELINE_CREATE_2_PER_LAYER_FRAGMENT_DENSITY_BIT_VALVE = "per_layer_fragment_density"
+
+[bits."VkPipelineLayoutCreateFlagBits"]
+VK_PIPELINE_LAYOUT_CREATE_INDEPENDENT_SETS_BIT_EXT = "independent_sets"
+
+[bits."VkPresentGravityFlagBitsKHR"]
+VK_PRESENT_GRAVITY_MIN_BIT_KHR = "min"
+VK_PRESENT_GRAVITY_MAX_BIT_KHR = "max"
+VK_PRESENT_GRAVITY_CENTERED_BIT_KHR = "centered"
+
+[bits."VkPresentScalingFlagBitsKHR"]
+VK_PRESENT_SCALING_ONE_TO_ONE_BIT_KHR = "one_to_one"
+VK_PRESENT_SCALING_ASPECT_RATIO_STRETCH_BIT_KHR = "aspect_ratio_stretch"
+VK_PRESENT_SCALING_STRETCH_BIT_KHR = "stretch"
+
+[bits."VkQueryPipelineStatisticFlagBits"]
+VK_QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_VERTICES_BIT = "input_assembly_vertices"
+VK_QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_PRIMITIVES_BIT = "input_assembly_primitives"
+VK_QUERY_PIPELINE_STATISTIC_VERTEX_SHADER_INVOCATIONS_BIT = "vertex_shader_invocations"
+VK_QUERY_PIPELINE_STATISTIC_GEOMETRY_SHADER_INVOCATIONS_BIT = "geometry_shader_invocations"
+VK_QUERY_PIPELINE_STATISTIC_GEOMETRY_SHADER_PRIMITIVES_BIT = "geometry_shader_primitives"
+VK_QUERY_PIPELINE_STATISTIC_CLIPPING_INVOCATIONS_BIT = "clipping_invocations"
+VK_QUERY_PIPELINE_STATISTIC_CLIPPING_PRIMITIVES_BIT = "clipping_primitives"
+VK_QUERY_PIPELINE_STATISTIC_FRAGMENT_SHADER_INVOCATIONS_BIT = "fragment_shader_invocations"
+VK_QUERY_PIPELINE_STATISTIC_TESSELLATION_CONTROL_SHADER_PATCHES_BIT = "tessellation_control_shader_patches"
+VK_QUERY_PIPELINE_STATISTIC_TESSELLATION_EVALUATION_SHADER_INVOCATIONS_BIT = "tessellation_evaluation_shader_invocations"
+VK_QUERY_PIPELINE_STATISTIC_COMPUTE_SHADER_INVOCATIONS_BIT = "compute_shader_invocations"
+VK_QUERY_PIPELINE_STATISTIC_TASK_SHADER_INVOCATIONS_BIT_EXT = "task_shader_invocations"
+VK_QUERY_PIPELINE_STATISTIC_MESH_SHADER_INVOCATIONS_BIT_EXT = "mesh_shader_invocations"
+VK_QUERY_PIPELINE_STATISTIC_CLUSTER_CULLING_SHADER_INVOCATIONS_BIT_HUAWEI = "cluster_culling_shader_invocations"
+
+[bits."VkQueryPoolCreateFlagBits"]
+VK_QUERY_POOL_CREATE_RESET_BIT_KHR = "reset"
+
+[bits."VkRenderPassCreateFlagBits"]
+VK_RENDER_PASS_CREATE_TRANSFORM_BIT_QCOM = "transform"
+VK_RENDER_PASS_CREATE_PER_LAYER_FRAGMENT_DENSITY_BIT_VALVE = "per_layer_fragment_density"
+
+[bits."VkSamplerCreateFlagBits"]
+VK_SAMPLER_CREATE_SUBSAMPLED_BIT_EXT = "subsampled"
+VK_SAMPLER_CREATE_SUBSAMPLED_COARSE_RECONSTRUCTION_BIT_EXT = "subsampled_coarse_reconstruction"
+VK_SAMPLER_CREATE_NON_SEAMLESS_CUBE_MAP_BIT_EXT = "non_seamless_cube_map"
+VK_SAMPLER_CREATE_DESCRIPTOR_BUFFER_CAPTURE_REPLAY_BIT_EXT = "descriptor_buffer_capture_replay"
+VK_SAMPLER_CREATE_IMAGE_PROCESSING_BIT_QCOM = "image_processing"
+
+[bits."VkShaderCreateFlagBitsEXT"]
+VK_SHADER_CREATE_LINK_STAGE_BIT_EXT = "link_stage"
+VK_SHADER_CREATE_ALLOW_VARYING_SUBGROUP_SIZE_BIT_EXT = "allow_varying_subgroup_size"
+VK_SHADER_CREATE_REQUIRE_FULL_SUBGROUPS_BIT_EXT = "require_full_subgroups"
+VK_SHADER_CREATE_NO_TASK_SHADER_BIT_EXT = "no_task_shader"
+VK_SHADER_CREATE_DISPATCH_BASE_BIT_EXT = "dispatch_base"
+VK_SHADER_CREATE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_EXT = "fragment_shading_rate_attachment"
+VK_SHADER_CREATE_FRAGMENT_DENSITY_MAP_ATTACHMENT_BIT_EXT = "fragment_density_map_attachment"
+VK_SHADER_CREATE_INDIRECT_BINDABLE_BIT_EXT = "indirect_bindable"
+
+[bits."VkShaderStageFlagBits"]
+VK_SHADER_STAGE_VERTEX_BIT = "vertex"
+VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT = "tessellation_control"
+VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT = "tessellation_evaluation"
+VK_SHADER_STAGE_GEOMETRY_BIT = "geometry"
+VK_SHADER_STAGE_FRAGMENT_BIT = "fragment"
+VK_SHADER_STAGE_COMPUTE_BIT = "compute"
+VK_SHADER_STAGE_TASK_BIT_EXT = "task"
+VK_SHADER_STAGE_MESH_BIT_EXT = "mesh"
+VK_SHADER_STAGE_RAYGEN_BIT_KHR = "raygen"
+VK_SHADER_STAGE_ANY_HIT_BIT_KHR = "any_hit"
+VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR = "closest_hit"
+VK_SHADER_STAGE_MISS_BIT_KHR = "miss"
+VK_SHADER_STAGE_INTERSECTION_BIT_KHR = "intersection"
+VK_SHADER_STAGE_CALLABLE_BIT_KHR = "callable"
+VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI = "subpass_shading"
+VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI = "cluster_culling"
+
+[bits."VkSurfaceCounterFlagBitsEXT"]
+VK_SURFACE_COUNTER_VBLANK_BIT_EXT = "vblank"
+
+[bits."VkSwapchainCreateFlagBitsKHR"]
+VK_SWAPCHAIN_CREATE_SPLIT_INSTANCE_BIND_REGIONS_BIT_KHR = "split_instance_bind_regions"
+VK_SWAPCHAIN_CREATE_PROTECTED_BIT_KHR = "protected_"
+VK_SWAPCHAIN_CREATE_MUTABLE_FORMAT_BIT_KHR = "mutable_format"
+VK_SWAPCHAIN_CREATE_DEFERRED_MEMORY_ALLOCATION_BIT_KHR = "deferred_memory_allocation"
+VK_SWAPCHAIN_CREATE_PRESENT_ID_2_BIT_KHR = "present_id_2"
+VK_SWAPCHAIN_CREATE_PRESENT_WAIT_2_BIT_KHR = "present_wait_2"
+
+[bits."VkTensorCreateFlagBitsARM"]
+VK_TENSOR_CREATE_MUTABLE_FORMAT_BIT_ARM = "mutable_format"
+VK_TENSOR_CREATE_PROTECTED_BIT_ARM = "protected_"
+VK_TENSOR_CREATE_DESCRIPTOR_BUFFER_CAPTURE_REPLAY_BIT_ARM = "descriptor_buffer_capture_replay"
+
+[bits."VkTensorViewCreateFlagBitsARM"]
+VK_TENSOR_VIEW_CREATE_DESCRIPTOR_BUFFER_CAPTURE_REPLAY_BIT_ARM = "descriptor_buffer_capture_replay"
+
+[bits."VkTileShadingRenderPassFlagBitsQCOM"]
+VK_TILE_SHADING_RENDER_PASS_ENABLE_BIT_QCOM = "enable"
+VK_TILE_SHADING_RENDER_PASS_PER_TILE_EXECUTION_BIT_QCOM = "per_tile_execution"
+
+[bits."VkVideoChromaSubsamplingFlagBitsKHR"]
+VK_VIDEO_CHROMA_SUBSAMPLING_MONOCHROME_BIT_KHR = "monochrome"
+VK_VIDEO_CHROMA_SUBSAMPLING_420_BIT_KHR = "ratio_420"
+VK_VIDEO_CHROMA_SUBSAMPLING_422_BIT_KHR = "ratio_422"
+VK_VIDEO_CHROMA_SUBSAMPLING_444_BIT_KHR = "ratio_444"
+
+[bits."VkVideoComponentBitDepthFlagBitsKHR"]
+VK_VIDEO_COMPONENT_BIT_DEPTH_8_BIT_KHR = "depth_8"
+VK_VIDEO_COMPONENT_BIT_DEPTH_10_BIT_KHR = "depth_10"
+VK_VIDEO_COMPONENT_BIT_DEPTH_12_BIT_KHR = "depth_12"
+
+[bits."VkVideoDecodeUsageFlagBitsKHR"]
+VK_VIDEO_DECODE_USAGE_TRANSCODING_BIT_KHR = "transcoding"
+VK_VIDEO_DECODE_USAGE_OFFLINE_BIT_KHR = "offline"
+VK_VIDEO_DECODE_USAGE_STREAMING_BIT_KHR = "streaming"
+
+[bits."VkVideoEncodeContentFlagBitsKHR"]
+VK_VIDEO_ENCODE_CONTENT_CAMERA_BIT_KHR = "camera"
+VK_VIDEO_ENCODE_CONTENT_DESKTOP_BIT_KHR = "desktop"
+VK_VIDEO_ENCODE_CONTENT_RENDERED_BIT_KHR = "rendered"
+
+[bits."VkVideoEncodeFeedbackFlagBitsKHR"]
+VK_VIDEO_ENCODE_FEEDBACK_BITSTREAM_BUFFER_OFFSET_BIT_KHR = "buffer_offset"
+VK_VIDEO_ENCODE_FEEDBACK_BITSTREAM_BYTES_WRITTEN_BIT_KHR = "bytes_written"
+VK_VIDEO_ENCODE_FEEDBACK_BITSTREAM_HAS_OVERRIDES_BIT_KHR = "has_overrides"
+
+[bits."VkVideoEncodeUsageFlagBitsKHR"]
+VK_VIDEO_ENCODE_USAGE_TRANSCODING_BIT_KHR = "transcoding"
+VK_VIDEO_ENCODE_USAGE_STREAMING_BIT_KHR = "streaming"
+VK_VIDEO_ENCODE_USAGE_RECORDING_BIT_KHR = "recording"
+VK_VIDEO_ENCODE_USAGE_CONFERENCING_BIT_KHR = "conferencing"
+
+[bits."VkVideoSessionCreateFlagBitsKHR"]
+VK_VIDEO_SESSION_CREATE_PROTECTED_CONTENT_BIT_KHR = "protected_content"
+VK_VIDEO_SESSION_CREATE_ALLOW_ENCODE_PARAMETER_OPTIMIZATIONS_BIT_KHR = "allow_encode_parameter_optimizations"
+VK_VIDEO_SESSION_CREATE_INLINE_QUERIES_BIT_KHR = "inline_queries"
+VK_VIDEO_SESSION_CREATE_ALLOW_ENCODE_QUANTIZATION_DELTA_MAP_BIT_KHR = "allow_encode_quantization_delta_map"
+VK_VIDEO_SESSION_CREATE_ALLOW_ENCODE_EMPHASIS_MAP_BIT_KHR = "allow_encode_emphasis_map"
+VK_VIDEO_SESSION_CREATE_INLINE_SESSION_PARAMETERS_BIT_KHR = "inline_session_parameters"
+
+[bits."VkVideoSessionParametersCreateFlagBitsKHR"]
+VK_VIDEO_SESSION_PARAMETERS_CREATE_QUANTIZATION_MAP_COMPATIBLE_BIT_KHR = "quantization_map_compatible"
