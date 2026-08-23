@@ -269,6 +269,7 @@ def _render_flags_checks(field: Field, table: Table, field_name: str) -> list[st
 	"""
 	lines = [
 		f"{TAB}static_assert(sizeof({field_name}_type) == sizeof({field.member.type}));",
+		"#if !defined(__clang__) || !defined(_MSC_VER)",
 	]
 	for bit in field.layout:
 		name = table.bit_name(field.flag_bits, bit.name)
@@ -277,6 +278,7 @@ def _render_flags_checks(field: Field, table: Table, field_name: str) -> list[st
 			f"{TAB}static_assert(::std::bit_cast<{field.member.type}>({field_name}_type{{.{name} = 1}}) == {bit.name});"
 		)
 		_guard_close(lines, bit.guards)
+	lines.append("#endif")
 	return lines
 
 

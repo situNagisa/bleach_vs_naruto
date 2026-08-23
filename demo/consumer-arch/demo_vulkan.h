@@ -18,6 +18,7 @@
 #include <bvn/platform/window.h>
 #include <bvn/graphics/renderer.h>
 #include <vkkl/vkkl.h>
+#include <vkfu/generated/vulkan-v1.4.328.h>
 
 namespace consumer_arch_vulkan
 {
@@ -244,14 +245,16 @@ inline auto create_swapchain(vulkan_context& renderer, ::bvn::platform::window c
 	renderer._swapchain_image_view_handles.reserve(renderer._swapchain_images.size());
 	for (auto image : renderer._swapchain_images)
 	{
-		auto info = ::VkImageViewCreateInfo{};
-		info.sType = ::VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		info.image = image;
-		info.viewType = ::VK_IMAGE_VIEW_TYPE_2D;
-		info.format = renderer._swapchain_image_format;
-		info.subresourceRange.aspectMask = ::VK_IMAGE_ASPECT_COLOR_BIT;
-		info.subresourceRange.levelCount = 1;
-		info.subresourceRange.layerCount = 1;
+		auto info = ::vkfu::evaluate(::vkfu::param::image_view{
+			.image = image,
+			.view_type = ::VK_IMAGE_VIEW_TYPE_2D,
+			.format = renderer._swapchain_image_format,
+			.subresource_range = {
+				.aspectMask = ::VK_IMAGE_ASPECT_COLOR_BIT,
+				.levelCount = 1,
+				.layerCount = 1,
+			},
+		});
 		auto view = renderer._device.create_image_view(info);
 		renderer._swapchain_image_view_handles.push_back(view.handle);
 		renderer._swapchain_image_views.push_back(::std::move(view));
@@ -260,20 +263,20 @@ inline auto create_swapchain(vulkan_context& renderer, ::bvn::platform::window c
 
 inline auto create_triangle_pipeline(vulkan_context& renderer) -> void
 {
+	using ::vkfu::operator|;
+
 	auto const vertex_words = read_spirv(R"(D:\project\bvn\demo\consumer-arch\shaders\triangle.vert.spv)");
 	auto const fragment_words = read_spirv(R"(D:\project\bvn\demo\consumer-arch\shaders\triangle.frag.spv)");
-	auto vertex_info = ::VkShaderModuleCreateInfo{};
-	vertex_info.sType = ::VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-	vertex_info.codeSize = vertex_words.size() * sizeof(::std::uint32_t);
-	vertex_info.pCode = vertex_words.data();
-	auto fragment_info = vertex_info;
-	fragment_info.codeSize = fragment_words.size() * sizeof(::std::uint32_t);
-	fragment_info.pCode = fragment_words.data();
-	auto vertex_shader = renderer._device.create_shader_module(vertex_info);
-	auto fragment_shader = renderer._device.create_shader_module(fragment_info);
+	auto vertex_shader = renderer._device.create_shader_module(::vkfu::unpack(::vkfu::evaluate(::vkfu::param::shader_module{
+		.code_size = vertex_words.size() * sizeof(::std::uint32_t),
+		.code = vertex_words.data(),
+		})));
+	auto fragment_shader = renderer._device.create_shader_module(::vkfu::unpack(::vkfu::evaluate(::vkfu::param::shader_module{
+		.code_size = fragment_words.size() * sizeof(::std::uint32_t),
+		.code = fragment_words.data(),
+		})));
 
-	auto layout_info = ::VkPipelineLayoutCreateInfo{};
-	layout_info.sType = ::VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	auto layout_info = ::vkfu::evaluate(::vkfu::param::pipeline_layout{});
 	renderer._triangle_pipeline_layout = renderer._device.create_pipeline_layout(layout_info);
 
 	auto stages = ::std::array<::VkPipelineShaderStageCreateInfo, 2>{};
@@ -317,23 +320,23 @@ inline auto create_triangle_pipeline(vulkan_context& renderer) -> void
 	dynamic.sType = ::VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 	dynamic.dynamicStateCount = static_cast<::std::uint32_t>(dynamic_states.size());
 	dynamic.pDynamicStates = dynamic_states.data();
-	auto rendering = ::VkPipelineRenderingCreateInfo{};
-	rendering.sType = ::VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
-	rendering.colorAttachmentCount = 1;
-	rendering.pColorAttachmentFormats = &renderer._swapchain_image_format;
-	auto pipeline_info = ::VkGraphicsPipelineCreateInfo{};
-	pipeline_info.sType = ::VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-	pipeline_info.pNext = &rendering;
-	pipeline_info.stageCount = static_cast<::std::uint32_t>(stages.size());
-	pipeline_info.pStages = stages.data();
-	pipeline_info.pVertexInputState = &vertex_input;
-	pipeline_info.pInputAssemblyState = &input_assembly;
-	pipeline_info.pViewportState = &viewport;
-	pipeline_info.pRasterizationState = &rasterization;
-	pipeline_info.pMultisampleState = &multisample;
-	pipeline_info.pColorBlendState = &blend;
-	pipeline_info.pDynamicState = &dynamic;
-	pipeline_info.layout = renderer._triangle_pipeline_layout.handle;
+	auto pipeline_storage = ::vkfu::evaluate(
+		::vkfu::param::graphics_pipeline{
+			.stages = stages,
+			.vertex_input_state = &vertex_input,
+			.input_assembly_state = &input_assembly,
+			.viewport_state = &viewport,
+			.rasterization_state = &rasterization,
+			.multisample_state = &multisample,
+			.color_blend_state = &blend,
+			.dynamic_state = &dynamic,
+			.layout = renderer._triangle_pipeline_layout.handle,
+		}
+		| ::vkfu::param::option::pipeline_rendering{
+			.color_attachment_formats = ::std::span{&renderer._swapchain_image_format, 1u},
+		}
+	);
+	auto const& pipeline_info = ::std::get<0>(pipeline_storage.storages);
 	renderer._triangle_pipeline = renderer._device.create_graphics_pipeline(pipeline_info);
 }
 
@@ -412,10 +415,10 @@ inline auto create_secondary_command_pool(
 ) -> ::vkkl::command_pool
 {
 	auto device = ::vkkl::device_observer{renderer.device()};
-	auto pool_info = ::VkCommandPoolCreateInfo{};
-	pool_info.sType = ::VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	pool_info.flags = ::VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
-	pool_info.queueFamilyIndex = renderer.graphics_queue_family();
+	auto pool_info = ::vkfu::evaluate(::vkfu::param::command_pool{
+		.flags = {.transient = 1},
+		.queue_family_index = renderer.graphics_queue_family(),
+	});
 	return device.create_command_pool(pool_info);
 }
 

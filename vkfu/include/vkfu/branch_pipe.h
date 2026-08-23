@@ -32,12 +32,12 @@ struct branch_pipe_expression
 
 	constexpr auto evaluate() noexcept(noexcept(_evaluate(::std::index_sequence_for<Features...>{})))
 	{
-		return _evaluate(::std::index_sequence_for<Features...>{});
+		return self_type::_evaluate(::std::index_sequence_for<Features...>{});
 	}
 
 	constexpr auto append(expression auto&&... features) noexcept(noexcept(_append(::std::index_sequence_for<Features...>{}, ::std::forward<decltype(features)>(features)...)))
 	{
-		return _append(::std::index_sequence_for<Features...>{}, ::std::forward<decltype(features)>(features)...);
+		return self_type::_append(::std::index_sequence_for<Features...>{}, ::std::forward<decltype(features)>(features)...);
 	}
 
 	template<::std::size_t... Indices>

@@ -42,6 +42,7 @@ struct consumer_promise
 	, nc::promises::value<void>
 	// , nc::promises::propagate_stopped_to_continuation<>
 	, nc::promises::jump_to_continuation<>
+	, nc::promises::terminate_on_unhandled_stopped
 	, nc::promises::return_object_from_handle<consumer_promise, consumer_task>
 	, nc::promises::with_scheduler<any_scheduler_type>
 	, nc::promises::with_stop_token<::stdexec::inplace_stop_token>

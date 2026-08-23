@@ -212,11 +212,10 @@ struct frame_slot_resource
 		for (auto index = ::std::size_t{}; index < count; ++index)
 		{
 			auto& slot = _free_slots.emplace_back();
-			auto pool_info = ::VkCommandPoolCreateInfo{};
-			pool_info.sType = ::VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-			pool_info.flags = ::VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | ::VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-			pool_info.queueFamilyIndex = renderer.graphics_queue_family();
-			slot._primary_command_pool = device.create_command_pool(pool_info);
+			slot._primary_command_pool = device.create_command_pool(::vkfu::unpack(::vkfu::evaluate(::vkfu::param::command_pool{
+				.flags = {.transient = 1, .reset_command_buffer = 1},
+				.queue_family_index = renderer.graphics_queue_family(),
+				})));
 
 			auto allocate_info = ::VkCommandBufferAllocateInfo{};
 			allocate_info.sType = ::VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -234,13 +233,11 @@ struct frame_slot_resource
 				raw_command_buffer,
 			};
 
-			auto semaphore_info = ::VkSemaphoreCreateInfo{};
-			semaphore_info.sType = ::VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-			slot._image_available = device.create_semaphore(semaphore_info);
-			slot._render_finished = device.create_semaphore(semaphore_info);
-			auto fence_info = ::VkFenceCreateInfo{};
-			fence_info.sType = ::VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-			slot._in_flight = device.create_fence(fence_info);
+			auto semaphore_info = ::vkfu::evaluate(::vkfu::param::semaphore{});
+			slot._image_available = device.create_semaphore(::vkfu::unpack(semaphore_info));
+			slot._render_finished = device.create_semaphore(::vkfu::unpack(semaphore_info));
+			auto fence_info = ::vkfu::evaluate(::vkfu::param::fence{});
+			slot._in_flight = device.create_fence(::vkfu::unpack(fence_info));
 		}
 	}
 

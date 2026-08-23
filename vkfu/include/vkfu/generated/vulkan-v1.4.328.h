@@ -5586,9 +5586,11 @@ struct acceleration_structure_khr
 	VkDeviceAddress device_address{};
 
 	static_assert(sizeof(create_flags_type) == sizeof(VkAccelerationStructureCreateFlagsKHR));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkAccelerationStructureCreateFlagsKHR>(create_flags_type{.device_address_capture_replay = 1}) == VK_ACCELERATION_STRUCTURE_CREATE_DEVICE_ADDRESS_CAPTURE_REPLAY_BIT_KHR);
 	static_assert(::std::bit_cast<VkAccelerationStructureCreateFlagsKHR>(create_flags_type{.motion = 1}) == VK_ACCELERATION_STRUCTURE_CREATE_MOTION_BIT_NV);
 	static_assert(::std::bit_cast<VkAccelerationStructureCreateFlagsKHR>(create_flags_type{.descriptor_buffer_capture_replay = 1}) == VK_ACCELERATION_STRUCTURE_CREATE_DESCRIPTOR_BUFFER_CAPTURE_REPLAY_BIT_EXT);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkAccelerationStructureCreateInfoKHR
 	{
@@ -5717,6 +5719,7 @@ struct buffer
 	::std::span<::std::uint32_t const> queue_family_indices{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkBufferCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkBufferCreateFlags>(flags_type{.sparse_binding = 1}) == VK_BUFFER_CREATE_SPARSE_BINDING_BIT);
 	static_assert(::std::bit_cast<VkBufferCreateFlags>(flags_type{.sparse_residency = 1}) == VK_BUFFER_CREATE_SPARSE_RESIDENCY_BIT);
 	static_assert(::std::bit_cast<VkBufferCreateFlags>(flags_type{.sparse_aliased = 1}) == VK_BUFFER_CREATE_SPARSE_ALIASED_BIT);
@@ -5724,8 +5727,10 @@ struct buffer
 	static_assert(::std::bit_cast<VkBufferCreateFlags>(flags_type{.device_address_capture_replay = 1}) == VK_BUFFER_CREATE_DEVICE_ADDRESS_CAPTURE_REPLAY_BIT);
 	static_assert(::std::bit_cast<VkBufferCreateFlags>(flags_type{.descriptor_buffer_capture_replay = 1}) == VK_BUFFER_CREATE_DESCRIPTOR_BUFFER_CAPTURE_REPLAY_BIT_EXT);
 	static_assert(::std::bit_cast<VkBufferCreateFlags>(flags_type{.video_profile_independent = 1}) == VK_BUFFER_CREATE_VIDEO_PROFILE_INDEPENDENT_BIT_KHR);
+#endif
 
 	static_assert(sizeof(usage_type) == sizeof(VkBufferUsageFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkBufferUsageFlags>(usage_type{.transfer_src = 1}) == VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
 	static_assert(::std::bit_cast<VkBufferUsageFlags>(usage_type{.transfer_dst = 1}) == VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 	static_assert(::std::bit_cast<VkBufferUsageFlags>(usage_type{.uniform_texel_buffer = 1}) == VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT);
@@ -5755,6 +5760,7 @@ struct buffer
 #endif
 	static_assert(::std::bit_cast<VkBufferUsageFlags>(usage_type{.push_descriptors_descriptor_buffer = 1}) == VK_BUFFER_USAGE_PUSH_DESCRIPTORS_DESCRIPTOR_BUFFER_BIT_EXT);
 	static_assert(::std::bit_cast<VkBufferUsageFlags>(usage_type{.tile_memory = 1}) == VK_BUFFER_USAGE_TILE_MEMORY_BIT_QCOM);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkBufferCreateInfo
 	{
@@ -5811,9 +5817,11 @@ struct command_pool
 	::std::uint32_t queue_family_index{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkCommandPoolCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkCommandPoolCreateFlags>(flags_type{.transient = 1}) == VK_COMMAND_POOL_CREATE_TRANSIENT_BIT);
 	static_assert(::std::bit_cast<VkCommandPoolCreateFlags>(flags_type{.reset_command_buffer = 1}) == VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 	static_assert(::std::bit_cast<VkCommandPoolCreateFlags>(flags_type{.protected_ = 1}) == VK_COMMAND_POOL_CREATE_PROTECTED_BIT);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkCommandPoolCreateInfo
 	{
@@ -5873,6 +5881,7 @@ struct compute_pipeline
 	::std::int32_t base_pipeline_index{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkPipelineCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.disable_optimization = 1}) == VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.allow_derivatives = 1}) == VK_PIPELINE_CREATE_ALLOW_DERIVATIVES_BIT);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.derivative = 1}) == VK_PIPELINE_CREATE_DERIVATIVE_BIT);
@@ -5906,6 +5915,7 @@ struct compute_pipeline
 #endif
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.descriptor_buffer = 1}) == VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.protected_access_only = 1}) == VK_PIPELINE_CREATE_PROTECTED_ACCESS_ONLY_BIT);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkComputePipelineCreateInfo
 	{
@@ -6032,7 +6042,9 @@ struct data_graph_pipeline_session
 	VkPipeline data_graph_pipeline{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkDataGraphPipelineSessionCreateFlagsARM));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkDataGraphPipelineSessionCreateFlagsARM>(flags_type{.protected_ = 1}) == VK_DATA_GRAPH_PIPELINE_SESSION_CREATE_PROTECTED_BIT_ARM);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkDataGraphPipelineSessionCreateInfoARM
 	{
@@ -6064,11 +6076,13 @@ struct debug_report_callback
 	void* user_data = nullptr;
 
 	static_assert(sizeof(flags_type) == sizeof(VkDebugReportFlagsEXT));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkDebugReportFlagsEXT>(flags_type{.information = 1}) == VK_DEBUG_REPORT_INFORMATION_BIT_EXT);
 	static_assert(::std::bit_cast<VkDebugReportFlagsEXT>(flags_type{.warning = 1}) == VK_DEBUG_REPORT_WARNING_BIT_EXT);
 	static_assert(::std::bit_cast<VkDebugReportFlagsEXT>(flags_type{.performance_warning = 1}) == VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT);
 	static_assert(::std::bit_cast<VkDebugReportFlagsEXT>(flags_type{.error = 1}) == VK_DEBUG_REPORT_ERROR_BIT_EXT);
 	static_assert(::std::bit_cast<VkDebugReportFlagsEXT>(flags_type{.debug = 1}) == VK_DEBUG_REPORT_DEBUG_BIT_EXT);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkDebugReportCallbackCreateInfoEXT
 	{
@@ -6114,16 +6128,20 @@ struct debug_utils_messenger
 	void* user_data = nullptr;
 
 	static_assert(sizeof(message_severity_type) == sizeof(VkDebugUtilsMessageSeverityFlagsEXT));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkDebugUtilsMessageSeverityFlagsEXT>(message_severity_type{.verbose = 1}) == VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT);
 	static_assert(::std::bit_cast<VkDebugUtilsMessageSeverityFlagsEXT>(message_severity_type{.info = 1}) == VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT);
 	static_assert(::std::bit_cast<VkDebugUtilsMessageSeverityFlagsEXT>(message_severity_type{.warning = 1}) == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT);
 	static_assert(::std::bit_cast<VkDebugUtilsMessageSeverityFlagsEXT>(message_severity_type{.error = 1}) == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT);
+#endif
 
 	static_assert(sizeof(message_type_type) == sizeof(VkDebugUtilsMessageTypeFlagsEXT));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkDebugUtilsMessageTypeFlagsEXT>(message_type_type{.general = 1}) == VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT);
 	static_assert(::std::bit_cast<VkDebugUtilsMessageTypeFlagsEXT>(message_type_type{.validation = 1}) == VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT);
 	static_assert(::std::bit_cast<VkDebugUtilsMessageTypeFlagsEXT>(message_type_type{.performance = 1}) == VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT);
 	static_assert(::std::bit_cast<VkDebugUtilsMessageTypeFlagsEXT>(message_type_type{.device_address_binding = 1}) == VK_DEBUG_UTILS_MESSAGE_TYPE_DEVICE_ADDRESS_BINDING_BIT_EXT);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkDebugUtilsMessengerCreateInfoEXT
 	{
@@ -6158,11 +6176,13 @@ struct descriptor_pool
 	::std::span<VkDescriptorPoolSize const> pool_sizes{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkDescriptorPoolCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkDescriptorPoolCreateFlags>(flags_type{.free_descriptor_set = 1}) == VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT);
 	static_assert(::std::bit_cast<VkDescriptorPoolCreateFlags>(flags_type{.update_after_bind = 1}) == VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT);
 	static_assert(::std::bit_cast<VkDescriptorPoolCreateFlags>(flags_type{.host_only = 1}) == VK_DESCRIPTOR_POOL_CREATE_HOST_ONLY_BIT_EXT);
 	static_assert(::std::bit_cast<VkDescriptorPoolCreateFlags>(flags_type{.allow_overallocation_sets = 1}) == VK_DESCRIPTOR_POOL_CREATE_ALLOW_OVERALLOCATION_SETS_BIT_NV);
 	static_assert(::std::bit_cast<VkDescriptorPoolCreateFlags>(flags_type{.allow_overallocation_pools = 1}) == VK_DESCRIPTOR_POOL_CREATE_ALLOW_OVERALLOCATION_POOLS_BIT_NV);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkDescriptorPoolCreateInfo
 	{
@@ -6198,6 +6218,7 @@ struct descriptor_set_layout
 	::std::span<VkDescriptorSetLayoutBinding const> bindings{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkDescriptorSetLayoutCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkDescriptorSetLayoutCreateFlags>(flags_type{.push_descriptor = 1}) == VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT);
 	static_assert(::std::bit_cast<VkDescriptorSetLayoutCreateFlags>(flags_type{.update_after_bind_pool = 1}) == VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT);
 	static_assert(::std::bit_cast<VkDescriptorSetLayoutCreateFlags>(flags_type{.host_only_pool = 1}) == VK_DESCRIPTOR_SET_LAYOUT_CREATE_HOST_ONLY_POOL_BIT_EXT);
@@ -6205,6 +6226,7 @@ struct descriptor_set_layout
 	static_assert(::std::bit_cast<VkDescriptorSetLayoutCreateFlags>(flags_type{.embedded_immutable_samplers = 1}) == VK_DESCRIPTOR_SET_LAYOUT_CREATE_EMBEDDED_IMMUTABLE_SAMPLERS_BIT_EXT);
 	static_assert(::std::bit_cast<VkDescriptorSetLayoutCreateFlags>(flags_type{.per_stage = 1}) == VK_DESCRIPTOR_SET_LAYOUT_CREATE_PER_STAGE_BIT_NV);
 	static_assert(::std::bit_cast<VkDescriptorSetLayoutCreateFlags>(flags_type{.indirect_bindable = 1}) == VK_DESCRIPTOR_SET_LAYOUT_CREATE_INDIRECT_BINDABLE_BIT_NV);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkDescriptorSetLayoutCreateInfo
 	{
@@ -6357,7 +6379,9 @@ struct event
 	flags_type flags{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkEventCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkEventCreateFlags>(flags_type{.device_only = 1}) == VK_EVENT_CREATE_DEVICE_ONLY_BIT);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkEventCreateInfo
 	{
@@ -6418,6 +6442,7 @@ struct execution_graph_pipeline
 	::std::int32_t base_pipeline_index{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkPipelineCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.disable_optimization = 1}) == VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.allow_derivatives = 1}) == VK_PIPELINE_CREATE_ALLOW_DERIVATIVES_BIT);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.derivative = 1}) == VK_PIPELINE_CREATE_DERIVATIVE_BIT);
@@ -6451,6 +6476,7 @@ struct execution_graph_pipeline
 #endif
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.descriptor_buffer = 1}) == VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.protected_access_only = 1}) == VK_PIPELINE_CREATE_PROTECTED_ACCESS_ONLY_BIT);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkExecutionGraphPipelineCreateInfoAMDX
 	{
@@ -6498,7 +6524,9 @@ struct fence
 	flags_type flags{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkFenceCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkFenceCreateFlags>(flags_type{.signaled = 1}) == VK_FENCE_CREATE_SIGNALED_BIT);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkFenceCreateInfo
 	{
@@ -6528,7 +6556,9 @@ struct framebuffer
 	::std::uint32_t layers{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkFramebufferCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkFramebufferCreateFlags>(flags_type{.imageless = 1}) == VK_FRAMEBUFFER_CREATE_IMAGELESS_BIT);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkFramebufferCreateInfo
 	{
@@ -6604,6 +6634,7 @@ struct graphics_pipeline
 	::std::int32_t base_pipeline_index{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkPipelineCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.disable_optimization = 1}) == VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.allow_derivatives = 1}) == VK_PIPELINE_CREATE_ALLOW_DERIVATIVES_BIT);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.derivative = 1}) == VK_PIPELINE_CREATE_DERIVATIVE_BIT);
@@ -6637,6 +6668,7 @@ struct graphics_pipeline
 #endif
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.descriptor_buffer = 1}) == VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.protected_access_only = 1}) == VK_PIPELINE_CREATE_PROTECTED_ACCESS_ONLY_BIT);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkGraphicsPipelineCreateInfo
 	{
@@ -6776,6 +6808,7 @@ struct image
 	VkImageLayout initial_layout{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkImageCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkImageCreateFlags>(flags_type{.sparse_binding = 1}) == VK_IMAGE_CREATE_SPARSE_BINDING_BIT);
 	static_assert(::std::bit_cast<VkImageCreateFlags>(flags_type{.sparse_residency = 1}) == VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT);
 	static_assert(::std::bit_cast<VkImageCreateFlags>(flags_type{.sparse_aliased = 1}) == VK_IMAGE_CREATE_SPARSE_ALIASED_BIT);
@@ -6796,8 +6829,10 @@ struct image
 	static_assert(::std::bit_cast<VkImageCreateFlags>(flags_type{.view_2d_compatible = 1}) == VK_IMAGE_CREATE_2D_VIEW_COMPATIBLE_BIT_EXT);
 	static_assert(::std::bit_cast<VkImageCreateFlags>(flags_type{.multisampled_render_to_single_sampled = 1}) == VK_IMAGE_CREATE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_BIT_EXT);
 	static_assert(::std::bit_cast<VkImageCreateFlags>(flags_type{.video_profile_independent = 1}) == VK_IMAGE_CREATE_VIDEO_PROFILE_INDEPENDENT_BIT_KHR);
+#endif
 
 	static_assert(sizeof(usage_type) == sizeof(VkImageUsageFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkImageUsageFlags>(usage_type{.transfer_src = 1}) == VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
 	static_assert(::std::bit_cast<VkImageUsageFlags>(usage_type{.transfer_dst = 1}) == VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 	static_assert(::std::bit_cast<VkImageUsageFlags>(usage_type{.sampled = 1}) == VK_IMAGE_USAGE_SAMPLED_BIT);
@@ -6823,6 +6858,7 @@ struct image
 	static_assert(::std::bit_cast<VkImageUsageFlags>(usage_type{.video_encode_quantization_delta_map = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_QUANTIZATION_DELTA_MAP_BIT_KHR);
 	static_assert(::std::bit_cast<VkImageUsageFlags>(usage_type{.video_encode_emphasis_map = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_EMPHASIS_MAP_BIT_KHR);
 	static_assert(::std::bit_cast<VkImageUsageFlags>(usage_type{.tile_memory = 1}) == VK_IMAGE_USAGE_TILE_MEMORY_BIT_QCOM);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkImageCreateInfo
 	{
@@ -6886,9 +6922,11 @@ struct image_view
 	VkImageSubresourceRange subresource_range{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkImageViewCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkImageViewCreateFlags>(flags_type{.fragment_density_map_dynamic = 1}) == VK_IMAGE_VIEW_CREATE_FRAGMENT_DENSITY_MAP_DYNAMIC_BIT_EXT);
 	static_assert(::std::bit_cast<VkImageViewCreateFlags>(flags_type{.fragment_density_map_deferred = 1}) == VK_IMAGE_VIEW_CREATE_FRAGMENT_DENSITY_MAP_DEFERRED_BIT_EXT);
 	static_assert(::std::bit_cast<VkImageViewCreateFlags>(flags_type{.descriptor_buffer_capture_replay = 1}) == VK_IMAGE_VIEW_CREATE_DESCRIPTOR_BUFFER_CAPTURE_REPLAY_BIT_EXT);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkImageViewCreateInfo
 	{
@@ -6945,10 +6983,13 @@ struct indirect_commands_layout_ext
 	::std::span<VkIndirectCommandsLayoutTokenEXT const> tokens{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkIndirectCommandsLayoutUsageFlagsEXT));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkIndirectCommandsLayoutUsageFlagsEXT>(flags_type{.explicit_preprocess = 1}) == VK_INDIRECT_COMMANDS_LAYOUT_USAGE_EXPLICIT_PREPROCESS_BIT_EXT);
 	static_assert(::std::bit_cast<VkIndirectCommandsLayoutUsageFlagsEXT>(flags_type{.unordered_sequences = 1}) == VK_INDIRECT_COMMANDS_LAYOUT_USAGE_UNORDERED_SEQUENCES_BIT_EXT);
+#endif
 
 	static_assert(sizeof(shader_stages_type) == sizeof(VkShaderStageFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkShaderStageFlags>(shader_stages_type{.vertex = 1}) == VK_SHADER_STAGE_VERTEX_BIT);
 	static_assert(::std::bit_cast<VkShaderStageFlags>(shader_stages_type{.tessellation_control = 1}) == VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT);
 	static_assert(::std::bit_cast<VkShaderStageFlags>(shader_stages_type{.tessellation_evaluation = 1}) == VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
@@ -6965,6 +7006,7 @@ struct indirect_commands_layout_ext
 	static_assert(::std::bit_cast<VkShaderStageFlags>(shader_stages_type{.callable = 1}) == VK_SHADER_STAGE_CALLABLE_BIT_KHR);
 	static_assert(::std::bit_cast<VkShaderStageFlags>(shader_stages_type{.subpass_shading = 1}) == VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI);
 	static_assert(::std::bit_cast<VkShaderStageFlags>(shader_stages_type{.cluster_culling = 1}) == VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkIndirectCommandsLayoutCreateInfoEXT
 	{
@@ -6999,9 +7041,11 @@ struct indirect_commands_layout_nv
 	::std::span<::std::uint32_t const> stream_strides{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkIndirectCommandsLayoutUsageFlagsNV));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkIndirectCommandsLayoutUsageFlagsNV>(flags_type{.explicit_preprocess = 1}) == VK_INDIRECT_COMMANDS_LAYOUT_USAGE_EXPLICIT_PREPROCESS_BIT_NV);
 	static_assert(::std::bit_cast<VkIndirectCommandsLayoutUsageFlagsNV>(flags_type{.indexed_sequences = 1}) == VK_INDIRECT_COMMANDS_LAYOUT_USAGE_INDEXED_SEQUENCES_BIT_NV);
 	static_assert(::std::bit_cast<VkIndirectCommandsLayoutUsageFlagsNV>(flags_type{.unordered_sequences = 1}) == VK_INDIRECT_COMMANDS_LAYOUT_USAGE_UNORDERED_SEQUENCES_BIT_NV);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkIndirectCommandsLayoutCreateInfoNV
 	{
@@ -7052,7 +7096,9 @@ struct instance
 	::std::span<char const* const> enabled_extension_names{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkInstanceCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkInstanceCreateFlags>(flags_type{.enumerate_portability = 1}) == VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkInstanceCreateInfo
 	{
@@ -7127,7 +7173,9 @@ struct micromap
 	VkDeviceAddress device_address{};
 
 	static_assert(sizeof(create_flags_type) == sizeof(VkMicromapCreateFlagsEXT));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkMicromapCreateFlagsEXT>(create_flags_type{.device_address_capture_replay = 1}) == VK_MICROMAP_CREATE_DEVICE_ADDRESS_CAPTURE_REPLAY_BIT_EXT);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkMicromapCreateInfoEXT
 	{
@@ -7187,23 +7235,29 @@ struct optical_flow_session
 	flags_type flags{};
 
 	static_assert(sizeof(output_grid_size_type) == sizeof(VkOpticalFlowGridSizeFlagsNV));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkOpticalFlowGridSizeFlagsNV>(output_grid_size_type{.size_1x1 = 1}) == VK_OPTICAL_FLOW_GRID_SIZE_1X1_BIT_NV);
 	static_assert(::std::bit_cast<VkOpticalFlowGridSizeFlagsNV>(output_grid_size_type{.size_2x2 = 1}) == VK_OPTICAL_FLOW_GRID_SIZE_2X2_BIT_NV);
 	static_assert(::std::bit_cast<VkOpticalFlowGridSizeFlagsNV>(output_grid_size_type{.size_4x4 = 1}) == VK_OPTICAL_FLOW_GRID_SIZE_4X4_BIT_NV);
 	static_assert(::std::bit_cast<VkOpticalFlowGridSizeFlagsNV>(output_grid_size_type{.size_8x8 = 1}) == VK_OPTICAL_FLOW_GRID_SIZE_8X8_BIT_NV);
+#endif
 
 	static_assert(sizeof(hint_grid_size_type) == sizeof(VkOpticalFlowGridSizeFlagsNV));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkOpticalFlowGridSizeFlagsNV>(hint_grid_size_type{.size_1x1 = 1}) == VK_OPTICAL_FLOW_GRID_SIZE_1X1_BIT_NV);
 	static_assert(::std::bit_cast<VkOpticalFlowGridSizeFlagsNV>(hint_grid_size_type{.size_2x2 = 1}) == VK_OPTICAL_FLOW_GRID_SIZE_2X2_BIT_NV);
 	static_assert(::std::bit_cast<VkOpticalFlowGridSizeFlagsNV>(hint_grid_size_type{.size_4x4 = 1}) == VK_OPTICAL_FLOW_GRID_SIZE_4X4_BIT_NV);
 	static_assert(::std::bit_cast<VkOpticalFlowGridSizeFlagsNV>(hint_grid_size_type{.size_8x8 = 1}) == VK_OPTICAL_FLOW_GRID_SIZE_8X8_BIT_NV);
+#endif
 
 	static_assert(sizeof(flags_type) == sizeof(VkOpticalFlowSessionCreateFlagsNV));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkOpticalFlowSessionCreateFlagsNV>(flags_type{.enable_hint = 1}) == VK_OPTICAL_FLOW_SESSION_CREATE_ENABLE_HINT_BIT_NV);
 	static_assert(::std::bit_cast<VkOpticalFlowSessionCreateFlagsNV>(flags_type{.enable_cost = 1}) == VK_OPTICAL_FLOW_SESSION_CREATE_ENABLE_COST_BIT_NV);
 	static_assert(::std::bit_cast<VkOpticalFlowSessionCreateFlagsNV>(flags_type{.enable_global_flow = 1}) == VK_OPTICAL_FLOW_SESSION_CREATE_ENABLE_GLOBAL_FLOW_BIT_NV);
 	static_assert(::std::bit_cast<VkOpticalFlowSessionCreateFlagsNV>(flags_type{.allow_regions = 1}) == VK_OPTICAL_FLOW_SESSION_CREATE_ALLOW_REGIONS_BIT_NV);
 	static_assert(::std::bit_cast<VkOpticalFlowSessionCreateFlagsNV>(flags_type{.both_directions = 1}) == VK_OPTICAL_FLOW_SESSION_CREATE_BOTH_DIRECTIONS_BIT_NV);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkOpticalFlowSessionCreateInfoNV
 	{
@@ -7260,8 +7314,10 @@ struct pipeline_cache
 	void const* initial_data = nullptr;
 
 	static_assert(sizeof(flags_type) == sizeof(VkPipelineCacheCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkPipelineCacheCreateFlags>(flags_type{.externally_synchronized = 1}) == VK_PIPELINE_CACHE_CREATE_EXTERNALLY_SYNCHRONIZED_BIT);
 	static_assert(::std::bit_cast<VkPipelineCacheCreateFlags>(flags_type{.internally_synchronized_merge = 1}) == VK_PIPELINE_CACHE_CREATE_INTERNALLY_SYNCHRONIZED_MERGE_BIT_KHR);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkPipelineCacheCreateInfo
 	{
@@ -7291,7 +7347,9 @@ struct pipeline_layout
 	::std::span<VkPushConstantRange const> push_constant_ranges{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkPipelineLayoutCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkPipelineLayoutCreateFlags>(flags_type{.independent_sets = 1}) == VK_PIPELINE_LAYOUT_CREATE_INDEPENDENT_SETS_BIT_EXT);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkPipelineLayoutCreateInfo
 	{
@@ -7358,9 +7416,12 @@ struct query_pool
 	pipeline_statistics_type pipeline_statistics{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkQueryPoolCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkQueryPoolCreateFlags>(flags_type{.reset = 1}) == VK_QUERY_POOL_CREATE_RESET_BIT_KHR);
+#endif
 
 	static_assert(sizeof(pipeline_statistics_type) == sizeof(VkQueryPipelineStatisticFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkQueryPipelineStatisticFlags>(pipeline_statistics_type{.input_assembly_vertices = 1}) == VK_QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_VERTICES_BIT);
 	static_assert(::std::bit_cast<VkQueryPipelineStatisticFlags>(pipeline_statistics_type{.input_assembly_primitives = 1}) == VK_QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_PRIMITIVES_BIT);
 	static_assert(::std::bit_cast<VkQueryPipelineStatisticFlags>(pipeline_statistics_type{.vertex_shader_invocations = 1}) == VK_QUERY_PIPELINE_STATISTIC_VERTEX_SHADER_INVOCATIONS_BIT);
@@ -7375,6 +7436,7 @@ struct query_pool
 	static_assert(::std::bit_cast<VkQueryPipelineStatisticFlags>(pipeline_statistics_type{.task_shader_invocations = 1}) == VK_QUERY_PIPELINE_STATISTIC_TASK_SHADER_INVOCATIONS_BIT_EXT);
 	static_assert(::std::bit_cast<VkQueryPipelineStatisticFlags>(pipeline_statistics_type{.mesh_shader_invocations = 1}) == VK_QUERY_PIPELINE_STATISTIC_MESH_SHADER_INVOCATIONS_BIT_EXT);
 	static_assert(::std::bit_cast<VkQueryPipelineStatisticFlags>(pipeline_statistics_type{.cluster_culling_shader_invocations = 1}) == VK_QUERY_PIPELINE_STATISTIC_CLUSTER_CULLING_SHADER_INVOCATIONS_BIT_HUAWEI);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkQueryPoolCreateInfo
 	{
@@ -7441,6 +7503,7 @@ struct ray_tracing_pipeline_khr
 	::std::int32_t base_pipeline_index{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkPipelineCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.disable_optimization = 1}) == VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.allow_derivatives = 1}) == VK_PIPELINE_CREATE_ALLOW_DERIVATIVES_BIT);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.derivative = 1}) == VK_PIPELINE_CREATE_DERIVATIVE_BIT);
@@ -7474,6 +7537,7 @@ struct ray_tracing_pipeline_khr
 #endif
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.descriptor_buffer = 1}) == VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.protected_access_only = 1}) == VK_PIPELINE_CREATE_PROTECTED_ACCESS_ONLY_BIT);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkRayTracingPipelineCreateInfoKHR
 	{
@@ -7545,6 +7609,7 @@ struct ray_tracing_pipeline_nv
 	::std::int32_t base_pipeline_index{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkPipelineCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.disable_optimization = 1}) == VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.allow_derivatives = 1}) == VK_PIPELINE_CREATE_ALLOW_DERIVATIVES_BIT);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.derivative = 1}) == VK_PIPELINE_CREATE_DERIVATIVE_BIT);
@@ -7578,6 +7643,7 @@ struct ray_tracing_pipeline_nv
 #endif
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.descriptor_buffer = 1}) == VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags>(flags_type{.protected_access_only = 1}) == VK_PIPELINE_CREATE_PROTECTED_ACCESS_ONLY_BIT);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkRayTracingPipelineCreateInfoNV
 	{
@@ -7615,8 +7681,10 @@ struct render_pass
 	::std::span<VkSubpassDependency const> dependencies{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkRenderPassCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkRenderPassCreateFlags>(flags_type{.transform = 1}) == VK_RENDER_PASS_CREATE_TRANSFORM_BIT_QCOM);
 	static_assert(::std::bit_cast<VkRenderPassCreateFlags>(flags_type{.per_layer_fragment_density = 1}) == VK_RENDER_PASS_CREATE_PER_LAYER_FRAGMENT_DENSITY_BIT_VALVE);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkRenderPassCreateInfo
 	{
@@ -7653,8 +7721,10 @@ struct render_pass2
 	::std::span<::std::uint32_t const> correlated_view_masks{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkRenderPassCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkRenderPassCreateFlags>(flags_type{.transform = 1}) == VK_RENDER_PASS_CREATE_TRANSFORM_BIT_QCOM);
 	static_assert(::std::bit_cast<VkRenderPassCreateFlags>(flags_type{.per_layer_fragment_density = 1}) == VK_RENDER_PASS_CREATE_PER_LAYER_FRAGMENT_DENSITY_BIT_VALVE);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkRenderPassCreateInfo2
 	{
@@ -7706,11 +7776,13 @@ struct sampler
 	bool unnormalized_coordinates = false;
 
 	static_assert(sizeof(flags_type) == sizeof(VkSamplerCreateFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkSamplerCreateFlags>(flags_type{.subsampled = 1}) == VK_SAMPLER_CREATE_SUBSAMPLED_BIT_EXT);
 	static_assert(::std::bit_cast<VkSamplerCreateFlags>(flags_type{.subsampled_coarse_reconstruction = 1}) == VK_SAMPLER_CREATE_SUBSAMPLED_COARSE_RECONSTRUCTION_BIT_EXT);
 	static_assert(::std::bit_cast<VkSamplerCreateFlags>(flags_type{.non_seamless_cube_map = 1}) == VK_SAMPLER_CREATE_NON_SEAMLESS_CUBE_MAP_BIT_EXT);
 	static_assert(::std::bit_cast<VkSamplerCreateFlags>(flags_type{.descriptor_buffer_capture_replay = 1}) == VK_SAMPLER_CREATE_DESCRIPTOR_BUFFER_CAPTURE_REPLAY_BIT_EXT);
 	static_assert(::std::bit_cast<VkSamplerCreateFlags>(flags_type{.image_processing = 1}) == VK_SAMPLER_CREATE_IMAGE_PROCESSING_BIT_QCOM);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkSamplerCreateInfo
 	{
@@ -7856,6 +7928,7 @@ struct shader
 	VkSpecializationInfo const* specialization_info = nullptr;
 
 	static_assert(sizeof(flags_type) == sizeof(VkShaderCreateFlagsEXT));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkShaderCreateFlagsEXT>(flags_type{.link_stage = 1}) == VK_SHADER_CREATE_LINK_STAGE_BIT_EXT);
 	static_assert(::std::bit_cast<VkShaderCreateFlagsEXT>(flags_type{.allow_varying_subgroup_size = 1}) == VK_SHADER_CREATE_ALLOW_VARYING_SUBGROUP_SIZE_BIT_EXT);
 	static_assert(::std::bit_cast<VkShaderCreateFlagsEXT>(flags_type{.require_full_subgroups = 1}) == VK_SHADER_CREATE_REQUIRE_FULL_SUBGROUPS_BIT_EXT);
@@ -7864,8 +7937,10 @@ struct shader
 	static_assert(::std::bit_cast<VkShaderCreateFlagsEXT>(flags_type{.fragment_shading_rate_attachment = 1}) == VK_SHADER_CREATE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_EXT);
 	static_assert(::std::bit_cast<VkShaderCreateFlagsEXT>(flags_type{.fragment_density_map_attachment = 1}) == VK_SHADER_CREATE_FRAGMENT_DENSITY_MAP_ATTACHMENT_BIT_EXT);
 	static_assert(::std::bit_cast<VkShaderCreateFlagsEXT>(flags_type{.indirect_bindable = 1}) == VK_SHADER_CREATE_INDIRECT_BINDABLE_BIT_EXT);
+#endif
 
 	static_assert(sizeof(next_stage_type) == sizeof(VkShaderStageFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkShaderStageFlags>(next_stage_type{.vertex = 1}) == VK_SHADER_STAGE_VERTEX_BIT);
 	static_assert(::std::bit_cast<VkShaderStageFlags>(next_stage_type{.tessellation_control = 1}) == VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT);
 	static_assert(::std::bit_cast<VkShaderStageFlags>(next_stage_type{.tessellation_evaluation = 1}) == VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
@@ -7882,6 +7957,7 @@ struct shader
 	static_assert(::std::bit_cast<VkShaderStageFlags>(next_stage_type{.callable = 1}) == VK_SHADER_STAGE_CALLABLE_BIT_KHR);
 	static_assert(::std::bit_cast<VkShaderStageFlags>(next_stage_type{.subpass_shading = 1}) == VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI);
 	static_assert(::std::bit_cast<VkShaderStageFlags>(next_stage_type{.cluster_culling = 1}) == VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkShaderCreateInfoEXT
 	{
@@ -8029,14 +8105,17 @@ struct swapchain
 	VkSwapchainKHR old_swapchain{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkSwapchainCreateFlagsKHR));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkSwapchainCreateFlagsKHR>(flags_type{.split_instance_bind_regions = 1}) == VK_SWAPCHAIN_CREATE_SPLIT_INSTANCE_BIND_REGIONS_BIT_KHR);
 	static_assert(::std::bit_cast<VkSwapchainCreateFlagsKHR>(flags_type{.protected_ = 1}) == VK_SWAPCHAIN_CREATE_PROTECTED_BIT_KHR);
 	static_assert(::std::bit_cast<VkSwapchainCreateFlagsKHR>(flags_type{.mutable_format = 1}) == VK_SWAPCHAIN_CREATE_MUTABLE_FORMAT_BIT_KHR);
 	static_assert(::std::bit_cast<VkSwapchainCreateFlagsKHR>(flags_type{.deferred_memory_allocation = 1}) == VK_SWAPCHAIN_CREATE_DEFERRED_MEMORY_ALLOCATION_BIT_KHR);
 	static_assert(::std::bit_cast<VkSwapchainCreateFlagsKHR>(flags_type{.present_id_2 = 1}) == VK_SWAPCHAIN_CREATE_PRESENT_ID_2_BIT_KHR);
 	static_assert(::std::bit_cast<VkSwapchainCreateFlagsKHR>(flags_type{.present_wait_2 = 1}) == VK_SWAPCHAIN_CREATE_PRESENT_WAIT_2_BIT_KHR);
+#endif
 
 	static_assert(sizeof(image_usage_type) == sizeof(VkImageUsageFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkImageUsageFlags>(image_usage_type{.transfer_src = 1}) == VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
 	static_assert(::std::bit_cast<VkImageUsageFlags>(image_usage_type{.transfer_dst = 1}) == VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 	static_assert(::std::bit_cast<VkImageUsageFlags>(image_usage_type{.sampled = 1}) == VK_IMAGE_USAGE_SAMPLED_BIT);
@@ -8062,6 +8141,7 @@ struct swapchain
 	static_assert(::std::bit_cast<VkImageUsageFlags>(image_usage_type{.video_encode_quantization_delta_map = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_QUANTIZATION_DELTA_MAP_BIT_KHR);
 	static_assert(::std::bit_cast<VkImageUsageFlags>(image_usage_type{.video_encode_emphasis_map = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_EMPHASIS_MAP_BIT_KHR);
 	static_assert(::std::bit_cast<VkImageUsageFlags>(image_usage_type{.tile_memory = 1}) == VK_IMAGE_USAGE_TILE_MEMORY_BIT_QCOM);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkSwapchainCreateInfoKHR
 	{
@@ -8106,9 +8186,11 @@ struct tensor
 	::std::span<::std::uint32_t const> queue_family_indices{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkTensorCreateFlagsARM));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkTensorCreateFlagsARM>(flags_type{.mutable_format = 1}) == VK_TENSOR_CREATE_MUTABLE_FORMAT_BIT_ARM);
 	static_assert(::std::bit_cast<VkTensorCreateFlagsARM>(flags_type{.protected_ = 1}) == VK_TENSOR_CREATE_PROTECTED_BIT_ARM);
 	static_assert(::std::bit_cast<VkTensorCreateFlagsARM>(flags_type{.descriptor_buffer_capture_replay = 1}) == VK_TENSOR_CREATE_DESCRIPTOR_BUFFER_CAPTURE_REPLAY_BIT_ARM);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkTensorCreateInfoARM
 	{
@@ -8139,7 +8221,9 @@ struct tensor_view
 	VkFormat format{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkTensorViewCreateFlagsARM));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkTensorViewCreateFlagsARM>(flags_type{.descriptor_buffer_capture_replay = 1}) == VK_TENSOR_VIEW_CREATE_DESCRIPTOR_BUFFER_CAPTURE_REPLAY_BIT_ARM);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkTensorViewCreateInfoARM
 	{
@@ -8219,12 +8303,14 @@ struct video_session
 	VkExtensionProperties const* std_header_version = nullptr;
 
 	static_assert(sizeof(flags_type) == sizeof(VkVideoSessionCreateFlagsKHR));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkVideoSessionCreateFlagsKHR>(flags_type{.protected_content = 1}) == VK_VIDEO_SESSION_CREATE_PROTECTED_CONTENT_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoSessionCreateFlagsKHR>(flags_type{.allow_encode_parameter_optimizations = 1}) == VK_VIDEO_SESSION_CREATE_ALLOW_ENCODE_PARAMETER_OPTIMIZATIONS_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoSessionCreateFlagsKHR>(flags_type{.inline_queries = 1}) == VK_VIDEO_SESSION_CREATE_INLINE_QUERIES_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoSessionCreateFlagsKHR>(flags_type{.allow_encode_quantization_delta_map = 1}) == VK_VIDEO_SESSION_CREATE_ALLOW_ENCODE_QUANTIZATION_DELTA_MAP_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoSessionCreateFlagsKHR>(flags_type{.allow_encode_emphasis_map = 1}) == VK_VIDEO_SESSION_CREATE_ALLOW_ENCODE_EMPHASIS_MAP_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoSessionCreateFlagsKHR>(flags_type{.inline_session_parameters = 1}) == VK_VIDEO_SESSION_CREATE_INLINE_SESSION_PARAMETERS_BIT_KHR);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkVideoSessionCreateInfoKHR
 	{
@@ -8259,7 +8345,9 @@ struct video_session_parameters
 	VkVideoSessionKHR video_session{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkVideoSessionParametersCreateFlagsKHR));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkVideoSessionParametersCreateFlagsKHR>(flags_type{.quantization_map_compatible = 1}) == VK_VIDEO_SESSION_PARAMETERS_CREATE_QUANTIZATION_MAP_COMPATIBLE_BIT_KHR);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkVideoSessionParametersCreateInfoKHR
 	{
@@ -12914,6 +13002,7 @@ struct buffer_usage_flags2
 	usage_type usage{};
 
 	static_assert(sizeof(usage_type) == sizeof(VkBufferUsageFlags2));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkBufferUsageFlags2>(usage_type{.transfer_src = 1}) == VK_BUFFER_USAGE_2_TRANSFER_SRC_BIT);
 	static_assert(::std::bit_cast<VkBufferUsageFlags2>(usage_type{.transfer_dst = 1}) == VK_BUFFER_USAGE_2_TRANSFER_DST_BIT);
 	static_assert(::std::bit_cast<VkBufferUsageFlags2>(usage_type{.uniform_texel_buffer = 1}) == VK_BUFFER_USAGE_2_UNIFORM_TEXEL_BUFFER_BIT);
@@ -12947,6 +13036,7 @@ struct buffer_usage_flags2
 	static_assert(::std::bit_cast<VkBufferUsageFlags2>(usage_type{.preprocess_buffer = 1}) == VK_BUFFER_USAGE_2_PREPROCESS_BUFFER_BIT_EXT);
 #if defined(VK_ENABLE_BETA_EXTENSIONS)
 	static_assert(::std::bit_cast<VkBufferUsageFlags2>(usage_type{.compressed_data_dgf1 = 1}) == VK_BUFFER_USAGE_2_COMPRESSED_DATA_DGF1_BIT_AMDX);
+#endif
 #endif
 
 	constexpr auto evaluate() const noexcept -> VkBufferUsageFlags2CreateInfo
@@ -13169,10 +13259,12 @@ struct device_diagnostics_config
 	flags_type flags{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkDeviceDiagnosticsConfigFlagsNV));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkDeviceDiagnosticsConfigFlagsNV>(flags_type{.shader_debug_info = 1}) == VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_SHADER_DEBUG_INFO_BIT_NV);
 	static_assert(::std::bit_cast<VkDeviceDiagnosticsConfigFlagsNV>(flags_type{.resource_tracking = 1}) == VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_RESOURCE_TRACKING_BIT_NV);
 	static_assert(::std::bit_cast<VkDeviceDiagnosticsConfigFlagsNV>(flags_type{.automatic_checkpoints = 1}) == VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_AUTOMATIC_CHECKPOINTS_BIT_NV);
 	static_assert(::std::bit_cast<VkDeviceDiagnosticsConfigFlagsNV>(flags_type{.shader_error_reporting = 1}) == VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_SHADER_ERROR_REPORTING_BIT_NV);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkDeviceDiagnosticsConfigCreateInfoNV
 	{
@@ -13217,10 +13309,12 @@ struct device_group_swapchain
 	modes_type modes{};
 
 	static_assert(sizeof(modes_type) == sizeof(VkDeviceGroupPresentModeFlagsKHR));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkDeviceGroupPresentModeFlagsKHR>(modes_type{.local = 1}) == VK_DEVICE_GROUP_PRESENT_MODE_LOCAL_BIT_KHR);
 	static_assert(::std::bit_cast<VkDeviceGroupPresentModeFlagsKHR>(modes_type{.remote = 1}) == VK_DEVICE_GROUP_PRESENT_MODE_REMOTE_BIT_KHR);
 	static_assert(::std::bit_cast<VkDeviceGroupPresentModeFlagsKHR>(modes_type{.sum = 1}) == VK_DEVICE_GROUP_PRESENT_MODE_SUM_BIT_KHR);
 	static_assert(::std::bit_cast<VkDeviceGroupPresentModeFlagsKHR>(modes_type{.local_multi_device = 1}) == VK_DEVICE_GROUP_PRESENT_MODE_LOCAL_MULTI_DEVICE_BIT_KHR);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkDeviceGroupSwapchainCreateInfoKHR
 	{
@@ -13347,10 +13441,12 @@ struct export_fence
 	handle_types_type handle_types{};
 
 	static_assert(sizeof(handle_types_type) == sizeof(VkExternalFenceHandleTypeFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkExternalFenceHandleTypeFlags>(handle_types_type{.opaque_fd = 1}) == VK_EXTERNAL_FENCE_HANDLE_TYPE_OPAQUE_FD_BIT);
 	static_assert(::std::bit_cast<VkExternalFenceHandleTypeFlags>(handle_types_type{.opaque_win32 = 1}) == VK_EXTERNAL_FENCE_HANDLE_TYPE_OPAQUE_WIN32_BIT);
 	static_assert(::std::bit_cast<VkExternalFenceHandleTypeFlags>(handle_types_type{.opaque_win32_kmt = 1}) == VK_EXTERNAL_FENCE_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT);
 	static_assert(::std::bit_cast<VkExternalFenceHandleTypeFlags>(handle_types_type{.sync_fd = 1}) == VK_EXTERNAL_FENCE_HANDLE_TYPE_SYNC_FD_BIT);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkExportFenceCreateInfo
 	{
@@ -13421,6 +13517,7 @@ struct export_semaphore
 	handle_types_type handle_types{};
 
 	static_assert(sizeof(handle_types_type) == sizeof(VkExternalSemaphoreHandleTypeFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkExternalSemaphoreHandleTypeFlags>(handle_types_type{.opaque_fd = 1}) == VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT);
 	static_assert(::std::bit_cast<VkExternalSemaphoreHandleTypeFlags>(handle_types_type{.opaque_win32 = 1}) == VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT);
 	static_assert(::std::bit_cast<VkExternalSemaphoreHandleTypeFlags>(handle_types_type{.opaque_win32_kmt = 1}) == VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT);
@@ -13428,6 +13525,7 @@ struct export_semaphore
 	static_assert(::std::bit_cast<VkExternalSemaphoreHandleTypeFlags>(handle_types_type{.sync_fd = 1}) == VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT);
 #if defined(VK_USE_PLATFORM_FUCHSIA)
 	static_assert(::std::bit_cast<VkExternalSemaphoreHandleTypeFlags>(handle_types_type{.zircon_event = 1}) == VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_ZIRCON_EVENT_BIT_FUCHSIA);
+#endif
 #endif
 
 	constexpr auto evaluate() const noexcept -> VkExportSemaphoreCreateInfo
@@ -13545,6 +13643,7 @@ struct external_memory_buffer
 	handle_types_type handle_types{};
 
 	static_assert(sizeof(handle_types_type) == sizeof(VkExternalMemoryHandleTypeFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(handle_types_type{.opaque_fd = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT);
 	static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(handle_types_type{.opaque_win32 = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT);
 	static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(handle_types_type{.opaque_win32_kmt = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT);
@@ -13573,6 +13672,7 @@ struct external_memory_buffer
 #endif
 #if defined(VK_USE_PLATFORM_METAL_EXT)
 	static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(handle_types_type{.mtlheap = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_MTLHEAP_BIT_EXT);
+#endif
 #endif
 
 	constexpr auto evaluate() const noexcept -> VkExternalMemoryBufferCreateInfo
@@ -13616,6 +13716,7 @@ struct external_memory_image
 	handle_types_type handle_types{};
 
 	static_assert(sizeof(handle_types_type) == sizeof(VkExternalMemoryHandleTypeFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(handle_types_type{.opaque_fd = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT);
 	static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(handle_types_type{.opaque_win32 = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT);
 	static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(handle_types_type{.opaque_win32_kmt = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT);
@@ -13645,6 +13746,7 @@ struct external_memory_image
 #if defined(VK_USE_PLATFORM_METAL_EXT)
 	static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(handle_types_type{.mtlheap = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_MTLHEAP_BIT_EXT);
 #endif
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkExternalMemoryImageCreateInfo
 	{
@@ -13672,10 +13774,12 @@ struct external_memory_image_nv
 	handle_types_type handle_types{};
 
 	static_assert(sizeof(handle_types_type) == sizeof(VkExternalMemoryHandleTypeFlagsNV));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlagsNV>(handle_types_type{.opaque_win32 = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT_NV);
 	static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlagsNV>(handle_types_type{.opaque_win32_kmt = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT_NV);
 	static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlagsNV>(handle_types_type{.d3d11_image = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_IMAGE_BIT_NV);
 	static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlagsNV>(handle_types_type{.d3d11_image_kmt = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_IMAGE_KMT_BIT_NV);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkExternalMemoryImageCreateInfoNV
 	{
@@ -13718,6 +13822,7 @@ struct external_memory_tensor
 	handle_types_type handle_types{};
 
 	static_assert(sizeof(handle_types_type) == sizeof(VkExternalMemoryHandleTypeFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(handle_types_type{.opaque_fd = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT);
 	static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(handle_types_type{.opaque_win32 = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT);
 	static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(handle_types_type{.opaque_win32_kmt = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT);
@@ -13746,6 +13851,7 @@ struct external_memory_tensor
 #endif
 #if defined(VK_USE_PLATFORM_METAL_EXT)
 	static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(handle_types_type{.mtlheap = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_MTLHEAP_BIT_EXT);
+#endif
 #endif
 
 	constexpr auto evaluate() const noexcept -> VkExternalMemoryTensorCreateInfoARM
@@ -13791,10 +13897,12 @@ struct graphics_pipeline_library
 	flags_type flags{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkGraphicsPipelineLibraryFlagsEXT));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkGraphicsPipelineLibraryFlagsEXT>(flags_type{.vertex_input_interface = 1}) == VK_GRAPHICS_PIPELINE_LIBRARY_VERTEX_INPUT_INTERFACE_BIT_EXT);
 	static_assert(::std::bit_cast<VkGraphicsPipelineLibraryFlagsEXT>(flags_type{.pre_rasterization_shaders = 1}) == VK_GRAPHICS_PIPELINE_LIBRARY_PRE_RASTERIZATION_SHADERS_BIT_EXT);
 	static_assert(::std::bit_cast<VkGraphicsPipelineLibraryFlagsEXT>(flags_type{.fragment_shader = 1}) == VK_GRAPHICS_PIPELINE_LIBRARY_FRAGMENT_SHADER_BIT_EXT);
 	static_assert(::std::bit_cast<VkGraphicsPipelineLibraryFlagsEXT>(flags_type{.fragment_output_interface = 1}) == VK_GRAPHICS_PIPELINE_LIBRARY_FRAGMENT_OUTPUT_INTERFACE_BIT_EXT);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkGraphicsPipelineLibraryCreateInfoEXT
 	{
@@ -13858,9 +13966,11 @@ struct image_compression_control
 	::std::span<VkImageCompressionFixedRateFlagsEXT> fixed_rate_flags{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkImageCompressionFlagsEXT));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkImageCompressionFlagsEXT>(flags_type{.fixed_rate_default_ext = 1}) == VK_IMAGE_COMPRESSION_FIXED_RATE_DEFAULT_EXT);
 	static_assert(::std::bit_cast<VkImageCompressionFlagsEXT>(flags_type{.fixed_rate_explicit_ext = 1}) == VK_IMAGE_COMPRESSION_FIXED_RATE_EXPLICIT_EXT);
 	static_assert(::std::bit_cast<VkImageCompressionFlagsEXT>(flags_type{.disabled_ext = 1}) == VK_IMAGE_COMPRESSION_DISABLED_EXT);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkImageCompressionControlEXT
 	{
@@ -13966,6 +14076,7 @@ struct image_stencil_usage
 	stencil_usage_type stencil_usage{};
 
 	static_assert(sizeof(stencil_usage_type) == sizeof(VkImageUsageFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkImageUsageFlags>(stencil_usage_type{.transfer_src = 1}) == VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
 	static_assert(::std::bit_cast<VkImageUsageFlags>(stencil_usage_type{.transfer_dst = 1}) == VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 	static_assert(::std::bit_cast<VkImageUsageFlags>(stencil_usage_type{.sampled = 1}) == VK_IMAGE_USAGE_SAMPLED_BIT);
@@ -13991,6 +14102,7 @@ struct image_stencil_usage
 	static_assert(::std::bit_cast<VkImageUsageFlags>(stencil_usage_type{.video_encode_quantization_delta_map = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_QUANTIZATION_DELTA_MAP_BIT_KHR);
 	static_assert(::std::bit_cast<VkImageUsageFlags>(stencil_usage_type{.video_encode_emphasis_map = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_EMPHASIS_MAP_BIT_KHR);
 	static_assert(::std::bit_cast<VkImageUsageFlags>(stencil_usage_type{.tile_memory = 1}) == VK_IMAGE_USAGE_TILE_MEMORY_BIT_QCOM);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkImageStencilUsageCreateInfo
 	{
@@ -14127,6 +14239,7 @@ struct image_view_usage
 	usage_type usage{};
 
 	static_assert(sizeof(usage_type) == sizeof(VkImageUsageFlags));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkImageUsageFlags>(usage_type{.transfer_src = 1}) == VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
 	static_assert(::std::bit_cast<VkImageUsageFlags>(usage_type{.transfer_dst = 1}) == VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 	static_assert(::std::bit_cast<VkImageUsageFlags>(usage_type{.sampled = 1}) == VK_IMAGE_USAGE_SAMPLED_BIT);
@@ -14152,6 +14265,7 @@ struct image_view_usage
 	static_assert(::std::bit_cast<VkImageUsageFlags>(usage_type{.video_encode_quantization_delta_map = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_QUANTIZATION_DELTA_MAP_BIT_KHR);
 	static_assert(::std::bit_cast<VkImageUsageFlags>(usage_type{.video_encode_emphasis_map = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_EMPHASIS_MAP_BIT_KHR);
 	static_assert(::std::bit_cast<VkImageUsageFlags>(usage_type{.tile_memory = 1}) == VK_IMAGE_USAGE_TILE_MEMORY_BIT_QCOM);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkImageViewUsageCreateInfo
 	{
@@ -14304,11 +14418,13 @@ struct optical_flow_image_format
 	usage_type usage{};
 
 	static_assert(sizeof(usage_type) == sizeof(VkOpticalFlowUsageFlagsNV));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkOpticalFlowUsageFlagsNV>(usage_type{.input = 1}) == VK_OPTICAL_FLOW_USAGE_INPUT_BIT_NV);
 	static_assert(::std::bit_cast<VkOpticalFlowUsageFlagsNV>(usage_type{.output = 1}) == VK_OPTICAL_FLOW_USAGE_OUTPUT_BIT_NV);
 	static_assert(::std::bit_cast<VkOpticalFlowUsageFlagsNV>(usage_type{.hint = 1}) == VK_OPTICAL_FLOW_USAGE_HINT_BIT_NV);
 	static_assert(::std::bit_cast<VkOpticalFlowUsageFlagsNV>(usage_type{.cost = 1}) == VK_OPTICAL_FLOW_USAGE_COST_BIT_NV);
 	static_assert(::std::bit_cast<VkOpticalFlowUsageFlagsNV>(usage_type{.global_flow = 1}) == VK_OPTICAL_FLOW_USAGE_GLOBAL_FLOW_BIT_NV);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkOpticalFlowImageFormatInfoNV
 	{
@@ -14416,7 +14532,7 @@ struct pipeline_create_flags2
 		VkPipelineCreateFlags2 enable_legacy_dithering : 1 = 0;
 		VkPipelineCreateFlags2 _reserved_35 : 2 = 0;
 		VkPipelineCreateFlags2 disallow_opacity_micromap : 1 = 0;
-		VkPipelineCreateFlags2 indirect_bindable : 1 = 0;
+		VkPipelineCreateFlags2 indirect_bindable_ext : 1 = 0;
 		VkPipelineCreateFlags2 _reserved_39 : 1 = 0;
 		VkPipelineCreateFlags2 per_layer_fragment_density : 1 = 0;
 		VkPipelineCreateFlags2 _reserved_41 : 23 = 0;
@@ -14425,6 +14541,7 @@ struct pipeline_create_flags2
 	flags_type flags{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkPipelineCreateFlags2));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkPipelineCreateFlags2>(flags_type{.disable_optimization = 1}) == VK_PIPELINE_CREATE_2_DISABLE_OPTIMIZATION_BIT);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags2>(flags_type{.allow_derivatives = 1}) == VK_PIPELINE_CREATE_2_ALLOW_DERIVATIVES_BIT);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags2>(flags_type{.derivative = 1}) == VK_PIPELINE_CREATE_2_DERIVATIVE_BIT);
@@ -14463,8 +14580,9 @@ struct pipeline_create_flags2
 	static_assert(::std::bit_cast<VkPipelineCreateFlags2>(flags_type{.ray_tracing_allow_spheres_and_linear_swept_spheres = 1}) == VK_PIPELINE_CREATE_2_RAY_TRACING_ALLOW_SPHERES_AND_LINEAR_SWEPT_SPHERES_BIT_NV);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags2>(flags_type{.enable_legacy_dithering = 1}) == VK_PIPELINE_CREATE_2_ENABLE_LEGACY_DITHERING_BIT_EXT);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags2>(flags_type{.disallow_opacity_micromap = 1}) == VK_PIPELINE_CREATE_2_DISALLOW_OPACITY_MICROMAP_BIT_ARM);
-	static_assert(::std::bit_cast<VkPipelineCreateFlags2>(flags_type{.indirect_bindable = 1}) == VK_PIPELINE_CREATE_2_INDIRECT_BINDABLE_BIT_EXT);
+	static_assert(::std::bit_cast<VkPipelineCreateFlags2>(flags_type{.indirect_bindable_ext = 1}) == VK_PIPELINE_CREATE_2_INDIRECT_BINDABLE_BIT_EXT);
 	static_assert(::std::bit_cast<VkPipelineCreateFlags2>(flags_type{.per_layer_fragment_density = 1}) == VK_PIPELINE_CREATE_2_PER_LAYER_FRAGMENT_DENSITY_BIT_VALVE);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkPipelineCreateFlags2CreateInfo
 	{
@@ -14732,9 +14850,11 @@ struct query_pool_video_encode_feedback
 	encode_feedback_flags_type encode_feedback_flags{};
 
 	static_assert(sizeof(encode_feedback_flags_type) == sizeof(VkVideoEncodeFeedbackFlagsKHR));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkVideoEncodeFeedbackFlagsKHR>(encode_feedback_flags_type{.buffer_offset = 1}) == VK_VIDEO_ENCODE_FEEDBACK_BITSTREAM_BUFFER_OFFSET_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoEncodeFeedbackFlagsKHR>(encode_feedback_flags_type{.bytes_written = 1}) == VK_VIDEO_ENCODE_FEEDBACK_BITSTREAM_BYTES_WRITTEN_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoEncodeFeedbackFlagsKHR>(encode_feedback_flags_type{.has_overrides = 1}) == VK_VIDEO_ENCODE_FEEDBACK_BITSTREAM_HAS_OVERRIDES_BIT_KHR);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkQueryPoolVideoEncodeFeedbackCreateInfoKHR
 	{
@@ -14865,8 +14985,10 @@ struct render_pass_tile_shading
 	VkExtent2D tile_apron_size{};
 
 	static_assert(sizeof(flags_type) == sizeof(VkTileShadingRenderPassFlagsQCOM));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkTileShadingRenderPassFlagsQCOM>(flags_type{.enable = 1}) == VK_TILE_SHADING_RENDER_PASS_ENABLE_BIT_QCOM);
 	static_assert(::std::bit_cast<VkTileShadingRenderPassFlagsQCOM>(flags_type{.per_tile_execution = 1}) == VK_TILE_SHADING_RENDER_PASS_PER_TILE_EXECUTION_BIT_QCOM);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkRenderPassTileShadingCreateInfoQCOM
 	{
@@ -15138,7 +15260,9 @@ struct swapchain_counter
 	surface_counters_type surface_counters{};
 
 	static_assert(sizeof(surface_counters_type) == sizeof(VkSurfaceCounterFlagsEXT));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkSurfaceCounterFlagsEXT>(surface_counters_type{.vblank = 1}) == VK_SURFACE_COUNTER_VBLANK_BIT_EXT);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkSwapchainCounterCreateInfoEXT
 	{
@@ -15248,19 +15372,25 @@ struct swapchain_present_scaling
 	present_gravity_y_type present_gravity_y{};
 
 	static_assert(sizeof(scaling_behavior_type) == sizeof(VkPresentScalingFlagsKHR));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkPresentScalingFlagsKHR>(scaling_behavior_type{.one_to_one = 1}) == VK_PRESENT_SCALING_ONE_TO_ONE_BIT_KHR);
 	static_assert(::std::bit_cast<VkPresentScalingFlagsKHR>(scaling_behavior_type{.aspect_ratio_stretch = 1}) == VK_PRESENT_SCALING_ASPECT_RATIO_STRETCH_BIT_KHR);
 	static_assert(::std::bit_cast<VkPresentScalingFlagsKHR>(scaling_behavior_type{.stretch = 1}) == VK_PRESENT_SCALING_STRETCH_BIT_KHR);
+#endif
 
 	static_assert(sizeof(present_gravity_x_type) == sizeof(VkPresentGravityFlagsKHR));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkPresentGravityFlagsKHR>(present_gravity_x_type{.min = 1}) == VK_PRESENT_GRAVITY_MIN_BIT_KHR);
 	static_assert(::std::bit_cast<VkPresentGravityFlagsKHR>(present_gravity_x_type{.max = 1}) == VK_PRESENT_GRAVITY_MAX_BIT_KHR);
 	static_assert(::std::bit_cast<VkPresentGravityFlagsKHR>(present_gravity_x_type{.centered = 1}) == VK_PRESENT_GRAVITY_CENTERED_BIT_KHR);
+#endif
 
 	static_assert(sizeof(present_gravity_y_type) == sizeof(VkPresentGravityFlagsKHR));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkPresentGravityFlagsKHR>(present_gravity_y_type{.min = 1}) == VK_PRESENT_GRAVITY_MIN_BIT_KHR);
 	static_assert(::std::bit_cast<VkPresentGravityFlagsKHR>(present_gravity_y_type{.max = 1}) == VK_PRESENT_GRAVITY_MAX_BIT_KHR);
 	static_assert(::std::bit_cast<VkPresentGravityFlagsKHR>(present_gravity_y_type{.centered = 1}) == VK_PRESENT_GRAVITY_CENTERED_BIT_KHR);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkSwapchainPresentScalingCreateInfoKHR
 	{
@@ -15452,9 +15582,11 @@ struct video_decode_usage
 	video_usage_hints_type video_usage_hints{};
 
 	static_assert(sizeof(video_usage_hints_type) == sizeof(VkVideoDecodeUsageFlagsKHR));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkVideoDecodeUsageFlagsKHR>(video_usage_hints_type{.transcoding = 1}) == VK_VIDEO_DECODE_USAGE_TRANSCODING_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoDecodeUsageFlagsKHR>(video_usage_hints_type{.offline = 1}) == VK_VIDEO_DECODE_USAGE_OFFLINE_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoDecodeUsageFlagsKHR>(video_usage_hints_type{.streaming = 1}) == VK_VIDEO_DECODE_USAGE_STREAMING_BIT_KHR);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkVideoDecodeUsageInfoKHR
 	{
@@ -15759,15 +15891,19 @@ struct video_encode_usage
 	VkVideoEncodeTuningModeKHR tuning_mode{};
 
 	static_assert(sizeof(video_usage_hints_type) == sizeof(VkVideoEncodeUsageFlagsKHR));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkVideoEncodeUsageFlagsKHR>(video_usage_hints_type{.transcoding = 1}) == VK_VIDEO_ENCODE_USAGE_TRANSCODING_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoEncodeUsageFlagsKHR>(video_usage_hints_type{.streaming = 1}) == VK_VIDEO_ENCODE_USAGE_STREAMING_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoEncodeUsageFlagsKHR>(video_usage_hints_type{.recording = 1}) == VK_VIDEO_ENCODE_USAGE_RECORDING_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoEncodeUsageFlagsKHR>(video_usage_hints_type{.conferencing = 1}) == VK_VIDEO_ENCODE_USAGE_CONFERENCING_BIT_KHR);
+#endif
 
 	static_assert(sizeof(video_content_hints_type) == sizeof(VkVideoEncodeContentFlagsKHR));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkVideoEncodeContentFlagsKHR>(video_content_hints_type{.camera = 1}) == VK_VIDEO_ENCODE_CONTENT_CAMERA_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoEncodeContentFlagsKHR>(video_content_hints_type{.desktop = 1}) == VK_VIDEO_ENCODE_CONTENT_DESKTOP_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoEncodeContentFlagsKHR>(video_content_hints_type{.rendered = 1}) == VK_VIDEO_ENCODE_CONTENT_RENDERED_BIT_KHR);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkVideoEncodeUsageInfoKHR
 	{
@@ -15820,20 +15956,26 @@ struct video_profile
 	chroma_bit_depth_type chroma_bit_depth{};
 
 	static_assert(sizeof(chroma_subsampling_type) == sizeof(VkVideoChromaSubsamplingFlagsKHR));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkVideoChromaSubsamplingFlagsKHR>(chroma_subsampling_type{.monochrome = 1}) == VK_VIDEO_CHROMA_SUBSAMPLING_MONOCHROME_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoChromaSubsamplingFlagsKHR>(chroma_subsampling_type{.ratio_420 = 1}) == VK_VIDEO_CHROMA_SUBSAMPLING_420_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoChromaSubsamplingFlagsKHR>(chroma_subsampling_type{.ratio_422 = 1}) == VK_VIDEO_CHROMA_SUBSAMPLING_422_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoChromaSubsamplingFlagsKHR>(chroma_subsampling_type{.ratio_444 = 1}) == VK_VIDEO_CHROMA_SUBSAMPLING_444_BIT_KHR);
+#endif
 
 	static_assert(sizeof(luma_bit_depth_type) == sizeof(VkVideoComponentBitDepthFlagsKHR));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkVideoComponentBitDepthFlagsKHR>(luma_bit_depth_type{.depth_8 = 1}) == VK_VIDEO_COMPONENT_BIT_DEPTH_8_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoComponentBitDepthFlagsKHR>(luma_bit_depth_type{.depth_10 = 1}) == VK_VIDEO_COMPONENT_BIT_DEPTH_10_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoComponentBitDepthFlagsKHR>(luma_bit_depth_type{.depth_12 = 1}) == VK_VIDEO_COMPONENT_BIT_DEPTH_12_BIT_KHR);
+#endif
 
 	static_assert(sizeof(chroma_bit_depth_type) == sizeof(VkVideoComponentBitDepthFlagsKHR));
+#if !defined(__clang__) || !defined(_MSC_VER)
 	static_assert(::std::bit_cast<VkVideoComponentBitDepthFlagsKHR>(chroma_bit_depth_type{.depth_8 = 1}) == VK_VIDEO_COMPONENT_BIT_DEPTH_8_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoComponentBitDepthFlagsKHR>(chroma_bit_depth_type{.depth_10 = 1}) == VK_VIDEO_COMPONENT_BIT_DEPTH_10_BIT_KHR);
 	static_assert(::std::bit_cast<VkVideoComponentBitDepthFlagsKHR>(chroma_bit_depth_type{.depth_12 = 1}) == VK_VIDEO_COMPONENT_BIT_DEPTH_12_BIT_KHR);
+#endif
 
 	constexpr auto evaluate() const noexcept -> VkVideoProfileInfoKHR
 	{

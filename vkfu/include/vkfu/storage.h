@@ -180,4 +180,23 @@ struct basic_storage
 template<class... Storages>
 	requires (sizeof...(Storages) != 0 && (storable<::std::remove_cvref_t<Storages>> && ...))
 basic_storage(Storages&&...) -> basic_storage<::std::remove_cvref_t<Storages>...>;
+
+
+template<class... S>
+void _match_basic_storage(basic_storage<S...> const&);
+
+template<class T>
+concept _derived_from_basic_storage = requires(T const& s)
+{
+	_match_basic_storage(s);
+};
+
+constexpr auto&& unpack(auto&& storage) noexcept
+{
+	if constexpr (_derived_from_basic_storage<decltype(storage)>)
+		return ::std::get<0>(::std::forward<decltype(storage)>(storage).storages);
+	else
+		return ::std::forward<decltype(storage)>(storage);
+}
+
 }

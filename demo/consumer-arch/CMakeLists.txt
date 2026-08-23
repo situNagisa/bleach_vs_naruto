@@ -99,6 +99,12 @@ find_package(Vulkan REQUIRED)
 find_package(vk-bootstrap CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 
+if(NOT TARGET vkfu::vkfu)
+	set(VKFU_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+	set(VKFU_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+	add_subdirectory("${CONSUMER_ARCH_BVN_ROOT}/vkfu" "${CMAKE_CURRENT_BINARY_DIR}/vkfu" EXCLUDE_FROM_ALL)
+endif()
+
 function(consumer_arch_compile_shader OUT_VAR SHADER_SOURCE)
 	get_filename_component(CONSUMER_ARCH_SHADER_NAME "${SHADER_SOURCE}" NAME)
 	set(CONSUMER_ARCH_SHADER_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/shaders/${CONSUMER_ARCH_SHADER_NAME}.spv")
@@ -136,6 +142,7 @@ target_link_libraries(bvn_consumer_arch_demo PRIVATE
 	Threads::Threads
 	Vulkan::Vulkan
 	vk-bootstrap::vk-bootstrap
+	vkfu::vkfu
 )
 target_compile_definitions(bvn_consumer_arch_demo PRIVATE
 	BVN_CONSUMER_ARCH_VERT_SPV="${CONSUMER_ARCH_VERT_SPV}"
