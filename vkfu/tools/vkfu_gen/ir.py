@@ -56,15 +56,47 @@ class FlagBits:
 
 
 @dataclasses.dataclass
+class EnumValue:
+	name: str  # VK_FORMAT_R8G8B8A8_SRGB
+	guards: list[str]
+
+
+@dataclasses.dataclass
+class EnumType:
+	name: str  # VkFormat
+	values: list[EnumValue]
+	guards: list[str]  # the type itself can be platform-gated
+
+
+@dataclasses.dataclass
+class Command:
+	name: str  # vkCreateBuffer
+	returns: str  # VkResult, or void
+	leading: list[Member]  # parameters before the info
+	info: Member  # the structure the caller fills in
+	info_is_array: bool  # pCreateInfos rather than pCreateInfo
+	count: Member | None  # the createInfoCount that goes with an array
+	allocator: bool  # takes a pAllocator
+	out: Member  # the handle(s) the command produces
+	out_from_info: bool  # the out array's length lives inside the info
+	guards: list[str]
+
+
+@dataclasses.dataclass
 class Registry:
 	header_version: str
 	author_tags: list[str]  # vk.xml <tags>, e.g. KHR / EXT / HUAWEI
 	structs: dict[str, Struct]
 	bitmask_to_flagbits: dict[str, str]  # VkXxxFlags -> VkXxxFlagBits
 	flagbits: dict[str, FlagBits]
+	enums: dict[str, EnumType]  # plain (non-bitmask) enums
 	roots: list[str]
+	root_commands: dict[str, list[str]]  # root struct -> commands that take it
+	producers: list[Command]  # vkCreate* / vkAllocate* in a shape vkfu can wrap
 	closure: list[str]
 	branches: list[str]
+	references: list[tuple[str, str, str]]  # (owner, member, target) pointer slots
+	elements: list[tuple[str, str, str]]  # (owner, member, target) array element types
 	edges: list[tuple[str, str]]  # (parent, child) from structextends
 
 
@@ -233,14 +265,177 @@ def _collect_flagbits(root: ET.Element, api: str, requirements: dict[str, list[s
 	return collected
 
 
-def _create_info_roots(root: ET.Element, structs: dict[str, Struct], api: str) -> list[str]:
-	"""Roots are the create-info parameters of vkCreate* commands.
+def _collect_enums(root: ET.Element, api: str, requirements: dict[str, list[str | None]]) -> dict[str, EnumType]:
+	"""Plain enums, i.e. everything <enums> declares that is not a bitmask."""
+	collected: dict[str, EnumType] = {}
+	for enums in root.iter("enums"):
+		if enums.get("type") != "enum" or not enums.get("name"):
+			continue
+		values = [
+			EnumValue(name=enum.get("name"), guards=[])
+			for enum in enums.findall("enum")
+			if enum.get("name") and not enum.get("alias") and _api_allows(enum, api)
+		]
+		collected[enums.get("name")] = EnumType(
+			name=enums.get("name"),
+			values=values,
+			guards=_guards_for(requirements, enums.get("name")),
+		)
+
+	platforms = _platform_guards(root)
+
+	def absorb(container: ET.Element, guard: str | None) -> None:
+		for require in container.findall("require"):
+			if not _api_allows(require, api):
+				continue
+			for enum in require.findall("enum"):
+				extends = enum.get("extends")
+				name = enum.get("name")
+				if not extends or not name or enum.get("alias") or not _api_allows(enum, api):
+					continue
+				target = collected.get(extends)
+				if target is None or any(value.name == name for value in target.values):
+					continue
+				target.values.append(EnumValue(name=name, guards=[guard] if guard else []))
+
+	for feature in root.iter("feature"):
+		if _api_allows(feature, api):
+			absorb(feature, None)
+	for extension in root.iter("extension"):
+		supported = extension.get("supported")
+		if supported and api not in supported.split(","):
+			continue
+		absorb(extension, _extension_guard(extension, platforms))
+
+	for enum_type in collected.values():
+		for value in enum_type.values:
+			if not value.guards:
+				value.guards = _guards_for(requirements, value.name)
+
+	return collected
+
+
+def _flag_bits_as_enums(flagbits: dict[str, FlagBits], requirements: dict[str, list[str | None]]) -> dict[str, EnumType]:
+	"""A FlagBits type used directly as a member is a single choice, not a mask.
+
+	VkPipelineMultisampleStateCreateInfo::rasterizationSamples is declared
+	VkSampleCountFlagBits, meaning one sample count -- so it reads as an enum.
+	"""
+	return {
+		name: EnumType(
+			name=name,
+			values=[EnumValue(name=bit.name, guards=bit.guards) for bit in spec.bits],
+			guards=_guards_for(requirements, name),
+		)
+		for name, spec in flagbits.items()
+	}
+
+
+def is_reference(member: Member, target: Struct | None) -> bool:
+	"""A single const pointer naming another sType-carrying structure.
+
+	`len` means it is an array, which stays a span; no sType means it is a plain
+	value structure like VkPhysicalDeviceFeatures, which stays a pointer.
+	"""
+	return (
+		target is not None
+		and target.stype is not None
+		and member.ptr_depth == 1
+		and member.elem_const
+		and not member.array_dims
+		and (member.length is None or member.length == "1")
+	)
+
+
+def _producers(
+	root: ET.Element,
+	structs: dict[str, Struct],
+	api: str,
+	requirements: dict[str, list[str | None]],
+) -> tuple[list[Command], list[str]]:
+	"""vkCreate* / vkAllocate* commands, split into the shapes vkfu can wrap.
+
+	Every one of them has the same skeleton: some handles the caller already has,
+	one structure the caller fills in, an optional allocator, and the handle the
+	command produces. Anything that does not fit is reported rather than guessed.
+	"""
+	commands: list[Command] = []
+	skipped: list[str] = []
+	for element in root.iter("command"):
+		if not _api_allows(element, api):
+			continue
+		proto = element.find("proto")
+		if proto is None:
+			continue
+		name = proto.findtext("name") or ""
+		if not (name.startswith("vkCreate") or name.startswith("vkAllocate")):
+			continue
+
+		params = [_parse_decl(p) for p in element.findall("param") if _api_allows(p, api)]
+		infos = [
+			p
+			for p in params
+			if p.ptr_depth == 1 and p.elem_const and (structs.get(p.type) or Struct("", [], [], False, False, None, [])).stype
+		]
+		outs = [p for p in params if p.ptr_depth == 1 and not p.elem_const]
+		if len(infos) != 1 or len(outs) != 1:
+			skipped.append(name)
+			continue
+
+		info, out = infos[0], outs[0]
+		index = params.index(info)
+		leading = [
+			p for p in params[:index] if p.type != "VkAllocationCallbacks" and p.name != info.length
+		]
+		count = next((p for p in params if info.length and p.name == info.length), None)
+		commands.append(
+			Command(
+				name=name,
+				returns=proto.findtext("type") or "void",
+				leading=leading,
+				info=info,
+				info_is_array=info.length is not None,
+				count=count,
+				allocator=any(p.type == "VkAllocationCallbacks" for p in params),
+				out=out,
+				out_from_info=bool(out.length and "->" in out.length),
+				guards=sorted(
+					set(_guards_for(requirements, name))
+					| set(structs[info.type].guards if info.type in structs else [])
+				),
+			)
+		)
+	return commands, skipped
+
+
+def is_element(member: Member, target: Struct | None) -> bool:
+	"""An array of another sType-carrying structure.
+
+	It stays a span of native values -- a span borrows, so the parent cannot own
+	the elements -- but the element type still deserves a param of its own.
+	"""
+	return (
+		target is not None
+		and target.stype is not None
+		and member.ptr_depth == 1
+		and member.elem_const
+		and not member.array_dims
+		and member.length is not None
+		and member.length != "1"
+	)
+
+
+def _info_roots(root: ET.Element, structs: dict[str, Struct], api: str) -> tuple[list[str], dict[str, list[str]]]:
+	"""Roots are the structures a caller builds and hands to a command.
 
 	The rule is judgement-free: a const pointer parameter whose struct type has
 	an sType member. That excludes pAllocator (VkAllocationCallbacks has no
-	sType) without naming it.
+	sType) without naming it, and it does not care which command family the
+	parameter belongs to -- vkCreate*, vkAllocate*, vkCmd* and vkQueue* all take
+	structures the caller fills in the same way.
 	"""
 	roots: list[str] = []
+	commands: dict[str, list[str]] = {}
 	for command in root.iter("command"):
 		if not _api_allows(command, api):
 			continue
@@ -248,8 +443,6 @@ def _create_info_roots(root: ET.Element, structs: dict[str, Struct], api: str) -
 		if proto is None:
 			continue
 		name = proto.findtext("name") or ""
-		if not name.startswith("vkCreate"):
-			continue
 		for param in command.findall("param"):
 			if not _api_allows(param, api):
 				continue
@@ -261,7 +454,8 @@ def _create_info_roots(root: ET.Element, structs: dict[str, Struct], api: str) -
 				continue
 			if struct.name not in roots:
 				roots.append(struct.name)
-	return roots
+			commands.setdefault(struct.name, []).append(name)
+	return roots, commands
 
 
 def load(path: str, api: str = "vulkan") -> Registry:
@@ -316,9 +510,19 @@ def load(path: str, api: str = "vulkan") -> Registry:
 	structs = {name: struct for name, struct in structs.items() if name in requirements}
 
 	flagbits = _collect_flagbits(root, api, requirements)
-	roots = _create_info_roots(root, structs, api)
+	enums = _collect_enums(root, api, requirements)
+	# A FlagBits type can appear as a member in its own right; give it an enum
+	# form too. Only the ones actually used as members get generated.
+	enums.update(
+		(name, spec)
+		for name, spec in _flag_bits_as_enums(flagbits, requirements).items()
+		if name not in enums
+	)
+	roots, root_commands = _info_roots(root, structs, api)
+	producers, _unwrappable = _producers(root, structs, api, requirements)
 
-	# pNext closure: fixpoint over structextends starting from the roots.
+	# Closure over two relations at once: pNext (structextends) and the pointer
+	# members that name another sType-carrying structure.
 	closure = list(roots)
 	in_closure = set(closure)
 	changed = True
@@ -331,6 +535,30 @@ def load(path: str, api: str = "vulkan") -> Registry:
 				closure.append(name)
 				in_closure.add(name)
 				changed = True
+		for name in list(closure):
+			for member in structs[name].members:
+				target = structs.get(member.type)
+				if not (is_reference(member, target) or is_element(member, target)):
+					continue
+				if member.type in in_closure:
+					continue
+				closure.append(member.type)
+				in_closure.add(member.type)
+				changed = True
+
+	elements = sorted(
+		(name, member.name, member.type)
+		for name in closure
+		for member in structs[name].members
+		if is_element(member, structs.get(member.type))
+	)
+
+	references = sorted(
+		(name, member.name, member.type)
+		for name in closure
+		for member in structs[name].members
+		if is_reference(member, structs.get(member.type))
+	)
 
 	edges: list[tuple[str, str]] = []
 	for name in closure:
@@ -346,8 +574,13 @@ def load(path: str, api: str = "vulkan") -> Registry:
 		structs=structs,
 		bitmask_to_flagbits=bitmask_to_flagbits,
 		flagbits=flagbits,
+		enums=enums,
 		roots=sorted(roots),
+		root_commands={name: sorted(set(cmds)) for name, cmds in sorted(root_commands.items())},
+		producers=sorted(producers, key=lambda command: command.name),
 		closure=sorted(closure),
 		branches=branches,
+		references=references,
+		elements=elements,
 		edges=sorted(edges),
 	)

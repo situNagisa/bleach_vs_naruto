@@ -3,16 +3,18 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <cstdio>
 #include <fstream>
 #include <limits>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <span>
 #include <stdexcept>
+#include <string_view>
 #include <utility>
 #include <vector>
 
-#include <VkBootstrap.h>
 #include <vulkan/vulkan.h>
 
 #include <bvn/platform/window.h>
@@ -112,10 +114,59 @@ struct vulkan_context
 	::std::vector<::VkImageView> _swapchain_image_view_handles;
 	::vkkl::pipeline_layout _triangle_pipeline_layout;
 	::vkkl::pipeline _triangle_pipeline;
-	::vkb::Instance _bootstrap_instance;
-	::vkb::Device _bootstrap_device;
 	temporary_queue_synchronization _temporary_queue_synchronization;
 };
+
+namespace detail
+{
+inline auto has_layer(::std::span<::VkLayerProperties const> available, ::std::string_view wanted) -> bool
+{
+	return ::std::ranges::any_of(available, [wanted](::VkLayerProperties const& entry)
+	{
+		return ::std::string_view{entry.layerName} == wanted;
+	});
+}
+
+inline auto has_extension(::std::span<::VkExtensionProperties const> available, ::std::string_view wanted) -> bool
+{
+	return ::std::ranges::any_of(available, [wanted](::VkExtensionProperties const& entry)
+	{
+		return ::std::string_view{entry.extensionName} == wanted;
+	});
+}
+
+inline auto instance_layers() -> ::std::vector<::VkLayerProperties>
+{
+	auto count = ::std::uint32_t{};
+	::vkEnumerateInstanceLayerProperties(&count, nullptr);
+	auto layers = ::std::vector<::VkLayerProperties>(count);
+	::vkEnumerateInstanceLayerProperties(&count, layers.data());
+	return layers;
+}
+
+inline auto device_extensions(::VkPhysicalDevice device) -> ::std::vector<::VkExtensionProperties>
+{
+	auto count = ::std::uint32_t{};
+	::vkEnumerateDeviceExtensionProperties(device, nullptr, &count, nullptr);
+	auto extensions = ::std::vector<::VkExtensionProperties>(count);
+	::vkEnumerateDeviceExtensionProperties(device, nullptr, &count, extensions.data());
+	return extensions;
+}
+
+inline VKAPI_ATTR auto VKAPI_CALL report_debug_message(
+	::VkDebugUtilsMessageSeverityFlagBitsEXT,
+	::VkDebugUtilsMessageTypeFlagsEXT,
+	::VkDebugUtilsMessengerCallbackDataEXT const* data,
+	void*) -> ::VkBool32
+{
+	if (data != nullptr && data->pMessage != nullptr)
+	{
+		::std::fputs(data->pMessage, stderr);
+		::std::fputc('\n', stderr);
+	}
+	return VK_FALSE;
+}
+}
 
 inline auto global_vulkan_env_renderer::instance() const noexcept -> ::VkInstance { return _context->_instance.handle; }
 inline auto global_vulkan_env_renderer::physical_device() const noexcept -> ::VkPhysicalDevice { return _context->_physical_device; }
@@ -139,24 +190,57 @@ inline auto global_vulkan_env_renderer::triangle_pipeline() const noexcept -> ::
 
 inline auto create_instance(vulkan_context& renderer, ::bvn::platform::window const& target_window) -> void
 {
-	auto builder = ::vkb::InstanceBuilder{};
-	builder.set_app_name("bvn consumer architecture triangle");
-	builder.set_engine_name("bvn");
-	builder.require_api_version(1, 3, 0);
-	builder.enable_extensions(target_window.required_vulkan_extensions());
-	builder.request_validation_layers(true);
+	namespace param = ::vkfu::param;
 
-	auto result = builder.build();
-	if (!result)
+	auto const layers = detail::instance_layers();
+	auto const validation = detail::has_layer(layers, "VK_LAYER_KHRONOS_validation");
+
+	auto const platform_extensions = target_window.required_vulkan_extensions();
+	auto enabled_layers = ::std::vector<char const*>{};
+	auto enabled_extensions = ::std::vector<char const*>(platform_extensions.begin(), platform_extensions.end());
+	if (validation)
 	{
-		throw ::std::runtime_error{"failed to create Vulkan instance"};
+		enabled_layers.push_back("VK_LAYER_KHRONOS_validation");
+		enabled_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 	}
-	renderer._bootstrap_instance = result.value();
-	renderer._instance = ::vkkl::instance{renderer._bootstrap_instance.instance};
-	renderer._debug_messenger = ::vkkl::debug_utils_messenger{
-		renderer._instance.handle,
-		renderer._bootstrap_instance.debug_messenger,
-	};
+
+	renderer._instance = ::vkkl::instance{::vkfu::create_instance(param::instance{
+		// pApplicationInfo is a pointer member, so it takes a whole expression and
+		// the storage this evaluates into owns what it points at.
+		.application_info = param::application{
+			.name = "bvn consumer architecture triangle",
+			.version = VK_MAKE_API_VERSION(0, 1, 0, 0),
+			.engine_name = "bvn",
+			.engine_version = VK_MAKE_API_VERSION(0, 1, 0, 0),
+			.api_version = VK_API_VERSION_1_3,
+		},
+		.enabled_layer_names = enabled_layers,
+		.enabled_extension_names = enabled_extensions,
+	})};
+
+	if (!validation)
+	{
+		return;
+	}
+
+	auto const create_messenger = reinterpret_cast<::PFN_vkCreateDebugUtilsMessengerEXT>(
+		::vkGetInstanceProcAddr(renderer._instance.handle, "vkCreateDebugUtilsMessengerEXT"));
+	if (create_messenger == nullptr)
+	{
+		return;
+	}
+
+	auto const messenger_info = ::vkfu::evaluate(param::ext::debug_utils_messenger{
+		.message_severity = {.warning = 1, .error = 1},
+		.message_type = {.general = 1, .validation = 1, .performance = 1},
+		.user_callback = &detail::report_debug_message,
+	});
+	auto raw_messenger = ::VkDebugUtilsMessengerEXT{VK_NULL_HANDLE};
+	check(
+		create_messenger(renderer._instance.handle, &messenger_info, nullptr, &raw_messenger),
+		"failed to create the Vulkan debug messenger"
+	);
+	renderer._debug_messenger = ::vkkl::debug_utils_messenger{renderer._instance.handle, raw_messenger};
 }
 
 inline auto create_surface(vulkan_context& renderer, ::bvn::platform::window const& target_window) -> void
@@ -171,87 +255,245 @@ inline auto create_surface(vulkan_context& renderer, ::bvn::platform::window con
 
 inline auto create_device_and_queues(vulkan_context& renderer) -> void
 {
-	auto features_13 = ::VkPhysicalDeviceVulkan13Features{};
-	features_13.sType = ::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
-	features_13.dynamicRendering = VK_TRUE;
-	features_13.synchronization2 = VK_TRUE;
+	namespace param = ::vkfu::param;
 
-	auto selector = ::vkb::PhysicalDeviceSelector{renderer._bootstrap_instance, renderer._surface.handle};
-	selector.set_minimum_version(1, 3);
-	selector.prefer_gpu_device_type(::vkb::PreferredDeviceType::discrete);
-	selector.allow_any_gpu_device_type(true);
-	selector.set_required_features_13(features_13);
-	auto physical_device_result = selector.select();
-	if (!physical_device_result)
+	// Pick a device: Vulkan 1.3, the swapchain extension, dynamic rendering and
+	// synchronization2, a graphics queue and a queue that can present here.
+	// Discrete wins when there is a choice.
+	auto device_count = ::std::uint32_t{};
+	::vkEnumeratePhysicalDevices(renderer._instance.handle, &device_count, nullptr);
+	auto candidates = ::std::vector<::VkPhysicalDevice>(device_count);
+	::vkEnumeratePhysicalDevices(renderer._instance.handle, &device_count, candidates.data());
+
+	struct choice
+	{
+		::VkPhysicalDevice handle = VK_NULL_HANDLE;
+		::std::uint32_t graphics_family = 0;
+		::std::uint32_t present_family = 0;
+		bool discrete = false;
+	};
+	auto best = ::std::optional<choice>{};
+
+	for (auto const candidate : candidates)
+	{
+		auto properties = ::VkPhysicalDeviceProperties{};
+		::vkGetPhysicalDeviceProperties(candidate, &properties);
+		if (properties.apiVersion < VK_API_VERSION_1_3)
+		{
+			continue;
+		}
+		if (!detail::has_extension(detail::device_extensions(candidate), VK_KHR_SWAPCHAIN_EXTENSION_NAME))
+		{
+			continue;
+		}
+
+		auto vulkan13 = ::VkPhysicalDeviceVulkan13Features{};
+		vulkan13.sType = ::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+		auto supported = ::VkPhysicalDeviceFeatures2{};
+		supported.sType = ::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+		supported.pNext = &vulkan13;
+		::vkGetPhysicalDeviceFeatures2(candidate, &supported);
+		if (vulkan13.dynamicRendering != VK_TRUE || vulkan13.synchronization2 != VK_TRUE)
+		{
+			continue;
+		}
+
+		auto family_count = ::std::uint32_t{};
+		::vkGetPhysicalDeviceQueueFamilyProperties(candidate, &family_count, nullptr);
+		auto families = ::std::vector<::VkQueueFamilyProperties>(family_count);
+		::vkGetPhysicalDeviceQueueFamilyProperties(candidate, &family_count, families.data());
+
+		auto graphics = ::std::optional<::std::uint32_t>{};
+		auto present = ::std::optional<::std::uint32_t>{};
+		for (auto index = ::std::uint32_t{}; index < family_count; ++index)
+		{
+			if (!graphics && (families[index].queueFlags & ::VK_QUEUE_GRAPHICS_BIT) != 0)
+			{
+				graphics = index;
+			}
+			auto can_present = ::VkBool32{VK_FALSE};
+			::vkGetPhysicalDeviceSurfaceSupportKHR(candidate, index, renderer._surface.handle, &can_present);
+			if (!present && can_present == VK_TRUE)
+			{
+				present = index;
+			}
+		}
+		if (!graphics || !present)
+		{
+			continue;
+		}
+
+		auto const found = choice{
+			.handle = candidate,
+			.graphics_family = *graphics,
+			.present_family = *present,
+			.discrete = properties.deviceType == ::VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU,
+		};
+		if (!best || (found.discrete && !best->discrete))
+		{
+			best = found;
+		}
+	}
+
+	if (!best)
 	{
 		throw ::std::runtime_error{"failed to select Vulkan physical device"};
 	}
+	renderer._physical_device = best->handle;
+	renderer._graphics_queue_family = best->graphics_family;
+	renderer._present_queue_family = best->present_family;
 
-	auto device_result = ::vkb::DeviceBuilder{physical_device_result.value()}.build();
-	if (!device_result)
+	auto const priority = 1.0f;
+	auto queues = ::std::vector<::VkDeviceQueueCreateInfo>{};
+	queues.push_back(::vkfu::evaluate(param::device_queue{
+		.queue_family_index = best->graphics_family,
+		.queue_priorities = ::std::span{&priority, 1u},
+	}));
+	if (best->present_family != best->graphics_family)
 	{
-		throw ::std::runtime_error{"failed to create Vulkan device"};
+		queues.push_back(::vkfu::evaluate(param::device_queue{
+			.queue_family_index = best->present_family,
+			.queue_priorities = ::std::span{&priority, 1u},
+		}));
 	}
-	renderer._bootstrap_device = device_result.value();
-	renderer._physical_device = renderer._bootstrap_device.physical_device.physical_device;
-	renderer._device = ::vkkl::device{renderer._bootstrap_device.device};
+	char const* const device_extensions[]{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
-	auto graphics_queue_result = renderer._bootstrap_device.get_queue(::vkb::QueueType::graphics);
-	auto graphics_queue_family_result = renderer._bootstrap_device.get_queue_index(::vkb::QueueType::graphics);
-	auto present_queue_result = renderer._bootstrap_device.get_queue(::vkb::QueueType::present);
-	auto present_queue_family_result = renderer._bootstrap_device.get_queue_index(::vkb::QueueType::present);
-	if (!graphics_queue_result || !graphics_queue_family_result || !present_queue_result || !present_queue_family_result)
-	{
-		throw ::std::runtime_error{"failed to get Vulkan queues"};
-	}
-	renderer._graphics_queue = graphics_queue_result.value();
-	renderer._graphics_queue_family = graphics_queue_family_result.value();
-	renderer._present_queue = present_queue_result.value();
-	renderer._present_queue_family = present_queue_family_result.value();
+	renderer._device = ::vkkl::device{::vkfu::create_device(
+		best->handle,
+		::vkfu::chain(
+			param::device{
+				.queue_create_infos = queues,
+				.enabled_extension_names = device_extensions,
+			},
+			param::feature::vulkan13{
+				.synchronization2 = true,
+				.dynamic_rendering = true,
+			}
+		)
+	)};
+
+	::vkGetDeviceQueue(renderer._device.handle, best->graphics_family, 0, &renderer._graphics_queue);
+	::vkGetDeviceQueue(renderer._device.handle, best->present_family, 0, &renderer._present_queue);
 }
 
 inline auto create_swapchain(vulkan_context& renderer, ::bvn::platform::window const& target_window) -> void
 {
+	namespace param = ::vkfu::param;
+	using namespace ::vkfu::enums;
+
+	auto capabilities = ::VkSurfaceCapabilitiesKHR{};
+	check(
+		::vkGetPhysicalDeviceSurfaceCapabilitiesKHR(renderer._physical_device, renderer._surface.handle, &capabilities),
+		"failed to query Vulkan surface capabilities"
+	);
+
+	auto format_count = ::std::uint32_t{};
+	::vkGetPhysicalDeviceSurfaceFormatsKHR(renderer._physical_device, renderer._surface.handle, &format_count, nullptr);
+	auto formats = ::std::vector<::VkSurfaceFormatKHR>(format_count);
+	::vkGetPhysicalDeviceSurfaceFormatsKHR(renderer._physical_device, renderer._surface.handle, &format_count, formats.data());
+	if (formats.empty())
+	{
+		throw ::std::runtime_error{"the Vulkan surface reports no formats"};
+	}
+
+	auto mode_count = ::std::uint32_t{};
+	::vkGetPhysicalDeviceSurfacePresentModesKHR(renderer._physical_device, renderer._surface.handle, &mode_count, nullptr);
+	auto modes = ::std::vector<::VkPresentModeKHR>(mode_count);
+	::vkGetPhysicalDeviceSurfacePresentModesKHR(renderer._physical_device, renderer._surface.handle, &mode_count, modes.data());
+
+	auto surface_format = formats.front();
+	for (auto const& candidate : formats)
+	{
+		if (candidate.format == ::VK_FORMAT_B8G8R8A8_SRGB
+			&& candidate.colorSpace == ::VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+		{
+			surface_format = candidate;
+			break;
+		}
+	}
+
+	// FIFO is the one mode always available, which is what the demo asked for.
+	auto const requested_mode = ::VK_PRESENT_MODE_FIFO_KHR;
+	if (::std::ranges::find(modes, requested_mode) == modes.end())
+	{
+		throw ::std::runtime_error{"the Vulkan surface does not support FIFO present"};
+	}
+
 	auto const drawable_extent = target_window.drawable_extent();
-	auto builder = ::vkb::SwapchainBuilder{
-		renderer._physical_device,
+	auto extent = capabilities.currentExtent;
+	if (extent.width == 0xFFFFFFFFu)
+	{
+		extent.width = ::std::clamp(
+			::std::max(drawable_extent.width, 1u),
+			capabilities.minImageExtent.width,
+			capabilities.maxImageExtent.width
+		);
+		extent.height = ::std::clamp(
+			::std::max(drawable_extent.height, 1u),
+			capabilities.minImageExtent.height,
+			capabilities.maxImageExtent.height
+		);
+	}
+
+	auto image_count = capabilities.minImageCount + 1;
+	if (capabilities.maxImageCount != 0)
+	{
+		image_count = ::std::min(image_count, capabilities.maxImageCount);
+	}
+
+	auto const families = ::std::array{renderer._graphics_queue_family, renderer._present_queue_family};
+	auto const concurrent = renderer._graphics_queue_family != renderer._present_queue_family;
+
+	renderer._swapchain_image_format = surface_format.format;
+	renderer._swapchain_extent = extent;
+	renderer._swapchain = ::vkkl::swapchain{
 		renderer._device.handle,
-		renderer._surface.handle,
-		renderer._graphics_queue_family,
-		renderer._present_queue_family,
+		::vkfu::khr::create_swapchain(renderer._device.handle, param::khr::swapchain{
+			.surface = renderer._surface.handle,
+			.min_image_count = image_count,
+			.image_format = static_cast<format>(surface_format.format),
+			.image_color_space = static_cast<color_space>(surface_format.colorSpace),
+			.image_extent = extent,
+			.image_array_layers = 1,
+			.image_usage = {.color_attachment = 1},
+			.image_sharing_mode = concurrent ? sharing_mode::concurrent : sharing_mode::exclusive,
+			.queue_family_indices = concurrent ? ::std::span{families} : ::std::span<::std::uint32_t const>{},
+			.pre_transform = static_cast<surface_transform>(capabilities.currentTransform),
+			.composite_alpha = composite_alpha::opaque,
+			.present_mode = static_cast<present_mode>(requested_mode),
+			.clipped = true,
+		}),
 	};
-	builder.set_desired_extent(::std::max(drawable_extent.width, 1u), ::std::max(drawable_extent.height, 1u));
-	builder.set_desired_present_mode(::VK_PRESENT_MODE_FIFO_KHR);
-	builder.set_desired_format({::VK_FORMAT_B8G8R8A8_SRGB, ::VK_COLOR_SPACE_SRGB_NONLINEAR_KHR});
-	builder.add_image_usage_flags(::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
 
-	auto result = builder.build();
-	if (!result)
-	{
-		throw ::std::runtime_error{"failed to create Vulkan swapchain"};
-	}
-	auto created = result.value();
-	renderer._swapchain = ::vkkl::swapchain{renderer._device.handle, created.swapchain};
-	renderer._swapchain_extent = created.extent;
-	renderer._swapchain_image_format = created.image_format;
+	auto swapchain_image_count = ::std::uint32_t{};
+	check(
+		::vkGetSwapchainImagesKHR(renderer._device.handle, renderer._swapchain.handle, &swapchain_image_count, nullptr),
+		"failed to count Vulkan swapchain images"
+	);
+	renderer._swapchain_images.resize(swapchain_image_count);
+	check(
+		::vkGetSwapchainImagesKHR(
+			renderer._device.handle,
+			renderer._swapchain.handle,
+			&swapchain_image_count,
+			renderer._swapchain_images.data()
+		),
+		"failed to get Vulkan swapchain images"
+	);
 
-	auto image_result = created.get_images();
-	if (!image_result)
-	{
-		throw ::std::runtime_error{"failed to get Vulkan swapchain images"};
-	}
-	renderer._swapchain_images = image_result.value();
 	renderer._swapchain_image_views.reserve(renderer._swapchain_images.size());
 	renderer._swapchain_image_view_handles.reserve(renderer._swapchain_images.size());
 	for (auto image : renderer._swapchain_images)
 	{
-		auto info = ::vkfu::evaluate(::vkfu::param::image_view{
+		auto info = ::vkfu::evaluate(param::image_view{
 			.image = image,
-			.view_type = ::VK_IMAGE_VIEW_TYPE_2D,
-			.format = renderer._swapchain_image_format,
+			.view_type = image_view_type::dim_2d,
+			.format = static_cast<format>(renderer._swapchain_image_format),
 			.subresource_range = {
 				.aspectMask = ::VK_IMAGE_ASPECT_COLOR_BIT,
+				.baseMipLevel = 0,
 				.levelCount = 1,
+				.baseArrayLayer = 0,
 				.layerCount = 1,
 			},
 		});
@@ -263,8 +505,6 @@ inline auto create_swapchain(vulkan_context& renderer, ::bvn::platform::window c
 
 inline auto create_triangle_pipeline(vulkan_context& renderer) -> void
 {
-	using ::vkfu::operator|;
-
 	auto const vertex_words = read_spirv(R"(D:\project\bvn\demo\consumer-arch\shaders\triangle.vert.spv)");
 	auto const fragment_words = read_spirv(R"(D:\project\bvn\demo\consumer-arch\shaders\triangle.frag.spv)");
 	auto vertex_shader = renderer._device.create_shader_module(::vkfu::unpack(::vkfu::evaluate(::vkfu::param::shader_module{
@@ -279,65 +519,67 @@ inline auto create_triangle_pipeline(vulkan_context& renderer) -> void
 	auto layout_info = ::vkfu::evaluate(::vkfu::param::pipeline_layout{});
 	renderer._triangle_pipeline_layout = renderer._device.create_pipeline_layout(layout_info);
 
-	auto stages = ::std::array<::VkPipelineShaderStageCreateInfo, 2>{};
-	stages[0].sType = ::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-	stages[0].stage = ::VK_SHADER_STAGE_VERTEX_BIT;
-	stages[0].module = vertex_shader.handle;
-	stages[0].pName = "main";
-	stages[1].sType = ::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-	stages[1].stage = ::VK_SHADER_STAGE_FRAGMENT_BIT;
-	stages[1].module = fragment_shader.handle;
-	stages[1].pName = "main";
-	auto vertex_input = ::VkPipelineVertexInputStateCreateInfo{};
-	vertex_input.sType = ::VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	auto input_assembly = ::VkPipelineInputAssemblyStateCreateInfo{};
-	input_assembly.sType = ::VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-	input_assembly.topology = ::VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-	auto viewport = ::VkPipelineViewportStateCreateInfo{};
-	viewport.sType = ::VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-	viewport.viewportCount = 1;
-	viewport.scissorCount = 1;
-	auto rasterization = ::VkPipelineRasterizationStateCreateInfo{};
-	rasterization.sType = ::VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-	rasterization.polygonMode = ::VK_POLYGON_MODE_FILL;
-	rasterization.cullMode = ::VK_CULL_MODE_NONE;
-	rasterization.frontFace = ::VK_FRONT_FACE_CLOCKWISE;
-	rasterization.lineWidth = 1.0f;
-	auto multisample = ::VkPipelineMultisampleStateCreateInfo{};
-	multisample.sType = ::VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-	multisample.rasterizationSamples = ::VK_SAMPLE_COUNT_1_BIT;
-	auto blend_attachment = ::VkPipelineColorBlendAttachmentState{};
-	blend_attachment.colorWriteMask = ::VK_COLOR_COMPONENT_R_BIT
-		| ::VK_COLOR_COMPONENT_G_BIT
-		| ::VK_COLOR_COMPONENT_B_BIT
-		| ::VK_COLOR_COMPONENT_A_BIT;
-	auto blend = ::VkPipelineColorBlendStateCreateInfo{};
-	blend.sType = ::VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-	blend.attachmentCount = 1;
-	blend.pAttachments = &blend_attachment;
-	auto dynamic_states = ::std::array{::VK_DYNAMIC_STATE_VIEWPORT, ::VK_DYNAMIC_STATE_SCISSOR};
-	auto dynamic = ::VkPipelineDynamicStateCreateInfo{};
-	dynamic.sType = ::VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-	dynamic.dynamicStateCount = static_cast<::std::uint32_t>(dynamic_states.size());
-	dynamic.pDynamicStates = dynamic_states.data();
+	namespace param = ::vkfu::param;
+	using namespace ::vkfu::enums;
+
+	auto const stages = ::std::array{
+		::vkfu::evaluate(param::state::shader_stage{
+			.stage = shader_stage::vertex,
+			.module = vertex_shader.handle,
+			.name = "main",
+		}),
+		::vkfu::evaluate(param::state::shader_stage{
+			.stage = shader_stage::fragment,
+			.module = fragment_shader.handle,
+			.name = "main",
+		}),
+	};
+	auto const blend_attachment = ::VkPipelineColorBlendAttachmentState{
+		.colorWriteMask = ::VK_COLOR_COMPONENT_R_BIT
+			| ::VK_COLOR_COMPONENT_G_BIT
+			| ::VK_COLOR_COMPONENT_B_BIT
+			| ::VK_COLOR_COMPONENT_A_BIT,
+	};
+	auto const dynamic_states = ::std::array{::VK_DYNAMIC_STATE_VIEWPORT, ::VK_DYNAMIC_STATE_SCISSOR};
+
+	// Every pipeline state is a sub-expression of the pipeline itself, so the
+	// storage below owns them and wires the pointers up on its own.
 	auto pipeline_storage = ::vkfu::evaluate(
-		::vkfu::param::graphics_pipeline{
-			.stages = stages,
-			.vertex_input_state = &vertex_input,
-			.input_assembly_state = &input_assembly,
-			.viewport_state = &viewport,
-			.rasterization_state = &rasterization,
-			.multisample_state = &multisample,
-			.color_blend_state = &blend,
-			.dynamic_state = &dynamic,
+		param::graphics_pipeline{
+			.stage_count = static_cast<::std::uint32_t>(stages.size()),
+			.stages = stages.data(),
+			.vertex_input_state = param::state::vertex_input{},
+			.input_assembly_state = param::state::input_assembly{
+				.topology = primitive_topology::triangle_list,
+			},
+			// Viewport and scissor are dynamic, so the counts stand alone and
+			// the arrays stay null.
+			.viewport_state = param::state::viewport{
+				.viewport_count = 1,
+				.scissor_count = 1,
+			},
+			.rasterization_state = param::state::rasterization{
+				.polygon_mode = polygon_mode::fill,
+				.front_face = front_face::clockwise,
+				.line_width = 1.0f,
+			},
+			.multisample_state = param::state::multisample{
+				.rasterization_samples = sample_count::count_1,
+			},
+			.color_blend_state = param::state::color_blend{
+				.attachment_count = 1,
+				.attachments = &blend_attachment,
+			},
+			.dynamic_state = param::state::dynamic{
+				.states = dynamic_states,
+			},
 			.layout = renderer._triangle_pipeline_layout.handle,
 		}
-		| ::vkfu::param::option::pipeline_rendering{
+		| param::option::pipeline_rendering{
 			.color_attachment_formats = ::std::span{&renderer._swapchain_image_format, 1u},
 		}
 	);
-	auto const& pipeline_info = ::std::get<0>(pipeline_storage.storages);
-	renderer._triangle_pipeline = renderer._device.create_graphics_pipeline(pipeline_info);
+	renderer._triangle_pipeline = renderer._device.create_graphics_pipeline(::vkfu::unpack(pipeline_storage));
 }
 
 inline vulkan_context::vulkan_context(::bvn::platform::window const& target_window)
@@ -368,45 +610,54 @@ inline auto begin_frame(
 	check(::vkResetCommandPool(renderer.device(), primary_command_pool, 0), "failed to reset primary command pool");
 	check(::vkResetFences(renderer.device(), 1, &in_flight), "failed to reset frame fence");
 
-	auto begin_info = ::VkCommandBufferBeginInfo{};
-	begin_info.sType = ::VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	begin_info.flags = ::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+	namespace param = ::vkfu::param;
+	using namespace ::vkfu::enums;
+
+	// command_buffer_begin has a slot (pInheritanceInfo), so evaluating it gives a
+	// storage rather than the structure; unpack reaches the native head.
+	auto const begin_storage = ::vkfu::evaluate(param::command_buffer_begin{
+		.flags = {.one_time_submit = 1},
+	});
+	auto&& begin_info = ::vkfu::unpack(begin_storage);
 	check(::vkBeginCommandBuffer(primary_command_buffer, &begin_info), "failed to begin primary command buffer");
 
-	auto image_barrier = ::VkImageMemoryBarrier2{};
-	image_barrier.sType = ::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
-	image_barrier.srcStageMask = ::VK_PIPELINE_STAGE_2_NONE;
-	image_barrier.srcAccessMask = ::VK_ACCESS_2_NONE;
-	image_barrier.dstStageMask = ::VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
-	image_barrier.dstAccessMask = ::VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
-	image_barrier.oldLayout = ::VK_IMAGE_LAYOUT_UNDEFINED;
-	image_barrier.newLayout = ::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-	image_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	image_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	image_barrier.image = frame.active_image();
-	image_barrier.subresourceRange.aspectMask = ::VK_IMAGE_ASPECT_COLOR_BIT;
-	image_barrier.subresourceRange.levelCount = 1;
-	image_barrier.subresourceRange.layerCount = 1;
-	auto dependency = ::VkDependencyInfo{};
-	dependency.sType = ::VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
-	dependency.imageMemoryBarrierCount = 1;
-	dependency.pImageMemoryBarriers = &image_barrier;
-	::vkCmdPipelineBarrier2(primary_command_buffer, &dependency);
+	auto const acquire_barrier = ::vkfu::evaluate(param::image_memory_barrier2{
+		.dst_stage_mask = {.color_attachment_output = 1},
+		.dst_access_mask = {.color_attachment_write = 1},
+		.old_layout = image_layout::undefined,
+		.new_layout = image_layout::color_attachment_optimal,
+		.src_queue_family_index = VK_QUEUE_FAMILY_IGNORED,
+		.dst_queue_family_index = VK_QUEUE_FAMILY_IGNORED,
+		.image = frame.active_image(),
+		.subresource_range = {
+			.aspectMask = ::VK_IMAGE_ASPECT_COLOR_BIT,
+			.baseMipLevel = 0,
+			.levelCount = 1,
+			.baseArrayLayer = 0,
+			.layerCount = 1,
+		},
+	});
+	auto const acquire_dependency = ::vkfu::evaluate(param::dependency{
+		.image_memory_barriers = ::std::span{&acquire_barrier, 1u},
+	});
+	::vkCmdPipelineBarrier2(primary_command_buffer, &acquire_dependency);
 
-	auto color_attachment = ::VkRenderingAttachmentInfo{};
-	color_attachment.sType = ::VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-	color_attachment.imageView = frame.active_image_view();
-	color_attachment.imageLayout = ::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-	color_attachment.loadOp = ::VK_ATTACHMENT_LOAD_OP_CLEAR;
-	color_attachment.storeOp = ::VK_ATTACHMENT_STORE_OP_STORE;
-	color_attachment.clearValue.color = {{0.025f, 0.035f, 0.055f, 1.0f}};
-	auto rendering_info = ::VkRenderingInfo{};
-	rendering_info.sType = ::VK_STRUCTURE_TYPE_RENDERING_INFO;
-	rendering_info.flags = ::VK_RENDERING_CONTENTS_SECONDARY_COMMAND_BUFFERS_BIT;
-	rendering_info.renderArea.extent = frame.extent();
-	rendering_info.layerCount = 1;
-	rendering_info.colorAttachmentCount = 1;
-	rendering_info.pColorAttachments = &color_attachment;
+	auto clear_value = ::VkClearValue{};
+	clear_value.color = {{0.025f, 0.035f, 0.055f, 1.0f}};
+	auto const color_attachment = ::vkfu::evaluate(param::rendering_attachment{
+		.image_view = frame.active_image_view(),
+		.image_layout = image_layout::color_attachment_optimal,
+		.load_op = attachment_load_op::clear,
+		.store_op = attachment_store_op::store,
+		.clear_value = clear_value,
+	});
+	auto const rendering_storage = ::vkfu::evaluate(param::rendering{
+		.flags = {.contents_secondary_command_buffers = 1},
+		.render_area = ::VkRect2D{.offset = {}, .extent = frame.extent()},
+		.layer_count = 1,
+		.color_attachments = ::std::span{&color_attachment, 1u},
+	});
+	auto&& rendering_info = ::vkfu::unpack(rendering_storage);
 	::vkCmdBeginRendering(primary_command_buffer, &rendering_info);
 }
 
@@ -428,32 +679,39 @@ inline auto record_triangle(
 	::vkkl::command_pool_observer secondary_command_pool
 ) -> ::vkkl::command_buffer
 {
-	auto allocate_info = ::VkCommandBufferAllocateInfo{};
-	allocate_info.sType = ::VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	allocate_info.commandPool = secondary_command_pool.handle;
-	allocate_info.level = ::VK_COMMAND_BUFFER_LEVEL_SECONDARY;
-	allocate_info.commandBufferCount = 1;
+	namespace param = ::vkfu::param;
+	using namespace ::vkfu::enums;
+
 	auto raw_secondary = ::VkCommandBuffer{};
-	check(::vkAllocateCommandBuffers(renderer.device(), &allocate_info, &raw_secondary), "failed to allocate secondary command buffer");
+	::vkfu::allocate_command_buffers(
+		renderer.device(),
+		param::command_buffer{
+			.command_pool = secondary_command_pool.handle,
+			.level = command_buffer_level::secondary,
+			.command_buffer_count = 1,
+		},
+		::std::span{&raw_secondary, 1u}
+	);
 	auto secondary_command_buffer = ::vkkl::command_buffer{
 		renderer.device(),
 		secondary_command_pool.handle,
 		raw_secondary,
 	};
 
+	// The inheritance info is a pointer member of the begin info, so it goes in
+	// as a sub-expression -- pNext chain and all.
+	// A span of enums keeps the native element type, so this stays a VkFormat.
 	auto const color_format = renderer.swapchain_image_format();
-	auto inheritance_rendering = ::VkCommandBufferInheritanceRenderingInfo{};
-	inheritance_rendering.sType = ::VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_RENDERING_INFO;
-	inheritance_rendering.colorAttachmentCount = 1;
-	inheritance_rendering.pColorAttachmentFormats = &color_format;
-	inheritance_rendering.rasterizationSamples = ::VK_SAMPLE_COUNT_1_BIT;
-	auto inheritance = ::VkCommandBufferInheritanceInfo{};
-	inheritance.sType = ::VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-	inheritance.pNext = &inheritance_rendering;
-	auto begin_info = ::VkCommandBufferBeginInfo{};
-	begin_info.sType = ::VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	begin_info.flags = ::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT | ::VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
-	begin_info.pInheritanceInfo = &inheritance;
+	auto begin = param::command_buffer_begin{
+		.flags = {.one_time_submit = 1, .render_pass_continue = 1},
+		.inheritance_info = param::command_buffer_inheritance{}
+			| param::option::command_buffer_inheritance_rendering{
+				.color_attachment_formats = ::std::span{&color_format, 1u},
+				.rasterization_samples = sample_count::count_1,
+			},
+	};
+	auto const begin_storage = ::vkfu::evaluate(begin);
+	auto const& begin_info = ::vkfu::unpack(begin_storage);
 	check(::vkBeginCommandBuffer(secondary_command_buffer.handle, &begin_info), "failed to begin secondary command buffer");
 
 	auto const extent = renderer.swapchain_extent();
@@ -489,59 +747,59 @@ inline auto submit_present_frame(
 	}
 	::vkCmdEndRendering(primary_command_buffer);
 
-	auto present_barrier = ::VkImageMemoryBarrier2{};
-	present_barrier.sType = ::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
-	present_barrier.srcStageMask = ::VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
-	present_barrier.srcAccessMask = ::VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
-	present_barrier.dstStageMask = ::VK_PIPELINE_STAGE_2_NONE;
-	present_barrier.dstAccessMask = ::VK_ACCESS_2_NONE;
-	present_barrier.oldLayout = ::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-	present_barrier.newLayout = ::VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-	present_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	present_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	present_barrier.image = frame.active_image();
-	present_barrier.subresourceRange.aspectMask = ::VK_IMAGE_ASPECT_COLOR_BIT;
-	present_barrier.subresourceRange.levelCount = 1;
-	present_barrier.subresourceRange.layerCount = 1;
-	auto dependency = ::VkDependencyInfo{};
-	dependency.sType = ::VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
-	dependency.imageMemoryBarrierCount = 1;
-	dependency.pImageMemoryBarriers = &present_barrier;
-	::vkCmdPipelineBarrier2(primary_command_buffer, &dependency);
+	namespace param = ::vkfu::param;
+	using namespace ::vkfu::enums;
+
+	auto const present_barrier = ::vkfu::evaluate(param::image_memory_barrier2{
+		.src_stage_mask = {.color_attachment_output = 1},
+		.src_access_mask = {.color_attachment_write = 1},
+		.old_layout = image_layout::color_attachment_optimal,
+		.new_layout = image_layout::present_src,
+		.src_queue_family_index = VK_QUEUE_FAMILY_IGNORED,
+		.dst_queue_family_index = VK_QUEUE_FAMILY_IGNORED,
+		.image = frame.active_image(),
+		.subresource_range = {
+			.aspectMask = ::VK_IMAGE_ASPECT_COLOR_BIT,
+			.baseMipLevel = 0,
+			.levelCount = 1,
+			.baseArrayLayer = 0,
+			.layerCount = 1,
+		},
+	});
+	auto const present_dependency = ::vkfu::evaluate(param::dependency{
+		.image_memory_barriers = ::std::span{&present_barrier, 1u},
+	});
+	::vkCmdPipelineBarrier2(primary_command_buffer, &present_dependency);
 	check(::vkEndCommandBuffer(primary_command_buffer), "failed to end primary command buffer");
 
 	auto const image_available = frame.image_available();
 	auto const render_finished = frame.render_finished();
-	auto wait_semaphore = ::VkSemaphoreSubmitInfo{};
-	wait_semaphore.sType = ::VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-	wait_semaphore.semaphore = image_available;
-	wait_semaphore.stageMask = ::VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
-	auto command_buffer = ::VkCommandBufferSubmitInfo{};
-	command_buffer.sType = ::VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
-	command_buffer.commandBuffer = primary_command_buffer;
-	auto signal_semaphore = ::VkSemaphoreSubmitInfo{};
-	signal_semaphore.sType = ::VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-	signal_semaphore.semaphore = render_finished;
-	signal_semaphore.stageMask = ::VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-	auto submit = ::VkSubmitInfo2{};
-	submit.sType = ::VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
-	submit.waitSemaphoreInfoCount = 1;
-	submit.pWaitSemaphoreInfos = &wait_semaphore;
-	submit.commandBufferInfoCount = 1;
-	submit.pCommandBufferInfos = &command_buffer;
-	submit.signalSemaphoreInfoCount = 1;
-	submit.pSignalSemaphoreInfos = &signal_semaphore;
+	auto const wait_semaphore = ::vkfu::evaluate(param::semaphore_submit{
+		.semaphore = image_available,
+		.stage_mask = {.color_attachment_output = 1},
+	});
+	auto const command_buffer = ::vkfu::evaluate(param::command_buffer_submit{
+		.command_buffer = primary_command_buffer,
+	});
+	auto const signal_semaphore = ::vkfu::evaluate(param::semaphore_submit{
+		.semaphore = render_finished,
+		.stage_mask = {.all_commands = 1},
+	});
+	auto const submit = ::vkfu::evaluate(param::submit2{
+		.wait_semaphore_infos = ::std::span{&wait_semaphore, 1u},
+		.command_buffer_infos = ::std::span{&command_buffer, 1u},
+		.signal_semaphore_infos = ::std::span{&signal_semaphore, 1u},
+	});
 	check(::vkQueueSubmit2(renderer.graphics_queue(), 1, &submit, frame.in_flight()), "failed to submit Vulkan frame");
 
 	auto const swapchain = renderer.swapchain();
 	auto const active_image_index = frame.active_image_index();
-	auto present = ::VkPresentInfoKHR{};
-	present.sType = ::VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-	present.waitSemaphoreCount = 1;
-	present.pWaitSemaphores = &render_finished;
-	present.swapchainCount = 1;
-	present.pSwapchains = &swapchain;
-	present.pImageIndices = &active_image_index;
+	auto const present = ::vkfu::evaluate(param::khr::present{
+		.wait_semaphores = ::std::span{&render_finished, 1u},
+		.swapchain_count = 1,
+		.swapchains = &swapchain,
+		.image_indices = &active_image_index,
+	});
 	return ::vkQueuePresentKHR(renderer.present_queue(), &present);
 }
 

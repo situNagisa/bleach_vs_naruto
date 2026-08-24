@@ -96,7 +96,6 @@ endif()
 
 find_package(Threads REQUIRED)
 find_package(Vulkan REQUIRED)
-find_package(vk-bootstrap CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 
 if(NOT TARGET vkfu::vkfu)
@@ -141,7 +140,6 @@ target_link_libraries(bvn_consumer_arch_demo PRIVATE
 	${CONSUMER_ARCH_PROJECT_LIBRARIES}
 	Threads::Threads
 	Vulkan::Vulkan
-	vk-bootstrap::vk-bootstrap
 	vkfu::vkfu
 )
 target_compile_definitions(bvn_consumer_arch_demo PRIVATE

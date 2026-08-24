@@ -217,15 +217,15 @@ struct frame_slot_resource
 				.queue_family_index = renderer.graphics_queue_family(),
 				})));
 
-			auto allocate_info = ::VkCommandBufferAllocateInfo{};
-			allocate_info.sType = ::VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-			allocate_info.commandPool = slot._primary_command_pool.handle;
-			allocate_info.level = ::VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-			allocate_info.commandBufferCount = 1;
 			auto raw_command_buffer = ::VkCommandBuffer{};
-			::consumer_arch_vulkan::check(
-				::vkAllocateCommandBuffers(renderer.device(), &allocate_info, &raw_command_buffer),
-				"failed to allocate primary command buffer"
+			::vkfu::allocate_command_buffers(
+				renderer.device(),
+				::vkfu::param::command_buffer{
+					.command_pool = slot._primary_command_pool.handle,
+					.level = ::vkfu::enums::command_buffer_level::primary,
+					.command_buffer_count = 1,
+				},
+				::std::span{&raw_command_buffer, 1u}
 			);
 			slot._primary_command_buffer = ::vkkl::command_buffer{
 				renderer.device(),

@@ -23,8 +23,8 @@ int main()
 	auto features = feature::core{}
 		| feature::timeline_semaphore{.enable = true}
 		| feature::host_query_reset{.enable = true}
-		| (feature::cluster_culling_shader{.enable = true}
-			| feature::cluster_culling_shader_vrs{.cluster_shading_rate = true});
+		| (feature::huawei::cluster_culling_shader{.enable = true}
+			| feature::huawei::cluster_culling_shader_vrs{.cluster_shading_rate = true});
 	auto expression = device{
 		.queue_create_infos = ::std::span{&queue_info, 1u},
 		.enabled_extension_names = extensions,

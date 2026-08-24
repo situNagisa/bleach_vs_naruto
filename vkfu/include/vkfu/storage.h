@@ -12,10 +12,18 @@ namespace storage_customization
 void address();
 void set_next();
 
+// Native Vulkan structures cannot grow members, and an unqualified `address`
+// overload for them would have to sit in the global namespace. These two
+// prefixed names are that hook: narrow enough not to be mistaken for anything
+// else, and only consulted after the ordinary two.
+void _vkfu_address();
+void _vkfu_set_next();
+
 enum class choice
 {
 	member,
 	adl,
+	prefixed,
 	none,
 };
 
@@ -36,6 +44,10 @@ consteval auto choose_address() noexcept -> choice_result
 	{
 		return {choice::adl, noexcept(address(::std::declval<Storage>()))};
 	}
+	else if constexpr (requires { _vkfu_address(::std::declval<Storage>()); })
+	{
+		return {choice::prefixed, noexcept(_vkfu_address(::std::declval<Storage>()))};
+	}
 	else
 	{
 		return {choice::none, true};
@@ -53,6 +65,10 @@ consteval auto choose_set_next() noexcept -> choice_result
 	{
 		return {choice::adl, noexcept(set_next(::std::declval<Storage>(), ::std::declval<void const*>()))};
 	}
+	else if constexpr (requires { _vkfu_set_next(::std::declval<Storage>(), ::std::declval<void const*>()); })
+	{
+		return {choice::prefixed, noexcept(_vkfu_set_next(::std::declval<Storage>(), ::std::declval<void const*>()))};
+	}
 	else
 	{
 		return {choice::none, true};
@@ -69,9 +85,13 @@ struct address_t
 		{
 			return ::std::forward<decltype(storage)>(storage).address();
 		}
-		else
+		else if constexpr (selected == choice::adl)
 		{
 			return address(::std::forward<decltype(storage)>(storage));
+		}
+		else
+		{
+			return _vkfu_address(::std::forward<decltype(storage)>(storage));
 		}
 	}
 };
@@ -86,9 +106,13 @@ struct set_next_t
 		{
 			return ::std::forward<decltype(storage)>(storage).set_next(next);
 		}
-		else
+		else if constexpr (selected == choice::adl)
 		{
 			return set_next(::std::forward<decltype(storage)>(storage), next);
+		}
+		else
+		{
+			return _vkfu_set_next(::std::forward<decltype(storage)>(storage), next);
 		}
 	}
 };
@@ -191,10 +215,24 @@ concept _derived_from_basic_storage = requires(T const& s)
 	_match_basic_storage(s);
 };
 
+// The native head structure of an evaluated value, whatever it is wrapped in.
+template<class T>
+concept _has_native_head = requires(T& value) { value.native; };
+
 constexpr auto&& unpack(auto&& storage) noexcept
 {
 	if constexpr (_derived_from_basic_storage<decltype(storage)>)
-		return ::std::get<0>(::std::forward<decltype(storage)>(storage).storages);
+	{
+		// The head of a chain is the branch's own storage, which is either the
+		// native structure already or a reference_storage wrapping one.
+		auto&& head = ::std::get<0>(::std::forward<decltype(storage)>(storage).storages);
+		if constexpr (_has_native_head<decltype(head)>)
+			return static_cast<decltype(head)>(head).native;
+		else
+			return static_cast<decltype(head)>(head);
+	}
+	else if constexpr (_has_native_head<decltype(storage)>)
+		return ::std::forward<decltype(storage)>(storage).native;
 	else
 		return ::std::forward<decltype(storage)>(storage);
 }

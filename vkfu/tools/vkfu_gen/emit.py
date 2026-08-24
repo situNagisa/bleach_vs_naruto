@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import dataclasses
 
-from . import ir
+from . import ir, producers
 from .naming import Table
 
 
@@ -40,12 +40,14 @@ class GenerationError(Exception):
 
 @dataclasses.dataclass
 class Field:
-	kind: str  # bool | scalar | flags | span | pointer | array
+	kind: str  # bool | scalar | enum | flags | span | pointer | reference | array
 	member: ir.Member
 	cpp_type: str  # declared type of the param field
 	count_member: str | None = None  # span: the native count member it drives
 	flag_bits: str | None = None  # flags: the VkXxxFlagBits enum
 	layout: list[ir.Bit] | None = None  # flags: bits in ascending bitpos order
+	enum_type: str | None = None  # enum: the VkXxx plain enum it wraps
+	target: str | None = None  # reference: the VkXxx the pointer names
 
 
 @dataclasses.dataclass
@@ -98,6 +100,11 @@ def plan_struct(struct: ir.Struct, registry: ir.Registry) -> Plan:
 			continue
 		if member.type == "void":
 			continue
+		if member.optional:
+			# An optional pointer's count is independent of it: dynamic viewport
+			# state means viewportCount == 1 with pViewports == NULL, which a
+			# span cannot say. Keep both members verbatim.
+			continue
 		references.setdefault(token, []).append(member)
 
 	foldable = {count: pointers[0] for count, pointers in references.items() if len(pointers) == 1}
@@ -138,6 +145,10 @@ def plan_struct(struct: ir.Struct, registry: ir.Registry) -> Plan:
 			consumed[field.count_member] = field
 			continue
 
+		if ir.is_reference(member, registry.structs.get(member.type)):
+			fields.append(Field(kind="reference", member=member, cpp_type=member.type, target=member.type))
+			continue
+
 		if member.ptr_depth >= 1:
 			fields.append(Field(kind="pointer", member=member, cpp_type=_pointer_type(member)))
 			continue
@@ -164,6 +175,10 @@ def plan_struct(struct: ir.Struct, registry: ir.Registry) -> Plan:
 				unsupported.append(
 					f"{struct.name}.{member.name}: {flag_bits} bits do not fit one per position"
 				)
+
+		if member.type in registry.enums and registry.enums[member.type].values:
+			fields.append(Field(kind="enum", member=member, cpp_type=member.type, enum_type=member.type))
+			continue
 
 		fields.append(Field(kind="scalar", member=member, cpp_type=_base_type(member.type)))
 
@@ -259,7 +274,7 @@ def _grouped(selected: list[str], table: Table) -> list[tuple[str, list[str]]]:
 	return sorted(buckets.items(), key=lambda entry: (entry[0] != "", entry[0]))
 
 
-def _render_flags_checks(field: Field, table: Table, field_name: str) -> list[str]:
+def _render_flags_checks(field: Field, table: Table, owner: str, field_name: str) -> list[str]:
 	"""Prove the bit-field layout against the real enum constants.
 
 	Bit-field allocation order is implementation-defined, so the mapping is
@@ -267,15 +282,18 @@ def _render_flags_checks(field: Field, table: Table, field_name: str) -> list[st
 	where it exists; the field itself is unconditional so the layout never
 	shifts between platforms.
 	"""
+	nested = f"{owner}::{field_name}_type"
 	lines = [
-		f"{TAB}static_assert(sizeof({field_name}_type) == sizeof({field.member.type}));",
-		"#if !defined(__clang__) || !defined(_MSC_VER)",
+		f"static_assert(sizeof({nested}) == sizeof({field.member.type}));",
+		# clang has no constexpr bit_cast over bit-fields yet, so the layout is
+		# proven on the compilers that do; the runtime tests cover clang.
+		"#if !defined(__clang__)",
 	]
 	for bit in field.layout:
 		name = table.bit_name(field.flag_bits, bit.name)
 		_guard_open(lines, bit.guards)
 		lines.append(
-			f"{TAB}static_assert(::std::bit_cast<{field.member.type}>({field_name}_type{{.{name} = 1}}) == {bit.name});"
+			f"static_assert(::std::bit_cast<{field.member.type}>({nested}{{.{name} = 1}}) == {bit.name});"
 		)
 		_guard_close(lines, bit.guards)
 	lines.append("#endif")
@@ -291,36 +309,63 @@ def _render_param(
 ) -> list[str]:
 	names = {field.member.name: table.member_name(struct.name, field.member.name) for field in plan.fields}
 
+	slots = [field for field in plan.fields if field.kind == "reference"]
+	parameters = {field.member.name: f"{names[field.member.name]}_expression" for field in slots}
+
 	lines: list[str] = []
 	_guard_open(lines, struct.guards)
+	if slots:
+		# One template parameter per pointer slot, so a slot can hold a whole
+		# sub-expression and the parent's storage owns what it points at.
+		declarations = ", ".join(
+			f"::vkfu::reference_expression_for<obj::{table.struct_name(field.target)}> "
+			f"{parameters[field.member.name]} = ::vkfu::absent_expression"
+			for field in slots
+		)
+		lines.append(f"template<{declarations}>")
 	lines.append(f"struct {_leaf_of(object_name)}")
 	lines.append("{")
 	lines.append(f"{TAB}using vulkan_tag_type = obj::{object_name};")
+	if slots:
+		lines.append(f"{TAB}using storage_type = ::vkfu::reference_storage<{struct.name}")
+		for field in slots:
+			lines.append(
+				f"{TAB}{TAB}, ::vkfu::reference_slot<&{struct.name}::{field.member.name}, "
+				f"::vkfu::reference_storage_of_t<{parameters[field.member.name]}>>"
+			)
+		lines.append(f"{TAB}{TAB}>;")
 	lines.append("")
 
 	for field in plan.fields:
 		field_name = names[field.member.name]
 		if field.kind == "flags":
 			lines.extend(_render_flags_type(field, registry, table, field_name))
+		elif field.kind == "enum":
+			lines.append(f"{TAB}::vkfu::enums::{table.enum_name(field.enum_type)} {field_name}{{}};")
+		elif field.kind == "reference":
+			lines.append(f"{TAB}{parameters[field.member.name]} {field_name}{{}};")
 		else:
 			lines.append(f"{TAB}{field.cpp_type} {field_name}{_field_default(field)};")
-
-	for field in plan.fields:
-		if field.kind == "flags":
-			lines.append("")
-			lines.extend(_render_flags_checks(field, table, names[field.member.name]))
 
 	arrays = [field for field in plan.fields if field.kind == "array"]
 	by_field = {field.member.name: field for field in plan.fields}
 	# A fixed-size native array cannot be filled by a designated initialiser, so
 	# only those structures need a named temporary.
-	head = f"{TAB}{TAB}auto value = {struct.name}{{" if arrays else f"{TAB}{TAB}return {struct.name}{{"
 	inner = f"{TAB}{TAB}{TAB}"
-
-	lines.append("")
-	lines.append(f"{TAB}constexpr auto evaluate() const noexcept -> {struct.name}")
-	lines.append(f"{TAB}{{")
-	lines.append(head)
+	if slots:
+		# Not const: a sub-expression's own evaluate() need not be.
+		lines.append("")
+		lines.append(f"{TAB}constexpr auto evaluate() -> storage_type")
+		lines.append(f"{TAB}{{")
+		lines.append(f"{TAB}{TAB}return storage_type{{")
+		lines.append(f"{TAB}{TAB}{TAB}{struct.name}{{")
+		inner = f"{TAB}{TAB}{TAB}{TAB}"
+	else:
+		head = f"{TAB}{TAB}auto value = {struct.name}{{" if arrays else f"{TAB}{TAB}return {struct.name}{{"
+		lines.append("")
+		lines.append(f"{TAB}constexpr auto evaluate() const noexcept -> {struct.name}")
+		lines.append(f"{TAB}{{")
+		lines.append(head)
 	lines.append(f"{inner}.sType = {struct.stype},")
 	lines.append(f"{inner}.pNext = nullptr,")
 	for member in struct.members:
@@ -337,6 +382,9 @@ def _render_param(
 			continue
 		field_name = names[member.name]
 		if field.kind == "array":
+			# Designated as empty so the aggregate is complete; the values are
+			# copied in below, because a designator cannot fill a C array.
+			lines.append(f"{inner}.{member.name} = {{}},")
 			continue
 		if field.kind == "bool":
 			lines.append(f"{inner}.{member.name} = {field_name} ? VK_TRUE : VK_FALSE,")
@@ -344,8 +392,28 @@ def _render_param(
 			lines.append(f"{inner}.{member.name} = {field_name}.data(),")
 		elif field.kind == "flags":
 			lines.append(f"{inner}.{member.name} = ::std::bit_cast<{member.type}>({field_name}),")
+		elif field.kind == "enum":
+			lines.append(f"{inner}.{member.name} = static_cast<{member.type}>({field_name}),")
+		elif field.kind == "reference":
+			lines.append(f"{inner}.{member.name} = nullptr,")
 		else:
 			lines.append(f"{inner}.{member.name} = {field_name},")
+
+	if slots:
+		lines.append(f"{TAB}{TAB}{TAB}}},")
+		for field in slots:
+			lines.append(f"{TAB}{TAB}{TAB}::vkfu::evaluate({names[field.member.name]}),")
+		lines.append(f"{TAB}{TAB}}};")
+		lines.append(f"{TAB}}}")
+		lines.append("};")
+		for field in plan.fields:
+			if field.kind == "flags":
+				lines.append("")
+				# Every template parameter has a default, so the layout of the
+				# nested bit-field type can be checked on the default instantiation.
+				lines.extend(_render_flags_checks(field, table, f"{_leaf_of(object_name)}<>", names[field.member.name]))
+		_guard_close(lines, struct.guards)
+		return lines
 
 	lines.append(f"{TAB}{TAB}}};")
 	if arrays:
@@ -355,34 +423,81 @@ def _render_param(
 		lines.append(f"{TAB}{TAB}return value;")
 	lines.append(f"{TAB}}}")
 	lines.append("};")
+
+	# A nested class's default member initialisers are not usable inside the
+	# enclosing class's body, so the layout checks sit just after it.
+	for field in plan.fields:
+		if field.kind == "flags":
+			lines.append("")
+			lines.extend(_render_flags_checks(field, table, _leaf_of(object_name), names[field.member.name]))
+
 	_guard_close(lines, struct.guards)
 	return lines
 
 
-NATIVE_GLUE = """\
-// vkfu::address / vkfu::set_next reach native Vulkan structures through ADL, so
-// these have to live in the namespace those structures are declared in.
-template<class T>
-	requires requires(T& value) { value.sType; value.pNext; }
-constexpr auto address(T& value) noexcept -> void const*
-{
-	return ::std::addressof(value);
-}
+def used_enums(selected: list[str], registry: ir.Registry) -> list[str]:
+	"""Plain enums that some selected object exposes as a field."""
+	names: list[str] = []
+	for name in selected:
+		for field in plan_struct(registry.structs[name], registry).fields:
+			if field.kind == "enum" and field.enum_type not in names:
+				names.append(field.enum_type)
+	return sorted(names)
 
-template<class T>
-	requires requires(T& value) { value.sType; value.pNext; }
-constexpr void set_next(T& value, void const* next) noexcept
-{
-	if constexpr (::std::is_const_v<::std::remove_pointer_t<decltype(value.pNext)>>)
-	{
-		value.pNext = next;
-	}
-	else
-	{
-		value.pNext = const_cast<void*>(next);
-	}
-}
-"""
+
+def _render_enum(enum_type: ir.EnumType, table: Table) -> list[str]:
+	"""A scoped enum over the native one.
+
+	The underlying type is taken from the native enum so the static_cast back is
+	always value-preserving.
+	"""
+	lines: list[str] = []
+	_guard_open(lines, enum_type.guards)
+	lines += [
+		f"enum class {table.enum_name(enum_type.name)} : ::std::underlying_type_t<{enum_type.name}>",
+		"{",
+	]
+	for value in enum_type.values:
+		_guard_open(lines, value.guards)
+		lines.append(f"{TAB}{table.value_name(enum_type.name, value.name)} = {value.name},")
+		_guard_close(lines, value.guards)
+	lines.append("};")
+	_guard_close(lines, enum_type.guards)
+	return lines
+
+
+def _render_native_glue(struct: ir.Struct) -> list[str]:
+	"""The evaluate / pNext hooks for one native structure.
+
+	One overload per structure rather than a constrained template: a template
+	would answer for every Vulkan structure in existence, including ones vkfu
+	knows nothing about. These names live in the global namespace because that is
+	where the structures are declared and so where ADL looks, and they are
+	prefixed so that nothing else can collide with them.
+	"""
+	pnext = next((member for member in struct.members if member.name == "pNext"), None)
+	assign = "value.pNext = next;" if pnext is not None and pnext.elem_const else "value.pNext = const_cast<void*>(next);"
+	lines: list[str] = []
+	_guard_open(lines, struct.guards)
+	lines += [
+		f"constexpr auto _vkfu_address({struct.name}& value) noexcept -> void const*",
+		"{",
+		f"{TAB}return ::std::addressof(value);",
+		"}",
+		"",
+		f"constexpr void _vkfu_set_next({struct.name}& value, void const* next) noexcept",
+		"{",
+		f"{TAB}{assign}",
+		"}",
+		"",
+		f"constexpr auto _vkfu_evaluate({struct.name} const& value) noexcept -> {struct.name}",
+		"{",
+		f"{TAB}return value;",
+		"}",
+	]
+	_guard_close(lines, struct.guards)
+	return lines
+
 
 
 def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list[str]]:
@@ -430,14 +545,73 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 				problems.append(f"field collision in {name}: {used[field_name]} and {field.member.name} -> '{field_name}'")
 			else:
 				used[field_name] = field.member.name
+			if field.kind == "enum" and field_name == table.enum_name(field.enum_type):
+				# Legal, because generated code always writes ::vkfu::enums::x in
+				# full, but the member does hide the enum name in class scope.
+				warnings.append(f"{name}: field '{field_name}' hides the enum class it is typed with")
 			if field_name == _leaf_of(object_name):
 				# Legal for an aggregate, but the member hides the injected class
 				# name inside the struct, so it is worth a look.
 				warnings.append(f"{name}: field '{field_name}' has the same name as its object")
 			if field.kind == "flags":
+				seen_bits: dict[str, str] = {}
 				for bit in field.layout:
-					if not table.bit_name(field.flag_bits, bit.name):
+					bit_name = table.bit_name(field.flag_bits, bit.name)
+					if not bit_name:
 						missing.append(f"bit.{field.flag_bits}.{bit.name}")
+					elif bit_name in seen_bits:
+						problems.append(
+							f"bit collision in {field.flag_bits}: {seen_bits[bit_name]} and {bit.name} -> '{bit_name}'"
+						)
+					else:
+						seen_bits[bit_name] = bit.name
+
+	enums = used_enums(selected, registry)
+	for enum_type in enums:
+		if not table.enum_name(enum_type):
+			missing.append(f"enum.{enum_type}")
+			continue
+		seen_values: dict[str, str] = {}
+		for value in registry.enums[enum_type].values:
+			name = table.value_name(enum_type, value.name)
+			if not name:
+				missing.append(f"value.{enum_type}.{value.name}")
+			elif name in seen_values:
+				problems.append(f"enumerator collision in {enum_type}: {seen_values[name]} and {value.name} -> '{name}'")
+			else:
+				seen_values[name] = value.name
+
+	for command in registry.producers:
+		if command.info.type not in selected:
+			continue
+		if not table.command_name(command.name):
+			missing.append(f"command.{command.name}")
+		elif producers.shape_of(command) == "array" and not table.command_singular(command.name):
+			missing.append(f"command.{command.name}.singular")
+
+	# Everything a param struct declares at class scope has to be distinct: the
+	# fields, the nested `<field>_type` of a flags field, the `<field>_expression`
+	# template parameter of a slot, and the fixed aliases.
+	for name in selected:
+		plan = plans[name]
+		scope: dict[str, str] = {}
+		entries = [("vulkan_tag_type", "alias")]
+		if any(field.kind == "reference" for field in plan.fields):
+			entries.append(("storage_type", "alias"))
+		for field in plan.fields:
+			field_name = table.member_name(name, field.member.name)
+			if not field_name:
+				continue
+			entries.append((field_name, "field"))
+			if field.kind == "flags":
+				entries.append((f"{field_name}_type", "nested type"))
+			if field.kind == "reference":
+				entries.append((f"{field_name}_expression", "template parameter"))
+		for entry, kind in entries:
+			if entry in scope:
+				problems.append(f"{name}: '{entry}' is both a {scope[entry]} and a {kind}")
+			else:
+				scope[entry] = kind
 
 	if missing or problems:
 		raise GenerationError(sorted(set(missing)), sorted(set(problems)))
@@ -452,6 +626,8 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 		"#include <algorithm>",
 		"#include <array>",
 		"#include <bit>",
+		"#include <expected>",
+		"#include <new>",
 		"#include <cstdint>",
 		"#include <memory>",
 		"#include <span>",
@@ -460,14 +636,26 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 		"#include <vulkan/vulkan.h>",
 		"",
 		'#include "../branch_pipe.h"',
+		'#include "../chain.h"',
+		'#include "../reference.h"',
 		'#include "../expression.h"',
 		'#include "../storage.h"',
 		'#include "../vulkan_object.h"',
 		"",
-		NATIVE_GLUE,
-		"namespace vkfu::obj",
-		"{",
 	]
+
+	for name in selected:
+		lines.extend(_render_native_glue(registry.structs[name]))
+		lines.append("")
+
+	if enums:
+		lines += ["namespace vkfu::enums", "{"]
+		for enum_type in enums:
+			lines.extend(_render_enum(registry.enums[enum_type], table))
+			lines.append("")
+		lines += ["}", ""]
+
+	lines += ["namespace vkfu::obj", "{"]
 
 	for namespace, names in _grouped(selected, table):
 		if namespace:
@@ -499,6 +687,17 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 		_guard_close(lines, struct.guards)
 		lines.append("")
 
+	for name in selected:
+		struct = registry.structs[name]
+		_guard_open(lines, struct.guards)
+		lines.append("template<>")
+		lines.append(f"struct expression_vulkan_tag<{name}>")
+		lines.append("{")
+		lines.append(f"{TAB}using type = obj::{table.struct_name(name)};")
+		lines.append("};")
+		_guard_close(lines, struct.guards)
+		lines.append("")
+
 	for parent, child in registry.edges:
 		if parent not in emitted or child not in emitted:
 			continue
@@ -516,6 +715,10 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 		if namespace:
 			lines.append(f"namespace {namespace}")
 			lines.append("{")
+		# Argument-dependent lookup only associates a class's innermost enclosing
+		# namespace, so vkfu::operator| has to be visible from each one.
+		lines.append("using ::vkfu::operator|;")
+		lines.append("")
 		for name in names:
 			lines.extend(_render_param(registry.structs[name], plans[name], registry, table, table.struct_name(name)))
 			lines.append("")
@@ -524,4 +727,27 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 			lines.append("")
 
 	lines.append("}")
+
+	wrapped = [
+		command
+		for command in registry.producers
+		if command.info.type in emitted and table.command_name(command.name)
+	]
+	if wrapped:
+		lines += ["", "namespace vkfu", "{"]
+		grouped: dict[str, list[ir.Command]] = {}
+		for command in wrapped:
+			grouped.setdefault(_namespace_of(table.command_name(command.name)), []).append(command)
+		for namespace, commands in sorted(grouped.items(), key=lambda entry: (entry[0] != "", entry[0])):
+			if namespace:
+				lines.append(f"namespace {namespace}")
+				lines.append("{")
+			for command in commands:
+				lines.extend(producers.render(command, table))
+				lines.append("")
+			if namespace:
+				lines.append("}")
+				lines.append("")
+		lines.append("}")
+
 	return "\n".join(lines) + "\n", warnings

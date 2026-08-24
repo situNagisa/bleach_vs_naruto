@@ -12,15 +12,15 @@ namespace param = vkfu::param;
 static_assert(vkfu::vulkan_root_object<obj::device>);
 static_assert(vkfu::vulkan_branch_object<obj::device>);
 static_assert(vkfu::vulkan_branch_object<obj::feature::core>);
-static_assert(vkfu::vulkan_branch_object<obj::feature::cluster_culling_shader>);
+static_assert(vkfu::vulkan_branch_object<obj::feature::huawei::cluster_culling_shader>);
 static_assert(vkfu::duplicatable_vulkan_object<obj::option::device_private_data>);
 static_assert(!vkfu::duplicatable_vulkan_object<obj::feature::timeline_semaphore>);
 
 static_assert(vkfu::vulkan_object_compatible_with<obj::device, obj::feature::core>);
 static_assert(vkfu::vulkan_object_compatible_with<obj::feature::core, obj::feature::timeline_semaphore>);
 static_assert(vkfu::vulkan_object_compatible_with<obj::feature::core, obj::feature::host_query_reset>);
-static_assert(vkfu::vulkan_object_compatible_with<obj::feature::core, obj::feature::cluster_culling_shader>);
-static_assert(vkfu::vulkan_object_compatible_with<obj::feature::cluster_culling_shader, obj::feature::cluster_culling_shader_vrs>);
+static_assert(vkfu::vulkan_object_compatible_with<obj::feature::core, obj::feature::huawei::cluster_culling_shader>);
+static_assert(vkfu::vulkan_object_compatible_with<obj::feature::huawei::cluster_culling_shader, obj::feature::huawei::cluster_culling_shader_vrs>);
 static_assert(vkfu::vulkan_object_compatible_with<obj::device, obj::option::device_private_data>);
 // vk.xml has no structextends edge here, so the pipe must not compile.
 static_assert(!vkfu::vulkan_object_compatible_with<obj::feature::core, obj::option::device_private_data>);
@@ -34,32 +34,23 @@ static_assert(vkfu::storable<VkDeviceCreateInfo>);
 static_assert(vkfu::storable<VkPhysicalDeviceFeatures2>);
 static_assert(vkfu::storable<VkPhysicalDeviceClusterCullingShaderFeaturesHUAWEI>);
 
+// The requirement has to be dependent: gcc treats an invalid expression in a
+// non-template requires-expression as a hard error rather than as `false`.
+template<class... Expressions>
+concept pipeable = requires(Expressions... expressions) { (... | expressions); };
+
+using nested_features = decltype(param::feature::core{} | param::feature::timeline_semaphore{});
+
 // A non-repeatable feature may appear once per branch.
-static_assert(requires {
-	param::feature::core{} | param::feature::timeline_semaphore{};
-});
-static_assert(!requires {
-	param::feature::core{}
-		| param::feature::timeline_semaphore{}
-		| param::feature::timeline_semaphore{};
-});
+static_assert(pipeable<param::feature::core, param::feature::timeline_semaphore>);
+static_assert(!pipeable<param::feature::core, param::feature::timeline_semaphore, param::feature::timeline_semaphore>);
 // allow_duplicate lifts that restriction.
-static_assert(requires {
-	param::device{}
-		| param::option::device_private_data{}
-		| param::option::device_private_data{};
-});
+static_assert(pipeable<param::device, param::option::device_private_data, param::option::device_private_data>);
 // The check is per level: the nested branch has its own feature list, so the
 // same object may appear once inside it and once outside.
-static_assert(requires {
-	param::device{}
-		| param::feature::timeline_semaphore{}
-		| (param::feature::core{} | param::feature::timeline_semaphore{});
-});
+static_assert(pipeable<param::device, param::feature::timeline_semaphore, nested_features>);
 // An object that does not extend the branch is rejected regardless.
-static_assert(!requires {
-	param::feature::core{} | param::option::device_private_data{};
-});
+static_assert(!pipeable<param::feature::core, param::option::device_private_data>);
 
 template<class Storage>
 void check_device_feature_chain(Storage& storage, VkDeviceQueueCreateInfo const* queue_info, char const* const* extensions)
@@ -106,8 +97,8 @@ void test_device_feature_chain()
 	auto feature_expression = param::feature::core{}
 		| param::feature::timeline_semaphore{.enable = true}
 		| param::feature::host_query_reset{.enable = true}
-		| (param::feature::cluster_culling_shader{.enable = true}
-			| param::feature::cluster_culling_shader_vrs{.cluster_shading_rate = true});
+		| (param::feature::huawei::cluster_culling_shader{.enable = true}
+			| param::feature::huawei::cluster_culling_shader_vrs{.cluster_shading_rate = true});
 	auto expression = param::device{
 		.queue_create_infos = ::std::span{&queue_info, 1u},
 		.enabled_extension_names = extensions,
@@ -147,7 +138,7 @@ void test_duplicatable_object()
 
 void test_fixed_arrays()
 {
-	auto state = param::option::pipeline_fragment_shading_rate_state{
+	auto state = param::option::khr::pipeline_fragment_shading_rate_state{
 		.fragment_size = VkExtent2D{.width = 2, .height = 4},
 		.combiner_ops = {VK_FRAGMENT_SHADING_RATE_COMBINER_OP_KEEP_KHR, VK_FRAGMENT_SHADING_RATE_COMBINER_OP_MAX_KHR},
 	};

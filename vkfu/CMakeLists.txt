@@ -9,9 +9,8 @@ find_package(Vulkan REQUIRED)
 
 add_library(vkfu INTERFACE)
 add_library(vkfu::vkfu ALIAS vkfu)
-# std::bit_cast in a constant expression, plus default member initialisers on
-# bit-fields, so C++20 is the floor.
-target_compile_features(vkfu INTERFACE cxx_std_20)
+# C++23 for std::expected, which the generated create_* wrappers return.
+target_compile_features(vkfu INTERFACE cxx_std_23)
 target_include_directories(vkfu INTERFACE
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
@@ -26,11 +25,23 @@ endif()
 if(VKFU_BUILD_EXAMPLES)
 	add_executable(vkfu_device_example examples/device.cpp)
 	target_link_libraries(vkfu_device_example PRIVATE vkfu::vkfu)
+
+	# Instance / device / swapchain bring-up with no helper library. It calls into
+	# the loader, so it links against Vulkan.
+	add_executable(vkfu_bootstrap_example examples/bootstrap.cpp)
+	target_link_libraries(vkfu_bootstrap_example PRIVATE vkfu::vkfu)
 endif()
 
 if(VKFU_BUILD_TESTS)
 	include(CTest)
-	add_executable(vkfu_typical_structures tests/typical_structures.cpp)
-	target_link_libraries(vkfu_typical_structures PRIVATE vkfu::vkfu)
-	add_test(NAME vkfu_typical_structures COMMAND vkfu_typical_structures)
+	foreach(case IN ITEMS typical_structures native_expression pipeline_slots triangle_pipeline chain frame_recording)
+		add_executable(vkfu_${case} tests/${case}.cpp)
+		target_link_libraries(vkfu_${case} PRIVATE vkfu::vkfu)
+		add_test(NAME vkfu_${case} COMMAND vkfu_${case})
+	endforeach()
+
+	# The create_* wrappers call into the loader, so this one is a compile-only
+	# check: building it instantiates every template body under test.
+	add_library(vkfu_producers OBJECT tests/producers.cpp)
+	target_link_libraries(vkfu_producers PRIVATE vkfu::vkfu)
 endif()

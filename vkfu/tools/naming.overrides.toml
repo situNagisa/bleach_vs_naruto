@@ -1,0 +1,121 @@
+# Human naming decisions. This is the only hand-written naming input.
+#
+# `vkfu_gen rebuild` regenerates naming.toml as "what the suggester proposes,
+# overridden by whatever is written here". That keeps the bulk reproducible when
+# the bucketing rules change, while every judgement call stays in one reviewable
+# place. Object entries give the *leaf* only; the namespace comes from the rules.
+#
+# Everything here was written because a REVIEW tag asked for it -- see
+# README.md for what each one fixes.
+
+[struct]
+# Leaf started with a digit, or was nothing but a version number.
+VkPhysicalDeviceFeatures2 = "core"                       # holds the 1.0 features and heads the chain
+VkPhysicalDevice16BitStorageFeatures = "storage_16bit"
+VkPhysicalDevice8BitStorageFeatures = "storage_8bit"
+VkPhysicalDevice4444FormatsFeaturesEXT = "format_4444"
+# A word repeated because the namespace or the parent already carries it.
+VkDeviceDeviceMemoryReportCreateInfoEXT = "device_memory_report"
+VkDeviceGroupDeviceCreateInfo = "device_group"
+VkQueryPoolPerformanceQueryCreateInfoINTEL = "query_pool_performance"
+VkSamplerYcbcrConversionYcbcrDegammaCreateInfoQCOM = "ycbcr_degamma"
+VkPipelineRasterizationStateRasterizationOrderAMD = "rasterization_order"
+VkPipelineRasterizationStateStreamCreateInfoEXT = "rasterization_stream"
+VkDebugMarkerMarkerInfoEXT = "debug_marker"
+VkDescriptorBufferBindingPushDescriptorBufferHandleEXT = "push_descriptor_buffer_handle"
+VkMultiviewPerViewRenderAreasRenderPassBeginInfoQCOM = "multiview_per_view_render_areas"
+VkPhysicalDeviceImageViewImageFormatInfoEXT = "image_view_type"
+# Same leaf as a sibling in another namespace; said differently on purpose.
+VkPipelineBinaryInfoKHR = "pipeline_binaries"            # carries binaries that already exist
+VkSamplerYcbcrConversionInfo = "ycbcr_conversion"        # picks a conversion that already exists
+VkBufferCollectionBufferCreateInfoFUCHSIA = "buffer_from_collection"
+VkBufferCollectionImageCreateInfoFUCHSIA = "image_from_collection"
+
+[member]
+# A digit blocked the prefix strip; reordered so it reads.
+"VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR.workgroupMemoryExplicitLayout8BitAccess" = "access_8bit"
+"VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR.workgroupMemoryExplicitLayout16BitAccess" = "access_16bit"
+# The object already says 16bit / 8bit, so the field only says which storage.
+"VkPhysicalDevice16BitStorageFeatures.storageBuffer16BitAccess" = "storage_buffer"
+"VkPhysicalDevice16BitStorageFeatures.uniformAndStorageBuffer16BitAccess" = "uniform_and_storage_buffer"
+"VkPhysicalDevice16BitStorageFeatures.storagePushConstant16" = "push_constant"
+"VkPhysicalDevice16BitStorageFeatures.storageInputOutput16" = "input_output"
+"VkPhysicalDevice8BitStorageFeatures.storageBuffer8BitAccess" = "storage_buffer"
+"VkPhysicalDevice8BitStorageFeatures.uniformAndStorageBuffer8BitAccess" = "uniform_and_storage_buffer"
+"VkPhysicalDevice8BitStorageFeatures.storagePushConstant8" = "push_constant"
+# Restates the object but is not a flag, so `enable` would be a lie.
+"VkOpaqueCaptureDescriptorDataCreateInfoEXT.opaqueCaptureDescriptorData" = "data"
+"VkPipelineCreationFeedbackCreateInfo.pPipelineCreationFeedback" = "pipeline"
+"VkPipelineCreationFeedbackCreateInfo.pPipelineStageCreationFeedbacks" = "stages"
+"VkSemaphoreTypeCreateInfo.semaphoreType" = "type"
+"VkPipelineBinaryInfoKHR.pPipelineBinaries" = "binaries"
+"VkDepthBiasRepresentationInfoEXT.depthBiasRepresentation" = "representation"
+"VkPipelineRasterizationStateRasterizationOrderAMD.rasterizationOrder" = "order"
+"VkPipelineRasterizationStateStreamCreateInfoEXT.rasterizationStream" = "stream"
+"VkFragmentShadingRateAttachmentInfoKHR.pFragmentShadingRateAttachment" = "attachment"
+"VkDeviceEventInfoEXT.deviceEvent" = "event"
+"VkDisplayEventInfoEXT.displayEvent" = "event"
+"VkGeometryNV.geometry" = "data"
+"VkSampleLocationsInfoEXT.pSampleLocations" = "locations"
+"VkPhysicalDeviceImageViewImageFormatInfoEXT.imageViewType" = "type"
+"VkPipelineViewportWScalingStateCreateInfoNV.pViewportWScalings" = "scalings"
+"VkExternalFormatANDROID.externalFormat" = "format"
+"VkExternalFormatQNX.externalFormat" = "format"
+"VkPipelineInfoKHR.pipeline" = "handle"
+"VkDataGraphPipelineInfoARM.dataGraphPipeline" = "handle"
+# A bare quantity needs its noun, and its sibling is scissor_count.
+"VkPipelineViewportStateCreateInfo.viewportCount" = "viewport_count"
+# p and pp differ only by the Hungarian prefix: one is an array of structures,
+# the other an array of pointers to them.
+"VkAccelerationStructureBuildGeometryInfoKHR.pGeometries" = "geometries"
+"VkAccelerationStructureBuildGeometryInfoKHR.ppGeometries" = "geometry_pointers"
+"VkAccelerationStructureTrianglesOpacityMicromapEXT.pUsageCounts" = "usage_counts"
+"VkAccelerationStructureTrianglesOpacityMicromapEXT.ppUsageCounts" = "usage_count_pointers"
+"VkMicromapBuildInfoEXT.pUsageCounts" = "usage_counts"
+"VkMicromapBuildInfoEXT.ppUsageCounts" = "usage_count_pointers"
+
+[bit]
+# The constant starts with a digit; each gets the qualifier its enum implies.
+"VkImageCreateFlagBits.VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT" = "view_2d_array_compatible"
+"VkImageCreateFlagBits.VK_IMAGE_CREATE_2D_VIEW_COMPATIBLE_BIT_EXT" = "view_2d_compatible"
+"VkOpticalFlowGridSizeFlagBitsNV.VK_OPTICAL_FLOW_GRID_SIZE_1X1_BIT_NV" = "size_1x1"
+"VkOpticalFlowGridSizeFlagBitsNV.VK_OPTICAL_FLOW_GRID_SIZE_2X2_BIT_NV" = "size_2x2"
+"VkOpticalFlowGridSizeFlagBitsNV.VK_OPTICAL_FLOW_GRID_SIZE_4X4_BIT_NV" = "size_4x4"
+"VkOpticalFlowGridSizeFlagBitsNV.VK_OPTICAL_FLOW_GRID_SIZE_8X8_BIT_NV" = "size_8x8"
+"VkVideoChromaSubsamplingFlagBitsKHR.VK_VIDEO_CHROMA_SUBSAMPLING_420_BIT_KHR" = "ratio_420"
+"VkVideoChromaSubsamplingFlagBitsKHR.VK_VIDEO_CHROMA_SUBSAMPLING_422_BIT_KHR" = "ratio_422"
+"VkVideoChromaSubsamplingFlagBitsKHR.VK_VIDEO_CHROMA_SUBSAMPLING_444_BIT_KHR" = "ratio_444"
+"VkVideoComponentBitDepthFlagBitsKHR.VK_VIDEO_COMPONENT_BIT_DEPTH_8_BIT_KHR" = "depth_8"
+"VkVideoComponentBitDepthFlagBitsKHR.VK_VIDEO_COMPONENT_BIT_DEPTH_10_BIT_KHR" = "depth_10"
+"VkVideoComponentBitDepthFlagBitsKHR.VK_VIDEO_COMPONENT_BIT_DEPTH_12_BIT_KHR" = "depth_12"
+
+[value]
+# Dimensions, spelled so they do not start with a digit.
+"VkImageType.VK_IMAGE_TYPE_1D" = "dim_1d"
+"VkImageType.VK_IMAGE_TYPE_2D" = "dim_2d"
+"VkImageType.VK_IMAGE_TYPE_3D" = "dim_3d"
+"VkImageViewType.VK_IMAGE_VIEW_TYPE_1D" = "dim_1d"
+"VkImageViewType.VK_IMAGE_VIEW_TYPE_2D" = "dim_2d"
+"VkImageViewType.VK_IMAGE_VIEW_TYPE_3D" = "dim_3d"
+"VkImageViewType.VK_IMAGE_VIEW_TYPE_1D_ARRAY" = "dim_1d_array"
+"VkImageViewType.VK_IMAGE_VIEW_TYPE_2D_ARRAY" = "dim_2d_array"
+# Sample counts as a single choice.
+"VkSampleCountFlagBits.VK_SAMPLE_COUNT_1_BIT" = "count_1"
+"VkSampleCountFlagBits.VK_SAMPLE_COUNT_2_BIT" = "count_2"
+"VkSampleCountFlagBits.VK_SAMPLE_COUNT_4_BIT" = "count_4"
+"VkSampleCountFlagBits.VK_SAMPLE_COUNT_8_BIT" = "count_8"
+"VkSampleCountFlagBits.VK_SAMPLE_COUNT_16_BIT" = "count_16"
+"VkSampleCountFlagBits.VK_SAMPLE_COUNT_32_BIT" = "count_32"
+"VkSampleCountFlagBits.VK_SAMPLE_COUNT_64_BIT" = "count_64"
+# Shading rate: how many invocations per how many pixels.
+"VkFragmentShadingRateNV.VK_FRAGMENT_SHADING_RATE_1_INVOCATION_PER_PIXEL_NV" = "one_per_pixel"
+"VkFragmentShadingRateNV.VK_FRAGMENT_SHADING_RATE_1_INVOCATION_PER_1X2_PIXELS_NV" = "one_per_1x2"
+"VkFragmentShadingRateNV.VK_FRAGMENT_SHADING_RATE_1_INVOCATION_PER_2X1_PIXELS_NV" = "one_per_2x1"
+"VkFragmentShadingRateNV.VK_FRAGMENT_SHADING_RATE_1_INVOCATION_PER_2X2_PIXELS_NV" = "one_per_2x2"
+"VkFragmentShadingRateNV.VK_FRAGMENT_SHADING_RATE_1_INVOCATION_PER_2X4_PIXELS_NV" = "one_per_2x4"
+"VkFragmentShadingRateNV.VK_FRAGMENT_SHADING_RATE_1_INVOCATION_PER_4X2_PIXELS_NV" = "one_per_4x2"
+"VkFragmentShadingRateNV.VK_FRAGMENT_SHADING_RATE_1_INVOCATION_PER_4X4_PIXELS_NV" = "one_per_4x4"
+"VkFragmentShadingRateNV.VK_FRAGMENT_SHADING_RATE_2_INVOCATIONS_PER_PIXEL_NV" = "two_per_pixel"
+"VkFragmentShadingRateNV.VK_FRAGMENT_SHADING_RATE_4_INVOCATIONS_PER_PIXEL_NV" = "four_per_pixel"
+"VkFragmentShadingRateNV.VK_FRAGMENT_SHADING_RATE_8_INVOCATIONS_PER_PIXEL_NV" = "eight_per_pixel"
+"VkFragmentShadingRateNV.VK_FRAGMENT_SHADING_RATE_16_INVOCATIONS_PER_PIXEL_NV" = "sixteen_per_pixel"

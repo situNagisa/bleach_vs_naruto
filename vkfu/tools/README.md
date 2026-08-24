@@ -30,22 +30,37 @@ vk.xml ──(纯机械)──> IR（键全是 Vulkan 原标识符）──┐
 
 ## 作用域
 
-只做**构造侧**：root = `vkCreate*` 命令的 create-info 参数（判定规则无需判断：
-const 指针参数且其结构体有 `sType` 成员——`pAllocator` 因此自动被排除），
-再对 `structextends` 求不动点闭包。
+只做**构造侧**：root = **任何命令**的 const 指针 info 参数（判定规则无需判断：
+const 指针参数且其结构体有 `sType` 成员——`pAllocator` 因此自动被排除）。
+不限于 `vkCreate*`：`vkAllocate*`、`vkCmd*`、`vkQueue*`、`vkGet*` 的入参结构体
+都是调用方自己填的，形态完全一样。
 
-v1.4.328 下是 70 个 root / 440 个对象 / 40 个 branch / 659 条 pNext 边，全部已命名。
+闭包同时对三种关系求不动点：`structextends`（pNext 子节点）、单个 const 指针指向的
+带 `sType` 结构体（**表达式槽**），以及带 `len` 的数组元素类型（有自己的 param，但仍是
+native 的 span——span 是借用，父级无法拥有元素）。
+
+v1.4.328 下是 **257 个 root / 834 个对象** / 41 个表达式槽 / 55 个数组元素类型，全部已命名。
+`param::command_buffer_begin`、`param::rendering`、`param::dependency`、`param::submit2`、
+`param::present`、`param::memory`、`param::image_memory_barrier2` 都在里面，所以命令录制和
+内存分配那一侧也不用再手写 `sType`。
 查询侧（`returnedonly` + `vkGet*Properties2`）不在此范围内。
 
 ## 命名空间：共享前缀不进名字
 
 440 个对象按 Vulkan 名字的族分三层，共享前缀由命名空间承担而不是抄进每个名字里：
 
-| 命名空间 | 数量 | 来源 | 例 |
-| --- | --- | --- | --- |
-| `param::` | 70 | `vkCreate*` 的 create-info，也就是 root | `device` `image` `swapchain` `graphics_pipeline` `render_pass` / `render_pass2` |
-| `param::feature::` | 235 | `VkPhysicalDevice*Features*` | `timeline_semaphore` `mesh_shader_ext` `core`(= `VkPhysicalDeviceFeatures2`) |
-| `param::option::` | 135 | 其余挂在 pNext 上的节点 | `device_private_data` `image_format_list` `ycbcr_conversion` |
+| 命名空间 | 来源 | 例 |
+| --- | --- | --- |
+| `param::` | `vkCreate*` 的 create-info，也就是 root | `device` `image` `swapchain` `graphics_pipeline` `render_pass` / `render_pass2` |
+| `param::feature::` | `VkPhysicalDevice*Features*` | `timeline_semaphore` `mesh_shader_ext` `core`(= `VkPhysicalDeviceFeatures2`) |
+| `param::state::` | 管线状态（表达式槽的目标及其 pNext 后代中以 `Pipeline` 开头的） | `vertex_input` `viewport` `rasterization` `color_blend` `shader_stage` |
+| `param::option::` | 其余挂在 pNext 上的节点 | `device_private_data` `image_format_list` `ycbcr_conversion` |
+| `vkfu::enums::` | 被当作字段类型的纯枚举（含被当单值用的 FlagBits） | `format` `primitive_topology` `sample_count` |
+
+**厂商标记是命名空间，不是后缀**。vk.xml `<tags>` 里声明的每个标记都自成一层，放在族之后：
+`param::khr::swapchain`、`param::feature::ext::mesh_shader` 与 `param::feature::nv::mesh_shader`、
+`param::state::nv::viewport_swizzle`。这样跨厂商根本不会撞名，消歧只剩一档：同一命名空间内
+仍然重名时保留动词（`nv::acceleration_structure` 对 `nv::acceleration_structure_create`）。
 
 `obj::` 与 `param::` 用同一套限定名，所以 `obj::feature::timeline_semaphore` 与
 `param::feature::timeline_semaphore` 一一对应。命名空间隔开之后
@@ -72,10 +87,66 @@ extended_dynamic_state3{.alpha_to_coverage_enable = 1}            // 剥掉 30 �
 留给人处理。字段名等于叶名但**不是**开关的会打 `restates` 标记要求人工命名——
 叫 `enable` 会是撒谎。剥离后平均字段名 16.3 个字符。
 
+## 表达式槽：指针成员也能接表达式
+
+`VkGraphicsPipelineCreateInfo::pVertexInputState` 这类**单个 const 指针**指向的子结构体，
+在 param 里是一个模板参数，可以直接塞一整个表达式；父级的存储拥有求值结果并自己接线：
+
+```cpp
+auto storage = vkfu::evaluate(param::graphics_pipeline{
+    .vertex_input_state = param::state::vertex_input{...} | param::state::vertex_input_divisor{...},
+    .viewport_state = param::state::viewport{.viewport_count = 1, .scissor_count = 1},
+    .rasterization_state = param::state::rasterization{.polygon_mode = polygon_mode::fill},
+} | param::option::pipeline_rendering{...});
+```
+
+- 槽是 `template<::vkfu::reference_expression_for<obj::state::vertex_input> ... = ::vkfu::absent_expression>`，
+  所以**类型不匹配的子表达式接不上**，没填的槽 native 指针保持 null。
+- 调用点仍是聚合初始化：C++20 的聚合 CTAD 支持指定初始化器且允许跳过成员（g++ / clang 均已验证）。
+- 存储是 `reference_storage`，拷贝和移动都会重新把父级指向自己那份子存储。
+- 有槽的 param 的 `evaluate()` **不是 const**——子表达式自己的 `evaluate()` 不必是 const。
+
+## naming.toml 是重建出来的
+
+命名规则变一次就要重刷五千行表，所以判断被抽到 `naming.overrides.toml`（约 100 行），
+`vkfu_gen rebuild` 把 `naming.toml` 重建成"规则提议 + 人工覆盖"。对象条目只写**叶名**，
+命名空间由规则给。改分桶规则从此是一条命令，而不是一次手工大改。
+
+## chain：一次性接完所有 feature
+
+`operator|` 是二元的，`a | b | c` 会堆出两个中间类型，而且每接一个就重新校验一遍。
+`vkfu::chain` 一步到位，**类型与折叠完全相同**：
+
+```cpp
+static_assert(::std::same_as<
+    decltype(vkfu::chain(a, b, c)),
+    decltype(a | b | c)>);
+```
+
+- 一次看到整个集合，所以重复检查是一遍而不是 n 遍。
+- 定制点是 ADL 的 `_vkfu_chain(branch, features...)`，与 `_vkfu_address` 等同一套约定。
+- `chain(branch)` 就是 branch 本身，和对空包折叠 `|` 一致。
+
+## create 系列
+
+生成器为 74 个 `vkCreate*` / `vkAllocate*` 生成包装，参数吃**表达式**，内部求值 + unpack。
+每个两个重载，形态照 vkkl：抛 `VkResult` 的，和吃 `std::nothrow_t` 返回 `std::expected` 的。
+命令只有三种骨架：
+
+| 形态 | 数量 | 签名 |
+| --- | --- | --- |
+| 一个结构体、一个句柄 | 64 | `create_device(physical_device, expression, callbacks)` |
+| 一次多个结构体 | 8 | `create_graphics_pipelines(device, cache, callbacks, e1, e2, ...)` → `std::array`，另附单数版 `create_graphics_pipeline` |
+| 数量写在结构体里 | 2 | `allocate_command_buffers(device, expression, span<VkCommandBuffer> out)` |
+
+厂商标记同样是命名空间：`vkfu::khr::create_swapchain`。约束是
+`expression_for<Expression, obj::x>`，所以塞错结构体的表达式接不上。
+
 ## 用法
 
 ```bash
 python -m vkfu_gen dump-ir  --xml vk.xml --out ir.json
+python -m vkfu_gen rebuild  --xml vk.xml --table naming.toml --overrides naming.overrides.toml
 python -m vkfu_gen suggest  --xml vk.xml --table naming.toml --out naming.suggested.toml
 python -m vkfu_gen promote  --xml vk.xml --table naming.toml --out naming.suggested.toml
 python -m vkfu_gen gen      --xml vk.xml --table naming.toml --scope closure \
@@ -88,9 +159,11 @@ python -m vkfu_gen gen      --xml vk.xml --table naming.toml --scope closure \
 `--scope closure` 要求闭包里每个对象都有名字，缺一个就失败。`--scope table`（默认）
 只生成命名过的，并报告还差多少，适合按用到才填表的增量节奏。
 
-`gen` 在这些情况下**硬失败**：缺名字、名字撞车、同一结构体内字段名撞车、
-遇到未支持的成员形态（多维数组、位无法一位一格的 flag 枚举）。
-**只警告**：字段名与所属对象同名、表里命名了不在作用域内的标识符。
+`gen` 在这些情况下**硬失败**：缺名字、名字撞车、**类作用域撞名**（字段、flags 的嵌套
+`<字段>_type`、槽的 `<字段>_expression` 模板参数、`vulkan_tag_type` / `storage_type`
+别名之间任意两者相撞）、枚举项撞名、遇到未支持的成员形态（多维数组、位无法一位一格
+的 flag 枚举）。**只警告**：字段名与所属对象同名、字段名遮蔽它自己的枚举类型
+（合法，因为生成的代码始终写全限定名）、表里命名了不在作用域内的标识符。
 
 ## flags 的处理
 
@@ -125,6 +198,21 @@ static_assert(::std::bit_cast<VkCommandPoolCreateFlags>(flags_type{.transient = 
   （`VK_SHADER_STAGE_ALL_GRAPHICS` / `_ALL`，逐位设置即可表达）。排除后
   57 个 flag 枚举全部可 `bit_cast`。
 
+## 原生结构体与 CPO 钩子
+
+原生 Vulkan 结构体长不出成员函数，所以三个 CPO 各留一个**前缀钩子**，作为 member / ADL
+之后的第三档：`_vkfu_address`、`_vkfu_set_next`、`_vkfu_evaluate`。生成器为每个已知结构体
+生成**独立的重载**（不是受约束的模板），因此影响面精确等于 vkfu 认识的那 507 个类型——
+一个只是长得像（有 `sType`/`pNext`）但 vkfu 不认识的结构体不会被误认领：
+
+```cpp
+struct look_alike { VkStructureType sType; void const* pNext; };
+static_assert(!vkfu::storable<look_alike>);   // tests/native_expression.cpp
+```
+
+配上 `expression_vulkan_tag` 的特化，原生结构体本身就是 expression，`evaluate` 对它是恒等，
+可以和 param 混在同一条链里。
+
 ## 建议算法与词典
 
 分词是两段式：先按 camelCase 切成原子（数字单独成原子），再由词典做合并/拆分，
@@ -145,13 +233,18 @@ static_assert(::std::bit_cast<VkCommandPoolCreateFlags>(flags_type{.transient = 
 | 合并 | `directfb` | `DirectFBSurface` → `direct_fb_surface`（`FB` 恰好也是真厂商标记，所以启发式救不了） |
 | 合并 | `imagepipe` | `ImagePipeSurface` → `image_pipe_surface` |
 | 词汇 | `av1` `io` `ios` `pps` `rdma` `sm` `sps` `vp9` `vps` | 真缩写，让 `acronym` 标记不被刷屏 |
-| 词汇 | 22 个长单词（`rasterization` `maintenance` …） | 让 `wordrun` 标记不被刷屏 |
+| 拆分 | `push` `constant` | `pushconstantPipelineLayout` → `pushconstant_...` |
+| 词汇 | 26 个长单词（`rasterization` `maintenance` `premultiplied` …） | 让 `wordrun` 标记不被刷屏 |
+
+另有一条规则不靠词典：**缩写后紧跟的小写 `s` 是复数标记**，所以 `pStdSPSs` → `std_sps`
+而不是 `std_sp_ss`。
 
 复核标记（只出现在 `naming.suggested.toml` 里）：
 
 | tag | 含义 |
 | --- | --- |
 | `restates` | 字段名复述了对象名，但它不是开关，`enable` 不适用 |
+| `repeat` | 名字里有重复的词，通常说明命名空间或父节点已经带了那段前缀（`device_device_memory_report`） |
 | `collision` | 裸名被争用（有个带厂商标记的近亲），确认该由谁占裸名 |
 | `acronym` | 有连写大写且词典不认识，词的切分是猜的；vk.xml `<tags>` 声明过的厂商标记、以及被词典消化掉的原子都不算 |
 | `lone` | 切出了孤立单字母词，典型是 `Dimension2D` → `dimension2_d` |
@@ -189,14 +282,58 @@ static_assert(::std::bit_cast<VkCommandPoolCreateFlags>(flags_type{.transient = 
   `pipeline_binary`）、`VkSamplerYcbcrConversionInfo` → `option::ycbcr_conversion`
   （指定用哪个已建的转换，区别于 root `sampler_ycbcr_conversion`）。
 
+## flags 与枚举的两个已知边界
+
+- **clang 目前没有位域上的 constexpr `bit_cast`**，所以逐位的 `static_assert` 用
+  `#if !defined(__clang__)` 跳过；GCC/MSVC 上 507 个对象的位布局全部编译期验证，
+  clang 侧由运行期测试（`typical_structures` 的 `test_flag_bits`）覆盖。
+- **枚举的 span/数组保持 native 元素类型**。`state::dynamic::states` 是
+  `span<VkDynamicState const>` 而不是 `span<enums::dynamic_state const>`：span 是借用，
+  换元素类型就得复制，而按别的枚举类型读同一块内存违反类型别名规则。标量枚举字段
+  则一律包成 `enum class`。
+
+## 编译验证
+
+WSL Arch 里 g++ 16.1.1 与 clang++ 22.1.8，配 v1.4.328 的 Vulkan-Headers（与 vk.xml 同版本），
+C++23、`-Wall -Wextra`、**零警告**：
+
+- 可运行：`typical_structures` `native_expression` `pipeline_slots` `triangle_pipeline`
+  `chain` `frame_recording`
+- 只编译（会调 loader）：`producers.cpp`、`examples/bootstrap.cpp`
+
+编译器抓到过 6 个我靠标识符回查发现不了的真错误：嵌套类的 DMI 在外层类闭合前不可用、
+ADL 只关联最内层命名空间（`operator|` 整个用不了）、GCC 对非模板 `requires` 不做 SFINAE、
+clang 没有位域上的 constexpr `bit_cast`、位名跨厂商撞名导致位域重复声明、
+命令级守卫宏漏收。
+
+## demo 是怎么验证的
+
+`demo/consumer-arch` 要 SDL3 / glslang / bvn 平台层才能链接，在这里编不了。所以：
+
+- 它现在用的**每一个表达式**都镜像进了 `tests/frame_recording.cpp`——实例、设备、交换链、
+  image view、命令缓冲开始/继承、屏障、依赖、动态渲染、提交、呈现——断言出来的原生结构体
+  与原先手写的赋值逐字段一致，并且拷贝之后槽仍指向自己那份子存储。
+- 另外对 demo 源码做静态回查：每个 `param::X` 存在、每个顶层指定初始化器是该结构体的真字段、
+  19 个位域名、每个 `enums::X::Y`、每个 `vkfu::create_*` / `allocate_*` 都对得上，且没有 vkb 残留。
+
 ## 已知欠账
 
 - 创建期元信息（physical_device / allocator / 池句柄）与 `create_*` 函数还没做；
   框架侧也还没有"非 pNext 节点"这个概念。
-- 查询侧未做。
+- 查询侧未做（`returnedonly` + `vkGet*` 的出参）。
+- **没有 `sType` 的值结构体不生成 param**：`VkPipelineColorBlendAttachmentState`、`VkViewport`、
+  `VkVertexInputBindingDescription` 这些没有 pNext 要管，直接用原生聚合初始化就行。这是
+  刻意的边界，不是遗漏。
+- 枚举的 span/数组保持 native 元素类型（见上）。
+- 引擎侧 `include/bvn/graphics/vulkan_renderer.h` 和 `source/client/context.h` 还在用
+  vk-bootstrap，所以 `vcpkg.json` 里的依赖没有摘掉。demo 已经不用它了。
 - 本机没有编译器和 Vulkan 头，生成结果尚未编译验证（已做标识符回查与结构自检）。
 - 一个 count 被多个指针共用时（如 `VkWriteDescriptorSet`）不折叠成 span，
   保留 count + 裸指针。
+- **指针带 `optional` 时也不折叠**（17 处）：`viewportCount == 1` 配 `pViewports == NULL`
+  是动态视口的合法写法，span 表达不出来，所以 count 与指针都保持原样。代价是
+  `graphics_pipeline` 的 `.stage_count` / `.stages`、`color_blend` 的
+  `.attachment_count` / `.attachments` 要自己对齐——和手写 Vulkan 一样。
 - `option::` 里还有几个很长的名字（最长 `option::ray_tracing_pipeline_cluster_acceleration_structure`）。
   它们的前缀多是"挂在谁身上"，调用点其实已经能看出来，进一步按父节点分层可以再短一截——
   但 30 个对象有多个父节点，需要逐个定。
