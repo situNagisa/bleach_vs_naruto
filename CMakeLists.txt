@@ -103,4 +103,5 @@ add_subdirectory(source)
 
 if(BVN_BUILD_DEMOS)
 	add_subdirectory(demo/consumer-arch)
+	add_subdirectory(demo/dynamic-dag)
 endif()
