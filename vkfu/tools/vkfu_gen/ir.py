@@ -83,6 +83,26 @@ class Command:
 
 
 @dataclasses.dataclass
+class Argument:
+	kind: str  # passthrough | info | span | out | out_span | allocator
+	member: Member
+	count: Member | None = None  # the length parameter a span consumes
+
+
+@dataclasses.dataclass
+class Wrapper:
+	"""A command vkfu can wrap: expressions where Vulkan takes a structure, spans
+	where it takes a pointer and a count."""
+
+	name: str
+	returns: str
+	arguments: list[Argument]  # what the wrapper takes, counts folded away
+	params: list[Member]  # what the command takes, in its own order
+	spans: dict[str, str]  # count parameter name -> the span parameter that drives it
+	guards: list[str]
+
+
+@dataclasses.dataclass
 class Registry:
 	header_version: str
 	author_tags: list[str]  # vk.xml <tags>, e.g. KHR / EXT / HUAWEI
@@ -93,7 +113,9 @@ class Registry:
 	roots: list[str]
 	root_commands: dict[str, list[str]]  # root struct -> commands that take it
 	producers: list[Command]  # vkCreate* / vkAllocate* in a shape vkfu can wrap
+	wrappers: list[Wrapper]  # every other command worth wrapping
 	closure: list[str]
+	plain: list[str]  # sType-less member structures: a param, but not a chain node
 	branches: list[str]
 	references: list[tuple[str, str, str]]  # (owner, member, target) pointer slots
 	elements: list[tuple[str, str, str]]  # (owner, member, target) array element types
@@ -172,6 +194,8 @@ def _collect_requirements(root: ET.Element, api: str) -> dict[str, list[str | No
 				continue
 			for type_element in require.findall("type"):
 				record(type_element.get("name"), None)
+				for command_element in require.findall("command"):
+					record(command_element.get("name"), None)
 
 	for extension in root.iter("extension"):
 		supported = extension.get("supported")
@@ -183,6 +207,8 @@ def _collect_requirements(root: ET.Element, api: str) -> dict[str, list[str | No
 				continue
 			for type_element in require.findall("type"):
 				record(type_element.get("name"), guard)
+				for command_element in require.findall("command"):
+					record(command_element.get("name"), guard)
 
 	return requirements
 
@@ -408,6 +434,117 @@ def _producers(
 	return commands, skipped
 
 
+def _wrappers(
+	root: ET.Element,
+	structs: dict[str, Struct],
+	api: str,
+	requirements: dict[str, list[str | None]],
+) -> tuple[list[Wrapper], list[str]]:
+	"""Commands other than vkCreate*/vkAllocate* that a wrapper would improve.
+
+	Worth wrapping when the command takes a structure the caller fills in, or a
+	pointer paired with its own count. The two-call enumerate pattern is left
+	alone: its count is an out parameter, which is a different shape entirely.
+	"""
+	wrappers: list[Wrapper] = []
+	skipped: list[str] = []
+	for element in root.iter("command"):
+		if not _api_allows(element, api):
+			continue
+		proto = element.find("proto")
+		if proto is None:
+			continue
+		name = proto.findtext("name") or ""
+		if name.startswith("vkCreate") or name.startswith("vkAllocate"):
+			continue
+
+		params = [_parse_decl(p) for p in element.findall("param") if _api_allows(p, api)]
+		by_name = {p.name: p for p in params}
+
+		def length_of(param: Member) -> Member | None:
+			if not param.length:
+				return None
+			token = param.length.split(",")[0]
+			target = by_name.get(token)
+			return target if target is not None and target.ptr_depth == 0 else None
+
+		# `void* pData` is a buffer the caller supplies, not something produced.
+		outs = [
+			p
+			for p in params
+			if p.ptr_depth >= 1 and not p.elem_const and not (p.type == "void" and p.ptr_depth == 1)
+		]
+		# Enumerate pattern: the out array's count is itself written by the call.
+		if any(
+			out.length and by_name.get(out.length) is not None and by_name[out.length].ptr_depth >= 1
+			for out in outs
+		):
+			continue
+		if len(outs) > 1:
+			skipped.append(name)
+			continue
+		# Only wrap what this api actually declares; a platform command we cannot
+		# see would not compile.
+		if name not in requirements:
+			continue
+
+		consumed = {
+			length_of(p).name
+			for p in params
+			if p.ptr_depth >= 1 and p.type != "void" and length_of(p) is not None
+		}
+
+		arguments: list[Argument] = []
+		interesting = False
+		for param in params:
+			if param.name in consumed:
+				continue
+			if param.type == "VkAllocationCallbacks":
+				arguments.append(Argument(kind="allocator", member=param))
+				continue
+			if param in outs:
+				count = length_of(param)
+				arguments.append(Argument(kind="out_span" if param.length else "out", member=param, count=count))
+				continue
+			count = length_of(param)
+			if param.ptr_depth >= 1 and param.elem_const and count is not None and param.type != "void":
+				arguments.append(Argument(kind="span", member=param, count=count))
+				interesting = True
+				continue
+			target = structs.get(param.type)
+			if param.ptr_depth == 1 and param.elem_const and target is not None and target.stype is not None:
+				arguments.append(Argument(kind="info", member=param))
+				interesting = True
+				continue
+			arguments.append(Argument(kind="passthrough", member=param))
+
+		if not interesting:
+			continue
+		wrappers.append(
+			Wrapper(
+				name=name,
+				returns=proto.findtext("type") or "void",
+				arguments=arguments,
+				params=params,
+				spans={
+					argument.count.name: argument.member.name
+					for argument in arguments
+					if argument.count is not None
+				},
+				guards=sorted(
+					set(_guards_for(requirements, name))
+					| {
+						guard
+						for argument in arguments
+						if argument.kind == "info"
+						for guard in structs[argument.member.type].guards
+					}
+				),
+			)
+		)
+	return wrappers, skipped
+
+
 def is_element(member: Member, target: Struct | None) -> bool:
 	"""An array of another sType-carrying structure.
 
@@ -520,6 +657,7 @@ def load(path: str, api: str = "vulkan") -> Registry:
 	)
 	roots, root_commands = _info_roots(root, structs, api)
 	producers, _unwrappable = _producers(root, structs, api, requirements)
+	wrappers, _unwrappable_commands = _wrappers(root, structs, api, requirements)
 
 	# Closure over two relations at once: pNext (structextends) and the pointer
 	# members that name another sType-carrying structure.
@@ -553,6 +691,24 @@ def load(path: str, api: str = "vulkan") -> Registry:
 		if is_element(member, structs.get(member.type))
 	)
 
+	# Structures a closure member names that carry no sType. They have no pNext to
+	# manage, so they get a param and nothing else -- but the param is still worth
+	# having, for snake_case fields, scoped enums and bit-field flags.
+	plain: set[str] = set()
+	frontier = set(closure)
+	while frontier:
+		discovered: set[str] = set()
+		for name in frontier:
+			for member in structs[name].members:
+				target = structs.get(member.type)
+				if target is None or target.stype is not None:
+					continue
+				if member.type in in_closure or member.type in plain:
+					continue
+				plain.add(member.type)
+				discovered.add(member.type)
+		frontier = discovered
+
 	references = sorted(
 		(name, member.name, member.type)
 		for name in closure
@@ -578,7 +734,9 @@ def load(path: str, api: str = "vulkan") -> Registry:
 		roots=sorted(roots),
 		root_commands={name: sorted(set(cmds)) for name, cmds in sorted(root_commands.items())},
 		producers=sorted(producers, key=lambda command: command.name),
+		wrappers=sorted(wrappers, key=lambda command: command.name),
 		closure=sorted(closure),
+		plain=sorted(plain),
 		branches=branches,
 		references=references,
 		elements=elements,

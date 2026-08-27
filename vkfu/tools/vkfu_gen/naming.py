@@ -378,6 +378,15 @@ def suggest_object_names(
 		struct: _bucket(struct, roots, states, members, author_tags, keep_verb=True)
 		for struct in closure
 	}
+	# Last resort: the core name with no suffix stripped at all.
+	whole = {
+		struct: (
+			plain[struct][0],
+			_split_author_tag(struct.removeprefix("Vk"), author_tags)[0],
+			plain[struct][2],
+		)
+		for struct in closure
+	}
 
 	def qualified(bucket: tuple[str, str, str]) -> str:
 		family, leaf, tag = bucket
@@ -390,10 +399,17 @@ def suggest_object_names(
 		return out
 
 	chosen = {struct: qualified(bucket) for struct, bucket in plain.items()}
+	# Tier 2 already happened inside _bucket (the vendor namespace). Tier 3 keeps
+	# the verb, tier 4 keeps the whole core name -- and anything that stripped
+	# down to nothing goes straight to tier 4.
 	for contenders in group(chosen).values():
 		if len(contenders) > 1:
 			for struct in contenders:
 				chosen[struct] = qualified(verbose[struct])
+	for contenders in list(group(chosen).values()):
+		for struct in contenders:
+			if len(contenders) > 1 or not chosen[struct].rpartition("::")[2]:
+				chosen[struct] = qualified(whole[struct])
 
 	final = group(chosen)
 	suggestions: dict[str, Suggestion] = {}

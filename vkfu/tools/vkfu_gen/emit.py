@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import dataclasses
 
-from . import ir, producers
+from . import commands, ir, producers
 from .naming import Table
 
 
@@ -325,7 +325,11 @@ def _render_param(
 		lines.append(f"template<{declarations}>")
 	lines.append(f"struct {_leaf_of(object_name)}")
 	lines.append("{")
-	lines.append(f"{TAB}using vulkan_tag_type = obj::{object_name};")
+	if struct.stype is not None:
+		lines.append(f"{TAB}using vulkan_tag_type = obj::{object_name};")
+	elif not slots:
+		lines.pop()  # no alias to separate from the fields
+		lines.append("{")
 	if slots:
 		lines.append(f"{TAB}using storage_type = ::vkfu::reference_storage<{struct.name}")
 		for field in slots:
@@ -366,8 +370,9 @@ def _render_param(
 		lines.append(f"{TAB}constexpr auto evaluate() const noexcept -> {struct.name}")
 		lines.append(f"{TAB}{{")
 		lines.append(head)
-	lines.append(f"{inner}.sType = {struct.stype},")
-	lines.append(f"{inner}.pNext = nullptr,")
+	if struct.stype is not None:
+		lines.append(f"{inner}.sType = {struct.stype},")
+		lines.append(f"{inner}.pNext = nullptr,")
 	for member in struct.members:
 		if member.name in ("sType", "pNext"):
 			continue
@@ -438,7 +443,7 @@ def _render_param(
 def used_enums(selected: list[str], registry: ir.Registry) -> list[str]:
 	"""Plain enums that some selected object exposes as a field."""
 	names: list[str] = []
-	for name in selected:
+	for name in list(selected) + list(registry.plain):
 		for field in plan_struct(registry.structs[name], registry).fields:
 			if field.kind == "enum" and field.enum_type not in names:
 				names.append(field.enum_type)
@@ -505,9 +510,10 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 	problems: list[str] = []
 	warnings: list[str] = []
 
+	known = set(registry.closure) | set(registry.plain)
 	for named in table.structs:
-		if named not in registry.closure:
-			warnings.append(f"naming.toml names {named}, which is not in the vkCreate* closure; ignored")
+		if named not in known:
+			warnings.append(f"naming.toml names {named}, which is not in scope; ignored")
 
 	if scope == "table":
 		selected = [name for name in registry.closure if table.struct_name(name)]
@@ -518,10 +524,13 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 				missing.append(f"struct.{name}")
 
 	seen: dict[str, str] = {}
-	for name in selected:
+	for name in list(selected) + [n for n in registry.plain if table.struct_name(n)]:
 		object_name = table.struct_name(name)
 		if object_name is None:
 			continue  # already reported as missing
+		if not object_name.rpartition("::")[2]:
+			problems.append(f"{name}: '{object_name}' has no leaf name")
+			continue
 		if not all(segment.isidentifier() for segment in object_name.split("::")):
 			problems.append(f"{name}: '{object_name}' is not a valid qualified name")
 		if object_name in seen:
@@ -565,6 +574,29 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 						)
 					else:
 						seen_bits[bit_name] = bit.name
+
+	plain_selected = [name for name in registry.plain if table.struct_name(name)]
+	if scope != "table":
+		for name in registry.plain:
+			if not table.struct_name(name):
+				missing.append(f"struct.{name}")
+	for name in plain_selected:
+		plan = plan_struct(registry.structs[name], registry)
+		problems.extend(plan.unsupported)
+		used_names: dict[str, str] = {}
+		for field in plan.fields:
+			field_name = table.member_name(name, field.member.name)
+			if not field_name:
+				missing.append(f"member.{name}.{field.member.name}")
+				continue
+			if field_name in used_names:
+				problems.append(f"field collision in {name}: {used_names[field_name]} and {field.member.name} -> '{field_name}'")
+			else:
+				used_names[field_name] = field.member.name
+			if field.kind == "flags":
+				for bit in field.layout:
+					if not table.bit_name(field.flag_bits, bit.name):
+						missing.append(f"bit.{field.flag_bits}.{bit.name}")
 
 	enums = used_enums(selected, registry)
 	for enum_type in enums:
@@ -677,7 +709,7 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 		struct = registry.structs[name]
 		object_name = table.struct_name(name)
 		_guard_open(lines, struct.guards)
-		lines.append(f"template<>")
+		lines.append("template<>")
 		lines.append(f"struct vulkan_object_trait<obj::{object_name}>")
 		lines.append("{")
 		lines.append(f"{TAB}constexpr static auto root = {'true' if name in roots else 'false'};")
@@ -726,6 +758,27 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 			lines.append("}")
 			lines.append("")
 
+	# Structures with no sType: a param and an evaluate(), nothing else. They have
+	# no pNext to manage, so no tag, no trait and no chain hooks.
+	for namespace, names in _grouped(plain_selected, table):
+		if namespace:
+			lines.append(f"namespace {namespace}")
+			lines.append("{")
+		for name in names:
+			lines.extend(
+				_render_param(
+					registry.structs[name],
+					plan_struct(registry.structs[name], registry),
+					registry,
+					table,
+					table.struct_name(name),
+				)
+			)
+			lines.append("")
+		if namespace:
+			lines.append("}")
+			lines.append("")
+
 	lines.append("}")
 
 	wrapped = [
@@ -733,17 +786,31 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 		for command in registry.producers
 		if command.info.type in emitted and table.command_name(command.name)
 	]
-	if wrapped:
+	known = set(selected) | set(plain_selected)
+	general = [
+		command
+		for command in registry.wrappers
+		if table.command_name(command.name)
+		and all(
+			argument.member.type in known
+			for argument in command.arguments
+			if argument.kind == "info"
+		)
+	]
+	if wrapped or general:
 		lines += ["", "namespace vkfu", "{"]
-		grouped: dict[str, list[ir.Command]] = {}
+		grouped: dict[str, list[object]] = {}
 		for command in wrapped:
 			grouped.setdefault(_namespace_of(table.command_name(command.name)), []).append(command)
-		for namespace, commands in sorted(grouped.items(), key=lambda entry: (entry[0] != "", entry[0])):
+		for command in general:
+			grouped.setdefault(_namespace_of(table.command_name(command.name)), []).append(command)
+		for namespace, group in sorted(grouped.items(), key=lambda entry: (entry[0] != "", entry[0])):
 			if namespace:
 				lines.append(f"namespace {namespace}")
 				lines.append("{")
-			for command in commands:
-				lines.extend(producers.render(command, table))
+			for command in group:
+				renderer = producers.render if isinstance(command, ir.Command) else commands.render
+				lines.extend(renderer(command, table))
 				lines.append("")
 			if namespace:
 				lines.append("}")

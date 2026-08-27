@@ -12716,6 +12716,84 @@ enum class attachment_store_op : ::std::underlying_type_t<VkAttachmentStoreOp>
 	none = VK_ATTACHMENT_STORE_OP_NONE,
 };
 
+enum class blend_factor : ::std::underlying_type_t<VkBlendFactor>
+{
+	zero = VK_BLEND_FACTOR_ZERO,
+	one = VK_BLEND_FACTOR_ONE,
+	src_color = VK_BLEND_FACTOR_SRC_COLOR,
+	one_minus_src_color = VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR,
+	dst_color = VK_BLEND_FACTOR_DST_COLOR,
+	one_minus_dst_color = VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR,
+	src_alpha = VK_BLEND_FACTOR_SRC_ALPHA,
+	one_minus_src_alpha = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+	dst_alpha = VK_BLEND_FACTOR_DST_ALPHA,
+	one_minus_dst_alpha = VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA,
+	constant_color = VK_BLEND_FACTOR_CONSTANT_COLOR,
+	one_minus_constant_color = VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR,
+	constant_alpha = VK_BLEND_FACTOR_CONSTANT_ALPHA,
+	one_minus_constant_alpha = VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA,
+	src_alpha_saturate = VK_BLEND_FACTOR_SRC_ALPHA_SATURATE,
+	src1_color = VK_BLEND_FACTOR_SRC1_COLOR,
+	one_minus_src1_color = VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR,
+	src1_alpha = VK_BLEND_FACTOR_SRC1_ALPHA,
+	one_minus_src1_alpha = VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA,
+};
+
+enum class blend_op : ::std::underlying_type_t<VkBlendOp>
+{
+	add = VK_BLEND_OP_ADD,
+	subtract = VK_BLEND_OP_SUBTRACT,
+	reverse_subtract = VK_BLEND_OP_REVERSE_SUBTRACT,
+	min = VK_BLEND_OP_MIN,
+	max = VK_BLEND_OP_MAX,
+	zero = VK_BLEND_OP_ZERO_EXT,
+	src = VK_BLEND_OP_SRC_EXT,
+	dst = VK_BLEND_OP_DST_EXT,
+	src_over = VK_BLEND_OP_SRC_OVER_EXT,
+	dst_over = VK_BLEND_OP_DST_OVER_EXT,
+	src_in = VK_BLEND_OP_SRC_IN_EXT,
+	dst_in = VK_BLEND_OP_DST_IN_EXT,
+	src_out = VK_BLEND_OP_SRC_OUT_EXT,
+	dst_out = VK_BLEND_OP_DST_OUT_EXT,
+	src_atop = VK_BLEND_OP_SRC_ATOP_EXT,
+	dst_atop = VK_BLEND_OP_DST_ATOP_EXT,
+	xor_ = VK_BLEND_OP_XOR_EXT,
+	multiply = VK_BLEND_OP_MULTIPLY_EXT,
+	screen = VK_BLEND_OP_SCREEN_EXT,
+	overlay = VK_BLEND_OP_OVERLAY_EXT,
+	darken = VK_BLEND_OP_DARKEN_EXT,
+	lighten = VK_BLEND_OP_LIGHTEN_EXT,
+	colordodge = VK_BLEND_OP_COLORDODGE_EXT,
+	colorburn = VK_BLEND_OP_COLORBURN_EXT,
+	hardlight = VK_BLEND_OP_HARDLIGHT_EXT,
+	softlight = VK_BLEND_OP_SOFTLIGHT_EXT,
+	difference = VK_BLEND_OP_DIFFERENCE_EXT,
+	exclusion = VK_BLEND_OP_EXCLUSION_EXT,
+	invert = VK_BLEND_OP_INVERT_EXT,
+	invert_rgb = VK_BLEND_OP_INVERT_RGB_EXT,
+	lineardodge = VK_BLEND_OP_LINEARDODGE_EXT,
+	linearburn = VK_BLEND_OP_LINEARBURN_EXT,
+	vividlight = VK_BLEND_OP_VIVIDLIGHT_EXT,
+	linearlight = VK_BLEND_OP_LINEARLIGHT_EXT,
+	pinlight = VK_BLEND_OP_PINLIGHT_EXT,
+	hardmix = VK_BLEND_OP_HARDMIX_EXT,
+	hsl_hue = VK_BLEND_OP_HSL_HUE_EXT,
+	hsl_saturation = VK_BLEND_OP_HSL_SATURATION_EXT,
+	hsl_color = VK_BLEND_OP_HSL_COLOR_EXT,
+	hsl_luminosity = VK_BLEND_OP_HSL_LUMINOSITY_EXT,
+	plus = VK_BLEND_OP_PLUS_EXT,
+	plus_clamped = VK_BLEND_OP_PLUS_CLAMPED_EXT,
+	plus_clamped_alpha = VK_BLEND_OP_PLUS_CLAMPED_ALPHA_EXT,
+	plus_darker = VK_BLEND_OP_PLUS_DARKER_EXT,
+	minus = VK_BLEND_OP_MINUS_EXT,
+	minus_clamped = VK_BLEND_OP_MINUS_CLAMPED_EXT,
+	contrast = VK_BLEND_OP_CONTRAST_EXT,
+	invert_ovg = VK_BLEND_OP_INVERT_OVG_EXT,
+	red = VK_BLEND_OP_RED_EXT,
+	green = VK_BLEND_OP_GREEN_EXT,
+	blue = VK_BLEND_OP_BLUE_EXT,
+};
+
 enum class blend_overlap : ::std::underlying_type_t<VkBlendOverlapEXT>
 {
 	uncorrelated = VK_BLEND_OVERLAP_UNCORRELATED_EXT,
@@ -12819,6 +12897,17 @@ enum class compare_op : ::std::underlying_type_t<VkCompareOp>
 	not_equal = VK_COMPARE_OP_NOT_EQUAL,
 	greater_or_equal = VK_COMPARE_OP_GREATER_OR_EQUAL,
 	always = VK_COMPARE_OP_ALWAYS,
+};
+
+enum class component_swizzle : ::std::underlying_type_t<VkComponentSwizzle>
+{
+	identity = VK_COMPONENT_SWIZZLE_IDENTITY,
+	zero = VK_COMPONENT_SWIZZLE_ZERO,
+	one = VK_COMPONENT_SWIZZLE_ONE,
+	r = VK_COMPONENT_SWIZZLE_R,
+	g = VK_COMPONENT_SWIZZLE_G,
+	b = VK_COMPONENT_SWIZZLE_B,
+	a = VK_COMPONENT_SWIZZLE_A,
 };
 
 enum class component_type : ::std::underlying_type_t<VkComponentTypeKHR>
@@ -13598,6 +13687,18 @@ enum class latency_marker : ::std::underlying_type_t<VkLatencyMarkerNV>
 	out_of_band_present_end = VK_LATENCY_MARKER_OUT_OF_BAND_PRESENT_END_NV,
 };
 
+enum class layer_setting_type : ::std::underlying_type_t<VkLayerSettingTypeEXT>
+{
+	bool32 = VK_LAYER_SETTING_TYPE_BOOL32_EXT,
+	int32 = VK_LAYER_SETTING_TYPE_INT32_EXT,
+	int64 = VK_LAYER_SETTING_TYPE_INT64_EXT,
+	uint32 = VK_LAYER_SETTING_TYPE_UINT32_EXT,
+	uint64 = VK_LAYER_SETTING_TYPE_UINT64_EXT,
+	float32 = VK_LAYER_SETTING_TYPE_FLOAT32_EXT,
+	float64 = VK_LAYER_SETTING_TYPE_FLOAT64_EXT,
+	string = VK_LAYER_SETTING_TYPE_STRING_EXT,
+};
+
 enum class line_rasterization_mode : ::std::underlying_type_t<VkLineRasterizationMode>
 {
 	default_ = VK_LINE_RASTERIZATION_MODE_DEFAULT,
@@ -13961,10 +14062,38 @@ enum class shader_stage : ::std::underlying_type_t<VkShaderStageFlagBits>
 	cluster_culling = VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI,
 };
 
+enum class shading_rate_palette_entry : ::std::underlying_type_t<VkShadingRatePaletteEntryNV>
+{
+	no_invocations = VK_SHADING_RATE_PALETTE_ENTRY_NO_INVOCATIONS_NV,
+	value_16_invocations_per_pixel = VK_SHADING_RATE_PALETTE_ENTRY_16_INVOCATIONS_PER_PIXEL_NV,
+	value_8_invocations_per_pixel = VK_SHADING_RATE_PALETTE_ENTRY_8_INVOCATIONS_PER_PIXEL_NV,
+	value_4_invocations_per_pixel = VK_SHADING_RATE_PALETTE_ENTRY_4_INVOCATIONS_PER_PIXEL_NV,
+	value_2_invocations_per_pixel = VK_SHADING_RATE_PALETTE_ENTRY_2_INVOCATIONS_PER_PIXEL_NV,
+	value_1_invocation_per_pixel = VK_SHADING_RATE_PALETTE_ENTRY_1_INVOCATION_PER_PIXEL_NV,
+	value_1_invocation_per_2x1_pixels = VK_SHADING_RATE_PALETTE_ENTRY_1_INVOCATION_PER_2X1_PIXELS_NV,
+	value_1_invocation_per_1x2_pixels = VK_SHADING_RATE_PALETTE_ENTRY_1_INVOCATION_PER_1X2_PIXELS_NV,
+	value_1_invocation_per_2x2_pixels = VK_SHADING_RATE_PALETTE_ENTRY_1_INVOCATION_PER_2X2_PIXELS_NV,
+	value_1_invocation_per_4x2_pixels = VK_SHADING_RATE_PALETTE_ENTRY_1_INVOCATION_PER_4X2_PIXELS_NV,
+	value_1_invocation_per_2x4_pixels = VK_SHADING_RATE_PALETTE_ENTRY_1_INVOCATION_PER_2X4_PIXELS_NV,
+	value_1_invocation_per_4x4_pixels = VK_SHADING_RATE_PALETTE_ENTRY_1_INVOCATION_PER_4X4_PIXELS_NV,
+};
+
 enum class sharing_mode : ::std::underlying_type_t<VkSharingMode>
 {
 	exclusive = VK_SHARING_MODE_EXCLUSIVE,
 	concurrent = VK_SHARING_MODE_CONCURRENT,
+};
+
+enum class stencil_op : ::std::underlying_type_t<VkStencilOp>
+{
+	keep = VK_STENCIL_OP_KEEP,
+	zero = VK_STENCIL_OP_ZERO,
+	replace = VK_STENCIL_OP_REPLACE,
+	increment_and_clamp = VK_STENCIL_OP_INCREMENT_AND_CLAMP,
+	decrement_and_clamp = VK_STENCIL_OP_DECREMENT_AND_CLAMP,
+	invert = VK_STENCIL_OP_INVERT,
+	increment_and_wrap = VK_STENCIL_OP_INCREMENT_AND_WRAP,
+	decrement_and_wrap = VK_STENCIL_OP_DECREMENT_AND_WRAP,
 };
 
 enum class subpass_contents : ::std::underlying_type_t<VkSubpassContents>
@@ -13972,6 +14101,24 @@ enum class subpass_contents : ::std::underlying_type_t<VkSubpassContents>
 	inline_ = VK_SUBPASS_CONTENTS_INLINE,
 	secondary_command_buffers = VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS,
 	inline_and_secondary_command_buffers = VK_SUBPASS_CONTENTS_INLINE_AND_SECONDARY_COMMAND_BUFFERS_KHR,
+};
+
+enum class subpass_merge_status : ::std::underlying_type_t<VkSubpassMergeStatusEXT>
+{
+	merged = VK_SUBPASS_MERGE_STATUS_MERGED_EXT,
+	disallowed = VK_SUBPASS_MERGE_STATUS_DISALLOWED_EXT,
+	not_merged_side_effects = VK_SUBPASS_MERGE_STATUS_NOT_MERGED_SIDE_EFFECTS_EXT,
+	not_merged_samples_mismatch = VK_SUBPASS_MERGE_STATUS_NOT_MERGED_SAMPLES_MISMATCH_EXT,
+	not_merged_views_mismatch = VK_SUBPASS_MERGE_STATUS_NOT_MERGED_VIEWS_MISMATCH_EXT,
+	not_merged_aliasing = VK_SUBPASS_MERGE_STATUS_NOT_MERGED_ALIASING_EXT,
+	not_merged_dependencies = VK_SUBPASS_MERGE_STATUS_NOT_MERGED_DEPENDENCIES_EXT,
+	not_merged_incompatible_input_attachment = VK_SUBPASS_MERGE_STATUS_NOT_MERGED_INCOMPATIBLE_INPUT_ATTACHMENT_EXT,
+	not_merged_too_many_attachments = VK_SUBPASS_MERGE_STATUS_NOT_MERGED_TOO_MANY_ATTACHMENTS_EXT,
+	not_merged_insufficient_storage = VK_SUBPASS_MERGE_STATUS_NOT_MERGED_INSUFFICIENT_STORAGE_EXT,
+	not_merged_depth_stencil_count = VK_SUBPASS_MERGE_STATUS_NOT_MERGED_DEPTH_STENCIL_COUNT_EXT,
+	not_merged_resolve_attachment_reuse = VK_SUBPASS_MERGE_STATUS_NOT_MERGED_RESOLVE_ATTACHMENT_REUSE_EXT,
+	not_merged_single_subpass = VK_SUBPASS_MERGE_STATUS_NOT_MERGED_SINGLE_SUBPASS_EXT,
+	not_merged_unspecified = VK_SUBPASS_MERGE_STATUS_NOT_MERGED_UNSPECIFIED_EXT,
 };
 
 enum class surface_transform : ::std::underlying_type_t<VkSurfaceTransformFlagBitsKHR>
@@ -14092,6 +14239,18 @@ enum class video_encode_tuning_mode : ::std::underlying_type_t<VkVideoEncodeTuni
 	low_latency = VK_VIDEO_ENCODE_TUNING_MODE_LOW_LATENCY_KHR,
 	ultra_low_latency = VK_VIDEO_ENCODE_TUNING_MODE_ULTRA_LOW_LATENCY_KHR,
 	lossless = VK_VIDEO_ENCODE_TUNING_MODE_LOSSLESS_KHR,
+};
+
+enum class viewport_coordinate_swizzle : ::std::underlying_type_t<VkViewportCoordinateSwizzleNV>
+{
+	positive_x = VK_VIEWPORT_COORDINATE_SWIZZLE_POSITIVE_X_NV,
+	negative_x = VK_VIEWPORT_COORDINATE_SWIZZLE_NEGATIVE_X_NV,
+	positive_y = VK_VIEWPORT_COORDINATE_SWIZZLE_POSITIVE_Y_NV,
+	negative_y = VK_VIEWPORT_COORDINATE_SWIZZLE_NEGATIVE_Y_NV,
+	positive_z = VK_VIEWPORT_COORDINATE_SWIZZLE_POSITIVE_Z_NV,
+	negative_z = VK_VIEWPORT_COORDINATE_SWIZZLE_NEGATIVE_Z_NV,
+	positive_w = VK_VIEWPORT_COORDINATE_SWIZZLE_POSITIVE_W_NV,
+	negative_w = VK_VIEWPORT_COORDINATE_SWIZZLE_NEGATIVE_W_NV,
 };
 
 }
@@ -14684,7 +14843,7 @@ struct physical_device_surface2{};
 struct physical_device_video_encode_quality_level{};
 struct physical_device_video_format{};
 struct pipeline_binary{};
-struct pipeline_binary_data{};
+struct pipeline_binary_data_info{};
 struct pipeline_executable{};
 struct pipeline{};
 struct present{};
@@ -19953,7 +20112,7 @@ struct vulkan_object_trait<obj::khr::pipeline_binary>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::pipeline_binary_data>
+struct vulkan_object_trait<obj::khr::pipeline_binary_data_info>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -25619,7 +25778,7 @@ struct expression_vulkan_tag<VkPipelineBinaryCreateInfoKHR>
 template<>
 struct expression_vulkan_tag<VkPipelineBinaryDataInfoKHR>
 {
-	using type = obj::khr::pipeline_binary_data;
+	using type = obj::khr::pipeline_binary_data_info;
 };
 
 template<>
@@ -43300,9 +43459,9 @@ struct pipeline_binary
 	}
 };
 
-struct pipeline_binary_data
+struct pipeline_binary_data_info
 {
-	using vulkan_tag_type = obj::khr::pipeline_binary_data;
+	using vulkan_tag_type = obj::khr::pipeline_binary_data_info;
 
 	VkPipelineBinaryKHR pipeline_binary{};
 
@@ -52528,6 +52687,1931 @@ struct descriptor_set_binding_reference
 
 }
 
+struct attachment_description
+{
+
+	struct flags_type
+	{
+		VkAttachmentDescriptionFlags may_alias : 1 = 0;
+		VkAttachmentDescriptionFlags _reserved_1 : 31 = 0;
+	};
+
+	flags_type flags{};
+	::vkfu::enums::format format{};
+	::vkfu::enums::sample_count samples{};
+	::vkfu::enums::attachment_load_op load_op{};
+	::vkfu::enums::attachment_store_op store_op{};
+	::vkfu::enums::attachment_load_op stencil_load_op{};
+	::vkfu::enums::attachment_store_op stencil_store_op{};
+	::vkfu::enums::image_layout initial_layout{};
+	::vkfu::enums::image_layout final_layout{};
+
+	constexpr auto evaluate() const noexcept -> VkAttachmentDescription
+	{
+		return VkAttachmentDescription{
+			.flags = ::std::bit_cast<VkAttachmentDescriptionFlags>(flags),
+			.format = static_cast<VkFormat>(format),
+			.samples = static_cast<VkSampleCountFlagBits>(samples),
+			.loadOp = static_cast<VkAttachmentLoadOp>(load_op),
+			.storeOp = static_cast<VkAttachmentStoreOp>(store_op),
+			.stencilLoadOp = static_cast<VkAttachmentLoadOp>(stencil_load_op),
+			.stencilStoreOp = static_cast<VkAttachmentStoreOp>(stencil_store_op),
+			.initialLayout = static_cast<VkImageLayout>(initial_layout),
+			.finalLayout = static_cast<VkImageLayout>(final_layout),
+		};
+	}
+};
+
+static_assert(sizeof(attachment_description::flags_type) == sizeof(VkAttachmentDescriptionFlags));
+#if !defined(__clang__)
+static_assert(::std::bit_cast<VkAttachmentDescriptionFlags>(attachment_description::flags_type{.may_alias = 1}) == VK_ATTACHMENT_DESCRIPTION_MAY_ALIAS_BIT);
+#endif
+
+struct attachment_reference
+{
+
+	::std::uint32_t attachment{};
+	::vkfu::enums::image_layout layout{};
+
+	constexpr auto evaluate() const noexcept -> VkAttachmentReference
+	{
+		return VkAttachmentReference{
+			.attachment = attachment,
+			.layout = static_cast<VkImageLayout>(layout),
+		};
+	}
+};
+
+struct component_mapping
+{
+
+	::vkfu::enums::component_swizzle r{};
+	::vkfu::enums::component_swizzle g{};
+	::vkfu::enums::component_swizzle b{};
+	::vkfu::enums::component_swizzle a{};
+
+	constexpr auto evaluate() const noexcept -> VkComponentMapping
+	{
+		return VkComponentMapping{
+			.r = static_cast<VkComponentSwizzle>(r),
+			.g = static_cast<VkComponentSwizzle>(g),
+			.b = static_cast<VkComponentSwizzle>(b),
+			.a = static_cast<VkComponentSwizzle>(a),
+		};
+	}
+};
+
+struct descriptor_buffer
+{
+
+	VkBuffer buffer{};
+	VkDeviceSize offset{};
+	VkDeviceSize range{};
+
+	constexpr auto evaluate() const noexcept -> VkDescriptorBufferInfo
+	{
+		return VkDescriptorBufferInfo{
+			.buffer = buffer,
+			.offset = offset,
+			.range = range,
+		};
+	}
+};
+
+struct descriptor_image
+{
+
+	VkSampler sampler{};
+	VkImageView image_view{};
+	::vkfu::enums::image_layout image_layout{};
+
+	constexpr auto evaluate() const noexcept -> VkDescriptorImageInfo
+	{
+		return VkDescriptorImageInfo{
+			.sampler = sampler,
+			.imageView = image_view,
+			.imageLayout = static_cast<VkImageLayout>(image_layout),
+		};
+	}
+};
+
+struct descriptor_pool_size
+{
+
+	::vkfu::enums::descriptor_type type{};
+	::std::uint32_t descriptor_count{};
+
+	constexpr auto evaluate() const noexcept -> VkDescriptorPoolSize
+	{
+		return VkDescriptorPoolSize{
+			.type = static_cast<VkDescriptorType>(type),
+			.descriptorCount = descriptor_count,
+		};
+	}
+};
+
+struct descriptor_set_layout_binding
+{
+
+	::std::uint32_t binding{};
+	::vkfu::enums::descriptor_type descriptor_type{};
+	::std::uint32_t descriptor_count{};
+	struct stage_flags_type
+	{
+		VkShaderStageFlags vertex : 1 = 0;
+		VkShaderStageFlags tessellation_control : 1 = 0;
+		VkShaderStageFlags tessellation_evaluation : 1 = 0;
+		VkShaderStageFlags geometry : 1 = 0;
+		VkShaderStageFlags fragment : 1 = 0;
+		VkShaderStageFlags compute : 1 = 0;
+		VkShaderStageFlags task : 1 = 0;
+		VkShaderStageFlags mesh : 1 = 0;
+		VkShaderStageFlags raygen : 1 = 0;
+		VkShaderStageFlags any_hit : 1 = 0;
+		VkShaderStageFlags closest_hit : 1 = 0;
+		VkShaderStageFlags miss : 1 = 0;
+		VkShaderStageFlags intersection : 1 = 0;
+		VkShaderStageFlags callable : 1 = 0;
+		VkShaderStageFlags subpass_shading : 1 = 0;
+		VkShaderStageFlags _reserved_15 : 4 = 0;
+		VkShaderStageFlags cluster_culling : 1 = 0;
+		VkShaderStageFlags _reserved_20 : 12 = 0;
+	};
+
+	stage_flags_type stage_flags{};
+	VkSampler const* immutable_samplers = nullptr;
+
+	constexpr auto evaluate() const noexcept -> VkDescriptorSetLayoutBinding
+	{
+		return VkDescriptorSetLayoutBinding{
+			.binding = binding,
+			.descriptorType = static_cast<VkDescriptorType>(descriptor_type),
+			.descriptorCount = descriptor_count,
+			.stageFlags = ::std::bit_cast<VkShaderStageFlags>(stage_flags),
+			.pImmutableSamplers = immutable_samplers,
+		};
+	}
+};
+
+static_assert(sizeof(descriptor_set_layout_binding::stage_flags_type) == sizeof(VkShaderStageFlags));
+#if !defined(__clang__)
+static_assert(::std::bit_cast<VkShaderStageFlags>(descriptor_set_layout_binding::stage_flags_type{.vertex = 1}) == VK_SHADER_STAGE_VERTEX_BIT);
+static_assert(::std::bit_cast<VkShaderStageFlags>(descriptor_set_layout_binding::stage_flags_type{.tessellation_control = 1}) == VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT);
+static_assert(::std::bit_cast<VkShaderStageFlags>(descriptor_set_layout_binding::stage_flags_type{.tessellation_evaluation = 1}) == VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
+static_assert(::std::bit_cast<VkShaderStageFlags>(descriptor_set_layout_binding::stage_flags_type{.geometry = 1}) == VK_SHADER_STAGE_GEOMETRY_BIT);
+static_assert(::std::bit_cast<VkShaderStageFlags>(descriptor_set_layout_binding::stage_flags_type{.fragment = 1}) == VK_SHADER_STAGE_FRAGMENT_BIT);
+static_assert(::std::bit_cast<VkShaderStageFlags>(descriptor_set_layout_binding::stage_flags_type{.compute = 1}) == VK_SHADER_STAGE_COMPUTE_BIT);
+static_assert(::std::bit_cast<VkShaderStageFlags>(descriptor_set_layout_binding::stage_flags_type{.task = 1}) == VK_SHADER_STAGE_TASK_BIT_EXT);
+static_assert(::std::bit_cast<VkShaderStageFlags>(descriptor_set_layout_binding::stage_flags_type{.mesh = 1}) == VK_SHADER_STAGE_MESH_BIT_EXT);
+static_assert(::std::bit_cast<VkShaderStageFlags>(descriptor_set_layout_binding::stage_flags_type{.raygen = 1}) == VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+static_assert(::std::bit_cast<VkShaderStageFlags>(descriptor_set_layout_binding::stage_flags_type{.any_hit = 1}) == VK_SHADER_STAGE_ANY_HIT_BIT_KHR);
+static_assert(::std::bit_cast<VkShaderStageFlags>(descriptor_set_layout_binding::stage_flags_type{.closest_hit = 1}) == VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+static_assert(::std::bit_cast<VkShaderStageFlags>(descriptor_set_layout_binding::stage_flags_type{.miss = 1}) == VK_SHADER_STAGE_MISS_BIT_KHR);
+static_assert(::std::bit_cast<VkShaderStageFlags>(descriptor_set_layout_binding::stage_flags_type{.intersection = 1}) == VK_SHADER_STAGE_INTERSECTION_BIT_KHR);
+static_assert(::std::bit_cast<VkShaderStageFlags>(descriptor_set_layout_binding::stage_flags_type{.callable = 1}) == VK_SHADER_STAGE_CALLABLE_BIT_KHR);
+static_assert(::std::bit_cast<VkShaderStageFlags>(descriptor_set_layout_binding::stage_flags_type{.subpass_shading = 1}) == VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI);
+static_assert(::std::bit_cast<VkShaderStageFlags>(descriptor_set_layout_binding::stage_flags_type{.cluster_culling = 1}) == VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI);
+#endif
+
+struct descriptor_update_template_entry
+{
+
+	::std::uint32_t dst_binding{};
+	::std::uint32_t dst_array_element{};
+	::std::uint32_t descriptor_count{};
+	::vkfu::enums::descriptor_type descriptor_type{};
+	::std::size_t offset{};
+	::std::size_t stride{};
+
+	constexpr auto evaluate() const noexcept -> VkDescriptorUpdateTemplateEntry
+	{
+		return VkDescriptorUpdateTemplateEntry{
+			.dstBinding = dst_binding,
+			.dstArrayElement = dst_array_element,
+			.descriptorCount = descriptor_count,
+			.descriptorType = static_cast<VkDescriptorType>(descriptor_type),
+			.offset = offset,
+			.stride = stride,
+		};
+	}
+};
+
+struct extension_properties
+{
+
+	::std::array<char, VK_MAX_EXTENSION_NAME_SIZE> extension_name{};
+	::std::uint32_t spec_version{};
+
+	constexpr auto evaluate() const noexcept -> VkExtensionProperties
+	{
+		auto value = VkExtensionProperties{
+			.extensionName = {},
+			.specVersion = spec_version,
+		};
+		::std::ranges::copy(extension_name, value.extensionName);
+		return value;
+	}
+};
+
+struct extent_2d
+{
+
+	::std::uint32_t width{};
+	::std::uint32_t height{};
+
+	constexpr auto evaluate() const noexcept -> VkExtent2D
+	{
+		return VkExtent2D{
+			.width = width,
+			.height = height,
+		};
+	}
+};
+
+struct extent_3d
+{
+
+	::std::uint32_t width{};
+	::std::uint32_t height{};
+	::std::uint32_t depth{};
+
+	constexpr auto evaluate() const noexcept -> VkExtent3D
+	{
+		return VkExtent3D{
+			.width = width,
+			.height = height,
+			.depth = depth,
+		};
+	}
+};
+
+struct image_subresource
+{
+
+	struct aspect_mask_type
+	{
+		VkImageAspectFlags color : 1 = 0;
+		VkImageAspectFlags depth : 1 = 0;
+		VkImageAspectFlags stencil : 1 = 0;
+		VkImageAspectFlags metadata : 1 = 0;
+		VkImageAspectFlags plane_0 : 1 = 0;
+		VkImageAspectFlags plane_1 : 1 = 0;
+		VkImageAspectFlags plane_2 : 1 = 0;
+		VkImageAspectFlags memory_plane_0 : 1 = 0;
+		VkImageAspectFlags memory_plane_1 : 1 = 0;
+		VkImageAspectFlags memory_plane_2 : 1 = 0;
+		VkImageAspectFlags memory_plane_3 : 1 = 0;
+		VkImageAspectFlags _reserved_11 : 21 = 0;
+	};
+
+	aspect_mask_type aspect_mask{};
+	::std::uint32_t mip_level{};
+	::std::uint32_t array_layer{};
+
+	constexpr auto evaluate() const noexcept -> VkImageSubresource
+	{
+		return VkImageSubresource{
+			.aspectMask = ::std::bit_cast<VkImageAspectFlags>(aspect_mask),
+			.mipLevel = mip_level,
+			.arrayLayer = array_layer,
+		};
+	}
+};
+
+static_assert(sizeof(image_subresource::aspect_mask_type) == sizeof(VkImageAspectFlags));
+#if !defined(__clang__)
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource::aspect_mask_type{.color = 1}) == VK_IMAGE_ASPECT_COLOR_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource::aspect_mask_type{.depth = 1}) == VK_IMAGE_ASPECT_DEPTH_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource::aspect_mask_type{.stencil = 1}) == VK_IMAGE_ASPECT_STENCIL_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource::aspect_mask_type{.metadata = 1}) == VK_IMAGE_ASPECT_METADATA_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource::aspect_mask_type{.plane_0 = 1}) == VK_IMAGE_ASPECT_PLANE_0_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource::aspect_mask_type{.plane_1 = 1}) == VK_IMAGE_ASPECT_PLANE_1_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource::aspect_mask_type{.plane_2 = 1}) == VK_IMAGE_ASPECT_PLANE_2_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource::aspect_mask_type{.memory_plane_0 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_0_BIT_EXT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource::aspect_mask_type{.memory_plane_1 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_1_BIT_EXT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource::aspect_mask_type{.memory_plane_2 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_2_BIT_EXT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource::aspect_mask_type{.memory_plane_3 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_3_BIT_EXT);
+#endif
+
+struct image_subresource_layers
+{
+
+	struct aspect_mask_type
+	{
+		VkImageAspectFlags color : 1 = 0;
+		VkImageAspectFlags depth : 1 = 0;
+		VkImageAspectFlags stencil : 1 = 0;
+		VkImageAspectFlags metadata : 1 = 0;
+		VkImageAspectFlags plane_0 : 1 = 0;
+		VkImageAspectFlags plane_1 : 1 = 0;
+		VkImageAspectFlags plane_2 : 1 = 0;
+		VkImageAspectFlags memory_plane_0 : 1 = 0;
+		VkImageAspectFlags memory_plane_1 : 1 = 0;
+		VkImageAspectFlags memory_plane_2 : 1 = 0;
+		VkImageAspectFlags memory_plane_3 : 1 = 0;
+		VkImageAspectFlags _reserved_11 : 21 = 0;
+	};
+
+	aspect_mask_type aspect_mask{};
+	::std::uint32_t mip_level{};
+	::std::uint32_t base_array_layer{};
+	::std::uint32_t layer_count{};
+
+	constexpr auto evaluate() const noexcept -> VkImageSubresourceLayers
+	{
+		return VkImageSubresourceLayers{
+			.aspectMask = ::std::bit_cast<VkImageAspectFlags>(aspect_mask),
+			.mipLevel = mip_level,
+			.baseArrayLayer = base_array_layer,
+			.layerCount = layer_count,
+		};
+	}
+};
+
+static_assert(sizeof(image_subresource_layers::aspect_mask_type) == sizeof(VkImageAspectFlags));
+#if !defined(__clang__)
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.color = 1}) == VK_IMAGE_ASPECT_COLOR_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.depth = 1}) == VK_IMAGE_ASPECT_DEPTH_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.stencil = 1}) == VK_IMAGE_ASPECT_STENCIL_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.metadata = 1}) == VK_IMAGE_ASPECT_METADATA_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.plane_0 = 1}) == VK_IMAGE_ASPECT_PLANE_0_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.plane_1 = 1}) == VK_IMAGE_ASPECT_PLANE_1_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.plane_2 = 1}) == VK_IMAGE_ASPECT_PLANE_2_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.memory_plane_0 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_0_BIT_EXT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.memory_plane_1 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_1_BIT_EXT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.memory_plane_2 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_2_BIT_EXT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.memory_plane_3 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_3_BIT_EXT);
+#endif
+
+struct image_subresource_range
+{
+
+	struct aspect_mask_type
+	{
+		VkImageAspectFlags color : 1 = 0;
+		VkImageAspectFlags depth : 1 = 0;
+		VkImageAspectFlags stencil : 1 = 0;
+		VkImageAspectFlags metadata : 1 = 0;
+		VkImageAspectFlags plane_0 : 1 = 0;
+		VkImageAspectFlags plane_1 : 1 = 0;
+		VkImageAspectFlags plane_2 : 1 = 0;
+		VkImageAspectFlags memory_plane_0 : 1 = 0;
+		VkImageAspectFlags memory_plane_1 : 1 = 0;
+		VkImageAspectFlags memory_plane_2 : 1 = 0;
+		VkImageAspectFlags memory_plane_3 : 1 = 0;
+		VkImageAspectFlags _reserved_11 : 21 = 0;
+	};
+
+	aspect_mask_type aspect_mask{};
+	::std::uint32_t base_mip_level{};
+	::std::uint32_t level_count{};
+	::std::uint32_t base_array_layer{};
+	::std::uint32_t layer_count{};
+
+	constexpr auto evaluate() const noexcept -> VkImageSubresourceRange
+	{
+		return VkImageSubresourceRange{
+			.aspectMask = ::std::bit_cast<VkImageAspectFlags>(aspect_mask),
+			.baseMipLevel = base_mip_level,
+			.levelCount = level_count,
+			.baseArrayLayer = base_array_layer,
+			.layerCount = layer_count,
+		};
+	}
+};
+
+static_assert(sizeof(image_subresource_range::aspect_mask_type) == sizeof(VkImageAspectFlags));
+#if !defined(__clang__)
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_range::aspect_mask_type{.color = 1}) == VK_IMAGE_ASPECT_COLOR_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_range::aspect_mask_type{.depth = 1}) == VK_IMAGE_ASPECT_DEPTH_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_range::aspect_mask_type{.stencil = 1}) == VK_IMAGE_ASPECT_STENCIL_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_range::aspect_mask_type{.metadata = 1}) == VK_IMAGE_ASPECT_METADATA_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_range::aspect_mask_type{.plane_0 = 1}) == VK_IMAGE_ASPECT_PLANE_0_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_range::aspect_mask_type{.plane_1 = 1}) == VK_IMAGE_ASPECT_PLANE_1_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_range::aspect_mask_type{.plane_2 = 1}) == VK_IMAGE_ASPECT_PLANE_2_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_range::aspect_mask_type{.memory_plane_0 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_0_BIT_EXT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_range::aspect_mask_type{.memory_plane_1 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_1_BIT_EXT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_range::aspect_mask_type{.memory_plane_2 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_2_BIT_EXT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_range::aspect_mask_type{.memory_plane_3 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_3_BIT_EXT);
+#endif
+
+struct input_attachment_aspect_reference
+{
+
+	::std::uint32_t subpass{};
+	::std::uint32_t input_attachment_index{};
+	struct aspect_mask_type
+	{
+		VkImageAspectFlags color : 1 = 0;
+		VkImageAspectFlags depth : 1 = 0;
+		VkImageAspectFlags stencil : 1 = 0;
+		VkImageAspectFlags metadata : 1 = 0;
+		VkImageAspectFlags plane_0 : 1 = 0;
+		VkImageAspectFlags plane_1 : 1 = 0;
+		VkImageAspectFlags plane_2 : 1 = 0;
+		VkImageAspectFlags memory_plane_0 : 1 = 0;
+		VkImageAspectFlags memory_plane_1 : 1 = 0;
+		VkImageAspectFlags memory_plane_2 : 1 = 0;
+		VkImageAspectFlags memory_plane_3 : 1 = 0;
+		VkImageAspectFlags _reserved_11 : 21 = 0;
+	};
+
+	aspect_mask_type aspect_mask{};
+
+	constexpr auto evaluate() const noexcept -> VkInputAttachmentAspectReference
+	{
+		return VkInputAttachmentAspectReference{
+			.subpass = subpass,
+			.inputAttachmentIndex = input_attachment_index,
+			.aspectMask = ::std::bit_cast<VkImageAspectFlags>(aspect_mask),
+		};
+	}
+};
+
+static_assert(sizeof(input_attachment_aspect_reference::aspect_mask_type) == sizeof(VkImageAspectFlags));
+#if !defined(__clang__)
+static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.color = 1}) == VK_IMAGE_ASPECT_COLOR_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.depth = 1}) == VK_IMAGE_ASPECT_DEPTH_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.stencil = 1}) == VK_IMAGE_ASPECT_STENCIL_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.metadata = 1}) == VK_IMAGE_ASPECT_METADATA_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.plane_0 = 1}) == VK_IMAGE_ASPECT_PLANE_0_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.plane_1 = 1}) == VK_IMAGE_ASPECT_PLANE_1_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.plane_2 = 1}) == VK_IMAGE_ASPECT_PLANE_2_BIT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.memory_plane_0 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_0_BIT_EXT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.memory_plane_1 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_1_BIT_EXT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.memory_plane_2 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_2_BIT_EXT);
+static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.memory_plane_3 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_3_BIT_EXT);
+#endif
+
+struct offset_2d
+{
+
+	::std::int32_t x{};
+	::std::int32_t y{};
+
+	constexpr auto evaluate() const noexcept -> VkOffset2D
+	{
+		return VkOffset2D{
+			.x = x,
+			.y = y,
+		};
+	}
+};
+
+struct offset_3d
+{
+
+	::std::int32_t x{};
+	::std::int32_t y{};
+	::std::int32_t z{};
+
+	constexpr auto evaluate() const noexcept -> VkOffset3D
+	{
+		return VkOffset3D{
+			.x = x,
+			.y = y,
+			.z = z,
+		};
+	}
+};
+
+struct pipeline_creation_feedback
+{
+
+	struct flags_type
+	{
+		VkPipelineCreationFeedbackFlags valid : 1 = 0;
+		VkPipelineCreationFeedbackFlags application_pipeline_cache_hit : 1 = 0;
+		VkPipelineCreationFeedbackFlags base_pipeline_acceleration : 1 = 0;
+		VkPipelineCreationFeedbackFlags _reserved_3 : 29 = 0;
+	};
+
+	flags_type flags{};
+	::std::uint64_t duration{};
+
+	constexpr auto evaluate() const noexcept -> VkPipelineCreationFeedback
+	{
+		return VkPipelineCreationFeedback{
+			.flags = ::std::bit_cast<VkPipelineCreationFeedbackFlags>(flags),
+			.duration = duration,
+		};
+	}
+};
+
+static_assert(sizeof(pipeline_creation_feedback::flags_type) == sizeof(VkPipelineCreationFeedbackFlags));
+#if !defined(__clang__)
+static_assert(::std::bit_cast<VkPipelineCreationFeedbackFlags>(pipeline_creation_feedback::flags_type{.valid = 1}) == VK_PIPELINE_CREATION_FEEDBACK_VALID_BIT);
+static_assert(::std::bit_cast<VkPipelineCreationFeedbackFlags>(pipeline_creation_feedback::flags_type{.application_pipeline_cache_hit = 1}) == VK_PIPELINE_CREATION_FEEDBACK_APPLICATION_PIPELINE_CACHE_HIT_BIT);
+static_assert(::std::bit_cast<VkPipelineCreationFeedbackFlags>(pipeline_creation_feedback::flags_type{.base_pipeline_acceleration = 1}) == VK_PIPELINE_CREATION_FEEDBACK_BASE_PIPELINE_ACCELERATION_BIT);
+#endif
+
+struct push_constant_range
+{
+
+	struct stage_flags_type
+	{
+		VkShaderStageFlags vertex : 1 = 0;
+		VkShaderStageFlags tessellation_control : 1 = 0;
+		VkShaderStageFlags tessellation_evaluation : 1 = 0;
+		VkShaderStageFlags geometry : 1 = 0;
+		VkShaderStageFlags fragment : 1 = 0;
+		VkShaderStageFlags compute : 1 = 0;
+		VkShaderStageFlags task : 1 = 0;
+		VkShaderStageFlags mesh : 1 = 0;
+		VkShaderStageFlags raygen : 1 = 0;
+		VkShaderStageFlags any_hit : 1 = 0;
+		VkShaderStageFlags closest_hit : 1 = 0;
+		VkShaderStageFlags miss : 1 = 0;
+		VkShaderStageFlags intersection : 1 = 0;
+		VkShaderStageFlags callable : 1 = 0;
+		VkShaderStageFlags subpass_shading : 1 = 0;
+		VkShaderStageFlags _reserved_15 : 4 = 0;
+		VkShaderStageFlags cluster_culling : 1 = 0;
+		VkShaderStageFlags _reserved_20 : 12 = 0;
+	};
+
+	stage_flags_type stage_flags{};
+	::std::uint32_t offset{};
+	::std::uint32_t size{};
+
+	constexpr auto evaluate() const noexcept -> VkPushConstantRange
+	{
+		return VkPushConstantRange{
+			.stageFlags = ::std::bit_cast<VkShaderStageFlags>(stage_flags),
+			.offset = offset,
+			.size = size,
+		};
+	}
+};
+
+static_assert(sizeof(push_constant_range::stage_flags_type) == sizeof(VkShaderStageFlags));
+#if !defined(__clang__)
+static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.vertex = 1}) == VK_SHADER_STAGE_VERTEX_BIT);
+static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.tessellation_control = 1}) == VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT);
+static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.tessellation_evaluation = 1}) == VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
+static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.geometry = 1}) == VK_SHADER_STAGE_GEOMETRY_BIT);
+static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.fragment = 1}) == VK_SHADER_STAGE_FRAGMENT_BIT);
+static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.compute = 1}) == VK_SHADER_STAGE_COMPUTE_BIT);
+static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.task = 1}) == VK_SHADER_STAGE_TASK_BIT_EXT);
+static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.mesh = 1}) == VK_SHADER_STAGE_MESH_BIT_EXT);
+static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.raygen = 1}) == VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.any_hit = 1}) == VK_SHADER_STAGE_ANY_HIT_BIT_KHR);
+static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.closest_hit = 1}) == VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.miss = 1}) == VK_SHADER_STAGE_MISS_BIT_KHR);
+static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.intersection = 1}) == VK_SHADER_STAGE_INTERSECTION_BIT_KHR);
+static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.callable = 1}) == VK_SHADER_STAGE_CALLABLE_BIT_KHR);
+static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.subpass_shading = 1}) == VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI);
+static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.cluster_culling = 1}) == VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI);
+#endif
+
+struct rect_2d
+{
+
+	VkOffset2D offset{};
+	VkExtent2D extent{};
+
+	constexpr auto evaluate() const noexcept -> VkRect2D
+	{
+		return VkRect2D{
+			.offset = offset,
+			.extent = extent,
+		};
+	}
+};
+
+struct sparse_buffer_memory_bind
+{
+
+	VkBuffer buffer{};
+	::std::span<VkSparseMemoryBind const> binds{};
+
+	constexpr auto evaluate() const noexcept -> VkSparseBufferMemoryBindInfo
+	{
+		return VkSparseBufferMemoryBindInfo{
+			.buffer = buffer,
+			.bindCount = static_cast<::std::uint32_t>(binds.size()),
+			.pBinds = binds.data(),
+		};
+	}
+};
+
+struct sparse_image_memory_bind
+{
+
+	VkImageSubresource subresource{};
+	VkOffset3D offset{};
+	VkExtent3D extent{};
+	VkDeviceMemory memory{};
+	VkDeviceSize memory_offset{};
+	struct flags_type
+	{
+		VkSparseMemoryBindFlags metadata : 1 = 0;
+		VkSparseMemoryBindFlags _reserved_1 : 31 = 0;
+	};
+
+	flags_type flags{};
+
+	constexpr auto evaluate() const noexcept -> VkSparseImageMemoryBind
+	{
+		return VkSparseImageMemoryBind{
+			.subresource = subresource,
+			.offset = offset,
+			.extent = extent,
+			.memory = memory,
+			.memoryOffset = memory_offset,
+			.flags = ::std::bit_cast<VkSparseMemoryBindFlags>(flags),
+		};
+	}
+};
+
+static_assert(sizeof(sparse_image_memory_bind::flags_type) == sizeof(VkSparseMemoryBindFlags));
+#if !defined(__clang__)
+static_assert(::std::bit_cast<VkSparseMemoryBindFlags>(sparse_image_memory_bind::flags_type{.metadata = 1}) == VK_SPARSE_MEMORY_BIND_METADATA_BIT);
+#endif
+
+struct sparse_image_memory_bind_info
+{
+
+	VkImage image{};
+	::std::span<VkSparseImageMemoryBind const> binds{};
+
+	constexpr auto evaluate() const noexcept -> VkSparseImageMemoryBindInfo
+	{
+		return VkSparseImageMemoryBindInfo{
+			.image = image,
+			.bindCount = static_cast<::std::uint32_t>(binds.size()),
+			.pBinds = binds.data(),
+		};
+	}
+};
+
+struct sparse_image_opaque_memory_bind
+{
+
+	VkImage image{};
+	::std::span<VkSparseMemoryBind const> binds{};
+
+	constexpr auto evaluate() const noexcept -> VkSparseImageOpaqueMemoryBindInfo
+	{
+		return VkSparseImageOpaqueMemoryBindInfo{
+			.image = image,
+			.bindCount = static_cast<::std::uint32_t>(binds.size()),
+			.pBinds = binds.data(),
+		};
+	}
+};
+
+struct sparse_memory_bind
+{
+
+	VkDeviceSize resource_offset{};
+	VkDeviceSize size{};
+	VkDeviceMemory memory{};
+	VkDeviceSize memory_offset{};
+	struct flags_type
+	{
+		VkSparseMemoryBindFlags metadata : 1 = 0;
+		VkSparseMemoryBindFlags _reserved_1 : 31 = 0;
+	};
+
+	flags_type flags{};
+
+	constexpr auto evaluate() const noexcept -> VkSparseMemoryBind
+	{
+		return VkSparseMemoryBind{
+			.resourceOffset = resource_offset,
+			.size = size,
+			.memory = memory,
+			.memoryOffset = memory_offset,
+			.flags = ::std::bit_cast<VkSparseMemoryBindFlags>(flags),
+		};
+	}
+};
+
+static_assert(sizeof(sparse_memory_bind::flags_type) == sizeof(VkSparseMemoryBindFlags));
+#if !defined(__clang__)
+static_assert(::std::bit_cast<VkSparseMemoryBindFlags>(sparse_memory_bind::flags_type{.metadata = 1}) == VK_SPARSE_MEMORY_BIND_METADATA_BIT);
+#endif
+
+struct specialization
+{
+
+	::std::span<VkSpecializationMapEntry const> map_entries{};
+	::std::size_t data_size{};
+	void const* data = nullptr;
+
+	constexpr auto evaluate() const noexcept -> VkSpecializationInfo
+	{
+		return VkSpecializationInfo{
+			.mapEntryCount = static_cast<::std::uint32_t>(map_entries.size()),
+			.pMapEntries = map_entries.data(),
+			.dataSize = data_size,
+			.pData = data,
+		};
+	}
+};
+
+struct specialization_map_entry
+{
+
+	::std::uint32_t constant_id{};
+	::std::uint32_t offset{};
+	::std::size_t size{};
+
+	constexpr auto evaluate() const noexcept -> VkSpecializationMapEntry
+	{
+		return VkSpecializationMapEntry{
+			.constantID = constant_id,
+			.offset = offset,
+			.size = size,
+		};
+	}
+};
+
+struct stencil_op_state
+{
+
+	::vkfu::enums::stencil_op fail_op{};
+	::vkfu::enums::stencil_op pass_op{};
+	::vkfu::enums::stencil_op depth_fail_op{};
+	::vkfu::enums::compare_op compare_op{};
+	::std::uint32_t compare_mask{};
+	::std::uint32_t write_mask{};
+	::std::uint32_t reference{};
+
+	constexpr auto evaluate() const noexcept -> VkStencilOpState
+	{
+		return VkStencilOpState{
+			.failOp = static_cast<VkStencilOp>(fail_op),
+			.passOp = static_cast<VkStencilOp>(pass_op),
+			.depthFailOp = static_cast<VkStencilOp>(depth_fail_op),
+			.compareOp = static_cast<VkCompareOp>(compare_op),
+			.compareMask = compare_mask,
+			.writeMask = write_mask,
+			.reference = reference,
+		};
+	}
+};
+
+struct subpass_dependency
+{
+
+	::std::uint32_t src_subpass{};
+	::std::uint32_t dst_subpass{};
+	struct src_stage_mask_type
+	{
+		VkPipelineStageFlags top_of_pipe : 1 = 0;
+		VkPipelineStageFlags draw_indirect : 1 = 0;
+		VkPipelineStageFlags vertex_input : 1 = 0;
+		VkPipelineStageFlags vertex_shader : 1 = 0;
+		VkPipelineStageFlags tessellation_control_shader : 1 = 0;
+		VkPipelineStageFlags tessellation_evaluation_shader : 1 = 0;
+		VkPipelineStageFlags geometry_shader : 1 = 0;
+		VkPipelineStageFlags fragment_shader : 1 = 0;
+		VkPipelineStageFlags early_fragment_tests : 1 = 0;
+		VkPipelineStageFlags late_fragment_tests : 1 = 0;
+		VkPipelineStageFlags color_attachment_output : 1 = 0;
+		VkPipelineStageFlags compute_shader : 1 = 0;
+		VkPipelineStageFlags transfer : 1 = 0;
+		VkPipelineStageFlags bottom_of_pipe : 1 = 0;
+		VkPipelineStageFlags host : 1 = 0;
+		VkPipelineStageFlags all_graphics : 1 = 0;
+		VkPipelineStageFlags all_commands : 1 = 0;
+		VkPipelineStageFlags command_preprocess : 1 = 0;
+		VkPipelineStageFlags conditional_rendering : 1 = 0;
+		VkPipelineStageFlags task_shader : 1 = 0;
+		VkPipelineStageFlags mesh_shader : 1 = 0;
+		VkPipelineStageFlags ray_tracing_shader : 1 = 0;
+		VkPipelineStageFlags fragment_shading_rate_attachment : 1 = 0;
+		VkPipelineStageFlags fragment_density_process : 1 = 0;
+		VkPipelineStageFlags transform_feedback : 1 = 0;
+		VkPipelineStageFlags acceleration_structure_build : 1 = 0;
+		VkPipelineStageFlags _reserved_26 : 6 = 0;
+	};
+
+	src_stage_mask_type src_stage_mask{};
+	struct dst_stage_mask_type
+	{
+		VkPipelineStageFlags top_of_pipe : 1 = 0;
+		VkPipelineStageFlags draw_indirect : 1 = 0;
+		VkPipelineStageFlags vertex_input : 1 = 0;
+		VkPipelineStageFlags vertex_shader : 1 = 0;
+		VkPipelineStageFlags tessellation_control_shader : 1 = 0;
+		VkPipelineStageFlags tessellation_evaluation_shader : 1 = 0;
+		VkPipelineStageFlags geometry_shader : 1 = 0;
+		VkPipelineStageFlags fragment_shader : 1 = 0;
+		VkPipelineStageFlags early_fragment_tests : 1 = 0;
+		VkPipelineStageFlags late_fragment_tests : 1 = 0;
+		VkPipelineStageFlags color_attachment_output : 1 = 0;
+		VkPipelineStageFlags compute_shader : 1 = 0;
+		VkPipelineStageFlags transfer : 1 = 0;
+		VkPipelineStageFlags bottom_of_pipe : 1 = 0;
+		VkPipelineStageFlags host : 1 = 0;
+		VkPipelineStageFlags all_graphics : 1 = 0;
+		VkPipelineStageFlags all_commands : 1 = 0;
+		VkPipelineStageFlags command_preprocess : 1 = 0;
+		VkPipelineStageFlags conditional_rendering : 1 = 0;
+		VkPipelineStageFlags task_shader : 1 = 0;
+		VkPipelineStageFlags mesh_shader : 1 = 0;
+		VkPipelineStageFlags ray_tracing_shader : 1 = 0;
+		VkPipelineStageFlags fragment_shading_rate_attachment : 1 = 0;
+		VkPipelineStageFlags fragment_density_process : 1 = 0;
+		VkPipelineStageFlags transform_feedback : 1 = 0;
+		VkPipelineStageFlags acceleration_structure_build : 1 = 0;
+		VkPipelineStageFlags _reserved_26 : 6 = 0;
+	};
+
+	dst_stage_mask_type dst_stage_mask{};
+	struct src_access_mask_type
+	{
+		VkAccessFlags indirect_command_read : 1 = 0;
+		VkAccessFlags index_read : 1 = 0;
+		VkAccessFlags vertex_attribute_read : 1 = 0;
+		VkAccessFlags uniform_read : 1 = 0;
+		VkAccessFlags input_attachment_read : 1 = 0;
+		VkAccessFlags shader_read : 1 = 0;
+		VkAccessFlags shader_write : 1 = 0;
+		VkAccessFlags color_attachment_read : 1 = 0;
+		VkAccessFlags color_attachment_write : 1 = 0;
+		VkAccessFlags depth_stencil_attachment_read : 1 = 0;
+		VkAccessFlags depth_stencil_attachment_write : 1 = 0;
+		VkAccessFlags transfer_read : 1 = 0;
+		VkAccessFlags transfer_write : 1 = 0;
+		VkAccessFlags host_read : 1 = 0;
+		VkAccessFlags host_write : 1 = 0;
+		VkAccessFlags memory_read : 1 = 0;
+		VkAccessFlags memory_write : 1 = 0;
+		VkAccessFlags command_preprocess_read : 1 = 0;
+		VkAccessFlags command_preprocess_write : 1 = 0;
+		VkAccessFlags color_attachment_read_noncoherent : 1 = 0;
+		VkAccessFlags conditional_rendering_read : 1 = 0;
+		VkAccessFlags acceleration_structure_read : 1 = 0;
+		VkAccessFlags acceleration_structure_write : 1 = 0;
+		VkAccessFlags fragment_shading_rate_attachment_read : 1 = 0;
+		VkAccessFlags fragment_density_map_read : 1 = 0;
+		VkAccessFlags transform_feedback_write : 1 = 0;
+		VkAccessFlags transform_feedback_counter_read : 1 = 0;
+		VkAccessFlags transform_feedback_counter_write : 1 = 0;
+		VkAccessFlags _reserved_28 : 4 = 0;
+	};
+
+	src_access_mask_type src_access_mask{};
+	struct dst_access_mask_type
+	{
+		VkAccessFlags indirect_command_read : 1 = 0;
+		VkAccessFlags index_read : 1 = 0;
+		VkAccessFlags vertex_attribute_read : 1 = 0;
+		VkAccessFlags uniform_read : 1 = 0;
+		VkAccessFlags input_attachment_read : 1 = 0;
+		VkAccessFlags shader_read : 1 = 0;
+		VkAccessFlags shader_write : 1 = 0;
+		VkAccessFlags color_attachment_read : 1 = 0;
+		VkAccessFlags color_attachment_write : 1 = 0;
+		VkAccessFlags depth_stencil_attachment_read : 1 = 0;
+		VkAccessFlags depth_stencil_attachment_write : 1 = 0;
+		VkAccessFlags transfer_read : 1 = 0;
+		VkAccessFlags transfer_write : 1 = 0;
+		VkAccessFlags host_read : 1 = 0;
+		VkAccessFlags host_write : 1 = 0;
+		VkAccessFlags memory_read : 1 = 0;
+		VkAccessFlags memory_write : 1 = 0;
+		VkAccessFlags command_preprocess_read : 1 = 0;
+		VkAccessFlags command_preprocess_write : 1 = 0;
+		VkAccessFlags color_attachment_read_noncoherent : 1 = 0;
+		VkAccessFlags conditional_rendering_read : 1 = 0;
+		VkAccessFlags acceleration_structure_read : 1 = 0;
+		VkAccessFlags acceleration_structure_write : 1 = 0;
+		VkAccessFlags fragment_shading_rate_attachment_read : 1 = 0;
+		VkAccessFlags fragment_density_map_read : 1 = 0;
+		VkAccessFlags transform_feedback_write : 1 = 0;
+		VkAccessFlags transform_feedback_counter_read : 1 = 0;
+		VkAccessFlags transform_feedback_counter_write : 1 = 0;
+		VkAccessFlags _reserved_28 : 4 = 0;
+	};
+
+	dst_access_mask_type dst_access_mask{};
+	struct dependency_flags_type
+	{
+		VkDependencyFlags by_region : 1 = 0;
+		VkDependencyFlags view_local : 1 = 0;
+		VkDependencyFlags device_group : 1 = 0;
+		VkDependencyFlags feedback_loop : 1 = 0;
+		VkDependencyFlags _reserved_4 : 1 = 0;
+		VkDependencyFlags queue_family_ownership_transfer_use_all_stages : 1 = 0;
+		VkDependencyFlags asymmetric_event : 1 = 0;
+		VkDependencyFlags _reserved_7 : 25 = 0;
+	};
+
+	dependency_flags_type dependency_flags{};
+
+	constexpr auto evaluate() const noexcept -> VkSubpassDependency
+	{
+		return VkSubpassDependency{
+			.srcSubpass = src_subpass,
+			.dstSubpass = dst_subpass,
+			.srcStageMask = ::std::bit_cast<VkPipelineStageFlags>(src_stage_mask),
+			.dstStageMask = ::std::bit_cast<VkPipelineStageFlags>(dst_stage_mask),
+			.srcAccessMask = ::std::bit_cast<VkAccessFlags>(src_access_mask),
+			.dstAccessMask = ::std::bit_cast<VkAccessFlags>(dst_access_mask),
+			.dependencyFlags = ::std::bit_cast<VkDependencyFlags>(dependency_flags),
+		};
+	}
+};
+
+static_assert(sizeof(subpass_dependency::src_stage_mask_type) == sizeof(VkPipelineStageFlags));
+#if !defined(__clang__)
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.top_of_pipe = 1}) == VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.draw_indirect = 1}) == VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.vertex_input = 1}) == VK_PIPELINE_STAGE_VERTEX_INPUT_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.vertex_shader = 1}) == VK_PIPELINE_STAGE_VERTEX_SHADER_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.tessellation_control_shader = 1}) == VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.tessellation_evaluation_shader = 1}) == VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.geometry_shader = 1}) == VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.fragment_shader = 1}) == VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.early_fragment_tests = 1}) == VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.late_fragment_tests = 1}) == VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.color_attachment_output = 1}) == VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.compute_shader = 1}) == VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.transfer = 1}) == VK_PIPELINE_STAGE_TRANSFER_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.bottom_of_pipe = 1}) == VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.host = 1}) == VK_PIPELINE_STAGE_HOST_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.all_graphics = 1}) == VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.all_commands = 1}) == VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.command_preprocess = 1}) == VK_PIPELINE_STAGE_COMMAND_PREPROCESS_BIT_EXT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.conditional_rendering = 1}) == VK_PIPELINE_STAGE_CONDITIONAL_RENDERING_BIT_EXT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.task_shader = 1}) == VK_PIPELINE_STAGE_TASK_SHADER_BIT_EXT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.mesh_shader = 1}) == VK_PIPELINE_STAGE_MESH_SHADER_BIT_EXT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.ray_tracing_shader = 1}) == VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.fragment_shading_rate_attachment = 1}) == VK_PIPELINE_STAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.fragment_density_process = 1}) == VK_PIPELINE_STAGE_FRAGMENT_DENSITY_PROCESS_BIT_EXT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.transform_feedback = 1}) == VK_PIPELINE_STAGE_TRANSFORM_FEEDBACK_BIT_EXT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::src_stage_mask_type{.acceleration_structure_build = 1}) == VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR);
+#endif
+
+static_assert(sizeof(subpass_dependency::dst_stage_mask_type) == sizeof(VkPipelineStageFlags));
+#if !defined(__clang__)
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.top_of_pipe = 1}) == VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.draw_indirect = 1}) == VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.vertex_input = 1}) == VK_PIPELINE_STAGE_VERTEX_INPUT_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.vertex_shader = 1}) == VK_PIPELINE_STAGE_VERTEX_SHADER_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.tessellation_control_shader = 1}) == VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.tessellation_evaluation_shader = 1}) == VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.geometry_shader = 1}) == VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.fragment_shader = 1}) == VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.early_fragment_tests = 1}) == VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.late_fragment_tests = 1}) == VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.color_attachment_output = 1}) == VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.compute_shader = 1}) == VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.transfer = 1}) == VK_PIPELINE_STAGE_TRANSFER_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.bottom_of_pipe = 1}) == VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.host = 1}) == VK_PIPELINE_STAGE_HOST_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.all_graphics = 1}) == VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.all_commands = 1}) == VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.command_preprocess = 1}) == VK_PIPELINE_STAGE_COMMAND_PREPROCESS_BIT_EXT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.conditional_rendering = 1}) == VK_PIPELINE_STAGE_CONDITIONAL_RENDERING_BIT_EXT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.task_shader = 1}) == VK_PIPELINE_STAGE_TASK_SHADER_BIT_EXT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.mesh_shader = 1}) == VK_PIPELINE_STAGE_MESH_SHADER_BIT_EXT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.ray_tracing_shader = 1}) == VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.fragment_shading_rate_attachment = 1}) == VK_PIPELINE_STAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.fragment_density_process = 1}) == VK_PIPELINE_STAGE_FRAGMENT_DENSITY_PROCESS_BIT_EXT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.transform_feedback = 1}) == VK_PIPELINE_STAGE_TRANSFORM_FEEDBACK_BIT_EXT);
+static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency::dst_stage_mask_type{.acceleration_structure_build = 1}) == VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR);
+#endif
+
+static_assert(sizeof(subpass_dependency::src_access_mask_type) == sizeof(VkAccessFlags));
+#if !defined(__clang__)
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.indirect_command_read = 1}) == VK_ACCESS_INDIRECT_COMMAND_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.index_read = 1}) == VK_ACCESS_INDEX_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.vertex_attribute_read = 1}) == VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.uniform_read = 1}) == VK_ACCESS_UNIFORM_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.input_attachment_read = 1}) == VK_ACCESS_INPUT_ATTACHMENT_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.shader_read = 1}) == VK_ACCESS_SHADER_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.shader_write = 1}) == VK_ACCESS_SHADER_WRITE_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.color_attachment_read = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.color_attachment_write = 1}) == VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.depth_stencil_attachment_read = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.depth_stencil_attachment_write = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.transfer_read = 1}) == VK_ACCESS_TRANSFER_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.transfer_write = 1}) == VK_ACCESS_TRANSFER_WRITE_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.host_read = 1}) == VK_ACCESS_HOST_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.host_write = 1}) == VK_ACCESS_HOST_WRITE_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.memory_read = 1}) == VK_ACCESS_MEMORY_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.memory_write = 1}) == VK_ACCESS_MEMORY_WRITE_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.command_preprocess_read = 1}) == VK_ACCESS_COMMAND_PREPROCESS_READ_BIT_EXT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.command_preprocess_write = 1}) == VK_ACCESS_COMMAND_PREPROCESS_WRITE_BIT_EXT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.color_attachment_read_noncoherent = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_NONCOHERENT_BIT_EXT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.conditional_rendering_read = 1}) == VK_ACCESS_CONDITIONAL_RENDERING_READ_BIT_EXT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.acceleration_structure_read = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.acceleration_structure_write = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.fragment_shading_rate_attachment_read = 1}) == VK_ACCESS_FRAGMENT_SHADING_RATE_ATTACHMENT_READ_BIT_KHR);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.fragment_density_map_read = 1}) == VK_ACCESS_FRAGMENT_DENSITY_MAP_READ_BIT_EXT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.transform_feedback_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_WRITE_BIT_EXT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.transform_feedback_counter_read = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::src_access_mask_type{.transform_feedback_counter_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT);
+#endif
+
+static_assert(sizeof(subpass_dependency::dst_access_mask_type) == sizeof(VkAccessFlags));
+#if !defined(__clang__)
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.indirect_command_read = 1}) == VK_ACCESS_INDIRECT_COMMAND_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.index_read = 1}) == VK_ACCESS_INDEX_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.vertex_attribute_read = 1}) == VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.uniform_read = 1}) == VK_ACCESS_UNIFORM_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.input_attachment_read = 1}) == VK_ACCESS_INPUT_ATTACHMENT_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.shader_read = 1}) == VK_ACCESS_SHADER_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.shader_write = 1}) == VK_ACCESS_SHADER_WRITE_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.color_attachment_read = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.color_attachment_write = 1}) == VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.depth_stencil_attachment_read = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.depth_stencil_attachment_write = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.transfer_read = 1}) == VK_ACCESS_TRANSFER_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.transfer_write = 1}) == VK_ACCESS_TRANSFER_WRITE_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.host_read = 1}) == VK_ACCESS_HOST_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.host_write = 1}) == VK_ACCESS_HOST_WRITE_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.memory_read = 1}) == VK_ACCESS_MEMORY_READ_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.memory_write = 1}) == VK_ACCESS_MEMORY_WRITE_BIT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.command_preprocess_read = 1}) == VK_ACCESS_COMMAND_PREPROCESS_READ_BIT_EXT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.command_preprocess_write = 1}) == VK_ACCESS_COMMAND_PREPROCESS_WRITE_BIT_EXT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.color_attachment_read_noncoherent = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_NONCOHERENT_BIT_EXT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.conditional_rendering_read = 1}) == VK_ACCESS_CONDITIONAL_RENDERING_READ_BIT_EXT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.acceleration_structure_read = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.acceleration_structure_write = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.fragment_shading_rate_attachment_read = 1}) == VK_ACCESS_FRAGMENT_SHADING_RATE_ATTACHMENT_READ_BIT_KHR);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.fragment_density_map_read = 1}) == VK_ACCESS_FRAGMENT_DENSITY_MAP_READ_BIT_EXT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.transform_feedback_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_WRITE_BIT_EXT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.transform_feedback_counter_read = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT);
+static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency::dst_access_mask_type{.transform_feedback_counter_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT);
+#endif
+
+static_assert(sizeof(subpass_dependency::dependency_flags_type) == sizeof(VkDependencyFlags));
+#if !defined(__clang__)
+static_assert(::std::bit_cast<VkDependencyFlags>(subpass_dependency::dependency_flags_type{.by_region = 1}) == VK_DEPENDENCY_BY_REGION_BIT);
+static_assert(::std::bit_cast<VkDependencyFlags>(subpass_dependency::dependency_flags_type{.view_local = 1}) == VK_DEPENDENCY_VIEW_LOCAL_BIT);
+static_assert(::std::bit_cast<VkDependencyFlags>(subpass_dependency::dependency_flags_type{.device_group = 1}) == VK_DEPENDENCY_DEVICE_GROUP_BIT);
+static_assert(::std::bit_cast<VkDependencyFlags>(subpass_dependency::dependency_flags_type{.feedback_loop = 1}) == VK_DEPENDENCY_FEEDBACK_LOOP_BIT_EXT);
+static_assert(::std::bit_cast<VkDependencyFlags>(subpass_dependency::dependency_flags_type{.queue_family_ownership_transfer_use_all_stages = 1}) == VK_DEPENDENCY_QUEUE_FAMILY_OWNERSHIP_TRANSFER_USE_ALL_STAGES_BIT_KHR);
+static_assert(::std::bit_cast<VkDependencyFlags>(subpass_dependency::dependency_flags_type{.asymmetric_event = 1}) == VK_DEPENDENCY_ASYMMETRIC_EVENT_BIT_KHR);
+#endif
+
+struct subpass_description
+{
+
+	struct flags_type
+	{
+		VkSubpassDescriptionFlags per_view_attributes : 1 = 0;
+		VkSubpassDescriptionFlags per_view_position_x_only : 1 = 0;
+		VkSubpassDescriptionFlags fragment_region : 1 = 0;
+		VkSubpassDescriptionFlags shader_resolve : 1 = 0;
+		VkSubpassDescriptionFlags rasterization_order_attachment_color_access : 1 = 0;
+		VkSubpassDescriptionFlags rasterization_order_attachment_depth_access : 1 = 0;
+		VkSubpassDescriptionFlags rasterization_order_attachment_stencil_access : 1 = 0;
+		VkSubpassDescriptionFlags enable_legacy_dithering : 1 = 0;
+		VkSubpassDescriptionFlags tile_shading_apron : 1 = 0;
+		VkSubpassDescriptionFlags _reserved_9 : 23 = 0;
+	};
+
+	flags_type flags{};
+	::vkfu::enums::pipeline_bind_point pipeline_bind_point{};
+	::std::span<VkAttachmentReference const> input_attachments{};
+	::std::span<VkAttachmentReference const> color_attachments{};
+	VkAttachmentReference const* resolve_attachments = nullptr;
+	VkAttachmentReference const* depth_stencil_attachment = nullptr;
+	::std::span<::std::uint32_t const> preserve_attachments{};
+
+	constexpr auto evaluate() const noexcept -> VkSubpassDescription
+	{
+		return VkSubpassDescription{
+			.flags = ::std::bit_cast<VkSubpassDescriptionFlags>(flags),
+			.pipelineBindPoint = static_cast<VkPipelineBindPoint>(pipeline_bind_point),
+			.inputAttachmentCount = static_cast<::std::uint32_t>(input_attachments.size()),
+			.pInputAttachments = input_attachments.data(),
+			.colorAttachmentCount = static_cast<::std::uint32_t>(color_attachments.size()),
+			.pColorAttachments = color_attachments.data(),
+			.pResolveAttachments = resolve_attachments,
+			.pDepthStencilAttachment = depth_stencil_attachment,
+			.preserveAttachmentCount = static_cast<::std::uint32_t>(preserve_attachments.size()),
+			.pPreserveAttachments = preserve_attachments.data(),
+		};
+	}
+};
+
+static_assert(sizeof(subpass_description::flags_type) == sizeof(VkSubpassDescriptionFlags));
+#if !defined(__clang__)
+static_assert(::std::bit_cast<VkSubpassDescriptionFlags>(subpass_description::flags_type{.per_view_attributes = 1}) == VK_SUBPASS_DESCRIPTION_PER_VIEW_ATTRIBUTES_BIT_NVX);
+static_assert(::std::bit_cast<VkSubpassDescriptionFlags>(subpass_description::flags_type{.per_view_position_x_only = 1}) == VK_SUBPASS_DESCRIPTION_PER_VIEW_POSITION_X_ONLY_BIT_NVX);
+static_assert(::std::bit_cast<VkSubpassDescriptionFlags>(subpass_description::flags_type{.fragment_region = 1}) == VK_SUBPASS_DESCRIPTION_FRAGMENT_REGION_BIT_QCOM);
+static_assert(::std::bit_cast<VkSubpassDescriptionFlags>(subpass_description::flags_type{.shader_resolve = 1}) == VK_SUBPASS_DESCRIPTION_SHADER_RESOLVE_BIT_QCOM);
+static_assert(::std::bit_cast<VkSubpassDescriptionFlags>(subpass_description::flags_type{.rasterization_order_attachment_color_access = 1}) == VK_SUBPASS_DESCRIPTION_RASTERIZATION_ORDER_ATTACHMENT_COLOR_ACCESS_BIT_EXT);
+static_assert(::std::bit_cast<VkSubpassDescriptionFlags>(subpass_description::flags_type{.rasterization_order_attachment_depth_access = 1}) == VK_SUBPASS_DESCRIPTION_RASTERIZATION_ORDER_ATTACHMENT_DEPTH_ACCESS_BIT_EXT);
+static_assert(::std::bit_cast<VkSubpassDescriptionFlags>(subpass_description::flags_type{.rasterization_order_attachment_stencil_access = 1}) == VK_SUBPASS_DESCRIPTION_RASTERIZATION_ORDER_ATTACHMENT_STENCIL_ACCESS_BIT_EXT);
+static_assert(::std::bit_cast<VkSubpassDescriptionFlags>(subpass_description::flags_type{.enable_legacy_dithering = 1}) == VK_SUBPASS_DESCRIPTION_ENABLE_LEGACY_DITHERING_BIT_EXT);
+static_assert(::std::bit_cast<VkSubpassDescriptionFlags>(subpass_description::flags_type{.tile_shading_apron = 1}) == VK_SUBPASS_DESCRIPTION_TILE_SHADING_APRON_BIT_QCOM);
+#endif
+
+struct subresource_layout
+{
+
+	VkDeviceSize offset{};
+	VkDeviceSize size{};
+	VkDeviceSize row_pitch{};
+	VkDeviceSize array_pitch{};
+	VkDeviceSize depth_pitch{};
+
+	constexpr auto evaluate() const noexcept -> VkSubresourceLayout
+	{
+		return VkSubresourceLayout{
+			.offset = offset,
+			.size = size,
+			.rowPitch = row_pitch,
+			.arrayPitch = array_pitch,
+			.depthPitch = depth_pitch,
+		};
+	}
+};
+
+struct vertex_input_attribute_description
+{
+
+	::std::uint32_t location{};
+	::std::uint32_t binding{};
+	::vkfu::enums::format format{};
+	::std::uint32_t offset{};
+
+	constexpr auto evaluate() const noexcept -> VkVertexInputAttributeDescription
+	{
+		return VkVertexInputAttributeDescription{
+			.location = location,
+			.binding = binding,
+			.format = static_cast<VkFormat>(format),
+			.offset = offset,
+		};
+	}
+};
+
+struct vertex_input_binding_description
+{
+
+	::std::uint32_t binding{};
+	::std::uint32_t stride{};
+	::vkfu::enums::vertex_input_rate input_rate{};
+
+	constexpr auto evaluate() const noexcept -> VkVertexInputBindingDescription
+	{
+		return VkVertexInputBindingDescription{
+			.binding = binding,
+			.stride = stride,
+			.inputRate = static_cast<VkVertexInputRate>(input_rate),
+		};
+	}
+};
+
+struct vertex_input_binding_divisor_description
+{
+
+	::std::uint32_t binding{};
+	::std::uint32_t divisor{};
+
+	constexpr auto evaluate() const noexcept -> VkVertexInputBindingDivisorDescription
+	{
+		return VkVertexInputBindingDivisorDescription{
+			.binding = binding,
+			.divisor = divisor,
+		};
+	}
+};
+
+struct viewport
+{
+
+	float x{};
+	float y{};
+	float width{};
+	float height{};
+	float min_depth{};
+	float max_depth{};
+
+	constexpr auto evaluate() const noexcept -> VkViewport
+	{
+		return VkViewport{
+			.x = x,
+			.y = y,
+			.width = width,
+			.height = height,
+			.minDepth = min_depth,
+			.maxDepth = max_depth,
+		};
+	}
+};
+
+namespace arm
+{
+struct physical_device_data_graph_processing_engine
+{
+
+	::vkfu::enums::physical_device_data_graph_processing_engine_type type{};
+	bool is_foreign = false;
+
+	constexpr auto evaluate() const noexcept -> VkPhysicalDeviceDataGraphProcessingEngineARM
+	{
+		return VkPhysicalDeviceDataGraphProcessingEngineARM{
+			.type = static_cast<VkPhysicalDeviceDataGraphProcessingEngineTypeARM>(type),
+			.isForeign = is_foreign ? VK_TRUE : VK_FALSE,
+		};
+	}
+};
+
+}
+
+namespace ext
+{
+struct attachment_sample_locations
+{
+
+	::std::uint32_t attachment_index{};
+	VkSampleLocationsInfoEXT sample_locations_info{};
+
+	constexpr auto evaluate() const noexcept -> VkAttachmentSampleLocationsEXT
+	{
+		return VkAttachmentSampleLocationsEXT{
+			.attachmentIndex = attachment_index,
+			.sampleLocationsInfo = sample_locations_info,
+		};
+	}
+};
+
+struct depth_clamp_range
+{
+
+	float min_depth_clamp{};
+	float max_depth_clamp{};
+
+	constexpr auto evaluate() const noexcept -> VkDepthClampRangeEXT
+	{
+		return VkDepthClampRangeEXT{
+			.minDepthClamp = min_depth_clamp,
+			.maxDepthClamp = max_depth_clamp,
+		};
+	}
+};
+
+struct layer_setting
+{
+
+	char const* layer_name = nullptr;
+	char const* setting_name = nullptr;
+	::vkfu::enums::layer_setting_type type{};
+	::std::uint32_t value_count{};
+	void const* values = nullptr;
+
+	constexpr auto evaluate() const noexcept -> VkLayerSettingEXT
+	{
+		return VkLayerSettingEXT{
+			.pLayerName = layer_name,
+			.pSettingName = setting_name,
+			.type = static_cast<VkLayerSettingTypeEXT>(type),
+			.valueCount = value_count,
+			.pValues = values,
+		};
+	}
+};
+
+struct micromap_usage
+{
+
+	::std::uint32_t count{};
+	::std::uint32_t subdivision_level{};
+	::std::uint32_t format{};
+
+	constexpr auto evaluate() const noexcept -> VkMicromapUsageEXT
+	{
+		return VkMicromapUsageEXT{
+			.count = count,
+			.subdivisionLevel = subdivision_level,
+			.format = format,
+		};
+	}
+};
+
+struct mutable_descriptor_type_list
+{
+
+	::std::span<VkDescriptorType const> descriptor_types{};
+
+	constexpr auto evaluate() const noexcept -> VkMutableDescriptorTypeListEXT
+	{
+		return VkMutableDescriptorTypeListEXT{
+			.descriptorTypeCount = static_cast<::std::uint32_t>(descriptor_types.size()),
+			.pDescriptorTypes = descriptor_types.data(),
+		};
+	}
+};
+
+struct render_pass_creation_feedback
+{
+
+	::std::uint32_t post_merge_subpass_count{};
+
+	constexpr auto evaluate() const noexcept -> VkRenderPassCreationFeedbackInfoEXT
+	{
+		return VkRenderPassCreationFeedbackInfoEXT{
+			.postMergeSubpassCount = post_merge_subpass_count,
+		};
+	}
+};
+
+struct render_pass_subpass_feedback
+{
+
+	::vkfu::enums::subpass_merge_status subpass_merge_status{};
+	::std::array<char, VK_MAX_DESCRIPTION_SIZE> description{};
+	::std::uint32_t post_merge_index{};
+
+	constexpr auto evaluate() const noexcept -> VkRenderPassSubpassFeedbackInfoEXT
+	{
+		auto value = VkRenderPassSubpassFeedbackInfoEXT{
+			.subpassMergeStatus = static_cast<VkSubpassMergeStatusEXT>(subpass_merge_status),
+			.description = {},
+			.postMergeIndex = post_merge_index,
+		};
+		::std::ranges::copy(description, value.description);
+		return value;
+	}
+};
+
+struct sample_location
+{
+
+	float x{};
+	float y{};
+
+	constexpr auto evaluate() const noexcept -> VkSampleLocationEXT
+	{
+		return VkSampleLocationEXT{
+			.x = x,
+			.y = y,
+		};
+	}
+};
+
+struct subpass_sample_locations
+{
+
+	::std::uint32_t subpass_index{};
+	VkSampleLocationsInfoEXT sample_locations_info{};
+
+	constexpr auto evaluate() const noexcept -> VkSubpassSampleLocationsEXT
+	{
+		return VkSubpassSampleLocationsEXT{
+			.subpassIndex = subpass_index,
+			.sampleLocationsInfo = sample_locations_info,
+		};
+	}
+};
+
+struct xy_color
+{
+
+	float x{};
+	float y{};
+
+	constexpr auto evaluate() const noexcept -> VkXYColorEXT
+	{
+		return VkXYColorEXT{
+			.x = x,
+			.y = y,
+		};
+	}
+};
+
+}
+
+namespace feature
+{
+struct vulkan10
+{
+
+	bool robust_buffer_access = false;
+	bool full_draw_index_uint32 = false;
+	bool image_cube_array = false;
+	bool independent_blend = false;
+	bool geometry_shader = false;
+	bool tessellation_shader = false;
+	bool sample_rate_shading = false;
+	bool dual_src_blend = false;
+	bool logic_op = false;
+	bool multi_draw_indirect = false;
+	bool draw_indirect_first_instance = false;
+	bool depth_clamp = false;
+	bool depth_bias_clamp = false;
+	bool fill_mode_non_solid = false;
+	bool depth_bounds = false;
+	bool wide_lines = false;
+	bool large_points = false;
+	bool alpha_to_one = false;
+	bool multi_viewport = false;
+	bool sampler_anisotropy = false;
+	bool texture_compression_etc2 = false;
+	bool texture_compression_astc_ldr = false;
+	bool texture_compression_bc = false;
+	bool occlusion_query_precise = false;
+	bool pipeline_statistics_query = false;
+	bool vertex_pipeline_stores_and_atomics = false;
+	bool fragment_stores_and_atomics = false;
+	bool shader_tessellation_and_geometry_point_size = false;
+	bool shader_image_gather_extended = false;
+	bool shader_storage_image_extended_formats = false;
+	bool shader_storage_image_multisample = false;
+	bool shader_storage_image_read_without_format = false;
+	bool shader_storage_image_write_without_format = false;
+	bool shader_uniform_buffer_array_dynamic_indexing = false;
+	bool shader_sampled_image_array_dynamic_indexing = false;
+	bool shader_storage_buffer_array_dynamic_indexing = false;
+	bool shader_storage_image_array_dynamic_indexing = false;
+	bool shader_clip_distance = false;
+	bool shader_cull_distance = false;
+	bool shader_float64 = false;
+	bool shader_int64 = false;
+	bool shader_int16 = false;
+	bool shader_resource_residency = false;
+	bool shader_resource_min_lod = false;
+	bool sparse_binding = false;
+	bool sparse_residency_buffer = false;
+	bool sparse_residency_image_2d = false;
+	bool sparse_residency_image_3d = false;
+	bool sparse_residency2_samples = false;
+	bool sparse_residency4_samples = false;
+	bool sparse_residency8_samples = false;
+	bool sparse_residency16_samples = false;
+	bool sparse_residency_aliased = false;
+	bool variable_multisample_rate = false;
+	bool inherited_queries = false;
+
+	constexpr auto evaluate() const noexcept -> VkPhysicalDeviceFeatures
+	{
+		return VkPhysicalDeviceFeatures{
+			.robustBufferAccess = robust_buffer_access ? VK_TRUE : VK_FALSE,
+			.fullDrawIndexUint32 = full_draw_index_uint32 ? VK_TRUE : VK_FALSE,
+			.imageCubeArray = image_cube_array ? VK_TRUE : VK_FALSE,
+			.independentBlend = independent_blend ? VK_TRUE : VK_FALSE,
+			.geometryShader = geometry_shader ? VK_TRUE : VK_FALSE,
+			.tessellationShader = tessellation_shader ? VK_TRUE : VK_FALSE,
+			.sampleRateShading = sample_rate_shading ? VK_TRUE : VK_FALSE,
+			.dualSrcBlend = dual_src_blend ? VK_TRUE : VK_FALSE,
+			.logicOp = logic_op ? VK_TRUE : VK_FALSE,
+			.multiDrawIndirect = multi_draw_indirect ? VK_TRUE : VK_FALSE,
+			.drawIndirectFirstInstance = draw_indirect_first_instance ? VK_TRUE : VK_FALSE,
+			.depthClamp = depth_clamp ? VK_TRUE : VK_FALSE,
+			.depthBiasClamp = depth_bias_clamp ? VK_TRUE : VK_FALSE,
+			.fillModeNonSolid = fill_mode_non_solid ? VK_TRUE : VK_FALSE,
+			.depthBounds = depth_bounds ? VK_TRUE : VK_FALSE,
+			.wideLines = wide_lines ? VK_TRUE : VK_FALSE,
+			.largePoints = large_points ? VK_TRUE : VK_FALSE,
+			.alphaToOne = alpha_to_one ? VK_TRUE : VK_FALSE,
+			.multiViewport = multi_viewport ? VK_TRUE : VK_FALSE,
+			.samplerAnisotropy = sampler_anisotropy ? VK_TRUE : VK_FALSE,
+			.textureCompressionETC2 = texture_compression_etc2 ? VK_TRUE : VK_FALSE,
+			.textureCompressionASTC_LDR = texture_compression_astc_ldr ? VK_TRUE : VK_FALSE,
+			.textureCompressionBC = texture_compression_bc ? VK_TRUE : VK_FALSE,
+			.occlusionQueryPrecise = occlusion_query_precise ? VK_TRUE : VK_FALSE,
+			.pipelineStatisticsQuery = pipeline_statistics_query ? VK_TRUE : VK_FALSE,
+			.vertexPipelineStoresAndAtomics = vertex_pipeline_stores_and_atomics ? VK_TRUE : VK_FALSE,
+			.fragmentStoresAndAtomics = fragment_stores_and_atomics ? VK_TRUE : VK_FALSE,
+			.shaderTessellationAndGeometryPointSize = shader_tessellation_and_geometry_point_size ? VK_TRUE : VK_FALSE,
+			.shaderImageGatherExtended = shader_image_gather_extended ? VK_TRUE : VK_FALSE,
+			.shaderStorageImageExtendedFormats = shader_storage_image_extended_formats ? VK_TRUE : VK_FALSE,
+			.shaderStorageImageMultisample = shader_storage_image_multisample ? VK_TRUE : VK_FALSE,
+			.shaderStorageImageReadWithoutFormat = shader_storage_image_read_without_format ? VK_TRUE : VK_FALSE,
+			.shaderStorageImageWriteWithoutFormat = shader_storage_image_write_without_format ? VK_TRUE : VK_FALSE,
+			.shaderUniformBufferArrayDynamicIndexing = shader_uniform_buffer_array_dynamic_indexing ? VK_TRUE : VK_FALSE,
+			.shaderSampledImageArrayDynamicIndexing = shader_sampled_image_array_dynamic_indexing ? VK_TRUE : VK_FALSE,
+			.shaderStorageBufferArrayDynamicIndexing = shader_storage_buffer_array_dynamic_indexing ? VK_TRUE : VK_FALSE,
+			.shaderStorageImageArrayDynamicIndexing = shader_storage_image_array_dynamic_indexing ? VK_TRUE : VK_FALSE,
+			.shaderClipDistance = shader_clip_distance ? VK_TRUE : VK_FALSE,
+			.shaderCullDistance = shader_cull_distance ? VK_TRUE : VK_FALSE,
+			.shaderFloat64 = shader_float64 ? VK_TRUE : VK_FALSE,
+			.shaderInt64 = shader_int64 ? VK_TRUE : VK_FALSE,
+			.shaderInt16 = shader_int16 ? VK_TRUE : VK_FALSE,
+			.shaderResourceResidency = shader_resource_residency ? VK_TRUE : VK_FALSE,
+			.shaderResourceMinLod = shader_resource_min_lod ? VK_TRUE : VK_FALSE,
+			.sparseBinding = sparse_binding ? VK_TRUE : VK_FALSE,
+			.sparseResidencyBuffer = sparse_residency_buffer ? VK_TRUE : VK_FALSE,
+			.sparseResidencyImage2D = sparse_residency_image_2d ? VK_TRUE : VK_FALSE,
+			.sparseResidencyImage3D = sparse_residency_image_3d ? VK_TRUE : VK_FALSE,
+			.sparseResidency2Samples = sparse_residency2_samples ? VK_TRUE : VK_FALSE,
+			.sparseResidency4Samples = sparse_residency4_samples ? VK_TRUE : VK_FALSE,
+			.sparseResidency8Samples = sparse_residency8_samples ? VK_TRUE : VK_FALSE,
+			.sparseResidency16Samples = sparse_residency16_samples ? VK_TRUE : VK_FALSE,
+			.sparseResidencyAliased = sparse_residency_aliased ? VK_TRUE : VK_FALSE,
+			.variableMultisampleRate = variable_multisample_rate ? VK_TRUE : VK_FALSE,
+			.inheritedQueries = inherited_queries ? VK_TRUE : VK_FALSE,
+		};
+	}
+};
+
+}
+
+namespace google
+{
+struct present_time
+{
+
+	::std::uint32_t present_id{};
+	::std::uint64_t desired_present_time{};
+
+	constexpr auto evaluate() const noexcept -> VkPresentTimeGOOGLE
+	{
+		return VkPresentTimeGOOGLE{
+			.presentID = present_id,
+			.desiredPresentTime = desired_present_time,
+		};
+	}
+};
+
+}
+
+namespace khr
+{
+struct display_mode_parameters
+{
+
+	VkExtent2D visible_region{};
+	::std::uint32_t refresh_rate{};
+
+	constexpr auto evaluate() const noexcept -> VkDisplayModeParametersKHR
+	{
+		return VkDisplayModeParametersKHR{
+			.visibleRegion = visible_region,
+			.refreshRate = refresh_rate,
+		};
+	}
+};
+
+struct pipeline_binary_data
+{
+
+	::std::size_t data_size{};
+	void* data = nullptr;
+
+	constexpr auto evaluate() const noexcept -> VkPipelineBinaryDataKHR
+	{
+		return VkPipelineBinaryDataKHR{
+			.dataSize = data_size,
+			.pData = data,
+		};
+	}
+};
+
+struct pipeline_binary_keys_and_data
+{
+
+	::std::uint32_t binary_count{};
+	VkPipelineBinaryKeyKHR const* pipeline_binary_keys = nullptr;
+	VkPipelineBinaryDataKHR const* pipeline_binary_data = nullptr;
+
+	constexpr auto evaluate() const noexcept -> VkPipelineBinaryKeysAndDataKHR
+	{
+		return VkPipelineBinaryKeysAndDataKHR{
+			.binaryCount = binary_count,
+			.pPipelineBinaryKeys = pipeline_binary_keys,
+			.pPipelineBinaryData = pipeline_binary_data,
+		};
+	}
+};
+
+struct present_region
+{
+
+	::std::uint32_t rectangle_count{};
+	VkRectLayerKHR const* rectangles = nullptr;
+
+	constexpr auto evaluate() const noexcept -> VkPresentRegionKHR
+	{
+		return VkPresentRegionKHR{
+			.rectangleCount = rectangle_count,
+			.pRectangles = rectangles,
+		};
+	}
+};
+
+struct rect_layer
+{
+
+	VkOffset2D offset{};
+	VkExtent2D extent{};
+	::std::uint32_t layer{};
+
+	constexpr auto evaluate() const noexcept -> VkRectLayerKHR
+	{
+		return VkRectLayerKHR{
+			.offset = offset,
+			.extent = extent,
+			.layer = layer,
+		};
+	}
+};
+
+struct strided_device_address_range
+{
+
+	VkDeviceAddress address{};
+	VkDeviceSize size{};
+	VkDeviceSize stride{};
+
+	constexpr auto evaluate() const noexcept -> VkStridedDeviceAddressRangeKHR
+	{
+		return VkStridedDeviceAddressRangeKHR{
+			.address = address,
+			.size = size,
+			.stride = stride,
+		};
+	}
+};
+
+struct strided_device_address_region
+{
+
+	VkDeviceAddress device_address{};
+	VkDeviceSize stride{};
+	VkDeviceSize size{};
+
+	constexpr auto evaluate() const noexcept -> VkStridedDeviceAddressRegionKHR
+	{
+		return VkStridedDeviceAddressRegionKHR{
+			.deviceAddress = device_address,
+			.stride = stride,
+			.size = size,
+		};
+	}
+};
+
+struct video_encode_av1_frame_size
+{
+
+	::std::uint32_t intra_frame_size{};
+	::std::uint32_t predictive_frame_size{};
+	::std::uint32_t bipredictive_frame_size{};
+
+	constexpr auto evaluate() const noexcept -> VkVideoEncodeAV1FrameSizeKHR
+	{
+		return VkVideoEncodeAV1FrameSizeKHR{
+			.intraFrameSize = intra_frame_size,
+			.predictiveFrameSize = predictive_frame_size,
+			.bipredictiveFrameSize = bipredictive_frame_size,
+		};
+	}
+};
+
+struct video_encode_av1_q_index
+{
+
+	::std::uint32_t intra_q_index{};
+	::std::uint32_t predictive_q_index{};
+	::std::uint32_t bipredictive_q_index{};
+
+	constexpr auto evaluate() const noexcept -> VkVideoEncodeAV1QIndexKHR
+	{
+		return VkVideoEncodeAV1QIndexKHR{
+			.intraQIndex = intra_q_index,
+			.predictiveQIndex = predictive_q_index,
+			.bipredictiveQIndex = bipredictive_q_index,
+		};
+	}
+};
+
+struct video_encode_h264_frame_size
+{
+
+	::std::uint32_t frame_i_size{};
+	::std::uint32_t frame_p_size{};
+	::std::uint32_t frame_b_size{};
+
+	constexpr auto evaluate() const noexcept -> VkVideoEncodeH264FrameSizeKHR
+	{
+		return VkVideoEncodeH264FrameSizeKHR{
+			.frameISize = frame_i_size,
+			.framePSize = frame_p_size,
+			.frameBSize = frame_b_size,
+		};
+	}
+};
+
+struct video_encode_h264_qp
+{
+
+	::std::int32_t qp_i{};
+	::std::int32_t qp_p{};
+	::std::int32_t qp_b{};
+
+	constexpr auto evaluate() const noexcept -> VkVideoEncodeH264QpKHR
+	{
+		return VkVideoEncodeH264QpKHR{
+			.qpI = qp_i,
+			.qpP = qp_p,
+			.qpB = qp_b,
+		};
+	}
+};
+
+struct video_encode_h265_frame_size
+{
+
+	::std::uint32_t frame_i_size{};
+	::std::uint32_t frame_p_size{};
+	::std::uint32_t frame_b_size{};
+
+	constexpr auto evaluate() const noexcept -> VkVideoEncodeH265FrameSizeKHR
+	{
+		return VkVideoEncodeH265FrameSizeKHR{
+			.frameISize = frame_i_size,
+			.framePSize = frame_p_size,
+			.frameBSize = frame_b_size,
+		};
+	}
+};
+
+struct video_encode_h265_qp
+{
+
+	::std::int32_t qp_i{};
+	::std::int32_t qp_p{};
+	::std::int32_t qp_b{};
+
+	constexpr auto evaluate() const noexcept -> VkVideoEncodeH265QpKHR
+	{
+		return VkVideoEncodeH265QpKHR{
+			.qpI = qp_i,
+			.qpP = qp_p,
+			.qpB = qp_b,
+		};
+	}
+};
+
+}
+
+namespace nv
+{
+struct coarse_sample_location
+{
+
+	::std::uint32_t pixel_x{};
+	::std::uint32_t pixel_y{};
+	::std::uint32_t sample{};
+
+	constexpr auto evaluate() const noexcept -> VkCoarseSampleLocationNV
+	{
+		return VkCoarseSampleLocationNV{
+			.pixelX = pixel_x,
+			.pixelY = pixel_y,
+			.sample = sample,
+		};
+	}
+};
+
+struct coarse_sample_order_custom
+{
+
+	::vkfu::enums::shading_rate_palette_entry shading_rate{};
+	::std::uint32_t sample_count{};
+	::std::span<VkCoarseSampleLocationNV const> sample_locations{};
+
+	constexpr auto evaluate() const noexcept -> VkCoarseSampleOrderCustomNV
+	{
+		return VkCoarseSampleOrderCustomNV{
+			.shadingRate = static_cast<VkShadingRatePaletteEntryNV>(shading_rate),
+			.sampleCount = sample_count,
+			.sampleLocationCount = static_cast<::std::uint32_t>(sample_locations.size()),
+			.pSampleLocations = sample_locations.data(),
+		};
+	}
+};
+
+struct geometry_data
+{
+
+	VkGeometryTrianglesNV triangles{};
+	VkGeometryAABBNV aabbs{};
+
+	constexpr auto evaluate() const noexcept -> VkGeometryDataNV
+	{
+		return VkGeometryDataNV{
+			.triangles = triangles,
+			.aabbs = aabbs,
+		};
+	}
+};
+
+struct indirect_commands_stream
+{
+
+	VkBuffer buffer{};
+	VkDeviceSize offset{};
+
+	constexpr auto evaluate() const noexcept -> VkIndirectCommandsStreamNV
+	{
+		return VkIndirectCommandsStreamNV{
+			.buffer = buffer,
+			.offset = offset,
+		};
+	}
+};
+
+struct shading_rate_palette
+{
+
+	::std::span<VkShadingRatePaletteEntryNV const> entries{};
+
+	constexpr auto evaluate() const noexcept -> VkShadingRatePaletteNV
+	{
+		return VkShadingRatePaletteNV{
+			.shadingRatePaletteEntryCount = static_cast<::std::uint32_t>(entries.size()),
+			.pShadingRatePaletteEntries = entries.data(),
+		};
+	}
+};
+
+struct viewport_swizzle
+{
+
+	::vkfu::enums::viewport_coordinate_swizzle x{};
+	::vkfu::enums::viewport_coordinate_swizzle y{};
+	::vkfu::enums::viewport_coordinate_swizzle z{};
+	::vkfu::enums::viewport_coordinate_swizzle w{};
+
+	constexpr auto evaluate() const noexcept -> VkViewportSwizzleNV
+	{
+		return VkViewportSwizzleNV{
+			.x = static_cast<VkViewportCoordinateSwizzleNV>(x),
+			.y = static_cast<VkViewportCoordinateSwizzleNV>(y),
+			.z = static_cast<VkViewportCoordinateSwizzleNV>(z),
+			.w = static_cast<VkViewportCoordinateSwizzleNV>(w),
+		};
+	}
+};
+
+struct viewport_w_scaling
+{
+
+	float xcoeff{};
+	float ycoeff{};
+
+	constexpr auto evaluate() const noexcept -> VkViewportWScalingNV
+	{
+		return VkViewportWScalingNV{
+			.xcoeff = xcoeff,
+			.ycoeff = ycoeff,
+		};
+	}
+};
+
+}
+
+namespace state
+{
+struct color_blend_attachment
+{
+
+	bool blend_enable = false;
+	::vkfu::enums::blend_factor src_color_blend_factor{};
+	::vkfu::enums::blend_factor dst_color_blend_factor{};
+	::vkfu::enums::blend_op color_blend_op{};
+	::vkfu::enums::blend_factor src_alpha_blend_factor{};
+	::vkfu::enums::blend_factor dst_alpha_blend_factor{};
+	::vkfu::enums::blend_op alpha_blend_op{};
+	struct color_write_mask_type
+	{
+		VkColorComponentFlags r : 1 = 0;
+		VkColorComponentFlags g : 1 = 0;
+		VkColorComponentFlags b : 1 = 0;
+		VkColorComponentFlags a : 1 = 0;
+		VkColorComponentFlags _reserved_4 : 28 = 0;
+	};
+
+	color_write_mask_type color_write_mask{};
+
+	constexpr auto evaluate() const noexcept -> VkPipelineColorBlendAttachmentState
+	{
+		return VkPipelineColorBlendAttachmentState{
+			.blendEnable = blend_enable ? VK_TRUE : VK_FALSE,
+			.srcColorBlendFactor = static_cast<VkBlendFactor>(src_color_blend_factor),
+			.dstColorBlendFactor = static_cast<VkBlendFactor>(dst_color_blend_factor),
+			.colorBlendOp = static_cast<VkBlendOp>(color_blend_op),
+			.srcAlphaBlendFactor = static_cast<VkBlendFactor>(src_alpha_blend_factor),
+			.dstAlphaBlendFactor = static_cast<VkBlendFactor>(dst_alpha_blend_factor),
+			.alphaBlendOp = static_cast<VkBlendOp>(alpha_blend_op),
+			.colorWriteMask = ::std::bit_cast<VkColorComponentFlags>(color_write_mask),
+		};
+	}
+};
+
+static_assert(sizeof(color_blend_attachment::color_write_mask_type) == sizeof(VkColorComponentFlags));
+#if !defined(__clang__)
+static_assert(::std::bit_cast<VkColorComponentFlags>(color_blend_attachment::color_write_mask_type{.r = 1}) == VK_COLOR_COMPONENT_R_BIT);
+static_assert(::std::bit_cast<VkColorComponentFlags>(color_blend_attachment::color_write_mask_type{.g = 1}) == VK_COLOR_COMPONENT_G_BIT);
+static_assert(::std::bit_cast<VkColorComponentFlags>(color_blend_attachment::color_write_mask_type{.b = 1}) == VK_COLOR_COMPONENT_B_BIT);
+static_assert(::std::bit_cast<VkColorComponentFlags>(color_blend_attachment::color_write_mask_type{.a = 1}) == VK_COLOR_COMPONENT_A_BIT);
+#endif
+
+}
+
 }
 
 namespace vkfu
@@ -53316,6 +55400,832 @@ template<::vkfu::expression_for<::vkfu::obj::shader_module> Expression>
 	return *produced;
 }
 
+template<::vkfu::expression_for<::vkfu::obj::command_buffer_begin> Expression1>
+[[nodiscard]] auto begin_command_buffer(VkCommandBuffer command_buffer, Expression1&& begin_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(begin_info));
+	auto const outcome = ::vkBeginCommandBuffer(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::command_buffer_begin> Expression1>
+void begin_command_buffer(VkCommandBuffer command_buffer, Expression1&& begin_info)
+{
+	auto outcome = begin_command_buffer(command_buffer, ::std::forward<Expression1>(begin_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+[[nodiscard]] inline auto bind_buffer_memory2(VkDevice device, ::std::span<VkBindBufferMemoryInfo const> bind_infos, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkBindBufferMemory2(device, static_cast<::std::uint32_t>(bind_infos.size()), bind_infos.data());
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void bind_buffer_memory2(VkDevice device, ::std::span<VkBindBufferMemoryInfo const> bind_infos)
+{
+	auto outcome = bind_buffer_memory2(device, bind_infos, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+[[nodiscard]] inline auto bind_image_memory2(VkDevice device, ::std::span<VkBindImageMemoryInfo const> bind_infos, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkBindImageMemory2(device, static_cast<::std::uint32_t>(bind_infos.size()), bind_infos.data());
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void bind_image_memory2(VkDevice device, ::std::span<VkBindImageMemoryInfo const> bind_infos)
+{
+	auto outcome = bind_image_memory2(device, bind_infos, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::render_pass_begin> Expression1>
+void cmd_begin_render_pass(VkCommandBuffer command_buffer, Expression1&& render_pass_begin, VkSubpassContents contents)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(render_pass_begin));
+	::vkCmdBeginRenderPass(command_buffer, ::std::addressof(::vkfu::unpack(storage1)), contents);
+}
+
+template<::vkfu::expression_for<::vkfu::obj::render_pass_begin> Expression1, ::vkfu::expression_for<::vkfu::obj::subpass_begin> Expression2>
+void cmd_begin_render_pass2(VkCommandBuffer command_buffer, Expression1&& render_pass_begin, Expression2&& subpass_begin_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(render_pass_begin));
+	decltype(auto) storage2 = ::vkfu::evaluate(::std::forward<Expression2>(subpass_begin_info));
+	::vkCmdBeginRenderPass2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(::vkfu::unpack(storage2)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::rendering> Expression1>
+void cmd_begin_rendering(VkCommandBuffer command_buffer, Expression1&& rendering_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(rendering_info));
+	::vkCmdBeginRendering(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_bind_descriptor_sets(VkCommandBuffer command_buffer, VkPipelineBindPoint pipeline_bind_point, VkPipelineLayout layout, ::std::uint32_t first_set, ::std::span<VkDescriptorSet const> descriptor_sets, ::std::span<::std::uint32_t const> dynamic_offsets)
+{
+	::vkCmdBindDescriptorSets(command_buffer, pipeline_bind_point, layout, first_set, static_cast<::std::uint32_t>(descriptor_sets.size()), descriptor_sets.data(), static_cast<::std::uint32_t>(dynamic_offsets.size()), dynamic_offsets.data());
+}
+
+template<::vkfu::expression_for<::vkfu::obj::bind_descriptor_sets> Expression1>
+void cmd_bind_descriptor_sets2(VkCommandBuffer command_buffer, Expression1&& bind_descriptor_sets_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(bind_descriptor_sets_info));
+	::vkCmdBindDescriptorSets2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_bind_vertex_buffers(VkCommandBuffer command_buffer, ::std::uint32_t first_binding, ::std::span<VkBuffer const> buffers, ::std::span<VkDeviceSize const> offsets)
+{
+	::vkCmdBindVertexBuffers(command_buffer, first_binding, static_cast<::std::uint32_t>(offsets.size()), buffers.data(), offsets.data());
+}
+
+inline void cmd_blit_image(VkCommandBuffer command_buffer, VkImage src_image, VkImageLayout src_image_layout, VkImage dst_image, VkImageLayout dst_image_layout, ::std::span<VkImageBlit const> regions, VkFilter filter)
+{
+	::vkCmdBlitImage(command_buffer, src_image, src_image_layout, dst_image, dst_image_layout, static_cast<::std::uint32_t>(regions.size()), regions.data(), filter);
+}
+
+template<::vkfu::expression_for<::vkfu::obj::blit_image2> Expression1>
+void cmd_blit_image2(VkCommandBuffer command_buffer, Expression1&& blit_image_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(blit_image_info));
+	::vkCmdBlitImage2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_clear_attachments(VkCommandBuffer command_buffer, ::std::span<VkClearAttachment const> attachments, ::std::span<VkClearRect const> rects)
+{
+	::vkCmdClearAttachments(command_buffer, static_cast<::std::uint32_t>(attachments.size()), attachments.data(), static_cast<::std::uint32_t>(rects.size()), rects.data());
+}
+
+inline void cmd_clear_color_image(VkCommandBuffer command_buffer, VkImage image, VkImageLayout image_layout, VkClearColorValue const* color, ::std::span<VkImageSubresourceRange const> ranges)
+{
+	::vkCmdClearColorImage(command_buffer, image, image_layout, color, static_cast<::std::uint32_t>(ranges.size()), ranges.data());
+}
+
+inline void cmd_clear_depth_stencil_image(VkCommandBuffer command_buffer, VkImage image, VkImageLayout image_layout, VkClearDepthStencilValue const* depth_stencil, ::std::span<VkImageSubresourceRange const> ranges)
+{
+	::vkCmdClearDepthStencilImage(command_buffer, image, image_layout, depth_stencil, static_cast<::std::uint32_t>(ranges.size()), ranges.data());
+}
+
+inline void cmd_copy_buffer(VkCommandBuffer command_buffer, VkBuffer src_buffer, VkBuffer dst_buffer, ::std::span<VkBufferCopy const> regions)
+{
+	::vkCmdCopyBuffer(command_buffer, src_buffer, dst_buffer, static_cast<::std::uint32_t>(regions.size()), regions.data());
+}
+
+template<::vkfu::expression_for<::vkfu::obj::copy_buffer2> Expression1>
+void cmd_copy_buffer2(VkCommandBuffer command_buffer, Expression1&& copy_buffer_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(copy_buffer_info));
+	::vkCmdCopyBuffer2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_copy_buffer_to_image(VkCommandBuffer command_buffer, VkBuffer src_buffer, VkImage dst_image, VkImageLayout dst_image_layout, ::std::span<VkBufferImageCopy const> regions)
+{
+	::vkCmdCopyBufferToImage(command_buffer, src_buffer, dst_image, dst_image_layout, static_cast<::std::uint32_t>(regions.size()), regions.data());
+}
+
+template<::vkfu::expression_for<::vkfu::obj::copy_buffer_to_image2> Expression1>
+void cmd_copy_buffer_to_image2(VkCommandBuffer command_buffer, Expression1&& copy_buffer_to_image_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(copy_buffer_to_image_info));
+	::vkCmdCopyBufferToImage2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_copy_image(VkCommandBuffer command_buffer, VkImage src_image, VkImageLayout src_image_layout, VkImage dst_image, VkImageLayout dst_image_layout, ::std::span<VkImageCopy const> regions)
+{
+	::vkCmdCopyImage(command_buffer, src_image, src_image_layout, dst_image, dst_image_layout, static_cast<::std::uint32_t>(regions.size()), regions.data());
+}
+
+template<::vkfu::expression_for<::vkfu::obj::copy_image2> Expression1>
+void cmd_copy_image2(VkCommandBuffer command_buffer, Expression1&& copy_image_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(copy_image_info));
+	::vkCmdCopyImage2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_copy_image_to_buffer(VkCommandBuffer command_buffer, VkImage src_image, VkImageLayout src_image_layout, VkBuffer dst_buffer, ::std::span<VkBufferImageCopy const> regions)
+{
+	::vkCmdCopyImageToBuffer(command_buffer, src_image, src_image_layout, dst_buffer, static_cast<::std::uint32_t>(regions.size()), regions.data());
+}
+
+template<::vkfu::expression_for<::vkfu::obj::copy_image_to_buffer2> Expression1>
+void cmd_copy_image_to_buffer2(VkCommandBuffer command_buffer, Expression1&& copy_image_to_buffer_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(copy_image_to_buffer_info));
+	::vkCmdCopyImageToBuffer2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::subpass_end> Expression1>
+void cmd_end_render_pass2(VkCommandBuffer command_buffer, Expression1&& subpass_end_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(subpass_end_info));
+	::vkCmdEndRenderPass2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_execute_commands(VkCommandBuffer command_buffer, ::std::span<VkCommandBuffer const> command_buffers)
+{
+	::vkCmdExecuteCommands(command_buffer, static_cast<::std::uint32_t>(command_buffers.size()), command_buffers.data());
+}
+
+template<::vkfu::expression_for<::vkfu::obj::subpass_begin> Expression1, ::vkfu::expression_for<::vkfu::obj::subpass_end> Expression2>
+void cmd_next_subpass2(VkCommandBuffer command_buffer, Expression1&& subpass_begin_info, Expression2&& subpass_end_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(subpass_begin_info));
+	decltype(auto) storage2 = ::vkfu::evaluate(::std::forward<Expression2>(subpass_end_info));
+	::vkCmdNextSubpass2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(::vkfu::unpack(storage2)));
+}
+
+inline void cmd_pipeline_barrier(VkCommandBuffer command_buffer, VkPipelineStageFlags src_stage_mask, VkPipelineStageFlags dst_stage_mask, VkDependencyFlags dependency_flags, ::std::span<VkMemoryBarrier const> memory_barriers, ::std::span<VkBufferMemoryBarrier const> buffer_memory_barriers, ::std::span<VkImageMemoryBarrier const> image_memory_barriers)
+{
+	::vkCmdPipelineBarrier(command_buffer, src_stage_mask, dst_stage_mask, dependency_flags, static_cast<::std::uint32_t>(memory_barriers.size()), memory_barriers.data(), static_cast<::std::uint32_t>(buffer_memory_barriers.size()), buffer_memory_barriers.data(), static_cast<::std::uint32_t>(image_memory_barriers.size()), image_memory_barriers.data());
+}
+
+template<::vkfu::expression_for<::vkfu::obj::dependency> Expression1>
+void cmd_pipeline_barrier2(VkCommandBuffer command_buffer, Expression1&& dependency_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(dependency_info));
+	::vkCmdPipelineBarrier2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::push_constants> Expression1>
+void cmd_push_constants2(VkCommandBuffer command_buffer, Expression1&& push_constants_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(push_constants_info));
+	::vkCmdPushConstants2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_push_descriptor_set(VkCommandBuffer command_buffer, VkPipelineBindPoint pipeline_bind_point, VkPipelineLayout layout, ::std::uint32_t set, ::std::span<VkWriteDescriptorSet const> descriptor_writes)
+{
+	::vkCmdPushDescriptorSet(command_buffer, pipeline_bind_point, layout, set, static_cast<::std::uint32_t>(descriptor_writes.size()), descriptor_writes.data());
+}
+
+template<::vkfu::expression_for<::vkfu::obj::push_descriptor_set> Expression1>
+void cmd_push_descriptor_set2(VkCommandBuffer command_buffer, Expression1&& push_descriptor_set_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(push_descriptor_set_info));
+	::vkCmdPushDescriptorSet2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::push_descriptor_set_with_template> Expression1>
+void cmd_push_descriptor_set_with_template2(VkCommandBuffer command_buffer, Expression1&& push_descriptor_set_with_template_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(push_descriptor_set_with_template_info));
+	::vkCmdPushDescriptorSetWithTemplate2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_resolve_image(VkCommandBuffer command_buffer, VkImage src_image, VkImageLayout src_image_layout, VkImage dst_image, VkImageLayout dst_image_layout, ::std::span<VkImageResolve const> regions)
+{
+	::vkCmdResolveImage(command_buffer, src_image, src_image_layout, dst_image, dst_image_layout, static_cast<::std::uint32_t>(regions.size()), regions.data());
+}
+
+template<::vkfu::expression_for<::vkfu::obj::resolve_image2> Expression1>
+void cmd_resolve_image2(VkCommandBuffer command_buffer, Expression1&& resolve_image_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(resolve_image_info));
+	::vkCmdResolveImage2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::dependency> Expression1>
+void cmd_set_event2(VkCommandBuffer command_buffer, VkEvent event, Expression1&& dependency_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(dependency_info));
+	::vkCmdSetEvent2(command_buffer, event, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::rendering_attachment_location> Expression1>
+void cmd_set_rendering_attachment_locations(VkCommandBuffer command_buffer, Expression1&& location_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(location_info));
+	::vkCmdSetRenderingAttachmentLocations(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::rendering_input_attachment_index> Expression1>
+void cmd_set_rendering_input_attachment_indices(VkCommandBuffer command_buffer, Expression1&& input_attachment_index_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(input_attachment_index_info));
+	::vkCmdSetRenderingInputAttachmentIndices(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_set_scissor(VkCommandBuffer command_buffer, ::std::uint32_t first_scissor, ::std::span<VkRect2D const> scissors)
+{
+	::vkCmdSetScissor(command_buffer, first_scissor, static_cast<::std::uint32_t>(scissors.size()), scissors.data());
+}
+
+inline void cmd_set_viewport(VkCommandBuffer command_buffer, ::std::uint32_t first_viewport, ::std::span<VkViewport const> viewports)
+{
+	::vkCmdSetViewport(command_buffer, first_viewport, static_cast<::std::uint32_t>(viewports.size()), viewports.data());
+}
+
+inline void cmd_wait_events(VkCommandBuffer command_buffer, ::std::span<VkEvent const> events, VkPipelineStageFlags src_stage_mask, VkPipelineStageFlags dst_stage_mask, ::std::span<VkMemoryBarrier const> memory_barriers, ::std::span<VkBufferMemoryBarrier const> buffer_memory_barriers, ::std::span<VkImageMemoryBarrier const> image_memory_barriers)
+{
+	::vkCmdWaitEvents(command_buffer, static_cast<::std::uint32_t>(events.size()), events.data(), src_stage_mask, dst_stage_mask, static_cast<::std::uint32_t>(memory_barriers.size()), memory_barriers.data(), static_cast<::std::uint32_t>(buffer_memory_barriers.size()), buffer_memory_barriers.data(), static_cast<::std::uint32_t>(image_memory_barriers.size()), image_memory_barriers.data());
+}
+
+inline void cmd_wait_events2(VkCommandBuffer command_buffer, ::std::span<VkEvent const> events, ::std::span<VkDependencyInfo const> dependency_infos)
+{
+	::vkCmdWaitEvents2(command_buffer, static_cast<::std::uint32_t>(dependency_infos.size()), events.data(), dependency_infos.data());
+}
+
+template<::vkfu::expression_for<::vkfu::obj::copy_image_to_image> Expression1>
+[[nodiscard]] auto copy_image_to_image(VkDevice device, Expression1&& copy_image_to_image_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(copy_image_to_image_info));
+	auto const outcome = ::vkCopyImageToImage(device, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::copy_image_to_image> Expression1>
+void copy_image_to_image(VkDevice device, Expression1&& copy_image_to_image_info)
+{
+	auto outcome = copy_image_to_image(device, ::std::forward<Expression1>(copy_image_to_image_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::copy_image_to_memory> Expression1>
+[[nodiscard]] auto copy_image_to_memory(VkDevice device, Expression1&& copy_image_to_memory_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(copy_image_to_memory_info));
+	auto const outcome = ::vkCopyImageToMemory(device, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::copy_image_to_memory> Expression1>
+void copy_image_to_memory(VkDevice device, Expression1&& copy_image_to_memory_info)
+{
+	auto outcome = copy_image_to_memory(device, ::std::forward<Expression1>(copy_image_to_memory_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::copy_memory_to_image> Expression1>
+[[nodiscard]] auto copy_memory_to_image(VkDevice device, Expression1&& copy_memory_to_image_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(copy_memory_to_image_info));
+	auto const outcome = ::vkCopyMemoryToImage(device, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::copy_memory_to_image> Expression1>
+void copy_memory_to_image(VkDevice device, Expression1&& copy_memory_to_image_info)
+{
+	auto outcome = copy_memory_to_image(device, ::std::forward<Expression1>(copy_memory_to_image_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+[[nodiscard]] inline auto flush_mapped_memory_ranges(VkDevice device, ::std::span<VkMappedMemoryRange const> memory_ranges, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkFlushMappedMemoryRanges(device, static_cast<::std::uint32_t>(memory_ranges.size()), memory_ranges.data());
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void flush_mapped_memory_ranges(VkDevice device, ::std::span<VkMappedMemoryRange const> memory_ranges)
+{
+	auto outcome = flush_mapped_memory_ranges(device, memory_ranges, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+inline void free_command_buffers(VkDevice device, VkCommandPool command_pool, ::std::span<VkCommandBuffer const> command_buffers)
+{
+	::vkFreeCommandBuffers(device, command_pool, static_cast<::std::uint32_t>(command_buffers.size()), command_buffers.data());
+}
+
+[[nodiscard]] inline auto free_descriptor_sets(VkDevice device, VkDescriptorPool descriptor_pool, ::std::span<VkDescriptorSet const> descriptor_sets, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkFreeDescriptorSets(device, descriptor_pool, static_cast<::std::uint32_t>(descriptor_sets.size()), descriptor_sets.data());
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void free_descriptor_sets(VkDevice device, VkDescriptorPool descriptor_pool, ::std::span<VkDescriptorSet const> descriptor_sets)
+{
+	auto outcome = free_descriptor_sets(device, descriptor_pool, descriptor_sets, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::buffer_device_address> Expression1>
+[[nodiscard]] auto get_buffer_device_address(VkDevice device, Expression1&& info) -> VkDeviceAddress
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	return ::vkGetBufferDeviceAddress(device, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::buffer_memory_requirements2> Expression1>
+[[nodiscard]] auto get_buffer_memory_requirements2(VkDevice device, Expression1&& info) -> VkMemoryRequirements2
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	VkMemoryRequirements2 produced{};
+	::vkGetBufferMemoryRequirements2(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::buffer_device_address> Expression1>
+[[nodiscard]] auto get_buffer_opaque_capture_address(VkDevice device, Expression1&& info) -> ::std::uint64_t
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	return ::vkGetBufferOpaqueCaptureAddress(device, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::descriptor_set_layout> Expression1>
+[[nodiscard]] auto get_descriptor_set_layout_support(VkDevice device, Expression1&& create_info) -> VkDescriptorSetLayoutSupport
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(create_info));
+	VkDescriptorSetLayoutSupport produced{};
+	::vkGetDescriptorSetLayoutSupport(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::device_buffer_memory_requirements> Expression1>
+[[nodiscard]] auto get_device_buffer_memory_requirements(VkDevice device, Expression1&& info) -> VkMemoryRequirements2
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	VkMemoryRequirements2 produced{};
+	::vkGetDeviceBufferMemoryRequirements(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::device_image_memory_requirements> Expression1>
+[[nodiscard]] auto get_device_image_memory_requirements(VkDevice device, Expression1&& info) -> VkMemoryRequirements2
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	VkMemoryRequirements2 produced{};
+	::vkGetDeviceImageMemoryRequirements(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::device_image_subresource> Expression1>
+[[nodiscard]] auto get_device_image_subresource_layout(VkDevice device, Expression1&& info) -> VkSubresourceLayout2
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	VkSubresourceLayout2 produced{};
+	::vkGetDeviceImageSubresourceLayout(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::device_memory_opaque_capture_address> Expression1>
+[[nodiscard]] auto get_device_memory_opaque_capture_address(VkDevice device, Expression1&& info) -> ::std::uint64_t
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	return ::vkGetDeviceMemoryOpaqueCaptureAddress(device, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::device_queue2> Expression1>
+[[nodiscard]] auto get_device_queue2(VkDevice device, Expression1&& queue_info) -> VkQueue
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(queue_info));
+	VkQueue produced{};
+	::vkGetDeviceQueue2(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::image_memory_requirements2> Expression1>
+[[nodiscard]] auto get_image_memory_requirements2(VkDevice device, Expression1&& info) -> VkMemoryRequirements2
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	VkMemoryRequirements2 produced{};
+	::vkGetImageMemoryRequirements2(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::image_subresource2> Expression1>
+[[nodiscard]] auto get_image_subresource_layout2(VkDevice device, VkImage image, Expression1&& subresource) -> VkSubresourceLayout2
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(subresource));
+	VkSubresourceLayout2 produced{};
+	::vkGetImageSubresourceLayout2(device, image, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::physical_device_external_buffer> Expression1>
+[[nodiscard]] auto get_physical_device_external_buffer_properties(VkPhysicalDevice physical_device, Expression1&& external_buffer_info) -> VkExternalBufferProperties
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(external_buffer_info));
+	VkExternalBufferProperties produced{};
+	::vkGetPhysicalDeviceExternalBufferProperties(physical_device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::physical_device_external_fence> Expression1>
+[[nodiscard]] auto get_physical_device_external_fence_properties(VkPhysicalDevice physical_device, Expression1&& external_fence_info) -> VkExternalFenceProperties
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(external_fence_info));
+	VkExternalFenceProperties produced{};
+	::vkGetPhysicalDeviceExternalFenceProperties(physical_device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::physical_device_external_semaphore> Expression1>
+[[nodiscard]] auto get_physical_device_external_semaphore_properties(VkPhysicalDevice physical_device, Expression1&& external_semaphore_info) -> VkExternalSemaphoreProperties
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(external_semaphore_info));
+	VkExternalSemaphoreProperties produced{};
+	::vkGetPhysicalDeviceExternalSemaphoreProperties(physical_device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::physical_device_image_format2> Expression1>
+[[nodiscard]] auto get_physical_device_image_format_properties2(VkPhysicalDevice physical_device, Expression1&& image_format_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<VkImageFormatProperties2, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(image_format_info));
+	VkImageFormatProperties2 produced{};
+	auto const outcome = ::vkGetPhysicalDeviceImageFormatProperties2(physical_device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::physical_device_image_format2> Expression1>
+[[nodiscard]] auto get_physical_device_image_format_properties2(VkPhysicalDevice physical_device, Expression1&& image_format_info) -> VkImageFormatProperties2
+{
+	auto outcome = get_physical_device_image_format_properties2(physical_device, ::std::forward<Expression1>(image_format_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::rendering_area> Expression1>
+[[nodiscard]] auto get_rendering_area_granularity(VkDevice device, Expression1&& rendering_area_info) -> VkExtent2D
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(rendering_area_info));
+	VkExtent2D produced{};
+	::vkGetRenderingAreaGranularity(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+[[nodiscard]] inline auto invalidate_mapped_memory_ranges(VkDevice device, ::std::span<VkMappedMemoryRange const> memory_ranges, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkInvalidateMappedMemoryRanges(device, static_cast<::std::uint32_t>(memory_ranges.size()), memory_ranges.data());
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void invalidate_mapped_memory_ranges(VkDevice device, ::std::span<VkMappedMemoryRange const> memory_ranges)
+{
+	auto outcome = invalidate_mapped_memory_ranges(device, memory_ranges, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::memory_map> Expression1>
+[[nodiscard]] auto map_memory2(VkDevice device, Expression1&& memory_map_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void*, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(memory_map_info));
+	void* produced{};
+	auto const outcome = ::vkMapMemory2(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::memory_map> Expression1>
+[[nodiscard]] auto map_memory2(VkDevice device, Expression1&& memory_map_info) -> void*
+{
+	auto outcome = map_memory2(device, ::std::forward<Expression1>(memory_map_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+
+[[nodiscard]] inline auto merge_pipeline_caches(VkDevice device, VkPipelineCache dst_cache, ::std::span<VkPipelineCache const> src_caches, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkMergePipelineCaches(device, dst_cache, static_cast<::std::uint32_t>(src_caches.size()), src_caches.data());
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void merge_pipeline_caches(VkDevice device, VkPipelineCache dst_cache, ::std::span<VkPipelineCache const> src_caches)
+{
+	auto outcome = merge_pipeline_caches(device, dst_cache, src_caches, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+[[nodiscard]] inline auto queue_bind_sparse(VkQueue queue, ::std::span<VkBindSparseInfo const> bind_info, VkFence fence, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkQueueBindSparse(queue, static_cast<::std::uint32_t>(bind_info.size()), bind_info.data(), fence);
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void queue_bind_sparse(VkQueue queue, ::std::span<VkBindSparseInfo const> bind_info, VkFence fence)
+{
+	auto outcome = queue_bind_sparse(queue, bind_info, fence, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+[[nodiscard]] inline auto queue_submit(VkQueue queue, ::std::span<VkSubmitInfo const> submits, VkFence fence, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkQueueSubmit(queue, static_cast<::std::uint32_t>(submits.size()), submits.data(), fence);
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void queue_submit(VkQueue queue, ::std::span<VkSubmitInfo const> submits, VkFence fence)
+{
+	auto outcome = queue_submit(queue, submits, fence, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+[[nodiscard]] inline auto queue_submit2(VkQueue queue, ::std::span<VkSubmitInfo2 const> submits, VkFence fence, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkQueueSubmit2(queue, static_cast<::std::uint32_t>(submits.size()), submits.data(), fence);
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void queue_submit2(VkQueue queue, ::std::span<VkSubmitInfo2 const> submits, VkFence fence)
+{
+	auto outcome = queue_submit2(queue, submits, fence, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+[[nodiscard]] inline auto reset_fences(VkDevice device, ::std::span<VkFence const> fences, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkResetFences(device, static_cast<::std::uint32_t>(fences.size()), fences.data());
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void reset_fences(VkDevice device, ::std::span<VkFence const> fences)
+{
+	auto outcome = reset_fences(device, fences, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::semaphore_signal> Expression1>
+[[nodiscard]] auto signal_semaphore(VkDevice device, Expression1&& signal_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(signal_info));
+	auto const outcome = ::vkSignalSemaphore(device, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::semaphore_signal> Expression1>
+void signal_semaphore(VkDevice device, Expression1&& signal_info)
+{
+	auto outcome = signal_semaphore(device, ::std::forward<Expression1>(signal_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+[[nodiscard]] inline auto transition_image_layout(VkDevice device, ::std::span<VkHostImageLayoutTransitionInfo const> transitions, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkTransitionImageLayout(device, static_cast<::std::uint32_t>(transitions.size()), transitions.data());
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void transition_image_layout(VkDevice device, ::std::span<VkHostImageLayoutTransitionInfo const> transitions)
+{
+	auto outcome = transition_image_layout(device, transitions, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::memory_unmap> Expression1>
+[[nodiscard]] auto unmap_memory2(VkDevice device, Expression1&& memory_unmap_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(memory_unmap_info));
+	auto const outcome = ::vkUnmapMemory2(device, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::memory_unmap> Expression1>
+void unmap_memory2(VkDevice device, Expression1&& memory_unmap_info)
+{
+	auto outcome = unmap_memory2(device, ::std::forward<Expression1>(memory_unmap_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+inline void update_descriptor_sets(VkDevice device, ::std::span<VkWriteDescriptorSet const> descriptor_writes, ::std::span<VkCopyDescriptorSet const> descriptor_copies)
+{
+	::vkUpdateDescriptorSets(device, static_cast<::std::uint32_t>(descriptor_writes.size()), descriptor_writes.data(), static_cast<::std::uint32_t>(descriptor_copies.size()), descriptor_copies.data());
+}
+
+[[nodiscard]] inline auto wait_for_fences(VkDevice device, ::std::span<VkFence const> fences, VkBool32 wait_all, ::std::uint64_t timeout, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkWaitForFences(device, static_cast<::std::uint32_t>(fences.size()), fences.data(), wait_all, timeout);
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void wait_for_fences(VkDevice device, ::std::span<VkFence const> fences, VkBool32 wait_all, ::std::uint64_t timeout)
+{
+	auto outcome = wait_for_fences(device, fences, wait_all, timeout, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::semaphore_wait> Expression1>
+[[nodiscard]] auto wait_semaphores(VkDevice device, Expression1&& wait_info, ::std::uint64_t timeout, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(wait_info));
+	auto const outcome = ::vkWaitSemaphores(device, ::std::addressof(::vkfu::unpack(storage1)), timeout);
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::semaphore_wait> Expression1>
+void wait_semaphores(VkDevice device, Expression1&& wait_info, ::std::uint64_t timeout)
+{
+	auto outcome = wait_semaphores(device, ::std::forward<Expression1>(wait_info), timeout, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+namespace amd
+{
+template<::vkfu::expression_for<::vkfu::obj::amd::anti_lag_data> Expression1>
+void anti_lag_update(VkDevice device, Expression1&& data)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(data));
+	::vkAntiLagUpdateAMD(device, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+}
+
 namespace amdx
 {
 #if defined(VK_ENABLE_BETA_EXTENSIONS)
@@ -53372,6 +56282,64 @@ template<::vkfu::expression_for<::vkfu::obj::amdx::execution_graph_pipeline> Exp
 		return ::std::unexpected{produced.error()};
 	}
 	return (*produced)[0];
+}
+#endif
+
+#if defined(VK_ENABLE_BETA_EXTENSIONS)
+template<::vkfu::expression_for<::vkfu::obj::state::amdx::shader_stage_node> Expression1>
+[[nodiscard]] auto get_execution_graph_pipeline_node_index(VkDevice device, VkPipeline execution_graph, Expression1&& node_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<::std::uint32_t, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(node_info));
+	::std::uint32_t produced{};
+	auto const outcome = ::vkGetExecutionGraphPipelineNodeIndexAMDX(device, execution_graph, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::state::amdx::shader_stage_node> Expression1>
+[[nodiscard]] auto get_execution_graph_pipeline_node_index(VkDevice device, VkPipeline execution_graph, Expression1&& node_info) -> ::std::uint32_t
+{
+	auto outcome = get_execution_graph_pipeline_node_index(device, execution_graph, ::std::forward<Expression1>(node_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+#endif
+
+}
+
+namespace android
+{
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+template<::vkfu::expression_for<::vkfu::obj::android::memory_get_android_hardware_buffer> Expression1>
+[[nodiscard]] auto get_memory_android_hardware_buffer(VkDevice device, Expression1&& info, ::std::nothrow_t) noexcept
+	-> ::std::expected<AHardwareBuffer*, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	AHardwareBuffer* produced{};
+	auto const outcome = ::vkGetMemoryAndroidHardwareBufferANDROID(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::android::memory_get_android_hardware_buffer> Expression1>
+[[nodiscard]] auto get_memory_android_hardware_buffer(VkDevice device, Expression1&& info) -> AHardwareBuffer*
+{
+	auto outcome = get_memory_android_hardware_buffer(device, ::std::forward<Expression1>(info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
 }
 #endif
 
@@ -53510,6 +56478,174 @@ template<::vkfu::expression_for<::vkfu::obj::arm::tensor_view> Expression>
 		throw produced.error();
 	}
 	return *produced;
+}
+
+[[nodiscard]] inline auto bind_data_graph_pipeline_session_memory(VkDevice device, ::std::span<VkBindDataGraphPipelineSessionMemoryInfoARM const> bind_infos, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkBindDataGraphPipelineSessionMemoryARM(device, static_cast<::std::uint32_t>(bind_infos.size()), bind_infos.data());
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void bind_data_graph_pipeline_session_memory(VkDevice device, ::std::span<VkBindDataGraphPipelineSessionMemoryInfoARM const> bind_infos)
+{
+	auto outcome = bind_data_graph_pipeline_session_memory(device, bind_infos, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+[[nodiscard]] inline auto bind_tensor_memory(VkDevice device, ::std::span<VkBindTensorMemoryInfoARM const> bind_infos, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkBindTensorMemoryARM(device, static_cast<::std::uint32_t>(bind_infos.size()), bind_infos.data());
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void bind_tensor_memory(VkDevice device, ::std::span<VkBindTensorMemoryInfoARM const> bind_infos)
+{
+	auto outcome = bind_tensor_memory(device, bind_infos, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::arm::copy_tensor> Expression1>
+void cmd_copy_tensor(VkCommandBuffer command_buffer, Expression1&& copy_tensor_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(copy_tensor_info));
+	::vkCmdCopyTensorARM(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::arm::data_graph_pipeline_dispatch> Expression1>
+void cmd_dispatch_data_graph(VkCommandBuffer command_buffer, VkDataGraphPipelineSessionARM session, Expression1&& info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	::vkCmdDispatchDataGraphARM(command_buffer, session, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::arm::data_graph_pipeline> Expression1>
+[[nodiscard]] auto get_data_graph_pipeline_properties(VkDevice device, Expression1&& pipeline_info, ::std::span<VkDataGraphPipelinePropertyQueryResultARM> properties, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(pipeline_info));
+	auto const outcome = ::vkGetDataGraphPipelinePropertiesARM(device, ::std::addressof(::vkfu::unpack(storage1)), static_cast<::std::uint32_t>(properties.size()), properties.data());
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::arm::data_graph_pipeline> Expression1>
+void get_data_graph_pipeline_properties(VkDevice device, Expression1&& pipeline_info, ::std::span<VkDataGraphPipelinePropertyQueryResultARM> properties)
+{
+	auto outcome = get_data_graph_pipeline_properties(device, ::std::forward<Expression1>(pipeline_info), properties, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::arm::data_graph_pipeline_session_memory_requirements> Expression1>
+[[nodiscard]] auto get_data_graph_pipeline_session_memory_requirements(VkDevice device, Expression1&& info) -> VkMemoryRequirements2
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	VkMemoryRequirements2 produced{};
+	::vkGetDataGraphPipelineSessionMemoryRequirementsARM(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::arm::device_tensor_memory_requirements> Expression1>
+[[nodiscard]] auto get_device_tensor_memory_requirements(VkDevice device, Expression1&& info) -> VkMemoryRequirements2
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	VkMemoryRequirements2 produced{};
+	::vkGetDeviceTensorMemoryRequirementsARM(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::arm::physical_device_external_tensor> Expression1>
+[[nodiscard]] auto get_physical_device_external_tensor_properties(VkPhysicalDevice physical_device, Expression1&& external_tensor_info) -> VkExternalTensorPropertiesARM
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(external_tensor_info));
+	VkExternalTensorPropertiesARM produced{};
+	::vkGetPhysicalDeviceExternalTensorPropertiesARM(physical_device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::arm::physical_device_queue_family_data_graph_processing_engine> Expression1>
+[[nodiscard]] auto get_physical_device_queue_family_data_graph_processing_engine_properties(VkPhysicalDevice physical_device, Expression1&& queue_family_data_graph_processing_engine_info) -> VkQueueFamilyDataGraphProcessingEnginePropertiesARM
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(queue_family_data_graph_processing_engine_info));
+	VkQueueFamilyDataGraphProcessingEnginePropertiesARM produced{};
+	::vkGetPhysicalDeviceQueueFamilyDataGraphProcessingEnginePropertiesARM(physical_device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::arm::tensor_memory_requirements> Expression1>
+[[nodiscard]] auto get_tensor_memory_requirements(VkDevice device, Expression1&& info) -> VkMemoryRequirements2
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	VkMemoryRequirements2 produced{};
+	::vkGetTensorMemoryRequirementsARM(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::arm::tensor_capture_descriptor_data> Expression1>
+[[nodiscard]] auto get_tensor_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	auto const outcome = ::vkGetTensorOpaqueCaptureDescriptorDataARM(device, ::std::addressof(::vkfu::unpack(storage1)), data);
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::arm::tensor_capture_descriptor_data> Expression1>
+void get_tensor_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data)
+{
+	auto outcome = get_tensor_opaque_capture_descriptor_data(device, ::std::forward<Expression1>(info), data, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::arm::tensor_view_capture_descriptor_data> Expression1>
+[[nodiscard]] auto get_tensor_view_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	auto const outcome = ::vkGetTensorViewOpaqueCaptureDescriptorDataARM(device, ::std::addressof(::vkfu::unpack(storage1)), data);
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::arm::tensor_view_capture_descriptor_data> Expression1>
+void get_tensor_view_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data)
+{
+	auto outcome = get_tensor_view_opaque_capture_descriptor_data(device, ::std::forward<Expression1>(info), data, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
 }
 
 }
@@ -53809,6 +56945,706 @@ template<::vkfu::expression_for<::vkfu::obj::ext::validation_cache> Expression>
 	return *produced;
 }
 
+[[nodiscard]] inline auto build_micromaps(VkDevice device, VkDeferredOperationKHR deferred_operation, ::std::span<VkMicromapBuildInfoEXT const> infos, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkBuildMicromapsEXT(device, deferred_operation, static_cast<::std::uint32_t>(infos.size()), infos.data());
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void build_micromaps(VkDevice device, VkDeferredOperationKHR deferred_operation, ::std::span<VkMicromapBuildInfoEXT const> infos)
+{
+	auto outcome = build_micromaps(device, deferred_operation, infos, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::conditional_rendering_begin> Expression1>
+void cmd_begin_conditional_rendering(VkCommandBuffer command_buffer, Expression1&& conditional_rendering_begin)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(conditional_rendering_begin));
+	::vkCmdBeginConditionalRenderingEXT(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::debug_utils_label> Expression1>
+void cmd_begin_debug_utils_label(VkCommandBuffer command_buffer, Expression1&& label_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(label_info));
+	::vkCmdBeginDebugUtilsLabelEXT(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_begin_transform_feedback(VkCommandBuffer command_buffer, ::std::uint32_t first_counter_buffer, ::std::span<VkBuffer const> counter_buffers, ::std::span<VkDeviceSize const> counter_buffer_offsets)
+{
+	::vkCmdBeginTransformFeedbackEXT(command_buffer, first_counter_buffer, static_cast<::std::uint32_t>(counter_buffer_offsets.size()), counter_buffers.data(), counter_buffer_offsets.data());
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::bind_descriptor_buffer_embedded_samplers> Expression1>
+void cmd_bind_descriptor_buffer_embedded_samplers2(VkCommandBuffer command_buffer, Expression1&& bind_descriptor_buffer_embedded_samplers_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(bind_descriptor_buffer_embedded_samplers_info));
+	::vkCmdBindDescriptorBufferEmbeddedSamplers2EXT(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_bind_descriptor_buffers(VkCommandBuffer command_buffer, ::std::span<VkDescriptorBufferBindingInfoEXT const> binding_infos)
+{
+	::vkCmdBindDescriptorBuffersEXT(command_buffer, static_cast<::std::uint32_t>(binding_infos.size()), binding_infos.data());
+}
+
+inline void cmd_bind_shaders(VkCommandBuffer command_buffer, ::std::span<VkShaderStageFlagBits const> stages, ::std::span<VkShaderEXT const> shaders)
+{
+	::vkCmdBindShadersEXT(command_buffer, static_cast<::std::uint32_t>(shaders.size()), stages.data(), shaders.data());
+}
+
+inline void cmd_bind_transform_feedback_buffers(VkCommandBuffer command_buffer, ::std::uint32_t first_binding, ::std::span<VkBuffer const> buffers, ::std::span<VkDeviceSize const> offsets, ::std::span<VkDeviceSize const> sizes)
+{
+	::vkCmdBindTransformFeedbackBuffersEXT(command_buffer, first_binding, static_cast<::std::uint32_t>(sizes.size()), buffers.data(), offsets.data(), sizes.data());
+}
+
+inline void cmd_build_micromaps(VkCommandBuffer command_buffer, ::std::span<VkMicromapBuildInfoEXT const> infos)
+{
+	::vkCmdBuildMicromapsEXT(command_buffer, static_cast<::std::uint32_t>(infos.size()), infos.data());
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::copy_memory_to_micromap> Expression1>
+void cmd_copy_memory_to_micromap(VkCommandBuffer command_buffer, Expression1&& info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	::vkCmdCopyMemoryToMicromapEXT(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::copy_micromap> Expression1>
+void cmd_copy_micromap(VkCommandBuffer command_buffer, Expression1&& info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	::vkCmdCopyMicromapEXT(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::copy_micromap_to_memory> Expression1>
+void cmd_copy_micromap_to_memory(VkCommandBuffer command_buffer, Expression1&& info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	::vkCmdCopyMicromapToMemoryEXT(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::debug_marker> Expression1>
+void cmd_debug_marker_begin(VkCommandBuffer command_buffer, Expression1&& marker_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(marker_info));
+	::vkCmdDebugMarkerBeginEXT(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::debug_marker> Expression1>
+void cmd_debug_marker_insert(VkCommandBuffer command_buffer, Expression1&& marker_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(marker_info));
+	::vkCmdDebugMarkerInsertEXT(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_draw_multi(VkCommandBuffer command_buffer, ::std::span<VkMultiDrawInfoEXT const> vertex_info, ::std::uint32_t instance_count, ::std::uint32_t first_instance, ::std::uint32_t stride)
+{
+	::vkCmdDrawMultiEXT(command_buffer, static_cast<::std::uint32_t>(vertex_info.size()), vertex_info.data(), instance_count, first_instance, stride);
+}
+
+inline void cmd_draw_multi_indexed(VkCommandBuffer command_buffer, ::std::span<VkMultiDrawIndexedInfoEXT const> index_info, ::std::uint32_t instance_count, ::std::uint32_t first_instance, ::std::uint32_t stride, ::std::int32_t const* vertex_offset)
+{
+	::vkCmdDrawMultiIndexedEXT(command_buffer, static_cast<::std::uint32_t>(index_info.size()), index_info.data(), instance_count, first_instance, stride, vertex_offset);
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::rendering_end> Expression1>
+void cmd_end_rendering2(VkCommandBuffer command_buffer, Expression1&& rendering_end_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(rendering_end_info));
+	::vkCmdEndRendering2EXT(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_end_transform_feedback(VkCommandBuffer command_buffer, ::std::uint32_t first_counter_buffer, ::std::span<VkBuffer const> counter_buffers, ::std::span<VkDeviceSize const> counter_buffer_offsets)
+{
+	::vkCmdEndTransformFeedbackEXT(command_buffer, first_counter_buffer, static_cast<::std::uint32_t>(counter_buffer_offsets.size()), counter_buffers.data(), counter_buffer_offsets.data());
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::generated_commands> Expression1>
+void cmd_execute_generated_commands(VkCommandBuffer command_buffer, VkBool32 is_preprocessed, Expression1&& generated_commands_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(generated_commands_info));
+	::vkCmdExecuteGeneratedCommandsEXT(command_buffer, is_preprocessed, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::debug_utils_label> Expression1>
+void cmd_insert_debug_utils_label(VkCommandBuffer command_buffer, Expression1&& label_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(label_info));
+	::vkCmdInsertDebugUtilsLabelEXT(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::generated_commands> Expression1>
+void cmd_preprocess_generated_commands(VkCommandBuffer command_buffer, Expression1&& generated_commands_info, VkCommandBuffer state_command_buffer)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(generated_commands_info));
+	::vkCmdPreprocessGeneratedCommandsEXT(command_buffer, ::std::addressof(::vkfu::unpack(storage1)), state_command_buffer);
+}
+
+inline void cmd_set_color_blend_enable(VkCommandBuffer command_buffer, ::std::uint32_t first_attachment, ::std::span<VkBool32 const> color_blend_enables)
+{
+	::vkCmdSetColorBlendEnableEXT(command_buffer, first_attachment, static_cast<::std::uint32_t>(color_blend_enables.size()), color_blend_enables.data());
+}
+
+inline void cmd_set_color_blend_equation(VkCommandBuffer command_buffer, ::std::uint32_t first_attachment, ::std::span<VkColorBlendEquationEXT const> color_blend_equations)
+{
+	::vkCmdSetColorBlendEquationEXT(command_buffer, first_attachment, static_cast<::std::uint32_t>(color_blend_equations.size()), color_blend_equations.data());
+}
+
+inline void cmd_set_color_write_enable(VkCommandBuffer command_buffer, ::std::span<VkBool32 const> color_write_enables)
+{
+	::vkCmdSetColorWriteEnableEXT(command_buffer, static_cast<::std::uint32_t>(color_write_enables.size()), color_write_enables.data());
+}
+
+inline void cmd_set_color_write_mask(VkCommandBuffer command_buffer, ::std::uint32_t first_attachment, ::std::span<VkColorComponentFlags const> color_write_masks)
+{
+	::vkCmdSetColorWriteMaskEXT(command_buffer, first_attachment, static_cast<::std::uint32_t>(color_write_masks.size()), color_write_masks.data());
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::depth_bias> Expression1>
+void cmd_set_depth_bias2(VkCommandBuffer command_buffer, Expression1&& depth_bias_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(depth_bias_info));
+	::vkCmdSetDepthBias2EXT(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::set_descriptor_buffer_offsets> Expression1>
+void cmd_set_descriptor_buffer_offsets2(VkCommandBuffer command_buffer, Expression1&& set_descriptor_buffer_offsets_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(set_descriptor_buffer_offsets_info));
+	::vkCmdSetDescriptorBufferOffsets2EXT(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_set_descriptor_buffer_offsets(VkCommandBuffer command_buffer, VkPipelineBindPoint pipeline_bind_point, VkPipelineLayout layout, ::std::uint32_t first_set, ::std::span<::std::uint32_t const> buffer_indices, ::std::span<VkDeviceSize const> offsets)
+{
+	::vkCmdSetDescriptorBufferOffsetsEXT(command_buffer, pipeline_bind_point, layout, first_set, static_cast<::std::uint32_t>(offsets.size()), buffer_indices.data(), offsets.data());
+}
+
+inline void cmd_set_discard_rectangle(VkCommandBuffer command_buffer, ::std::uint32_t first_discard_rectangle, ::std::span<VkRect2D const> discard_rectangles)
+{
+	::vkCmdSetDiscardRectangleEXT(command_buffer, first_discard_rectangle, static_cast<::std::uint32_t>(discard_rectangles.size()), discard_rectangles.data());
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::sample_locations> Expression1>
+void cmd_set_sample_locations(VkCommandBuffer command_buffer, Expression1&& sample_locations_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(sample_locations_info));
+	::vkCmdSetSampleLocationsEXT(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_set_vertex_input(VkCommandBuffer command_buffer, ::std::span<VkVertexInputBindingDescription2EXT const> vertex_binding_descriptions, ::std::span<VkVertexInputAttributeDescription2EXT const> vertex_attribute_descriptions)
+{
+	::vkCmdSetVertexInputEXT(command_buffer, static_cast<::std::uint32_t>(vertex_binding_descriptions.size()), vertex_binding_descriptions.data(), static_cast<::std::uint32_t>(vertex_attribute_descriptions.size()), vertex_attribute_descriptions.data());
+}
+
+inline void cmd_write_micromaps_properties(VkCommandBuffer command_buffer, ::std::span<VkMicromapEXT const> micromaps, VkQueryType query_type, VkQueryPool query_pool, ::std::uint32_t first_query)
+{
+	::vkCmdWriteMicromapsPropertiesEXT(command_buffer, static_cast<::std::uint32_t>(micromaps.size()), micromaps.data(), query_type, query_pool, first_query);
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::copy_memory_to_micromap> Expression1>
+[[nodiscard]] auto copy_memory_to_micromap(VkDevice device, VkDeferredOperationKHR deferred_operation, Expression1&& info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	auto const outcome = ::vkCopyMemoryToMicromapEXT(device, deferred_operation, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::copy_memory_to_micromap> Expression1>
+void copy_memory_to_micromap(VkDevice device, VkDeferredOperationKHR deferred_operation, Expression1&& info)
+{
+	auto outcome = copy_memory_to_micromap(device, deferred_operation, ::std::forward<Expression1>(info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::copy_micromap> Expression1>
+[[nodiscard]] auto copy_micromap(VkDevice device, VkDeferredOperationKHR deferred_operation, Expression1&& info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	auto const outcome = ::vkCopyMicromapEXT(device, deferred_operation, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::copy_micromap> Expression1>
+void copy_micromap(VkDevice device, VkDeferredOperationKHR deferred_operation, Expression1&& info)
+{
+	auto outcome = copy_micromap(device, deferred_operation, ::std::forward<Expression1>(info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::copy_micromap_to_memory> Expression1>
+[[nodiscard]] auto copy_micromap_to_memory(VkDevice device, VkDeferredOperationKHR deferred_operation, Expression1&& info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	auto const outcome = ::vkCopyMicromapToMemoryEXT(device, deferred_operation, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::copy_micromap_to_memory> Expression1>
+void copy_micromap_to_memory(VkDevice device, VkDeferredOperationKHR deferred_operation, Expression1&& info)
+{
+	auto outcome = copy_micromap_to_memory(device, deferred_operation, ::std::forward<Expression1>(info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::debug_marker_object_name> Expression1>
+[[nodiscard]] auto debug_marker_set_object_name(VkDevice device, Expression1&& name_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(name_info));
+	auto const outcome = ::vkDebugMarkerSetObjectNameEXT(device, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::debug_marker_object_name> Expression1>
+void debug_marker_set_object_name(VkDevice device, Expression1&& name_info)
+{
+	auto outcome = debug_marker_set_object_name(device, ::std::forward<Expression1>(name_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::debug_marker_object_tag> Expression1>
+[[nodiscard]] auto debug_marker_set_object_tag(VkDevice device, Expression1&& tag_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(tag_info));
+	auto const outcome = ::vkDebugMarkerSetObjectTagEXT(device, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::debug_marker_object_tag> Expression1>
+void debug_marker_set_object_tag(VkDevice device, Expression1&& tag_info)
+{
+	auto outcome = debug_marker_set_object_tag(device, ::std::forward<Expression1>(tag_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::display_power> Expression1>
+[[nodiscard]] auto display_power_control(VkDevice device, VkDisplayKHR display, Expression1&& display_power_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(display_power_info));
+	auto const outcome = ::vkDisplayPowerControlEXT(device, display, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::display_power> Expression1>
+void display_power_control(VkDevice device, VkDisplayKHR display, Expression1&& display_power_info)
+{
+	auto outcome = display_power_control(device, display, ::std::forward<Expression1>(display_power_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::acceleration_structure_capture_descriptor_data> Expression1>
+[[nodiscard]] auto get_acceleration_structure_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	auto const outcome = ::vkGetAccelerationStructureOpaqueCaptureDescriptorDataEXT(device, ::std::addressof(::vkfu::unpack(storage1)), data);
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::acceleration_structure_capture_descriptor_data> Expression1>
+void get_acceleration_structure_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data)
+{
+	auto outcome = get_acceleration_structure_opaque_capture_descriptor_data(device, ::std::forward<Expression1>(info), data, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::buffer_capture_descriptor_data> Expression1>
+[[nodiscard]] auto get_buffer_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	auto const outcome = ::vkGetBufferOpaqueCaptureDescriptorDataEXT(device, ::std::addressof(::vkfu::unpack(storage1)), data);
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::buffer_capture_descriptor_data> Expression1>
+void get_buffer_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data)
+{
+	auto outcome = get_buffer_opaque_capture_descriptor_data(device, ::std::forward<Expression1>(info), data, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::descriptor_get> Expression1>
+void get_descriptor(VkDevice device, Expression1&& descriptor_info, ::std::size_t data_size, void* descriptor)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(descriptor_info));
+	::vkGetDescriptorEXT(device, ::std::addressof(::vkfu::unpack(storage1)), data_size, descriptor);
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::micromap_version> Expression1>
+[[nodiscard]] auto get_device_micromap_compatibility(VkDevice device, Expression1&& version_info) -> VkAccelerationStructureCompatibilityKHR
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(version_info));
+	VkAccelerationStructureCompatibilityKHR produced{};
+	::vkGetDeviceMicromapCompatibilityEXT(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::generated_commands_memory_requirements> Expression1>
+[[nodiscard]] auto get_generated_commands_memory_requirements(VkDevice device, Expression1&& info) -> VkMemoryRequirements2
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	VkMemoryRequirements2 produced{};
+	::vkGetGeneratedCommandsMemoryRequirementsEXT(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::image_capture_descriptor_data> Expression1>
+[[nodiscard]] auto get_image_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	auto const outcome = ::vkGetImageOpaqueCaptureDescriptorDataEXT(device, ::std::addressof(::vkfu::unpack(storage1)), data);
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::image_capture_descriptor_data> Expression1>
+void get_image_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data)
+{
+	auto outcome = get_image_opaque_capture_descriptor_data(device, ::std::forward<Expression1>(info), data, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::image_view_capture_descriptor_data> Expression1>
+[[nodiscard]] auto get_image_view_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	auto const outcome = ::vkGetImageViewOpaqueCaptureDescriptorDataEXT(device, ::std::addressof(::vkfu::unpack(storage1)), data);
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::image_view_capture_descriptor_data> Expression1>
+void get_image_view_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data)
+{
+	auto outcome = get_image_view_opaque_capture_descriptor_data(device, ::std::forward<Expression1>(info), data, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+#if defined(VK_USE_PLATFORM_METAL_EXT)
+template<::vkfu::expression_for<::vkfu::obj::ext::memory_get_metal_handle> Expression1>
+[[nodiscard]] auto get_memory_metal_handle(VkDevice device, Expression1&& get_metal_handle_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void*, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(get_metal_handle_info));
+	void* produced{};
+	auto const outcome = ::vkGetMemoryMetalHandleEXT(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::memory_get_metal_handle> Expression1>
+[[nodiscard]] auto get_memory_metal_handle(VkDevice device, Expression1&& get_metal_handle_info) -> void*
+{
+	auto outcome = get_memory_metal_handle(device, ::std::forward<Expression1>(get_metal_handle_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+#endif
+
+template<::vkfu::expression_for<::vkfu::obj::ext::micromap_build> Expression1>
+[[nodiscard]] auto get_micromap_build_sizes(VkDevice device, VkAccelerationStructureBuildTypeKHR build_type, Expression1&& build_info) -> VkMicromapBuildSizesInfoEXT
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(build_info));
+	VkMicromapBuildSizesInfoEXT produced{};
+	::vkGetMicromapBuildSizesEXT(device, build_type, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::sampler_capture_descriptor_data> Expression1>
+[[nodiscard]] auto get_sampler_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	auto const outcome = ::vkGetSamplerOpaqueCaptureDescriptorDataEXT(device, ::std::addressof(::vkfu::unpack(storage1)), data);
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::sampler_capture_descriptor_data> Expression1>
+void get_sampler_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data)
+{
+	auto outcome = get_sampler_opaque_capture_descriptor_data(device, ::std::forward<Expression1>(info), data, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::shader_module> Expression1>
+[[nodiscard]] auto get_shader_module_create_info_identifier(VkDevice device, Expression1&& create_info) -> VkShaderModuleIdentifierEXT
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(create_info));
+	VkShaderModuleIdentifierEXT produced{};
+	::vkGetShaderModuleCreateInfoIdentifierEXT(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+[[nodiscard]] inline auto merge_validation_caches(VkDevice device, VkValidationCacheEXT dst_cache, ::std::span<VkValidationCacheEXT const> src_caches, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkMergeValidationCachesEXT(device, dst_cache, static_cast<::std::uint32_t>(src_caches.size()), src_caches.data());
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void merge_validation_caches(VkDevice device, VkValidationCacheEXT dst_cache, ::std::span<VkValidationCacheEXT const> src_caches)
+{
+	auto outcome = merge_validation_caches(device, dst_cache, src_caches, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::debug_utils_label> Expression1>
+void queue_begin_debug_utils_label(VkQueue queue, Expression1&& label_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(label_info));
+	::vkQueueBeginDebugUtilsLabelEXT(queue, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::debug_utils_label> Expression1>
+void queue_insert_debug_utils_label(VkQueue queue, Expression1&& label_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(label_info));
+	::vkQueueInsertDebugUtilsLabelEXT(queue, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::device_event> Expression1>
+[[nodiscard]] auto register_device_event(VkDevice device, Expression1&& device_event_info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
+	-> ::std::expected<VkFence, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(device_event_info));
+	VkFence produced{};
+	auto const outcome = ::vkRegisterDeviceEventEXT(device, ::std::addressof(::vkfu::unpack(storage1)), allocation_callbacks, ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::device_event> Expression1>
+[[nodiscard]] auto register_device_event(VkDevice device, Expression1&& device_event_info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkFence
+{
+	auto outcome = register_device_event(device, ::std::forward<Expression1>(device_event_info), allocation_callbacks, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::display_event> Expression1>
+[[nodiscard]] auto register_display_event(VkDevice device, VkDisplayKHR display, Expression1&& display_event_info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
+	-> ::std::expected<VkFence, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(display_event_info));
+	VkFence produced{};
+	auto const outcome = ::vkRegisterDisplayEventEXT(device, display, ::std::addressof(::vkfu::unpack(storage1)), allocation_callbacks, ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::display_event> Expression1>
+[[nodiscard]] auto register_display_event(VkDevice device, VkDisplayKHR display, Expression1&& display_event_info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkFence
+{
+	auto outcome = register_display_event(device, display, ::std::forward<Expression1>(display_event_info), allocation_callbacks, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::debug_utils_object_name> Expression1>
+[[nodiscard]] auto set_debug_utils_object_name(VkDevice device, Expression1&& name_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(name_info));
+	auto const outcome = ::vkSetDebugUtilsObjectNameEXT(device, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::debug_utils_object_name> Expression1>
+void set_debug_utils_object_name(VkDevice device, Expression1&& name_info)
+{
+	auto outcome = set_debug_utils_object_name(device, ::std::forward<Expression1>(name_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::debug_utils_object_tag> Expression1>
+[[nodiscard]] auto set_debug_utils_object_tag(VkDevice device, Expression1&& tag_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(tag_info));
+	auto const outcome = ::vkSetDebugUtilsObjectTagEXT(device, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::debug_utils_object_tag> Expression1>
+void set_debug_utils_object_tag(VkDevice device, Expression1&& tag_info)
+{
+	auto outcome = set_debug_utils_object_tag(device, ::std::forward<Expression1>(tag_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+inline void set_hdr_metadata(VkDevice device, ::std::span<VkSwapchainKHR const> swapchains, ::std::span<VkHdrMetadataEXT const> metadata)
+{
+	::vkSetHdrMetadataEXT(device, static_cast<::std::uint32_t>(metadata.size()), swapchains.data(), metadata.data());
+}
+
+template<::vkfu::expression_for<::vkfu::obj::ext::debug_utils_messenger_callback_data> Expression1>
+void submit_debug_utils_message(VkInstance instance, VkDebugUtilsMessageSeverityFlagBitsEXT message_severity, VkDebugUtilsMessageTypeFlagsEXT message_types, Expression1&& callback_data)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(callback_data));
+	::vkSubmitDebugUtilsMessageEXT(instance, message_severity, message_types, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void update_indirect_execution_set_pipeline(VkDevice device, VkIndirectExecutionSetEXT indirect_execution_set, ::std::span<VkWriteIndirectExecutionSetPipelineEXT const> execution_set_writes)
+{
+	::vkUpdateIndirectExecutionSetPipelineEXT(device, indirect_execution_set, static_cast<::std::uint32_t>(execution_set_writes.size()), execution_set_writes.data());
+}
+
+inline void update_indirect_execution_set_shader(VkDevice device, VkIndirectExecutionSetEXT indirect_execution_set, ::std::span<VkWriteIndirectExecutionSetShaderEXT const> execution_set_writes)
+{
+	::vkUpdateIndirectExecutionSetShaderEXT(device, indirect_execution_set, static_cast<::std::uint32_t>(execution_set_writes.size()), execution_set_writes.data());
+}
+
+[[nodiscard]] inline auto write_micromaps_properties(VkDevice device, ::std::span<VkMicromapEXT const> micromaps, VkQueryType query_type, ::std::size_t data_size, void* data, ::std::size_t stride, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkWriteMicromapsPropertiesEXT(device, static_cast<::std::uint32_t>(micromaps.size()), micromaps.data(), query_type, data_size, data, stride);
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void write_micromaps_properties(VkDevice device, ::std::span<VkMicromapEXT const> micromaps, VkQueryType query_type, ::std::size_t data_size, void* data, ::std::size_t stride)
+{
+	auto outcome = write_micromaps_properties(device, micromaps, query_type, data_size, data, stride, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
 }
 
 namespace fuchsia
@@ -53869,6 +57705,135 @@ template<::vkfu::expression_for<::vkfu::obj::fuchsia::imagepipe_surface> Express
 }
 #endif
 
+#if defined(VK_USE_PLATFORM_FUCHSIA)
+template<::vkfu::expression_for<::vkfu::obj::fuchsia::memory_get_zircon_handle> Expression1>
+[[nodiscard]] auto get_memory_zircon_handle(VkDevice device, Expression1&& get_zircon_handle_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<zx_handle_t, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(get_zircon_handle_info));
+	zx_handle_t produced{};
+	auto const outcome = ::vkGetMemoryZirconHandleFUCHSIA(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::fuchsia::memory_get_zircon_handle> Expression1>
+[[nodiscard]] auto get_memory_zircon_handle(VkDevice device, Expression1&& get_zircon_handle_info) -> zx_handle_t
+{
+	auto outcome = get_memory_zircon_handle(device, ::std::forward<Expression1>(get_zircon_handle_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+#endif
+
+#if defined(VK_USE_PLATFORM_FUCHSIA)
+template<::vkfu::expression_for<::vkfu::obj::fuchsia::semaphore_get_zircon_handle> Expression1>
+[[nodiscard]] auto get_semaphore_zircon_handle(VkDevice device, Expression1&& get_zircon_handle_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<zx_handle_t, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(get_zircon_handle_info));
+	zx_handle_t produced{};
+	auto const outcome = ::vkGetSemaphoreZirconHandleFUCHSIA(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::fuchsia::semaphore_get_zircon_handle> Expression1>
+[[nodiscard]] auto get_semaphore_zircon_handle(VkDevice device, Expression1&& get_zircon_handle_info) -> zx_handle_t
+{
+	auto outcome = get_semaphore_zircon_handle(device, ::std::forward<Expression1>(get_zircon_handle_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+#endif
+
+#if defined(VK_USE_PLATFORM_FUCHSIA)
+template<::vkfu::expression_for<::vkfu::obj::fuchsia::import_semaphore_zircon_handle> Expression1>
+[[nodiscard]] auto import_semaphore_zircon_handle(VkDevice device, Expression1&& import_semaphore_zircon_handle_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(import_semaphore_zircon_handle_info));
+	auto const outcome = ::vkImportSemaphoreZirconHandleFUCHSIA(device, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::fuchsia::import_semaphore_zircon_handle> Expression1>
+void import_semaphore_zircon_handle(VkDevice device, Expression1&& import_semaphore_zircon_handle_info)
+{
+	auto outcome = import_semaphore_zircon_handle(device, ::std::forward<Expression1>(import_semaphore_zircon_handle_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+#endif
+
+#if defined(VK_USE_PLATFORM_FUCHSIA)
+template<::vkfu::expression_for<::vkfu::obj::fuchsia::buffer_constraints> Expression1>
+[[nodiscard]] auto set_buffer_collection_buffer_constraints(VkDevice device, VkBufferCollectionFUCHSIA collection, Expression1&& buffer_constraints_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(buffer_constraints_info));
+	auto const outcome = ::vkSetBufferCollectionBufferConstraintsFUCHSIA(device, collection, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::fuchsia::buffer_constraints> Expression1>
+void set_buffer_collection_buffer_constraints(VkDevice device, VkBufferCollectionFUCHSIA collection, Expression1&& buffer_constraints_info)
+{
+	auto outcome = set_buffer_collection_buffer_constraints(device, collection, ::std::forward<Expression1>(buffer_constraints_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+#endif
+
+#if defined(VK_USE_PLATFORM_FUCHSIA)
+template<::vkfu::expression_for<::vkfu::obj::fuchsia::image_constraints> Expression1>
+[[nodiscard]] auto set_buffer_collection_image_constraints(VkDevice device, VkBufferCollectionFUCHSIA collection, Expression1&& image_constraints_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(image_constraints_info));
+	auto const outcome = ::vkSetBufferCollectionImageConstraintsFUCHSIA(device, collection, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::fuchsia::image_constraints> Expression1>
+void set_buffer_collection_image_constraints(VkDevice device, VkBufferCollectionFUCHSIA collection, Expression1&& image_constraints_info)
+{
+	auto outcome = set_buffer_collection_image_constraints(device, collection, ::std::forward<Expression1>(image_constraints_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+#endif
+
 }
 
 namespace ggp
@@ -53900,6 +57865,127 @@ template<::vkfu::expression_for<::vkfu::obj::ggp::stream_descriptor_surface> Exp
 	return *produced;
 }
 #endif
+
+}
+
+namespace intel
+{
+template<::vkfu::expression_for<::vkfu::obj::intel::performance_configuration_acquire> Expression1>
+[[nodiscard]] auto acquire_performance_configuration(VkDevice device, Expression1&& acquire_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<VkPerformanceConfigurationINTEL, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(acquire_info));
+	VkPerformanceConfigurationINTEL produced{};
+	auto const outcome = ::vkAcquirePerformanceConfigurationINTEL(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::intel::performance_configuration_acquire> Expression1>
+[[nodiscard]] auto acquire_performance_configuration(VkDevice device, Expression1&& acquire_info) -> VkPerformanceConfigurationINTEL
+{
+	auto outcome = acquire_performance_configuration(device, ::std::forward<Expression1>(acquire_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::intel::performance_marker> Expression1>
+[[nodiscard]] auto cmd_set_performance_marker(VkCommandBuffer command_buffer, Expression1&& marker_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(marker_info));
+	auto const outcome = ::vkCmdSetPerformanceMarkerINTEL(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::intel::performance_marker> Expression1>
+void cmd_set_performance_marker(VkCommandBuffer command_buffer, Expression1&& marker_info)
+{
+	auto outcome = cmd_set_performance_marker(command_buffer, ::std::forward<Expression1>(marker_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::intel::performance_override> Expression1>
+[[nodiscard]] auto cmd_set_performance_override(VkCommandBuffer command_buffer, Expression1&& override_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(override_info));
+	auto const outcome = ::vkCmdSetPerformanceOverrideINTEL(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::intel::performance_override> Expression1>
+void cmd_set_performance_override(VkCommandBuffer command_buffer, Expression1&& override_info)
+{
+	auto outcome = cmd_set_performance_override(command_buffer, ::std::forward<Expression1>(override_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::intel::performance_stream_marker> Expression1>
+[[nodiscard]] auto cmd_set_performance_stream_marker(VkCommandBuffer command_buffer, Expression1&& marker_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(marker_info));
+	auto const outcome = ::vkCmdSetPerformanceStreamMarkerINTEL(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::intel::performance_stream_marker> Expression1>
+void cmd_set_performance_stream_marker(VkCommandBuffer command_buffer, Expression1&& marker_info)
+{
+	auto outcome = cmd_set_performance_stream_marker(command_buffer, ::std::forward<Expression1>(marker_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::intel::initialize_performance_api> Expression1>
+[[nodiscard]] auto initialize_performance_api(VkDevice device, Expression1&& initialize_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(initialize_info));
+	auto const outcome = ::vkInitializePerformanceApiINTEL(device, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::intel::initialize_performance_api> Expression1>
+void initialize_performance_api(VkDevice device, Expression1&& initialize_info)
+{
+	auto outcome = initialize_performance_api(device, ::std::forward<Expression1>(initialize_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
 
 }
 
@@ -54337,6 +58423,794 @@ template<::vkfu::expression_for<::vkfu::obj::khr::xlib_surface> Expression>
 }
 #endif
 
+template<::vkfu::expression_for<::vkfu::obj::khr::acquire_next_image> Expression1>
+[[nodiscard]] auto acquire_next_image2(VkDevice device, Expression1&& acquire_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<::std::uint32_t, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(acquire_info));
+	::std::uint32_t produced{};
+	auto const outcome = ::vkAcquireNextImage2KHR(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::acquire_next_image> Expression1>
+[[nodiscard]] auto acquire_next_image2(VkDevice device, Expression1&& acquire_info) -> ::std::uint32_t
+{
+	auto outcome = acquire_next_image2(device, ::std::forward<Expression1>(acquire_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::acquire_profiling_lock> Expression1>
+[[nodiscard]] auto acquire_profiling_lock(VkDevice device, Expression1&& info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	auto const outcome = ::vkAcquireProfilingLockKHR(device, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::acquire_profiling_lock> Expression1>
+void acquire_profiling_lock(VkDevice device, Expression1&& info)
+{
+	auto outcome = acquire_profiling_lock(device, ::std::forward<Expression1>(info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+[[nodiscard]] inline auto bind_video_session_memory(VkDevice device, VkVideoSessionKHR video_session, ::std::span<VkBindVideoSessionMemoryInfoKHR const> bind_session_memory_infos, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkBindVideoSessionMemoryKHR(device, video_session, static_cast<::std::uint32_t>(bind_session_memory_infos.size()), bind_session_memory_infos.data());
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void bind_video_session_memory(VkDevice device, VkVideoSessionKHR video_session, ::std::span<VkBindVideoSessionMemoryInfoKHR const> bind_session_memory_infos)
+{
+	auto outcome = bind_video_session_memory(device, video_session, bind_session_memory_infos, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+[[nodiscard]] inline auto build_acceleration_structures(VkDevice device, VkDeferredOperationKHR deferred_operation, ::std::span<VkAccelerationStructureBuildGeometryInfoKHR const> infos, ::std::span<VkAccelerationStructureBuildRangeInfoKHR const* const> build_range_infos, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkBuildAccelerationStructuresKHR(device, deferred_operation, static_cast<::std::uint32_t>(build_range_infos.size()), infos.data(), build_range_infos.data());
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void build_acceleration_structures(VkDevice device, VkDeferredOperationKHR deferred_operation, ::std::span<VkAccelerationStructureBuildGeometryInfoKHR const> infos, ::std::span<VkAccelerationStructureBuildRangeInfoKHR const* const> build_range_infos)
+{
+	auto outcome = build_acceleration_structures(device, deferred_operation, infos, build_range_infos, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::video_begin_coding> Expression1>
+void cmd_begin_video_coding(VkCommandBuffer command_buffer, Expression1&& begin_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(begin_info));
+	::vkCmdBeginVideoCodingKHR(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_build_acceleration_structures_indirect(VkCommandBuffer command_buffer, ::std::span<VkAccelerationStructureBuildGeometryInfoKHR const> infos, ::std::span<VkDeviceAddress const> indirect_device_addresses, ::std::span<::std::uint32_t const> indirect_strides, ::std::span<::std::uint32_t const* const> max_primitive_counts)
+{
+	::vkCmdBuildAccelerationStructuresIndirectKHR(command_buffer, static_cast<::std::uint32_t>(max_primitive_counts.size()), infos.data(), indirect_device_addresses.data(), indirect_strides.data(), max_primitive_counts.data());
+}
+
+inline void cmd_build_acceleration_structures(VkCommandBuffer command_buffer, ::std::span<VkAccelerationStructureBuildGeometryInfoKHR const> infos, ::std::span<VkAccelerationStructureBuildRangeInfoKHR const* const> build_range_infos)
+{
+	::vkCmdBuildAccelerationStructuresKHR(command_buffer, static_cast<::std::uint32_t>(build_range_infos.size()), infos.data(), build_range_infos.data());
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::video_coding_control> Expression1>
+void cmd_control_video_coding(VkCommandBuffer command_buffer, Expression1&& coding_control_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(coding_control_info));
+	::vkCmdControlVideoCodingKHR(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::copy_acceleration_structure> Expression1>
+void cmd_copy_acceleration_structure(VkCommandBuffer command_buffer, Expression1&& info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	::vkCmdCopyAccelerationStructureKHR(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::copy_acceleration_structure_to_memory> Expression1>
+void cmd_copy_acceleration_structure_to_memory(VkCommandBuffer command_buffer, Expression1&& info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	::vkCmdCopyAccelerationStructureToMemoryKHR(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::copy_memory_indirect> Expression1>
+void cmd_copy_memory_indirect(VkCommandBuffer command_buffer, Expression1&& copy_memory_indirect_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(copy_memory_indirect_info));
+	::vkCmdCopyMemoryIndirectKHR(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::copy_memory_to_acceleration_structure> Expression1>
+void cmd_copy_memory_to_acceleration_structure(VkCommandBuffer command_buffer, Expression1&& info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	::vkCmdCopyMemoryToAccelerationStructureKHR(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::copy_memory_to_image_indirect> Expression1>
+void cmd_copy_memory_to_image_indirect(VkCommandBuffer command_buffer, Expression1&& copy_memory_to_image_indirect_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(copy_memory_to_image_indirect_info));
+	::vkCmdCopyMemoryToImageIndirectKHR(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::video_decode> Expression1>
+void cmd_decode_video(VkCommandBuffer command_buffer, Expression1&& decode_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(decode_info));
+	::vkCmdDecodeVideoKHR(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::video_encode> Expression1>
+void cmd_encode_video(VkCommandBuffer command_buffer, Expression1&& encode_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(encode_info));
+	::vkCmdEncodeVideoKHR(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::video_end_coding> Expression1>
+void cmd_end_video_coding(VkCommandBuffer command_buffer, Expression1&& end_coding_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(end_coding_info));
+	::vkCmdEndVideoCodingKHR(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_write_acceleration_structures_properties(VkCommandBuffer command_buffer, ::std::span<VkAccelerationStructureKHR const> acceleration_structures, VkQueryType query_type, VkQueryPool query_pool, ::std::uint32_t first_query)
+{
+	::vkCmdWriteAccelerationStructuresPropertiesKHR(command_buffer, static_cast<::std::uint32_t>(acceleration_structures.size()), acceleration_structures.data(), query_type, query_pool, first_query);
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::copy_acceleration_structure> Expression1>
+[[nodiscard]] auto copy_acceleration_structure(VkDevice device, VkDeferredOperationKHR deferred_operation, Expression1&& info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	auto const outcome = ::vkCopyAccelerationStructureKHR(device, deferred_operation, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::copy_acceleration_structure> Expression1>
+void copy_acceleration_structure(VkDevice device, VkDeferredOperationKHR deferred_operation, Expression1&& info)
+{
+	auto outcome = copy_acceleration_structure(device, deferred_operation, ::std::forward<Expression1>(info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::copy_acceleration_structure_to_memory> Expression1>
+[[nodiscard]] auto copy_acceleration_structure_to_memory(VkDevice device, VkDeferredOperationKHR deferred_operation, Expression1&& info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	auto const outcome = ::vkCopyAccelerationStructureToMemoryKHR(device, deferred_operation, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::copy_acceleration_structure_to_memory> Expression1>
+void copy_acceleration_structure_to_memory(VkDevice device, VkDeferredOperationKHR deferred_operation, Expression1&& info)
+{
+	auto outcome = copy_acceleration_structure_to_memory(device, deferred_operation, ::std::forward<Expression1>(info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::copy_memory_to_acceleration_structure> Expression1>
+[[nodiscard]] auto copy_memory_to_acceleration_structure(VkDevice device, VkDeferredOperationKHR deferred_operation, Expression1&& info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	auto const outcome = ::vkCopyMemoryToAccelerationStructureKHR(device, deferred_operation, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::copy_memory_to_acceleration_structure> Expression1>
+void copy_memory_to_acceleration_structure(VkDevice device, VkDeferredOperationKHR deferred_operation, Expression1&& info)
+{
+	auto outcome = copy_memory_to_acceleration_structure(device, deferred_operation, ::std::forward<Expression1>(info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::acceleration_structure_build_geometry> Expression1>
+[[nodiscard]] auto get_acceleration_structure_build_sizes(VkDevice device, VkAccelerationStructureBuildTypeKHR build_type, Expression1&& build_info, ::std::uint32_t const* max_primitive_counts) -> VkAccelerationStructureBuildSizesInfoKHR
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(build_info));
+	VkAccelerationStructureBuildSizesInfoKHR produced{};
+	::vkGetAccelerationStructureBuildSizesKHR(device, build_type, ::std::addressof(::vkfu::unpack(storage1)), max_primitive_counts, ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::acceleration_structure_device_address> Expression1>
+[[nodiscard]] auto get_acceleration_structure_device_address(VkDevice device, Expression1&& info) -> VkDeviceAddress
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	return ::vkGetAccelerationStructureDeviceAddressKHR(device, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::acceleration_structure_version> Expression1>
+[[nodiscard]] auto get_device_acceleration_structure_compatibility(VkDevice device, Expression1&& version_info) -> VkAccelerationStructureCompatibilityKHR
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(version_info));
+	VkAccelerationStructureCompatibilityKHR produced{};
+	::vkGetDeviceAccelerationStructureCompatibilityKHR(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::display_plane2> Expression1>
+[[nodiscard]] auto get_display_plane_capabilities2(VkPhysicalDevice physical_device, Expression1&& display_plane_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<VkDisplayPlaneCapabilities2KHR, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(display_plane_info));
+	VkDisplayPlaneCapabilities2KHR produced{};
+	auto const outcome = ::vkGetDisplayPlaneCapabilities2KHR(physical_device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::display_plane2> Expression1>
+[[nodiscard]] auto get_display_plane_capabilities2(VkPhysicalDevice physical_device, Expression1&& display_plane_info) -> VkDisplayPlaneCapabilities2KHR
+{
+	auto outcome = get_display_plane_capabilities2(physical_device, ::std::forward<Expression1>(display_plane_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::fence_get_fd> Expression1>
+[[nodiscard]] auto get_fence_fd(VkDevice device, Expression1&& get_fd_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<int, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(get_fd_info));
+	int produced{};
+	auto const outcome = ::vkGetFenceFdKHR(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::fence_get_fd> Expression1>
+[[nodiscard]] auto get_fence_fd(VkDevice device, Expression1&& get_fd_info) -> int
+{
+	auto outcome = get_fence_fd(device, ::std::forward<Expression1>(get_fd_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+template<::vkfu::expression_for<::vkfu::obj::khr::fence_get_win32_handle> Expression1>
+[[nodiscard]] auto get_fence_win32_handle(VkDevice device, Expression1&& get_win32_handle_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<HANDLE, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(get_win32_handle_info));
+	HANDLE produced{};
+	auto const outcome = ::vkGetFenceWin32HandleKHR(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::fence_get_win32_handle> Expression1>
+[[nodiscard]] auto get_fence_win32_handle(VkDevice device, Expression1&& get_win32_handle_info) -> HANDLE
+{
+	auto outcome = get_fence_win32_handle(device, ::std::forward<Expression1>(get_win32_handle_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+#endif
+
+template<::vkfu::expression_for<::vkfu::obj::khr::memory_get_fd> Expression1>
+[[nodiscard]] auto get_memory_fd(VkDevice device, Expression1&& get_fd_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<int, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(get_fd_info));
+	int produced{};
+	auto const outcome = ::vkGetMemoryFdKHR(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::memory_get_fd> Expression1>
+[[nodiscard]] auto get_memory_fd(VkDevice device, Expression1&& get_fd_info) -> int
+{
+	auto outcome = get_memory_fd(device, ::std::forward<Expression1>(get_fd_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+template<::vkfu::expression_for<::vkfu::obj::khr::memory_get_win32_handle> Expression1>
+[[nodiscard]] auto get_memory_win32_handle(VkDevice device, Expression1&& get_win32_handle_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<HANDLE, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(get_win32_handle_info));
+	HANDLE produced{};
+	auto const outcome = ::vkGetMemoryWin32HandleKHR(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::memory_get_win32_handle> Expression1>
+[[nodiscard]] auto get_memory_win32_handle(VkDevice device, Expression1&& get_win32_handle_info) -> HANDLE
+{
+	auto outcome = get_memory_win32_handle(device, ::std::forward<Expression1>(get_win32_handle_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+#endif
+
+template<::vkfu::expression_for<::vkfu::obj::khr::query_pool_performance> Expression1>
+[[nodiscard]] auto get_physical_device_queue_family_performance_query_passes(VkPhysicalDevice physical_device, Expression1&& performance_query_create_info) -> ::std::uint32_t
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(performance_query_create_info));
+	::std::uint32_t produced{};
+	::vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR(physical_device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expression1>
+[[nodiscard]] auto get_physical_device_surface_capabilities2(VkPhysicalDevice physical_device, Expression1&& surface_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<VkSurfaceCapabilities2KHR, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(surface_info));
+	VkSurfaceCapabilities2KHR produced{};
+	auto const outcome = ::vkGetPhysicalDeviceSurfaceCapabilities2KHR(physical_device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expression1>
+[[nodiscard]] auto get_physical_device_surface_capabilities2(VkPhysicalDevice physical_device, Expression1&& surface_info) -> VkSurfaceCapabilities2KHR
+{
+	auto outcome = get_physical_device_surface_capabilities2(physical_device, ::std::forward<Expression1>(surface_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::video_profile> Expression1>
+[[nodiscard]] auto get_physical_device_video_capabilities(VkPhysicalDevice physical_device, Expression1&& video_profile, ::std::nothrow_t) noexcept
+	-> ::std::expected<VkVideoCapabilitiesKHR, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(video_profile));
+	VkVideoCapabilitiesKHR produced{};
+	auto const outcome = ::vkGetPhysicalDeviceVideoCapabilitiesKHR(physical_device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::video_profile> Expression1>
+[[nodiscard]] auto get_physical_device_video_capabilities(VkPhysicalDevice physical_device, Expression1&& video_profile) -> VkVideoCapabilitiesKHR
+{
+	auto outcome = get_physical_device_video_capabilities(physical_device, ::std::forward<Expression1>(video_profile), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_video_encode_quality_level> Expression1>
+[[nodiscard]] auto get_physical_device_video_encode_quality_level_properties(VkPhysicalDevice physical_device, Expression1&& quality_level_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<VkVideoEncodeQualityLevelPropertiesKHR, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(quality_level_info));
+	VkVideoEncodeQualityLevelPropertiesKHR produced{};
+	auto const outcome = ::vkGetPhysicalDeviceVideoEncodeQualityLevelPropertiesKHR(physical_device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_video_encode_quality_level> Expression1>
+[[nodiscard]] auto get_physical_device_video_encode_quality_level_properties(VkPhysicalDevice physical_device, Expression1&& quality_level_info) -> VkVideoEncodeQualityLevelPropertiesKHR
+{
+	auto outcome = get_physical_device_video_encode_quality_level_properties(physical_device, ::std::forward<Expression1>(quality_level_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::state::khr::create> Expression1>
+[[nodiscard]] auto get_pipeline_key(VkDevice device, Expression1&& pipeline_create_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<VkPipelineBinaryKeyKHR, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(pipeline_create_info));
+	VkPipelineBinaryKeyKHR produced{};
+	auto const outcome = ::vkGetPipelineKeyKHR(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::state::khr::create> Expression1>
+[[nodiscard]] auto get_pipeline_key(VkDevice device, Expression1&& pipeline_create_info) -> VkPipelineBinaryKeyKHR
+{
+	auto outcome = get_pipeline_key(device, ::std::forward<Expression1>(pipeline_create_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::semaphore_get_fd> Expression1>
+[[nodiscard]] auto get_semaphore_fd(VkDevice device, Expression1&& get_fd_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<int, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(get_fd_info));
+	int produced{};
+	auto const outcome = ::vkGetSemaphoreFdKHR(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::semaphore_get_fd> Expression1>
+[[nodiscard]] auto get_semaphore_fd(VkDevice device, Expression1&& get_fd_info) -> int
+{
+	auto outcome = get_semaphore_fd(device, ::std::forward<Expression1>(get_fd_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+template<::vkfu::expression_for<::vkfu::obj::khr::semaphore_get_win32_handle> Expression1>
+[[nodiscard]] auto get_semaphore_win32_handle(VkDevice device, Expression1&& get_win32_handle_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<HANDLE, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(get_win32_handle_info));
+	HANDLE produced{};
+	auto const outcome = ::vkGetSemaphoreWin32HandleKHR(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::semaphore_get_win32_handle> Expression1>
+[[nodiscard]] auto get_semaphore_win32_handle(VkDevice device, Expression1&& get_win32_handle_info) -> HANDLE
+{
+	auto outcome = get_semaphore_win32_handle(device, ::std::forward<Expression1>(get_win32_handle_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+#endif
+
+template<::vkfu::expression_for<::vkfu::obj::khr::import_fence_fd> Expression1>
+[[nodiscard]] auto import_fence_fd(VkDevice device, Expression1&& import_fence_fd_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(import_fence_fd_info));
+	auto const outcome = ::vkImportFenceFdKHR(device, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::import_fence_fd> Expression1>
+void import_fence_fd(VkDevice device, Expression1&& import_fence_fd_info)
+{
+	auto outcome = import_fence_fd(device, ::std::forward<Expression1>(import_fence_fd_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+template<::vkfu::expression_for<::vkfu::obj::khr::import_fence_win32_handle> Expression1>
+[[nodiscard]] auto import_fence_win32_handle(VkDevice device, Expression1&& import_fence_win32_handle_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(import_fence_win32_handle_info));
+	auto const outcome = ::vkImportFenceWin32HandleKHR(device, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::import_fence_win32_handle> Expression1>
+void import_fence_win32_handle(VkDevice device, Expression1&& import_fence_win32_handle_info)
+{
+	auto outcome = import_fence_win32_handle(device, ::std::forward<Expression1>(import_fence_win32_handle_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+#endif
+
+template<::vkfu::expression_for<::vkfu::obj::khr::import_semaphore_fd> Expression1>
+[[nodiscard]] auto import_semaphore_fd(VkDevice device, Expression1&& import_semaphore_fd_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(import_semaphore_fd_info));
+	auto const outcome = ::vkImportSemaphoreFdKHR(device, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::import_semaphore_fd> Expression1>
+void import_semaphore_fd(VkDevice device, Expression1&& import_semaphore_fd_info)
+{
+	auto outcome = import_semaphore_fd(device, ::std::forward<Expression1>(import_semaphore_fd_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+template<::vkfu::expression_for<::vkfu::obj::khr::import_semaphore_win32_handle> Expression1>
+[[nodiscard]] auto import_semaphore_win32_handle(VkDevice device, Expression1&& import_semaphore_win32_handle_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(import_semaphore_win32_handle_info));
+	auto const outcome = ::vkImportSemaphoreWin32HandleKHR(device, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::import_semaphore_win32_handle> Expression1>
+void import_semaphore_win32_handle(VkDevice device, Expression1&& import_semaphore_win32_handle_info)
+{
+	auto outcome = import_semaphore_win32_handle(device, ::std::forward<Expression1>(import_semaphore_win32_handle_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+#endif
+
+template<::vkfu::expression_for<::vkfu::obj::khr::present> Expression1>
+[[nodiscard]] auto queue_present(VkQueue queue, Expression1&& present_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(present_info));
+	auto const outcome = ::vkQueuePresentKHR(queue, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::present> Expression1>
+void queue_present(VkQueue queue, Expression1&& present_info)
+{
+	auto outcome = queue_present(queue, ::std::forward<Expression1>(present_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::release_captured_pipeline_data> Expression1>
+[[nodiscard]] auto release_captured_pipeline_data(VkDevice device, Expression1&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	auto const outcome = ::vkReleaseCapturedPipelineDataKHR(device, ::std::addressof(::vkfu::unpack(storage1)), allocation_callbacks);
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::release_captured_pipeline_data> Expression1>
+void release_captured_pipeline_data(VkDevice device, Expression1&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr)
+{
+	auto outcome = release_captured_pipeline_data(device, ::std::forward<Expression1>(info), allocation_callbacks, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::release_swapchain_images> Expression1>
+[[nodiscard]] auto release_swapchain_images(VkDevice device, Expression1&& release_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(release_info));
+	auto const outcome = ::vkReleaseSwapchainImagesKHR(device, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::release_swapchain_images> Expression1>
+void release_swapchain_images(VkDevice device, Expression1&& release_info)
+{
+	auto outcome = release_swapchain_images(device, ::std::forward<Expression1>(release_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::video_session_parameters_update> Expression1>
+[[nodiscard]] auto update_video_session_parameters(VkDevice device, VkVideoSessionParametersKHR video_session_parameters, Expression1&& update_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(update_info));
+	auto const outcome = ::vkUpdateVideoSessionParametersKHR(device, video_session_parameters, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::video_session_parameters_update> Expression1>
+void update_video_session_parameters(VkDevice device, VkVideoSessionParametersKHR video_session_parameters, Expression1&& update_info)
+{
+	auto outcome = update_video_session_parameters(device, video_session_parameters, ::std::forward<Expression1>(update_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::present_wait2> Expression1>
+[[nodiscard]] auto wait_for_present2(VkDevice device, VkSwapchainKHR swapchain, Expression1&& present_wait2_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(present_wait2_info));
+	auto const outcome = ::vkWaitForPresent2KHR(device, swapchain, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::khr::present_wait2> Expression1>
+void wait_for_present2(VkDevice device, VkSwapchainKHR swapchain, Expression1&& present_wait2_info)
+{
+	auto outcome = wait_for_present2(device, swapchain, ::std::forward<Expression1>(present_wait2_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+[[nodiscard]] inline auto write_acceleration_structures_properties(VkDevice device, ::std::span<VkAccelerationStructureKHR const> acceleration_structures, VkQueryType query_type, ::std::size_t data_size, void* data, ::std::size_t stride, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkWriteAccelerationStructuresPropertiesKHR(device, static_cast<::std::uint32_t>(acceleration_structures.size()), acceleration_structures.data(), query_type, data_size, data, stride);
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void write_acceleration_structures_properties(VkDevice device, ::std::span<VkAccelerationStructureKHR const> acceleration_structures, VkQueryType query_type, ::std::size_t data_size, void* data, ::std::size_t stride)
+{
+	auto outcome = write_acceleration_structures_properties(device, acceleration_structures, query_type, data_size, data, stride, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
 }
 
 namespace mvk
@@ -54648,6 +59522,282 @@ template<::vkfu::expression_for<::vkfu::obj::nv::ray_tracing_pipeline> Expressio
 	return (*produced)[0];
 }
 
+[[nodiscard]] inline auto bind_acceleration_structure_memory(VkDevice device, ::std::span<VkBindAccelerationStructureMemoryInfoNV const> bind_infos, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	auto const outcome = ::vkBindAccelerationStructureMemoryNV(device, static_cast<::std::uint32_t>(bind_infos.size()), bind_infos.data());
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+inline void bind_acceleration_structure_memory(VkDevice device, ::std::span<VkBindAccelerationStructureMemoryInfoNV const> bind_infos)
+{
+	auto outcome = bind_acceleration_structure_memory(device, bind_infos, ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::acceleration_structure> Expression1>
+void cmd_build_acceleration_structure(VkCommandBuffer command_buffer, Expression1&& info, VkBuffer instance_data, VkDeviceSize instance_offset, VkBool32 update, VkAccelerationStructureNV dst, VkAccelerationStructureNV src, VkBuffer scratch, VkDeviceSize scratch_offset)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	::vkCmdBuildAccelerationStructureNV(command_buffer, ::std::addressof(::vkfu::unpack(storage1)), instance_data, instance_offset, update, dst, src, scratch, scratch_offset);
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::cluster_acceleration_structure_commands> Expression1>
+void cmd_build_cluster_acceleration_structure_indirect(VkCommandBuffer command_buffer, Expression1&& command_infos)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(command_infos));
+	::vkCmdBuildClusterAccelerationStructureIndirectNV(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::build_partitioned_acceleration_structure> Expression1>
+void cmd_build_partitioned_acceleration_structures(VkCommandBuffer command_buffer, Expression1&& build_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(build_info));
+	::vkCmdBuildPartitionedAccelerationStructuresNV(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_convert_cooperative_vector_matrix(VkCommandBuffer command_buffer, ::std::span<VkConvertCooperativeVectorMatrixInfoNV const> infos)
+{
+	::vkCmdConvertCooperativeVectorMatrixNV(command_buffer, static_cast<::std::uint32_t>(infos.size()), infos.data());
+}
+
+inline void cmd_copy_memory_to_image_indirect(VkCommandBuffer command_buffer, VkDeviceAddress copy_buffer_address, ::std::uint32_t stride, VkImage dst_image, VkImageLayout dst_image_layout, ::std::span<VkImageSubresourceLayers const> image_subresources)
+{
+	::vkCmdCopyMemoryToImageIndirectNV(command_buffer, copy_buffer_address, static_cast<::std::uint32_t>(image_subresources.size()), stride, dst_image, dst_image_layout, image_subresources.data());
+}
+
+#if defined(VK_ENABLE_BETA_EXTENSIONS)
+template<::vkfu::expression_for<::vkfu::obj::nv::cuda_launch> Expression1>
+void cmd_cuda_launch_kernel(VkCommandBuffer command_buffer, Expression1&& launch_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(launch_info));
+	::vkCmdCudaLaunchKernelNV(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+#endif
+
+inline void cmd_decompress_memory(VkCommandBuffer command_buffer, ::std::span<VkDecompressMemoryRegionNV const> decompress_memory_regions)
+{
+	::vkCmdDecompressMemoryNV(command_buffer, static_cast<::std::uint32_t>(decompress_memory_regions.size()), decompress_memory_regions.data());
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::generated_commands> Expression1>
+void cmd_execute_generated_commands(VkCommandBuffer command_buffer, VkBool32 is_preprocessed, Expression1&& generated_commands_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(generated_commands_info));
+	::vkCmdExecuteGeneratedCommandsNV(command_buffer, is_preprocessed, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::optical_flow_execute> Expression1>
+void cmd_optical_flow_execute(VkCommandBuffer command_buffer, VkOpticalFlowSessionNV session, Expression1&& execute_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(execute_info));
+	::vkCmdOpticalFlowExecuteNV(command_buffer, session, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::generated_commands> Expression1>
+void cmd_preprocess_generated_commands(VkCommandBuffer command_buffer, Expression1&& generated_commands_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(generated_commands_info));
+	::vkCmdPreprocessGeneratedCommandsNV(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+inline void cmd_set_coarse_sample_order(VkCommandBuffer command_buffer, VkCoarseSampleOrderTypeNV sample_order_type, ::std::span<VkCoarseSampleOrderCustomNV const> custom_sample_orders)
+{
+	::vkCmdSetCoarseSampleOrderNV(command_buffer, sample_order_type, static_cast<::std::uint32_t>(custom_sample_orders.size()), custom_sample_orders.data());
+}
+
+inline void cmd_set_exclusive_scissor_enable(VkCommandBuffer command_buffer, ::std::uint32_t first_exclusive_scissor, ::std::span<VkBool32 const> exclusive_scissor_enables)
+{
+	::vkCmdSetExclusiveScissorEnableNV(command_buffer, first_exclusive_scissor, static_cast<::std::uint32_t>(exclusive_scissor_enables.size()), exclusive_scissor_enables.data());
+}
+
+inline void cmd_set_exclusive_scissor(VkCommandBuffer command_buffer, ::std::uint32_t first_exclusive_scissor, ::std::span<VkRect2D const> exclusive_scissors)
+{
+	::vkCmdSetExclusiveScissorNV(command_buffer, first_exclusive_scissor, static_cast<::std::uint32_t>(exclusive_scissors.size()), exclusive_scissors.data());
+}
+
+inline void cmd_set_viewport_shading_rate_palette(VkCommandBuffer command_buffer, ::std::uint32_t first_viewport, ::std::span<VkShadingRatePaletteNV const> shading_rate_palettes)
+{
+	::vkCmdSetViewportShadingRatePaletteNV(command_buffer, first_viewport, static_cast<::std::uint32_t>(shading_rate_palettes.size()), shading_rate_palettes.data());
+}
+
+inline void cmd_set_viewport_w_scaling(VkCommandBuffer command_buffer, ::std::uint32_t first_viewport, ::std::span<VkViewportWScalingNV const> viewport_w_scalings)
+{
+	::vkCmdSetViewportWScalingNV(command_buffer, first_viewport, static_cast<::std::uint32_t>(viewport_w_scalings.size()), viewport_w_scalings.data());
+}
+
+inline void cmd_write_acceleration_structures_properties(VkCommandBuffer command_buffer, ::std::span<VkAccelerationStructureNV const> acceleration_structures, VkQueryType query_type, VkQueryPool query_pool, ::std::uint32_t first_query)
+{
+	::vkCmdWriteAccelerationStructuresPropertiesNV(command_buffer, static_cast<::std::uint32_t>(acceleration_structures.size()), acceleration_structures.data(), query_type, query_pool, first_query);
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::convert_cooperative_vector_matrix> Expression1>
+[[nodiscard]] auto convert_cooperative_vector_matrix(VkDevice device, Expression1&& info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	auto const outcome = ::vkConvertCooperativeVectorMatrixNV(device, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::convert_cooperative_vector_matrix> Expression1>
+void convert_cooperative_vector_matrix(VkDevice device, Expression1&& info)
+{
+	auto outcome = convert_cooperative_vector_matrix(device, ::std::forward<Expression1>(info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::acceleration_structure_memory_requirements> Expression1>
+[[nodiscard]] auto get_acceleration_structure_memory_requirements(VkDevice device, Expression1&& info) -> VkMemoryRequirements2KHR
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	VkMemoryRequirements2KHR produced{};
+	::vkGetAccelerationStructureMemoryRequirementsNV(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::cluster_acceleration_structure_input> Expression1>
+[[nodiscard]] auto get_cluster_acceleration_structure_build_sizes(VkDevice device, Expression1&& info) -> VkAccelerationStructureBuildSizesInfoKHR
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	VkAccelerationStructureBuildSizesInfoKHR produced{};
+	::vkGetClusterAccelerationStructureBuildSizesNV(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::generated_commands_memory_requirements> Expression1>
+[[nodiscard]] auto get_generated_commands_memory_requirements(VkDevice device, Expression1&& info) -> VkMemoryRequirements2
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	VkMemoryRequirements2 produced{};
+	::vkGetGeneratedCommandsMemoryRequirementsNV(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::memory_get_remote_address> Expression1>
+[[nodiscard]] auto get_memory_remote_address(VkDevice device, Expression1&& memory_get_remote_address_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<VkRemoteAddressNV, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(memory_get_remote_address_info));
+	VkRemoteAddressNV produced{};
+	auto const outcome = ::vkGetMemoryRemoteAddressNV(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::memory_get_remote_address> Expression1>
+[[nodiscard]] auto get_memory_remote_address(VkDevice device, Expression1&& memory_get_remote_address_info) -> VkRemoteAddressNV
+{
+	auto outcome = get_memory_remote_address(device, ::std::forward<Expression1>(memory_get_remote_address_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::partitioned_acceleration_structure_instances_input> Expression1>
+[[nodiscard]] auto get_partitioned_acceleration_structures_build_sizes(VkDevice device, Expression1&& info) -> VkAccelerationStructureBuildSizesInfoKHR
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	VkAccelerationStructureBuildSizesInfoKHR produced{};
+	::vkGetPartitionedAccelerationStructuresBuildSizesNV(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::pipeline_indirect_device_address> Expression1>
+[[nodiscard]] auto get_pipeline_indirect_device_address(VkDevice device, Expression1&& info) -> VkDeviceAddress
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	return ::vkGetPipelineIndirectDeviceAddressNV(device, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::compute_pipeline> Expression1>
+[[nodiscard]] auto get_pipeline_indirect_memory_requirements(VkDevice device, Expression1&& create_info) -> VkMemoryRequirements2
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(create_info));
+	VkMemoryRequirements2 produced{};
+	::vkGetPipelineIndirectMemoryRequirementsNV(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::latency_sleep> Expression1>
+[[nodiscard]] auto latency_sleep(VkDevice device, VkSwapchainKHR swapchain, Expression1&& sleep_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(sleep_info));
+	auto const outcome = ::vkLatencySleepNV(device, swapchain, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::latency_sleep> Expression1>
+void latency_sleep(VkDevice device, VkSwapchainKHR swapchain, Expression1&& sleep_info)
+{
+	auto outcome = latency_sleep(device, swapchain, ::std::forward<Expression1>(sleep_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::out_of_band_queue_type> Expression1>
+void queue_notify_out_of_band(VkQueue queue, Expression1&& queue_type_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(queue_type_info));
+	::vkQueueNotifyOutOfBandNV(queue, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::set_latency_marker> Expression1>
+void set_latency_marker(VkDevice device, VkSwapchainKHR swapchain, Expression1&& latency_marker_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(latency_marker_info));
+	::vkSetLatencyMarkerNV(device, swapchain, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::latency_sleep_mode> Expression1>
+[[nodiscard]] auto set_latency_sleep_mode(VkDevice device, VkSwapchainKHR swapchain, Expression1&& sleep_mode_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<void, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(sleep_mode_info));
+	auto const outcome = ::vkSetLatencySleepModeNV(device, swapchain, ::std::addressof(::vkfu::unpack(storage1)));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return {};
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nv::latency_sleep_mode> Expression1>
+void set_latency_sleep_mode(VkDevice device, VkSwapchainKHR swapchain, Expression1&& sleep_mode_info)
+{
+	auto outcome = set_latency_sleep_mode(device, swapchain, ::std::forward<Expression1>(sleep_mode_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+}
+
 }
 
 namespace nvx
@@ -54704,6 +59854,27 @@ template<::vkfu::expression_for<::vkfu::obj::nvx::cu_module> Expression>
 	return *produced;
 }
 
+template<::vkfu::expression_for<::vkfu::obj::nvx::cu_launch> Expression1>
+void cmd_cu_launch_kernel(VkCommandBuffer command_buffer, Expression1&& launch_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(launch_info));
+	::vkCmdCuLaunchKernelNVX(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nvx::image_view_handle> Expression1>
+[[nodiscard]] auto get_image_view_handle64(VkDevice device, Expression1&& info) -> ::std::uint64_t
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	return ::vkGetImageViewHandle64NVX(device, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::nvx::image_view_handle> Expression1>
+[[nodiscard]] auto get_image_view_handle(VkDevice device, Expression1&& info) -> ::std::uint32_t
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	return ::vkGetImageViewHandleNVX(device, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
 }
 
 namespace ohos
@@ -54738,6 +59909,63 @@ template<::vkfu::expression_for<::vkfu::obj::ohos::surface> Expression>
 
 }
 
+namespace qcom
+{
+template<::vkfu::expression_for<::vkfu::obj::qcom::per_tile_begin> Expression1>
+void cmd_begin_per_tile_execution(VkCommandBuffer command_buffer, Expression1&& per_tile_begin_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(per_tile_begin_info));
+	::vkCmdBeginPerTileExecutionQCOM(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::qcom::tile_memory_bind> Expression1>
+void cmd_bind_tile_memory(VkCommandBuffer command_buffer, Expression1&& tile_memory_bind_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(tile_memory_bind_info));
+	::vkCmdBindTileMemoryQCOM(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::qcom::dispatch_tile> Expression1>
+void cmd_dispatch_tile(VkCommandBuffer command_buffer, Expression1&& dispatch_tile_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(dispatch_tile_info));
+	::vkCmdDispatchTileQCOM(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::qcom::per_tile_end> Expression1>
+void cmd_end_per_tile_execution(VkCommandBuffer command_buffer, Expression1&& per_tile_end_info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(per_tile_end_info));
+	::vkCmdEndPerTileExecutionQCOM(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
+}
+
+template<::vkfu::expression_for<::vkfu::obj::rendering> Expression1>
+[[nodiscard]] auto get_dynamic_rendering_tile_properties(VkDevice device, Expression1&& rendering_info, ::std::nothrow_t) noexcept
+	-> ::std::expected<VkTilePropertiesQCOM, ::VkResult>
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(rendering_info));
+	VkTilePropertiesQCOM produced{};
+	auto const outcome = ::vkGetDynamicRenderingTilePropertiesQCOM(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	if (outcome != ::VK_SUCCESS)
+	{
+		return ::std::unexpected{outcome};
+	}
+	return produced;
+}
+
+template<::vkfu::expression_for<::vkfu::obj::rendering> Expression1>
+[[nodiscard]] auto get_dynamic_rendering_tile_properties(VkDevice device, Expression1&& rendering_info) -> VkTilePropertiesQCOM
+{
+	auto outcome = get_dynamic_rendering_tile_properties(device, ::std::forward<Expression1>(rendering_info), ::std::nothrow);
+	if (!outcome)
+	{
+		throw outcome.error();
+	}
+	return *outcome;
+}
+
+}
+
 namespace qnx
 {
 #if defined(VK_USE_PLATFORM_SCREEN_QNX)
@@ -54767,6 +59995,19 @@ template<::vkfu::expression_for<::vkfu::obj::qnx::screen_surface> Expression>
 	return *produced;
 }
 #endif
+
+}
+
+namespace valve
+{
+template<::vkfu::expression_for<::vkfu::obj::valve::descriptor_set_binding_reference> Expression1>
+[[nodiscard]] auto get_descriptor_set_layout_host_mapping_info(VkDevice device, Expression1&& binding_reference) -> VkDescriptorSetLayoutHostMappingInfoVALVE
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(binding_reference));
+	VkDescriptorSetLayoutHostMappingInfoVALVE produced{};
+	::vkGetDescriptorSetLayoutHostMappingInfoVALVE(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(produced));
+	return produced;
+}
 
 }
 

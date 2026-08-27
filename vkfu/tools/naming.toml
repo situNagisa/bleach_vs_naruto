@@ -179,6 +179,19 @@ pEngineName = "engine_name"
 engineVersion = "engine_version"
 apiVersion = "api_version"
 
+[struct."VkAttachmentDescription"]
+name = "attachment_description"
+[struct."VkAttachmentDescription".members]
+flags = "flags"
+format = "format"
+samples = "samples"
+loadOp = "load_op"
+storeOp = "store_op"
+stencilLoadOp = "stencil_load_op"
+stencilStoreOp = "stencil_store_op"
+initialLayout = "initial_layout"
+finalLayout = "final_layout"
+
 [struct."VkAttachmentDescription2"]
 name = "attachment_description2"
 [struct."VkAttachmentDescription2".members]
@@ -203,6 +216,12 @@ name = "option::ext::attachment_feedback_loop"
 [struct."VkAttachmentFeedbackLoopInfoEXT".members]
 feedbackLoopEnable = "feedback_loop_enable"
 
+[struct."VkAttachmentReference"]
+name = "attachment_reference"
+[struct."VkAttachmentReference".members]
+attachment = "attachment"
+layout = "layout"
+
 [struct."VkAttachmentReference2"]
 name = "attachment_reference2"
 [struct."VkAttachmentReference2".members]
@@ -220,6 +239,12 @@ name = "option::amd::attachment_sample_count"
 [struct."VkAttachmentSampleCountInfoAMD".members]
 pColorAttachmentSamples = "color_attachment_samples"
 depthStencilAttachmentSamples = "depth_stencil_attachment_samples"
+
+[struct."VkAttachmentSampleLocationsEXT"]
+name = "ext::attachment_sample_locations"
+[struct."VkAttachmentSampleLocationsEXT".members]
+attachmentIndex = "attachment_index"
+sampleLocationsInfo = "sample_locations_info"
 
 [struct."VkBindAccelerationStructureMemoryInfoNV"]
 name = "nv::bind_acceleration_structure_memory"
@@ -483,6 +508,20 @@ opType = "op_type"
 opMode = "op_mode"
 opInput = "op_input"
 
+[struct."VkCoarseSampleLocationNV"]
+name = "nv::coarse_sample_location"
+[struct."VkCoarseSampleLocationNV".members]
+pixelX = "pixel_x"
+pixelY = "pixel_y"
+sample = "sample"
+
+[struct."VkCoarseSampleOrderCustomNV"]
+name = "nv::coarse_sample_order_custom"
+[struct."VkCoarseSampleOrderCustomNV".members]
+shadingRate = "shading_rate"
+sampleCount = "sample_count"
+pSampleLocations = "sample_locations"
+
 [struct."VkCommandBufferAllocateInfo"]
 name = "command_buffer"
 [struct."VkCommandBufferAllocateInfo".members]
@@ -545,6 +584,14 @@ name = "command_pool"
 [struct."VkCommandPoolCreateInfo".members]
 flags = "flags"
 queueFamilyIndex = "queue_family_index"
+
+[struct."VkComponentMapping"]
+name = "component_mapping"
+[struct."VkComponentMapping".members]
+r = "r"
+g = "g"
+b = "b"
+a = "a"
 
 [struct."VkComputePipelineCreateInfo"]
 name = "compute_pipeline"
@@ -981,6 +1028,12 @@ name = "option::ext::depth_bias_representation"
 depthBiasRepresentation = "representation"
 depthBiasExact = "depth_bias_exact"
 
+[struct."VkDepthClampRangeEXT"]
+name = "ext::depth_clamp_range"
+[struct."VkDepthClampRangeEXT".members]
+minDepthClamp = "min_depth_clamp"
+maxDepthClamp = "max_depth_clamp"
+
 [struct."VkDescriptorBufferBindingInfoEXT"]
 name = "ext::descriptor_buffer_binding"
 [struct."VkDescriptorBufferBindingInfoEXT".members]
@@ -992,6 +1045,13 @@ name = "option::ext::push_descriptor_buffer_handle"
 [struct."VkDescriptorBufferBindingPushDescriptorBufferHandleEXT".members]
 buffer = "buffer"
 
+[struct."VkDescriptorBufferInfo"]
+name = "descriptor_buffer"
+[struct."VkDescriptorBufferInfo".members]
+buffer = "buffer"
+offset = "offset"
+range = "range"
+
 [struct."VkDescriptorGetInfoEXT"]
 name = "ext::descriptor_get"
 [struct."VkDescriptorGetInfoEXT".members]
@@ -1002,6 +1062,13 @@ data = "data"
 name = "option::arm::descriptor_get_tensor"
 [struct."VkDescriptorGetTensorInfoARM".members]
 tensorView = "tensor_view"
+
+[struct."VkDescriptorImageInfo"]
+name = "descriptor_image"
+[struct."VkDescriptorImageInfo".members]
+sampler = "sampler"
+imageView = "image_view"
+imageLayout = "image_layout"
 
 [struct."VkDescriptorPoolCreateInfo"]
 name = "descriptor_pool"
@@ -1015,6 +1082,12 @@ name = "option::descriptor_pool_inline_uniform_block"
 [struct."VkDescriptorPoolInlineUniformBlockCreateInfo".members]
 maxInlineUniformBlockBindings = "max_inline_uniform_block_bindings"
 
+[struct."VkDescriptorPoolSize"]
+name = "descriptor_pool_size"
+[struct."VkDescriptorPoolSize".members]
+type = "type"
+descriptorCount = "descriptor_count"
+
 [struct."VkDescriptorSetAllocateInfo"]
 name = "descriptor_set"
 [struct."VkDescriptorSetAllocateInfo".members]
@@ -1026,6 +1099,15 @@ name = "valve::descriptor_set_binding_reference"
 [struct."VkDescriptorSetBindingReferenceVALVE".members]
 descriptorSetLayout = "descriptor_set_layout"
 binding = "binding"
+
+[struct."VkDescriptorSetLayoutBinding"]
+name = "descriptor_set_layout_binding"
+[struct."VkDescriptorSetLayoutBinding".members]
+binding = "binding"
+descriptorType = "descriptor_type"
+descriptorCount = "descriptor_count"
+stageFlags = "stage_flags"
+pImmutableSamplers = "immutable_samplers"
 
 [struct."VkDescriptorSetLayoutBindingFlagsCreateInfo"]
 name = "option::descriptor_set_layout_binding_flags"
@@ -1053,6 +1135,16 @@ descriptorSetLayout = "descriptor_set_layout"
 pipelineBindPoint = "pipeline_bind_point"
 pipelineLayout = "pipeline_layout"
 set = "set"
+
+[struct."VkDescriptorUpdateTemplateEntry"]
+name = "descriptor_update_template_entry"
+[struct."VkDescriptorUpdateTemplateEntry".members]
+dstBinding = "dst_binding"
+dstArrayElement = "dst_array_element"
+descriptorCount = "descriptor_count"
+descriptorType = "descriptor_type"
+offset = "offset"
+stride = "stride"
 
 [struct."VkDeviceAddressBindingCallbackDataEXT"]
 name = "option::ext::device_address_binding_callback_data"
@@ -1227,6 +1319,12 @@ name = "khr::display_mode"
 flags = "flags"
 parameters = "parameters"
 
+[struct."VkDisplayModeParametersKHR"]
+name = "khr::display_mode_parameters"
+[struct."VkDisplayModeParametersKHR".members]
+visibleRegion = "visible_region"
+refreshRate = "refresh_rate"
+
 [struct."VkDisplayPlaneInfo2KHR"]
 name = "khr::display_plane2"
 [struct."VkDisplayPlaneInfo2KHR".members]
@@ -1329,6 +1427,25 @@ name = "option::khr::export_semaphore_win32_handle"
 pAttributes = "attributes"
 dwAccess = "dw_access"
 name = "name"
+
+[struct."VkExtensionProperties"]
+name = "extension_properties"
+[struct."VkExtensionProperties".members]
+extensionName = "extension_name"
+specVersion = "spec_version"
+
+[struct."VkExtent2D"]
+name = "extent_2d"
+[struct."VkExtent2D".members]
+width = "width"
+height = "height"
+
+[struct."VkExtent3D"]
+name = "extent_3d"
+[struct."VkExtent3D".members]
+width = "width"
+height = "height"
+depth = "depth"
 
 [struct."VkExternalComputeQueueCreateInfoNV"]
 name = "nv::external_compute_queue"
@@ -1496,6 +1613,12 @@ pipeline = "pipeline"
 name = "option::ext::generated_commands_shader"
 [struct."VkGeneratedCommandsShaderInfoEXT".members]
 pShaders = "shaders"
+
+[struct."VkGeometryDataNV"]
+name = "nv::geometry_data"
+[struct."VkGeometryDataNV".members]
+triangles = "triangles"
+aabbs = "aabbs"
 
 [struct."VkGeometryNV"]
 name = "nv::geometry"
@@ -1722,10 +1845,34 @@ name = "option::image_stencil_usage"
 [struct."VkImageStencilUsageCreateInfo".members]
 stencilUsage = "stencil_usage"
 
+[struct."VkImageSubresource"]
+name = "image_subresource"
+[struct."VkImageSubresource".members]
+aspectMask = "aspect_mask"
+mipLevel = "mip_level"
+arrayLayer = "array_layer"
+
 [struct."VkImageSubresource2"]
 name = "image_subresource2"
 [struct."VkImageSubresource2".members]
 imageSubresource = "image_subresource"
+
+[struct."VkImageSubresourceLayers"]
+name = "image_subresource_layers"
+[struct."VkImageSubresourceLayers".members]
+aspectMask = "aspect_mask"
+mipLevel = "mip_level"
+baseArrayLayer = "base_array_layer"
+layerCount = "layer_count"
+
+[struct."VkImageSubresourceRange"]
+name = "image_subresource_range"
+[struct."VkImageSubresourceRange".members]
+aspectMask = "aspect_mask"
+baseMipLevel = "base_mip_level"
+levelCount = "level_count"
+baseArrayLayer = "base_array_layer"
+layerCount = "layer_count"
 
 [struct."VkImageSwapchainCreateInfoKHR"]
 name = "option::khr::image_swapchain"
@@ -1949,6 +2096,12 @@ indexTypeCount = "index_type_count"
 pIndexTypes = "index_types"
 pIndexTypeValues = "index_type_values"
 
+[struct."VkIndirectCommandsStreamNV"]
+name = "nv::indirect_commands_stream"
+[struct."VkIndirectCommandsStreamNV".members]
+buffer = "buffer"
+offset = "offset"
+
 [struct."VkIndirectExecutionSetCreateInfoEXT"]
 name = "ext::indirect_execution_set"
 [struct."VkIndirectExecutionSetCreateInfoEXT".members]
@@ -1959,6 +2112,13 @@ info = "info"
 name = "intel::initialize_performance_api"
 [struct."VkInitializePerformanceApiInfoINTEL".members]
 pUserData = "user_data"
+
+[struct."VkInputAttachmentAspectReference"]
+name = "input_attachment_aspect_reference"
+[struct."VkInputAttachmentAspectReference".members]
+subpass = "subpass"
+inputAttachmentIndex = "input_attachment_index"
+aspectMask = "aspect_mask"
 
 [struct."VkInstanceCreateInfo"]
 name = "instance"
@@ -1985,6 +2145,15 @@ minimumIntervalUs = "minimum_interval_us"
 name = "option::nv::latency_submission_present_id"
 [struct."VkLatencySubmissionPresentIdNV".members]
 presentID = "present_id"
+
+[struct."VkLayerSettingEXT"]
+name = "ext::layer_setting"
+[struct."VkLayerSettingEXT".members]
+pLayerName = "layer_name"
+pSettingName = "setting_name"
+type = "type"
+valueCount = "value_count"
+pValues = "values"
 
 [struct."VkLayerSettingsCreateInfoEXT"]
 name = "option::ext::layer_settings"
@@ -2151,6 +2320,13 @@ size = "size"
 type = "type"
 deviceAddress = "device_address"
 
+[struct."VkMicromapUsageEXT"]
+name = "ext::micromap_usage"
+[struct."VkMicromapUsageEXT".members]
+count = "count"
+subdivisionLevel = "subdivision_level"
+format = "format"
+
 [struct."VkMicromapVersionInfoEXT"]
 name = "ext::micromap_version"
 [struct."VkMicromapVersionInfoEXT".members]
@@ -2177,6 +2353,24 @@ pPerViewRenderAreas = "per_view_render_areas"
 name = "option::ext::mutable_descriptor_type"
 [struct."VkMutableDescriptorTypeCreateInfoEXT".members]
 pMutableDescriptorTypeLists = "lists"
+
+[struct."VkMutableDescriptorTypeListEXT"]
+name = "ext::mutable_descriptor_type_list"
+[struct."VkMutableDescriptorTypeListEXT".members]
+pDescriptorTypes = "descriptor_types"
+
+[struct."VkOffset2D"]
+name = "offset_2d"
+[struct."VkOffset2D".members]
+x = "x"
+y = "y"
+
+[struct."VkOffset3D"]
+name = "offset_3d"
+[struct."VkOffset3D".members]
+x = "x"
+y = "y"
+z = "z"
 
 [struct."VkOpaqueCaptureDescriptorDataCreateInfoEXT"]
 name = "option::ext::opaque_capture_descriptor_data"
@@ -2474,6 +2668,12 @@ dataGraphSpecializationConstants = "specialization_constants"
 dataGraphDescriptorBuffer = "descriptor_buffer"
 dataGraphShaderModule = "shader_module"
 
+[struct."VkPhysicalDeviceDataGraphProcessingEngineARM"]
+name = "arm::physical_device_data_graph_processing_engine"
+[struct."VkPhysicalDeviceDataGraphProcessingEngineARM".members]
+type = "type"
+isForeign = "is_foreign"
+
 [struct."VkPhysicalDeviceDedicatedAllocationImageAliasingFeaturesNV"]
 name = "feature::nv::dedicated_allocation_image_aliasing"
 [struct."VkPhysicalDeviceDedicatedAllocationImageAliasingFeaturesNV".members]
@@ -2713,6 +2913,65 @@ name = "feature::ext::fault"
 [struct."VkPhysicalDeviceFaultFeaturesEXT".members]
 deviceFault = "device_fault"
 deviceFaultVendorBinary = "device_fault_vendor_binary"
+
+[struct."VkPhysicalDeviceFeatures"]
+name = "feature::vulkan10"
+[struct."VkPhysicalDeviceFeatures".members]
+robustBufferAccess = "robust_buffer_access"
+fullDrawIndexUint32 = "full_draw_index_uint32"
+imageCubeArray = "image_cube_array"
+independentBlend = "independent_blend"
+geometryShader = "geometry_shader"
+tessellationShader = "tessellation_shader"
+sampleRateShading = "sample_rate_shading"
+dualSrcBlend = "dual_src_blend"
+logicOp = "logic_op"
+multiDrawIndirect = "multi_draw_indirect"
+drawIndirectFirstInstance = "draw_indirect_first_instance"
+depthClamp = "depth_clamp"
+depthBiasClamp = "depth_bias_clamp"
+fillModeNonSolid = "fill_mode_non_solid"
+depthBounds = "depth_bounds"
+wideLines = "wide_lines"
+largePoints = "large_points"
+alphaToOne = "alpha_to_one"
+multiViewport = "multi_viewport"
+samplerAnisotropy = "sampler_anisotropy"
+textureCompressionETC2 = "texture_compression_etc2"
+textureCompressionASTC_LDR = "texture_compression_astc_ldr"
+textureCompressionBC = "texture_compression_bc"
+occlusionQueryPrecise = "occlusion_query_precise"
+pipelineStatisticsQuery = "pipeline_statistics_query"
+vertexPipelineStoresAndAtomics = "vertex_pipeline_stores_and_atomics"
+fragmentStoresAndAtomics = "fragment_stores_and_atomics"
+shaderTessellationAndGeometryPointSize = "shader_tessellation_and_geometry_point_size"
+shaderImageGatherExtended = "shader_image_gather_extended"
+shaderStorageImageExtendedFormats = "shader_storage_image_extended_formats"
+shaderStorageImageMultisample = "shader_storage_image_multisample"
+shaderStorageImageReadWithoutFormat = "shader_storage_image_read_without_format"
+shaderStorageImageWriteWithoutFormat = "shader_storage_image_write_without_format"
+shaderUniformBufferArrayDynamicIndexing = "shader_uniform_buffer_array_dynamic_indexing"
+shaderSampledImageArrayDynamicIndexing = "shader_sampled_image_array_dynamic_indexing"
+shaderStorageBufferArrayDynamicIndexing = "shader_storage_buffer_array_dynamic_indexing"
+shaderStorageImageArrayDynamicIndexing = "shader_storage_image_array_dynamic_indexing"
+shaderClipDistance = "shader_clip_distance"
+shaderCullDistance = "shader_cull_distance"
+shaderFloat64 = "shader_float64"
+shaderInt64 = "shader_int64"
+shaderInt16 = "shader_int16"
+shaderResourceResidency = "shader_resource_residency"
+shaderResourceMinLod = "shader_resource_min_lod"
+sparseBinding = "sparse_binding"
+sparseResidencyBuffer = "sparse_residency_buffer"
+sparseResidencyImage2D = "sparse_residency_image_2d"
+sparseResidencyImage3D = "sparse_residency_image_3d"
+sparseResidency2Samples = "sparse_residency2_samples"
+sparseResidency4Samples = "sparse_residency4_samples"
+sparseResidency8Samples = "sparse_residency8_samples"
+sparseResidency16Samples = "sparse_residency16_samples"
+sparseResidencyAliased = "sparse_residency_aliased"
+variableMultisampleRate = "variable_multisample_rate"
+inheritedQueries = "inherited_queries"
 
 [struct."VkPhysicalDeviceFeatures2"]
 name = "feature::core"
@@ -3838,14 +4097,27 @@ pipeline = "pipeline"
 pPipelineCreateInfo = "pipeline_create_info"
 
 [struct."VkPipelineBinaryDataInfoKHR"]
-name = "khr::pipeline_binary_data"
+name = "khr::pipeline_binary_data_info"
 [struct."VkPipelineBinaryDataInfoKHR".members]
 pipelineBinary = "pipeline_binary"
+
+[struct."VkPipelineBinaryDataKHR"]
+name = "khr::pipeline_binary_data"
+[struct."VkPipelineBinaryDataKHR".members]
+dataSize = "data_size"
+pData = "data"
 
 [struct."VkPipelineBinaryInfoKHR"]
 name = "option::khr::pipeline_binaries"
 [struct."VkPipelineBinaryInfoKHR".members]
 pPipelineBinaries = "binaries"
+
+[struct."VkPipelineBinaryKeysAndDataKHR"]
+name = "khr::pipeline_binary_keys_and_data"
+[struct."VkPipelineBinaryKeysAndDataKHR".members]
+binaryCount = "binary_count"
+pPipelineBinaryKeys = "pipeline_binary_keys"
+pPipelineBinaryData = "pipeline_binary_data"
 
 [struct."VkPipelineCacheCreateInfo"]
 name = "pipeline_cache"
@@ -3860,6 +4132,18 @@ name = "state::ext::color_blend_advanced"
 srcPremultiplied = "src_premultiplied"
 dstPremultiplied = "dst_premultiplied"
 blendOverlap = "blend_overlap"
+
+[struct."VkPipelineColorBlendAttachmentState"]
+name = "state::color_blend_attachment"
+[struct."VkPipelineColorBlendAttachmentState".members]
+blendEnable = "blend_enable"
+srcColorBlendFactor = "src_color_blend_factor"
+dstColorBlendFactor = "dst_color_blend_factor"
+colorBlendOp = "color_blend_op"
+srcAlphaBlendFactor = "src_alpha_blend_factor"
+dstAlphaBlendFactor = "dst_alpha_blend_factor"
+alphaBlendOp = "alpha_blend_op"
+colorWriteMask = "color_write_mask"
 
 [struct."VkPipelineColorBlendStateCreateInfo"]
 name = "state::color_blend"
@@ -3910,6 +4194,12 @@ flags = "flags"
 
 [struct."VkPipelineCreateInfoKHR"]
 name = "state::khr::create"
+
+[struct."VkPipelineCreationFeedback"]
+name = "pipeline_creation_feedback"
+[struct."VkPipelineCreationFeedback".members]
+flags = "flags"
+duration = "duration"
 
 [struct."VkPipelineCreationFeedbackCreateInfo"]
 name = "option::pipeline_creation_feedback"
@@ -4212,11 +4502,23 @@ pSwapchains = "swapchains"
 pImageIndices = "image_indices"
 pResults = "results"
 
+[struct."VkPresentRegionKHR"]
+name = "khr::present_region"
+[struct."VkPresentRegionKHR".members]
+rectangleCount = "rectangle_count"
+pRectangles = "rectangles"
+
 [struct."VkPresentRegionsKHR"]
 name = "option::khr::present_regions"
 [struct."VkPresentRegionsKHR".members]
 swapchainCount = "swapchain_count"
 pRegions = "regions"
+
+[struct."VkPresentTimeGOOGLE"]
+name = "google::present_time"
+[struct."VkPresentTimeGOOGLE".members]
+presentID = "present_id"
+desiredPresentTime = "desired_present_time"
 
 [struct."VkPresentTimesInfoGOOGLE"]
 name = "option::google::present_times"
@@ -4239,6 +4541,13 @@ flags = "flags"
 name = "option::protected_submit"
 [struct."VkProtectedSubmitInfo".members]
 protectedSubmit = "enable"
+
+[struct."VkPushConstantRange"]
+name = "push_constant_range"
+[struct."VkPushConstantRange".members]
+stageFlags = "stage_flags"
+offset = "offset"
+size = "size"
 
 [struct."VkPushConstantsInfo"]
 name = "push_constants"
@@ -4349,6 +4658,19 @@ closestHitShader = "closest_hit_shader"
 anyHitShader = "any_hit_shader"
 intersectionShader = "intersection_shader"
 
+[struct."VkRect2D"]
+name = "rect_2d"
+[struct."VkRect2D".members]
+offset = "offset"
+extent = "extent"
+
+[struct."VkRectLayerKHR"]
+name = "khr::rect_layer"
+[struct."VkRectLayerKHR".members]
+offset = "offset"
+extent = "extent"
+layer = "layer"
+
 [struct."VkReleaseCapturedPipelineDataInfoKHR"]
 name = "khr::release_captured_pipeline_data"
 [struct."VkReleaseCapturedPipelineDataInfoKHR".members]
@@ -4400,6 +4722,11 @@ name = "option::ext::render_pass_creation_feedback"
 [struct."VkRenderPassCreationFeedbackCreateInfoEXT".members]
 pRenderPassFeedback = "render_pass_feedback"
 
+[struct."VkRenderPassCreationFeedbackInfoEXT"]
+name = "ext::render_pass_creation_feedback"
+[struct."VkRenderPassCreationFeedbackInfoEXT".members]
+postMergeSubpassCount = "post_merge_subpass_count"
+
 [struct."VkRenderPassFragmentDensityMapCreateInfoEXT"]
 name = "option::ext::render_pass_fragment_density_map"
 [struct."VkRenderPassFragmentDensityMapCreateInfoEXT".members]
@@ -4447,6 +4774,13 @@ pStripeSemaphoreInfos = "stripe_semaphore_infos"
 name = "option::ext::render_pass_subpass_feedback"
 [struct."VkRenderPassSubpassFeedbackCreateInfoEXT".members]
 pSubpassFeedback = "subpass_feedback"
+
+[struct."VkRenderPassSubpassFeedbackInfoEXT"]
+name = "ext::render_pass_subpass_feedback"
+[struct."VkRenderPassSubpassFeedbackInfoEXT".members]
+subpassMergeStatus = "subpass_merge_status"
+description = "description"
+postMergeIndex = "post_merge_index"
 
 [struct."VkRenderPassTileShadingCreateInfoQCOM"]
 name = "option::qcom::render_pass_tile_shading"
@@ -4527,6 +4861,12 @@ srcImageLayout = "src_image_layout"
 dstImage = "dst_image"
 dstImageLayout = "dst_image_layout"
 pRegions = "regions"
+
+[struct."VkSampleLocationEXT"]
+name = "ext::sample_location"
+[struct."VkSampleLocationEXT".members]
+x = "x"
+y = "y"
 
 [struct."VkSampleLocationsInfoEXT"]
 name = "ext::sample_locations"
@@ -4719,11 +5059,92 @@ name = "option::ext::shader_module_validation_cache"
 [struct."VkShaderModuleValidationCacheCreateInfoEXT".members]
 validationCache = "validation_cache"
 
+[struct."VkShadingRatePaletteNV"]
+name = "nv::shading_rate_palette"
+[struct."VkShadingRatePaletteNV".members]
+pShadingRatePaletteEntries = "entries"
+
+[struct."VkSparseBufferMemoryBindInfo"]
+name = "sparse_buffer_memory_bind"
+[struct."VkSparseBufferMemoryBindInfo".members]
+buffer = "buffer"
+pBinds = "binds"
+
+[struct."VkSparseImageMemoryBind"]
+name = "sparse_image_memory_bind"
+[struct."VkSparseImageMemoryBind".members]
+subresource = "subresource"
+offset = "offset"
+extent = "extent"
+memory = "memory"
+memoryOffset = "memory_offset"
+flags = "flags"
+
+[struct."VkSparseImageMemoryBindInfo"]
+name = "sparse_image_memory_bind_info"
+[struct."VkSparseImageMemoryBindInfo".members]
+image = "image"
+pBinds = "binds"
+
+[struct."VkSparseImageOpaqueMemoryBindInfo"]
+name = "sparse_image_opaque_memory_bind"
+[struct."VkSparseImageOpaqueMemoryBindInfo".members]
+image = "image"
+pBinds = "binds"
+
+[struct."VkSparseMemoryBind"]
+name = "sparse_memory_bind"
+[struct."VkSparseMemoryBind".members]
+resourceOffset = "resource_offset"
+size = "size"
+memory = "memory"
+memoryOffset = "memory_offset"
+flags = "flags"
+
+[struct."VkSpecializationInfo"]
+name = "specialization"
+[struct."VkSpecializationInfo".members]
+pMapEntries = "map_entries"
+dataSize = "data_size"
+pData = "data"
+
+[struct."VkSpecializationMapEntry"]
+name = "specialization_map_entry"
+[struct."VkSpecializationMapEntry".members]
+constantID = "constant_id"
+offset = "offset"
+size = "size"
+
+[struct."VkStencilOpState"]
+name = "stencil_op_state"
+[struct."VkStencilOpState".members]
+failOp = "fail_op"
+passOp = "pass_op"
+depthFailOp = "depth_fail_op"
+compareOp = "compare_op"
+compareMask = "compare_mask"
+writeMask = "write_mask"
+reference = "reference"
+
 [struct."VkStreamDescriptorSurfaceCreateInfoGGP"]
 name = "ggp::stream_descriptor_surface"
 [struct."VkStreamDescriptorSurfaceCreateInfoGGP".members]
 flags = "flags"
 streamDescriptor = "stream_descriptor"
+
+[struct."VkStridedDeviceAddressRangeKHR"]
+name = "khr::strided_device_address_range"
+[struct."VkStridedDeviceAddressRangeKHR".members]
+address = "address"
+size = "size"
+stride = "stride"
+
+[struct."VkStridedDeviceAddressRegionKHR"]
+name = "khr::strided_device_address_region"
+[struct."VkStridedDeviceAddressRegionKHR".members]
+deviceAddress = "device_address"
+stride = "stride"
+size = "size"
 
 [struct."VkSubmitInfo"]
 name = "submit"
@@ -4747,6 +5168,17 @@ name = "subpass_begin"
 [struct."VkSubpassBeginInfo".members]
 contents = "contents"
 
+[struct."VkSubpassDependency"]
+name = "subpass_dependency"
+[struct."VkSubpassDependency".members]
+srcSubpass = "src_subpass"
+dstSubpass = "dst_subpass"
+srcStageMask = "src_stage_mask"
+dstStageMask = "dst_stage_mask"
+srcAccessMask = "src_access_mask"
+dstAccessMask = "dst_access_mask"
+dependencyFlags = "dependency_flags"
+
 [struct."VkSubpassDependency2"]
 name = "subpass_dependency2"
 [struct."VkSubpassDependency2".members]
@@ -4758,6 +5190,17 @@ srcAccessMask = "src_access_mask"
 dstAccessMask = "dst_access_mask"
 dependencyFlags = "dependency_flags"
 viewOffset = "view_offset"
+
+[struct."VkSubpassDescription"]
+name = "subpass_description"
+[struct."VkSubpassDescription".members]
+flags = "flags"
+pipelineBindPoint = "pipeline_bind_point"
+pInputAttachments = "input_attachments"
+pColorAttachments = "color_attachments"
+pResolveAttachments = "resolve_attachments"
+pDepthStencilAttachment = "depth_stencil_attachment"
+pPreserveAttachments = "preserve_attachments"
 
 [struct."VkSubpassDescription2"]
 name = "subpass_description2"
@@ -4781,11 +5224,26 @@ pDepthStencilResolveAttachment = "depth_stencil_resolve_attachment"
 [struct."VkSubpassEndInfo"]
 name = "subpass_end"
 
+[struct."VkSubpassSampleLocationsEXT"]
+name = "ext::subpass_sample_locations"
+[struct."VkSubpassSampleLocationsEXT".members]
+subpassIndex = "subpass_index"
+sampleLocationsInfo = "sample_locations_info"
+
 [struct."VkSubpassShadingPipelineCreateInfoHUAWEI"]
 name = "option::huawei::subpass_shading_pipeline"
 [struct."VkSubpassShadingPipelineCreateInfoHUAWEI".members]
 renderPass = "render_pass"
 subpass = "subpass"
+
+[struct."VkSubresourceLayout"]
+name = "subresource_layout"
+[struct."VkSubresourceLayout".members]
+offset = "offset"
+size = "size"
+rowPitch = "row_pitch"
+arrayPitch = "array_pitch"
+depthPitch = "depth_pitch"
 
 [struct."VkSurfaceCreateInfoOHOS"]
 name = "ohos::surface"
@@ -4974,6 +5432,14 @@ name = "option::ext::validation_flags"
 [struct."VkValidationFlagsEXT".members]
 pDisabledValidationChecks = "disabled_validation_checks"
 
+[struct."VkVertexInputAttributeDescription"]
+name = "vertex_input_attribute_description"
+[struct."VkVertexInputAttributeDescription".members]
+location = "location"
+binding = "binding"
+format = "format"
+offset = "offset"
+
 [struct."VkVertexInputAttributeDescription2EXT"]
 name = "ext::vertex_input_attribute_description2"
 [struct."VkVertexInputAttributeDescription2EXT".members]
@@ -4982,12 +5448,25 @@ binding = "binding"
 format = "format"
 offset = "offset"
 
+[struct."VkVertexInputBindingDescription"]
+name = "vertex_input_binding_description"
+[struct."VkVertexInputBindingDescription".members]
+binding = "binding"
+stride = "stride"
+inputRate = "input_rate"
+
 [struct."VkVertexInputBindingDescription2EXT"]
 name = "ext::vertex_input_binding_description2"
 [struct."VkVertexInputBindingDescription2EXT".members]
 binding = "binding"
 stride = "stride"
 inputRate = "input_rate"
+divisor = "divisor"
+
+[struct."VkVertexInputBindingDivisorDescription"]
+name = "vertex_input_binding_divisor_description"
+[struct."VkVertexInputBindingDivisorDescription".members]
+binding = "binding"
 divisor = "divisor"
 
 [struct."VkViSurfaceCreateInfoNN"]
@@ -5149,6 +5628,13 @@ name = "option::khr::video_encode_av1_dpb_slot"
 [struct."VkVideoEncodeAV1DpbSlotInfoKHR".members]
 pStdReferenceInfo = "std_reference_info"
 
+[struct."VkVideoEncodeAV1FrameSizeKHR"]
+name = "khr::video_encode_av1_frame_size"
+[struct."VkVideoEncodeAV1FrameSizeKHR".members]
+intraFrameSize = "intra_frame_size"
+predictiveFrameSize = "predictive_frame_size"
+bipredictiveFrameSize = "bipredictive_frame_size"
+
 [struct."VkVideoEncodeAV1GopRemainingFrameInfoKHR"]
 name = "option::khr::video_encode_av1_gop_remaining_frame"
 [struct."VkVideoEncodeAV1GopRemainingFrameInfoKHR".members]
@@ -5172,6 +5658,13 @@ generateObuExtensionHeader = "generate_obu_extension_header"
 name = "option::khr::video_encode_av1_profile"
 [struct."VkVideoEncodeAV1ProfileInfoKHR".members]
 stdProfile = "std_profile"
+
+[struct."VkVideoEncodeAV1QIndexKHR"]
+name = "khr::video_encode_av1_q_index"
+[struct."VkVideoEncodeAV1QIndexKHR".members]
+intraQIndex = "intra_q_index"
+predictiveQIndex = "predictive_q_index"
+bipredictiveQIndex = "bipredictive_q_index"
 
 [struct."VkVideoEncodeAV1RateControlInfoKHR"]
 name = "option::khr::video_encode_av1_rate_control"
@@ -5211,6 +5704,13 @@ name = "option::khr::video_encode_h264_dpb_slot"
 [struct."VkVideoEncodeH264DpbSlotInfoKHR".members]
 pStdReferenceInfo = "std_reference_info"
 
+[struct."VkVideoEncodeH264FrameSizeKHR"]
+name = "khr::video_encode_h264_frame_size"
+[struct."VkVideoEncodeH264FrameSizeKHR".members]
+frameISize = "frame_i_size"
+framePSize = "frame_p_size"
+frameBSize = "frame_b_size"
+
 [struct."VkVideoEncodeH264GopRemainingFrameInfoKHR"]
 name = "option::khr::video_encode_h264_gop_remaining_frame"
 [struct."VkVideoEncodeH264GopRemainingFrameInfoKHR".members]
@@ -5236,6 +5736,13 @@ generatePrefixNalu = "generate_prefix_nalu"
 name = "option::khr::video_encode_h264_profile"
 [struct."VkVideoEncodeH264ProfileInfoKHR".members]
 stdProfileIdc = "std_profile_idc"
+
+[struct."VkVideoEncodeH264QpKHR"]
+name = "khr::video_encode_h264_qp"
+[struct."VkVideoEncodeH264QpKHR".members]
+qpI = "qp_i"
+qpP = "qp_p"
+qpB = "qp_b"
 
 [struct."VkVideoEncodeH264RateControlInfoKHR"]
 name = "option::khr::video_encode_h264_rate_control"
@@ -5290,6 +5797,13 @@ name = "option::khr::video_encode_h265_dpb_slot"
 [struct."VkVideoEncodeH265DpbSlotInfoKHR".members]
 pStdReferenceInfo = "std_reference_info"
 
+[struct."VkVideoEncodeH265FrameSizeKHR"]
+name = "khr::video_encode_h265_frame_size"
+[struct."VkVideoEncodeH265FrameSizeKHR".members]
+frameISize = "frame_i_size"
+framePSize = "frame_p_size"
+frameBSize = "frame_b_size"
+
 [struct."VkVideoEncodeH265GopRemainingFrameInfoKHR"]
 name = "option::khr::video_encode_h265_gop_remaining_frame"
 [struct."VkVideoEncodeH265GopRemainingFrameInfoKHR".members]
@@ -5314,6 +5828,13 @@ pStdPictureInfo = "std_picture_info"
 name = "option::khr::video_encode_h265_profile"
 [struct."VkVideoEncodeH265ProfileInfoKHR".members]
 stdProfileIdc = "std_profile_idc"
+
+[struct."VkVideoEncodeH265QpKHR"]
+name = "khr::video_encode_h265_qp"
+[struct."VkVideoEncodeH265QpKHR".members]
+qpI = "qp_i"
+qpP = "qp_p"
+qpB = "qp_b"
 
 [struct."VkVideoEncodeH265RateControlInfoKHR"]
 name = "option::khr::video_encode_h265_rate_control"
@@ -5518,6 +6039,30 @@ name = "khr::video_session_parameters_update"
 [struct."VkVideoSessionParametersUpdateInfoKHR".members]
 updateSequenceCount = "update_sequence_count"
 
+[struct."VkViewport"]
+name = "viewport"
+[struct."VkViewport".members]
+x = "x"
+y = "y"
+width = "width"
+height = "height"
+minDepth = "min_depth"
+maxDepth = "max_depth"
+
+[struct."VkViewportSwizzleNV"]
+name = "nv::viewport_swizzle"
+[struct."VkViewportSwizzleNV".members]
+x = "x"
+y = "y"
+z = "z"
+w = "w"
+
+[struct."VkViewportWScalingNV"]
+name = "nv::viewport_w_scaling"
+[struct."VkViewportWScalingNV".members]
+xcoeff = "xcoeff"
+ycoeff = "ycoeff"
+
 [struct."VkWaylandSurfaceCreateInfoKHR"]
 name = "khr::wayland_surface"
 [struct."VkWaylandSurfaceCreateInfoKHR".members]
@@ -5603,6 +6148,12 @@ name = "ext::write_indirect_execution_set_shader"
 [struct."VkWriteIndirectExecutionSetShaderEXT".members]
 index = "index"
 shader = "shader"
+
+[struct."VkXYColorEXT"]
+name = "ext::xy_color"
+[struct."VkXYColorEXT".members]
+x = "x"
+y = "y"
 
 [struct."VkXcbSurfaceCreateInfoKHR"]
 name = "khr::xcb_surface"
@@ -5805,6 +6356,12 @@ VK_CLUSTER_ACCELERATION_STRUCTURE_ADDRESS_RESOLUTION_INDIRECTED_DST_ADDRESS_ARRA
 VK_CLUSTER_ACCELERATION_STRUCTURE_ADDRESS_RESOLUTION_INDIRECTED_DST_SIZES_ARRAY_BIT_NV = "dst_sizes_array"
 VK_CLUSTER_ACCELERATION_STRUCTURE_ADDRESS_RESOLUTION_INDIRECTED_SRC_INFOS_ARRAY_BIT_NV = "src_infos_array"
 VK_CLUSTER_ACCELERATION_STRUCTURE_ADDRESS_RESOLUTION_INDIRECTED_SRC_INFOS_COUNT_BIT_NV = "src_infos_count"
+
+[bits."VkColorComponentFlagBits"]
+VK_COLOR_COMPONENT_R_BIT = "r"
+VK_COLOR_COMPONENT_G_BIT = "g"
+VK_COLOR_COMPONENT_B_BIT = "b"
+VK_COLOR_COMPONENT_A_BIT = "a"
 
 [bits."VkCommandBufferUsageFlagBits"]
 VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT = "one_time_submit"
@@ -6199,6 +6756,11 @@ VK_PIPELINE_CREATE_2_DISALLOW_OPACITY_MICROMAP_BIT_ARM = "disallow_opacity_micro
 VK_PIPELINE_CREATE_2_INDIRECT_BINDABLE_BIT_EXT = "indirect_bindable_ext"
 VK_PIPELINE_CREATE_2_PER_LAYER_FRAGMENT_DENSITY_BIT_VALVE = "per_layer_fragment_density"
 
+[bits."VkPipelineCreationFeedbackFlagBits"]
+VK_PIPELINE_CREATION_FEEDBACK_VALID_BIT = "valid"
+VK_PIPELINE_CREATION_FEEDBACK_APPLICATION_PIPELINE_CACHE_HIT_BIT = "application_pipeline_cache_hit"
+VK_PIPELINE_CREATION_FEEDBACK_BASE_PIPELINE_ACCELERATION_BIT = "base_pipeline_acceleration"
+
 [bits."VkPipelineDepthStencilStateCreateFlagBits"]
 VK_PIPELINE_DEPTH_STENCIL_STATE_CREATE_RASTERIZATION_ORDER_ATTACHMENT_DEPTH_ACCESS_BIT_EXT = "depth_access"
 VK_PIPELINE_DEPTH_STENCIL_STATE_CREATE_RASTERIZATION_ORDER_ATTACHMENT_STENCIL_ACCESS_BIT_EXT = "stencil_access"
@@ -6369,6 +6931,9 @@ VK_SHADER_STAGE_CALLABLE_BIT_KHR = "callable"
 VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI = "subpass_shading"
 VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI = "cluster_culling"
 
+[bits."VkSparseMemoryBindFlagBits"]
+VK_SPARSE_MEMORY_BIND_METADATA_BIT = "metadata"
+
 [bits."VkSubmitFlagBits"]
 VK_SUBMIT_PROTECTED_BIT = "protected_"
 
@@ -6528,6 +7093,84 @@ VK_ATTACHMENT_STORE_OP_STORE = "store"
 VK_ATTACHMENT_STORE_OP_DONT_CARE = "dont_care"
 VK_ATTACHMENT_STORE_OP_NONE = "none"
 
+[enum."VkBlendFactor"]
+name = "blend_factor"
+[enum."VkBlendFactor".values]
+VK_BLEND_FACTOR_ZERO = "zero"
+VK_BLEND_FACTOR_ONE = "one"
+VK_BLEND_FACTOR_SRC_COLOR = "src_color"
+VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR = "one_minus_src_color"
+VK_BLEND_FACTOR_DST_COLOR = "dst_color"
+VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR = "one_minus_dst_color"
+VK_BLEND_FACTOR_SRC_ALPHA = "src_alpha"
+VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA = "one_minus_src_alpha"
+VK_BLEND_FACTOR_DST_ALPHA = "dst_alpha"
+VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA = "one_minus_dst_alpha"
+VK_BLEND_FACTOR_CONSTANT_COLOR = "constant_color"
+VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR = "one_minus_constant_color"
+VK_BLEND_FACTOR_CONSTANT_ALPHA = "constant_alpha"
+VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA = "one_minus_constant_alpha"
+VK_BLEND_FACTOR_SRC_ALPHA_SATURATE = "src_alpha_saturate"
+VK_BLEND_FACTOR_SRC1_COLOR = "src1_color"
+VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR = "one_minus_src1_color"
+VK_BLEND_FACTOR_SRC1_ALPHA = "src1_alpha"
+VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA = "one_minus_src1_alpha"
+
+[enum."VkBlendOp"]
+name = "blend_op"
+[enum."VkBlendOp".values]
+VK_BLEND_OP_ADD = "add"
+VK_BLEND_OP_SUBTRACT = "subtract"
+VK_BLEND_OP_REVERSE_SUBTRACT = "reverse_subtract"
+VK_BLEND_OP_MIN = "min"
+VK_BLEND_OP_MAX = "max"
+VK_BLEND_OP_ZERO_EXT = "zero"
+VK_BLEND_OP_SRC_EXT = "src"
+VK_BLEND_OP_DST_EXT = "dst"
+VK_BLEND_OP_SRC_OVER_EXT = "src_over"
+VK_BLEND_OP_DST_OVER_EXT = "dst_over"
+VK_BLEND_OP_SRC_IN_EXT = "src_in"
+VK_BLEND_OP_DST_IN_EXT = "dst_in"
+VK_BLEND_OP_SRC_OUT_EXT = "src_out"
+VK_BLEND_OP_DST_OUT_EXT = "dst_out"
+VK_BLEND_OP_SRC_ATOP_EXT = "src_atop"
+VK_BLEND_OP_DST_ATOP_EXT = "dst_atop"
+VK_BLEND_OP_XOR_EXT = "xor_"
+VK_BLEND_OP_MULTIPLY_EXT = "multiply"
+VK_BLEND_OP_SCREEN_EXT = "screen"
+VK_BLEND_OP_OVERLAY_EXT = "overlay"
+VK_BLEND_OP_DARKEN_EXT = "darken"
+VK_BLEND_OP_LIGHTEN_EXT = "lighten"
+VK_BLEND_OP_COLORDODGE_EXT = "colordodge"
+VK_BLEND_OP_COLORBURN_EXT = "colorburn"
+VK_BLEND_OP_HARDLIGHT_EXT = "hardlight"
+VK_BLEND_OP_SOFTLIGHT_EXT = "softlight"
+VK_BLEND_OP_DIFFERENCE_EXT = "difference"
+VK_BLEND_OP_EXCLUSION_EXT = "exclusion"
+VK_BLEND_OP_INVERT_EXT = "invert"
+VK_BLEND_OP_INVERT_RGB_EXT = "invert_rgb"
+VK_BLEND_OP_LINEARDODGE_EXT = "lineardodge"
+VK_BLEND_OP_LINEARBURN_EXT = "linearburn"
+VK_BLEND_OP_VIVIDLIGHT_EXT = "vividlight"
+VK_BLEND_OP_LINEARLIGHT_EXT = "linearlight"
+VK_BLEND_OP_PINLIGHT_EXT = "pinlight"
+VK_BLEND_OP_HARDMIX_EXT = "hardmix"
+VK_BLEND_OP_HSL_HUE_EXT = "hsl_hue"
+VK_BLEND_OP_HSL_SATURATION_EXT = "hsl_saturation"
+VK_BLEND_OP_HSL_COLOR_EXT = "hsl_color"
+VK_BLEND_OP_HSL_LUMINOSITY_EXT = "hsl_luminosity"
+VK_BLEND_OP_PLUS_EXT = "plus"
+VK_BLEND_OP_PLUS_CLAMPED_EXT = "plus_clamped"
+VK_BLEND_OP_PLUS_CLAMPED_ALPHA_EXT = "plus_clamped_alpha"
+VK_BLEND_OP_PLUS_DARKER_EXT = "plus_darker"
+VK_BLEND_OP_MINUS_EXT = "minus"
+VK_BLEND_OP_MINUS_CLAMPED_EXT = "minus_clamped"
+VK_BLEND_OP_CONTRAST_EXT = "contrast"
+VK_BLEND_OP_INVERT_OVG_EXT = "invert_ovg"
+VK_BLEND_OP_RED_EXT = "red"
+VK_BLEND_OP_GREEN_EXT = "green"
+VK_BLEND_OP_BLUE_EXT = "blue"
+
 [enum."VkBlendOverlapEXT"]
 name = "blend_overlap"
 [enum."VkBlendOverlapEXT".values]
@@ -6632,6 +7275,17 @@ VK_COMPARE_OP_GREATER = "greater"
 VK_COMPARE_OP_NOT_EQUAL = "not_equal"
 VK_COMPARE_OP_GREATER_OR_EQUAL = "greater_or_equal"
 VK_COMPARE_OP_ALWAYS = "always"
+
+[enum."VkComponentSwizzle"]
+name = "component_swizzle"
+[enum."VkComponentSwizzle".values]
+VK_COMPONENT_SWIZZLE_IDENTITY = "identity"
+VK_COMPONENT_SWIZZLE_ZERO = "zero"
+VK_COMPONENT_SWIZZLE_ONE = "one"
+VK_COMPONENT_SWIZZLE_R = "r"
+VK_COMPONENT_SWIZZLE_G = "g"
+VK_COMPONENT_SWIZZLE_B = "b"
+VK_COMPONENT_SWIZZLE_A = "a"
 
 [enum."VkComponentTypeKHR"]
 name = "component_type"
@@ -7382,6 +8036,18 @@ VK_LATENCY_MARKER_OUT_OF_BAND_RENDERSUBMIT_END_NV = "out_of_band_rendersubmit_en
 VK_LATENCY_MARKER_OUT_OF_BAND_PRESENT_START_NV = "out_of_band_present_start"
 VK_LATENCY_MARKER_OUT_OF_BAND_PRESENT_END_NV = "out_of_band_present_end"
 
+[enum."VkLayerSettingTypeEXT"]
+name = "layer_setting_type"
+[enum."VkLayerSettingTypeEXT".values]
+VK_LAYER_SETTING_TYPE_BOOL32_EXT = "bool32"
+VK_LAYER_SETTING_TYPE_INT32_EXT = "int32"
+VK_LAYER_SETTING_TYPE_INT64_EXT = "int64"
+VK_LAYER_SETTING_TYPE_UINT32_EXT = "uint32"
+VK_LAYER_SETTING_TYPE_UINT64_EXT = "uint64"
+VK_LAYER_SETTING_TYPE_FLOAT32_EXT = "float32"
+VK_LAYER_SETTING_TYPE_FLOAT64_EXT = "float64"
+VK_LAYER_SETTING_TYPE_STRING_EXT = "string"
+
 [enum."VkLineRasterizationMode"]
 name = "line_rasterization_mode"
 [enum."VkLineRasterizationMode".values]
@@ -7733,11 +8399,39 @@ VK_SHADER_STAGE_MESH_BIT_EXT = "mesh"
 VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI = "subpass_shading"
 VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI = "cluster_culling"
 
+[enum."VkShadingRatePaletteEntryNV"]
+name = "shading_rate_palette_entry"
+[enum."VkShadingRatePaletteEntryNV".values]
+VK_SHADING_RATE_PALETTE_ENTRY_NO_INVOCATIONS_NV = "no_invocations"
+VK_SHADING_RATE_PALETTE_ENTRY_16_INVOCATIONS_PER_PIXEL_NV = "value_16_invocations_per_pixel"
+VK_SHADING_RATE_PALETTE_ENTRY_8_INVOCATIONS_PER_PIXEL_NV = "value_8_invocations_per_pixel"
+VK_SHADING_RATE_PALETTE_ENTRY_4_INVOCATIONS_PER_PIXEL_NV = "value_4_invocations_per_pixel"
+VK_SHADING_RATE_PALETTE_ENTRY_2_INVOCATIONS_PER_PIXEL_NV = "value_2_invocations_per_pixel"
+VK_SHADING_RATE_PALETTE_ENTRY_1_INVOCATION_PER_PIXEL_NV = "value_1_invocation_per_pixel"
+VK_SHADING_RATE_PALETTE_ENTRY_1_INVOCATION_PER_2X1_PIXELS_NV = "value_1_invocation_per_2x1_pixels"
+VK_SHADING_RATE_PALETTE_ENTRY_1_INVOCATION_PER_1X2_PIXELS_NV = "value_1_invocation_per_1x2_pixels"
+VK_SHADING_RATE_PALETTE_ENTRY_1_INVOCATION_PER_2X2_PIXELS_NV = "value_1_invocation_per_2x2_pixels"
+VK_SHADING_RATE_PALETTE_ENTRY_1_INVOCATION_PER_4X2_PIXELS_NV = "value_1_invocation_per_4x2_pixels"
+VK_SHADING_RATE_PALETTE_ENTRY_1_INVOCATION_PER_2X4_PIXELS_NV = "value_1_invocation_per_2x4_pixels"
+VK_SHADING_RATE_PALETTE_ENTRY_1_INVOCATION_PER_4X4_PIXELS_NV = "value_1_invocation_per_4x4_pixels"
+
 [enum."VkSharingMode"]
 name = "sharing_mode"
 [enum."VkSharingMode".values]
 VK_SHARING_MODE_EXCLUSIVE = "exclusive"
 VK_SHARING_MODE_CONCURRENT = "concurrent"
+
+[enum."VkStencilOp"]
+name = "stencil_op"
+[enum."VkStencilOp".values]
+VK_STENCIL_OP_KEEP = "keep"
+VK_STENCIL_OP_ZERO = "zero"
+VK_STENCIL_OP_REPLACE = "replace"
+VK_STENCIL_OP_INCREMENT_AND_CLAMP = "increment_and_clamp"
+VK_STENCIL_OP_DECREMENT_AND_CLAMP = "decrement_and_clamp"
+VK_STENCIL_OP_INVERT = "invert"
+VK_STENCIL_OP_INCREMENT_AND_WRAP = "increment_and_wrap"
+VK_STENCIL_OP_DECREMENT_AND_WRAP = "decrement_and_wrap"
 
 [enum."VkSubpassContents"]
 name = "subpass_contents"
@@ -7745,6 +8439,24 @@ name = "subpass_contents"
 VK_SUBPASS_CONTENTS_INLINE = "inline_"
 VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS = "secondary_command_buffers"
 VK_SUBPASS_CONTENTS_INLINE_AND_SECONDARY_COMMAND_BUFFERS_KHR = "inline_and_secondary_command_buffers"
+
+[enum."VkSubpassMergeStatusEXT"]
+name = "subpass_merge_status"
+[enum."VkSubpassMergeStatusEXT".values]
+VK_SUBPASS_MERGE_STATUS_MERGED_EXT = "merged"
+VK_SUBPASS_MERGE_STATUS_DISALLOWED_EXT = "disallowed"
+VK_SUBPASS_MERGE_STATUS_NOT_MERGED_SIDE_EFFECTS_EXT = "not_merged_side_effects"
+VK_SUBPASS_MERGE_STATUS_NOT_MERGED_SAMPLES_MISMATCH_EXT = "not_merged_samples_mismatch"
+VK_SUBPASS_MERGE_STATUS_NOT_MERGED_VIEWS_MISMATCH_EXT = "not_merged_views_mismatch"
+VK_SUBPASS_MERGE_STATUS_NOT_MERGED_ALIASING_EXT = "not_merged_aliasing"
+VK_SUBPASS_MERGE_STATUS_NOT_MERGED_DEPENDENCIES_EXT = "not_merged_dependencies"
+VK_SUBPASS_MERGE_STATUS_NOT_MERGED_INCOMPATIBLE_INPUT_ATTACHMENT_EXT = "not_merged_incompatible_input_attachment"
+VK_SUBPASS_MERGE_STATUS_NOT_MERGED_TOO_MANY_ATTACHMENTS_EXT = "not_merged_too_many_attachments"
+VK_SUBPASS_MERGE_STATUS_NOT_MERGED_INSUFFICIENT_STORAGE_EXT = "not_merged_insufficient_storage"
+VK_SUBPASS_MERGE_STATUS_NOT_MERGED_DEPTH_STENCIL_COUNT_EXT = "not_merged_depth_stencil_count"
+VK_SUBPASS_MERGE_STATUS_NOT_MERGED_RESOLVE_ATTACHMENT_REUSE_EXT = "not_merged_resolve_attachment_reuse"
+VK_SUBPASS_MERGE_STATUS_NOT_MERGED_SINGLE_SUBPASS_EXT = "not_merged_single_subpass"
+VK_SUBPASS_MERGE_STATUS_NOT_MERGED_UNSPECIFIED_EXT = "not_merged_unspecified"
 
 [enum."VkSurfaceTransformFlagBitsKHR"]
 name = "surface_transform"
@@ -7865,6 +8577,18 @@ VK_VIDEO_ENCODE_TUNING_MODE_HIGH_QUALITY_KHR = "high_quality"
 VK_VIDEO_ENCODE_TUNING_MODE_LOW_LATENCY_KHR = "low_latency"
 VK_VIDEO_ENCODE_TUNING_MODE_ULTRA_LOW_LATENCY_KHR = "ultra_low_latency"
 VK_VIDEO_ENCODE_TUNING_MODE_LOSSLESS_KHR = "lossless"
+
+[enum."VkViewportCoordinateSwizzleNV"]
+name = "viewport_coordinate_swizzle"
+[enum."VkViewportCoordinateSwizzleNV".values]
+VK_VIEWPORT_COORDINATE_SWIZZLE_POSITIVE_X_NV = "positive_x"
+VK_VIEWPORT_COORDINATE_SWIZZLE_NEGATIVE_X_NV = "negative_x"
+VK_VIEWPORT_COORDINATE_SWIZZLE_POSITIVE_Y_NV = "positive_y"
+VK_VIEWPORT_COORDINATE_SWIZZLE_NEGATIVE_Y_NV = "negative_y"
+VK_VIEWPORT_COORDINATE_SWIZZLE_POSITIVE_Z_NV = "positive_z"
+VK_VIEWPORT_COORDINATE_SWIZZLE_NEGATIVE_Z_NV = "negative_z"
+VK_VIEWPORT_COORDINATE_SWIZZLE_POSITIVE_W_NV = "positive_w"
+VK_VIEWPORT_COORDINATE_SWIZZLE_NEGATIVE_W_NV = "negative_w"
 
 [command."vkAllocateCommandBuffers"]
 name = "allocate_command_buffers"
@@ -8095,3 +8819,735 @@ name = "khr::create_xcb_surface"
 
 [command."vkCreateXlibSurfaceKHR"]
 name = "khr::create_xlib_surface"
+
+[command."vkAcquireNextImage2KHR"]
+name = "khr::acquire_next_image2"
+
+[command."vkAcquirePerformanceConfigurationINTEL"]
+name = "intel::acquire_performance_configuration"
+
+[command."vkAcquireProfilingLockKHR"]
+name = "khr::acquire_profiling_lock"
+
+[command."vkAntiLagUpdateAMD"]
+name = "amd::anti_lag_update"
+
+[command."vkBeginCommandBuffer"]
+name = "begin_command_buffer"
+
+[command."vkBindAccelerationStructureMemoryNV"]
+name = "nv::bind_acceleration_structure_memory"
+
+[command."vkBindBufferMemory2"]
+name = "bind_buffer_memory2"
+
+[command."vkBindDataGraphPipelineSessionMemoryARM"]
+name = "arm::bind_data_graph_pipeline_session_memory"
+
+[command."vkBindImageMemory2"]
+name = "bind_image_memory2"
+
+[command."vkBindTensorMemoryARM"]
+name = "arm::bind_tensor_memory"
+
+[command."vkBindVideoSessionMemoryKHR"]
+name = "khr::bind_video_session_memory"
+
+[command."vkBuildAccelerationStructuresKHR"]
+name = "khr::build_acceleration_structures"
+
+[command."vkBuildMicromapsEXT"]
+name = "ext::build_micromaps"
+
+[command."vkCmdBeginConditionalRenderingEXT"]
+name = "ext::cmd_begin_conditional_rendering"
+
+[command."vkCmdBeginDebugUtilsLabelEXT"]
+name = "ext::cmd_begin_debug_utils_label"
+
+[command."vkCmdBeginPerTileExecutionQCOM"]
+name = "qcom::cmd_begin_per_tile_execution"
+
+[command."vkCmdBeginRenderPass"]
+name = "cmd_begin_render_pass"
+
+[command."vkCmdBeginRenderPass2"]
+name = "cmd_begin_render_pass2"
+
+[command."vkCmdBeginRendering"]
+name = "cmd_begin_rendering"
+
+[command."vkCmdBeginTransformFeedbackEXT"]
+name = "ext::cmd_begin_transform_feedback"
+
+[command."vkCmdBeginVideoCodingKHR"]
+name = "khr::cmd_begin_video_coding"
+
+[command."vkCmdBindDescriptorBufferEmbeddedSamplers2EXT"]
+name = "ext::cmd_bind_descriptor_buffer_embedded_samplers2"
+
+[command."vkCmdBindDescriptorBuffersEXT"]
+name = "ext::cmd_bind_descriptor_buffers"
+
+[command."vkCmdBindDescriptorSets"]
+name = "cmd_bind_descriptor_sets"
+
+[command."vkCmdBindDescriptorSets2"]
+name = "cmd_bind_descriptor_sets2"
+
+[command."vkCmdBindShadersEXT"]
+name = "ext::cmd_bind_shaders"
+
+[command."vkCmdBindTileMemoryQCOM"]
+name = "qcom::cmd_bind_tile_memory"
+
+[command."vkCmdBindTransformFeedbackBuffersEXT"]
+name = "ext::cmd_bind_transform_feedback_buffers"
+
+[command."vkCmdBindVertexBuffers"]
+name = "cmd_bind_vertex_buffers"
+
+[command."vkCmdBlitImage"]
+name = "cmd_blit_image"
+
+[command."vkCmdBlitImage2"]
+name = "cmd_blit_image2"
+
+[command."vkCmdBuildAccelerationStructureNV"]
+name = "nv::cmd_build_acceleration_structure"
+
+[command."vkCmdBuildAccelerationStructuresIndirectKHR"]
+name = "khr::cmd_build_acceleration_structures_indirect"
+
+[command."vkCmdBuildAccelerationStructuresKHR"]
+name = "khr::cmd_build_acceleration_structures"
+
+[command."vkCmdBuildClusterAccelerationStructureIndirectNV"]
+name = "nv::cmd_build_cluster_acceleration_structure_indirect"
+
+[command."vkCmdBuildMicromapsEXT"]
+name = "ext::cmd_build_micromaps"
+
+[command."vkCmdBuildPartitionedAccelerationStructuresNV"]
+name = "nv::cmd_build_partitioned_acceleration_structures"
+
+[command."vkCmdClearAttachments"]
+name = "cmd_clear_attachments"
+
+[command."vkCmdClearColorImage"]
+name = "cmd_clear_color_image"
+
+[command."vkCmdClearDepthStencilImage"]
+name = "cmd_clear_depth_stencil_image"
+
+[command."vkCmdControlVideoCodingKHR"]
+name = "khr::cmd_control_video_coding"
+
+[command."vkCmdConvertCooperativeVectorMatrixNV"]
+name = "nv::cmd_convert_cooperative_vector_matrix"
+
+[command."vkCmdCopyAccelerationStructureKHR"]
+name = "khr::cmd_copy_acceleration_structure"
+
+[command."vkCmdCopyAccelerationStructureToMemoryKHR"]
+name = "khr::cmd_copy_acceleration_structure_to_memory"
+
+[command."vkCmdCopyBuffer"]
+name = "cmd_copy_buffer"
+
+[command."vkCmdCopyBuffer2"]
+name = "cmd_copy_buffer2"
+
+[command."vkCmdCopyBufferToImage"]
+name = "cmd_copy_buffer_to_image"
+
+[command."vkCmdCopyBufferToImage2"]
+name = "cmd_copy_buffer_to_image2"
+
+[command."vkCmdCopyImage"]
+name = "cmd_copy_image"
+
+[command."vkCmdCopyImage2"]
+name = "cmd_copy_image2"
+
+[command."vkCmdCopyImageToBuffer"]
+name = "cmd_copy_image_to_buffer"
+
+[command."vkCmdCopyImageToBuffer2"]
+name = "cmd_copy_image_to_buffer2"
+
+[command."vkCmdCopyMemoryIndirectKHR"]
+name = "khr::cmd_copy_memory_indirect"
+
+[command."vkCmdCopyMemoryToAccelerationStructureKHR"]
+name = "khr::cmd_copy_memory_to_acceleration_structure"
+
+[command."vkCmdCopyMemoryToImageIndirectKHR"]
+name = "khr::cmd_copy_memory_to_image_indirect"
+
+[command."vkCmdCopyMemoryToImageIndirectNV"]
+name = "nv::cmd_copy_memory_to_image_indirect"
+
+[command."vkCmdCopyMemoryToMicromapEXT"]
+name = "ext::cmd_copy_memory_to_micromap"
+
+[command."vkCmdCopyMicromapEXT"]
+name = "ext::cmd_copy_micromap"
+
+[command."vkCmdCopyMicromapToMemoryEXT"]
+name = "ext::cmd_copy_micromap_to_memory"
+
+[command."vkCmdCopyTensorARM"]
+name = "arm::cmd_copy_tensor"
+
+[command."vkCmdCuLaunchKernelNVX"]
+name = "nvx::cmd_cu_launch_kernel"
+
+[command."vkCmdCudaLaunchKernelNV"]
+name = "nv::cmd_cuda_launch_kernel"
+
+[command."vkCmdDebugMarkerBeginEXT"]
+name = "ext::cmd_debug_marker_begin"
+
+[command."vkCmdDebugMarkerInsertEXT"]
+name = "ext::cmd_debug_marker_insert"
+
+[command."vkCmdDecodeVideoKHR"]
+name = "khr::cmd_decode_video"
+
+[command."vkCmdDecompressMemoryNV"]
+name = "nv::cmd_decompress_memory"
+
+[command."vkCmdDispatchDataGraphARM"]
+name = "arm::cmd_dispatch_data_graph"
+
+[command."vkCmdDispatchTileQCOM"]
+name = "qcom::cmd_dispatch_tile"
+
+[command."vkCmdDrawMultiEXT"]
+name = "ext::cmd_draw_multi"
+
+[command."vkCmdDrawMultiIndexedEXT"]
+name = "ext::cmd_draw_multi_indexed"
+
+[command."vkCmdEncodeVideoKHR"]
+name = "khr::cmd_encode_video"
+
+[command."vkCmdEndPerTileExecutionQCOM"]
+name = "qcom::cmd_end_per_tile_execution"
+
+[command."vkCmdEndRenderPass2"]
+name = "cmd_end_render_pass2"
+
+[command."vkCmdEndRendering2EXT"]
+name = "ext::cmd_end_rendering2"
+
+[command."vkCmdEndTransformFeedbackEXT"]
+name = "ext::cmd_end_transform_feedback"
+
+[command."vkCmdEndVideoCodingKHR"]
+name = "khr::cmd_end_video_coding"
+
+[command."vkCmdExecuteCommands"]
+name = "cmd_execute_commands"
+
+[command."vkCmdExecuteGeneratedCommandsEXT"]
+name = "ext::cmd_execute_generated_commands"
+
+[command."vkCmdExecuteGeneratedCommandsNV"]
+name = "nv::cmd_execute_generated_commands"
+
+[command."vkCmdInsertDebugUtilsLabelEXT"]
+name = "ext::cmd_insert_debug_utils_label"
+
+[command."vkCmdNextSubpass2"]
+name = "cmd_next_subpass2"
+
+[command."vkCmdOpticalFlowExecuteNV"]
+name = "nv::cmd_optical_flow_execute"
+
+[command."vkCmdPipelineBarrier"]
+name = "cmd_pipeline_barrier"
+
+[command."vkCmdPipelineBarrier2"]
+name = "cmd_pipeline_barrier2"
+
+[command."vkCmdPreprocessGeneratedCommandsEXT"]
+name = "ext::cmd_preprocess_generated_commands"
+
+[command."vkCmdPreprocessGeneratedCommandsNV"]
+name = "nv::cmd_preprocess_generated_commands"
+
+[command."vkCmdPushConstants2"]
+name = "cmd_push_constants2"
+
+[command."vkCmdPushDescriptorSet"]
+name = "cmd_push_descriptor_set"
+
+[command."vkCmdPushDescriptorSet2"]
+name = "cmd_push_descriptor_set2"
+
+[command."vkCmdPushDescriptorSetWithTemplate2"]
+name = "cmd_push_descriptor_set_with_template2"
+
+[command."vkCmdResolveImage"]
+name = "cmd_resolve_image"
+
+[command."vkCmdResolveImage2"]
+name = "cmd_resolve_image2"
+
+[command."vkCmdSetCoarseSampleOrderNV"]
+name = "nv::cmd_set_coarse_sample_order"
+
+[command."vkCmdSetColorBlendEnableEXT"]
+name = "ext::cmd_set_color_blend_enable"
+
+[command."vkCmdSetColorBlendEquationEXT"]
+name = "ext::cmd_set_color_blend_equation"
+
+[command."vkCmdSetColorWriteEnableEXT"]
+name = "ext::cmd_set_color_write_enable"
+
+[command."vkCmdSetColorWriteMaskEXT"]
+name = "ext::cmd_set_color_write_mask"
+
+[command."vkCmdSetDepthBias2EXT"]
+name = "ext::cmd_set_depth_bias2"
+
+[command."vkCmdSetDescriptorBufferOffsets2EXT"]
+name = "ext::cmd_set_descriptor_buffer_offsets2"
+
+[command."vkCmdSetDescriptorBufferOffsetsEXT"]
+name = "ext::cmd_set_descriptor_buffer_offsets"
+
+[command."vkCmdSetDiscardRectangleEXT"]
+name = "ext::cmd_set_discard_rectangle"
+
+[command."vkCmdSetEvent2"]
+name = "cmd_set_event2"
+
+[command."vkCmdSetExclusiveScissorEnableNV"]
+name = "nv::cmd_set_exclusive_scissor_enable"
+
+[command."vkCmdSetExclusiveScissorNV"]
+name = "nv::cmd_set_exclusive_scissor"
+
+[command."vkCmdSetPerformanceMarkerINTEL"]
+name = "intel::cmd_set_performance_marker"
+
+[command."vkCmdSetPerformanceOverrideINTEL"]
+name = "intel::cmd_set_performance_override"
+
+[command."vkCmdSetPerformanceStreamMarkerINTEL"]
+name = "intel::cmd_set_performance_stream_marker"
+
+[command."vkCmdSetRenderingAttachmentLocations"]
+name = "cmd_set_rendering_attachment_locations"
+
+[command."vkCmdSetRenderingInputAttachmentIndices"]
+name = "cmd_set_rendering_input_attachment_indices"
+
+[command."vkCmdSetSampleLocationsEXT"]
+name = "ext::cmd_set_sample_locations"
+
+[command."vkCmdSetScissor"]
+name = "cmd_set_scissor"
+
+[command."vkCmdSetVertexInputEXT"]
+name = "ext::cmd_set_vertex_input"
+
+[command."vkCmdSetViewport"]
+name = "cmd_set_viewport"
+
+[command."vkCmdSetViewportShadingRatePaletteNV"]
+name = "nv::cmd_set_viewport_shading_rate_palette"
+
+[command."vkCmdSetViewportWScalingNV"]
+name = "nv::cmd_set_viewport_w_scaling"
+
+[command."vkCmdWaitEvents"]
+name = "cmd_wait_events"
+
+[command."vkCmdWaitEvents2"]
+name = "cmd_wait_events2"
+
+[command."vkCmdWriteAccelerationStructuresPropertiesKHR"]
+name = "khr::cmd_write_acceleration_structures_properties"
+
+[command."vkCmdWriteAccelerationStructuresPropertiesNV"]
+name = "nv::cmd_write_acceleration_structures_properties"
+
+[command."vkCmdWriteMicromapsPropertiesEXT"]
+name = "ext::cmd_write_micromaps_properties"
+
+[command."vkConvertCooperativeVectorMatrixNV"]
+name = "nv::convert_cooperative_vector_matrix"
+
+[command."vkCopyAccelerationStructureKHR"]
+name = "khr::copy_acceleration_structure"
+
+[command."vkCopyAccelerationStructureToMemoryKHR"]
+name = "khr::copy_acceleration_structure_to_memory"
+
+[command."vkCopyImageToImage"]
+name = "copy_image_to_image"
+
+[command."vkCopyImageToMemory"]
+name = "copy_image_to_memory"
+
+[command."vkCopyMemoryToAccelerationStructureKHR"]
+name = "khr::copy_memory_to_acceleration_structure"
+
+[command."vkCopyMemoryToImage"]
+name = "copy_memory_to_image"
+
+[command."vkCopyMemoryToMicromapEXT"]
+name = "ext::copy_memory_to_micromap"
+
+[command."vkCopyMicromapEXT"]
+name = "ext::copy_micromap"
+
+[command."vkCopyMicromapToMemoryEXT"]
+name = "ext::copy_micromap_to_memory"
+
+[command."vkDebugMarkerSetObjectNameEXT"]
+name = "ext::debug_marker_set_object_name"
+
+[command."vkDebugMarkerSetObjectTagEXT"]
+name = "ext::debug_marker_set_object_tag"
+
+[command."vkDisplayPowerControlEXT"]
+name = "ext::display_power_control"
+
+[command."vkFlushMappedMemoryRanges"]
+name = "flush_mapped_memory_ranges"
+
+[command."vkFreeCommandBuffers"]
+name = "free_command_buffers"
+
+[command."vkFreeDescriptorSets"]
+name = "free_descriptor_sets"
+
+[command."vkGetAccelerationStructureBuildSizesKHR"]
+name = "khr::get_acceleration_structure_build_sizes"
+
+[command."vkGetAccelerationStructureDeviceAddressKHR"]
+name = "khr::get_acceleration_structure_device_address"
+
+[command."vkGetAccelerationStructureMemoryRequirementsNV"]
+name = "nv::get_acceleration_structure_memory_requirements"
+
+[command."vkGetAccelerationStructureOpaqueCaptureDescriptorDataEXT"]
+name = "ext::get_acceleration_structure_opaque_capture_descriptor_data"
+
+[command."vkGetBufferDeviceAddress"]
+name = "get_buffer_device_address"
+
+[command."vkGetBufferMemoryRequirements2"]
+name = "get_buffer_memory_requirements2"
+
+[command."vkGetBufferOpaqueCaptureAddress"]
+name = "get_buffer_opaque_capture_address"
+
+[command."vkGetBufferOpaqueCaptureDescriptorDataEXT"]
+name = "ext::get_buffer_opaque_capture_descriptor_data"
+
+[command."vkGetClusterAccelerationStructureBuildSizesNV"]
+name = "nv::get_cluster_acceleration_structure_build_sizes"
+
+[command."vkGetDataGraphPipelinePropertiesARM"]
+name = "arm::get_data_graph_pipeline_properties"
+
+[command."vkGetDataGraphPipelineSessionMemoryRequirementsARM"]
+name = "arm::get_data_graph_pipeline_session_memory_requirements"
+
+[command."vkGetDescriptorEXT"]
+name = "ext::get_descriptor"
+
+[command."vkGetDescriptorSetLayoutHostMappingInfoVALVE"]
+name = "valve::get_descriptor_set_layout_host_mapping_info"
+
+[command."vkGetDescriptorSetLayoutSupport"]
+name = "get_descriptor_set_layout_support"
+
+[command."vkGetDeviceAccelerationStructureCompatibilityKHR"]
+name = "khr::get_device_acceleration_structure_compatibility"
+
+[command."vkGetDeviceBufferMemoryRequirements"]
+name = "get_device_buffer_memory_requirements"
+
+[command."vkGetDeviceImageMemoryRequirements"]
+name = "get_device_image_memory_requirements"
+
+[command."vkGetDeviceImageSubresourceLayout"]
+name = "get_device_image_subresource_layout"
+
+[command."vkGetDeviceMemoryOpaqueCaptureAddress"]
+name = "get_device_memory_opaque_capture_address"
+
+[command."vkGetDeviceMicromapCompatibilityEXT"]
+name = "ext::get_device_micromap_compatibility"
+
+[command."vkGetDeviceQueue2"]
+name = "get_device_queue2"
+
+[command."vkGetDeviceTensorMemoryRequirementsARM"]
+name = "arm::get_device_tensor_memory_requirements"
+
+[command."vkGetDisplayPlaneCapabilities2KHR"]
+name = "khr::get_display_plane_capabilities2"
+
+[command."vkGetDynamicRenderingTilePropertiesQCOM"]
+name = "qcom::get_dynamic_rendering_tile_properties"
+
+[command."vkGetExecutionGraphPipelineNodeIndexAMDX"]
+name = "amdx::get_execution_graph_pipeline_node_index"
+
+[command."vkGetFenceFdKHR"]
+name = "khr::get_fence_fd"
+
+[command."vkGetFenceWin32HandleKHR"]
+name = "khr::get_fence_win32_handle"
+
+[command."vkGetGeneratedCommandsMemoryRequirementsEXT"]
+name = "ext::get_generated_commands_memory_requirements"
+
+[command."vkGetGeneratedCommandsMemoryRequirementsNV"]
+name = "nv::get_generated_commands_memory_requirements"
+
+[command."vkGetImageMemoryRequirements2"]
+name = "get_image_memory_requirements2"
+
+[command."vkGetImageOpaqueCaptureDescriptorDataEXT"]
+name = "ext::get_image_opaque_capture_descriptor_data"
+
+[command."vkGetImageSubresourceLayout2"]
+name = "get_image_subresource_layout2"
+
+[command."vkGetImageViewHandle64NVX"]
+name = "nvx::get_image_view_handle64"
+
+[command."vkGetImageViewHandleNVX"]
+name = "nvx::get_image_view_handle"
+
+[command."vkGetImageViewOpaqueCaptureDescriptorDataEXT"]
+name = "ext::get_image_view_opaque_capture_descriptor_data"
+
+[command."vkGetMemoryAndroidHardwareBufferANDROID"]
+name = "android::get_memory_android_hardware_buffer"
+
+[command."vkGetMemoryFdKHR"]
+name = "khr::get_memory_fd"
+
+[command."vkGetMemoryMetalHandleEXT"]
+name = "ext::get_memory_metal_handle"
+
+[command."vkGetMemoryRemoteAddressNV"]
+name = "nv::get_memory_remote_address"
+
+[command."vkGetMemoryWin32HandleKHR"]
+name = "khr::get_memory_win32_handle"
+
+[command."vkGetMemoryZirconHandleFUCHSIA"]
+name = "fuchsia::get_memory_zircon_handle"
+
+[command."vkGetMicromapBuildSizesEXT"]
+name = "ext::get_micromap_build_sizes"
+
+[command."vkGetPartitionedAccelerationStructuresBuildSizesNV"]
+name = "nv::get_partitioned_acceleration_structures_build_sizes"
+
+[command."vkGetPhysicalDeviceExternalBufferProperties"]
+name = "get_physical_device_external_buffer_properties"
+
+[command."vkGetPhysicalDeviceExternalFenceProperties"]
+name = "get_physical_device_external_fence_properties"
+
+[command."vkGetPhysicalDeviceExternalSemaphoreProperties"]
+name = "get_physical_device_external_semaphore_properties"
+
+[command."vkGetPhysicalDeviceExternalTensorPropertiesARM"]
+name = "arm::get_physical_device_external_tensor_properties"
+
+[command."vkGetPhysicalDeviceImageFormatProperties2"]
+name = "get_physical_device_image_format_properties2"
+
+[command."vkGetPhysicalDeviceQueueFamilyDataGraphProcessingEnginePropertiesARM"]
+name = "arm::get_physical_device_queue_family_data_graph_processing_engine_properties"
+
+[command."vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR"]
+name = "khr::get_physical_device_queue_family_performance_query_passes"
+
+[command."vkGetPhysicalDeviceSurfaceCapabilities2KHR"]
+name = "khr::get_physical_device_surface_capabilities2"
+
+[command."vkGetPhysicalDeviceVideoCapabilitiesKHR"]
+name = "khr::get_physical_device_video_capabilities"
+
+[command."vkGetPhysicalDeviceVideoEncodeQualityLevelPropertiesKHR"]
+name = "khr::get_physical_device_video_encode_quality_level_properties"
+
+[command."vkGetPipelineIndirectDeviceAddressNV"]
+name = "nv::get_pipeline_indirect_device_address"
+
+[command."vkGetPipelineIndirectMemoryRequirementsNV"]
+name = "nv::get_pipeline_indirect_memory_requirements"
+
+[command."vkGetPipelineKeyKHR"]
+name = "khr::get_pipeline_key"
+
+[command."vkGetRenderingAreaGranularity"]
+name = "get_rendering_area_granularity"
+
+[command."vkGetSamplerOpaqueCaptureDescriptorDataEXT"]
+name = "ext::get_sampler_opaque_capture_descriptor_data"
+
+[command."vkGetSemaphoreFdKHR"]
+name = "khr::get_semaphore_fd"
+
+[command."vkGetSemaphoreWin32HandleKHR"]
+name = "khr::get_semaphore_win32_handle"
+
+[command."vkGetSemaphoreZirconHandleFUCHSIA"]
+name = "fuchsia::get_semaphore_zircon_handle"
+
+[command."vkGetShaderModuleCreateInfoIdentifierEXT"]
+name = "ext::get_shader_module_create_info_identifier"
+
+[command."vkGetTensorMemoryRequirementsARM"]
+name = "arm::get_tensor_memory_requirements"
+
+[command."vkGetTensorOpaqueCaptureDescriptorDataARM"]
+name = "arm::get_tensor_opaque_capture_descriptor_data"
+
+[command."vkGetTensorViewOpaqueCaptureDescriptorDataARM"]
+name = "arm::get_tensor_view_opaque_capture_descriptor_data"
+
+[command."vkImportFenceFdKHR"]
+name = "khr::import_fence_fd"
+
+[command."vkImportFenceWin32HandleKHR"]
+name = "khr::import_fence_win32_handle"
+
+[command."vkImportSemaphoreFdKHR"]
+name = "khr::import_semaphore_fd"
+
+[command."vkImportSemaphoreWin32HandleKHR"]
+name = "khr::import_semaphore_win32_handle"
+
+[command."vkImportSemaphoreZirconHandleFUCHSIA"]
+name = "fuchsia::import_semaphore_zircon_handle"
+
+[command."vkInitializePerformanceApiINTEL"]
+name = "intel::initialize_performance_api"
+
+[command."vkInvalidateMappedMemoryRanges"]
+name = "invalidate_mapped_memory_ranges"
+
+[command."vkLatencySleepNV"]
+name = "nv::latency_sleep"
+
+[command."vkMapMemory2"]
+name = "map_memory2"
+
+[command."vkMergePipelineCaches"]
+name = "merge_pipeline_caches"
+
+[command."vkMergeValidationCachesEXT"]
+name = "ext::merge_validation_caches"
+
+[command."vkQueueBeginDebugUtilsLabelEXT"]
+name = "ext::queue_begin_debug_utils_label"
+
+[command."vkQueueBindSparse"]
+name = "queue_bind_sparse"
+
+[command."vkQueueInsertDebugUtilsLabelEXT"]
+name = "ext::queue_insert_debug_utils_label"
+
+[command."vkQueueNotifyOutOfBandNV"]
+name = "nv::queue_notify_out_of_band"
+
+[command."vkQueuePresentKHR"]
+name = "khr::queue_present"
+
+[command."vkQueueSubmit"]
+name = "queue_submit"
+
+[command."vkQueueSubmit2"]
+name = "queue_submit2"
+
+[command."vkRegisterDeviceEventEXT"]
+name = "ext::register_device_event"
+
+[command."vkRegisterDisplayEventEXT"]
+name = "ext::register_display_event"
+
+[command."vkReleaseCapturedPipelineDataKHR"]
+name = "khr::release_captured_pipeline_data"
+
+[command."vkReleaseSwapchainImagesKHR"]
+name = "khr::release_swapchain_images"
+
+[command."vkResetFences"]
+name = "reset_fences"
+
+[command."vkSetBufferCollectionBufferConstraintsFUCHSIA"]
+name = "fuchsia::set_buffer_collection_buffer_constraints"
+
+[command."vkSetBufferCollectionImageConstraintsFUCHSIA"]
+name = "fuchsia::set_buffer_collection_image_constraints"
+
+[command."vkSetDebugUtilsObjectNameEXT"]
+name = "ext::set_debug_utils_object_name"
+
+[command."vkSetDebugUtilsObjectTagEXT"]
+name = "ext::set_debug_utils_object_tag"
+
+[command."vkSetHdrMetadataEXT"]
+name = "ext::set_hdr_metadata"
+
+[command."vkSetLatencyMarkerNV"]
+name = "nv::set_latency_marker"
+
+[command."vkSetLatencySleepModeNV"]
+name = "nv::set_latency_sleep_mode"
+
+[command."vkSignalSemaphore"]
+name = "signal_semaphore"
+
+[command."vkSubmitDebugUtilsMessageEXT"]
+name = "ext::submit_debug_utils_message"
+
+[command."vkTransitionImageLayout"]
+name = "transition_image_layout"
+
+[command."vkUnmapMemory2"]
+name = "unmap_memory2"
+
+[command."vkUpdateDescriptorSets"]
+name = "update_descriptor_sets"
+
+[command."vkUpdateIndirectExecutionSetPipelineEXT"]
+name = "ext::update_indirect_execution_set_pipeline"
+
+[command."vkUpdateIndirectExecutionSetShaderEXT"]
+name = "ext::update_indirect_execution_set_shader"
+
+[command."vkUpdateVideoSessionParametersKHR"]
+name = "khr::update_video_session_parameters"
+
+[command."vkWaitForFences"]
+name = "wait_for_fences"
+
+[command."vkWaitForPresent2KHR"]
+name = "khr::wait_for_present2"
+
+[command."vkWaitSemaphores"]
+name = "wait_semaphores"
+
+[command."vkWriteAccelerationStructuresPropertiesKHR"]
+name = "khr::write_acceleration_structures_properties"
+
+[command."vkWriteMicromapsPropertiesEXT"]
+name = "ext::write_micromaps_properties"

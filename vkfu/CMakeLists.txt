@@ -42,6 +42,8 @@ if(VKFU_BUILD_TESTS)
 
 	# The create_* wrappers call into the loader, so this one is a compile-only
 	# check: building it instantiates every template body under test.
-	add_library(vkfu_producers OBJECT tests/producers.cpp)
-	target_link_libraries(vkfu_producers PRIVATE vkfu::vkfu)
+	foreach(case IN ITEMS producers commands)
+		add_library(vkfu_${case} OBJECT tests/${case}.cpp)
+		target_link_libraries(vkfu_${case} PRIVATE vkfu::vkfu)
+	endforeach()
 endif()

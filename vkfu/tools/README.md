@@ -39,7 +39,8 @@ const 指针参数且其结构体有 `sType` 成员——`pAllocator` 因此自�
 带 `sType` 结构体（**表达式槽**），以及带 `len` 的数组元素类型（有自己的 param，但仍是
 native 的 span——span 是借用，父级无法拥有元素）。
 
-v1.4.328 下是 **257 个 root / 834 个对象** / 41 个表达式槽 / 55 个数组元素类型，全部已命名。
+v1.4.328 下是 **257 个 root / 834 个链式对象 / 69 个无 sType 的 param / 318 个命令包装**，
+外加 41 个表达式槽和 55 个数组元素类型，全部已命名。
 `param::command_buffer_begin`、`param::rendering`、`param::dependency`、`param::submit2`、
 `param::present`、`param::memory`、`param::image_memory_barrier2` 都在里面，所以命令录制和
 内存分配那一侧也不用再手写 `sType`。
@@ -127,6 +128,28 @@ static_assert(::std::same_as<
 - 定制点是 ADL 的 `_vkfu_chain(branch, features...)`，与 `_vkfu_address` 等同一套约定。
 - `chain(branch)` 就是 branch 本身，和对空包折叠 `|` 一致。
 
+## 命令包装：不止 create
+
+677 个 vulkan 命令里 **318 个值得包装**，判据是"有东西可换"：吃调用方填的结构体（换成表达式），
+或者有指针+长度的参数对（折成一个 span）。其余 293 个既无 info 又无 span（`vkCmdDraw`、
+`vkCmdBindPipeline`），包装没有收益，保持原样调用；57 个是 `vkGet*` 的两段式枚举模式，
+形态不同，暂不处理。
+
+```cpp
+vkfu::cmd_execute_commands(cmd, secondaries);              // count + pointer -> 一个 span
+vkfu::cmd_set_viewport(cmd, 0, ::std::span{&viewport, 1u});
+vkfu::cmd_pipeline_barrier2(cmd, param::dependency{...});  // 直接吃表达式
+vkfu::begin_command_buffer(cmd, param::command_buffer_begin{...});
+vkfu::queue_submit2(queue, ::std::span{&submit, 1u}, fence);
+```
+
+返回 `VkResult` 的给一对重载（抛 / `std::nothrow_t` 返回 `expected`）；返回 `void` 的只有一个
+函数，没有可失败的东西。多个 info 参数各自一个模板参数（`vkCmdNextSubpass2` 有两个）。
+没有模板参数的包装是非模板函数，所以标了 `inline`。
+
+**参数名**是 vk.xml 的名字去掉匈牙利前缀后 snake 化。它们不是可调用 API 的一部分
+（C++ 没有具名实参），所以是唯一不走命名表的一类名字。
+
 ## create 系列
 
 生成器为 74 个 `vkCreate*` / `vkAllocate*` 生成包装，参数吃**表达式**，内部求值 + unpack。
@@ -164,6 +187,20 @@ python -m vkfu_gen gen      --xml vk.xml --table naming.toml --scope closure \
 别名之间任意两者相撞）、枚举项撞名、遇到未支持的成员形态（多维数组、位无法一位一格
 的 flag 枚举）。**只警告**：字段名与所属对象同名、字段名遮蔽它自己的枚举类型
 （合法，因为生成的代码始终写全限定名）、表里命名了不在作用域内的标识符。
+
+## 无 sType 的结构体也有 param
+
+`VkPipelineColorBlendAttachmentState`、`VkDescriptorSetLayoutBinding`、`VkStencilOpState`、
+`VkViewport` 这类 69 个结构体没有 pNext 要管，所以只生成 param 和 `evaluate()`——没有 tag、
+没有 trait、没有链式钩子，也不能进管道。但 param 本身仍然值得有：
+
+```cpp
+param::state::color_blend_attachment{.color_write_mask = {.r = 1, .g = 1, .b = 1, .a = 1}}
+param::descriptor_set_layout_binding{
+    .descriptor_type = descriptor_type::uniform_buffer,
+    .stage_flags = {.vertex = 1, .fragment = 1},
+}
+```
 
 ## flags 的处理
 
@@ -299,7 +336,7 @@ C++23、`-Wall -Wextra`、**零警告**：
 
 - 可运行：`typical_structures` `native_expression` `pipeline_slots` `triangle_pipeline`
   `chain` `frame_recording`
-- 只编译（会调 loader）：`producers.cpp`、`examples/bootstrap.cpp`
+- 只编译（会调 loader）：`producers.cpp` `commands.cpp`、`examples/bootstrap.cpp`
 
 编译器抓到过 6 个我靠标识符回查发现不了的真错误：嵌套类的 DMI 在外层类闭合前不可用、
 ADL 只关联最内层命名空间（`operator|` 整个用不了）、GCC 对非模板 `requires` 不做 SFINAE、
@@ -327,6 +364,8 @@ clang 没有位域上的 constexpr `bit_cast`、位名跨厂商撞名导致位�
 - 枚举的 span/数组保持 native 元素类型（见上）。
 - 引擎侧 `include/bvn/graphics/vulkan_renderer.h` 和 `source/client/context.h` 还在用
   vk-bootstrap，所以 `vcpkg.json` 里的依赖没有摘掉。demo 已经不用它了。
+- `vkGet*` 的两段式枚举（57 个命令）与查询侧读取都还没做。
+- 生成的头 60k 行；按族拆分或按 feature/extension 子集化还没做。
 - 本机没有编译器和 Vulkan 头，生成结果尚未编译验证（已做标识符回查与结构自检）。
 - 一个 count 被多个指针共用时（如 `VkWriteDescriptorSet`）不折叠成 span，
   保留 count + 裸指针。

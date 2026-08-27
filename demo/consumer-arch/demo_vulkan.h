@@ -608,18 +608,14 @@ inline auto begin_frame(
 	auto const primary_command_buffer = frame.primary_command_buffer();
 	auto const in_flight = frame.in_flight();
 	check(::vkResetCommandPool(renderer.device(), primary_command_pool, 0), "failed to reset primary command pool");
-	check(::vkResetFences(renderer.device(), 1, &in_flight), "failed to reset frame fence");
+	::vkfu::reset_fences(renderer.device(), ::std::span{&in_flight, 1u});
 
 	namespace param = ::vkfu::param;
 	using namespace ::vkfu::enums;
 
-	// command_buffer_begin has a slot (pInheritanceInfo), so evaluating it gives a
-	// storage rather than the structure; unpack reaches the native head.
-	auto const begin_storage = ::vkfu::evaluate(param::command_buffer_begin{
+	::vkfu::begin_command_buffer(primary_command_buffer, param::command_buffer_begin{
 		.flags = {.one_time_submit = 1},
 	});
-	auto&& begin_info = ::vkfu::unpack(begin_storage);
-	check(::vkBeginCommandBuffer(primary_command_buffer, &begin_info), "failed to begin primary command buffer");
 
 	auto const acquire_barrier = ::vkfu::evaluate(param::image_memory_barrier2{
 		.dst_stage_mask = {.color_attachment_output = 1},
@@ -637,10 +633,9 @@ inline auto begin_frame(
 			.layerCount = 1,
 		},
 	});
-	auto const acquire_dependency = ::vkfu::evaluate(param::dependency{
+	::vkfu::cmd_pipeline_barrier2(primary_command_buffer, param::dependency{
 		.image_memory_barriers = ::std::span{&acquire_barrier, 1u},
 	});
-	::vkCmdPipelineBarrier2(primary_command_buffer, &acquire_dependency);
 
 	auto clear_value = ::VkClearValue{};
 	clear_value.color = {{0.025f, 0.035f, 0.055f, 1.0f}};
@@ -651,14 +646,12 @@ inline auto begin_frame(
 		.store_op = attachment_store_op::store,
 		.clear_value = clear_value,
 	});
-	auto const rendering_storage = ::vkfu::evaluate(param::rendering{
+	::vkfu::cmd_begin_rendering(primary_command_buffer, param::rendering{
 		.flags = {.contents_secondary_command_buffers = 1},
 		.render_area = ::VkRect2D{.offset = {}, .extent = frame.extent()},
 		.layer_count = 1,
 		.color_attachments = ::std::span{&color_attachment, 1u},
 	});
-	auto&& rendering_info = ::vkfu::unpack(rendering_storage);
-	::vkCmdBeginRendering(primary_command_buffer, &rendering_info);
 }
 
 inline auto create_secondary_command_pool(
@@ -710,21 +703,19 @@ inline auto record_triangle(
 				.rasterization_samples = sample_count::count_1,
 			},
 	};
-	auto const begin_storage = ::vkfu::evaluate(begin);
-	auto const& begin_info = ::vkfu::unpack(begin_storage);
-	check(::vkBeginCommandBuffer(secondary_command_buffer.handle, &begin_info), "failed to begin secondary command buffer");
+	::vkfu::begin_command_buffer(secondary_command_buffer.handle, begin);
 
 	auto const extent = renderer.swapchain_extent();
-	auto viewport = ::VkViewport{};
-	viewport.width = static_cast<float>(extent.width);
-	viewport.height = static_cast<float>(extent.height);
-	viewport.minDepth = 0.0f;
-	viewport.maxDepth = 1.0f;
-	auto scissor = ::VkRect2D{};
-	scissor.extent = extent;
+	auto const viewport = ::vkfu::evaluate(param::viewport{
+		.width = static_cast<float>(extent.width),
+		.height = static_cast<float>(extent.height),
+		.min_depth = 0.0f,
+		.max_depth = 1.0f,
+	});
+	auto const scissor = ::vkfu::evaluate(param::rect_2d{.extent = extent});
 	::vkCmdBindPipeline(secondary_command_buffer.handle, ::VK_PIPELINE_BIND_POINT_GRAPHICS, renderer.triangle_pipeline());
-	::vkCmdSetViewport(secondary_command_buffer.handle, 0, 1, &viewport);
-	::vkCmdSetScissor(secondary_command_buffer.handle, 0, 1, &scissor);
+	::vkfu::cmd_set_viewport(secondary_command_buffer.handle, 0, ::std::span{&viewport, 1u});
+	::vkfu::cmd_set_scissor(secondary_command_buffer.handle, 0, ::std::span{&scissor, 1u});
 	::vkCmdDraw(secondary_command_buffer.handle, 3, 1, 0, 0);
 	check(::vkEndCommandBuffer(secondary_command_buffer.handle), "failed to end secondary command buffer");
 	return secondary_command_buffer;
@@ -739,11 +730,7 @@ inline auto submit_present_frame(
 	auto const primary_command_buffer = frame.primary_command_buffer();
 	if (!secondary_commands.empty())
 	{
-		::vkCmdExecuteCommands(
-			primary_command_buffer,
-			static_cast<::std::uint32_t>(secondary_commands.size()),
-			secondary_commands.data()
-		);
+		::vkfu::cmd_execute_commands(primary_command_buffer, secondary_commands);
 	}
 	::vkCmdEndRendering(primary_command_buffer);
 
@@ -766,10 +753,9 @@ inline auto submit_present_frame(
 			.layerCount = 1,
 		},
 	});
-	auto const present_dependency = ::vkfu::evaluate(param::dependency{
+	::vkfu::cmd_pipeline_barrier2(primary_command_buffer, param::dependency{
 		.image_memory_barriers = ::std::span{&present_barrier, 1u},
 	});
-	::vkCmdPipelineBarrier2(primary_command_buffer, &present_dependency);
 	check(::vkEndCommandBuffer(primary_command_buffer), "failed to end primary command buffer");
 
 	auto const image_available = frame.image_available();
@@ -790,17 +776,21 @@ inline auto submit_present_frame(
 		.command_buffer_infos = ::std::span{&command_buffer, 1u},
 		.signal_semaphore_infos = ::std::span{&signal_semaphore, 1u},
 	});
-	check(::vkQueueSubmit2(renderer.graphics_queue(), 1, &submit, frame.in_flight()), "failed to submit Vulkan frame");
+	::vkfu::queue_submit2(renderer.graphics_queue(), ::std::span{&submit, 1u}, frame.in_flight());
 
 	auto const swapchain = renderer.swapchain();
 	auto const active_image_index = frame.active_image_index();
-	auto const present = ::vkfu::evaluate(param::khr::present{
-		.wait_semaphores = ::std::span{&render_finished, 1u},
-		.swapchain_count = 1,
-		.swapchains = &swapchain,
-		.image_indices = &active_image_index,
-	});
-	return ::vkQueuePresentKHR(renderer.present_queue(), &present);
+	auto const outcome = ::vkfu::khr::queue_present(
+		renderer.present_queue(),
+		param::khr::present{
+			.wait_semaphores = ::std::span{&render_finished, 1u},
+			.swapchain_count = 1,
+			.swapchains = &swapchain,
+			.image_indices = &active_image_index,
+		},
+		::std::nothrow
+	);
+	return outcome ? ::VK_SUCCESS : outcome.error();
 }
 
 inline auto wait_for_frame_gpu(
@@ -809,15 +799,11 @@ inline auto wait_for_frame_gpu(
 ) -> void
 {
 	auto const in_flight = frame.in_flight();
-	check(
-		::vkWaitForFences(
-			renderer.device(),
-			1,
-			&in_flight,
-			VK_TRUE,
-			(::std::numeric_limits<::std::uint64_t>::max)()
-		),
-		"failed to synchronously wait for the frame fence"
+	::vkfu::wait_for_fences(
+		renderer.device(),
+		::std::span{&in_flight, 1u},
+		VK_TRUE,
+		(::std::numeric_limits<::std::uint64_t>::max)()
 	);
 	check(::vkQueueWaitIdle(renderer.present_queue()), "failed to wait for the present queue");
 }

@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import collections
 import dataclasses
+import re
 import json
 import sys
 import tomllib
@@ -28,6 +29,11 @@ def _pipeline_states(registry: ir.Registry) -> frozenset[str]:
 	"""Pipeline state objects: the pointer-slot targets plus their pNext children."""
 	slots = list(registry.references) + list(registry.elements)
 	states = {target for _, _, target in slots if target.startswith("VkPipeline")}
+	# A sType-less structure named VkPipeline<something>State is pipeline state
+	# too -- VkPipelineColorBlendAttachmentState is the obvious one.
+	states |= {
+		name for name in registry.plain if re.fullmatch(r"VkPipeline.+State", name)
+	}
 	frontier = set(states)
 	while frontier:
 		children = {child for parent, child in registry.edges if parent in frontier and child not in states}
@@ -55,14 +61,15 @@ def _suggest(registry: ir.Registry, table: naming.Table) -> tuple[str, dict[str,
 	seen_bits: set[str] = set()
 	author_tags = frozenset(registry.author_tags)
 	states = _pipeline_states(registry)
-	members = frozenset(
-		target for _, _, target in list(registry.references) + list(registry.elements)
+	members = (
+		frozenset(target for _, _, target in list(registry.references) + list(registry.elements))
+		| frozenset(registry.plain)
 	) - states
 	objects = naming.suggest_object_names(
-		registry.closure, frozenset(registry.roots), states, members, author_tags
+		list(registry.closure) + list(registry.plain), frozenset(registry.roots), states, members, author_tags
 	)
 
-	for name in registry.closure:
+	for name in list(registry.closure) + list(registry.plain):
 		struct = registry.structs[name]
 		plan = emit.plan_struct(struct, registry)
 		struct_suggestion = objects[name]
@@ -256,22 +263,24 @@ def _rebuild(registry: ir.Registry, overrides_path: str) -> tuple[str, dict[str,
 
 	author_tags = frozenset(registry.author_tags)
 	states = _pipeline_states(registry)
-	members = frozenset(
-		target for _, _, target in list(registry.references) + list(registry.elements)
+	members = (
+		frozenset(target for _, _, target in list(registry.references) + list(registry.elements))
+		| frozenset(registry.plain)
 	) - states
+	named_objects = list(registry.closure) + list(registry.plain)
 	proposed = naming.suggest_object_names(
-		registry.closure, frozenset(registry.roots), states, members, author_tags
+		named_objects, frozenset(registry.roots), states, members, author_tags
 	)
 
 	objects: dict[str, str] = {}
-	for name in registry.closure:
+	for name in named_objects:
 		namespace, _, leaf = proposed[name].value.rpartition("::")
 		leaf = struct_leaves.get(name, leaf)
 		objects[name] = f"{namespace}::{leaf}" if namespace else leaf
 
 	stats = {"structs": len(objects), "members": 0, "bits": 0, "enums": 0, "values": 0, "commands": 0}
 	lines = [TABLE_HEADER]
-	for name in sorted(registry.closure):
+	for name in sorted(named_objects):
 		lines.append(f"[struct.{_quote(name)}]")
 		lines.append(f'name = "{objects[name]}"')
 		fields = emit.plan_struct(registry.structs[name], registry).fields
@@ -289,7 +298,7 @@ def _rebuild(registry: ir.Registry, overrides_path: str) -> tuple[str, dict[str,
 
 	used_bits = sorted({
 		field.flag_bits
-		for name in registry.closure
+		for name in named_objects
 		for field in emit.plan_struct(registry.structs[name], registry).fields
 		if field.kind == "flags"
 	})
@@ -321,11 +330,11 @@ def _rebuild(registry: ir.Registry, overrides_path: str) -> tuple[str, dict[str,
 			stats["values"] += 1
 		lines.append("")
 
-	for command in registry.producers:
+	for command in list(registry.producers) + list(registry.wrappers):
 		proposed_name, proposed_singular = naming.suggest_command_name(command.name, author_tags)
 		lines.append(f"[command.{_quote(command.name)}]")
 		lines.append(f'name = "{command_names.get(command.name, proposed_name)}"')
-		if producers.shape_of(command) == "array":
+		if isinstance(command, ir.Command) and producers.shape_of(command) == "array":
 			key = f"{command.name}.singular"
 			lines.append(f'singular = "{command_names.get(key, proposed_singular)}"')
 		lines.append("")

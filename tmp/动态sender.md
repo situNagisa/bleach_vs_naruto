@@ -178,11 +178,11 @@ execution 在这里真正有价值的地方是另一处：**写一个 `vk_schedu
 
 你说得对，"在哪跑"确实归 `starts_on`/`continues_on` 管。我问的不是这个，是**完成信号从哪个线程、以什么方式回来**，它影响的是存储策略：
 
-||CPU 线程池节点|GPU / IO 节点|
-|---|---|---|
-|完成时机|`start()` 返回前后不久，同一个 worker 上|`start()` 立刻返回，几十 ms 后由 poll 线程/reaper 回调|
-|op-state 生命周期|短，可紧凑复用|必须跨越挂起点存活|
-|后继启动位置|可以内联在当前 worker 上继续（cache 热）|必然跨线程，且可能需要 hop 回去|
+|               | CPU 线程池节点                     | GPU / IO 节点                               |
+| ------------- | ----------------------------- | ----------------------------------------- |
+| 完成时机          | `start()` 返回前后不久，同一个 worker 上 | `start()` 立刻返回，几十 ms 后由 poll 线程/reaper 回调 |
+| op-state 生命周期 | 短，可紧凑复用                       | 必须跨越挂起点存活                                 |
+| 后继启动位置        | 可以内联在当前 worker 上继续（cache 热）   | 必然跨线程，且可能需要 hop 回去                        |
 
 两个具体后果：
 
@@ -634,3 +634,754 @@ sender 模型的所有优雅之处——op-state 在栈上、无分配、无引�
 6. 有没有**资源互斥**类的非依赖约束？
 
 	我觉得 3 和 4 是最能改变结论的两个。
+
+如何理解你的代码，我没看懂
+
+先把 `dag.h` 完整读一遍，我按它实际的样子讲，不凭记忆。
+
+`dag.h` 只有一个核心想法，其余全是为了把它塞进 sender 模型付的税。我按"先算法、后税"的顺序讲。
+
+---
+
+## 一、先把 execution 完全忘掉
+
+整个调度算法就是这些，跟 C++ 无关：
+
+```
+每个节点有一个计数器 counter[i] = 前驱个数
+每个节点有一个后继列表 successors[i]
+
+启动：所有 counter == 0 的节点（根）
+某个节点跑完时：
+    for 每个后继 s:
+        if (--counter[s] == 0) 启动 s
+    if (--outstanding == 0) 整图完成
+```
+
+**扇出**（一个节点有多个后继）= 上面那个 `for` 循环。 **扇入**（一个节点有多个前驱）= `--counter[s] == 0` 这个判断。
+
+这就是我在讨论里说的"`split` 和 `when_all` 退化成同一个东西"。`split` 是"广播给 N 个等待者"，`when_all` 是"等 N 个人到齐"——摊平成数组之后，它们是同一个 `counter[]` 的两个方向。代码里就是 [dag.h:678](app://localhost/epitaxy/demo/dynamic-dag/dag.h:678) 的 `retire()`，十几行。
+
+**如果你只想看懂一个函数，看 `retire()`。剩下 800 行都是为了让这十几行能用在 sender 上。**
+
+---
+
+## 二、唯一的难点：op-state 放在哪
+
+sender 模型有三条硬约束：
+
+1. `connect(sender, receiver)` 返回一个 **op-state**，它**不可移动**（P2300 规定）。
+2. op-state 的**类型**由 `(Sender, Receiver)` 这一对决定。
+3. 每个节点的 `Sender` 类型都不一样（`then(schedule(sch), lambda1)` 和 `then(schedule(sch), lambda2)` 是两个不同类型）。
+
+所以：**N 个节点有 N 个互不相同、且不可移动的 op-state 类型**。它们没法放进同一个 `vector`。
+
+常规解法是每个节点一次堆分配：
+
+```cpp
+std::vector<std::unique_ptr<void, void(*)(void*)>> ops;  // 每节点 1 次 malloc
+```
+
+我的解法是：**让 Receiver 固定**，于是 op-state 的**尺寸和对齐**在 `add_node` 那一刻就能算出来，把它们累加成一个 arena 里的 offset。
+
+看 [dag.h:374](app://localhost/epitaxy/demo/dynamic-dag/dag.h:374) 那几行：
+
+```cpp
+using operation_type = detail::node_operation_t<Sender>;
+//                   = connect_result_t<const Sender&, node_receiver>
+//                                                    ^^^^^^^^^^^^^ 固定类型！
+
+operation_arena_size_ = 对齐向上取整(operation_arena_size_, alignof(operation_type));
+desc.operation_offset = operation_arena_size_;      // 记下这个节点的 offset
+operation_arena_size_ += sizeof(operation_type);    // 往后推
+```
+
+`add_node` 是模板，`Sender` 在这里还是完整类型，所以 `sizeof` / `alignof` 立刻可求。等 `add_node` 返回，`Sender` 这个类型就永远消失了——**但尺寸已经被记进 `operation_offset` 这个 `uint32_t` 了**。
+
+这就是我说的"支点"。8 个节点算下来 arena 是 832 字节，一次 `make_unique<byte[]>` 全装下。
+
+---
+
+## 三、这是为什么必须有 `graph_run` / `graph_op` 两层
+
+这一点最容易卡住，单独说。
+
+`node_receiver` 里存的是 `graph_run*`（[dag.h:102](app://localhost/epitaxy/demo/dynamic-dag/dag.h:102)），不是 `graph_op<Receiver>*`。为什么？
+
+- 外层的 `Receiver` 是在 `sync_wait(graph.run())` 那一刻才知道的。
+- 但 arena 的尺寸必须在 `add_node` 那一刻就算好。
+- 如果 `node_receiver` 依赖外层 `Receiver`，那 `connect_result_t` 也依赖它，arena 尺寸就**算不出来**了。
+
+所以必须有一个**与外层 Receiver 无关的类型**给节点回调打，那就是 `graph_run`。`graph_op<Receiver>` 继承它，只在最后一步（`complete()`，[dag.h:798](app://localhost/epitaxy/demo/dynamic-dag/dag.h:798)）用一个虚函数把结果交给真正的外层 receiver。
+
+```
+node_receiver  ──持有──>  graph_run          （无模板，节点只认识这个）
+                              ▲
+                              │ 继承
+                     graph_op<Receiver>      （有模板，只负责最后一跳）
+```
+
+**整份代码里唯一的虚函数就是这一个**，每次执行调用一次。
+
+---
+
+## 四、总共只有 7 个数据结构
+
+分两组，这是理解全局的骨架：
+
+**构图期，`graph` 持有，只算一次：**
+
+|成员|是什么|
+|---|---|
+|`nodes_`|每节点一条：`{vtable*, sender*, operation_offset, predecessor_count, name}`|
+|`sender_arena_`|所有 sender 的副本住在这里（分块，所以永不移动）|
+|`successor_offsets_` + `successors_`|后继表，CSR 格式（下面解释）|
+|`roots_` / `depth_`|根节点列表 / 每节点的最长路径深度|
+
+**执行期，`run_storage`，池化跨次复用：**
+
+|成员|是什么|
+|---|---|
+|`operation_block`|一整块字节，所有 op-state 按 `operation_offset` 住在里面|
+|`counters[]`|每节点一个 `atomic<uint32_t>`，就是第一节那个 `counter[]`|
+|`poisoned[]`|每节点一个 `atomic<bool>`，"你的前驱失败了，别跑"|
+
+内存布局长这样：
+
+```
+operation_block:  [ op0 ][ op1 ][  op2  ][ op3 ]...
+                    ↑      ↑       ↑
+nodes_[0].operation_offset=0
+       [1].operation_offset=96
+       [2].operation_offset=192
+```
+
+**CSR 是什么**：把边表压成两个数组，避免 `vector<vector<>>` 的 N 次分配。
+
+```
+successor_offsets_ = [0, 3, 4, 6, 7, ...]
+successors_        = [shadow, gbuffer, ui, ssao, lighting, ...]
+                      └───── cull 的后继 ─────┘└ gbuffer 的 ┘
+```
+
+节点 `i` 的后继就是 `successors_[offsets_[i] .. offsets_[i+1])`。[dag.h:422](app://localhost/epitaxy/demo/dynamic-dag/dag.h:422) 的 `finalize()` 就在干这件事（计数 → 前缀和 → 填充，标准三步 CSR 构建）。
+
+---
+
+## 五、vtable 为什么正好是 4 个函数
+
+`Sender` 类型在 `add_node` 之后就没了，但有 4 件事必须在之后还能对它做。所以 [dag.h:115](app://localhost/epitaxy/demo/dynamic-dag/dag.h:115) 存了 4 个函数指针，每个 `Sender` 类型一份 `static constexpr`（**零分配，在 .rodata 里**）：
+
+|函数|何时调用|干什么|
+|---|---|---|
+|`connect`|每次执行开始，`launch()`|在 arena 的 offset 处就地构造 op-state|
+|`start`|该节点计数器归零时|`stdexec::start(op)`|
+|`destroy_operation`|整图结束、`~graph_run()`|析构 op-state|
+|`destroy_sender`|`~graph()`|析构 arena 里的 sender 副本|
+
+`connect` 那一句（[dag.h:136](app://localhost/epitaxy/demo/dynamic-dag/dag.h:136)）值得看一眼：
+
+```cpp
+::new (operation_storage) operation_type(
+    ::stdexec::connect(*static_cast<const Sender*>(sender), node_receiver{run, index}));
+```
+
+`connect` 返回的是 prvalue，靠**保证的复制消除**直接在 `operation_storage` 里构造——所以 op-state 不可移动也没关系，它从出生就在最终位置上。
+
+---
+
+## 六、完整走一遍（8 节点渲染图）
+
+**构图期（一次）**
+
+```
+add_node("cull", then(schedule(sch), λ), {})
+    → sender 副本进 sender_arena_
+    → operation_offset = 0，arena 长到 96 字节
+    → vtable = &node_vtable_for<decltype(sender)>::value
+add_node("shadow", ..., {cull})
+    → operation_offset = 96
+    → edges_.push_back({cull, shadow})
+...
+finalize() → 建 CSR、收根、算深度
+```
+
+**执行期（每次）**
+
+```
+sync_wait(graph.run())
+  graph_sender::connect(receiver) → graph_op<R> 落在 sync_wait 的栈上
+  graph_op::start()                            [dag.h:775]
+      挂上外层 stop token 的回调（两路取消合并成一路）
+      launch()                                 [dag.h:599]
+          for 全部 8 个节点: vtable->connect(...)   ← 8 个 op-state 一次性全建好
+          counters[i] = predecessor_count[i]
+          poisoned[i] = false
+          outstanding = 8
+          atomic_thread_fence(release)          ← 保证上面的初始化对 worker 可见
+          schedule_start(cull)
+              → vtable->start(op0) → 提交给线程池
+```
+
+然后 worker 线程上：
+
+```
+cull 的 lambda 跑完
+  → then 的 op-state 调 node_receiver::set_value()   [dag.h:311]
+  → graph_run::on_node_done(cull)                    [dag.h:722]
+  → retire(cull, poison=false)                       [dag.h:678]
+        successors 是 [shadow, gbuffer, ui]
+        counters[shadow].fetch_sub(1) == 1  → schedule_start(shadow) → 提交
+        counters[gbuffer].fetch_sub(1) == 1 → schedule_start(gbuffer) → 提交
+        counters[ui].fetch_sub(1) == 1      → schedule_start(ui) → 提交
+        outstanding.fetch_sub(1) == 8, 不是 1，返回
+...
+present 跑完
+  → retire(present)
+        没有后继
+        outstanding.fetch_sub(1) == 1  → finish()      [dag.h:745]
+              complete(error={}, stopped=false)
+              → set_value(receiver_)  ← sync_wait 醒了
+~graph_op → ~graph_run    [dag.h:579]
+      析构 8 个 op-state
+      把 run_storage 还给池        ← 下次执行不再分配
+```
+
+注意 `lighting` 有 3 个前驱，它的 `counters` 从 3 开始，前两个前驱 `fetch_sub` 返回 3 和 2（不启动），第三个返回 1（启动）。**扇入就这么一行。**
+
+`acq_rel` 那个内存序（[dag.h:698](app://localhost/epitaxy/demo/dynamic-dag/dag.h:698)）同时干两件事：计数，以及建立 happens-before —— 读到 0 的那个线程一定看得见三个前驱写的所有数据。
+
+---
+
+## 七、三个坑对应的代码
+
+这三处是"看起来多余、其实删了就炸"的地方：
+
+**① op-state 不能在自己的 completion 里析构。** `set_value` 是从 op-state 内部调出来的，此刻它自己的栈帧还在。所以 `retire` 里**没有**析构，统一推到 [dag.h:579](app://localhost/epitaxy/demo/dynamic-dag/dag.h:579) 的 `~graph_run()`。arena 反正预留了，不额外花钱。
+
+**② 内联完成会打穿栈。** 如果节点在 `start()` 里就完成了（inline scheduler、结果已就绪、或者被跳过），调用链是 `start_node → set_value → retire → schedule_start → start_node → ...`，**深度 = 图的深度**。 [dag.h:640](app://localhost/epitaxy/demo/dynamic-dag/dag.h:640) 的蹦床把它摊平：最外层那次调用负责排干 `pending` 队列，嵌套的启动请求只入队不递归。场景 4(b) 那条 20 万节点的链就是专门打这一点的——没有蹦床必爆。
+
+**③ 失败也必须减计数。** [dag.h:728](app://localhost/epitaxy/demo/dynamic-dag/dag.h:728) 的 `on_node_error` 最后一句是 `retire(index, true)`，**不是** `return`。 直觉上"失败了就别管后继了"，但少减一次 `outstanding_` 就永远到不了 0 → 整图挂死。所以照常减计数，只是同时把后继标成 `poisoned`，后继启动时在 [dag.h:665](app://localhost/epitaxy/demo/dynamic-dag/dag.h:665) 看到毒标记就直接退休（skip）而不执行。
+
+毒标记用 `relaxed` 存就够了，因为紧跟着的 `fetch_sub(acq_rel)` 会把它发布出去。
+
+---
+
+## 八、建议的阅读顺序
+
+1. `retire()` [dag.h:678](app://localhost/epitaxy/demo/dynamic-dag/dag.h:678) —— 全部算法在这
+2. `launch()` [dag.h:599](app://localhost/epitaxy/demo/dynamic-dag/dag.h:599) —— 一次执行怎么起来的
+3. `add_node()` [dag.h:366](app://localhost/epitaxy/demo/dynamic-dag/dag.h:366) —— arena offset 怎么算出来的
+4. `node_vtable_for` [dag.h:123](app://localhost/epitaxy/demo/dynamic-dag/dag.h:123) —— 类型擦除
+5. `graph_op` [dag.h:760](app://localhost/epitaxy/demo/dynamic-dag/dag.h:760) —— 对外那层 sender 皮
+6. 其余（`chunk_arena`、`finalize` 的 CSR、storage 池）都是纯机械代码，可以最后看
+
+哪一节还是没通，指给我，我拿具体的调用序列或者内存图展开。
+
+脱离你现在的代码，给我介绍下整体的思路
+
+# 动态 DAG on execution —— 整体思路
+
+## 一、起点：DAG 和 execution 有一个根本矛盾
+
+execution 的所有权模型是**树**。
+
+sender 组合出来的是一棵表达式树，`connect` 之后变成一棵嵌套的 op-state 树：父的 op-state 内联包含子的 op-state。这就是"结构化并发"的全部内容,也是它零开销的来源 —— 一次 `connect` 把整棵树摊成**一个对象**,生命周期由外向内层层包住,没有一个指针需要引用计数。
+
+DAG 有**菱形**。菱形意味着一个节点有两个"父"。树形所有权表达不了这件事:谁拥有 `gbuffer` 的 op-state?`ssao` 和 `lighting` 都依赖它。
+
+所以做动态 DAG,**必须在某处打破树形所有权**。这个代价不可避免。整个设计要回答的只有一句话:
+
+> **在哪里打破,打破几次。**
+
+---
+
+## 二、标准库的答案,以及它为什么必须那样
+
+`split` 就是标准库的答案:**在每一个共享点打破一次**,用引用计数把那个点变成共享所有权。菱形的合流端用 `when_all` 的倒计数收拢。
+
+这是**通解**,而且标准库只能给通解 —— 因为它看到的信息是局部的:"这里有个 sender 被多个人用"。它不知道你有多少节点、边长什么样、图什么时候构完。它甚至不知道存在一个"图"。
+
+代价是按共享点线性摊开的:每个共享点一次堆分配 + 一圈原子引用计数,再加结果 variant 和等待者链表。N 个节点大概 O(N) 次分配、O(E) 次引用计数操作。
+
+**这不是标准库写得差,是它掌握的信息比你少。**
+
+---
+
+## 三、第一个关键观察:你有一个图边界,标准库没有
+
+"运行期构图一次、然后反复执行"这个前提里藏着一个东西:**存在一个明确的时刻,图构完了**。那一刻你知道全部节点、全部边、全部拓扑。
+
+有了这个边界,就可以做一件标准库做不到的事:**把所有权整体上提到边界这一层**。
+
+- 一个对象拥有全部 N 个 op-state。
+- 节点之间不再互相持有,只用**索引**指来指去。
+- 索引不是所有权 —— 菱形于是不再是问题。
+
+洞只打一个(图这一层),不是每个共享点打一个。
+
+这一步不是"优化",是**利用了标准库没有的信息**。想清楚这点很重要,因为它决定了这套东西什么时候适用、什么时候不适用。
+
+---
+
+## 四、第二个关键观察:控制依赖下,广播和倒计数是同一个东西
+
+把两个组合子拆开看它们的机械构成:
+
+||本质|需要什么|
+|---|---|---|
+|`split`|跑一次 + 广播给 N 个等待者|引用计数 + 等待者链表 + **结果 variant**|
+|`when_all`|等 N 个人到齐|倒计数器|
+
+如果边**不携带值**(控制依赖),`split` 就不需要存结果、不需要 variant。剩下的"广播"退化成"通知 N 个后继"。而"通知一个后继"要做的事,就是**给它的倒计数器减一**。
+
+于是:
+
+- 扇出(一个节点 N 个后继)= 一个 `for` 循环
+- 扇入(一个节点 N 个前驱)= `--counter == 0` 这个判断
+
+两者合起来,**每个节点只需要一个整数**。
+
+这不是巧合。DAG 调度的经典算法(Kahn 拓扑排序)就是这个计数器,教科书写法。sender 只是在外面包了一层壳。**所以真正的问题从来不是"怎么调度 DAG",而是"怎么把这个众所皆知的计数器塞进 sender 的所有权模型里"。**
+
+---
+
+## 五、由此得到的分层:把成本推到最早的那一层
+
+零开销的定义就是:**执行期不做任何本可以在更早的层做完的事**。所以先把时间尺度分清:
+
+|层|频率|这一层知道什么|应该在这层做完什么|
+|---|---|---|---|
+|编译期|—|每个节点 sender 的**具体类型**|op-state 的尺寸、对齐|
+|构图期|运行期,**一次**|拓扑:节点数、边、根|内存布局、后继表、深度/优先级|
+|执行期|运行期,**每帧**|只有"谁完成了"|只剩计数器加减 + 一次间接调用|
+
+执行期允许剩下的东西:**每条边一次原子减,每个节点一次间接调用**。就这些。没有分配、没有引用计数、没有 `std::function`、没有虚函数(除了整图完成那一跳)。
+
+---
+
+## 六、支点:类型擦除必须放在哪一层
+
+这一步最不显然,也是全部设计的枢轴。**如果只记一件事,记这个。**
+
+op-state 的类型 = f(Sender, Receiver)。这两个参数的可知时刻不一样:
+
+- **Sender**:每个节点都不同,但在**构图期是已知的完整类型**(节点是模板函数加进来的)。
+- **Receiver**:是外层给的。`sync_wait(图)` 还是 `when_all(图A, 图B)`?构图期**不知道**。
+
+现在推论:
+
+> 如果让节点的 receiver 依赖外层 receiver,那 op-state 的尺寸就要等到执行期才知道 → 布局算不出来 → 只能退回每节点一次分配。
+
+所以:**必须给所有节点一个固定的、与外层 receiver 无关的 receiver 类型。**
+
+它只能持有一个**类型擦除的"图运行实例"指针**,把完成事件打到那里。外层 receiver 的类型只在最后一跳(整图完成)才出现。
+
+一旦定下这一点,剩下的全是机械推导,没有任何自由度了:
+
+1. 固定 receiver → op-state 尺寸构图期可知 → **一个 arena + 一组 offset**
+2. Sender 类型要在构图期之后消失,但之后还要能 connect / start / 销毁 → **每个类型一份静态 vtable**(几个函数指针,在 `.rodata`,零分配)
+3. 类型擦除的"图运行实例"需要把最终结果交给有类型的外层 receiver → **全程唯一一个虚调用**
+
+这三条不是我选的,是从"arena 尺寸必须在构图期可知"这一个约束里挤出来的。
+
+---
+
+## 七、sender 模型强加的三条铁律
+
+这三条也不是设计选择,是模型逼出来的。**任何人做同样的事都会撞上,而且都会先踩一遍再爬出来。**
+
+### ① op-state 不能在自己的完成回调里被销毁
+
+完成回调是从 op-state **内部**调出来的 —— 它自己的栈帧还在。销毁它就是在自己脚下拆地板。
+
+→ 销毁必须推迟到整图结束后统一进行。 → 好消息:arena 反正已经预留了那些字节,推迟不花钱。这是上提所有权的额外红利。
+
+### ② 完成可能是内联的,于是递归深度 = 图深度
+
+`start()` 里就完成的情况很常见:inline scheduler、结果已就绪、节点被跳过。此时调用链变成 `启动 → 完成 → 启动下一个 → 完成 → ...`,**深度等于图的深度**。
+
+图有 20 万层就是 20 万层栈帧。
+
+→ 必须有**蹦床**:嵌套的启动请求只入队,由最外层那次调用排干队列,把递归摊平成循环。 → 这条最阴险,因为小图上永远不出问题。
+
+### ③ 失败和取消必须走和成功完全相同的计数路径
+
+直觉是"这个节点失败了,后继不用跑了,直接返回"。这个直觉会造成挂死。
+
+因为**终止条件是"所有节点都退休了"**。少减一次计数,条件就永远不满足。
+
+→ 失败时照常减计数,只是**另外**打一个标记告诉后继"你可以退休了,但别真执行"。 → 推论:终止检测必须独立于成功/失败。所以除了每条边的计数器,还需要一个全局的"还剩几个节点没退休"。
+
+这三条的共同点:**它们都是"看起来多余、删掉之后小图照跑、大图或异常路径必炸"的代码。** 所以我在 demo 里专门给每条配了一个会打脸的场景。
+
+---
+
+## 八、放弃了什么(这部分比上面重要)
+
+一个设计不说代价就是营销。
+
+**图必须先构完再执行。** 执行途中发现新节点(你说的 case C)不支持 —— 那需要在执行中扩容计数器数组和 arena,而扩容就要面对"正在被别人读的数组能不能搬家"。可以做,但那是另一套设计,不是这套加个函数。
+
+**边不携带值。** 数据必须走旁路 context。类型安全由你自己负责,编译器不帮你查"lighting 读的那个字段 gbuffer 真的写了吗"。这是最实质的让步 —— 换来的是边的存储是 0 字节。想要数据依赖,得在 arena 里再开一层带类型的槽位,复杂度会明显上一个台阶。
+
+**节点粒度是你自己切的。** 图层不会帮你合并小节点。反过来说,节点切太碎的话,调度开销会盖过工作量 —— 实测每个节点大约 0.4~1 µs 的调度成本,所以节点体最好在几十微秒以上。**这件事对最终性能的影响,很可能比 arena 省下的那几百字节大一个数量级。** 真正成熟的引擎会在构图期做"链熔合"(把无分支的链压成一个节点),那是编译器 IR pass 的思路,而不是调度器的思路。
+
+**部分失败的语义是固定的:下游跳过,不相关的分支照跑。** 这通常是你想要的,但如果你想要"某个分支失败了,整帧丢弃"或者"降级到备用节点",那是策略,得另外加。
+
+---
+
+## 九、一个和图完全无关、但能把并行度打到 1 的坑
+
+这套模型的提交模式是:**节点完成后,在完成它的那个线程上提交后继。**
+
+很多线程池对"从池内线程提交"做了本地队列优化 —— 任务先进本线程的私有队列,攒够一批才发布给别人窃取。这个优化对"一个任务生成一堆子任务"的场景是对的,对 DAG 是灾难:**扇出通常只有 2~3 个后继,永远攒不够一批**,于是后继全滞留在完成者的私有队列里被它自己顺序跑完,其余线程一直睡着。
+
+我在 demo 里实测到的就是这个:4 个各 3.6 ms 的任务,池外提交用 4 个线程 3.9 ms,池内提交用 **1 个线程 14.8 ms**。
+
+**教训不是"这个池不好",而是:任何"在完成线程上扇出后继"的调度器都要去确认它底下那个池的窃取策略。** 这跟你的图层实现一行代码都无关,但它会让所有努力归零。
+
+---
+
+## 十、什么时候**不**该这么做
+
+如果图只有几十个节点,或者执行频率不高(不是每帧),那 `split` + `when_all` 拼出来的版本几十行就能写完,而且不用面对上面那三条铁律。**那才是正确选择。**
+
+这套东西的前提是:**每帧都跑、节点上千、且你已经确认调度开销出现在了 profile 里。** 否则你付出的是几百行需要维护的、涉及内存序和生命周期的代码,换回来的是 profile 上看不见的收益。
+
+---
+
+## 十一、放回你的真实场景
+
+你的上下文是 Vulkan 渲染。有一件事值得先说清楚:
+
+**CPU 侧的 DAG 和 GPU 侧的 DAG 是两张图。** 上面这一整套调度的是 CPU 上的命令录制、剔除、更新;而"shadow pass 的结果被 lighting pass 读取"是 GPU 侧的依赖,那是 barrier 和 timeline semaphore 的事,跟 CPU 上谁先谁后没有必然关系。
+
+所以 senders 在渲染里的真正杠杆,恐怕不是这个 CPU 调度器,而是**一个 `vk_scheduler`** —— 让 op-state 的完成挂在 timeline semaphore 上,于是 GPU 的完成也能变成一个 sender,和 CPU 的工作在同一套模型里组合。那才是 execution 这套抽象在图形里最值钱的地方。这个 CPU DAG 调度器是它的地基,不是它本身。
+
+---
+
+## 一句话总结
+
+> DAG 破坏了 execution 赖以实现零开销的树形所有权。标准库只能在每个共享点用引用计数各打一个洞,因为它不知道图在哪里结束。而"构图一次、反复执行"这个前提给了你一个边界,于是所有权可以整体上提到图这一层,菱形退化成索引。再加上"边不带值",扇出和扇入合并成每节点一个整数。剩下唯一的技术难点是:**让所有节点共用一个固定的 receiver 类型**,好让 op-state 的尺寸在构图期就算出来 —— 这一步之后,其余的一切都是被迫的推导,包括那三条会先咬你一口的生命周期铁律。
+
+能否通过模板配置的方式，像exec::any_sender/receiver/scheduler那样，来最大化抽象 例如我在配置图的时候我知道我需要一个什么样的动态图（需不需要传递数据），这些都是编译期信息，我可以提前确认 以及还有静态反射的手段 我想知道如果引入以上两个思路可以做成什么样子，哪些参数可以被模板化，静态反射可以做什么 我的目的是追求最大灵活度，并且0开销，与C++标准的设计是一致的
+
+# 规格驱动的 DAG 内核 + 静态反射
+
+能做,而且这正是这套东西该走的方向。但先把"模板化到底买了什么"说清楚,否则很容易做成一个 256 个实例化、编译半分钟、还是要付一次间接调用的怪物。
+
+---
+
+## 零、先分清"0 开销"的两层含义
+
+Stroustrup 那句话其实是两条:
+
+1. **不用的东西不花钱**(don't pay for what you don't use)
+2. **用了的东西不比手写更贵**(what you do use is as efficient as hand-coding)
+
+我现在的内核解决的是**第 2 条**。模板化能解决的是**第 1 条** —— 而且只有第 1 条。
+
+这个区分很重要,因为它划定了模板化的天花板:
+
+> **真正异构、真正运行期发现的图,必然要付一次间接调用。模板化消除不了它。模板化的价值是:让"其实不需要那么动态"的场景不为动态性付钱。**
+
+所以正确的目标不是"用模板让动态图变成零开销",而是**"让规格里没要求的能力,在生成的代码里彻底不存在"**。这跟 `std::span<T, N>` 让 size 成员消失、`never_stop_token` 让停止回调状态消失,是同一件事。P2300 自己就在用这个手法,你的方向和标准是一致的。
+
+---
+
+## 一、先修正我前面一个说窄了的结论
+
+上一轮我说:
+
+> 必须给所有节点一个**固定的、与外层 receiver 无关的** receiver 类型。
+
+后半句是对的,**前半句我说过头了,而这个差别恰好决定了数据依赖能不能做**。
+
+真实约束只有一条:**节点 receiver 的类型不能依赖外层 Receiver**(否则 arena 尺寸在构图期算不出来)。
+
+它**完全可以依赖节点自己的 Sender** —— 因为 Sender 在 `add_node` 里就是完整类型。所以:
+
+```
+node_receiver<T>        // T = 该节点的结果类型,来自它自己的 completion signatures
+```
+
+是合法的,arena 布局照样算得出来。这一条松开之后,数据依赖就通了。下面第三节展开。
+
+---
+
+## 二、第一层:把内核变成"规格驱动"
+
+`exec::any_sender_of<Completions, Queries>` 的精髓是:**模板参数是一份接口规格,不是一个实现**。你声明"我需要哪些完成签名、哪些 env query 要转发",它据此生成刚好够用的 vtable。
+
+DAG 内核可以照抄这个形状。核心性质是:**规格对整张图是统一的,所以它不破坏 arena 那个支点。**
+
+```cpp
+template<class Spec> class basic_graph;
+
+// 用法上像这样(名字随便,形状是重点)
+using render_graph = dag::basic_graph<dag::spec<
+    dag::data_dependency,                       // 边带值
+    dag::completions<set_value_t(), set_error_t(std::exception_ptr), set_stopped_t()>,
+    dag::node_queries<get_stop_token_t, get_scheduler_t>,
+    dag::concurrent,
+    dag::on_failure::skip_downstream,
+    dag::dispatch::indirect
+>>;
+
+using init_graph = dag::basic_graph<dag::spec<
+    dag::control_dependency,
+    dag::completions<set_value_t()>,            // 不会失败、不会取消
+    dag::single_threaded,
+    dag::static_capacity<64>
+>>;
+```
+
+### 策略 → 消掉什么的对照表
+
+这张表是"哪些参数可以被模板化"的直接答案。左边是策略,右边是在生成的代码里**彻底消失**的东西(不是被 `if` 跳过,是不存在):
+
+|策略|消掉的状态|消掉的代码路径|
+|---|---|---|
+|`no_cancellation`|`inplace_stop_source`、`stopped_` 标志、`graph_op` 里的 `optional<stop_callback>`、node_env 的 token 成员|`set_stopped` 全路径、外层 token 挂钩/摘钩、每个节点启动前的 `stop_requested()` 检查|
+|**节点 completion 无 `set_error`**|`error_`、`error_claimed_`、`error_ready_`、`poisoned[]`|`set_error` 全路径、首错 CAS、毒传播|
+|**上面两条同时成立**|—|**蹦床可以整个去掉** —— 因为"跳过"不再存在,唯一的内联完成来源变成 inline scheduler(见下一条)|
+|`assume_asynchronous_nodes`|—|蹦床的 thread_local 与排干循环|
+|`single_threaded`|所有 `atomic<>` 退化成裸整数|全部 fence、全部 `acq_rel`;`retire()` 变成纯标量运算|
+|`dispatch::homogeneous`(全图同一个 sender 类型)|`nodes_[i].vtable`、`nodes_[i].operation_offset`|**vtable 完全消失**,`start` 是直接调用、可内联;offset 退化成 `i * sizeof(Op)`|
+|`dispatch::closed_set<S...>`(节点类型是闭集)|每类型 vtable|间接调用 → `switch`,编译器可去虚化并内联热分支|
+|`on_failure::continue_anyway`|`poisoned[]`|毒传播|
+|`static_capacity<N>`|三个 `unique_ptr`、storage 池、池的 mutex|`acquire/release_storage` 全部|
+|`no_tracing`|`tracer_`、`tracer_user_`|每个事件点的空指针检查|
+|`control_dependency`|结果 arena、每节点 1 bit 的"结果已构造"|结果的构造/析构/读取|
+|`counter_width<uint8_t>`(入度上界已知)|每节点 3 字节|— (纯 cache footprint)|
+
+### 两个端点
+
+**最小端**:`single_threaded + no_cancellation + 不失败 + homogeneous + static_capacity<N> + control_dependency`
+
+塌缩成:
+
+```
+array<Op, N> ops;  array<uint8_t, N> counters;  一个循环
+```
+
+没有原子、没有间接调用、没有分配、没有虚函数、没有蹦床。**就是一个静态 Kahn 调度器**,和你手写的一模一样。
+
+**最大端**:全动态、并发、异构、可失败、可取消 —— 就是我现在写的那份。
+
+**关键在于:同一份源码。** 这正是你说的"与标准的设计一致"。
+
+---
+
+## 三、第二层:数据依赖怎么做成静态类型安全且零开销
+
+这是你问的"需不需要传递数据"那一半,也是我 demo 里唯一真正让步的地方(旁路 `frame_context`,类型安全靠自己)。它是可以补上的。
+
+### 3.1 句柄带上类型
+
+```
+node_index          →   node_handle<T>      // 就是个 uint32_t + 幻影类型,0 字节开销
+```
+
+`add_node` 返回 `node_handle<T>`,`T` 从该节点 sender 的 `completion_signatures` 里推出来。前驱以 `node_handle<Ts>...` 传入,于是**"这个节点读的类型和上游产出的类型不匹配"是编译错误**,不是运行期 UB。
+
+### 3.2 结果槽:第二个 arena,同一个 offset 手法
+
+每个节点在结果 arena 里有一个 `T_i` 的槽位,offset 在 `add_node` 时就算出来(和 op-state 完全一样的累加)。`node_receiver<T>::set_value(T&& v)` 就地构造进槽位,然后走原来的 `retire`。
+
+**没有新的间接调用** —— `T` 在 `node_vtable_for<Sender>::connect` 里是已知的完整类型,`set_value` 是模板成员,直接内联成一次 placement new。
+
+### 3.3 读取端:一个 `inputs` sender
+
+这里有个真实的时序难题:**`connect` 发生在输入存在之前**。所以不能让用户写 `add_node(f(inputs))` —— 构图时输入还不存在。
+
+解法是给图加一个 sender 工厂:
+
+```cpp
+auto lighting = g.add_node("lighting",
+    g.inputs(shadow, gbuffer, ssao)      // sender,完成签名 = set_value_t(const S&, const G&, const A&)
+        | continues_on(sch)
+        | then([](const S& s, const G& gb, const A& a) -> Lit { ... }));
+```
+
+`g.inputs(...)` 返回的 sender:connect 时只记下 `graph_run*` 和几个 offset,start 时读槽位、内联 `set_value`。
+
+这个形状的好处是**节点侧完全不受限** —— 用户照旧可以接 `continues_on` / `upon_error` / `let_value` / 任意自定义算法。图只管"喂进去"和"接出来"两端,中间是开放的。
+
+> **这是我认为整个设计里最该保住的性质:内核侧封闭(编译期规格),节点侧开放(任意 sender)。** 一旦为了做数据依赖去规定节点的 sender 形状,灵活度就崩了。
+
+### 3.4 唯一的新成本,以及一个新的正确性约束
+
+- **成本**:每节点 1 bit"结果已构造",供拆解时决定要不要析构(被跳过的节点没有结果)。
+- **约束**:`data_dependency` 和 `on_failure::continue_anyway` **互斥** —— 下游会读到未初始化的槽。这必须 `static_assert` 掉。
+
+这也预示了下面那个风险:策略之间不独立。
+
+---
+
+## 四、第三层:静态反射(P2996 / 注解 P3394)能做什么
+
+先给结论,因为这个最容易被高估:
+
+> **反射的价值在"作图/声明"这一层和"编译期验证"这一层,基本不在执行内核。** 内核已经接近手写,反射没什么可省的。
+
+但在作图层,它能做的事相当多,而且有几件是**别的手段做不了**的。
+
+### 4.1 从函数签名**推导数据依赖**(最实用的一条)
+
+```cpp
+struct gbuffer_pass {
+    gbuffer operator()(const visibility_set&, const view_config&) const;
+};
+```
+
+`parameters_of` 拿到参数类型列表 → 在已注册节点里找 `visibility_set` 的唯一生产者 → **边自动连上**。找不到或有歧义 → 编译错误。
+
+于是 `add_node(name, sender, {preds...})` 变成 `add_node<gbuffer_pass>()`,拓扑从**类型系统里长出来**,而不是手工维护一张边表。手工边表是这类系统里 bug 最集中的地方(漏一条边 = 数据竞争,多一条边 = 白丢并行度),而它恰恰是编译器能替你查的。
+
+**局限要说清楚**:同一个 pass 类型有 N 个实例时(4 级 shadow cascade),按类型查生产者就歧义了,必须显式给句柄或加注解消歧。
+
+由此得到一个我觉得很干净的分工:
+
+> **反射管形状,运行期管基数。** 静态骨架从签名和注解里推出来;实例个数(几级 cascade、几个 view、几个 tile)留给运行期。这刚好对上前面讨论过的"四种动态性来源"里的前三种。
+
+### 4.2 声明式作图 + 注解携带策略
+
+```cpp
+struct render_graph {
+    [[= dag::root]]                        cull_pass     cull;
+    [[= dag::scheduler(gpu_queue)]]        shadow_pass   shadow;
+    [[= dag::priority(critical)]]          gbuffer_pass  gbuffer;
+    [[= dag::enabled_if(&config::ssao)]]   ssao_pass     ssao;
+};
+```
+
+`members_of` + 读注解 → 拓扑、调度器、优先级、条件启用全都是编译期信息。图的结构变成**可被审查的声明**,而不是散落在几十次 `add_node` 调用里的过程性代码。
+
+`enabled_if` 那条特别值:**条件启用**(前面归类的第 3 种动态性)可以在编译期把每个 feature 组合的计数器初值表都算出来,运行期只是选表,`counters[]` 的初始化连加法都不用做。
+
+### 4.3 用 `define_aggregate` **生成**旁路 context
+
+这条直接补掉了我 demo 里承认的那个弱点。
+
+现在的 `frame_context` 是手写的,字段和节点对不上是没人管的。有了反射:
+
+```
+节点列表  →  define_aggregate  →  struct frame_results {
+                                      visibility_set cull;
+                                      gbuffer        gbuffer;
+                                      ...
+                                  };
+```
+
+字段**由节点集生成**,访问是 `results.gbuffer`(有名字、有类型、编译器查),而不是 offset 加 `reinterpret_cast`。**类型安全从"靠你自己"变成"编译期保证",而且运行期布局和手算 offset 完全一样。**
+
+### 4.4 生成闭集派发,替掉函数指针
+
+反射能枚举出全部节点类型,据此生成一个闭集 dispatcher(`switch` 或生成的 `variant`)。相比现在的函数指针 vtable:编译器能看见全部目标,可以内联热节点、可以做更好的分支预测,并且**没有间接调用**。
+
+这是反射能触及执行内核的**唯一一处**,前提是节点类型集在编译期封闭。
+
+### 4.5 编译期验证 —— 把 assert 变成 static_assert
+
+拓扑一旦是 constexpr 数据,下面这些全部可以在编译期证明:
+
+- 无环
+- 每个被消费的类型都有生产者、且唯一
+- 没有节点读取"可能被跳过的上游"的结果而不处理该情况
+- 关键路径长度在预算内
+- 所有节点的 completion 都在图声明的 completions 之内
+- 策略组合自洽(比如上面那个 `data_dependency` × `continue_anyway`)
+
+我现在这些是 `assert` —— 也就是"跑到了才知道"。这一条的价值可能不亚于性能。
+
+### 4.6 反射**不能**做什么(别抱幻想)
+
+- **不能**把运行期发现的拓扑变成编译期常量。节点数是运行期值,offset 就必须是运行期值。
+- **不能**消除真异构 + 真动态情况下的那次间接调用。
+- 注解只活在编译期。运行期构出来的图仍然要走完整的动态路径 —— 所以**两条路径都得留着**,反射只是让能走静态路的场景走静态路。
+- 求 completion signatures 的并集、算错误类型的 variant 这类事,今天用模板元编程已经能做(stdexec 内部就在做)。反射让它**好写**,但不是**使能者** —— 别把它算成收益。
+
+---
+
+## 五、放在一起的形状
+
+```
+                        ┌─────────────────────────────────────┐
+   声明层(可选)         │ struct render_graph { [[=dag::…]] … }│  ← 反射读注解与签名
+                        └──────────────────┬──────────────────┘
+                                           │ 编译期:拓扑、依赖、策略、验证
+                        ┌──────────────────▼──────────────────┐
+   作图层               │ basic_graph<Spec>::add_node<T>()      │  ← 静态路与动态路
+                        │ basic_graph<Spec>::add_node(sender,…) │     共用同一份内核
+                        └──────────────────┬──────────────────┘
+                                           │ 构图期:arena 布局、CSR、深度
+                        ┌──────────────────▼──────────────────┐
+   内核层               │ 计数器 + 后继表 + arena              │  ← Spec 决定这里
+                        │ (原子性/取消/错误/派发 由 Spec 裁剪) │     还剩下什么
+                        └──────────────────┬──────────────────┘
+                        ┌──────────────────▼──────────────────┐
+   对外                 │ 一个合规 sender                      │
+                        └─────────────────────────────────────┘
+```
+
+节点侧始终是**任意 sender**,这是灵活度的来源。规格只裁剪内核。
+
+---
+
+## 六、风险,以及我建议怎么防
+
+### 组合爆炸
+
+8 个二元策略 = 256 个实例化。代码膨胀、编译时间、调试符号爆炸。
+
+**防法**:内核实现里**不要按策略特化**,而是按"能力"用 `if constexpr` 分支 + 用空基类/`[[no_unique_address]]` 让状态消失。特化只用于真正改变数据结构的那两三个(`homogeneous`、`static_capacity`、`single_threaded`)。
+
+### 策略不独立
+
+上面已经撞到一个(`data_dependency` × `continue_anyway`)。还有:`homogeneous` 和"任意 sender"是矛盾的;`no_cancellation` 和"节点内部用了 stop token"是矛盾的。
+
+**防法**:规格本身要有一个 `static_assert` 层,而不是把矛盾留给用户在运行期发现。这层本身就是反射的好客户。
+
+### 规格的表达力上限
+
+`Spec` 一旦超过 5~6 个轴,就没人能读懂 `basic_graph<...>` 的声明了。
+
+**防法**:提供命名的预设(`dag::frame_graph`、`dag::init_graph`、`dag::job_graph`),让 `Spec` 成为专家逃生口而非日常接口 —— 就像 `std::pmr` 之于 allocator。
+
+### 反射的时间线
+
+P2996 进了 C++26,注解(P3394)也在。但编译器实现成熟度参差,大规模用在生产代码里还早。
+
+**防法**:**现在就按反射的形状设计接口**(节点是带 `operator()` 的类型、依赖体现在签名里、策略以类型形式表达),中间用手写 traits 或宏顶着。等编译器到位,替换的是推导层,不是内核。这样反射不是重写,是把手工填的东西自动填上。
+
+---
+
+## 七、标准里的先例(说明这条路是"正统"的)
+
+|标准设施|用的手法|
+|---|---|
+|`std::span<T, N>` vs `std::span<T>`|extent 做模板参数 → size 成员消失|
+|`never_stop_token` / `unstoppable_token`|停止能力做类型 → 停止回调状态与检查全部消失|
+|`exec::any_sender_of<Completions, Queries>`|**模板参数是接口规格,vtable 按规格生成**|
+|`unique_ptr<T, Deleter>`|无状态 deleter 占 0 字节|
+|`allocator_traits` / `pmr`|策略聚合成 traits,并提供命名预设|
+
+你要的东西在标准里没有对应设施,但**手法全都有先例**。第 3 行就是这个 DAG 内核该直接照抄的那个。
+
+---
+
+## 八、如果只挑三件事做
+
+按"收益 / 成本"排:
+
+1. **`node_handle<T>` + 结果 arena + `graph.inputs(...)`** —— 补上数据依赖,纯模板即可,不等反射。这是当前设计最大的功能缺口。
+2. **`Spec` 里先做 4 个轴**:`single_threaded`、`no_cancellation`、`无 set_error`、`static_capacity<N>`。这四个消掉的状态和代码最多,且互相基本独立,不会引发组合爆炸。特别是前三个同时成立时**蹦床整个消失**,那是很大一块复杂度。
+3. **反射先只做一件事:从签名推导依赖 + 编译期验证无环/生产者唯一。** 不碰派发、不碰内核。这条的收益是**正确性**,而正确性上的收益在这类系统里通常比性能值钱 —— 漏一条边就是数据竞争,而它恰好是编译器能查的。
+
+`define_aggregate` 生成 context 和闭集派发,可以放在后面 —— 前者是锦上添花,后者只在节点类型闭集时有效,而闭集的场景往往本来就可以直接 `homogeneous`。
+
+---
+
+要不要我挑其中一条,写一份能编译的原型出来?我建议从第 1 条(数据依赖的静态类型化)开始 —— 它不依赖反射,能立刻验证"`node_receiver<T>` 依赖自己的 sender 不破坏 arena 支点"这个关键假设是否真的成立。
