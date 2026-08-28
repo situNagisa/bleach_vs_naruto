@@ -1,0 +1,92 @@
+# vkfu naming table -- the sole authority for every name in generated code.
+#
+# Keys are verbatim vk.xml identifiers. Values are what you want to type. There
+# is no algorithm behind this file and therefore no exceptions to one: an
+# identifier that is absent is simply not generated, and `gen --scope closure`
+# fails on it.
+#
+# Entries arrive here by review: `vkfu_gen suggest` writes candidates with
+# REVIEW tags, a human reads them, and `vkfu_gen promote` folds the reviewed
+# file in. Editing a name afterwards is normal -- nothing derives these.
+
+[struct."VkWidgetDriverPropertiesEXT"]
+name = "result::ext::widget_driver_properties"
+
+[struct."VkWidgetProperties"]
+name = "result::widget_properties"
+
+[struct."VkExtent"]
+name = "extent"
+[struct."VkExtent".members]
+width = "width"
+height = "height"
+
+[struct."VkWidgetColourInfoEXT"]
+name = "option::ext::widget_colour"
+[struct."VkWidgetColourInfoEXT".members]
+fallbackMode = "fallback_mode"
+
+[struct."VkWidgetCreateInfo"]
+name = "widget"
+[struct."VkWidgetCreateInfo".members]
+flags = "flags"
+mode = "mode"
+enableTracing = "enable_tracing"
+pParts = "parts"
+pTuning = "tuning"
+extent = "extent"
+weights = "weights"
+
+[struct."VkWidgetLabelInfoKHR"]
+name = "option::khr::widget_label"
+[struct."VkWidgetLabelInfoKHR".members]
+tag = "tag"
+
+[struct."VkWidgetLimits"]
+name = "option::widget_limits"
+[struct."VkWidgetLimits".members]
+maxParts = "max_parts"
+
+[struct."VkWidgetPart"]
+name = "widget_part"
+[struct."VkWidgetPart".members]
+index = "index"
+
+[struct."VkWidgetTuning"]
+name = "widget_tuning"
+[struct."VkWidgetTuning".members]
+bias = "bias"
+
+[struct."VkWidgetWin32InfoKHR"]
+name = "khr::widget_win32"
+[struct."VkWidgetWin32InfoKHR".members]
+handle = "handle"
+
+[bits."VkWidgetFlagBits"]
+VK_WIDGET_ALPHA_BIT = "alpha"
+VK_WIDGET_GAMMA_BIT = "gamma"
+
+[enum."VkWidgetMode"]
+name = "widget_mode"
+[enum."VkWidgetMode".values]
+VK_WIDGET_MODE_PLAIN = "plain"
+VK_WIDGET_MODE_FANCY = "fancy"
+
+[command."vkCreateWidget"]
+name = "create_widget"
+
+[command."vkCmdSetWin32Widget"]
+name = "cmd_set_win32_widget"
+
+[command."vkCmdSubmitParts"]
+name = "cmd_submit_parts"
+
+[command."vkEnumerateWidgetReports"]
+name = "enumerate_widget_reports"
+count = "count_widget_reports"
+
+[command."vkGetWidgetProperties"]
+name = "get_widget_properties"
+
+[alias."VkWidgetLimitsKHR"]
+name = "option::khr::widget_limits"

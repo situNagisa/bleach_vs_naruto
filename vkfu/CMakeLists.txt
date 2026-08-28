@@ -34,7 +34,16 @@ endif()
 
 if(VKFU_BUILD_TESTS)
 	include(CTest)
-	foreach(case IN ITEMS typical_structures native_expression pipeline_slots triangle_pipeline chain frame_recording)
+
+	# The generator's own tests: unit tests over ir/naming/check plus a golden
+	# header built from tools/tests/fixture.xml. No GPU, no vk.xml.
+	find_package(Python3 COMPONENTS Interpreter)
+	if(Python3_FOUND)
+		add_test(NAME vkfu_generator
+			COMMAND ${Python3_EXECUTABLE} -m unittest discover -s tests -t .
+			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tools)
+	endif()
+	foreach(case IN ITEMS typical_structures native_expression pipeline_slots triangle_pipeline chain frame_recording extensions)
 		add_executable(vkfu_${case} tests/${case}.cpp)
 		target_link_libraries(vkfu_${case} PRIVATE vkfu::vkfu)
 		add_test(NAME vkfu_${case} COMMAND vkfu_${case})
@@ -42,7 +51,7 @@ if(VKFU_BUILD_TESTS)
 
 	# The create_* wrappers call into the loader, so this one is a compile-only
 	# check: building it instantiates every template body under test.
-	foreach(case IN ITEMS producers commands)
+	foreach(case IN ITEMS producers commands queries)
 		add_library(vkfu_${case} OBJECT tests/${case}.cpp)
 		target_link_libraries(vkfu_${case} PRIVATE vkfu::vkfu)
 	endforeach()

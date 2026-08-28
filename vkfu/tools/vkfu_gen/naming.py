@@ -131,6 +131,8 @@ class Table:
 	bits: dict[str, dict[str, str]]  # VkXxxFlagBits -> {VK_..._BIT: field name}
 	commands: dict[str, str]  # vkCreateBuffer -> qualified function name
 	singulars: dict[str, str]  # vkCreateGraphicsPipelines -> create_graphics_pipeline
+	counts: dict[str, str]  # vkEnumeratePhysicalDevices -> count_physical_devices
+	aliases: dict[str, str]  # VkPhysicalDeviceFeatures2KHR -> feature::khr::core
 	enums: dict[str, str]  # VkFormat -> enum class name
 	values: dict[str, dict[str, str]]  # VkFormat -> {VK_FORMAT_...: enumerator}
 
@@ -148,6 +150,12 @@ class Table:
 
 	def command_singular(self, command: str) -> str | None:
 		return self.singulars.get(command)
+
+	def command_count(self, command: str) -> str | None:
+		return self.counts.get(command)
+
+	def alias_name(self, struct: str) -> str | None:
+		return self.aliases.get(struct)
 
 	def enum_name(self, enum_type: str) -> str | None:
 		return self.enums.get(enum_type)
@@ -187,11 +195,19 @@ def load_table(path: str) -> Table:
 
 	commands: dict[str, str] = {}
 	singulars: dict[str, str] = {}
+	counts: dict[str, str] = {}
 	for command, entry in (document.get("command") or {}).items():
 		if entry.get("name"):
 			commands[command] = entry["name"]
 		if entry.get("singular"):
 			singulars[command] = entry["singular"]
+		if entry.get("count"):
+			counts[command] = entry["count"]
+
+	aliases: dict[str, str] = {}
+	for struct, entry in (document.get("alias") or {}).items():
+		if entry.get("name"):
+			aliases[struct] = entry["name"]
 
 	return Table(
 		structs=structs,
@@ -199,6 +215,8 @@ def load_table(path: str) -> Table:
 		bits=bits,
 		commands=commands,
 		singulars=singulars,
+		counts=counts,
+		aliases=aliases,
 		enums=enums,
 		values=values,
 	)
@@ -303,14 +321,34 @@ def _escape_keyword(value: str) -> str:
 FEATURE_NAMESPACE = "feature"
 OPTION_NAMESPACE = "option"
 STATE_NAMESPACE = "state"
+# The read side. A structure a command writes into is never mixed in with the
+# ones you fill in, so it gets its own namespace rather than a suffix.
+PROPERTY_NAMESPACE = "property"
+RESULT_NAMESPACE = "result"
 
 _FEATURE_FAMILY = re.compile(r"PhysicalDevice(.*?)Features(2?)")
+_PROPERTY_FAMILY = re.compile(r"PhysicalDevice(.*?)Properties(2?)")
 # Two tiers: normally `CreateInfo` / `AllocateInfo` / `Info` all go, but when
 # that makes two objects collide, only `Info` goes -- the verb is what tells
 # VkAccelerationStructureCreateInfoNV from VkAccelerationStructureInfoNV.
 _INFO_SUFFIX = re.compile(r"(?:Create|Allocate)?Info([0-9]*)$")
 _INFO_SUFFIX_KEEP_VERB = re.compile(r"Info([0-9]*)$")
 _STATE_FAMILY = re.compile(r"Pipeline(.+?)State$")
+
+
+def _family_leaf(match: re.Match[str], noun: str) -> str:
+	"""The part of a family member's name that is not the family itself.
+
+	VkPhysicalDeviceMeshShaderFeaturesEXT keeps `MeshShader`, but the family's
+	own base structure has nothing left over -- VkPhysicalDeviceFeatures2 would
+	strip to `2`, which cannot start an identifier. Those fall back to the family
+	noun, so the name is always usable; which of them reads best is a judgement
+	call for the overrides file.
+	"""
+	stem = match.group(1) + match.group(2)
+	if not stem or stem[0].isdigit():
+		return noun + stem
+	return stem
 
 
 def _split_author_tag(core: str, author_tags: frozenset[str]) -> tuple[str, str]:
@@ -327,12 +365,20 @@ def _bucket(
 	members: frozenset[str],
 	author_tags: frozenset[str],
 	keep_verb: bool = False,
+	queries: frozenset[str] = frozenset(),
 ) -> tuple[str, str, str]:
 	"""(namespace, leaf stem, author tag) for one object."""
 	core, tag = _split_author_tag(struct.removeprefix("Vk"), author_tags)
 	family = _FEATURE_FAMILY.fullmatch(core)
 	if family:
-		return FEATURE_NAMESPACE, family.group(1) + family.group(2), tag
+		return FEATURE_NAMESPACE, _family_leaf(family, "Features"), tag
+	if struct in queries:
+		# Read-side objects. Properties are the bulk of them and read well as a
+		# family; the rest are one-off results like VkMemoryRequirements2.
+		properties = _PROPERTY_FAMILY.fullmatch(core)
+		if properties:
+			return PROPERTY_NAMESPACE, _family_leaf(properties, "Properties"), tag
+		return RESULT_NAMESPACE, _INFO_SUFFIX.sub(lambda match: match.group(1), core), tag
 	leaf = (_INFO_SUFFIX_KEEP_VERB if keep_verb else _INFO_SUFFIX).sub(
 		lambda match: match.group(1), core
 	)
@@ -365,6 +411,7 @@ def suggest_object_names(
 	states: frozenset[str],
 	members: frozenset[str],
 	author_tags: frozenset[str],
+	queries: frozenset[str] = frozenset(),
 ) -> dict[str, Suggestion]:
 	"""Name every object at once, because collisions are only visible in bulk.
 
@@ -373,9 +420,12 @@ def suggest_object_names(
 	namespace, a tie falls back to keeping the verb, which is what tells
 	VkAccelerationStructureCreateInfoNV from VkAccelerationStructureInfoNV.
 	"""
-	plain = {struct: _bucket(struct, roots, states, members, author_tags) for struct in closure}
+	plain = {
+		struct: _bucket(struct, roots, states, members, author_tags, queries=queries)
+		for struct in closure
+	}
 	verbose = {
-		struct: _bucket(struct, roots, states, members, author_tags, keep_verb=True)
+		struct: _bucket(struct, roots, states, members, author_tags, keep_verb=True, queries=queries)
 		for struct in closure
 	}
 	# Last resort: the core name with no suffix stripped at all.
@@ -470,6 +520,35 @@ def suggest_command_name(command: str, author_tags: frozenset[str]) -> tuple[str
 		f"{namespace}::{name}" if namespace else name,
 		f"{namespace}::{singular}" if namespace else singular,
 	)
+
+
+def suggest_count_name(command_name: str) -> str:
+	"""The `count_*` twin of an enumerate's name.
+
+	Same words, different verb: the two functions ask about the same thing, so
+	only the leading verb changes. Review material like everything else here.
+	"""
+	namespace, _, leaf = command_name.rpartition("::")
+	words = leaf.split("_")
+	if words and words[0] in ("enumerate", "get"):
+		words = words[1:]
+	value = "_".join(["count"] + words)
+	return f"{namespace}::{value}" if namespace else value
+
+
+def suggest_alias_name(alias: str, target_name: str, author_tags: frozenset[str]) -> str | None:
+	"""Where an alias lives: the target's own name, one namespace deeper.
+
+	VkPhysicalDeviceTimelineSemaphoreFeaturesKHR is the same structure as the
+	core name, so it keeps the leaf and gains the vendor namespace that says
+	which spelling this is. None when the alias carries no tag to put there.
+	"""
+	_core, tag = _split_author_tag(alias.removeprefix("Vk"), author_tags)
+	if not tag:
+		return None
+	namespace, _, leaf = target_name.rpartition("::")
+	segments = [segment for segment in (namespace, tag.lower()) if segment]
+	return "::".join(segments + [leaf])
 
 
 def suggest_member(

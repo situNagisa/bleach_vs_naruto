@@ -12,6 +12,20 @@ namespace vkfu
 		constexpr static auto allow_duplicate = false;
 	};
 
+	/// The native structure a tag stands for, and its sType.
+	///
+	/// The opposite direction to expression_vulkan_tag: given only a tag, a query
+	/// chain has to declare storage for the structure and stamp its sType before
+	/// the driver ever sees it. The generated header specializes this for every
+	/// object it knows.
+	template<class Tag>
+	struct vulkan_object_native
+	{};
+
+	template<class Tag>
+		requires requires { typename vulkan_object_native<::std::remove_cvref_t<Tag>>::type; }
+	using vulkan_object_native_t = typename vulkan_object_native<::std::remove_cvref_t<Tag>>::type;
+
 	template<class T>
 	concept vulkan_object = true;
 

@@ -103,6 +103,69 @@ class Wrapper:
 
 
 @dataclasses.dataclass
+class Provenance:
+	"""What a caller has to enable before a type exists.
+
+	vk.xml puts a promoted type's core name in <feature> and its old name in
+	<extension>, so the two are read together: `core` is the earliest core
+	version that has it, `extensions` the extensions that provide it (its own or
+	its aliases'). Both empty is impossible; both set means either will do.
+	"""
+
+	extensions: list[str]
+	core: str | None  # VK_VERSION_1_2, or None for extension-only types
+	instance: bool  # the extensions are instance extensions, not device ones
+
+
+@dataclasses.dataclass
+class Query:
+	"""A two-call enumerate: the command writes the count as well as the array.
+
+	Distinct from Wrapper because the count is an out parameter, so the caller
+	cannot supply a span -- the wrapper has to size a container itself.
+	"""
+
+	name: str
+	returns: str  # VkResult (can answer VK_INCOMPLETE) or void
+	leading: list[Member]  # the handles the caller already has
+	params: list[Member]  # the command's own parameters, in order
+	count: Member
+	out: Member
+	guards: list[str]
+
+
+@dataclasses.dataclass
+class ChainQuery:
+	"""A command that fills in one sType structure, i.e. a query chain head.
+
+	vkGetPhysicalDeviceProperties2 and friends. The caller says which extra
+	structures to hang off pNext; the wrapper owns them, links them, stamps every
+	sType and hands back the lot.
+	"""
+
+	name: str
+	returns: str
+	arguments: list[Argument]  # what the caller supplies: passthrough or info
+	params: list[Member]  # the command's own parameters, in order
+	out: Member
+	guards: list[str]
+
+
+@dataclasses.dataclass
+class Alias:
+	"""An old spelling of a type core later promoted.
+
+	Same structure, same sType, different name -- vk.xml records the extension
+	against this name rather than against the promoted one. Code written before
+	the promotion says `...KHR`, so the generated header offers both.
+	"""
+
+	name: str  # VkPhysicalDeviceFeatures2KHR
+	target: str  # VkPhysicalDeviceFeatures2
+	guards: list[str]
+
+
+@dataclasses.dataclass
 class Registry:
 	header_version: str
 	author_tags: list[str]  # vk.xml <tags>, e.g. KHR / EXT / HUAWEI
@@ -114,6 +177,12 @@ class Registry:
 	root_commands: dict[str, list[str]]  # root struct -> commands that take it
 	producers: list[Command]  # vkCreate* / vkAllocate* in a shape vkfu can wrap
 	wrappers: list[Wrapper]  # every other command worth wrapping
+	queries: list[Query]  # two-call enumerates
+	chain_queries: list[ChainQuery]  # commands that fill in one sType structure
+	provenance: dict[str, Provenance]  # type name -> what enables it
+	aliases: list[Alias]  # old spellings whose target this header generates
+	query_roots: list[str]  # sType structures a command writes into
+	query_closure: list[str]  # those plus their pNext children, minus `closure`
 	closure: list[str]
 	plain: list[str]  # sType-less member structures: a param, but not a chain node
 	branches: list[str]
@@ -128,6 +197,31 @@ class Registry:
 def _api_allows(element: ET.Element, api: str) -> bool:
 	value = element.get("api")
 	return value is None or api in value.split(",")
+
+
+@dataclasses.dataclass(frozen=True)
+class Profile:
+	"""Which of vk.xml's features and extensions to generate for.
+
+	Everything downstream is reachability from these, so narrowing the profile
+	narrows the closure, the enums and the commands together -- there is no
+	separate list to keep in step.
+	"""
+
+	core: int | None = None  # highest VK_VERSION_1_x minor to include, None = all
+	extensions: frozenset[str] | None = None  # None = all supported ones
+
+	def allows_feature(self, name: str) -> bool:
+		if self.core is None:
+			return True
+		match = re.fullmatch(r"VK_VERSION_1_(\d+)", name or "")
+		return match is not None and int(match.group(1)) <= self.core
+
+	def allows_extension(self, name: str) -> bool:
+		return self.extensions is None or name in self.extensions
+
+
+EVERYTHING = Profile()
 
 
 def _parse_decl(element: ET.Element) -> Member:
@@ -177,7 +271,7 @@ def _extension_guard(extension: ET.Element, platforms: dict[str, str]) -> str | 
 	return None
 
 
-def _collect_requirements(root: ET.Element, api: str) -> dict[str, list[str | None]]:
+def _collect_requirements(root: ET.Element, api: str, profile: Profile = EVERYTHING) -> dict[str, list[str | None]]:
 	"""type name -> list of guards it is reachable through (None == unguarded)."""
 	platforms = _platform_guards(root)
 	requirements: dict[str, list[str | None]] = {}
@@ -187,7 +281,7 @@ def _collect_requirements(root: ET.Element, api: str) -> dict[str, list[str | No
 			requirements.setdefault(name, []).append(guard)
 
 	for feature in root.iter("feature"):
-		if not _api_allows(feature, api):
+		if not _api_allows(feature, api) or not profile.allows_feature(feature.get("name")):
 			continue
 		for require in feature.findall("require"):
 			if not _api_allows(require, api):
@@ -200,6 +294,8 @@ def _collect_requirements(root: ET.Element, api: str) -> dict[str, list[str | No
 	for extension in root.iter("extension"):
 		supported = extension.get("supported")
 		if supported and api not in supported.split(","):
+			continue
+		if not profile.allows_extension(extension.get("name")):
 			continue
 		guard = _extension_guard(extension, platforms)
 		for require in extension.findall("require"):
@@ -225,6 +321,258 @@ def _guards_for(requirements: dict[str, list[str | None]], name: str) -> list[st
 	return sorted({source for source in sources if source})
 
 
+def _provenance(root: ET.Element, api: str, profile: Profile = EVERYTHING) -> dict[str, Provenance]:
+	"""type name -> the core version and/or extensions that provide it.
+
+	An alias counts as the type itself: VkAttachmentDescription2 is core 1.2 and
+	vk.xml only mentions VK_KHR_create_renderpass2 against the KHR-suffixed
+	alias, so without following aliases every promoted type would look as if it
+	needed no extension at all.
+	"""
+	canonical: dict[str, str] = {}
+	for element in root.iter("type"):
+		name, target = element.get("name"), element.get("alias")
+		if name and target:
+			canonical[name] = target
+
+	def resolve(name: str) -> str:
+		seen: set[str] = set()
+		while name in canonical and name not in seen:
+			seen.add(name)
+			name = canonical[name]
+		return name
+
+	cores: dict[str, set[str]] = {}
+	extensions: dict[str, set[str]] = {}
+	instance: dict[str, set[bool]] = {}
+
+	for feature in root.iter("feature"):
+		if not _api_allows(feature, api) or not profile.allows_feature(feature.get("name")):
+			continue
+		version = feature.get("name")
+		for require in feature.findall("require"):
+			if not _api_allows(require, api):
+				continue
+			for element in require.findall("type"):
+				if element.get("name") and version:
+					cores.setdefault(resolve(element.get("name")), set()).add(version)
+
+	for extension in root.iter("extension"):
+		supported = extension.get("supported")
+		if supported and api not in supported.split(","):
+			continue
+		label = extension.get("name")
+		if not profile.allows_extension(label):
+			continue
+		kind = extension.get("type") == "instance"
+		for require in extension.findall("require"):
+			if not _api_allows(require, api):
+				continue
+			for element in require.findall("type"):
+				if not element.get("name") or not label:
+					continue
+				target = resolve(element.get("name"))
+				extensions.setdefault(target, set()).add(label)
+				instance.setdefault(target, set()).add(kind)
+
+	names = set(cores) | set(extensions)
+	return {
+		name: Provenance(
+			extensions=sorted(extensions.get(name, ())),
+			core=min(cores[name]) if cores.get(name) else None,
+			instance=instance.get(name) == {True},
+		)
+		for name in sorted(names)
+	}
+
+
+def _queries(
+	root: ET.Element,
+	api: str,
+	requirements: dict[str, list[str | None]],
+) -> tuple[list[Query], list[str]]:
+	"""The two-call enumerate pattern, which no span can express.
+
+	Identified by shape, not by name: an out array whose length parameter is
+	itself an out pointer. That is the whole family -- vkEnumerate*, most of the
+	plural vkGet*, and vkGetPhysicalDeviceQueueFamilyProperties, which returns
+	void rather than VkResult.
+	"""
+	queries: list[Query] = []
+	skipped: list[str] = []
+	for element in root.iter("command"):
+		if not _api_allows(element, api):
+			continue
+		proto = element.find("proto")
+		if proto is None:
+			continue
+		name = proto.findtext("name") or ""
+		if name not in requirements:
+			continue
+
+		params = [_parse_decl(p) for p in element.findall("param") if _api_allows(p, api)]
+		by_name = {p.name: p for p in params}
+		outs = [p for p in params if p.ptr_depth >= 1 and not p.elem_const]
+		pairs = [
+			(by_name[out.length], out)
+			for out in outs
+			if out.length and by_name.get(out.length) is not None and by_name[out.length].ptr_depth >= 1
+		]
+		if not pairs:
+			continue
+		if len(pairs) != 1 or len(outs) != 2:
+			# Several arrays sharing one count (vkGetPipelineCacheData's paired
+			# forms) need a decision about who owns the count; not guessed here.
+			skipped.append(name)
+			continue
+
+		count, out = pairs[0]
+		if out.ptr_depth != 1 or count.ptr_depth != 1:
+			skipped.append(name)
+			continue
+		queries.append(
+			Query(
+				name=name,
+				returns=proto.findtext("type") or "void",
+				leading=[p for p in params if p is not count and p is not out],
+				params=params,
+				count=count,
+				out=out,
+				guards=_guards_for(requirements, name),
+			)
+		)
+	return queries, skipped
+
+
+def _chain_queries(
+	root: ET.Element,
+	structs: dict[str, Struct],
+	api: str,
+	requirements: dict[str, list[str | None]],
+	branches: set[str],
+) -> list[ChainQuery]:
+	"""Commands whose single out parameter is an sType structure.
+
+	That sType is the tell: the structure heads a pNext chain, so the caller is
+	meant to hang further structures off it. Everything else about the command --
+	the handles it needs, an info structure it reads -- is the same shape the
+	other wrappers already handle.
+	"""
+	found: list[ChainQuery] = []
+	for element in root.iter("command"):
+		if not _api_allows(element, api):
+			continue
+		proto = element.find("proto")
+		if proto is None:
+			continue
+		name = proto.findtext("name") or ""
+		if name not in requirements:
+			continue
+		# vkCreate*/vkAllocate* belong to the producers, even when what they hand
+		# back happens to be a structure rather than a handle.
+		if name.startswith("vkCreate") or name.startswith("vkAllocate"):
+			continue
+
+		params = [_parse_decl(p) for p in element.findall("param") if _api_allows(p, api)]
+		outs = [p for p in params if p.ptr_depth >= 1 and not p.elem_const]
+		if len(outs) != 1:
+			continue
+		out = outs[0]
+		target = structs.get(out.type)
+		if out.ptr_depth != 1 or out.length or out.array_dims or target is None or target.stype is None:
+			continue
+		# Only worth a chain if something can actually hang off the head. When
+		# nothing extends it, returning the structure by value says the same thing
+		# with a plainer type, which is what the ordinary wrapper already does.
+		if out.type not in branches:
+			continue
+
+		arguments: list[Argument] = []
+		for param in params:
+			if param is out:
+				continue
+			info = structs.get(param.type)
+			if param.ptr_depth == 1 and param.elem_const and info is not None and info.stype is not None:
+				arguments.append(Argument(kind="info", member=param))
+			else:
+				arguments.append(Argument(kind="passthrough", member=param))
+		found.append(
+			ChainQuery(
+				name=name,
+				returns=proto.findtext("type") or "void",
+				arguments=arguments,
+				params=params,
+				out=out,
+				guards=sorted(
+					set(_guards_for(requirements, name))
+					| {
+						guard
+						for argument in arguments
+						if argument.kind == "info"
+						for guard in structs[argument.member.type].guards
+					}
+					| set(target.guards)
+				),
+			)
+		)
+	return found
+
+
+def _aliases(
+	root: ET.Element,
+	structs: dict[str, Struct],
+	api: str,
+	requirements: dict[str, list[str | None]],
+) -> list[Alias]:
+	"""Struct aliases whose target this api declares, and which it declares too."""
+	found: list[Alias] = []
+	for element in root.iter("type"):
+		if element.get("category") != "struct" or not _api_allows(element, api):
+			continue
+		name, target = element.get("name"), element.get("alias")
+		if not name or not target or name not in requirements:
+			continue
+		# Chains of aliases are legal; only the structure at the end is real.
+		seen: set[str] = set()
+		while target not in structs and target in seen.union({target}) and target not in seen:
+			seen.add(target)
+			nested = next(
+				(x.get("alias") for x in root.iter("type") if x.get("name") == target and x.get("alias")),
+				None,
+			)
+			if nested is None:
+				break
+			target = nested
+		if target not in structs:
+			continue
+		found.append(Alias(name=name, target=target, guards=_guards_for(requirements, name)))
+	return sorted(found, key=lambda alias: alias.name)
+
+
+def _query_roots(root: ET.Element, structs: dict[str, Struct], api: str) -> list[str]:
+	"""Structures a command writes into: the mirror image of _info_roots.
+
+	Same judgement-free rule with the const dropped. These carry an sType, so
+	they form pNext chains exactly like create-infos do -- but the caller reads
+	them instead of filling them in.
+	"""
+	found: list[str] = []
+	for command in root.iter("command"):
+		if not _api_allows(command, api):
+			continue
+		for param in command.findall("param"):
+			if not _api_allows(param, api):
+				continue
+			declaration = _parse_decl(param)
+			if declaration.ptr_depth != 1 or declaration.elem_const:
+				continue
+			struct = structs.get(declaration.type)
+			if struct is None or struct.stype is None or struct.name in found:
+				continue
+			found.append(struct.name)
+	return found
+
+
 def _bit_position(enum: ET.Element) -> dict[str, object]:
 	bitpos = enum.get("bitpos")
 	return {
@@ -233,7 +581,7 @@ def _bit_position(enum: ET.Element) -> dict[str, object]:
 	}
 
 
-def _collect_flagbits(root: ET.Element, api: str, requirements: dict[str, list[str | None]]) -> dict[str, FlagBits]:
+def _collect_flagbits(root: ET.Element, api: str, requirements: dict[str, list[str | None]], profile: Profile = EVERYTHING) -> dict[str, FlagBits]:
 	collected: dict[str, FlagBits] = {}
 
 	for enums in root.iter("enums"):
@@ -274,11 +622,13 @@ def _collect_flagbits(root: ET.Element, api: str, requirements: dict[str, list[s
 				target.bits.append(Bit(name=bit_name, guards=[guard] if guard else [], **_bit_position(enum)))
 
 	for feature in root.iter("feature"):
-		if _api_allows(feature, api):
+		if _api_allows(feature, api) and profile.allows_feature(feature.get("name")):
 			absorb(feature, None)
 	for extension in root.iter("extension"):
 		supported = extension.get("supported")
 		if supported and api not in supported.split(","):
+			continue
+		if not profile.allows_extension(extension.get("name")):
 			continue
 		absorb(extension, _extension_guard(extension, platforms))
 
@@ -291,7 +641,7 @@ def _collect_flagbits(root: ET.Element, api: str, requirements: dict[str, list[s
 	return collected
 
 
-def _collect_enums(root: ET.Element, api: str, requirements: dict[str, list[str | None]]) -> dict[str, EnumType]:
+def _collect_enums(root: ET.Element, api: str, requirements: dict[str, list[str | None]], profile: Profile = EVERYTHING) -> dict[str, EnumType]:
 	"""Plain enums, i.e. everything <enums> declares that is not a bitmask."""
 	collected: dict[str, EnumType] = {}
 	for enums in root.iter("enums"):
@@ -325,11 +675,13 @@ def _collect_enums(root: ET.Element, api: str, requirements: dict[str, list[str 
 				target.values.append(EnumValue(name=name, guards=[guard] if guard else []))
 
 	for feature in root.iter("feature"):
-		if _api_allows(feature, api):
+		if _api_allows(feature, api) and profile.allows_feature(feature.get("name")):
 			absorb(feature, None)
 	for extension in root.iter("extension"):
 		supported = extension.get("supported")
 		if supported and api not in supported.split(","):
+			continue
+		if not profile.allows_extension(extension.get("name")):
 			continue
 		absorb(extension, _extension_guard(extension, platforms))
 
@@ -439,6 +791,7 @@ def _wrappers(
 	structs: dict[str, Struct],
 	api: str,
 	requirements: dict[str, list[str | None]],
+	chain_queried: set[str],
 ) -> tuple[list[Wrapper], list[str]]:
 	"""Commands other than vkCreate*/vkAllocate* that a wrapper would improve.
 
@@ -457,6 +810,8 @@ def _wrappers(
 		name = proto.findtext("name") or ""
 		if name.startswith("vkCreate") or name.startswith("vkAllocate"):
 			continue
+		if name in chain_queried:
+			continue  # the query chain form supersedes a plain out parameter
 
 		params = [_parse_decl(p) for p in element.findall("param") if _api_allows(p, api)]
 		by_name = {p.name: p for p in params}
@@ -595,9 +950,9 @@ def _info_roots(root: ET.Element, structs: dict[str, Struct], api: str) -> tuple
 	return roots, commands
 
 
-def load(path: str, api: str = "vulkan") -> Registry:
+def load(path: str, api: str = "vulkan", profile: Profile = EVERYTHING) -> Registry:
 	root = ET.parse(path).getroot()
-	requirements = _collect_requirements(root, api)
+	requirements = _collect_requirements(root, api, profile)
 
 	header_version = "unknown"
 	for type_element in root.iter("type"):
@@ -646,8 +1001,8 @@ def load(path: str, api: str = "vulkan") -> Registry:
 	# Keep only structs that some feature/extension actually pulls in.
 	structs = {name: struct for name, struct in structs.items() if name in requirements}
 
-	flagbits = _collect_flagbits(root, api, requirements)
-	enums = _collect_enums(root, api, requirements)
+	flagbits = _collect_flagbits(root, api, requirements, profile)
+	enums = _collect_enums(root, api, requirements, profile)
 	# A FlagBits type can appear as a member in its own right; give it an enum
 	# form too. Only the ones actually used as members get generated.
 	enums.update(
@@ -657,7 +1012,15 @@ def load(path: str, api: str = "vulkan") -> Registry:
 	)
 	roots, root_commands = _info_roots(root, structs, api)
 	producers, _unwrappable = _producers(root, structs, api, requirements)
-	wrappers, _unwrappable_commands = _wrappers(root, structs, api, requirements)
+	queries, _unwrappable_queries = _queries(root, api, requirements)
+	# Anything named as a structextends target can carry a pNext chain, which is
+	# what makes a query chain worth having. Independent of any closure, so it is
+	# available before the wrapper families are split.
+	extended = {parent for struct in structs.values() for parent in struct.structextends}
+	chain_queries = _chain_queries(root, structs, api, requirements, extended)
+	wrappers, _unwrappable_commands = _wrappers(
+		root, structs, api, requirements, {query.name for query in chain_queries}
+	)
 
 	# Closure over two relations at once: pNext (structextends) and the pointer
 	# members that name another sType-carrying structure.
@@ -716,10 +1079,26 @@ def load(path: str, api: str = "vulkan") -> Registry:
 		if is_reference(member, structs.get(member.type))
 	)
 
+	# Query chains: the read-side mirror of `closure`. A caller links these to
+	# say which extra properties a vkGet* should fill in, so they need a tag and
+	# the pNext hooks -- but not a param, because nobody fills the fields in.
+	query_roots = [name for name in _query_roots(root, structs, api) if name not in in_closure]
+	query_closure = set(query_roots)
+	changed = True
+	while changed:
+		changed = False
+		for name, struct in structs.items():
+			if name in query_closure or name in in_closure:
+				continue
+			if any(parent in query_closure for parent in struct.structextends):
+				query_closure.add(name)
+				changed = True
+
+	chained = in_closure | query_closure
 	edges: list[tuple[str, str]] = []
-	for name in closure:
+	for name in sorted(chained):
 		for parent in structs[name].structextends:
-			if parent in in_closure:
+			if parent in chained:
 				edges.append((parent, name))
 
 	branches = sorted({parent for parent, _ in edges})
@@ -735,6 +1114,16 @@ def load(path: str, api: str = "vulkan") -> Registry:
 		root_commands={name: sorted(set(cmds)) for name, cmds in sorted(root_commands.items())},
 		producers=sorted(producers, key=lambda command: command.name),
 		wrappers=sorted(wrappers, key=lambda command: command.name),
+		queries=sorted(queries, key=lambda query: query.name),
+		chain_queries=sorted(chain_queries, key=lambda query: query.name),
+		provenance=_provenance(root, api, profile),
+		aliases=[
+			alias
+			for alias in _aliases(root, structs, api, requirements)
+			if alias.target in in_closure or alias.target in plain or alias.target in query_closure
+		],
+		query_roots=sorted(query_roots),
+		query_closure=sorted(query_closure),
 		closure=sorted(closure),
 		plain=sorted(plain),
 		branches=branches,

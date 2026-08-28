@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import dataclasses
 
-from . import commands, ir, producers
+from . import commands, ir, producers, queries
 from .naming import Table
 
 
@@ -26,6 +26,7 @@ PRIMITIVES = {
 }
 
 TAB = "\t"
+NEWLINE = chr(10)
 
 
 class GenerationError(Exception):
@@ -266,6 +267,51 @@ def _leaf_of(qualified: str) -> str:
 	return qualified.rpartition("::")[2]
 
 
+def _grouped_by(names: dict[str, str]) -> list[tuple[str, list[str]]]:
+	"""Keys bucketed by the namespace of their chosen name."""
+	buckets: dict[str, list[str]] = {}
+	for key, value in names.items():
+		buckets.setdefault(_namespace_of(value), []).append(key)
+	return sorted(
+		((namespace, sorted(keys)) for namespace, keys in buckets.items()),
+		key=lambda entry: (entry[0] != "", entry[0]),
+	)
+
+
+def _render_alias(
+	alias: ir.Alias,
+	chosen: str,
+	target: str,
+	slots: list[Field],
+	table: Table,
+	area: str,
+) -> list[str]:
+	"""`using` for an old spelling, in its own namespace beside the real name.
+
+	A param with pointer slots is a template, so its alias has to be an alias
+	template with the same defaults -- otherwise the old spelling would only work
+	with every slot named explicitly.
+	"""
+	lines: list[str] = []
+	_guard_open(lines, alias.guards)
+	leaf = _leaf_of(chosen)
+	if area == "param" and slots:
+		declarations = ", ".join(
+			f"::vkfu::reference_expression_for<::vkfu::obj::{table.struct_name(field.target)}> "
+			f"{table.member_name(alias.target, field.member.name)}_expression = ::vkfu::absent_expression"
+			for field in slots
+		)
+		arguments = ", ".join(
+			f"{table.member_name(alias.target, field.member.name)}_expression" for field in slots
+		)
+		lines.append(f"template<{declarations}>")
+		lines.append(f"using {leaf} = ::vkfu::{area}::{target}<{arguments}>;")
+	else:
+		lines.append(f"using {leaf} = ::vkfu::{area}::{target};")
+	_guard_close(lines, alias.guards)
+	return lines
+
+
 def _grouped(selected: list[str], table: Table) -> list[tuple[str, list[str]]]:
 	"""Objects bucketed by the namespace their table name puts them in."""
 	buckets: dict[str, list[str]] = {}
@@ -327,9 +373,6 @@ def _render_param(
 	lines.append("{")
 	if struct.stype is not None:
 		lines.append(f"{TAB}using vulkan_tag_type = obj::{object_name};")
-	elif not slots:
-		lines.pop()  # no alias to separate from the fields
-		lines.append("{")
 	if slots:
 		lines.append(f"{TAB}using storage_type = ::vkfu::reference_storage<{struct.name}")
 		for field in slots:
@@ -338,7 +381,10 @@ def _render_param(
 				f"::vkfu::reference_storage_of_t<{parameters[field.member.name]}>>"
 			)
 		lines.append(f"{TAB}{TAB}>;")
-	lines.append("")
+	if struct.stype is not None or slots:
+		# Only worth a blank line when there is an alias to separate from the
+		# fields; an sType-less param has nothing above them.
+		lines.append("")
 
 	for field in plan.fields:
 		field_name = names[field.member.name]
@@ -361,9 +407,15 @@ def _render_param(
 		lines.append("")
 		lines.append(f"{TAB}constexpr auto evaluate() -> storage_type")
 		lines.append(f"{TAB}{{")
-		lines.append(f"{TAB}{TAB}return storage_type{{")
-		lines.append(f"{TAB}{TAB}{TAB}{struct.name}{{")
-		inner = f"{TAB}{TAB}{TAB}{TAB}"
+		if arrays:
+			# A designator cannot fill a C array, so the head needs a name before
+			# it can go into the storage.
+			lines.append(f"{TAB}{TAB}auto value = {struct.name}{{")
+			inner = f"{TAB}{TAB}{TAB}"
+		else:
+			lines.append(f"{TAB}{TAB}return storage_type{{")
+			lines.append(f"{TAB}{TAB}{TAB}{struct.name}{{")
+			inner = f"{TAB}{TAB}{TAB}{TAB}"
 	else:
 		head = f"{TAB}{TAB}auto value = {struct.name}{{" if arrays else f"{TAB}{TAB}return {struct.name}{{"
 		lines.append("")
@@ -405,7 +457,16 @@ def _render_param(
 			lines.append(f"{inner}.{member.name} = {field_name},")
 
 	if slots:
-		lines.append(f"{TAB}{TAB}{TAB}}},")
+		if arrays:
+			lines.append(f"{TAB}{TAB}}};")
+			for field in arrays:
+				lines.append(
+					f"{TAB}{TAB}::std::ranges::copy({names[field.member.name]}, value.{field.member.name});"
+				)
+			lines.append(f"{TAB}{TAB}return storage_type{{")
+			lines.append(f"{TAB}{TAB}{TAB}value,")
+		else:
+			lines.append(f"{TAB}{TAB}{TAB}}},")
 		for field in slots:
 			lines.append(f"{TAB}{TAB}{TAB}::vkfu::evaluate({names[field.member.name]}),")
 		lines.append(f"{TAB}{TAB}}};")
@@ -505,12 +566,47 @@ def _render_native_glue(struct: ir.Struct) -> list[str]:
 
 
 
-def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list[str]]:
+_CORE_VERSION = {
+	"VK_VERSION_1_0": "VK_API_VERSION_1_0",
+	"VK_VERSION_1_1": "VK_API_VERSION_1_1",
+	"VK_VERSION_1_2": "VK_API_VERSION_1_2",
+	"VK_VERSION_1_3": "VK_API_VERSION_1_3",
+	"VK_VERSION_1_4": "VK_API_VERSION_1_4",
+}
+
+
+def _render_extensions(name: str, tag: str, provenance: ir.Provenance, guards: list[str]) -> list[str]:
+	"""What has to be enabled before this object exists.
+
+	Emitted for everything, including the objects that need nothing: an empty
+	`names` with a core version is the answer "this is core, you are fine", and
+	it is the specialization that makes required_extensions() stop asking.
+	"""
+	core = _CORE_VERSION.get(provenance.core or "", "0")
+	lines: list[str] = []
+	_guard_open(lines, guards)
+	lines.append("template<>")
+	lines.append(f"struct vulkan_object_extensions<obj::{tag}>")
+	lines.append("{")
+	count = len(provenance.extensions)
+	if count:
+		listed = ", ".join(f'"{entry}"' for entry in provenance.extensions)
+		lines.append(f"{TAB}constexpr static ::std::array<char const*, {count}> names{{{listed}}};")
+	else:
+		lines.append(f"{TAB}constexpr static ::std::array<char const*, 0> names{{}};")
+	lines.append(f"{TAB}constexpr static ::std::uint32_t core = {core};")
+	lines.append(f"{TAB}constexpr static auto instance = {'true' if provenance.instance else 'false'};")
+	lines.append("};")
+	_guard_close(lines, guards)
+	return lines
+
+
+def _build(registry: ir.Registry, table: Table, scope: str) -> tuple[dict[str, list[str]], list[str]]:
 	missing: list[str] = []
 	problems: list[str] = []
 	warnings: list[str] = []
 
-	known = set(registry.closure) | set(registry.plain)
+	known = set(registry.closure) | set(registry.plain) | set(registry.query_closure)
 	for named in table.structs:
 		if named not in known:
 			warnings.append(f"naming.toml names {named}, which is not in scope; ignored")
@@ -523,8 +619,17 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 			if not table.struct_name(name):
 				missing.append(f"struct.{name}")
 
+	# Read-side objects: a tag, a trait and the pNext hooks, so a query chain can
+	# be built and linked. No param -- a vkGet* fills these in, so there are no
+	# fields for a caller to set and no field names to look up.
+	queried = [name for name in registry.query_closure if table.struct_name(name)]
+	if scope != "table":
+		for name in registry.query_closure:
+			if not table.struct_name(name):
+				missing.append(f"struct.{name}")
+
 	seen: dict[str, str] = {}
-	for name in list(selected) + [n for n in registry.plain if table.struct_name(n)]:
+	for name in list(selected) + [n for n in list(registry.plain) + queried if table.struct_name(n)]:
 		object_name = table.struct_name(name)
 		if object_name is None:
 			continue  # already reported as missing
@@ -558,7 +663,9 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 				# Legal, because generated code always writes ::vkfu::enums::x in
 				# full, but the member does hide the enum name in class scope.
 				warnings.append(f"{name}: field '{field_name}' hides the enum class it is typed with")
-			if field_name == _leaf_of(object_name):
+			# object_name is None when the struct itself is unnamed, which is
+			# already reported; keep going rather than crashing on it.
+			if object_name is not None and field_name == _leaf_of(object_name):
 				# Legal for an aggregate, but the member hides the injected class
 				# name inside the struct, so it is worth a look.
 				warnings.append(f"{name}: field '{field_name}' has the same name as its object")
@@ -613,6 +720,10 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 			else:
 				seen_values[name] = value.name
 
+	for command in list(registry.queries) + list(registry.chain_queries):
+		if not table.command_name(command.name):
+			missing.append(f"command.{command.name}")
+
 	for command in registry.producers:
 		if command.info.type not in selected:
 			continue
@@ -648,48 +759,39 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 	if missing or problems:
 		raise GenerationError(sorted(set(missing)), sorted(set(problems)))
 
-	emitted = set(selected)
-	lines: list[str] = [
-		"#pragma once",
-		"",
-		f"// Generated by vkfu_gen from vk.xml (VK_HEADER_VERSION {registry.header_version}). Do not edit.",
-		f"// Scope: vkCreate* create-info roots and their pNext closure ({len(selected)} objects).",
-		"",
-		"#include <algorithm>",
-		"#include <array>",
-		"#include <bit>",
-		"#include <expected>",
-		"#include <new>",
-		"#include <cstdint>",
-		"#include <memory>",
-		"#include <span>",
-		"#include <type_traits>",
-		"",
-		"#include <vulkan/vulkan.h>",
-		"",
-		'#include "../branch_pipe.h"',
-		'#include "../chain.h"',
-		'#include "../reference.h"',
-		'#include "../expression.h"',
-		'#include "../storage.h"',
-		'#include "../vulkan_object.h"',
-		"",
-	]
+	emitted = set(selected) | set(queried)
+	# An alias only makes sense once its target is being emitted, and only if the
+	# table gives it somewhere to live.
+	by_alias = {
+		alias.name: alias
+		for alias in registry.aliases
+		if alias.target in emitted and table.alias_name(alias.name)
+	}
+	aliased = {name: table.alias_name(name) for name in by_alias}
+	param_targets = set(selected) | {n for n in registry.plain if table.struct_name(n)}
+	# Four bodies rather than one, because they depend on each other in one
+	# direction only: params and commands both need the tags, params also need the
+	# enums, and nothing needs the params. Written to one file or four.
+	sections: dict[str, list[str]] = {name: [] for name in SECTION_ORDER}
+	lines = sections["objects"]
 
-	for name in selected:
+	chained = list(selected) + queried
+	for name in chained:
 		lines.extend(_render_native_glue(registry.structs[name]))
 		lines.append("")
 
 	if enums:
+		lines = sections["enums"]
 		lines += ["namespace vkfu::enums", "{"]
 		for enum_type in enums:
 			lines.extend(_render_enum(registry.enums[enum_type], table))
 			lines.append("")
 		lines += ["}", ""]
 
+	lines = sections["objects"]
 	lines += ["namespace vkfu::obj", "{"]
 
-	for namespace, names in _grouped(selected, table):
+	for namespace, names in _grouped(chained, table):
 		if namespace:
 			lines.append(f"namespace {namespace}")
 			lines.append("{")
@@ -703,9 +805,11 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 
 	lines += ["}", "", "namespace vkfu", "{"]
 
-	roots = set(registry.roots)
+	# A query chain needs a head as much as a create chain does, so the structures
+	# a command writes into count as roots too.
+	roots = set(registry.roots) | set(registry.query_roots)
 	branches = set(registry.branches)
-	for name in selected:
+	for name in chained:
 		struct = registry.structs[name]
 		object_name = table.struct_name(name)
 		_guard_open(lines, struct.guards)
@@ -719,7 +823,7 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 		_guard_close(lines, struct.guards)
 		lines.append("")
 
-	for name in selected:
+	for name in chained:
 		struct = registry.structs[name]
 		_guard_open(lines, struct.guards)
 		lines.append("template<>")
@@ -727,7 +831,25 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 		lines.append("{")
 		lines.append(f"{TAB}using type = obj::{table.struct_name(name)};")
 		lines.append("};")
+		lines.append("")
+		# The other direction, which a query chain needs: it is handed tags and
+		# has to declare the native structures they stand for.
+		lines.append("template<>")
+		lines.append(f"struct vulkan_object_native<obj::{table.struct_name(name)}>")
+		lines.append("{")
+		lines.append(f"{TAB}using type = {name};")
+		lines.append(f"{TAB}constexpr static auto structure_type = {struct.stype};")
+		lines.append("};")
 		_guard_close(lines, struct.guards)
+		lines.append("")
+
+	for name in chained:
+		provenance = registry.provenance.get(name)
+		if provenance is None:
+			continue
+		lines.extend(
+			_render_extensions(name, table.struct_name(name), provenance, registry.structs[name].guards)
+		)
 		lines.append("")
 
 	for parent, child in registry.edges:
@@ -741,7 +863,29 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 		)
 		_guard_close(lines, guards)
 
-	lines += ["}", "", "namespace vkfu::param", "{"]
+	# Close `namespace vkfu` here: the traits and the compat edges are the end of
+	# the objects section, and it has to stand on its own as a file.
+	lines.append("}")
+
+	# Old spellings of promoted types. The tag alias always applies; the param
+	# alias only when the target has a param at all.
+	if aliased:
+		lines += ["", "namespace vkfu::obj", "{"]
+		for namespace, names in _grouped_by(aliased):
+			if namespace:
+				lines.append(f"namespace {namespace}")
+				lines.append("{")
+			for name in names:
+				alias = by_alias[name]
+				lines.extend(
+					_render_alias(alias, aliased[name], table.struct_name(alias.target), [], table, "obj")
+				)
+			if namespace:
+				lines.append("}")
+		lines.append("}")
+
+	lines = sections["param"]
+	lines += ["", "namespace vkfu::param", "{"]
 
 	for namespace, names in _grouped(selected, table):
 		if namespace:
@@ -779,6 +923,28 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 			lines.append("}")
 			lines.append("")
 
+	if aliased:
+		param_aliases = {n: v for n, v in aliased.items() if by_alias[n].target in param_targets}
+		for namespace, names in _grouped_by(param_aliases):
+			if namespace:
+				lines.append(f"namespace {namespace}")
+				lines.append("{")
+			for name in names:
+				alias = by_alias[name]
+				slots = [
+					field
+					for field in plan_struct(registry.structs[alias.target], registry).fields
+					if field.kind == "reference"
+				]
+				lines.extend(
+					_render_alias(
+						alias, aliased[name], table.struct_name(alias.target), slots, table, "param"
+					)
+				)
+			if namespace:
+				lines.append("}")
+			lines.append("")
+
 	lines.append("}")
 
 	wrapped = [
@@ -797,24 +963,145 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 			if argument.kind == "info"
 		)
 	]
-	if wrapped or general:
-		lines += ["", "namespace vkfu", "{"]
+	enumerates = [
+		query for query in registry.queries if table.command_name(query.name)
+	]
+	chains = [
+		query
+		for query in registry.chain_queries
+		if table.command_name(query.name)
+		and query.out.type in emitted
+		and all(
+			argument.member.type in known
+			for argument in query.arguments
+			if argument.kind == "info"
+		)
+	]
+	if wrapped or general or enumerates or chains:
+		lines = sections["commands"]
+		lines += ["namespace vkfu", "{"]
 		grouped: dict[str, list[object]] = {}
 		for command in wrapped:
 			grouped.setdefault(_namespace_of(table.command_name(command.name)), []).append(command)
-		for command in general:
+		for command in general + enumerates + chains:
 			grouped.setdefault(_namespace_of(table.command_name(command.name)), []).append(command)
 		for namespace, group in sorted(grouped.items(), key=lambda entry: (entry[0] != "", entry[0])):
 			if namespace:
 				lines.append(f"namespace {namespace}")
 				lines.append("{")
 			for command in group:
-				renderer = producers.render if isinstance(command, ir.Command) else commands.render
-				lines.extend(renderer(command, table))
+				if isinstance(command, ir.Command):
+					lines.extend(producers.render(command, table))
+				elif isinstance(command, ir.Query):
+					lines.extend(queries.render_query(command, table, registry))
+				elif isinstance(command, ir.ChainQuery):
+					lines.extend(queries.render_chain_query(command, table, registry))
+				else:
+					lines.extend(commands.render(command, table))
 				lines.append("")
 			if namespace:
 				lines.append("}")
 				lines.append("")
 		lines.append("}")
 
-	return "\n".join(lines) + "\n", warnings
+	return sections, warnings
+
+
+SECTION_ORDER = ["objects", "enums", "param", "commands"]
+
+# What each body needs on its own. The vkfu core headers are small and each is
+# #pragma once, so they go into all of them rather than being tracked; what is
+# worth splitting is the generated bulk.
+_CORE_INCLUDES = [
+	"#include <algorithm>",
+	"#include <array>",
+	"#include <bit>",
+	"#include <cstddef>",
+	"#include <cstdint>",
+	"#include <expected>",
+	"#include <iterator>",
+	"#include <memory>",
+	"#include <new>",
+	"#include <span>",
+	"#include <type_traits>",
+	"",
+	"#include <vulkan/vulkan.h>",
+	"",
+	'#include "{prefix}branch_pipe.h"',
+	'#include "{prefix}chain.h"',
+	'#include "{prefix}expression.h"',
+	'#include "{prefix}extension.h"',
+	'#include "{prefix}query.h"',
+	'#include "{prefix}reference.h"',
+	'#include "{prefix}storage.h"',
+	'#include "{prefix}vulkan_object.h"',
+]
+
+SECTION_DEPENDENCIES = {
+	"objects": [],
+	"enums": [],
+	"param": ["objects", "enums"],
+	"commands": ["objects"],
+}
+
+SECTION_SUMMARY = {
+	"objects": "tags, traits, extension requirements and the pNext hooks",
+	"enums": "scoped enums over the native ones",
+	"param": "the structures you fill in",
+	"commands": "the wrappers that take expressions",
+}
+
+
+def _preamble(registry: ir.Registry, name: str, prefix: str, siblings: dict[str, str] | None) -> list[str]:
+	lines = [
+		"#pragma once",
+		"",
+		f"// Generated by vkfu_gen from vk.xml (VK_HEADER_VERSION {registry.header_version}). Do not edit.",
+	]
+	if siblings is not None:
+		lines.append(f"// {name}: {SECTION_SUMMARY[name]}.")
+	lines.append("")
+	lines += [entry.format(prefix=prefix) for entry in _CORE_INCLUDES]
+	if siblings is not None:
+		for dependency in SECTION_DEPENDENCIES[name]:
+			lines.append(f'#include "{siblings[dependency]}"')
+	lines.append("")
+	return lines
+
+
+def generate(
+	registry: ir.Registry, table: Table, scope: str, prefix: str = "../"
+) -> tuple[str, list[str]]:
+	"""One header, every section in dependency order."""
+	sections, warnings = _build(registry, table, scope)
+	lines = _preamble(registry, "objects", prefix, None)
+	for name in SECTION_ORDER:
+		lines.extend(sections[name])
+	return NEWLINE.join(lines) + NEWLINE, warnings
+
+
+def generate_split(
+	registry: ir.Registry, table: Table, scope: str, stem: str, prefix: str = "../../"
+) -> tuple[dict[str, str], list[str]]:
+	"""One file per section, plus an umbrella that includes them in order.
+
+	The point is that a translation unit which only records commands need not
+	parse eight hundred param structures to do it.
+	"""
+	sections, warnings = _build(registry, table, scope)
+	siblings = {name: f"{stem}.{name}.h" for name in SECTION_ORDER}
+	files: dict[str, str] = {}
+	for name in SECTION_ORDER:
+		lines = _preamble(registry, name, prefix, siblings)
+		lines.extend(sections[name])
+		files[siblings[name]] = NEWLINE.join(lines) + NEWLINE
+	umbrella = [
+		"#pragma once",
+		"",
+		f"// Generated by vkfu_gen from vk.xml (VK_HEADER_VERSION {registry.header_version}). Do not edit.",
+		"// Everything. Include one of the parts instead when that is all you need.",
+		"",
+	]
+	umbrella += [f'#include "{stem}/{siblings[name]}"' for name in SECTION_ORDER]
+	files[f"{stem}.h"] = NEWLINE.join(umbrella) + NEWLINE
+	return files, warnings

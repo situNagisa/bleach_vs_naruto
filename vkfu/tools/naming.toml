@@ -9,6 +9,744 @@
 # REVIEW tags, a human reads them, and `vkfu_gen promote` folds the reviewed
 # file in. Editing a name afterwards is normal -- nothing derives these.
 
+[struct."VkAccelerationStructureBuildSizesInfoKHR"]
+name = "result::khr::acceleration_structure_build_sizes"
+
+[struct."VkAndroidHardwareBufferFormatProperties2ANDROID"]
+name = "result::android::android_hardware_buffer_format_properties2"
+
+[struct."VkAndroidHardwareBufferFormatPropertiesANDROID"]
+name = "result::android::android_hardware_buffer_format_properties"
+
+[struct."VkAndroidHardwareBufferFormatResolvePropertiesANDROID"]
+name = "result::android::android_hardware_buffer_format_resolve_properties"
+
+[struct."VkAndroidHardwareBufferPropertiesANDROID"]
+name = "result::android::android_hardware_buffer_properties"
+
+[struct."VkAndroidHardwareBufferUsageANDROID"]
+name = "result::android::android_hardware_buffer_usage"
+
+[struct."VkBufferCollectionPropertiesFUCHSIA"]
+name = "result::fuchsia::buffer_collection_properties"
+
+[struct."VkCheckpointData2NV"]
+name = "result::nv::checkpoint_data2"
+
+[struct."VkCheckpointDataNV"]
+name = "result::nv::checkpoint_data"
+
+[struct."VkCooperativeMatrixFlexibleDimensionsPropertiesNV"]
+name = "result::nv::cooperative_matrix_flexible_dimensions_properties"
+
+[struct."VkCooperativeMatrixPropertiesKHR"]
+name = "result::khr::cooperative_matrix_properties"
+
+[struct."VkCooperativeMatrixPropertiesNV"]
+name = "result::nv::cooperative_matrix_properties"
+
+[struct."VkCooperativeVectorPropertiesNV"]
+name = "result::nv::cooperative_vector_properties"
+
+[struct."VkDataGraphPipelinePropertyQueryResultARM"]
+name = "result::arm::data_graph_pipeline_property_query_result"
+
+[struct."VkDataGraphPipelineSessionBindPointRequirementARM"]
+name = "result::arm::data_graph_pipeline_session_bind_point_requirement"
+
+[struct."VkDescriptorSetLayoutHostMappingInfoVALVE"]
+name = "result::valve::descriptor_set_layout_host_mapping"
+
+[struct."VkDescriptorSetLayoutSupport"]
+name = "result::descriptor_set_layout_support"
+
+[struct."VkDescriptorSetVariableDescriptorCountLayoutSupport"]
+name = "result::descriptor_set_variable_descriptor_count_layout_support"
+
+[struct."VkDeviceFaultCountsEXT"]
+name = "result::ext::device_fault_counts"
+
+[struct."VkDeviceFaultInfoEXT"]
+name = "result::ext::device_fault"
+
+[struct."VkDeviceGroupPresentCapabilitiesKHR"]
+name = "result::khr::device_group_present_capabilities"
+
+[struct."VkDisplayModeProperties2KHR"]
+name = "result::khr::display_mode_properties2"
+
+[struct."VkDisplayModeStereoPropertiesNV"]
+name = "result::nv::display_mode_stereo_properties"
+
+[struct."VkDisplayNativeHdrSurfaceCapabilitiesAMD"]
+name = "result::amd::display_native_hdr_surface_capabilities"
+
+[struct."VkDisplayPlaneCapabilities2KHR"]
+name = "result::khr::display_plane_capabilities2"
+
+[struct."VkDisplayPlaneProperties2KHR"]
+name = "result::khr::display_plane_properties2"
+
+[struct."VkDisplayProperties2KHR"]
+name = "result::khr::display_properties2"
+
+[struct."VkDrmFormatModifierPropertiesList2EXT"]
+name = "result::ext::drm_format_modifier_properties_list2"
+
+[struct."VkDrmFormatModifierPropertiesListEXT"]
+name = "result::ext::drm_format_modifier_properties_list"
+
+[struct."VkExecutionGraphPipelineScratchSizeAMDX"]
+name = "result::amdx::execution_graph_pipeline_scratch_size"
+
+[struct."VkExportMetalBufferInfoEXT"]
+name = "result::ext::export_metal_buffer"
+
+[struct."VkExportMetalCommandQueueInfoEXT"]
+name = "result::ext::export_metal_command_queue"
+
+[struct."VkExportMetalDeviceInfoEXT"]
+name = "result::ext::export_metal_device"
+
+[struct."VkExportMetalIOSurfaceInfoEXT"]
+name = "result::ext::export_metal_io_surface"
+
+[struct."VkExportMetalObjectsInfoEXT"]
+name = "result::ext::export_metal_objects"
+
+[struct."VkExportMetalSharedEventInfoEXT"]
+name = "result::ext::export_metal_shared_event"
+
+[struct."VkExportMetalTextureInfoEXT"]
+name = "result::ext::export_metal_texture"
+
+[struct."VkExternalBufferProperties"]
+name = "result::external_buffer_properties"
+
+[struct."VkExternalComputeQueueDataParamsNV"]
+name = "result::nv::external_compute_queue_data_params"
+
+[struct."VkExternalFenceProperties"]
+name = "result::external_fence_properties"
+
+[struct."VkExternalImageFormatProperties"]
+name = "result::external_image_format_properties"
+
+[struct."VkExternalSemaphoreProperties"]
+name = "result::external_semaphore_properties"
+
+[struct."VkExternalTensorPropertiesARM"]
+name = "result::arm::external_tensor_properties"
+
+[struct."VkFilterCubicImageViewImageFormatPropertiesEXT"]
+name = "result::ext::filter_cubic_image_view_image_format_properties"
+
+[struct."VkFormatProperties2"]
+name = "result::format_properties2"
+
+[struct."VkFormatProperties3"]
+name = "result::format_properties3"
+
+[struct."VkFramebufferMixedSamplesCombinationNV"]
+name = "result::nv::framebuffer_mixed_samples_combination"
+
+[struct."VkGetLatencyMarkerInfoNV"]
+name = "result::nv::get_latency_marker"
+
+[struct."VkHostImageCopyDevicePerformanceQuery"]
+name = "result::host_image_copy_device_performance_query"
+
+[struct."VkImageCompressionPropertiesEXT"]
+name = "result::ext::image_compression_properties"
+
+[struct."VkImageDrmFormatModifierPropertiesEXT"]
+name = "result::ext::image_drm_format_modifier_properties"
+
+[struct."VkImageFormatProperties2"]
+name = "result::image_format_properties2"
+
+[struct."VkImageViewAddressPropertiesNVX"]
+name = "result::nvx::image_view_address_properties"
+
+[struct."VkLatencySurfaceCapabilitiesNV"]
+name = "result::nv::latency_surface_capabilities"
+
+[struct."VkMemoryDedicatedRequirements"]
+name = "result::memory_dedicated_requirements"
+
+[struct."VkMemoryFdPropertiesKHR"]
+name = "result::khr::memory_fd_properties"
+
+[struct."VkMemoryHostPointerPropertiesEXT"]
+name = "result::ext::memory_host_pointer_properties"
+
+[struct."VkMemoryMetalHandlePropertiesEXT"]
+name = "result::ext::memory_metal_handle_properties"
+
+[struct."VkMemoryRequirements2"]
+name = "result::memory_requirements2"
+
+[struct."VkMemoryWin32HandlePropertiesKHR"]
+name = "result::khr::memory_win32_handle_properties"
+
+[struct."VkMemoryZirconHandlePropertiesFUCHSIA"]
+name = "result::fuchsia::memory_zircon_handle_properties"
+
+[struct."VkMicromapBuildSizesInfoEXT"]
+name = "result::ext::micromap_build_sizes"
+
+[struct."VkMultisamplePropertiesEXT"]
+name = "result::ext::multisample_properties"
+
+[struct."VkOpticalFlowImageFormatPropertiesNV"]
+name = "result::nv::optical_flow_image_format_properties"
+
+[struct."VkPerformanceCounterDescriptionKHR"]
+name = "result::khr::performance_counter_description"
+
+[struct."VkPerformanceCounterKHR"]
+name = "result::khr::performance_counter"
+
+[struct."VkPhysicalDeviceAccelerationStructurePropertiesKHR"]
+name = "property::khr::acceleration_structure"
+
+[struct."VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT"]
+name = "property::ext::blend_operation_advanced"
+
+[struct."VkPhysicalDeviceClusterAccelerationStructurePropertiesNV"]
+name = "property::nv::cluster_acceleration_structure"
+
+[struct."VkPhysicalDeviceClusterCullingShaderPropertiesHUAWEI"]
+name = "property::huawei::cluster_culling_shader"
+
+[struct."VkPhysicalDeviceComputeShaderDerivativesPropertiesKHR"]
+name = "property::khr::compute_shader_derivatives"
+
+[struct."VkPhysicalDeviceConservativeRasterizationPropertiesEXT"]
+name = "property::ext::conservative_rasterization"
+
+[struct."VkPhysicalDeviceCooperativeMatrix2PropertiesNV"]
+name = "property::nv::cooperative_matrix2"
+
+[struct."VkPhysicalDeviceCooperativeMatrixPropertiesKHR"]
+name = "property::khr::cooperative_matrix"
+
+[struct."VkPhysicalDeviceCooperativeMatrixPropertiesNV"]
+name = "property::nv::cooperative_matrix"
+
+[struct."VkPhysicalDeviceCooperativeVectorPropertiesNV"]
+name = "property::nv::cooperative_vector"
+
+[struct."VkPhysicalDeviceCopyMemoryIndirectPropertiesKHR"]
+name = "property::khr::copy_memory_indirect"
+
+[struct."VkPhysicalDeviceCudaKernelLaunchPropertiesNV"]
+name = "property::nv::cuda_kernel_launch"
+
+[struct."VkPhysicalDeviceCustomBorderColorPropertiesEXT"]
+name = "property::ext::custom_border_color"
+
+[struct."VkPhysicalDeviceDepthStencilResolveProperties"]
+name = "property::depth_stencil_resolve"
+
+[struct."VkPhysicalDeviceDescriptorBufferDensityMapPropertiesEXT"]
+name = "property::ext::descriptor_buffer_density_map"
+
+[struct."VkPhysicalDeviceDescriptorBufferPropertiesEXT"]
+name = "property::ext::descriptor_buffer"
+
+[struct."VkPhysicalDeviceDescriptorBufferTensorPropertiesARM"]
+name = "property::arm::descriptor_buffer_tensor"
+
+[struct."VkPhysicalDeviceDescriptorIndexingProperties"]
+name = "property::descriptor_indexing"
+
+[struct."VkPhysicalDeviceDeviceGeneratedCommandsPropertiesEXT"]
+name = "property::ext::device_generated_commands"
+
+[struct."VkPhysicalDeviceDeviceGeneratedCommandsPropertiesNV"]
+name = "property::nv::device_generated_commands"
+
+[struct."VkPhysicalDeviceDiscardRectanglePropertiesEXT"]
+name = "property::ext::discard_rectangle"
+
+[struct."VkPhysicalDeviceDisplacementMicromapPropertiesNV"]
+name = "property::nv::displacement_micromap"
+
+[struct."VkPhysicalDeviceDriverProperties"]
+name = "property::driver"
+
+[struct."VkPhysicalDeviceDrmPropertiesEXT"]
+name = "property::ext::drm"
+
+[struct."VkPhysicalDeviceExtendedDynamicState3PropertiesEXT"]
+name = "property::ext::extended_dynamic_state3"
+
+[struct."VkPhysicalDeviceExtendedSparseAddressSpacePropertiesNV"]
+name = "property::nv::extended_sparse_address_space"
+
+[struct."VkPhysicalDeviceExternalComputeQueuePropertiesNV"]
+name = "property::nv::external_compute_queue"
+
+[struct."VkPhysicalDeviceExternalFormatResolvePropertiesANDROID"]
+name = "property::android::external_format_resolve"
+
+[struct."VkPhysicalDeviceExternalMemoryHostPropertiesEXT"]
+name = "property::ext::external_memory_host"
+
+[struct."VkPhysicalDeviceFloatControlsProperties"]
+name = "property::float_controls"
+
+[struct."VkPhysicalDeviceFragmentDensityMap2PropertiesEXT"]
+name = "property::ext::fragment_density_map2"
+
+[struct."VkPhysicalDeviceFragmentDensityMapLayeredPropertiesVALVE"]
+name = "property::valve::fragment_density_map_layered"
+
+[struct."VkPhysicalDeviceFragmentDensityMapOffsetPropertiesEXT"]
+name = "property::ext::fragment_density_map_offset"
+
+[struct."VkPhysicalDeviceFragmentDensityMapPropertiesEXT"]
+name = "property::ext::fragment_density_map"
+
+[struct."VkPhysicalDeviceFragmentShaderBarycentricPropertiesKHR"]
+name = "property::khr::fragment_shader_barycentric"
+
+[struct."VkPhysicalDeviceFragmentShadingRateEnumsPropertiesNV"]
+name = "property::nv::fragment_shading_rate_enums"
+
+[struct."VkPhysicalDeviceFragmentShadingRateKHR"]
+name = "result::khr::physical_device_fragment_shading_rate"
+
+[struct."VkPhysicalDeviceFragmentShadingRatePropertiesKHR"]
+name = "property::khr::fragment_shading_rate"
+
+[struct."VkPhysicalDeviceGraphicsPipelineLibraryPropertiesEXT"]
+name = "property::ext::graphics_pipeline_library"
+
+[struct."VkPhysicalDeviceGroupProperties"]
+name = "property::group"
+
+[struct."VkPhysicalDeviceHostImageCopyProperties"]
+name = "property::host_image_copy"
+
+[struct."VkPhysicalDeviceIDProperties"]
+name = "property::id"
+
+[struct."VkPhysicalDeviceImageAlignmentControlPropertiesMESA"]
+name = "property::mesa::image_alignment_control"
+
+[struct."VkPhysicalDeviceImageProcessing2PropertiesQCOM"]
+name = "property::qcom::image_processing2"
+
+[struct."VkPhysicalDeviceImageProcessingPropertiesQCOM"]
+name = "property::qcom::image_processing"
+
+[struct."VkPhysicalDeviceInlineUniformBlockProperties"]
+name = "property::inline_uniform_block"
+
+[struct."VkPhysicalDeviceLayeredApiPropertiesListKHR"]
+name = "result::khr::physical_device_layered_api_properties_list"
+
+[struct."VkPhysicalDeviceLayeredDriverPropertiesMSFT"]
+name = "property::msft::layered_driver"
+
+[struct."VkPhysicalDeviceLegacyVertexAttributesPropertiesEXT"]
+name = "property::ext::legacy_vertex_attributes"
+
+[struct."VkPhysicalDeviceLineRasterizationProperties"]
+name = "property::line_rasterization"
+
+[struct."VkPhysicalDeviceMaintenance3Properties"]
+name = "property::maintenance3"
+
+[struct."VkPhysicalDeviceMaintenance4Properties"]
+name = "property::maintenance4"
+
+[struct."VkPhysicalDeviceMaintenance5Properties"]
+name = "property::maintenance5"
+
+[struct."VkPhysicalDeviceMaintenance6Properties"]
+name = "property::maintenance6"
+
+[struct."VkPhysicalDeviceMaintenance7PropertiesKHR"]
+name = "property::khr::maintenance7"
+
+[struct."VkPhysicalDeviceMaintenance9PropertiesKHR"]
+name = "property::khr::maintenance9"
+
+[struct."VkPhysicalDeviceMapMemoryPlacedPropertiesEXT"]
+name = "property::ext::map_memory_placed"
+
+[struct."VkPhysicalDeviceMemoryBudgetPropertiesEXT"]
+name = "property::ext::memory_budget"
+
+[struct."VkPhysicalDeviceMemoryDecompressionPropertiesNV"]
+name = "property::nv::memory_decompression"
+
+[struct."VkPhysicalDeviceMemoryProperties2"]
+name = "property::memory2"
+
+[struct."VkPhysicalDeviceMeshShaderPropertiesEXT"]
+name = "property::ext::mesh_shader"
+
+[struct."VkPhysicalDeviceMeshShaderPropertiesNV"]
+name = "property::nv::mesh_shader"
+
+[struct."VkPhysicalDeviceMultiDrawPropertiesEXT"]
+name = "property::ext::multi_draw"
+
+[struct."VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX"]
+name = "property::nvx::multiview_per_view_attributes"
+
+[struct."VkPhysicalDeviceMultiviewProperties"]
+name = "property::multiview"
+
+[struct."VkPhysicalDeviceNestedCommandBufferPropertiesEXT"]
+name = "property::ext::nested_command_buffer"
+
+[struct."VkPhysicalDeviceOpacityMicromapPropertiesEXT"]
+name = "property::ext::opacity_micromap"
+
+[struct."VkPhysicalDeviceOpticalFlowPropertiesNV"]
+name = "property::nv::optical_flow"
+
+[struct."VkPhysicalDevicePCIBusInfoPropertiesEXT"]
+name = "property::ext::pci_bus_info"
+
+[struct."VkPhysicalDevicePartitionedAccelerationStructurePropertiesNV"]
+name = "property::nv::partitioned_acceleration_structure"
+
+[struct."VkPhysicalDevicePerformanceQueryPropertiesKHR"]
+name = "property::khr::performance_query"
+
+[struct."VkPhysicalDevicePipelineBinaryPropertiesKHR"]
+name = "property::khr::pipeline_binary"
+
+[struct."VkPhysicalDevicePipelineRobustnessProperties"]
+name = "property::pipeline_robustness"
+
+[struct."VkPhysicalDevicePointClippingProperties"]
+name = "property::point_clipping"
+
+[struct."VkPhysicalDevicePortabilitySubsetPropertiesKHR"]
+name = "property::khr::portability_subset"
+
+[struct."VkPhysicalDeviceProperties2"]
+name = "property::core"
+
+[struct."VkPhysicalDeviceProtectedMemoryProperties"]
+name = "property::protected_memory"
+
+[struct."VkPhysicalDeviceProvokingVertexPropertiesEXT"]
+name = "property::ext::provoking_vertex"
+
+[struct."VkPhysicalDevicePushDescriptorProperties"]
+name = "property::push_descriptor"
+
+[struct."VkPhysicalDeviceRayTracingInvocationReorderPropertiesNV"]
+name = "property::nv::ray_tracing_invocation_reorder"
+
+[struct."VkPhysicalDeviceRayTracingPipelinePropertiesKHR"]
+name = "property::khr::ray_tracing_pipeline"
+
+[struct."VkPhysicalDeviceRayTracingPropertiesNV"]
+name = "property::nv::ray_tracing"
+
+[struct."VkPhysicalDeviceRenderPassStripedPropertiesARM"]
+name = "property::arm::render_pass_striped"
+
+[struct."VkPhysicalDeviceRobustness2PropertiesKHR"]
+name = "property::khr::robustness2"
+
+[struct."VkPhysicalDeviceSampleLocationsPropertiesEXT"]
+name = "property::ext::sample_locations"
+
+[struct."VkPhysicalDeviceSamplerFilterMinmaxProperties"]
+name = "property::sampler_filter_minmax"
+
+[struct."VkPhysicalDeviceSchedulingControlsPropertiesARM"]
+name = "property::arm::scheduling_controls"
+
+[struct."VkPhysicalDeviceShaderCoreBuiltinsPropertiesARM"]
+name = "property::arm::shader_core_builtins"
+
+[struct."VkPhysicalDeviceShaderCoreProperties2AMD"]
+name = "property::amd::shader_core2"
+
+[struct."VkPhysicalDeviceShaderCorePropertiesAMD"]
+name = "property::amd::shader_core"
+
+[struct."VkPhysicalDeviceShaderCorePropertiesARM"]
+name = "property::arm::shader_core"
+
+[struct."VkPhysicalDeviceShaderEnqueuePropertiesAMDX"]
+name = "property::amdx::shader_enqueue"
+
+[struct."VkPhysicalDeviceShaderIntegerDotProductProperties"]
+name = "property::shader_integer_dot_product"
+
+[struct."VkPhysicalDeviceShaderModuleIdentifierPropertiesEXT"]
+name = "property::ext::shader_module_identifier"
+
+[struct."VkPhysicalDeviceShaderObjectPropertiesEXT"]
+name = "property::ext::shader_object"
+
+[struct."VkPhysicalDeviceShaderSMBuiltinsPropertiesNV"]
+name = "property::nv::shader_sm_builtins"
+
+[struct."VkPhysicalDeviceShaderTileImagePropertiesEXT"]
+name = "property::ext::shader_tile_image"
+
+[struct."VkPhysicalDeviceShadingRateImagePropertiesNV"]
+name = "property::nv::shading_rate_image"
+
+[struct."VkPhysicalDeviceSubgroupProperties"]
+name = "property::subgroup"
+
+[struct."VkPhysicalDeviceSubgroupSizeControlProperties"]
+name = "property::subgroup_size_control"
+
+[struct."VkPhysicalDeviceSubpassShadingPropertiesHUAWEI"]
+name = "property::huawei::subpass_shading"
+
+[struct."VkPhysicalDeviceTensorPropertiesARM"]
+name = "property::arm::tensor"
+
+[struct."VkPhysicalDeviceTexelBufferAlignmentProperties"]
+name = "property::texel_buffer_alignment"
+
+[struct."VkPhysicalDeviceTileMemoryHeapPropertiesQCOM"]
+name = "property::qcom::tile_memory_heap"
+
+[struct."VkPhysicalDeviceTileShadingPropertiesQCOM"]
+name = "property::qcom::tile_shading"
+
+[struct."VkPhysicalDeviceTimelineSemaphoreProperties"]
+name = "property::timeline_semaphore"
+
+[struct."VkPhysicalDeviceToolProperties"]
+name = "property::tool"
+
+[struct."VkPhysicalDeviceTransformFeedbackPropertiesEXT"]
+name = "property::ext::transform_feedback"
+
+[struct."VkPhysicalDeviceVertexAttributeDivisorProperties"]
+name = "property::vertex_attribute_divisor"
+
+[struct."VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT"]
+name = "property::ext::vertex_attribute_divisor"
+
+[struct."VkPhysicalDeviceVulkan11Properties"]
+name = "property::vulkan11"
+
+[struct."VkPhysicalDeviceVulkan12Properties"]
+name = "property::vulkan12"
+
+[struct."VkPhysicalDeviceVulkan13Properties"]
+name = "property::vulkan13"
+
+[struct."VkPhysicalDeviceVulkan14Properties"]
+name = "property::vulkan14"
+
+[struct."VkPipelineBinaryHandlesInfoKHR"]
+name = "result::khr::pipeline_binary_handles"
+
+[struct."VkPipelineBinaryKeyKHR"]
+name = "result::khr::pipeline_binary_key"
+
+[struct."VkPipelineExecutableInternalRepresentationKHR"]
+name = "result::khr::pipeline_executable_internal_representation"
+
+[struct."VkPipelineExecutablePropertiesKHR"]
+name = "result::khr::pipeline_executable_properties"
+
+[struct."VkPipelineExecutableStatisticKHR"]
+name = "result::khr::pipeline_executable_statistic"
+
+[struct."VkQueueFamilyCheckpointProperties2NV"]
+name = "result::nv::queue_family_checkpoint_properties2"
+
+[struct."VkQueueFamilyCheckpointPropertiesNV"]
+name = "result::nv::queue_family_checkpoint_properties"
+
+[struct."VkQueueFamilyDataGraphProcessingEnginePropertiesARM"]
+name = "result::arm::queue_family_data_graph_processing_engine_properties"
+
+[struct."VkQueueFamilyDataGraphPropertiesARM"]
+name = "result::arm::queue_family_data_graph_properties"
+
+[struct."VkQueueFamilyGlobalPriorityProperties"]
+name = "result::queue_family_global_priority_properties"
+
+[struct."VkQueueFamilyOwnershipTransferPropertiesKHR"]
+name = "result::khr::queue_family_ownership_transfer_properties"
+
+[struct."VkQueueFamilyProperties2"]
+name = "result::queue_family_properties2"
+
+[struct."VkQueueFamilyQueryResultStatusPropertiesKHR"]
+name = "result::khr::queue_family_query_result_status_properties"
+
+[struct."VkQueueFamilyVideoPropertiesKHR"]
+name = "result::khr::queue_family_video_properties"
+
+[struct."VkSamplerYcbcrConversionImageFormatProperties"]
+name = "result::sampler_ycbcr_conversion_image_format_properties"
+
+[struct."VkScreenBufferFormatPropertiesQNX"]
+name = "result::qnx::screen_buffer_format_properties"
+
+[struct."VkScreenBufferPropertiesQNX"]
+name = "result::qnx::screen_buffer_properties"
+
+[struct."VkShaderModuleIdentifierEXT"]
+name = "result::ext::shader_module_identifier"
+
+[struct."VkSharedPresentSurfaceCapabilitiesKHR"]
+name = "result::khr::shared_present_surface_capabilities"
+
+[struct."VkSparseImageFormatProperties2"]
+name = "result::sparse_image_format_properties2"
+
+[struct."VkSparseImageMemoryRequirements2"]
+name = "result::sparse_image_memory_requirements2"
+
+[struct."VkSubpassResolvePerformanceQueryEXT"]
+name = "result::ext::subpass_resolve_performance_query"
+
+[struct."VkSubresourceHostMemcpySize"]
+name = "result::subresource_host_memcpy_size"
+
+[struct."VkSubresourceLayout2"]
+name = "result::subresource_layout2"
+
+[struct."VkSurfaceCapabilities2EXT"]
+name = "result::ext::surface_capabilities2"
+
+[struct."VkSurfaceCapabilities2KHR"]
+name = "result::khr::surface_capabilities2"
+
+[struct."VkSurfaceCapabilitiesFullScreenExclusiveEXT"]
+name = "result::ext::surface_capabilities_full_screen_exclusive"
+
+[struct."VkSurfaceCapabilitiesPresentBarrierNV"]
+name = "result::nv::surface_capabilities_present_barrier"
+
+[struct."VkSurfaceCapabilitiesPresentId2KHR"]
+name = "result::khr::surface_capabilities_present_id2"
+
+[struct."VkSurfaceCapabilitiesPresentWait2KHR"]
+name = "result::khr::surface_capabilities_present_wait2"
+
+[struct."VkSurfaceFormat2KHR"]
+name = "result::khr::surface_format2"
+
+[struct."VkSurfacePresentModeCompatibilityKHR"]
+name = "result::khr::surface_present_mode_compatibility"
+
+[struct."VkSurfacePresentScalingCapabilitiesKHR"]
+name = "result::khr::surface_present_scaling_capabilities"
+
+[struct."VkSurfaceProtectedCapabilitiesKHR"]
+name = "result::khr::surface_protected_capabilities"
+
+[struct."VkTensorFormatPropertiesARM"]
+name = "result::arm::tensor_format_properties"
+
+[struct."VkTextureLODGatherFormatPropertiesAMD"]
+name = "result::amd::texture_lod_gather_format_properties"
+
+[struct."VkTileMemoryRequirementsQCOM"]
+name = "result::qcom::tile_memory_requirements"
+
+[struct."VkTilePropertiesQCOM"]
+name = "result::qcom::tile_properties"
+
+[struct."VkVideoCapabilitiesKHR"]
+name = "result::khr::video_capabilities"
+
+[struct."VkVideoDecodeAV1CapabilitiesKHR"]
+name = "result::khr::video_decode_av1_capabilities"
+
+[struct."VkVideoDecodeCapabilitiesKHR"]
+name = "result::khr::video_decode_capabilities"
+
+[struct."VkVideoDecodeH264CapabilitiesKHR"]
+name = "result::khr::video_decode_h264_capabilities"
+
+[struct."VkVideoDecodeH265CapabilitiesKHR"]
+name = "result::khr::video_decode_h265_capabilities"
+
+[struct."VkVideoDecodeVP9CapabilitiesKHR"]
+name = "result::khr::video_decode_vp9_capabilities"
+
+[struct."VkVideoEncodeAV1CapabilitiesKHR"]
+name = "result::khr::video_encode_av1_capabilities"
+
+[struct."VkVideoEncodeAV1QualityLevelPropertiesKHR"]
+name = "result::khr::video_encode_av1_quality_level_properties"
+
+[struct."VkVideoEncodeAV1QuantizationMapCapabilitiesKHR"]
+name = "result::khr::video_encode_av1_quantization_map_capabilities"
+
+[struct."VkVideoEncodeCapabilitiesKHR"]
+name = "result::khr::video_encode_capabilities"
+
+[struct."VkVideoEncodeH264CapabilitiesKHR"]
+name = "result::khr::video_encode_h264_capabilities"
+
+[struct."VkVideoEncodeH264QualityLevelPropertiesKHR"]
+name = "result::khr::video_encode_h264_quality_level_properties"
+
+[struct."VkVideoEncodeH264QuantizationMapCapabilitiesKHR"]
+name = "result::khr::video_encode_h264_quantization_map_capabilities"
+
+[struct."VkVideoEncodeH264SessionParametersFeedbackInfoKHR"]
+name = "result::khr::video_encode_h264_session_parameters_feedback"
+
+[struct."VkVideoEncodeH265CapabilitiesKHR"]
+name = "result::khr::video_encode_h265_capabilities"
+
+[struct."VkVideoEncodeH265QualityLevelPropertiesKHR"]
+name = "result::khr::video_encode_h265_quality_level_properties"
+
+[struct."VkVideoEncodeH265QuantizationMapCapabilitiesKHR"]
+name = "result::khr::video_encode_h265_quantization_map_capabilities"
+
+[struct."VkVideoEncodeH265SessionParametersFeedbackInfoKHR"]
+name = "result::khr::video_encode_h265_session_parameters_feedback"
+
+[struct."VkVideoEncodeIntraRefreshCapabilitiesKHR"]
+name = "result::khr::video_encode_intra_refresh_capabilities"
+
+[struct."VkVideoEncodeQualityLevelPropertiesKHR"]
+name = "result::khr::video_encode_quality_level_properties"
+
+[struct."VkVideoEncodeQuantizationMapCapabilitiesKHR"]
+name = "result::khr::video_encode_quantization_map_capabilities"
+
+[struct."VkVideoEncodeRgbConversionCapabilitiesVALVE"]
+name = "result::valve::video_encode_rgb_conversion_capabilities"
+
+[struct."VkVideoEncodeSessionParametersFeedbackInfoKHR"]
+name = "result::khr::video_encode_session_parameters_feedback"
+
+[struct."VkVideoFormatAV1QuantizationMapPropertiesKHR"]
+name = "result::khr::video_format_av1_quantization_map_properties"
+
+[struct."VkVideoFormatH265QuantizationMapPropertiesKHR"]
+name = "result::khr::video_format_h265_quantization_map_properties"
+
+[struct."VkVideoFormatPropertiesKHR"]
+name = "result::khr::video_format_properties"
+
+[struct."VkVideoFormatQuantizationMapPropertiesKHR"]
+name = "result::khr::video_format_quantization_map_properties"
+
+[struct."VkVideoSessionMemoryRequirementsKHR"]
+name = "result::khr::video_session_memory_requirements"
+
 [struct."VkAccelerationStructureBuildGeometryInfoKHR"]
 name = "khr::acceleration_structure_build_geometry"
 [struct."VkAccelerationStructureBuildGeometryInfoKHR".members]
@@ -9243,9 +9981,6 @@ name = "ext::get_acceleration_structure_opaque_capture_descriptor_data"
 [command."vkGetBufferDeviceAddress"]
 name = "get_buffer_device_address"
 
-[command."vkGetBufferMemoryRequirements2"]
-name = "get_buffer_memory_requirements2"
-
 [command."vkGetBufferOpaqueCaptureAddress"]
 name = "get_buffer_opaque_capture_address"
 
@@ -9258,29 +9993,14 @@ name = "nv::get_cluster_acceleration_structure_build_sizes"
 [command."vkGetDataGraphPipelinePropertiesARM"]
 name = "arm::get_data_graph_pipeline_properties"
 
-[command."vkGetDataGraphPipelineSessionMemoryRequirementsARM"]
-name = "arm::get_data_graph_pipeline_session_memory_requirements"
-
 [command."vkGetDescriptorEXT"]
 name = "ext::get_descriptor"
 
 [command."vkGetDescriptorSetLayoutHostMappingInfoVALVE"]
 name = "valve::get_descriptor_set_layout_host_mapping_info"
 
-[command."vkGetDescriptorSetLayoutSupport"]
-name = "get_descriptor_set_layout_support"
-
 [command."vkGetDeviceAccelerationStructureCompatibilityKHR"]
 name = "khr::get_device_acceleration_structure_compatibility"
-
-[command."vkGetDeviceBufferMemoryRequirements"]
-name = "get_device_buffer_memory_requirements"
-
-[command."vkGetDeviceImageMemoryRequirements"]
-name = "get_device_image_memory_requirements"
-
-[command."vkGetDeviceImageSubresourceLayout"]
-name = "get_device_image_subresource_layout"
 
 [command."vkGetDeviceMemoryOpaqueCaptureAddress"]
 name = "get_device_memory_opaque_capture_address"
@@ -9290,9 +10010,6 @@ name = "ext::get_device_micromap_compatibility"
 
 [command."vkGetDeviceQueue2"]
 name = "get_device_queue2"
-
-[command."vkGetDeviceTensorMemoryRequirementsARM"]
-name = "arm::get_device_tensor_memory_requirements"
 
 [command."vkGetDisplayPlaneCapabilities2KHR"]
 name = "khr::get_display_plane_capabilities2"
@@ -9309,20 +10026,8 @@ name = "khr::get_fence_fd"
 [command."vkGetFenceWin32HandleKHR"]
 name = "khr::get_fence_win32_handle"
 
-[command."vkGetGeneratedCommandsMemoryRequirementsEXT"]
-name = "ext::get_generated_commands_memory_requirements"
-
-[command."vkGetGeneratedCommandsMemoryRequirementsNV"]
-name = "nv::get_generated_commands_memory_requirements"
-
-[command."vkGetImageMemoryRequirements2"]
-name = "get_image_memory_requirements2"
-
 [command."vkGetImageOpaqueCaptureDescriptorDataEXT"]
 name = "ext::get_image_opaque_capture_descriptor_data"
-
-[command."vkGetImageSubresourceLayout2"]
-name = "get_image_subresource_layout2"
 
 [command."vkGetImageViewHandle64NVX"]
 name = "nvx::get_image_view_handle64"
@@ -9369,29 +10074,14 @@ name = "get_physical_device_external_semaphore_properties"
 [command."vkGetPhysicalDeviceExternalTensorPropertiesARM"]
 name = "arm::get_physical_device_external_tensor_properties"
 
-[command."vkGetPhysicalDeviceImageFormatProperties2"]
-name = "get_physical_device_image_format_properties2"
-
 [command."vkGetPhysicalDeviceQueueFamilyDataGraphProcessingEnginePropertiesARM"]
 name = "arm::get_physical_device_queue_family_data_graph_processing_engine_properties"
 
 [command."vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR"]
 name = "khr::get_physical_device_queue_family_performance_query_passes"
 
-[command."vkGetPhysicalDeviceSurfaceCapabilities2KHR"]
-name = "khr::get_physical_device_surface_capabilities2"
-
-[command."vkGetPhysicalDeviceVideoCapabilitiesKHR"]
-name = "khr::get_physical_device_video_capabilities"
-
-[command."vkGetPhysicalDeviceVideoEncodeQualityLevelPropertiesKHR"]
-name = "khr::get_physical_device_video_encode_quality_level_properties"
-
 [command."vkGetPipelineIndirectDeviceAddressNV"]
 name = "nv::get_pipeline_indirect_device_address"
-
-[command."vkGetPipelineIndirectMemoryRequirementsNV"]
-name = "nv::get_pipeline_indirect_memory_requirements"
 
 [command."vkGetPipelineKeyKHR"]
 name = "khr::get_pipeline_key"
@@ -9413,9 +10103,6 @@ name = "fuchsia::get_semaphore_zircon_handle"
 
 [command."vkGetShaderModuleCreateInfoIdentifierEXT"]
 name = "ext::get_shader_module_create_info_identifier"
-
-[command."vkGetTensorMemoryRequirementsARM"]
-name = "arm::get_tensor_memory_requirements"
 
 [command."vkGetTensorOpaqueCaptureDescriptorDataARM"]
 name = "arm::get_tensor_opaque_capture_descriptor_data"
@@ -9551,3 +10238,1027 @@ name = "khr::write_acceleration_structures_properties"
 
 [command."vkWriteMicromapsPropertiesEXT"]
 name = "ext::write_micromaps_properties"
+
+[command."vkEnumerateDeviceExtensionProperties"]
+name = "enumerate_device_extension_properties"
+count = "count_device_extension_properties"
+
+[command."vkEnumerateDeviceLayerProperties"]
+name = "enumerate_device_layer_properties"
+count = "count_device_layer_properties"
+
+[command."vkEnumerateInstanceExtensionProperties"]
+name = "enumerate_instance_extension_properties"
+count = "count_instance_extension_properties"
+
+[command."vkEnumerateInstanceLayerProperties"]
+name = "enumerate_instance_layer_properties"
+count = "count_instance_layer_properties"
+
+[command."vkEnumeratePhysicalDeviceGroups"]
+name = "enumerate_physical_device_groups"
+count = "count_physical_device_groups"
+
+[command."vkEnumeratePhysicalDevices"]
+name = "enumerate_physical_devices"
+count = "count_physical_devices"
+
+[command."vkGetCudaModuleCacheNV"]
+name = "nv::get_cuda_module_cache"
+count = "nv::count_cuda_module_cache"
+
+[command."vkGetDataGraphPipelineAvailablePropertiesARM"]
+name = "arm::get_data_graph_pipeline_available_properties"
+count = "arm::count_data_graph_pipeline_available_properties"
+
+[command."vkGetDataGraphPipelineSessionBindPointRequirementsARM"]
+name = "arm::get_data_graph_pipeline_session_bind_point_requirements"
+count = "arm::count_data_graph_pipeline_session_bind_point_requirements"
+
+[command."vkGetDeviceImageSparseMemoryRequirements"]
+name = "get_device_image_sparse_memory_requirements"
+count = "count_device_image_sparse_memory_requirements"
+
+[command."vkGetDisplayModeProperties2KHR"]
+name = "khr::get_display_mode_properties2"
+count = "khr::count_display_mode_properties2"
+
+[command."vkGetDisplayModePropertiesKHR"]
+name = "khr::get_display_mode_properties"
+count = "khr::count_display_mode_properties"
+
+[command."vkGetDisplayPlaneSupportedDisplaysKHR"]
+name = "khr::get_display_plane_supported_displays"
+count = "khr::count_display_plane_supported_displays"
+
+[command."vkGetFramebufferTilePropertiesQCOM"]
+name = "qcom::get_framebuffer_tile_properties"
+count = "qcom::count_framebuffer_tile_properties"
+
+[command."vkGetImageSparseMemoryRequirements"]
+name = "get_image_sparse_memory_requirements"
+count = "count_image_sparse_memory_requirements"
+
+[command."vkGetImageSparseMemoryRequirements2"]
+name = "get_image_sparse_memory_requirements2"
+count = "count_image_sparse_memory_requirements2"
+
+[command."vkGetPastPresentationTimingGOOGLE"]
+name = "google::get_past_presentation_timing"
+count = "google::count_past_presentation_timing"
+
+[command."vkGetPhysicalDeviceCalibrateableTimeDomainsKHR"]
+name = "khr::get_physical_device_calibrateable_time_domains"
+count = "khr::count_physical_device_calibrateable_time_domains"
+
+[command."vkGetPhysicalDeviceCooperativeMatrixFlexibleDimensionsPropertiesNV"]
+name = "nv::get_physical_device_cooperative_matrix_flexible_dimensions_properties"
+count = "nv::count_physical_device_cooperative_matrix_flexible_dimensions_properties"
+
+[command."vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR"]
+name = "khr::get_physical_device_cooperative_matrix_properties"
+count = "khr::count_physical_device_cooperative_matrix_properties"
+
+[command."vkGetPhysicalDeviceCooperativeMatrixPropertiesNV"]
+name = "nv::get_physical_device_cooperative_matrix_properties"
+count = "nv::count_physical_device_cooperative_matrix_properties"
+
+[command."vkGetPhysicalDeviceCooperativeVectorPropertiesNV"]
+name = "nv::get_physical_device_cooperative_vector_properties"
+count = "nv::count_physical_device_cooperative_vector_properties"
+
+[command."vkGetPhysicalDeviceDisplayPlaneProperties2KHR"]
+name = "khr::get_physical_device_display_plane_properties2"
+count = "khr::count_physical_device_display_plane_properties2"
+
+[command."vkGetPhysicalDeviceDisplayPlanePropertiesKHR"]
+name = "khr::get_physical_device_display_plane_properties"
+count = "khr::count_physical_device_display_plane_properties"
+
+[command."vkGetPhysicalDeviceDisplayProperties2KHR"]
+name = "khr::get_physical_device_display_properties2"
+count = "khr::count_physical_device_display_properties2"
+
+[command."vkGetPhysicalDeviceDisplayPropertiesKHR"]
+name = "khr::get_physical_device_display_properties"
+count = "khr::count_physical_device_display_properties"
+
+[command."vkGetPhysicalDeviceFragmentShadingRatesKHR"]
+name = "khr::get_physical_device_fragment_shading_rates"
+count = "khr::count_physical_device_fragment_shading_rates"
+
+[command."vkGetPhysicalDeviceOpticalFlowImageFormatsNV"]
+name = "nv::get_physical_device_optical_flow_image_formats"
+count = "nv::count_physical_device_optical_flow_image_formats"
+
+[command."vkGetPhysicalDevicePresentRectanglesKHR"]
+name = "khr::get_physical_device_present_rectangles"
+count = "khr::count_physical_device_present_rectangles"
+
+[command."vkGetPhysicalDeviceQueueFamilyDataGraphPropertiesARM"]
+name = "arm::get_physical_device_queue_family_data_graph_properties"
+count = "arm::count_physical_device_queue_family_data_graph_properties"
+
+[command."vkGetPhysicalDeviceQueueFamilyProperties"]
+name = "get_physical_device_queue_family_properties"
+count = "count_physical_device_queue_family_properties"
+
+[command."vkGetPhysicalDeviceQueueFamilyProperties2"]
+name = "get_physical_device_queue_family_properties2"
+count = "count_physical_device_queue_family_properties2"
+
+[command."vkGetPhysicalDeviceSparseImageFormatProperties"]
+name = "get_physical_device_sparse_image_format_properties"
+count = "count_physical_device_sparse_image_format_properties"
+
+[command."vkGetPhysicalDeviceSparseImageFormatProperties2"]
+name = "get_physical_device_sparse_image_format_properties2"
+count = "count_physical_device_sparse_image_format_properties2"
+
+[command."vkGetPhysicalDeviceSupportedFramebufferMixedSamplesCombinationsNV"]
+name = "nv::get_physical_device_supported_framebuffer_mixed_samples_combinations"
+count = "nv::count_physical_device_supported_framebuffer_mixed_samples_combinations"
+
+[command."vkGetPhysicalDeviceSurfaceFormats2KHR"]
+name = "khr::get_physical_device_surface_formats2"
+count = "khr::count_physical_device_surface_formats2"
+
+[command."vkGetPhysicalDeviceSurfaceFormatsKHR"]
+name = "khr::get_physical_device_surface_formats"
+count = "khr::count_physical_device_surface_formats"
+
+[command."vkGetPhysicalDeviceSurfacePresentModes2EXT"]
+name = "ext::get_physical_device_surface_present_modes2"
+count = "ext::count_physical_device_surface_present_modes2"
+
+[command."vkGetPhysicalDeviceSurfacePresentModesKHR"]
+name = "khr::get_physical_device_surface_present_modes"
+count = "khr::count_physical_device_surface_present_modes"
+
+[command."vkGetPhysicalDeviceToolProperties"]
+name = "get_physical_device_tool_properties"
+count = "count_physical_device_tool_properties"
+
+[command."vkGetPhysicalDeviceVideoFormatPropertiesKHR"]
+name = "khr::get_physical_device_video_format_properties"
+count = "khr::count_physical_device_video_format_properties"
+
+[command."vkGetPipelineCacheData"]
+name = "get_pipeline_cache_data"
+count = "count_pipeline_cache_data"
+
+[command."vkGetPipelineExecutableInternalRepresentationsKHR"]
+name = "khr::get_pipeline_executable_internal_representations"
+count = "khr::count_pipeline_executable_internal_representations"
+
+[command."vkGetPipelineExecutablePropertiesKHR"]
+name = "khr::get_pipeline_executable_properties"
+count = "khr::count_pipeline_executable_properties"
+
+[command."vkGetPipelineExecutableStatisticsKHR"]
+name = "khr::get_pipeline_executable_statistics"
+count = "khr::count_pipeline_executable_statistics"
+
+[command."vkGetQueueCheckpointData2NV"]
+name = "nv::get_queue_checkpoint_data2"
+count = "nv::count_queue_checkpoint_data2"
+
+[command."vkGetQueueCheckpointDataNV"]
+name = "nv::get_queue_checkpoint_data"
+count = "nv::count_queue_checkpoint_data"
+
+[command."vkGetShaderBinaryDataEXT"]
+name = "ext::get_shader_binary_data"
+count = "ext::count_shader_binary_data"
+
+[command."vkGetShaderInfoAMD"]
+name = "amd::get_shader_info"
+count = "amd::count_shader_info"
+
+[command."vkGetSwapchainImagesKHR"]
+name = "khr::get_swapchain_images"
+count = "khr::count_swapchain_images"
+
+[command."vkGetValidationCacheDataEXT"]
+name = "ext::get_validation_cache_data"
+count = "ext::count_validation_cache_data"
+
+[command."vkGetVideoSessionMemoryRequirementsKHR"]
+name = "khr::get_video_session_memory_requirements"
+count = "khr::count_video_session_memory_requirements"
+
+[command."vkExportMetalObjectsEXT"]
+name = "ext::export_metal_objects"
+
+[command."vkGetAndroidHardwareBufferPropertiesANDROID"]
+name = "android::get_android_hardware_buffer_properties"
+
+[command."vkGetBufferMemoryRequirements2"]
+name = "get_buffer_memory_requirements2"
+
+[command."vkGetDataGraphPipelineSessionMemoryRequirementsARM"]
+name = "arm::get_data_graph_pipeline_session_memory_requirements"
+
+[command."vkGetDescriptorSetLayoutSupport"]
+name = "get_descriptor_set_layout_support"
+
+[command."vkGetDeviceBufferMemoryRequirements"]
+name = "get_device_buffer_memory_requirements"
+
+[command."vkGetDeviceImageMemoryRequirements"]
+name = "get_device_image_memory_requirements"
+
+[command."vkGetDeviceImageSubresourceLayout"]
+name = "get_device_image_subresource_layout"
+
+[command."vkGetDeviceTensorMemoryRequirementsARM"]
+name = "arm::get_device_tensor_memory_requirements"
+
+[command."vkGetGeneratedCommandsMemoryRequirementsEXT"]
+name = "ext::get_generated_commands_memory_requirements"
+
+[command."vkGetGeneratedCommandsMemoryRequirementsNV"]
+name = "nv::get_generated_commands_memory_requirements"
+
+[command."vkGetImageMemoryRequirements2"]
+name = "get_image_memory_requirements2"
+
+[command."vkGetImageSubresourceLayout2"]
+name = "get_image_subresource_layout2"
+
+[command."vkGetPhysicalDeviceFeatures2"]
+name = "get_physical_device_features2"
+
+[command."vkGetPhysicalDeviceFormatProperties2"]
+name = "get_physical_device_format_properties2"
+
+[command."vkGetPhysicalDeviceImageFormatProperties2"]
+name = "get_physical_device_image_format_properties2"
+
+[command."vkGetPhysicalDeviceMemoryProperties2"]
+name = "get_physical_device_memory_properties2"
+
+[command."vkGetPhysicalDeviceProperties2"]
+name = "get_physical_device_properties2"
+
+[command."vkGetPhysicalDeviceSurfaceCapabilities2KHR"]
+name = "khr::get_physical_device_surface_capabilities2"
+
+[command."vkGetPhysicalDeviceVideoCapabilitiesKHR"]
+name = "khr::get_physical_device_video_capabilities"
+
+[command."vkGetPhysicalDeviceVideoEncodeQualityLevelPropertiesKHR"]
+name = "khr::get_physical_device_video_encode_quality_level_properties"
+
+[command."vkGetPipelineIndirectMemoryRequirementsNV"]
+name = "nv::get_pipeline_indirect_memory_requirements"
+
+[command."vkGetScreenBufferPropertiesQNX"]
+name = "qnx::get_screen_buffer_properties"
+
+[command."vkGetTensorMemoryRequirementsARM"]
+name = "arm::get_tensor_memory_requirements"
+
+[alias."VkAttachmentDescription2KHR"]
+name = "khr::attachment_description2"
+
+[alias."VkAttachmentDescriptionStencilLayoutKHR"]
+name = "option::khr::attachment_description_stencil_layout"
+
+[alias."VkAttachmentReference2KHR"]
+name = "khr::attachment_reference2"
+
+[alias."VkAttachmentReferenceStencilLayoutKHR"]
+name = "option::khr::attachment_reference_stencil_layout"
+
+[alias."VkAttachmentSampleCountInfoNV"]
+name = "option::amd::nv::attachment_sample_count"
+
+[alias."VkBindBufferMemoryDeviceGroupInfoKHR"]
+name = "option::khr::bind_buffer_memory_device_group"
+
+[alias."VkBindBufferMemoryInfoKHR"]
+name = "khr::bind_buffer_memory"
+
+[alias."VkBindDescriptorSetsInfoKHR"]
+name = "khr::bind_descriptor_sets"
+
+[alias."VkBindImageMemoryDeviceGroupInfoKHR"]
+name = "option::khr::bind_image_memory_device_group"
+
+[alias."VkBindImageMemoryInfoKHR"]
+name = "khr::bind_image_memory"
+
+[alias."VkBindImagePlaneMemoryInfoKHR"]
+name = "option::khr::bind_image_plane_memory"
+
+[alias."VkBindMemoryStatusKHR"]
+name = "option::khr::bind_memory_status"
+
+[alias."VkBlitImageInfo2KHR"]
+name = "khr::blit_image2"
+
+[alias."VkBufferCopy2KHR"]
+name = "khr::buffer_copy2"
+
+[alias."VkBufferDeviceAddressInfoEXT"]
+name = "ext::buffer_device_address"
+
+[alias."VkBufferDeviceAddressInfoKHR"]
+name = "khr::buffer_device_address"
+
+[alias."VkBufferImageCopy2KHR"]
+name = "khr::buffer_image_copy2"
+
+[alias."VkBufferMemoryBarrier2KHR"]
+name = "khr::buffer_memory_barrier2"
+
+[alias."VkBufferMemoryRequirementsInfo2KHR"]
+name = "khr::buffer_memory_requirements2"
+
+[alias."VkBufferOpaqueCaptureAddressCreateInfoKHR"]
+name = "option::khr::buffer_opaque_capture_address"
+
+[alias."VkBufferUsageFlags2CreateInfoKHR"]
+name = "option::khr::buffer_usage_flags2"
+
+[alias."VkCalibratedTimestampInfoEXT"]
+name = "khr::ext::calibrated_timestamp"
+
+[alias."VkCommandBufferInheritanceRenderingInfoKHR"]
+name = "option::khr::command_buffer_inheritance_rendering"
+
+[alias."VkCommandBufferSubmitInfoKHR"]
+name = "khr::command_buffer_submit"
+
+[alias."VkCopyBufferInfo2KHR"]
+name = "khr::copy_buffer2"
+
+[alias."VkCopyBufferToImageInfo2KHR"]
+name = "khr::copy_buffer_to_image2"
+
+[alias."VkCopyImageInfo2KHR"]
+name = "khr::copy_image2"
+
+[alias."VkCopyImageToBufferInfo2KHR"]
+name = "khr::copy_image_to_buffer2"
+
+[alias."VkCopyImageToImageInfoEXT"]
+name = "ext::copy_image_to_image"
+
+[alias."VkCopyImageToMemoryInfoEXT"]
+name = "ext::copy_image_to_memory"
+
+[alias."VkCopyMemoryToImageInfoEXT"]
+name = "ext::copy_memory_to_image"
+
+[alias."VkDependencyInfoKHR"]
+name = "khr::dependency"
+
+[alias."VkDescriptorPoolInlineUniformBlockCreateInfoEXT"]
+name = "option::ext::descriptor_pool_inline_uniform_block"
+
+[alias."VkDescriptorSetLayoutBindingFlagsCreateInfoEXT"]
+name = "option::ext::descriptor_set_layout_binding_flags"
+
+[alias."VkDescriptorSetLayoutSupportKHR"]
+name = "result::khr::descriptor_set_layout_support"
+
+[alias."VkDescriptorSetVariableDescriptorCountAllocateInfoEXT"]
+name = "option::ext::descriptor_set_variable_descriptor_count"
+
+[alias."VkDescriptorSetVariableDescriptorCountLayoutSupportEXT"]
+name = "result::ext::descriptor_set_variable_descriptor_count_layout_support"
+
+[alias."VkDescriptorUpdateTemplateCreateInfoKHR"]
+name = "khr::descriptor_update_template"
+
+[alias."VkDescriptorUpdateTemplateEntryKHR"]
+name = "khr::descriptor_update_template_entry"
+
+[alias."VkDeviceBufferMemoryRequirementsKHR"]
+name = "khr::device_buffer_memory_requirements"
+
+[alias."VkDeviceGroupBindSparseInfoKHR"]
+name = "option::khr::device_group_bind_sparse"
+
+[alias."VkDeviceGroupCommandBufferBeginInfoKHR"]
+name = "option::khr::device_group_command_buffer_begin"
+
+[alias."VkDeviceGroupDeviceCreateInfoKHR"]
+name = "option::khr::device_group"
+
+[alias."VkDeviceGroupRenderPassBeginInfoKHR"]
+name = "option::khr::device_group_render_pass_begin"
+
+[alias."VkDeviceGroupSubmitInfoKHR"]
+name = "option::khr::device_group_submit"
+
+[alias."VkDeviceImageMemoryRequirementsKHR"]
+name = "khr::device_image_memory_requirements"
+
+[alias."VkDeviceImageSubresourceInfoKHR"]
+name = "khr::device_image_subresource"
+
+[alias."VkDeviceMemoryOpaqueCaptureAddressInfoKHR"]
+name = "khr::device_memory_opaque_capture_address"
+
+[alias."VkDevicePrivateDataCreateInfoEXT"]
+name = "option::ext::device_private_data"
+
+[alias."VkDeviceQueueGlobalPriorityCreateInfoEXT"]
+name = "option::ext::device_queue_global_priority"
+
+[alias."VkDeviceQueueGlobalPriorityCreateInfoKHR"]
+name = "option::khr::device_queue_global_priority"
+
+[alias."VkExportFenceCreateInfoKHR"]
+name = "option::khr::export_fence"
+
+[alias."VkExportMemoryAllocateInfoKHR"]
+name = "option::khr::export_memory"
+
+[alias."VkExportSemaphoreCreateInfoKHR"]
+name = "option::khr::export_semaphore"
+
+[alias."VkExternalBufferPropertiesKHR"]
+name = "result::khr::external_buffer_properties"
+
+[alias."VkExternalFencePropertiesKHR"]
+name = "result::khr::external_fence_properties"
+
+[alias."VkExternalImageFormatPropertiesKHR"]
+name = "result::khr::external_image_format_properties"
+
+[alias."VkExternalMemoryBufferCreateInfoKHR"]
+name = "option::khr::external_memory_buffer"
+
+[alias."VkExternalMemoryImageCreateInfoKHR"]
+name = "option::khr::external_memory_image"
+
+[alias."VkExternalSemaphorePropertiesKHR"]
+name = "result::khr::external_semaphore_properties"
+
+[alias."VkFormatProperties2KHR"]
+name = "result::khr::format_properties2"
+
+[alias."VkFormatProperties3KHR"]
+name = "result::khr::format_properties3"
+
+[alias."VkFramebufferAttachmentImageInfoKHR"]
+name = "khr::framebuffer_attachment_image"
+
+[alias."VkFramebufferAttachmentsCreateInfoKHR"]
+name = "option::khr::framebuffer_attachments"
+
+[alias."VkHostImageCopyDevicePerformanceQueryEXT"]
+name = "result::ext::host_image_copy_device_performance_query"
+
+[alias."VkHostImageLayoutTransitionInfoEXT"]
+name = "ext::host_image_layout_transition"
+
+[alias."VkImageBlit2KHR"]
+name = "khr::image_blit2"
+
+[alias."VkImageCopy2KHR"]
+name = "khr::image_copy2"
+
+[alias."VkImageFormatListCreateInfoKHR"]
+name = "option::khr::image_format_list"
+
+[alias."VkImageFormatProperties2KHR"]
+name = "result::khr::image_format_properties2"
+
+[alias."VkImageMemoryBarrier2KHR"]
+name = "khr::image_memory_barrier2"
+
+[alias."VkImageMemoryRequirementsInfo2KHR"]
+name = "khr::image_memory_requirements2"
+
+[alias."VkImagePlaneMemoryRequirementsInfoKHR"]
+name = "option::khr::image_plane_memory_requirements"
+
+[alias."VkImageResolve2KHR"]
+name = "khr::image_resolve2"
+
+[alias."VkImageSparseMemoryRequirementsInfo2KHR"]
+name = "khr::image_sparse_memory_requirements2"
+
+[alias."VkImageStencilUsageCreateInfoEXT"]
+name = "option::ext::image_stencil_usage"
+
+[alias."VkImageSubresource2EXT"]
+name = "ext::image_subresource2"
+
+[alias."VkImageSubresource2KHR"]
+name = "khr::image_subresource2"
+
+[alias."VkImageToMemoryCopyEXT"]
+name = "ext::image_to_memory_copy"
+
+[alias."VkImageViewUsageCreateInfoKHR"]
+name = "option::khr::image_view_usage"
+
+[alias."VkInputAttachmentAspectReferenceKHR"]
+name = "khr::input_attachment_aspect_reference"
+
+[alias."VkMemoryAllocateFlagsInfoKHR"]
+name = "option::khr::memory_allocate_flags"
+
+[alias."VkMemoryBarrier2KHR"]
+name = "khr::memory_barrier2"
+
+[alias."VkMemoryDedicatedAllocateInfoKHR"]
+name = "option::khr::memory_dedicated"
+
+[alias."VkMemoryDedicatedRequirementsKHR"]
+name = "result::khr::memory_dedicated_requirements"
+
+[alias."VkMemoryMapInfoKHR"]
+name = "khr::memory_map"
+
+[alias."VkMemoryOpaqueCaptureAddressAllocateInfoKHR"]
+name = "option::khr::memory_opaque_capture_address"
+
+[alias."VkMemoryRequirements2KHR"]
+name = "result::khr::memory_requirements2"
+
+[alias."VkMemoryToImageCopyEXT"]
+name = "ext::memory_to_image_copy"
+
+[alias."VkMemoryUnmapInfoKHR"]
+name = "khr::memory_unmap"
+
+[alias."VkMutableDescriptorTypeCreateInfoVALVE"]
+name = "option::ext::valve::mutable_descriptor_type"
+
+[alias."VkMutableDescriptorTypeListVALVE"]
+name = "ext::valve::mutable_descriptor_type_list"
+
+[alias."VkPhysicalDevice16BitStorageFeaturesKHR"]
+name = "feature::khr::storage_16bit"
+
+[alias."VkPhysicalDevice8BitStorageFeaturesKHR"]
+name = "feature::khr::storage_8bit"
+
+[alias."VkPhysicalDeviceBufferAddressFeaturesEXT"]
+name = "feature::ext::ext::buffer_device_address"
+
+[alias."VkPhysicalDeviceBufferDeviceAddressFeaturesKHR"]
+name = "feature::khr::buffer_device_address"
+
+[alias."VkPhysicalDeviceComputeShaderDerivativesFeaturesNV"]
+name = "feature::khr::nv::compute_shader_derivatives"
+
+[alias."VkPhysicalDeviceCopyMemoryIndirectPropertiesNV"]
+name = "property::khr::nv::copy_memory_indirect"
+
+[alias."VkPhysicalDeviceDepthClampZeroOneFeaturesEXT"]
+name = "feature::khr::ext::depth_clamp_zero_one"
+
+[alias."VkPhysicalDeviceDepthStencilResolvePropertiesKHR"]
+name = "property::khr::depth_stencil_resolve"
+
+[alias."VkPhysicalDeviceDescriptorIndexingFeaturesEXT"]
+name = "feature::ext::descriptor_indexing"
+
+[alias."VkPhysicalDeviceDescriptorIndexingPropertiesEXT"]
+name = "property::ext::descriptor_indexing"
+
+[alias."VkPhysicalDeviceDriverPropertiesKHR"]
+name = "property::khr::driver"
+
+[alias."VkPhysicalDeviceDynamicRenderingFeaturesKHR"]
+name = "feature::khr::dynamic_rendering"
+
+[alias."VkPhysicalDeviceDynamicRenderingLocalReadFeaturesKHR"]
+name = "feature::khr::dynamic_rendering_local_read"
+
+[alias."VkPhysicalDeviceExternalBufferInfoKHR"]
+name = "khr::physical_device_external_buffer"
+
+[alias."VkPhysicalDeviceExternalFenceInfoKHR"]
+name = "khr::physical_device_external_fence"
+
+[alias."VkPhysicalDeviceExternalImageFormatInfoKHR"]
+name = "option::khr::physical_device_external_image_format"
+
+[alias."VkPhysicalDeviceExternalSemaphoreInfoKHR"]
+name = "khr::physical_device_external_semaphore"
+
+[alias."VkPhysicalDeviceFeatures2KHR"]
+name = "feature::khr::core"
+
+[alias."VkPhysicalDeviceFloat16Int8FeaturesKHR"]
+name = "feature::khr::shader_float16_int8"
+
+[alias."VkPhysicalDeviceFloatControlsPropertiesKHR"]
+name = "property::khr::float_controls"
+
+[alias."VkPhysicalDeviceFragmentDensityMapOffsetFeaturesQCOM"]
+name = "feature::ext::qcom::fragment_density_map_offset"
+
+[alias."VkPhysicalDeviceFragmentDensityMapOffsetPropertiesQCOM"]
+name = "property::ext::qcom::fragment_density_map_offset"
+
+[alias."VkPhysicalDeviceFragmentShaderBarycentricFeaturesNV"]
+name = "feature::khr::nv::fragment_shader_barycentric"
+
+[alias."VkPhysicalDeviceGlobalPriorityQueryFeaturesEXT"]
+name = "feature::ext::global_priority_query"
+
+[alias."VkPhysicalDeviceGlobalPriorityQueryFeaturesKHR"]
+name = "feature::khr::global_priority_query"
+
+[alias."VkPhysicalDeviceGroupPropertiesKHR"]
+name = "property::khr::group"
+
+[alias."VkPhysicalDeviceHostImageCopyFeaturesEXT"]
+name = "feature::ext::host_image_copy"
+
+[alias."VkPhysicalDeviceHostImageCopyPropertiesEXT"]
+name = "property::ext::host_image_copy"
+
+[alias."VkPhysicalDeviceHostQueryResetFeaturesEXT"]
+name = "feature::ext::host_query_reset"
+
+[alias."VkPhysicalDeviceIDPropertiesKHR"]
+name = "property::khr::id"
+
+[alias."VkPhysicalDeviceImageFormatInfo2KHR"]
+name = "khr::physical_device_image_format2"
+
+[alias."VkPhysicalDeviceImageRobustnessFeaturesEXT"]
+name = "feature::ext::image_robustness"
+
+[alias."VkPhysicalDeviceImagelessFramebufferFeaturesKHR"]
+name = "feature::khr::imageless_framebuffer"
+
+[alias."VkPhysicalDeviceIndexTypeUint8FeaturesEXT"]
+name = "feature::ext::index_type_uint8"
+
+[alias."VkPhysicalDeviceIndexTypeUint8FeaturesKHR"]
+name = "feature::khr::index_type_uint8"
+
+[alias."VkPhysicalDeviceInlineUniformBlockFeaturesEXT"]
+name = "feature::ext::inline_uniform_block"
+
+[alias."VkPhysicalDeviceInlineUniformBlockPropertiesEXT"]
+name = "property::ext::inline_uniform_block"
+
+[alias."VkPhysicalDeviceLineRasterizationFeaturesEXT"]
+name = "feature::ext::line_rasterization"
+
+[alias."VkPhysicalDeviceLineRasterizationFeaturesKHR"]
+name = "feature::khr::line_rasterization"
+
+[alias."VkPhysicalDeviceLineRasterizationPropertiesEXT"]
+name = "property::ext::line_rasterization"
+
+[alias."VkPhysicalDeviceLineRasterizationPropertiesKHR"]
+name = "property::khr::line_rasterization"
+
+[alias."VkPhysicalDeviceMaintenance3PropertiesKHR"]
+name = "property::khr::maintenance3"
+
+[alias."VkPhysicalDeviceMaintenance4FeaturesKHR"]
+name = "feature::khr::maintenance4"
+
+[alias."VkPhysicalDeviceMaintenance4PropertiesKHR"]
+name = "property::khr::maintenance4"
+
+[alias."VkPhysicalDeviceMaintenance5FeaturesKHR"]
+name = "feature::khr::maintenance5"
+
+[alias."VkPhysicalDeviceMaintenance5PropertiesKHR"]
+name = "property::khr::maintenance5"
+
+[alias."VkPhysicalDeviceMaintenance6FeaturesKHR"]
+name = "feature::khr::maintenance6"
+
+[alias."VkPhysicalDeviceMaintenance6PropertiesKHR"]
+name = "property::khr::maintenance6"
+
+[alias."VkPhysicalDeviceMemoryProperties2KHR"]
+name = "property::khr::memory2"
+
+[alias."VkPhysicalDeviceMultiviewFeaturesKHR"]
+name = "feature::khr::multiview"
+
+[alias."VkPhysicalDeviceMultiviewPropertiesKHR"]
+name = "property::khr::multiview"
+
+[alias."VkPhysicalDeviceMutableDescriptorTypeFeaturesVALVE"]
+name = "feature::ext::valve::mutable_descriptor_type"
+
+[alias."VkPhysicalDevicePipelineCreationCacheControlFeaturesEXT"]
+name = "feature::ext::pipeline_creation_cache_control"
+
+[alias."VkPhysicalDevicePipelineProtectedAccessFeaturesEXT"]
+name = "feature::ext::pipeline_protected_access"
+
+[alias."VkPhysicalDevicePipelineRobustnessFeaturesEXT"]
+name = "feature::ext::pipeline_robustness"
+
+[alias."VkPhysicalDevicePipelineRobustnessPropertiesEXT"]
+name = "property::ext::pipeline_robustness"
+
+[alias."VkPhysicalDevicePointClippingPropertiesKHR"]
+name = "property::khr::point_clipping"
+
+[alias."VkPhysicalDevicePresentModeFifoLatestReadyFeaturesEXT"]
+name = "feature::khr::ext::present_mode_fifo_latest_ready"
+
+[alias."VkPhysicalDevicePrivateDataFeaturesEXT"]
+name = "feature::ext::private_data"
+
+[alias."VkPhysicalDeviceProperties2KHR"]
+name = "property::khr::core"
+
+[alias."VkPhysicalDevicePushDescriptorPropertiesKHR"]
+name = "property::khr::push_descriptor"
+
+[alias."VkPhysicalDeviceRasterizationOrderAttachmentAccessFeaturesARM"]
+name = "feature::ext::arm::rasterization_order_attachment_access"
+
+[alias."VkPhysicalDeviceRobustness2FeaturesEXT"]
+name = "feature::khr::ext::robustness2"
+
+[alias."VkPhysicalDeviceRobustness2PropertiesEXT"]
+name = "property::khr::ext::robustness2"
+
+[alias."VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT"]
+name = "property::ext::sampler_filter_minmax"
+
+[alias."VkPhysicalDeviceSamplerYcbcrConversionFeaturesKHR"]
+name = "feature::khr::sampler_ycbcr_conversion"
+
+[alias."VkPhysicalDeviceScalarBlockLayoutFeaturesEXT"]
+name = "feature::ext::scalar_block_layout"
+
+[alias."VkPhysicalDeviceSeparateDepthStencilLayoutsFeaturesKHR"]
+name = "feature::khr::separate_depth_stencil_layouts"
+
+[alias."VkPhysicalDeviceShaderAtomicInt64FeaturesKHR"]
+name = "feature::khr::shader_atomic_int64"
+
+[alias."VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT"]
+name = "feature::ext::shader_demote_to_helper_invocation"
+
+[alias."VkPhysicalDeviceShaderExpectAssumeFeaturesKHR"]
+name = "feature::khr::shader_expect_assume"
+
+[alias."VkPhysicalDeviceShaderFloatControls2FeaturesKHR"]
+name = "feature::khr::shader_float_controls2"
+
+[alias."VkPhysicalDeviceShaderIntegerDotProductFeaturesKHR"]
+name = "feature::khr::shader_integer_dot_product"
+
+[alias."VkPhysicalDeviceShaderIntegerDotProductPropertiesKHR"]
+name = "property::khr::shader_integer_dot_product"
+
+[alias."VkPhysicalDeviceShaderSubgroupExtendedTypesFeaturesKHR"]
+name = "feature::khr::shader_subgroup_extended_types"
+
+[alias."VkPhysicalDeviceShaderSubgroupRotateFeaturesKHR"]
+name = "feature::khr::shader_subgroup_rotate"
+
+[alias."VkPhysicalDeviceShaderTerminateInvocationFeaturesKHR"]
+name = "feature::khr::shader_terminate_invocation"
+
+[alias."VkPhysicalDeviceSparseImageFormatInfo2KHR"]
+name = "khr::physical_device_sparse_image_format2"
+
+[alias."VkPhysicalDeviceSubgroupSizeControlFeaturesEXT"]
+name = "feature::ext::subgroup_size_control"
+
+[alias."VkPhysicalDeviceSubgroupSizeControlPropertiesEXT"]
+name = "property::ext::subgroup_size_control"
+
+[alias."VkPhysicalDeviceSwapchainMaintenance1FeaturesEXT"]
+name = "feature::khr::ext::swapchain_maintenance1"
+
+[alias."VkPhysicalDeviceSynchronization2FeaturesKHR"]
+name = "feature::khr::synchronization2"
+
+[alias."VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT"]
+name = "property::ext::texel_buffer_alignment"
+
+[alias."VkPhysicalDeviceTextureCompressionASTCHDRFeaturesEXT"]
+name = "feature::ext::texture_compression_astc_hdr"
+
+[alias."VkPhysicalDeviceTimelineSemaphoreFeaturesKHR"]
+name = "feature::khr::timeline_semaphore"
+
+[alias."VkPhysicalDeviceTimelineSemaphorePropertiesKHR"]
+name = "property::khr::timeline_semaphore"
+
+[alias."VkPhysicalDeviceToolPropertiesEXT"]
+name = "property::ext::tool"
+
+[alias."VkPhysicalDeviceUniformBufferStandardLayoutFeaturesKHR"]
+name = "feature::khr::uniform_buffer_standard_layout"
+
+[alias."VkPhysicalDeviceVariablePointerFeaturesKHR"]
+name = "feature::khr::variable_pointers"
+
+[alias."VkPhysicalDeviceVertexAttributeDivisorFeaturesEXT"]
+name = "feature::ext::vertex_attribute_divisor"
+
+[alias."VkPhysicalDeviceVertexAttributeDivisorFeaturesKHR"]
+name = "feature::khr::vertex_attribute_divisor"
+
+[alias."VkPhysicalDeviceVertexAttributeDivisorPropertiesKHR"]
+name = "property::khr::vertex_attribute_divisor"
+
+[alias."VkPhysicalDeviceVulkanMemoryModelFeaturesKHR"]
+name = "feature::khr::vulkan_memory_model"
+
+[alias."VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR"]
+name = "feature::khr::zero_initialize_workgroup_memory"
+
+[alias."VkPipelineCreateFlags2CreateInfoKHR"]
+name = "option::khr::pipeline_create_flags2"
+
+[alias."VkPipelineCreationFeedbackCreateInfoEXT"]
+name = "option::ext::pipeline_creation_feedback"
+
+[alias."VkPipelineCreationFeedbackEXT"]
+name = "ext::pipeline_creation_feedback"
+
+[alias."VkPipelineInfoEXT"]
+name = "khr::ext::pipeline"
+
+[alias."VkPipelineRasterizationLineStateCreateInfoEXT"]
+name = "state::ext::rasterization_line"
+
+[alias."VkPipelineRasterizationLineStateCreateInfoKHR"]
+name = "state::khr::rasterization_line"
+
+[alias."VkPipelineRenderingCreateInfoKHR"]
+name = "option::khr::pipeline_rendering"
+
+[alias."VkPipelineRobustnessCreateInfoEXT"]
+name = "state::ext::robustness"
+
+[alias."VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT"]
+name = "state::ext::shader_stage_required_subgroup_size"
+
+[alias."VkPipelineTessellationDomainOriginStateCreateInfoKHR"]
+name = "state::khr::tessellation_domain_origin"
+
+[alias."VkPipelineVertexInputDivisorStateCreateInfoEXT"]
+name = "state::ext::vertex_input_divisor"
+
+[alias."VkPipelineVertexInputDivisorStateCreateInfoKHR"]
+name = "state::khr::vertex_input_divisor"
+
+[alias."VkPrivateDataSlotCreateInfoEXT"]
+name = "ext::private_data_slot"
+
+[alias."VkPushConstantsInfoKHR"]
+name = "khr::push_constants"
+
+[alias."VkPushDescriptorSetInfoKHR"]
+name = "khr::push_descriptor_set"
+
+[alias."VkPushDescriptorSetWithTemplateInfoKHR"]
+name = "khr::push_descriptor_set_with_template"
+
+[alias."VkQueryPoolCreateInfoINTEL"]
+name = "option::intel::intel::query_pool_performance"
+
+[alias."VkQueueFamilyGlobalPriorityPropertiesEXT"]
+name = "result::ext::queue_family_global_priority_properties"
+
+[alias."VkQueueFamilyGlobalPriorityPropertiesKHR"]
+name = "result::khr::queue_family_global_priority_properties"
+
+[alias."VkQueueFamilyProperties2KHR"]
+name = "result::khr::queue_family_properties2"
+
+[alias."VkReleaseSwapchainImagesInfoEXT"]
+name = "khr::ext::release_swapchain_images"
+
+[alias."VkRenderPassAttachmentBeginInfoKHR"]
+name = "option::khr::render_pass_attachment_begin"
+
+[alias."VkRenderPassCreateInfo2KHR"]
+name = "khr::render_pass2"
+
+[alias."VkRenderPassInputAttachmentAspectCreateInfoKHR"]
+name = "option::khr::render_pass_input_attachment_aspect"
+
+[alias."VkRenderPassMultiviewCreateInfoKHR"]
+name = "option::khr::render_pass_multiview"
+
+[alias."VkRenderingAreaInfoKHR"]
+name = "khr::rendering_area"
+
+[alias."VkRenderingAttachmentInfoKHR"]
+name = "khr::rendering_attachment"
+
+[alias."VkRenderingAttachmentLocationInfoKHR"]
+name = "khr::rendering_attachment_location"
+
+[alias."VkRenderingInfoKHR"]
+name = "khr::rendering"
+
+[alias."VkRenderingInputAttachmentIndexInfoKHR"]
+name = "khr::rendering_input_attachment_index"
+
+[alias."VkResolveImageInfo2KHR"]
+name = "khr::resolve_image2"
+
+[alias."VkSamplerReductionModeCreateInfoEXT"]
+name = "option::ext::sampler_reduction_mode"
+
+[alias."VkSamplerYcbcrConversionCreateInfoKHR"]
+name = "khr::sampler_ycbcr_conversion"
+
+[alias."VkSamplerYcbcrConversionImageFormatPropertiesKHR"]
+name = "result::khr::sampler_ycbcr_conversion_image_format_properties"
+
+[alias."VkSamplerYcbcrConversionInfoKHR"]
+name = "option::khr::ycbcr_conversion"
+
+[alias."VkSemaphoreSignalInfoKHR"]
+name = "khr::semaphore_signal"
+
+[alias."VkSemaphoreSubmitInfoKHR"]
+name = "khr::semaphore_submit"
+
+[alias."VkSemaphoreTypeCreateInfoKHR"]
+name = "option::khr::semaphore_type"
+
+[alias."VkSemaphoreWaitInfoKHR"]
+name = "khr::semaphore_wait"
+
+[alias."VkSparseImageFormatProperties2KHR"]
+name = "result::khr::sparse_image_format_properties2"
+
+[alias."VkSparseImageMemoryRequirements2KHR"]
+name = "result::khr::sparse_image_memory_requirements2"
+
+[alias."VkSubmitInfo2KHR"]
+name = "khr::submit2"
+
+[alias."VkSubpassBeginInfoKHR"]
+name = "khr::subpass_begin"
+
+[alias."VkSubpassDependency2KHR"]
+name = "khr::subpass_dependency2"
+
+[alias."VkSubpassDescription2KHR"]
+name = "khr::subpass_description2"
+
+[alias."VkSubpassDescriptionDepthStencilResolveKHR"]
+name = "option::khr::subpass_description_depth_stencil_resolve"
+
+[alias."VkSubpassEndInfoKHR"]
+name = "khr::subpass_end"
+
+[alias."VkSubpassFragmentDensityMapOffsetEndInfoQCOM"]
+name = "option::ext::qcom::render_pass_fragment_density_map_offset_end"
+
+[alias."VkSubresourceHostMemcpySizeEXT"]
+name = "result::ext::subresource_host_memcpy_size"
+
+[alias."VkSubresourceLayout2EXT"]
+name = "result::ext::subresource_layout2"
+
+[alias."VkSubresourceLayout2KHR"]
+name = "result::khr::subresource_layout2"
+
+[alias."VkSurfacePresentModeCompatibilityEXT"]
+name = "result::khr::ext::surface_present_mode_compatibility"
+
+[alias."VkSurfacePresentModeEXT"]
+name = "option::khr::ext::surface_present_mode"
+
+[alias."VkSurfacePresentScalingCapabilitiesEXT"]
+name = "result::khr::ext::surface_present_scaling_capabilities"
+
+[alias."VkSwapchainPresentFenceInfoEXT"]
+name = "option::khr::ext::swapchain_present_fence"
+
+[alias."VkSwapchainPresentModeInfoEXT"]
+name = "option::khr::ext::swapchain_present_mode"
+
+[alias."VkSwapchainPresentModesCreateInfoEXT"]
+name = "option::khr::ext::swapchain_present_modes"
+
+[alias."VkSwapchainPresentScalingCreateInfoEXT"]
+name = "option::khr::ext::swapchain_present_scaling"
+
+[alias."VkTimelineSemaphoreSubmitInfoKHR"]
+name = "option::khr::timeline_semaphore_submit"
+
+[alias."VkVertexInputBindingDivisorDescriptionEXT"]
+name = "ext::vertex_input_binding_divisor_description"
+
+[alias."VkVertexInputBindingDivisorDescriptionKHR"]
+name = "khr::vertex_input_binding_divisor_description"
+
+[alias."VkWriteDescriptorSetInlineUniformBlockEXT"]
+name = "option::ext::write_descriptor_set_inline_uniform_block"

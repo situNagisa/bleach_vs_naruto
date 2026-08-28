@@ -12,10 +12,11 @@ import collections
 import dataclasses
 import re
 import json
+import pathlib
 import sys
 import tomllib
 
-from . import emit, ir, naming, producers
+from . import check, emit, ir, naming, producers
 
 
 NEWLINE = chr(10)
@@ -66,8 +67,25 @@ def _suggest(registry: ir.Registry, table: naming.Table) -> tuple[str, dict[str,
 		| frozenset(registry.plain)
 	) - states
 	objects = naming.suggest_object_names(
-		list(registry.closure) + list(registry.plain), frozenset(registry.roots), states, members, author_tags
+		list(registry.closure) + list(registry.plain) + list(registry.query_closure),
+		frozenset(registry.roots),
+		states,
+		members,
+		author_tags,
+		frozenset(registry.query_closure),
 	)
+
+	for name in registry.query_closure:
+		if table.struct_name(name) is not None:
+			continue
+		suggestion = objects[name]
+		stats["structs"] += 1
+		lines.append(f"[struct.{_quote(name)}]")
+		if suggestion.reviews:
+			stats["review"] += 1
+			lines.append(f"# REVIEW({','.join(suggestion.reviews)})")
+		lines.append(f'name = "{suggestion.value}"')
+		lines.append("")
 
 	for name in list(registry.closure) + list(registry.plain):
 		struct = registry.structs[name]
@@ -268,18 +286,30 @@ def _rebuild(registry: ir.Registry, overrides_path: str) -> tuple[str, dict[str,
 		| frozenset(registry.plain)
 	) - states
 	named_objects = list(registry.closure) + list(registry.plain)
+	# Query objects need a name so a chain can refer to them, but no field names:
+	# a vkGet* fills them in, so there is no param to declare.
+	all_objects = named_objects + list(registry.query_closure)
 	proposed = naming.suggest_object_names(
-		named_objects, frozenset(registry.roots), states, members, author_tags
+		all_objects,
+		frozenset(registry.roots),
+		states,
+		members,
+		author_tags,
+		frozenset(registry.query_closure),
 	)
 
 	objects: dict[str, str] = {}
-	for name in named_objects:
+	for name in all_objects:
 		namespace, _, leaf = proposed[name].value.rpartition("::")
 		leaf = struct_leaves.get(name, leaf)
 		objects[name] = f"{namespace}::{leaf}" if namespace else leaf
 
 	stats = {"structs": len(objects), "members": 0, "bits": 0, "enums": 0, "values": 0, "commands": 0}
 	lines = [TABLE_HEADER]
+	for name in sorted(registry.query_closure):
+		lines.append(f"[struct.{_quote(name)}]")
+		lines.append(f'name = "{objects[name]}"')
+		lines.append("")
 	for name in sorted(named_objects):
 		lines.append(f"[struct.{_quote(name)}]")
 		lines.append(f'name = "{objects[name]}"')
@@ -330,15 +360,41 @@ def _rebuild(registry: ir.Registry, overrides_path: str) -> tuple[str, dict[str,
 			stats["values"] += 1
 		lines.append("")
 
-	for command in list(registry.producers) + list(registry.wrappers):
+	for command in list(registry.producers) + list(registry.wrappers) + list(registry.queries) + list(registry.chain_queries):
 		proposed_name, proposed_singular = naming.suggest_command_name(command.name, author_tags)
+		chosen = command_names.get(command.name, proposed_name)
 		lines.append(f"[command.{_quote(command.name)}]")
-		lines.append(f'name = "{command_names.get(command.name, proposed_name)}"')
+		lines.append(f'name = "{chosen}"')
 		if isinstance(command, ir.Command) and producers.shape_of(command) == "array":
 			key = f"{command.name}.singular"
 			lines.append(f'singular = "{command_names.get(key, proposed_singular)}"')
+		if isinstance(command, ir.Query):
+			# The count twin. Same words, different verb.
+			key = f"{command.name}.count"
+			lines.append(f'count = "{command_names.get(key, naming.suggest_count_name(chosen))}"')
 		lines.append("")
 		stats["commands"] = stats.get("commands", 0) + 1
+
+	# Aliases last, because their names are derived from the objects above and a
+	# collision with a real object means the alias is the one that has to move.
+	alias_names = overrides.get("alias") or {}
+	claimed = set(objects.values())
+	for alias in registry.aliases:
+		target = objects.get(alias.target)
+		if target is None:
+			continue
+		proposed = naming.suggest_alias_name(alias.name, target, author_tags)
+		chosen = alias_names.get(alias.name, proposed)
+		if not chosen:
+			continue
+		if chosen in claimed:
+			stats["alias_collisions"] = stats.get("alias_collisions", 0) + 1
+			continue
+		claimed.add(chosen)
+		lines.append(f"[alias.{_quote(alias.name)}]")
+		lines.append(f'name = "{chosen}"')
+		lines.append("")
+		stats["aliases"] = stats.get("aliases", 0) + 1
 
 	unused = (
 		{key for key in struct_leaves if key not in registry.structs}
@@ -349,13 +405,60 @@ def _rebuild(registry: ir.Registry, overrides_path: str) -> tuple[str, dict[str,
 	return NEWLINE.join(lines), stats
 
 
+def _report(
+	problems: list[check.Problem], label: str, limit: int = 40, verbose: bool = False
+) -> int:
+	"""Print the mechanical findings. Errors are fatal, warnings are not.
+
+	Errors are always listed, because every one of them has to be dealt with.
+	Warnings are legal code a human already looked at once, so they are counted
+	rather than repeated on every run.
+	"""
+	errors, warnings = check.summarise(problems)
+	shown = [p for p in problems if verbose or p.severity == "error"]
+	for problem in shown[:limit]:
+		print(f"  {problem}", file=sys.stderr)
+	if len(shown) > limit:
+		print(f"  ... and {len(shown) - limit} more", file=sys.stderr)
+	if warnings and not verbose:
+		print(f"  ({warnings} warning(s) suppressed; pass --verbose to see them)", file=sys.stderr)
+	print(f"{label}: {errors} error(s), {warnings} warning(s)", file=sys.stderr if errors else sys.stdout)
+	return 1 if errors else 0
+
+
 def main(argv: list[str] | None = None) -> int:
 	parser = argparse.ArgumentParser(prog="vkfu_gen")
-	parser.add_argument("command", choices=["dump-ir", "suggest", "promote", "rebuild", "gen"])
+	parser.add_argument("command", choices=["dump-ir", "suggest", "promote", "rebuild", "check", "gen"])
 	parser.add_argument("--xml", default="vk.xml")
 	parser.add_argument("--table", default="naming.toml")
 	parser.add_argument("--overrides", default="naming.overrides.toml")
 	parser.add_argument("--out")
+	parser.add_argument(
+		"--verbose",
+		action="store_true",
+		help="list warnings as well as errors",
+	)
+	parser.add_argument(
+		"--include-prefix",
+		default=None,
+		help="how the generated headers reach the vkfu core headers; defaults to the in-tree layout",
+	)
+	parser.add_argument(
+		"--split",
+		action="store_true",
+		help="write one header per section plus an umbrella, instead of a single file",
+	)
+	parser.add_argument(
+		"--core",
+		type=int,
+		default=None,
+		help="highest Vulkan 1.x minor version to generate for; omit for every version vk.xml declares",
+	)
+	parser.add_argument(
+		"--extensions",
+		default=None,
+		help="comma-separated extension names to include; omit for all of them, pass an empty string for none",
+	)
 	parser.add_argument(
 		"--scope",
 		choices=["table", "closure"],
@@ -364,7 +467,15 @@ def main(argv: list[str] | None = None) -> int:
 	)
 	arguments = parser.parse_args(argv)
 
-	registry = ir.load(arguments.xml)
+	profile = ir.Profile(
+		core=arguments.core,
+		extensions=(
+			None
+			if arguments.extensions is None
+			else frozenset(filter(None, arguments.extensions.split(",")))
+		),
+	)
+	registry = ir.load(arguments.xml, profile=profile)
 
 	if arguments.command == "dump-ir":
 		payload = json.dumps(dataclasses.asdict(registry), indent="\t", sort_keys=True)
@@ -387,10 +498,25 @@ def main(argv: list[str] | None = None) -> int:
 		print(
 			f"{arguments.table}: rebuilt {stats['structs']} objects, {stats['members']} fields, "
 			f"{stats['bits']} flag bits, {stats['enums']} enums, {stats['values']} enumerators, "
-			f"{stats['commands']} commands"
+			f"{stats['commands']} commands, {stats.get('aliases', 0)} aliases"
+			+ (f"; {stats['alias_collisions']} alias(es) skipped for colliding" if stats.get("alias_collisions") else "")
 			+ (f"; {stats['stale']} stale override(s)" if stats.get("stale") else "")
 		)
-		return 0
+		# A rebuild that produced an unusable table should say so now, not when
+		# somebody eventually tries to compile the header.
+		return _report(
+			check.check(registry, naming.load_table(arguments.table), arguments.scope),
+			arguments.table,
+			verbose=arguments.verbose,
+		)
+
+	if arguments.command == "check":
+		return _report(
+			check.check(registry, naming.load_table(arguments.table), arguments.scope),
+			arguments.table,
+			limit=200,
+			verbose=arguments.verbose,
+		)
 
 	if arguments.command == "promote":
 		text, stats = _promote(arguments.table, arguments.out or "naming.suggested.toml")
@@ -415,10 +541,30 @@ def main(argv: list[str] | None = None) -> int:
 			f"{stats['bits']} flag bits, {stats['enums']} enums, {stats['values']} enumerators "
 			f"still unnamed; {stats['review']} entries tagged REVIEW"
 		)
-		return 0
+		# Check what a promote would produce, so a bad suggestion is caught here
+		# rather than after it has been folded in.
+		merged = naming.load_table(arguments.table)
+		proposed = naming.load_table(destination)
+		merged.structs.update(proposed.structs)
+		for owner, fields in proposed.members.items():
+			merged.members.setdefault(owner, {}).update(fields)
+		for owner, entries in proposed.bits.items():
+			merged.bits.setdefault(owner, {}).update(entries)
+		merged.enums.update(proposed.enums)
+		for owner, entries in proposed.values.items():
+			merged.values.setdefault(owner, {}).update(entries)
+		return _report(check.check(registry, merged, "table"), destination, verbose=arguments.verbose)
 
 	try:
-		text, warnings = emit.generate(registry, table, arguments.scope)
+		stem = pathlib.Path(arguments.out or "generated").stem
+		if arguments.split:
+			prefix = arguments.include_prefix or "../../"
+			files, warnings = emit.generate_split(registry, table, arguments.scope, stem, prefix)
+			text = None
+		else:
+			text, warnings = emit.generate(
+				registry, table, arguments.scope, arguments.include_prefix or "../"
+			)
 	except emit.GenerationError as error:
 		print(f"generation failed: {len(error.missing)} missing name(s), {len(error.problems)} problem(s)", file=sys.stderr)
 		for entry in error.missing[:40]:
@@ -436,10 +582,24 @@ def main(argv: list[str] | None = None) -> int:
 	named = sum(1 for name in registry.closure if table.struct_name(name))
 	unnamed = len(registry.closure) - named
 	destination = arguments.out or "-"
+	if text is None:
+		# The umbrella keeps the single-file path working; the parts live in a
+		# directory beside it, named after it.
+		root = pathlib.Path(destination).parent
+		(root / stem).mkdir(parents=True, exist_ok=True)
+		for name, body in sorted(files.items()):
+			target = root / name if name.endswith(f"{stem}.h") else root / stem / name
+			with open(target, "w", encoding="utf-8", newline=NEWLINE) as stream:
+				stream.write(body)
+		print(
+			f"{destination}: {len(files)} file(s), "
+			+ ", ".join(f"{name} {body.count(NEWLINE)} lines" for name, body in sorted(files.items()))
+		)
+		return 0
 	if destination == "-":
 		print(text)
 	else:
-		with open(destination, "w", encoding="utf-8", newline="\n") as stream:
+		with open(destination, "w", encoding="utf-8", newline=NEWLINE) as stream:
 			stream.write(text)
 	print(f"{destination}: {named} object(s) generated, {unnamed} of {len(registry.closure)} still unnamed")
 	return 0

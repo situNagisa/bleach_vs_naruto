@@ -236,6 +236,25 @@ def render(command: ir.Wrapper, table: Table) -> list[str]:
 	return lines
 
 
+def _forwarded_names(arguments: list[ir.Argument]) -> list[str]:
+	"""Call arguments for the throwing overload, forwarding the expressions."""
+	names: list[str] = []
+	index = 0
+	for argument in arguments:
+		if argument.kind == "out":
+			continue
+		if argument.kind == "allocator":
+			names.append("allocation_callbacks")
+			continue
+		name = _identifier(argument.member)
+		if argument.kind == "info":
+			index += 1
+			names.append(f"::std::forward<Expression{index}>({name})")
+		else:
+			names.append(name)
+	return names
+
+
 def _parameter_names(command: ir.Wrapper) -> list[str]:
 	names: list[str] = []
 	for argument in command.arguments:

@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+A hand-written registry in vk.xml's shape, small enough to reason about and wide
+enough to cover every construct the generator has a branch for:
+
+  * a create-info root with flags, an enum member, a folded count+pointer pair,
+    a single-pointer slot and an array of another sType structure;
+  * a pNext extension (structextends) and a duplicatable one;
+  * an sType-less member structure, which gets a param and nothing else;
+  * a returnedonly query root plus something that extends it;
+  * one producer, one span command, one two-call enumerate, one chain query;
+  * a platform-guarded structure and command;
+  * a promoted type whose old name lives on an extension, for provenance.
+-->
+<registry>
+	<platforms>
+		<platform name="win32" protect="VK_USE_PLATFORM_WIN32_KHR"/>
+	</platforms>
+
+	<tags>
+		<tag name="KHR"/>
+		<tag name="EXT"/>
+	</tags>
+
+	<types>
+		<type category="define">#define <name>VK_HEADER_VERSION</name> 42</type>
+
+		<type category="handle"><type>VK_DEFINE_HANDLE</type>(<name>VkDevice</name>)</type>
+		<type category="handle"><type>VK_DEFINE_HANDLE</type>(<name>VkWidget</name>)</type>
+		<type category="handle"><type>VK_DEFINE_HANDLE</type>(<name>VkRecorder</name>)</type>
+
+		<type category="bitmask" requires="VkWidgetFlagBits">typedef <type>VkFlags</type> <name>VkWidgetFlags</name>;</type>
+
+		<type category="struct" name="VkAllocationCallbacks">
+			<member><type>void</type>* <name>pUserData</name></member>
+		</type>
+
+		<!-- The root: every field kind at once. -->
+		<type category="struct" name="VkWidgetCreateInfo">
+			<member values="VK_STRUCTURE_TYPE_WIDGET_CREATE_INFO"><type>VkStructureType</type> <name>sType</name></member>
+			<member optional="true">const <type>void</type>* <name>pNext</name></member>
+			<member><type>VkWidgetFlags</type> <name>flags</name></member>
+			<member><type>VkWidgetMode</type> <name>mode</name></member>
+			<member><type>VkBool32</type> <name>enableTracing</name></member>
+			<member><type>uint32_t</type> <name>partCount</name></member>
+			<member len="partCount">const <type>VkWidgetPart</type>* <name>pParts</name></member>
+			<member optional="true">const <type>VkWidgetTuning</type>* <name>pTuning</name></member>
+			<member><type>VkExtent</type> <name>extent</name></member>
+			<member><type>float</type> <name>weights</name>[4]</member>
+		</type>
+
+		<!-- An array element: its own sType, so it becomes a span of natives. -->
+		<type category="struct" name="VkWidgetPart">
+			<member values="VK_STRUCTURE_TYPE_WIDGET_PART"><type>VkStructureType</type> <name>sType</name></member>
+			<member optional="true">const <type>void</type>* <name>pNext</name></member>
+			<member><type>uint32_t</type> <name>index</name></member>
+		</type>
+
+		<!-- A pointer slot: one const pointer to an sType structure. -->
+		<type category="struct" name="VkWidgetTuning">
+			<member values="VK_STRUCTURE_TYPE_WIDGET_TUNING"><type>VkStructureType</type> <name>sType</name></member>
+			<member optional="true">const <type>void</type>* <name>pNext</name></member>
+			<member><type>float</type> <name>bias</name></member>
+		</type>
+
+		<!-- No sType: a param, but not a chain node. -->
+		<type category="struct" name="VkExtent">
+			<member><type>uint32_t</type> <name>width</name></member>
+			<member><type>uint32_t</type> <name>height</name></member>
+		</type>
+
+		<!-- pNext extensions. -->
+		<type category="struct" name="VkWidgetColourInfoEXT" structextends="VkWidgetCreateInfo">
+			<member values="VK_STRUCTURE_TYPE_WIDGET_COLOUR_INFO_EXT"><type>VkStructureType</type> <name>sType</name></member>
+			<member optional="true">const <type>void</type>* <name>pNext</name></member>
+			<member><type>VkWidgetMode</type> <name>fallbackMode</name></member>
+		</type>
+
+		<type category="struct" name="VkWidgetLabelInfoKHR" structextends="VkWidgetCreateInfo" allowduplicate="true">
+			<member values="VK_STRUCTURE_TYPE_WIDGET_LABEL_INFO_KHR"><type>VkStructureType</type> <name>sType</name></member>
+			<member optional="true">const <type>void</type>* <name>pNext</name></member>
+			<member><type>uint32_t</type> <name>tag</name></member>
+		</type>
+
+		<!-- Promoted: core 1.1 has this name, the extension has the old one. -->
+		<type category="struct" name="VkWidgetLimits" structextends="VkWidgetCreateInfo">
+			<member values="VK_STRUCTURE_TYPE_WIDGET_LIMITS"><type>VkStructureType</type> <name>sType</name></member>
+			<member optional="true">const <type>void</type>* <name>pNext</name></member>
+			<member><type>uint32_t</type> <name>maxParts</name></member>
+		</type>
+		<type category="struct" name="VkWidgetLimitsKHR" alias="VkWidgetLimits"/>
+
+		<!-- Platform-guarded. -->
+		<type category="struct" name="VkWidgetWin32InfoKHR" structextends="VkWidgetCreateInfo">
+			<member values="VK_STRUCTURE_TYPE_WIDGET_WIN32_INFO_KHR"><type>VkStructureType</type> <name>sType</name></member>
+			<member optional="true">const <type>void</type>* <name>pNext</name></member>
+			<member><type>void</type>* <name>handle</name></member>
+		</type>
+
+		<!-- Query side: written by a command, so no param. -->
+		<type category="struct" name="VkWidgetProperties" returnedonly="true">
+			<member values="VK_STRUCTURE_TYPE_WIDGET_PROPERTIES"><type>VkStructureType</type> <name>sType</name></member>
+			<member optional="true"><type>void</type>* <name>pNext</name></member>
+			<member><type>uint32_t</type> <name>revision</name></member>
+		</type>
+
+		<type category="struct" name="VkWidgetDriverPropertiesEXT" returnedonly="true" structextends="VkWidgetProperties">
+			<member values="VK_STRUCTURE_TYPE_WIDGET_DRIVER_PROPERTIES_EXT"><type>VkStructureType</type> <name>sType</name></member>
+			<member optional="true"><type>void</type>* <name>pNext</name></member>
+			<member><type>uint32_t</type> <name>driverVersion</name></member>
+		</type>
+
+		<!-- The element of a two-call enumerate. -->
+		<type category="struct" name="VkWidgetReport">
+			<member><type>uint32_t</type> <name>code</name></member>
+		</type>
+	</types>
+
+	<enums name="VkWidgetMode" type="enum">
+		<enum value="0" name="VK_WIDGET_MODE_PLAIN"/>
+		<enum value="1" name="VK_WIDGET_MODE_FANCY"/>
+	</enums>
+
+	<enums name="VkWidgetFlagBits" type="bitmask">
+		<enum bitpos="0" name="VK_WIDGET_ALPHA_BIT"/>
+		<!-- A gap at bit 1, so the emitted bit-field needs a reserved run. -->
+		<enum bitpos="2" name="VK_WIDGET_GAMMA_BIT"/>
+		<!-- value rather than bitpos: not a bit-field position. -->
+		<enum value="0" name="VK_WIDGET_NONE"/>
+	</enums>
+
+	<commands>
+		<command successcodes="VK_SUCCESS">
+			<proto><type>VkResult</type> <name>vkCreateWidget</name></proto>
+			<param><type>VkDevice</type> <name>device</name></param>
+			<param>const <type>VkWidgetCreateInfo</type>* <name>pCreateInfo</name></param>
+			<param optional="true">const <type>VkAllocationCallbacks</type>* <name>pAllocator</name></param>
+			<param><type>VkWidget</type>* <name>pWidget</name></param>
+		</command>
+
+		<command>
+			<proto><type>void</type> <name>vkCmdSubmitParts</name></proto>
+			<param><type>VkRecorder</type> <name>recorder</name></param>
+			<param><type>uint32_t</type> <name>partCount</name></param>
+			<param len="partCount">const <type>VkWidgetPart</type>* <name>pParts</name></param>
+		</command>
+
+		<command successcodes="VK_SUCCESS,VK_INCOMPLETE">
+			<proto><type>VkResult</type> <name>vkEnumerateWidgetReports</name></proto>
+			<param><type>VkDevice</type> <name>device</name></param>
+			<param><type>uint32_t</type>* <name>pReportCount</name></param>
+			<param optional="true" len="pReportCount"><type>VkWidgetReport</type>* <name>pReports</name></param>
+		</command>
+
+		<command>
+			<proto><type>void</type> <name>vkGetWidgetProperties</name></proto>
+			<param><type>VkDevice</type> <name>device</name></param>
+			<param><type>VkWidgetProperties</type>* <name>pProperties</name></param>
+		</command>
+
+		<command>
+			<proto><type>void</type> <name>vkCmdSetWin32Widget</name></proto>
+			<param><type>VkRecorder</type> <name>recorder</name></param>
+			<param>const <type>VkWidgetWin32InfoKHR</type>* <name>pInfo</name></param>
+		</command>
+	</commands>
+
+	<feature api="vulkan" name="VK_VERSION_1_0" number="1.0">
+		<require>
+			<type name="VkAllocationCallbacks"/>
+			<type name="VkWidgetCreateInfo"/>
+			<type name="VkWidgetPart"/>
+			<type name="VkWidgetTuning"/>
+			<type name="VkExtent"/>
+			<type name="VkWidgetProperties"/>
+			<type name="VkWidgetReport"/>
+			<type name="VkWidgetMode"/>
+			<type name="VkWidgetFlags"/>
+			<type name="VkWidgetFlagBits"/>
+			<command name="vkCreateWidget"/>
+			<command name="vkCmdSubmitParts"/>
+			<command name="vkEnumerateWidgetReports"/>
+			<command name="vkGetWidgetProperties"/>
+		</require>
+	</feature>
+
+	<feature api="vulkan" name="VK_VERSION_1_1" number="1.1">
+		<require>
+			<type name="VkWidgetLimits"/>
+		</require>
+	</feature>
+
+	<extensions>
+		<extension name="VK_EXT_widget_colour" number="1" type="device" supported="vulkan">
+			<require>
+				<type name="VkWidgetColourInfoEXT"/>
+				<type name="VkWidgetDriverPropertiesEXT"/>
+			</require>
+		</extension>
+
+		<extension name="VK_KHR_widget_label" number="2" type="device" supported="vulkan">
+			<require>
+				<type name="VkWidgetLabelInfoKHR"/>
+			</require>
+		</extension>
+
+		<extension name="VK_KHR_widget_limits" number="3" type="device" supported="vulkan">
+			<require>
+				<type name="VkWidgetLimitsKHR"/>
+			</require>
+		</extension>
+
+		<extension name="VK_KHR_widget_win32" number="4" type="instance" supported="vulkan" platform="win32">
+			<require>
+				<type name="VkWidgetWin32InfoKHR"/>
+				<command name="vkCmdSetWin32Widget"/>
+			</require>
+		</extension>
+	</extensions>
+</registry>

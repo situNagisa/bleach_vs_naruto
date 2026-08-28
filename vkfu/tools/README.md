@@ -39,8 +39,8 @@ const 指针参数且其结构体有 `sType` 成员——`pAllocator` 因此自�
 带 `sType` 结构体（**表达式槽**），以及带 `len` 的数组元素类型（有自己的 param，但仍是
 native 的 span——span 是借用，父级无法拥有元素）。
 
-v1.4.328 下是 **257 个 root / 834 个链式对象 / 69 个无 sType 的 param / 318 个命令包装**，
-外加 41 个表达式槽和 55 个数组元素类型，全部已命名。
+v1.4.328 下是 **257 个 root / 834 个链式对象 / 69 个无 sType 的 param / 246 个只读的查询对象 /
+377 个命令包装**，外加 41 个表达式槽和 55 个数组元素类型，全部已命名。
 `param::command_buffer_begin`、`param::rendering`、`param::dependency`、`param::submit2`、
 `param::present`、`param::memory`、`param::image_memory_barrier2` 都在里面，所以命令录制和
 内存分配那一侧也不用再手写 `sType`。
@@ -128,6 +128,44 @@ static_assert(::std::same_as<
 - 定制点是 ADL 的 `_vkfu_chain(branch, features...)`，与 `_vkfu_address` 等同一套约定。
 - `chain(branch)` 就是 branch 本身，和对空包折叠 `|` 一致。
 
+## 已提升类型的旧名字
+
+162 个类型被核心提升过，vk.xml 把扩展记在**旧名字**上。旧代码按旧名字写，所以两个都发：
+
+```cpp
+param::feature::timeline_semaphore        // 核心名，1.2 起
+param::feature::khr::timeline_semaphore   // 同一个类型，一个命名空间深
+```
+
+别名的名字**进命名表**（`[alias."VkXxxKHR"] name = "..."`），和其它名字一样是人工权威。带
+表达式槽的目标（6 个）发的是别名模板，槽的默认值原样带过去。撞名时真结构体赢、别名跳过并
+计数——v1.4.328 下有 3 个，全都是别名撞别名（同一个结构体的两种旧拼法）。
+
+## 机械性检查：`vkfu_gen check`
+
+命名表里的低级错误不该等编译器来说。这些全部只靠表和 IR 就能判定，`rebuild` 和 `suggest`
+跑完自动执行一次，也可以单独跑：
+
+```bash
+python -m vkfu_gen check --xml vk.xml --table naming.toml --scope closure
+```
+
+| 类别 | 抓什么 |
+|---|---|
+| `empty` | 空名字，或者 `feature::` 这种没有叶子的（匿名 struct） |
+| `invalid` | 不是 C++ 标识符，比如 `property::2` |
+| `keyword` | C++ 关键字 |
+| `reserved` | 含 `__` 或 `_大写` 开头——保留给实现，程序是 ill-formed 的 |
+| `duplicate` | 两个对象/字段/位/枚举量/命令抢一个名字 |
+| `scope` | 字段撞上它自己生成的 `<字段>_type`、`<字段>_expression` 或固定别名 |
+| `namespace` | 同一个名字既是类又是命名空间（硬错误，只有两条都在了才显形） |
+| `shadow` | 命令名盖住 `vkfu` 里已有的 CPO |
+| `missing` / `orphan` | 在范围内却没有条目 / 有条目却不在范围内 |
+
+写完当天就抓到一个真的：`VkPhysicalDeviceProperties2` 按属性族剥下来叶子是 `"2"`，
+不能当标识符开头。同一个坑 `VkPhysicalDeviceFeatures2` 早就踩过，当时是拿人工 override
+盖掉的——检查器让它变成算法里的一条规则（族名兜底）而不是一条个案。
+
 ## 命令包装：不止 create
 
 677 个 vulkan 命令里 **318 个值得包装**，判据是"有东西可换"：吃调用方填的结构体（换成表达式），
@@ -149,6 +187,75 @@ vkfu::queue_submit2(queue, ::std::span{&submit, 1u}, fence);
 
 **参数名**是 vk.xml 的名字去掉匈牙利前缀后 snake 化。它们不是可调用 API 的一部分
 （C++ 没有具名实参），所以是唯一不走命名表的一类名字。
+
+## 读侧：枚举和查询链
+
+写侧的镜像，**不分配**——生成的头里没有 `<vector>`。52 个两段式枚举各给三种形态：
+
+```cpp
+auto const count = vkfu::count_physical_devices(instance);        // 先问有多少
+auto buffer = ::std::array<VkPhysicalDevice, 8>{};
+auto const devices = vkfu::enumerate_physical_devices(instance, buffer);   // 写进你的存储，返回写了多少
+
+vkfu::enumerate_physical_devices(instance, out_iterator);         // ranges::copy 的形状和契约
+```
+
+span 形态一次调用就够（`count` 是 in-out），`VK_INCOMPLETE` **不是错误**——它说"你的 span
+满了，还有更多"，返回写进去的那一截；想知道有没有截断就先问 `count_*`。元素带 sType 的会
+先盖好章。
+
+迭代器形态要 **`contiguous_iterator` 而不是 `output_iterator`**：驱动是通过裸指针写的，所以
+必须有指针可给，`back_insert_iterator` 编不过。边界契约和 `std::ranges::copy` 一样——调用方
+保证有地方放。`void* pData` 那种不透明块是 `std::span<std::byte>`。
+
+**24 个命令的唯一 out 参数是个能被 pNext 扩展的 sType 结构体**，它们变成查询链——调用方只说
+形状，wrapper 负责持有、串 pNext、盖 sType：
+
+```cpp
+auto props = vkfu::get_physical_device_properties2<
+    obj::property::driver, obj::property::id>(physical_device);
+
+props.head().properties.limits.maxImageDimension2D;
+props.get<obj::property::driver>().driverName;
+```
+
+约束用的是**写侧那套 structextends 边**：不扩展 `VkPhysicalDeviceProperties2` 的东西编译期
+就被拒，重复命名同一个也被拒（那会让链指向自己）。
+
+读侧的字段是 native 名字，这是故意的：查询结果是拿来读的，spec 上写的就是这些名字。所以
+`property::*` / `result::*` 只有 tag、trait 和 pNext 钩子，**没有 param**——246 个结构体只进
+命名表的对象名，不进 2554 个字段名里。
+
+## 需要开哪些扩展，从表达式里推出来
+
+vk.xml 记了每个类型由谁提供，所以不用记：
+
+```cpp
+auto chain = param::device{} | param::feature::core{} | param::feature::ext::mesh_shader{};
+constexpr auto needed = vkfu::required_extensions<VK_API_VERSION_1_1>(chain);
+// {"VK_EXT_mesh_shader"} —— device 和 feature::core 在 1.1 是 core，不贡献
+```
+
+`core` 是把它提升进核心的版本（没提升过就是 0），`names` 是提供它的扩展。**要跟着别名走**：
+vk.xml 把 `VK_KHR_create_renderpass2` 记在 `VkAttachmentDescription2KHR` 上而不是核心名上，
+不跟别名的话 162 个已提升类型会看起来一个扩展都不需要。
+
+`ApiVersion` 默认 1.0（每个实现都有），所以答案永远不会偏乐观；调高它，已提升的对象就从
+列表里掉出去。
+
+**槽是独立的链，但槽里的东西照样要开扩展**，所以链的遍历会递归进 `reference_storage` 的
+槽——只走 pNext 会漏掉挂在槽里的结构体。
+
+**Vulkan 有两张扩展表，链决定不了往哪张放**。这不是能检查出来的错误，是常态：
+`VkDeviceGroupDeviceCreateInfo` 挂在 `VkDeviceCreateInfo` 上，但 `VK_KHR_device_group_creation`
+是个 **instance** 扩展；`VkPhysicalDeviceFeatures2` 也一样（`VK_KHR_get_physical_device_properties2`）。
+所以不禁止混用，而是分开问：
+
+```cpp
+auto chain = param::device{} | param::option::device_group{} | param::feature::ext::mesh_shader{};
+vkfu::required_instance_extensions<VK_API_VERSION_1_0>(chain);  // {"VK_KHR_device_group_creation"}
+vkfu::required_device_extensions<VK_API_VERSION_1_0>(chain);    // {"VK_EXT_mesh_shader"}
+```
 
 ## create 系列
 
@@ -364,8 +471,12 @@ clang 没有位域上的 constexpr `bit_cast`、位名跨厂商撞名导致位�
 - 枚举的 span/数组保持 native 元素类型（见上）。
 - 引擎侧 `include/bvn/graphics/vulkan_renderer.h` 和 `source/client/context.h` 还在用
   vk-bootstrap，所以 `vcpkg.json` 里的依赖没有摘掉。demo 已经不用它了。
-- `vkGet*` 的两段式枚举（57 个命令）与查询侧读取都还没做。
-- 生成的头 60k 行；按族拆分或按 feature/extension 子集化还没做。
+- 查询链只能读 native 字段名，没有读侧的 snake 化 param。这是取舍：246 个结构体的 1027 个
+  字段进命名表，换来的收益不明显。
+- 重复检查是**逐层**的，这是完整的：表达式槽持有的是一条独立的 pNext 链，不是父链的延续，
+  所以"跨层重复"按规范本来就合法。全树扁平化检查的代价（`|` 折叠时每步重查前缀）不值得放进
+  默认路径；真要验证就在需要的地方写一次。
+- 表达式槽和 `reference.h` 还在等 review。
 - 本机没有编译器和 Vulkan 头，生成结果尚未编译验证（已做标识符回查与结构自检）。
 - 一个 count 被多个指针共用时（如 `VkWriteDescriptorSet`）不折叠成 span，
   保留 count + 裸指针。

@@ -11,6 +11,7 @@
 [struct]
 # Leaf started with a digit, or was nothing but a version number.
 VkPhysicalDeviceFeatures2 = "core"                       # holds the 1.0 features and heads the chain
+VkPhysicalDeviceProperties2 = "core"                     # the read-side counterpart, heads a query chain
 VkPhysicalDeviceFeatures = "vulkan10"                    # the 1.0 set itself, parallel to feature::vulkan13
 VkPhysicalDevice16BitStorageFeatures = "storage_16bit"
 VkPhysicalDevice8BitStorageFeatures = "storage_8bit"
