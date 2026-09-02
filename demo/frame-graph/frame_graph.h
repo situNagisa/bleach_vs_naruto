@@ -16,8 +16,11 @@
 ///     `renderer&`，通过它的 `_job_slot` 取到"本帧的 renderer job"。
 ///     于是插件能进来，而依赖关系不退化成字符串 / tag 查表。
 ///
-///  3. **两阶段**。`frame` 构造时先让每个 entity 生成本帧 job（阶段 A），
-///     `frame::run` 才向每个 job 要根节点（阶段 B）。阶段 A 全部做完才进阶段 B，
+///  3. **两阶段，且控制权在 entity 手上**。main 递过去的是 `frame_context`
+///     （调度器、帧号、取消令牌、帧根汇合点），entity 自己 `context.add(sender)`
+///     把节点挂进去——job 的契约是 `build()`，**不返回节点**。
+///     `frame` 构造时先让每个 entity 生成本帧 job（阶段 A），
+///     `frame::run` 才逐个 `build()`（阶段 B）。阶段 A 全部做完才进阶段 B，
 ///     所以阶段 B 里任何 job 都能拿到任何别的 job，**注册顺序无关**。
 ///     唯一约定：job 的构造函数里不许访问别的 job。
 ///
@@ -553,6 +556,18 @@ struct frame_context
 	/// 令牌），而取消由各个**干活的节点**自己用 `cancellable` 从帧上下文取。
 	::stdexec::inplace_stop_token _stop_token;
 
+	/// 本帧的根汇合点。**entity 自己往里挂**，main 不去问它要根节点。
+	node_roster* _roots = nullptr;
+
+	/// 把一条根节点挂进本帧。
+	///
+	/// 挂几条、挂不挂，由 entity 自己决定——它可以一条不挂（本帧无事可做），
+	/// 也可以挂好几条。控制权在 entity 手上，main 只负责把这个环境递过来。
+	auto add(node_sender node) const -> void
+	{
+		_roots->add(::std::move(node));
+	}
+
 	auto request_quit() const noexcept -> void
 	{
 		_quit->store(true, ::std::memory_order_relaxed);
@@ -571,11 +586,14 @@ template <class sender_type>
 		::stdexec::prop{::stdexec::get_stop_token, context._stop_token});
 }
 
-/// 一个 job 只需要能交出本帧的根节点。
+/// 一个 job 只需要能"把自己挂进本帧"。
+///
+/// 注意它**不返回**节点：交出根节点是"main 来拿"，挂进去才是"entity 自己放"。
+/// 挂几条、挂不挂、挂到哪个汇合点（帧根 / render 的录制名单）都由 job 自己决定。
 template <class job_type>
 concept frame_job = requires (job_type& job)
 {
-	{ job.frame_node() } -> ::std::same_as<node_sender>;
+	{ job.build() } -> ::std::same_as<void>;
 };
 
 /// 一个 entity 只需要能生成本帧的 job。
@@ -633,8 +651,8 @@ struct basic_entity_slot
 
 	/// 阶段 A：生成本帧 job。此时别的 job 可能还不存在，不许访问它们。
 	virtual auto begin_frame(frame_context const& context) -> void = 0;
-	/// 阶段 B：交出本帧的根节点。此时所有 job 都已就位。
-	[[nodiscard]] virtual auto frame_node() -> node_sender = 0;
+	/// 阶段 B：把自己挂进本帧。此时所有 job 都已就位。
+	virtual auto build() -> void = 0;
 	virtual auto end_frame() noexcept -> void = 0;
 	[[nodiscard]] virtual auto entity_address() const noexcept -> void const* = 0;
 };
@@ -661,9 +679,9 @@ struct entity_slot final : basic_entity_slot
 		}
 	}
 
-	[[nodiscard]] auto frame_node() -> node_sender override
+	auto build() -> void override
 	{
-		return _job.get().frame_node();
+		_job.get().build();
 	}
 
 	auto end_frame() noexcept -> void override
@@ -749,7 +767,8 @@ struct world
 			._index = _frame_index,
 			._delta_seconds = _delta_seconds,
 			._quit = &_quit,
-			._stop_token = {},  // 由 `frame` 的构造函数填上本帧的取消源。
+			._stop_token = {},  // 这两条由 `frame` 的构造函数填：
+			._roots = nullptr,  // 取消源和根汇合点都是帧own的，world 手里没有。
 		};
 	}
 
@@ -780,6 +799,10 @@ struct frame
 	/// 否则 `split` 会在订阅侧短路，fence 的清理就没了。
 	::stdexec::inplace_stop_source _structural_source;
 
+	/// 本帧的根汇合点。跟 render 的录制名单是同一种东西——**同一套 PUSH 机制**，
+	/// 只是层级不同：entity 挂到这里，录制者挂到 render 的名单上。
+	node_roster _roots;
+
 	frame_context _context;
 
 	explicit frame(world& target)
@@ -787,6 +810,7 @@ struct frame
 		, _context(target.context())
 	{
 		_context._stop_token = _stop_source.get_token();
+		_context._roots = &_roots;
 
 		for (auto&& slot : _world->_slots)
 		{
@@ -859,12 +883,13 @@ struct frame
 	/// 有了它才能测"上层取消整帧时 fence 仍然执行"。
 	auto run(::stdexec::inplace_stop_token stop_token = {}) -> bool
 	{
-		auto roots = ::std::vector<node_sender>{};
-		roots.reserve(_world->_slots.size());
+		// 阶段 B：每个 entity 自己往 `_roots` 挂。main 不问、不收、不排序。
 		for (auto&& slot : _world->_slots)
 		{
-			roots.push_back(slot->frame_node());
+			slot->build();
 		}
+
+		auto roots = _roots.seal();
 
 		// 外部取消转发进本帧的取消源。已经停止的令牌在这里注册即刻回调，
 		// 于是图还没启动就已经是"取消态"了。

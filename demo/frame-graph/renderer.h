@@ -232,9 +232,10 @@ struct renderer
 			});
 		}
 
-		[[nodiscard]] auto frame_node() -> node_sender
+		auto build() -> void
 		{
-			return fence_node();
+			// renderer 挂的就是自己的帧末等 fence。
+			_context.add(fence_node());
 		}
 	};
 

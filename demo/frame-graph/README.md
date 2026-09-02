@@ -25,10 +25,16 @@
 | 补丁 | 干什么 |
 | --- | --- |
 | `node_ref` | 具名共享节点的备忘格。第一次 `get` 建图并套 `split`，之后都是订阅 |
-| `node_roster` | 启动期才读取的动态汇合点。构建期往里挂，谁先挂谁后挂无所谓 |
+| `node_roster` | 动态汇合点。构建期往里挂，谁先挂谁后挂无所谓。帧根一个，render 的录制名单一个 |
 | `when_all_range` | 元素个数运行期才知道的扇入 |
 
-**两阶段。** `frame` 构造时先让每个 entity 生成本帧 job（阶段 A），`frame::run` 才向每个 job 要根节点
+**控制权在 entity 手上。** main 递过去的是 `frame_context`（调度器、帧号、取消令牌、帧根汇合点），
+entity 自己调 `context.add(sender)` 把节点挂进去——job 的契约是 `build()`，**不返回节点**。
+于是"挂几条 / 挂不挂 / 挂到哪个汇合点"全是 entity 的决定：纯计算 entity 挂一条到帧根，
+跟 render 同步的 entity 再多挂一条到 render 的录制名单，本帧被剔除就一条都不挂。
+main 里没有任何 `if (is_renderer)`，也没有"收集所有 xxx"。
+
+**两阶段。** `frame` 构造时先让每个 entity 生成本帧 job（阶段 A），`frame::run` 才逐个 `build()`
 （阶段 B）。阶段 A 全部做完才进阶段 B，所以阶段 B 里任何 job 都能拿到任何别的 job——
 **注册顺序无关**（场景 1）。唯一约定：**job 的构造函数里不许访问别的 job**。
 

@@ -7,6 +7,9 @@
 图就是 sender 表达式。扇出 = `split`，扇入 = `when_all`，先后 = 嵌套。
 框架只补三样 stdexec 没有的：**备忘格**、**动态汇合点**、**运行期扇入**。
 
+**控制权在 entity 手上**：main 递环境，entity 自己往图里挂 sender。
+不是 main 去问每个 entity 要根节点。
+
 ## 1. 边
 
 ```
@@ -50,7 +53,17 @@ node_roster:
     seal():  sealed = true;  return move(nodes)
 ```
 
-分界线由 `let_value` 免费给出：
+**同一套机制用在两个层级**：帧根一个，render 的录制名单一个。
+
+```
+frame_context:            # main 递给 entity 的全部东西
+    scheduler, index, delta, quit
+    stop_token            # 见 §5
+    roots: node_roster*   # 帧根汇合点
+    add(n) -> roots->add(n)
+```
+
+render 的名单还多一条"启动期才封"的分界线，由 `let_value` 免费给出：
 
 ```
 end_node = split(
@@ -126,16 +139,23 @@ fence_node = split(
 少任何一条 ⇒ slot 的 GPU 资源没人回收。`continues_on` 只搬 value 这条路，
 error / stopped 直接在出事的线程上跑。
 
-## 7. entity 侧：同步靠自己，main 不特判
+## 7. entity 侧：自己挂，同步靠自己，main 不特判
+
+job 的唯一契约是 `build()`——**不返回节点**，自己往汇合点挂。
+挂几条、挂不挂、挂到哪个汇合点，全由它决定。
 
 ```
-compute_entity.frame_node():
-    return make_node(cancellable(starts_on(sched, just()) | then(step), ctx))
+compute_entity.build():
+    ctx.add(make_node(cancellable(starts_on(sched, just()) | then(step), ctx)))
 
-render_entity.frame_node():
+render_entity.build():
     render = renderer_job_slot.get()          # 阶段 B：具体类型直连
-    if visible: render.recorders().add(record_node(render))     # 条件性参与
-    return make_node(render.fence_node() | then(cleanup))       # 帧末清理
+    if visible:                               # 条件性参与：不挂就是不参与
+        render.recorders().add(record_node(render))     # 挂到 render 的名单
+    ctx.add(make_node(render.fence_node() | then(cleanup)))   # 挂到帧根
+
+renderer.build():
+    ctx.add(fence_node())
 
 record_node(render):
     return make_node(
@@ -144,16 +164,19 @@ record_node(render):
         | then(record))
 ```
 
-非 render 的 entity 里没有任何 render 概念；main 里没有任何 `if (is_renderer)`。
+- 跟 render 的同步全在 `build()` 那几行里，main 一句都不掺和。
+- 非 render 的 entity 里没有任何 render 概念。
+- main 里没有任何 `if (is_renderer)`。
 
 ## 8. 两阶段 + 帧隔离
 
 ```
-frame ctor:            for e in entities: e.begin_frame(ctx)    # 阶段 A：只造 job
-frame::run:            for j in jobs:     roots.push(j.frame_node())   # 阶段 B：才取根
-frame dtor:            逆序销毁全部 job
+frame ctor:   for e in entities: e.begin_frame(ctx)   # 阶段 A：只造 job
+frame::run:   for j in jobs:     j.build()            # 阶段 B：entity 自己挂
+              when_all_range(roots.seal())            # main 只负责收网
+frame dtor:   逆序销毁全部 job
 ```
 
-- 阶段 A 全做完才进阶段 B ⇒ 任何 job 都能拿到任何别的 job。
+- 阶段 A 全做完才进阶段 B ⇒ 任何 job 都能拿到任何别的 job ⇒ **注册顺序无关**。
 - 唯一约定：**job 的构造函数里不许访问别的 job**。
 - `frame` 不可拷贝不可移动；隔离是结构性的，不靠"记得清空上一帧"。

@@ -44,10 +44,12 @@ struct physics
 		job(job const&) = delete;
 		auto operator=(job const&) -> job& = delete;
 
-		[[nodiscard]] auto frame_node() -> node_sender
+		auto build() -> void
 		{
-			return make_node(::stdexec::starts_on(_context._scheduler, ::stdexec::just())
-				| ::stdexec::then([this] { _physics.step(_context._index, _context._delta_seconds); }));
+			_context.add(make_node(cancellable(
+				::stdexec::starts_on(_context._scheduler, ::stdexec::just())
+					| ::stdexec::then([this] { _physics.step(_context._index, _context._delta_seconds); }),
+				_context)));
 		}
 	};
 
@@ -96,20 +98,22 @@ struct terrain
 		job(job const&) = delete;
 		auto operator=(job const&) -> job& = delete;
 
-		[[nodiscard]] auto frame_node() -> node_sender
+		auto build() -> void
 		{
 			// 阶段 B：所有 job 都已就位，这里才去取"本帧的 renderer job"。
 			// 这句是本 demo 的支点——依赖是具体类型直连，而 entity 名单是动态的。
 			auto&& render = _terrain._renderer._job_slot.get();
 
-			// 本帧被剔除就根本不注册。静态的"收集所有录制者"表达不了这件事。
+			// 跟 render 的同步全在这几行里：往它的录制名单挂一条，
+			// 再往帧根挂一条"等 fence 之后清理"。main 一句都不掺和。
+			// 本帧被剔除就根本不挂。静态的"收集所有录制者"表达不了这件事。
 			if (_terrain._visible)
 			{
 				render.recorders().add(record_node(render));
 			}
 
-			return make_node(render.fence_node()
-				| ::stdexec::then([this] { _terrain.release(_context._index, _staging); }));
+			_context.add(make_node(render.fence_node()
+				| ::stdexec::then([this] { _terrain.release(_context._index, _staging); })));
 		}
 
 		/// 只有一个消费者（录制名单），所以不需要 `split`，也就不需要 `node_ref`。
@@ -195,7 +199,7 @@ struct overlay
 		job(job const&) = delete;
 		auto operator=(job const&) -> job& = delete;
 
-		[[nodiscard]] auto frame_node() -> node_sender
+		auto build() -> void
 		{
 			auto&& render = _overlay._renderer._job_slot.get();
 
@@ -204,8 +208,8 @@ struct overlay
 				render.recorders().add(record_node(render));
 			}
 
-			return make_node(render.fence_node()
-				| ::stdexec::then([this] { ++_overlay._released; }));
+			_context.add(make_node(render.fence_node()
+				| ::stdexec::then([this] { ++_overlay._released; })));
 		}
 
 		[[nodiscard]] auto record_node(renderer::job& render) -> node_sender
