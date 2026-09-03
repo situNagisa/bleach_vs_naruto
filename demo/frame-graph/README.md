@@ -24,7 +24,7 @@
 
 | 补丁 | 干什么 |
 | --- | --- |
-| `node_ref` | 具名共享节点的备忘格。第一次 `get` 建图并套 `split`，之后都是订阅 |
+| `node_ref` | 具名共享节点的备忘格。第一次 `get` 建图并套 `split`，之后都是订阅。**job 上公开的节点入口只能是过了这个格子的**——没过格子的（唯一消费者、建完即推走）必须私有，否则第二个调用方就是第二次执行 |
 | `node_roster` | 动态汇合点。构建期往里挂，谁先挂谁后挂无所谓。帧根一个，render 的录制名单一个 |
 | `when_all_range` | 元素个数运行期才知道的扇入 |
 
@@ -133,6 +133,14 @@ tuple（核心，带 `static_assert`）和这个动态 vector（插件），`run
 依赖了 `fence_node()`"是一个真正的运行期环——`render.end` 等录制、录制等 fence、fence 等
 `render.end`——它不会触发上面任何一个检查，表现为启动后静默死锁。当前没有对策，只有约定：
 **录制节点只许依赖 `begin_node()` 和自己的计算节点。**
+
+**"跨 job 的共享节点"还没有具体场景。** 今天过 `node_ref` 的四个节点（renderer 的 begin / end /
+fence，terrain 的 compute）表达式里都只引用自己的 job；唯一跨 job 的 `_record_node` 恰好只有一个
+消费者，所以不需要 `split`。等真出现"既跨 job、又要多个消费者"的节点，再来决定 `node_ref`
+是不是够用——现在的惰性 memo 是按那个方向留的，但没被验证过。
+
+**g++ 会报 4 条 `-Wsubobject-linkage`。** 来自 stdexec 自己——`__sexpr` 落在匿名命名空间里，
+被 `node_ref` 的备忘闭包当成员存住就触发。单 TU 的 demo 里无害，clang 零警告。
 
 ## 场景
 

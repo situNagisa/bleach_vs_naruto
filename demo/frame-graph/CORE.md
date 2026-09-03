@@ -42,6 +42,16 @@ node_ref:
 
 一格 = 一个具名共享节点。格子长在**本帧的 job** 上 ⇒ 帧结束即消失 ⇒ 不需要 `reset`。
 
+**判据**（`node_sender` 是单发射的，建几次就跑几次）：
+
+| 节点 | 过格子？ | 可见性 |
+| --- | --- | --- |
+| 会被超过一个人拿到 | 要 | 公开 |
+| 建完立刻推进汇合点，唯一消费者 | 不要 | **必须私有**（`_` 前缀） |
+
+没过格子却公开 = 第二个调用方就是第二次执行。而且共享的上游只跑一次、只有末端那层翻倍，
+症状是偏的（计算 1 次、录制 2 次），很难查。见 `terrain::job::_record_node`。
+
 ## 3. 动态汇合点 —— 构建期挂，启动期封
 
 ```
@@ -157,7 +167,7 @@ render_entity.build():
 renderer.build():
     ctx.add(fence_node())
 
-record_node(render):
+_record_node(render):                # 【私有】不是 split，不许有第二个消费者
     return make_node(
         when_all(compute_node(), render.begin_node())
         | continues_on(sched)        # 【不可省】订阅已完成的 split 会原地同步派发

@@ -250,6 +250,12 @@ template <class sender_type>
 ///
 /// 存的是"擦除工厂"而不是擦好的 `node_sender`：后者只可移动，发不出第二份。
 /// 被闭包捕获的 `split` sender 是可拷贝的，每次 `get` 拷一份再擦除即可。
+///
+/// **给 entity 作者的一条规矩**：`node_sender` 是单发射的，一个表达式建几次就跑几次。
+/// 所以 job 上**公开的节点入口只能是过了这个格子的**；没过格子的节点（建完立刻推进
+/// 某个汇合点、只有一个消费者）必须私有，用 `_` 前缀，例如
+/// `terrain::job::_record_node`。否则第二个调用方就是第二次执行，而且共享的上游
+/// 只跑一次、只有末端那层翻倍，症状偏得很难查。
 struct node_ref
 {
 	::std::function<node_sender()> _make;

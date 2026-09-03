@@ -109,7 +109,7 @@ struct terrain
 			// 本帧被剔除就根本不挂。静态的"收集所有录制者"表达不了这件事。
 			if (_terrain._visible)
 			{
-				render.recorders().add(record_node(render));
+				render.recorders().add(_record_node(render));
 			}
 
 			_context.add(make_node(render.fence_node()
@@ -117,7 +117,12 @@ struct terrain
 		}
 
 		/// 只有一个消费者（录制名单），所以不需要 `split`，也就不需要 `node_ref`。
-		[[nodiscard]] auto record_node(renderer::job& render) -> node_sender
+		///
+		/// **正因为不是 `split`，它就必须是私有的**（`_` 前缀）：`node_sender` 是单发射的，
+		/// 建几次就跑几次。要是外人能叫到它，第二个消费者就意味着录制跑第二遍——
+		/// 而 `compute_node()` / `begin_node()` 已经 memo 过，只有这层 `then` 会翻倍，
+		/// 症状偏得很难查。公开的节点入口只能是 memo 过的那些。
+		[[nodiscard]] auto _record_node(renderer::job& render) -> node_sender
 		{
 			return make_node(::stdexec::when_all(compute_node(), render.begin_node())
 				// 这个 `continues_on` 不是可选的。名单是启动期才读的，读的时候 begin 早就
@@ -205,14 +210,15 @@ struct overlay
 
 			if (_overlay._visible)
 			{
-				render.recorders().add(record_node(render));
+				render.recorders().add(_record_node(render));
 			}
 
 			_context.add(make_node(render.fence_node()
 				| ::stdexec::then([this] { ++_overlay._released; })));
 		}
 
-		[[nodiscard]] auto record_node(renderer::job& render) -> node_sender
+		/// 同样不是 `split`，同样必须私有。见 `terrain::job::_record_node`。
+		[[nodiscard]] auto _record_node(renderer::job& render) -> node_sender
 		{
 			return make_node(render.begin_node()
 				| ::stdexec::continues_on(_context._scheduler)
