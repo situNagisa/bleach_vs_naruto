@@ -1,0 +1,298 @@
+#pragma once
+
+
+#include <utility>
+#include <atomic>
+#include <span>
+#include <ranges>
+#include <algorithm>
+#include <optional>
+#include <memory>
+#include <exception>
+#include <type_traits>
+#include <cstdint>
+#include <cstddef>
+
+#include <stdexec/execution.hpp>
+
+#include "./manual_lifetime.h"
+
+
+// ======== 探针全局量（只有这个探针头有，正式头没有）========
+inline ::std::atomic<int> probe_last_claims{0};
+inline ::std::atomic<bool> probe_completed{false};
+inline void (*probe_window_hook)() = nullptr;
+
+enum class completion_kind : ::std::uint8_t
+{
+	value,
+	error,
+	stopped,
+};
+
+/// 外层 token 不可能停时，`_on_stop` 的占位。配 `[[no_unique_address]]` 一个字节都不占。
+struct no_stop_callback
+{
+};
+
+/// 汇合点的可变状态。
+///
+/// **必须先于 `child_receiver` 和 `operation_type` 整个定义完。** `operation_type` 的类体里
+/// 有 `using child_operation_type = connect_result_t<..., child_receiver>`，这行会实例化
+/// `child_receiver::get_env()`；状态要是还塞在 `operation_type` 里，那一刻它的数据成员一个
+/// 都还没声明，clang 和 gcc 都报 "no member named '_stop_source'"。给 `get_env()` 补显式返回
+/// 类型只能挡住简单 sender，`let_value` 那条照样炸。upstream 的 `__when_all` 把 `__state`
+/// 和 op-state 拆开，就是这个原因，不是风格。
+///
+/// 顺带：完成路径（`_arrive`）也整个留在这一层，`operation_type` 只多出孩子的 op-state 数组。
+/// 这样 `child_receiver` 持一根 `dynamic_when_all_state*` 就够，不需要回跳 op-state 的间接层。
+template <class ReceiverType>
+struct dynamic_when_all_state
+{
+	/// 外层取消 → 转成内部 source 的 stop，让兄弟们看见。
+	struct forward_stop
+	{
+		dynamic_when_all_state* _state;
+
+		auto operator()() const noexcept -> void
+		{
+			// 回调执行期间多握一枚计数：`request_stop` 可能让孩子同步完成、计数归零，
+			// 进而 `_on_stop.reset()` 把我们正待在里面的这个回调销毁掉。
+			_state->_pending.fetch_add(1, ::std::memory_order_relaxed);
+			_state->_stopped();
+			_state->_arrive();
+		}
+	};
+
+	using outer_token_type = ::stdexec::stop_token_of_t<::stdexec::env_of_t<ReceiverType>>;
+	using stop_callback_type = typename outer_token_type::template callback_type<forward_stop>;
+
+	/// 外层 token 压根不会停的话，回调、`emplace`、`reset` 全是死重量，整个掐掉。
+	static constexpr bool _uses_stop_callback = !::stdexec::unstoppable_token<outer_token_type>;
+
+	using on_stop_type =
+		::std::conditional_t<_uses_stop_callback, ::std::optional<stop_callback_type>, no_stop_callback>;
+
+	ReceiverType _receiver;
+	::std::size_t _count;
+	::std::atomic<::std::size_t> _pending;
+	::std::atomic<completion_kind> _kind{ completion_kind::value };
+	::std::exception_ptr _error{};
+	::stdexec::inplace_stop_source _stop_source{};
+	[[no_unique_address]] on_stop_type _on_stop{};
+
+	auto _arm() noexcept -> void
+	{
+		if constexpr (_uses_stop_callback)
+		{
+			_on_stop.emplace(::stdexec::get_stop_token(::stdexec::get_env(_receiver)), forward_stop{ this });
+		}
+	}
+
+	auto _fail(::std::exception_ptr error) noexcept -> void
+	{
+		// error 覆盖 stopped：exchange 到 error 后，先前若是 value/stopped 都收下这个错误。
+		switch (_kind.exchange(completion_kind::error, ::std::memory_order_acq_rel))
+		{
+		case completion_kind::value:
+			_stop_source.request_stop();
+			[[fallthrough]];
+		case completion_kind::stopped:
+			_error = ::std::move(error);
+			break;
+		case completion_kind::error:
+			break;
+		}
+	}
+
+	auto _stopped() noexcept -> void
+	{
+		auto expected = completion_kind::value;
+		if (_kind.compare_exchange_strong(expected, completion_kind::stopped, ::std::memory_order_acq_rel))
+			_stop_source.request_stop();
+	}
+
+	auto _arrive() noexcept -> void
+	{
+		if (_pending.fetch_sub(1, ::std::memory_order_acq_rel) != 1)
+			return;
+
+		// —— 探针，唯一的改动 ——
+		// 记一笔"有几个线程认为自己是最后一个"。窗口（这里到 reset 之间）可选地撑开。
+		// 然后只放第一个 claimer 往下走真实路径：reset 和完成都照常发生，
+		// 窗口该怎么关还怎么关；第二个 claimer 只计数就退出，
+		// 免得双重 reset / 双重完成这些 UB 污染观测结果。
+		probe_last_claims.fetch_add(1, ::std::memory_order_relaxed);
+		if (probe_window_hook != nullptr) { probe_window_hook(); }
+		if (probe_completed.exchange(true, ::std::memory_order_acq_rel)) { return; }
+
+		if constexpr (_uses_stop_callback)
+		{
+			_on_stop.reset();
+		}
+
+		using enum completion_kind;
+		switch (_kind.load(::std::memory_order_acquire))
+		{
+		case value:
+			::stdexec::set_value(::std::move(_receiver));
+			return;
+		case error:
+			::stdexec::set_error(::std::move(_receiver), ::std::move(_error));
+			return;
+		case stopped:
+			::stdexec::set_stopped(::std::move(_receiver));
+			return;
+		}
+	}
+};
+
+template <class ReceiverType>
+struct dynamic_when_all_child_receiver
+{
+	using receiver_concept = ::stdexec::receiver_t;
+
+	dynamic_when_all_state<ReceiverType>* _state;
+
+	constexpr auto set_value() const noexcept -> void { _state->_arrive(); }
+
+	constexpr auto set_error(::std::exception_ptr error) const noexcept -> void
+	{
+		_state->_fail(::std::move(error));
+		_state->_arrive();
+	}
+
+	constexpr auto set_stopped() const noexcept -> void
+	{
+		_state->_stopped();
+		_state->_arrive();
+	}
+
+	// 只覆盖 stop token：其余 query 仍走外层 env。内部 source 才能在兄弟失败时 request_stop。
+	[[nodiscard]] constexpr auto get_env() const noexcept
+	{
+		return ::stdexec::env{
+			::stdexec::prop{::stdexec::get_stop_token, _state->_stop_source.get_token()},
+			::stdexec::get_env(_state->_receiver),
+		};
+	}
+};
+
+template <::std::ranges::sized_range ChildrenRange>
+	requires ::std::move_constructible<ChildrenRange> && ::stdexec::sender<::std::ranges::range_value_t<ChildrenRange>>
+struct dynamic_when_all_sender
+{
+	using children_range_type = ChildrenRange;
+	using sender_concept = ::stdexec::sender_t;
+	using completion_signatures = ::stdexec::completion_signatures<
+		::stdexec::set_value_t(),
+		::stdexec::set_error_t(::std::exception_ptr),
+		::stdexec::set_stopped_t()>;
+
+	using _child_sender_type = ::std::ranges::range_value_t<children_range_type>;
+
+	children_range_type _children;
+
+	template <class ReceiverType>
+	struct operation_type : dynamic_when_all_state<ReceiverType>
+	{
+		using receiver_type = ReceiverType;
+		using operation_state_concept = ::stdexec::operation_state_t;
+		using state_type = dynamic_when_all_state<ReceiverType>;
+		using child_receiver_type = dynamic_when_all_child_receiver<ReceiverType>;
+		using child_operation_type = ::stdexec::connect_result_t<_child_sender_type, child_receiver_type>;
+		using slot_type = manual_lifetime<child_operation_type>;
+
+		// 孩子连的是 `child_receiver_type`，它的 env 改过 stop token —— 要查的是这个 env，
+		// 不是外层 receiver 的。
+		static_assert(::stdexec::sender_in<_child_sender_type, ::stdexec::env_of_t<child_receiver_type>>);
+
+		::std::unique_ptr<slot_type[]> _operations{};
+		::std::size_t _constructed = 0;
+
+		constexpr operation_type(children_range_type sources, receiver_type receiver)
+			: state_type{
+				._receiver = ::std::move(receiver),
+				._count = ::std::ranges::size(sources),
+				// 第 k 次 arrive 必然在第 k 次 start 之后，所以计数归零必然在全部 start 之后；
+				// 起始不需要额外那枚"发起者计数"。
+				._pending = ::std::ranges::size(sources) }
+		{
+			if (this->_count == 0)
+				return; // 空 range 不分配
+
+			_operations = ::std::make_unique<slot_type[]>(this->_count);
+
+			// 槽里不记 `_engaged`，所以中途抛异常得自己回滚已经连上的那些。
+			try
+			{
+				for (auto&& [source, slot] :
+					::std::views::zip(::std::move(sources), ::std::span{ _operations.get(), this->_count }))
+				{
+					slot.construct_from([&] {
+						return ::stdexec::connect(::std::move(source), child_receiver_type{ this });
+					});
+					++_constructed;
+				}
+			}
+			catch (...)
+			{
+				_destroy_operations();
+				throw;
+			}
+		}
+
+		// op-state 是地址敏感的：声明了移动构造就把拷贝一并删掉了，不用再写拷贝那两条。
+		operation_type(operation_type&&) = delete;
+		auto operator=(operation_type&&) -> operation_type& = delete;
+
+		constexpr ~operation_type() noexcept { _destroy_operations(); }
+
+		auto _destroy_operations() noexcept -> void
+		{
+			while (_constructed != 0)
+			{
+				_operations[--_constructed].destroy();
+			}
+		}
+
+		auto start() & noexcept -> void
+		{
+			if (this->_count == 0)
+			{
+				if (::stdexec::get_stop_token(::stdexec::get_env(this->_receiver)).stop_requested())
+					::stdexec::set_stopped(::std::move(this->_receiver));
+				else
+					::stdexec::set_value(::std::move(this->_receiver));
+				return;
+			}
+			this->_arm();
+			// 投影写成 lambda 而不是 `&slot_type::get`：后者有 `&` / `&&` / `const&` 三个重载，取地址会歧义。
+			::std::ranges::for_each(
+				::std::span{ _operations.get(), this->_count },
+				::stdexec::start,
+				[](slot_type& slot) -> child_operation_type& { return slot.get(); });
+		}
+	};
+
+	// 单发射：孩子只可移动，连接即消费。`let_value` 以右值连接它返回的 sender
+	// （__let.hpp 里 `__nothrow_connectable<__sndr2_t, __rcvr2_t>` 用的是非引用类型），
+	// `run_frame` 也是就地构造后立刻连，两处都够用。
+	[[nodiscard]] auto connect(::stdexec::receiver auto receiver) && -> operation_type<decltype(receiver)>
+	{
+		return operation_type<decltype(receiver)>{::std::move(_children), ::std::move(receiver)};
+	}
+};
+
+struct dynamic_when_all_t
+{
+	[[nodiscard]] constexpr auto operator()(::std::ranges::sized_range auto children) const
+		-> dynamic_when_all_sender<decltype(children)>
+		requires ::std::move_constructible<decltype(children)>
+			&& ::stdexec::sender<::std::ranges::range_value_t<decltype(children)>>
+	{
+		return dynamic_when_all_sender<decltype(children)>{._children = ::std::move(children)};
+	}
+};
+
+inline constexpr dynamic_when_all_t dynamic_when_all{};
