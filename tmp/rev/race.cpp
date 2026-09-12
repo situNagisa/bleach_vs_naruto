@@ -208,13 +208,13 @@ int main()
 	run_mode("natural", 100000, nullptr);
 	auto const widened = run_mode("widened", 2000, &widen);
 	::std::printf("\n把窗口显式撑开 200us 后命中 %d/2000 —— 这条路径%s。\n",
-		widened, widened > 0 ? "确实可达" : "不可达，我的分析是错的");
+		widened, widened > 0 ? "可达 —— 还没修" : "打不中了 —— 修好了");
 #else
 	::std::printf("【真实头】一行没改，只看 receiver 被完成了几次：\n");
-	auto const hits = run_mode("real", 8000, nullptr, true);
+	auto const hits = run_mode("real", 50000, nullptr, true);
 	::std::printf("\n结论：%s\n", hits > 0
-		? "receiver 被完成两次 —— 窗口是真的"
-		: "8000 轮没撞到（不代表不存在，只说明自然状态下极窄）");
+		? "receiver 被完成两次 —— 还没修"
+		: "5 万轮全绿 —— 修好了（未修版第 1 轮就中）");
 #endif
 	return 0;
 }

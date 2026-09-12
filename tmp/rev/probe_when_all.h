@@ -18,7 +18,6 @@
 #include "./manual_lifetime.h"
 
 
-// ======== 探针全局量（只有这个探针头有，正式头没有）========
 inline ::std::atomic<int> probe_last_claims{0};
 inline ::std::atomic<bool> probe_completed{false};
 inline void (*probe_window_hook)() = nullptr;
@@ -58,7 +57,24 @@ struct dynamic_when_all_state
 		{
 			// 回调执行期间多握一枚计数：`request_stop` 可能让孩子同步完成、计数归零，
 			// 进而 `_on_stop.reset()` 把我们正待在里面的这个回调销毁掉。
-			_state->_pending.fetch_add(1, ::std::memory_order_relaxed);
+			//
+			// **只在计数还没归零时才握**。直接 `fetch_add` 会把已经归零的计数顶回 1，
+			// 下面自己的 `_arrive()` 再减回 0，于是本回调也判定"我是最后一个" ——
+			// 和那个刚刚释放屏障的线程同时跑完成路径：同一个 `_on_stop` 被析构两次、
+			// 同一个 receiver 被完成两次。实测第 1 轮就中（tmp/rev/race.cpp）。
+			//
+			// 归零就直接退出是安全的：本回调还在跑，说明那个线程正卡在
+			// `~inplace_stop_callback` 里等我们返回，状态一定还活着；完成这件事
+			// 交给它一个人做。
+			auto expected = _state->_pending.load(::std::memory_order_relaxed);
+			do
+			{
+				if (expected == 0)
+					return;
+			}
+			while (!_state->_pending.compare_exchange_weak(
+				expected, expected + 1, ::std::memory_order_acq_rel, ::std::memory_order_relaxed));
+
 			_state->_stopped();
 			_state->_arrive();
 		}
@@ -117,11 +133,6 @@ struct dynamic_when_all_state
 		if (_pending.fetch_sub(1, ::std::memory_order_acq_rel) != 1)
 			return;
 
-		// —— 探针，唯一的改动 ——
-		// 记一笔"有几个线程认为自己是最后一个"。窗口（这里到 reset 之间）可选地撑开。
-		// 然后只放第一个 claimer 往下走真实路径：reset 和完成都照常发生，
-		// 窗口该怎么关还怎么关；第二个 claimer 只计数就退出，
-		// 免得双重 reset / 双重完成这些 UB 污染观测结果。
 		probe_last_claims.fetch_add(1, ::std::memory_order_relaxed);
 		if (probe_window_hook != nullptr) { probe_window_hook(); }
 		if (probe_completed.exchange(true, ::std::memory_order_acq_rel)) { return; }
@@ -208,7 +219,6 @@ struct dynamic_when_all_sender
 		static_assert(::stdexec::sender_in<_child_sender_type, ::stdexec::env_of_t<child_receiver_type>>);
 
 		::std::unique_ptr<slot_type[]> _operations{};
-		::std::size_t _constructed = 0;
 
 		constexpr operation_type(children_range_type sources, receiver_type receiver)
 			: state_type{
@@ -223,7 +233,9 @@ struct dynamic_when_all_sender
 
 			_operations = ::std::make_unique<slot_type[]>(this->_count);
 
-			// 槽里不记 `_engaged`，所以中途抛异常得自己回滚已经连上的那些。
+			// 槽里不记 `_engaged`，所以中途抛异常得就地把已经连上的那些拆掉。
+			// 计数是个局部量：构造函数抛异常时析构函数不会被调用，没必要留成成员。
+			auto constructed = ::std::size_t{ 0 };
 			try
 			{
 				for (auto&& [source, slot] :
@@ -232,12 +244,15 @@ struct dynamic_when_all_sender
 					slot.construct_from([&] {
 						return ::stdexec::connect(::std::move(source), child_receiver_type{ this });
 					});
-					++_constructed;
+					++constructed;
 				}
 			}
 			catch (...)
 			{
-				_destroy_operations();
+				while (constructed != 0)
+				{
+					_operations[--constructed].destroy();
+				}
 				throw;
 			}
 		}
@@ -246,13 +261,12 @@ struct dynamic_when_all_sender
 		operation_type(operation_type&&) = delete;
 		auto operator=(operation_type&&) -> operation_type& = delete;
 
-		constexpr ~operation_type() noexcept { _destroy_operations(); }
-
-		auto _destroy_operations() noexcept -> void
+		// 构造成功就意味着 `_count` 个槽全连上了；构造失败的话这个析构函数压根不会被调用。
+		constexpr ~operation_type() noexcept
 		{
-			while (_constructed != 0)
+			for (auto index = this->_count; index != 0; --index)
 			{
-				_operations[--_constructed].destroy();
+				_operations[index - 1].destroy();
 			}
 		}
 

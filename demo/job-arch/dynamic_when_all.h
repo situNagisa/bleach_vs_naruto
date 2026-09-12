@@ -53,7 +53,24 @@ struct dynamic_when_all_state
 		{
 			// 回调执行期间多握一枚计数：`request_stop` 可能让孩子同步完成、计数归零，
 			// 进而 `_on_stop.reset()` 把我们正待在里面的这个回调销毁掉。
-			_state->_pending.fetch_add(1, ::std::memory_order_relaxed);
+			//
+			// **只在计数还没归零时才握**。直接 `fetch_add` 会把已经归零的计数顶回 1，
+			// 下面自己的 `_arrive()` 再减回 0，于是本回调也判定"我是最后一个" ——
+			// 和那个刚刚释放屏障的线程同时跑完成路径：同一个 `_on_stop` 被析构两次、
+			// 同一个 receiver 被完成两次。实测第 1 轮就中（tmp/rev/race.cpp）。
+			//
+			// 归零就直接退出是安全的：本回调还在跑，说明那个线程正卡在
+			// `~inplace_stop_callback` 里等我们返回，状态一定还活着；完成这件事
+			// 交给它一个人做。
+			auto expected = _state->_pending.load(::std::memory_order_relaxed);
+			do
+			{
+				if (expected == 0)
+					return;
+			}
+			while (!_state->_pending.compare_exchange_weak(
+				expected, expected + 1, ::std::memory_order_acq_rel, ::std::memory_order_relaxed));
+
 			_state->_stopped();
 			_state->_arrive();
 		}
