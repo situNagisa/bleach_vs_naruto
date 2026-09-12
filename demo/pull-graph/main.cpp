@@ -329,12 +329,10 @@ struct foliage_job
 			| ::stdexec::then([this](int const& count, int const& seen)
 				{
 					static_cast<void>(seen);
-
 					if (_foliage._fail)
 					{
 						throw ::std::runtime_error{_foliage._name + ": 录制失败"};
 					}
-
 					_staging = _foliage.record(count);
 				}));
 	}

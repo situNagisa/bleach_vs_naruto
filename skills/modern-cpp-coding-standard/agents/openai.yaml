@@ -1,0 +1,4 @@
+interface:
+  display_name: 现代 C++ 编码规范
+  short_description: 采用激进的最新标准 C++ 规则并应用项目 profile
+  default_prompt: 对这个 C++ 实现或审查任务应用 $modern-cpp-coding-standard，并先读取项目本地限制。

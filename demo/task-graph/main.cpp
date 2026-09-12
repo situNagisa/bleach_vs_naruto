@@ -10,7 +10,7 @@
 ///   `follower` 依赖 `gate`：往它的名单里挂一条，再往帧根挂一条"等 gate 收尾后清理"。
 ///
 /// 三种 entity **都不持有自己的 job**——job 交给 `frame_context` 托管，
-/// follower 用 `context.job_for<gate_job>(&gate)` 去取本帧的 gate job。
+/// follower 用 `context.job<gate_job>()` 去取本帧的 gate job。
 ///
 /// 钉住的性质：注册顺序无关、条件性参与、空名单、错误传播、整帧取消时收尾仍然执行、
 /// 迟到注册是响亮的异常（使用者自己防的）、帧与帧之间隔离。
@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <exception>
+#include <memory>
 #include <print>
 #include <stdexcept>
 #include <string>
@@ -71,8 +72,8 @@ struct context : tg::frame_context
 };
 
 /// 取消直接用 stdexec 自己的 `write_env`，库不包一层。
-template <class sender_type>
-[[nodiscard]] auto cancellable_by(sender_type sender, context const& target)
+template <class Sender>
+[[nodiscard]] auto cancellable_by(Sender sender, context const& target)
 {
 	return ::stdexec::write_env(
 		::std::move(sender),
@@ -100,10 +101,10 @@ struct worker
 
 	::std::atomic<int> _runs{0};
 
-	/// 阶段 A：造好 job 交给上下文托管，key 是自己的地址。自己不留一份。
+	/// 阶段 A：造好 job 交给上下文托管。自己不留一份。
 	auto frame_job(context& target) -> void
 	{
-		target.add_job<job>(this, *this, target);
+		target.add_job(tg::erase_job(job{*this, target}));
 	}
 };
 
@@ -217,7 +218,7 @@ struct gate_job
 	{
 		if (_sealed)
 		{
-			throw ::std::logic_error{"gate: 名单已封存，注册来晚了"};
+			throw ::std::runtime_error{"gate: 名单已封存，注册来晚了"};
 		}
 
 		_followers.push_back(::std::move(node));
@@ -230,12 +231,14 @@ struct gate
 
 	auto frame_job(context& target) -> void
 	{
-		target.add_job<gate_job>(this, _data, target);
+		target.add_job<gate_job>(_data, target);
 	}
 };
 
 // ----------------------------------------------------------------- follower
 
+/// Slot 代表不同的消费者角色，每个角色有独立的 job 类型，每帧至多一个。
+template <::std::size_t Slot>
 struct follower
 {
 	struct job
@@ -246,8 +249,12 @@ struct follower
 		auto build() -> void
 		{
 			// 阶段 B：所有 job 都已就位，这里才去取"本帧的 gate job"。
-			// key 是那个 gate entity 的地址——依赖仍是具体类型直连，不查 tag 表。
-			auto&& hub = _context.job_for<gate_job>(&_follower._gate);
+			auto found = _context.job<gate_job>();
+			if (!found)
+			{
+				throw ::std::runtime_error{"task graph: gate job 未参与本帧"};
+			}
+			auto&& hub = found->get();
 
 			// 跟 gate 的同步全在这两行里：往它的名单挂一条，再往帧根挂一条清理。
 			// 本帧不参与就一条都不挂。
@@ -286,7 +293,6 @@ struct follower
 		}
 	};
 
-	gate& _gate;
 	::std::string _name;
 	bool _active = true;
 	bool _fail = false;
@@ -294,14 +300,13 @@ struct follower
 	::std::atomic<int> _follows{0};
 	::std::atomic<int> _cleanups{0};
 
-	follower(gate& target, ::std::string name)
-		: _gate(target)
-		, _name(::std::move(name))
+	explicit follower(::std::string name)
+		: _name(::std::move(name))
 	{}
 
 	auto frame_job(context& target) -> void
 	{
-		target.add_job<job>(this, *this, target);
+		target.add_job(tg::erase_job(job{*this, target}));
 	}
 };
 
@@ -313,10 +318,10 @@ struct entity_ref
 	void* _object = nullptr;
 	void (*_frame_job)(void*, context&) = nullptr;
 
-	template <class entity_type>
-	explicit entity_ref(entity_type& entity) noexcept
+	template <class Entity>
+	explicit entity_ref(Entity& entity) noexcept
 		: _object(&entity)
-		, _frame_job([](void* object, context& target) { static_cast<entity_type*>(object)->frame_job(target); })
+		, _frame_job([](void* object, context& target) { static_cast<Entity*>(object)->frame_job(target); })
 	{}
 
 	auto frame_job(context& target) const -> void
@@ -352,8 +357,8 @@ auto scenario_basic() -> void
 	auto pool = ::exec::static_thread_pool{4};
 	auto tick = worker{};
 	auto hub = gate{};
-	auto first = follower{hub, "first"};
-	auto second = follower{hub, "second"};
+	auto first = follower<0>{"first"};
+	auto second = follower<1>{"second"};
 
 	auto roster = ::std::vector<entity_ref>{entity_ref{tick}, entity_ref{hub}, entity_ref{first}, entity_ref{second}};
 
@@ -373,8 +378,8 @@ auto scenario_registration_order() -> void
 	{
 		auto pool = ::exec::static_thread_pool{4};
 		auto hub = gate{};
-		auto first = follower{hub, "first"};
-		auto second = follower{hub, "second"};
+		auto first = follower<0>{"first"};
+		auto second = follower<1>{"second"};
 
 		auto roster = gate_first
 			? ::std::vector<entity_ref>{entity_ref{hub}, entity_ref{first}, entity_ref{second}}
@@ -398,7 +403,7 @@ auto scenario_conditional_and_empty() -> void
 
 	auto pool = ::exec::static_thread_pool{4};
 	auto hub = gate{};
-	auto idle = follower{hub, "idle"};
+	auto idle = follower<0>{"idle"};
 	idle._active = false;
 
 	auto roster = ::std::vector<entity_ref>{entity_ref{hub}, entity_ref{idle}};
@@ -420,8 +425,8 @@ auto scenario_failure() -> void
 
 	auto pool = ::exec::static_thread_pool{4};
 	auto hub = gate{};
-	auto good = follower{hub, "good"};
-	auto bad = follower{hub, "bad"};
+	auto good = follower<0>{"good"};
+	auto bad = follower<1>{"bad"};
 	bad._fail = true;
 
 	auto roster = ::std::vector<entity_ref>{entity_ref{hub}, entity_ref{good}, entity_ref{bad}};
@@ -449,7 +454,7 @@ auto scenario_cancel() -> void
 	auto pool = ::exec::static_thread_pool{4};
 	auto tick = worker{};
 	auto hub = gate{};
-	auto one = follower{hub, "one"};
+	auto one = follower<0>{"one"};
 
 	auto roster = ::std::vector<entity_ref>{entity_ref{tick}, entity_ref{hub}, entity_ref{one}};
 
@@ -469,7 +474,7 @@ auto scenario_late_registration() -> void
 
 	auto pool = ::exec::static_thread_pool{4};
 	auto hub = gate{};
-	auto sneaky = follower{hub, "sneaky"};
+	auto sneaky = follower<0>{"sneaky"};
 	sneaky._late = true;
 
 	auto roster = ::std::vector<entity_ref>{entity_ref{hub}, entity_ref{sneaky}};
@@ -494,8 +499,8 @@ auto scenario_dynamic_roster() -> void
 
 	auto pool = ::exec::static_thread_pool{4};
 	auto hub = gate{};
-	auto steady = follower{hub, "steady"};
-	auto guest = follower{hub, "guest"};
+	auto steady = follower<0>{"steady"};
+	auto guest = follower<1>{"guest"};
 
 	auto ok = true;
 	for (auto index = ::std::uint64_t{0}; index != 3; ++index)
@@ -515,7 +520,7 @@ auto scenario_dynamic_roster() -> void
 	check(steady._follows == 3, "常驻 follower 每帧都跑");
 	check(guest._follows == 1, "临时 follower 只在它在场的那帧跑");
 
-	auto orphan = follower{hub, "orphan"};
+	auto orphan = follower<0>{"orphan"};
 	auto without_gate = ::std::vector<entity_ref>{entity_ref{orphan}};
 	auto message = ::std::string{};
 	try
@@ -527,45 +532,86 @@ auto scenario_dynamic_roster() -> void
 		message = error.what();
 	}
 
-	check(message == "task graph: 依赖的 entity 未参与本帧", ::std::string{"缺席的依赖被当场点名："} + message);
+	check(message == "task graph: gate job 未参与本帧", ::std::string{"缺席的依赖被当场点名："} + message);
 }
 
-auto scenario_many_jobs() -> void
+auto scenario_job_storage() -> void
 {
-	section("8. 一个 entity 挂多个 job（job 不归 entity 持有）");
+	section("8. job 擦除、RTTI 查询和生命周期");
 
-	struct multi
+	struct owned_job
 	{
-		struct counter
+		::std::unique_ptr<int> _builds;
+
+		auto build() -> void
 		{
-			::std::atomic<int>& _target;
-			context& _context;
-
-			auto build() -> void
-			{
-				_context.add(tg::make_node(
-					::stdexec::starts_on(_context._scheduler, ::stdexec::just())
-						| ::stdexec::then([this] { ++_target; })));
-			}
-		};
-
-		::std::atomic<int> _runs{0};
-
-		auto frame_job(context& target) -> void
-		{
-			// 三个 job，全归上下文托管。entity 手里一份都没有。
-			target.add_job<counter>(this, _runs, target);
-			target.add_job<counter>(this, _runs, target);
-			target.add_job<counter>(this, _runs, target);
+			++*_builds;
 		}
 	};
 
-	auto pool = ::exec::static_thread_pool{4};
-	auto many = multi{};
-	auto roster = ::std::vector<entity_ref>{entity_ref{many}};
+	struct stable_job
+	{
+		::std::vector<int>& _destroyed;
+		stable_job* const _address = this;
+		int _builds = 0;
 
-	check(run_one_frame(roster, pool, 0), "整帧正常完成");
-	check(many._runs == 3, "三个 job 各挂一条根节点，都跑了");
+		explicit stable_job(::std::vector<int>& destroyed)
+			: _destroyed(destroyed)
+		{}
+		stable_job(stable_job const&) = delete;
+		auto operator=(stable_job const&) -> stable_job& = delete;
+
+		~stable_job()
+		{
+			_destroyed.push_back(1);
+		}
+
+		auto build() -> void
+		{
+			check(this == _address, "不可移动的 job 始终留在原地");
+			++_builds;
+		}
+	};
+
+	struct last_job
+	{
+		::std::vector<int>& _destroyed;
+		explicit last_job(::std::vector<int>& destroyed)
+			: _destroyed(destroyed)
+		{}
+		last_job(last_job const&) = delete;
+		auto operator=(last_job const&) -> last_job& = delete;
+		~last_job()
+		{
+			_destroyed.push_back(2);
+		}
+		auto build() -> void {}
+	};
+
+	auto destroyed = ::std::vector<int>{};
+	destroyed.reserve(2);
+	{
+		auto target = tg::frame_context{};
+		check(!target.job<owned_job>(), "缺失类型返回空 optional");
+		target.add_job(tg::erase_job(owned_job{::std::make_unique<int>(0)}));
+		auto&& stable = target.add_job<stable_job>(destroyed);
+		target.add_job(tg::erase_job(::std::in_place_type<last_job>, destroyed));
+
+		auto found = target.job<owned_job>();
+		auto const_found = ::std::as_const(target).job<owned_job>();
+		static_assert(::std::same_as<decltype(const_found),
+			::std::optional<::std::reference_wrapper<owned_job const>>>);
+		check(found && const_found && &found->get() == &const_found->get(),
+			"可变和 const 查询都引用同一个托管对象");
+		check(&target.job<stable_job>()->get() == &stable, "不同类型的 RTTI 查询找到正确对象");
+		*found->get()._builds = 10;
+
+		check(tg::run_frame(target), "通过虚函数构建全部 job，空根节点正常完成");
+		check(*found->get()._builds == 11 && stable._builds == 1,
+			"build() 转发到托管原对象，查询未产生副本");
+	}
+	check(destroyed == ::std::vector<int>{2, 1}, "上下文按逆注册顺序销毁 job");
+	check(!tg::frame_context{}.job<owned_job>(), "新帧没有上一帧的 job");
 }
 
 }
@@ -581,7 +627,7 @@ auto main() -> int
 	scenario_cancel();
 	scenario_late_registration();
 	scenario_dynamic_roster();
-	scenario_many_jobs();
+	scenario_job_storage();
 
 	::std::println("");
 	if (g_failures == 0)

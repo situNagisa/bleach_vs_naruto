@@ -130,6 +130,9 @@ add_custom_target(bvn_consumer_arch_shaders DEPENDS
 add_executable(bvn_consumer_arch_demo
 	demo.cpp
 	consumer_task.h
+	job.h
+	../task-graph/node_sender.h
+	../task-graph/dynamic_when_all.h
 	${CONSUMER_ARCH_PLATFORM_SOURCES}
 )
 add_dependencies(bvn_consumer_arch_demo bvn_consumer_arch_shaders)

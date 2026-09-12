@@ -68,6 +68,10 @@ find_package(Threads REQUIRED)
 
 add_executable(bvn_task_graph_demo
 	main.cpp
+	node_sender.h
+	dynamic_when_all.h
+	job.h
+	frame_context.h
 	task_graph.h
 )
 target_link_libraries(bvn_task_graph_demo PRIVATE
