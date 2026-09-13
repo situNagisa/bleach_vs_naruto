@@ -91,7 +91,12 @@ struct dynamic_when_all_state
 	::std::atomic<completion_kind> _kind{ completion_kind::value };
 	::std::exception_ptr _error{};
 	::stdexec::inplace_stop_source _stop_source{};
-	[[no_unique_address]] on_stop_type _on_stop{};
+#if defined(_MSC_VER)
+	[[msvc::no_unique_address]]
+#else
+	[[no_unique_address]]
+#endif
+	on_stop_type _on_stop{};
 
 	auto _arm() noexcept -> void
 	{
@@ -273,11 +278,10 @@ struct dynamic_when_all_sender
 				return;
 			}
 			this->_arm();
-			// 投影写成 lambda 而不是 `&slot_type::get`：后者有 `&` / `&&` / `const&` 三个重载，取地址会歧义。
-			::std::ranges::for_each(
-				::std::span{ _operations.get(), this->_count },
-				::stdexec::start,
-				[](slot_type& slot) -> child_operation_type& { return slot.get(); });
+			for (auto&& slot : ::std::span{ _operations.get(), this->_count })
+			{
+				::stdexec::start(slot.get());
+			}
 		}
 	};
 
@@ -290,14 +294,16 @@ struct dynamic_when_all_sender
 	}
 };
 
+
+template<class T>
+dynamic_when_all_sender(T&&) -> dynamic_when_all_sender<::std::views::all_t<T>>;
+
 struct dynamic_when_all_t
 {
-	[[nodiscard]] constexpr auto operator()(::std::ranges::sized_range auto children) const
-		-> dynamic_when_all_sender<decltype(children)>
-		requires ::std::move_constructible<decltype(children)>
-			&& ::stdexec::sender<::std::ranges::range_value_t<decltype(children)>>
+	[[nodiscard]] constexpr auto operator()(::std::ranges::viewable_range auto&& children) const
+		requires ::stdexec::sender<::std::ranges::range_value_t<decltype(children)>>
 	{
-		return dynamic_when_all_sender<decltype(children)>{._children = ::std::move(children)};
+		return dynamic_when_all_sender(::std::forward<decltype(children)>(children));
 	}
 };
 
