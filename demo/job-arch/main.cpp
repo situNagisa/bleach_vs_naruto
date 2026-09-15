@@ -9,7 +9,6 @@
 #include <cstdio>
 #include <exception>
 #include <mutex>
-#include <semaphore>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -72,55 +71,27 @@ struct frame
 	}
 };
 
-// ------------------------------------------------------------- 两种节点形状
-
-/// 干活的节点自己把取消令牌写进环境。结构边一律不传取消——`::exec::split` 在订阅者
-/// 令牌已停止时直接 `set_stopped`、根本不启动共享体，取消要是沿结构边下压，收尾节点
-/// 就一次都不跑。
-template <class Sender>
-[[nodiscard]] auto cancellable(Sender sender, ::stdexec::inplace_stop_token token)
-{
-	return ::stdexec::write_env(::std::move(sender), ::stdexec::prop{::stdexec::get_stop_token, token});
-}
-
-/// "在 scheduler 上跑一段活、可取消、可被多方共享"——帧图里最常见的节点形状。
-///
-/// 拆成**别名 + 工厂**而不是一个推导返回类型的工厂，是因为 task 嵌套在 entity 里
-/// （`camera::view`）：声明 `_sender` 成员的那一刻外层 entity 还没闭合，
-/// 而 `decltype(推导返回类型的函数(...))` 要求那个函数**已经定义完**。别名只依赖
-/// 函数对象的类型，绕开了这层循环。
-template <class Functor>
-using shared_node = decltype(cancellable(
-	::stdexec::then(
-		::stdexec::starts_on(
-			::std::declval<::exec::static_thread_pool::scheduler>(), ::stdexec::just()),
-		::std::declval<Functor>()),
-	::std::declval<::stdexec::inplace_stop_token>()));
-
-template <class Functor>
-[[nodiscard]] auto make_shared_node(frame& context, Functor functor) -> shared_node<Functor>
-{
-	return cancellable(
-		::stdexec::then(
-			::stdexec::starts_on(context._scheduler, ::stdexec::just()), ::std::move(functor)),
-		context._stop_token);
-}
-
-/// 共享节点要过一道 `::exec::split`：本帧只跑一次，每个消费者拿一份拷贝。
-template <class Functor>
-using split_node = decltype(::exec::split(::std::declval<shared_node<Functor>>()));
-
-template <class Functor>
-[[nodiscard]] auto make_split_node(frame& context, Functor functor) -> split_node<Functor>
-{
-	return ::exec::split(make_shared_node(context, ::std::move(functor)));
-}
-
-/// 一个"名单在运行期才定"的扇入。从工厂反推类型，别自己拼——`dynamic_when_all` 存的是
+/// 运行期才定名单的扇入的类型。从工厂反推，别自己拼——`dynamic_when_all` 存的是
 /// `::std::views::all_t<...>`（右值容器进来会包成 `owning_view`），写死会跟它失联。
 using recorder_join = decltype(dynamic_when_all(::std::declval<::std::vector<node_sender>>()));
 
 // ------------------------------------------------------------------- camera
+
+/// 视锥节点：在 scheduler 上算、可取消、被多方共享所以过 `split`。
+///
+/// 表达式只在这里写一遍，task 的成员类型用 `decltype` 反推。函数模板化**只是**因为
+/// 那个函数对象嵌在还没闭合的 entity 里（`camera::compute_view`），不是想搞成通用件。
+template <class Functor>
+[[nodiscard]] auto make_view_node(frame& context, Functor functor)
+{
+	return ::stdexec::starts_on(context._scheduler, ::stdexec::just())
+		| ::stdexec::then(::std::move(functor))
+		// 干活的节点自己把取消令牌写进环境。结构边一律不传取消——`::exec::split` 在订阅者
+		// 令牌已停止时直接 `set_stopped`、根本不启动共享体，取消要是沿结构边下压，
+		// 收尾节点就一次都不跑。
+		| ::stdexec::write_env(::stdexec::prop{::stdexec::get_stop_token, context._stop_token})
+		| ::exec::split();
+}
 
 struct camera
 {
@@ -141,13 +112,12 @@ struct camera
 		}
 	};
 
-	/// 视锥：被多方共享，所以过 `split`——本帧只算一次。
 	struct view
 	{
-		split_node<compute_view> _sender;
+		decltype(make_view_node(::std::declval<frame&>(), ::std::declval<compute_view>())) _sender;
 
 		view(camera& self, frame& context)
-			: _sender(make_split_node(context, compute_view{&self}))
+			: _sender(make_view_node(context, compute_view{&self}))
 		{
 		}
 
@@ -164,6 +134,25 @@ struct camera
 
 // ------------------------------------------------------------------ renderer
 
+/// 开帧节点：录制者都挂在它后面，所以也过 `split`。
+template <class Functor>
+[[nodiscard]] auto make_begin_node(frame& context, Functor functor)
+{
+	return ::stdexec::starts_on(context._scheduler, ::stdexec::just())
+		| ::stdexec::then(::std::move(functor))
+		| ::stdexec::write_env(::stdexec::prop{::stdexec::get_stop_token, context._stop_token})
+		| ::exec::split();
+}
+
+/// 汇合节点：开帧完了排干录制名单，再收尾。
+template <class OpeningSender, class DrainFunctor, class CloseFunctor>
+[[nodiscard]] auto make_fence_node(OpeningSender opening, DrainFunctor drain, CloseFunctor close)
+{
+	return ::std::move(opening)
+		| ::stdexec::let_value(::std::move(drain))
+		| ::stdexec::then(::std::move(close));
+}
+
 struct renderer
 {
 	struct open_frame
@@ -171,13 +160,12 @@ struct renderer
 		auto operator()() const -> void { log_event("begin"); }
 	};
 
-	/// 开帧：录制者都挂在它后面，所以也是共享的。
 	struct begin
 	{
-		split_node<open_frame> _sender;
+		decltype(make_begin_node(::std::declval<frame&>(), ::std::declval<open_frame>())) _sender;
 
 		explicit begin(frame& context)
-			: _sender(make_split_node(context, open_frame{}))
+			: _sender(make_begin_node(context, open_frame{}))
 		{
 		}
 
@@ -186,6 +174,7 @@ struct renderer
 	};
 
 	/// 排干录制名单。**在启动期才跑**，所以"谁先构建"不影响谁进得来。
+	/// 返回类型写死：它嵌在 `renderer` 里，推导返回类型在 `fence` 的成员声明处还用不了。
 	struct drain_recorders
 	{
 		::std::vector<node_sender>* _recorders;
@@ -207,15 +196,14 @@ struct renderer
 	{
 		::std::vector<node_sender> _recorders;
 		bool _sealed = false;
-		decltype(::stdexec::then(
-			::stdexec::let_value(
-				::std::declval<split_node<open_frame>>(), ::std::declval<drain_recorders>()),
+		decltype(make_fence_node(
+			::std::declval<decltype(begin::_sender)>(),
+			::std::declval<drain_recorders>(),
 			::std::declval<close_frame>())) _sender;
 
 		explicit fence(begin& opening)
-			: _sender(::stdexec::then(
-				::stdexec::let_value(opening._sender, drain_recorders{&_recorders, &_sealed}),
-				close_frame{}))
+			: _sender(make_fence_node(
+				opening._sender, drain_recorders{&_recorders, &_sealed}, close_frame{}))
 		{
 		}
 
@@ -244,6 +232,13 @@ struct renderer
 
 // ------------------------------------------------------------------- foliage
 
+/// 录制节点：等齐全部依赖，然后录。
+template <class Functor>
+[[nodiscard]] auto make_record_node(::std::vector<node_sender> dependencies, Functor functor)
+{
+	return dynamic_when_all(::std::move(dependencies)) | ::stdexec::then(::std::move(functor));
+}
+
 struct foliage
 {
 	::std::string _name;
@@ -257,11 +252,11 @@ struct foliage
 
 	struct record
 	{
-		decltype(::stdexec::then(
-			::std::declval<recorder_join>(), ::std::declval<do_record>())) _sender;
+		decltype(make_record_node(
+			::std::declval<::std::vector<node_sender>>(), ::std::declval<do_record>())) _sender;
 
 		record(foliage& self, ::std::vector<node_sender> dependencies)
-			: _sender(::stdexec::then(dynamic_when_all(::std::move(dependencies)), do_record{&self}))
+			: _sender(make_record_node(::std::move(dependencies), do_record{&self}))
 		{
 		}
 
@@ -334,52 +329,14 @@ static_assert(!can_look_up<entity_storage<frame>&>, "entity_storage 不该负责
 
 // ------------------------------------------------------------------- 跑一帧
 
-struct run_state
-{
-	::std::binary_semaphore _done{0};
-	::std::exception_ptr _error;
-	bool _stopped = false;
-};
-
-struct run_receiver
-{
-	using receiver_concept = ::stdexec::receiver_t;
-
-	run_state* _state;
-
-	auto set_value() noexcept -> void { _state->_done.release(); }
-
-	auto set_error(::std::exception_ptr error) noexcept -> void
-	{
-		_state->_error = ::std::move(error);
-		_state->_done.release();
-	}
-
-	auto set_stopped() noexcept -> void
-	{
-		_state->_stopped = true;
-		_state->_done.release();
-	}
-
-	/// 默认构造的令牌永不停止——结构边不传取消。
-	[[nodiscard]] auto get_env() const noexcept -> node_env { return node_env{}; }
-};
-
-/// 手写的 `sync_wait`，只为了给根接收者一个永不停止的令牌。
-/// 返回 false 表示整帧被取消；图内的错误以异常抛出。
+/// 把本帧的根节点扇入起来跑完。返回 false 表示整帧被取消；图内的错误以异常抛出。
+///
+/// 直接用 `::stdexec::sync_wait`：它的接收者环境只应答 scheduler 那几个查询、
+/// **不提供 `get_stop_token`**，于是根节点拿到的是 `never_stop_token` —— 正好符合
+/// "结构边不传取消"。不需要自己再写一遍等待逻辑。
 auto run_frame(frame& context) -> bool
 {
-	auto state = run_state{};
-	auto operation = ::stdexec::connect(
-		dynamic_when_all(::std::move(context._roots)), run_receiver{&state});
-	::stdexec::start(operation);
-	state._done.acquire();
-
-	if (state._error)
-	{
-		::std::rethrow_exception(state._error);
-	}
-	return !state._stopped;
+	return ::stdexec::sync_wait(dynamic_when_all(::std::move(context._roots))).has_value();
 }
 
 // -------------------------------------------------------------------- 场景

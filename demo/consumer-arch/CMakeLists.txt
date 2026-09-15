@@ -163,3 +163,48 @@ set_target_properties(bvn_consumer_arch_demo PROPERTIES
 	FOLDER demo
 	OUTPUT_NAME consumer-arch
 )
+
+# ---------------------------------------------------------------------------
+# entity_arch.cpp：同一个帧流程，改写在 job-arch 的 entity / task 两层结构上，
+# Vulkan 那层换成了内置的 mock。只要 stdexec + EnTT，不碰 Vulkan / SDL / vkfu / nagisa。
+#
+# EnTT 找不到就**跳过**这个目标，不影响上面那个真正的 Vulkan demo。
+find_package(EnTT CONFIG QUIET)
+if(TARGET EnTT::EnTT)
+	set(CONSUMER_ARCH_ENTT_LIBRARY EnTT::EnTT)
+else()
+	file(TO_CMAKE_PATH "$ENV{NAGISA_LIBRARY_ROOT}/entt" CONSUMER_ARCH_ENTT_ROOT_DEFAULT)
+	set(CONSUMER_ARCH_ENTT_ROOT "${CONSUMER_ARCH_ENTT_ROOT_DEFAULT}" CACHE PATH "EnTT source root")
+	if(EXISTS "${CONSUMER_ARCH_ENTT_ROOT}/src/entt/entt.hpp")
+		add_library(consumer_arch_entt_headers INTERFACE)
+		target_include_directories(consumer_arch_entt_headers SYSTEM INTERFACE
+			"${CONSUMER_ARCH_ENTT_ROOT}/src"
+		)
+		set(CONSUMER_ARCH_ENTT_LIBRARY consumer_arch_entt_headers)
+	endif()
+endif()
+
+if(CONSUMER_ARCH_ENTT_LIBRARY)
+	add_executable(bvn_consumer_arch_entity_demo
+		entity_arch.cpp
+		../job-arch/dynamic_when_all.h
+		../job-arch/entities.h
+		../job-arch/manual_lifetime.h
+		../job-arch/node_sender.h
+	)
+	target_link_libraries(bvn_consumer_arch_entity_demo PRIVATE
+		${CONSUMER_ARCH_PROJECT_LIBRARIES}
+		${CONSUMER_ARCH_ENTT_LIBRARY}
+		Threads::Threads
+	)
+	set_target_properties(bvn_consumer_arch_entity_demo PROPERTIES
+		FOLDER demo
+		OUTPUT_NAME consumer-arch-entity
+		CXX_SCAN_FOR_MODULES OFF
+	)
+else()
+	message(STATUS
+		"consumer-arch: 找不到 EnTT，跳过 bvn_consumer_arch_entity_demo"
+		"（设 CONSUMER_ARCH_ENTT_ROOT 指向 EnTT 源码根即可启用）"
+	)
+endif()
