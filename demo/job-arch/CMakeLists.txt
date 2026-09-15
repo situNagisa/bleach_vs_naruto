@@ -65,16 +65,40 @@ else()
 endif()
 
 find_package(Threads REQUIRED)
-find_package(EnTT CONFIG REQUIRED)
+
+# EnTT：优先包管理器，找不到就退回源码树——照上面 JOB_ARCH_STDEXEC_ROOT 的写法，
+# 让没有 vcpkg / conan 的机器也能配置。
+find_package(EnTT CONFIG QUIET)
+if(TARGET EnTT::EnTT)
+	set(JOB_ARCH_ENTT_LIBRARY EnTT::EnTT)
+else()
+	file(TO_CMAKE_PATH "$ENV{NAGISA_LIBRARY_ROOT}/entt" JOB_ARCH_ENTT_ROOT_DEFAULT)
+	set(JOB_ARCH_ENTT_ROOT "${JOB_ARCH_ENTT_ROOT_DEFAULT}" CACHE PATH "EnTT source root")
+	if(NOT EXISTS "${JOB_ARCH_ENTT_ROOT}/src/entt/entt.hpp")
+		message(FATAL_ERROR
+			"找不到 EnTT。装好让 find_package(EnTT CONFIG) 能找到，"
+			"或把 JOB_ARCH_ENTT_ROOT 指向 EnTT 源码根（需含 src/entt/entt.hpp）："
+			"${JOB_ARCH_ENTT_ROOT}"
+		)
+	endif()
+
+	add_library(job_arch_entt_headers INTERFACE)
+	target_include_directories(job_arch_entt_headers SYSTEM INTERFACE
+		"${JOB_ARCH_ENTT_ROOT}/src"
+	)
+	set(JOB_ARCH_ENTT_LIBRARY job_arch_entt_headers)
+endif()
 
 add_executable(bvn_job_arch_demo
 	main.cpp
 	dynamic_when_all.h
+	entities.h
 	manual_lifetime.h
+	node_sender.h
 )
 target_link_libraries(bvn_job_arch_demo PRIVATE
 	${JOB_ARCH_PROJECT_LIBRARIES}
-	EnTT::EnTT
+	${JOB_ARCH_ENTT_LIBRARY}
 	Threads::Threads
 )
 
