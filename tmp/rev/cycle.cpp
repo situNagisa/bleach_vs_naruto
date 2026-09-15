@@ -14,36 +14,33 @@
 struct frame
 {
 	::std::vector<node_sender> _roots;
-	entities<frame> _entities;
-
-	frame() : _entities(*this) {}
 };
 
 // 两个 entity 互相要对方的 task —— 谁先被构建都会绕回自己
 struct knot_a
 {
 	struct task { int _value = 0; };
-	auto build_task(frame& context, task_builder builder) -> void;
+	auto build_task(frame& context, entity_view<frame> entities, task_builder builder) -> void;
 };
 
 struct knot_b
 {
 	struct task { int _value = 0; };
-	auto build_task(frame& context, task_builder builder) -> void;
+	auto build_task(frame& context, entity_view<frame> entities, task_builder builder) -> void;
 };
 
-auto knot_a::build_task(frame& context, task_builder builder) -> void
+auto knot_a::build_task(frame&, entity_view<frame> entities, task_builder builder) -> void
 {
-	if (auto other = context._entities.entity<knot_b>())
+	if (auto other = entities.entity<knot_b>())
 	{
 		static_cast<void>(other->task<knot_b::task>());
 	}
 	builder.emplace<task>();
 }
 
-auto knot_b::build_task(frame& context, task_builder builder) -> void
+auto knot_b::build_task(frame&, entity_view<frame> entities, task_builder builder) -> void
 {
-	if (auto other = context._entities.entity<knot_a>())
+	if (auto other = entities.entity<knot_a>())
 	{
 		static_cast<void>(other->task<knot_a::task>());
 	}
@@ -56,13 +53,14 @@ int main()
 	auto right = knot_b{};
 
 	auto context = frame{};
-	context._entities.add(left);
-	context._entities.add(right);
+	auto world = entity_storage<frame>{};
+	world.add(left);
+	world.add(right);
 
 	::std::printf("about to build a cyclic pair; expect an assertion\n");
 	::std::fflush(stdout);
 
-	context._entities.build_all();
+	build_all(world, context);
 
 	::std::printf("FAIL: no assertion fired\n");
 	return 1;

@@ -59,7 +59,8 @@ struct frame
 	::std::vector<node_sender> _roots;
 	::stdexec::inplace_stop_token _stop_token;
 	::std::uint64_t _index = 0;
-	entities<frame> _entities;
+	// 没有任何 entity 相关的成员 —— 查找能力是 `build_task` 的参数送进来的，
+	// 所以 entity 手里根本没有通往 `add` / `build_all` 的路。
 
 	frame(::exec::static_thread_pool::scheduler scheduler,
 		::std::uint64_t index,
@@ -67,7 +68,6 @@ struct frame
 		: _scheduler(scheduler)
 		, _stop_token(stop_token)
 		, _index(index)
-		, _entities(*this)
 	{
 	}
 };
@@ -155,7 +155,7 @@ struct camera
 		auto operator=(view&&) -> view& = delete;
 	};
 
-	auto build_task(frame& context, task_builder builder) -> void
+	auto build_task(frame& context, entity_view<frame>, task_builder builder) -> void
 	{
 		log_event("build:camera");
 		builder.emplace<view>(*this, context);
@@ -233,7 +233,7 @@ struct renderer
 		}
 	};
 
-	auto build_task(frame& context, task_builder builder) -> void
+	auto build_task(frame& context, entity_view<frame>, task_builder builder) -> void
 	{
 		log_event("build:renderer");
 		auto&& opening = builder.emplace<begin>(context);
@@ -269,14 +269,14 @@ struct foliage
 		auto operator=(record&&) -> record& = delete;
 	};
 
-	auto build_task(frame& context, task_builder builder) -> void
+	auto build_task(frame&, entity_view<frame> entities, task_builder builder) -> void
 	{
 		log_event("build:foliage");
 
 		auto dependencies = ::std::vector<node_sender>{};
 
 		// —— 显式构建：先问"构建了没"，自己驱动，再从只读视图取 task ——
-		if (auto camera_entity = context._entities.entity<camera>())
+		if (auto camera_entity = entities.entity<camera>())
 		{
 			if (!camera_entity->task_built())
 			{
@@ -297,7 +297,7 @@ struct foliage
 		}
 
 		// —— 隐式构建：直接取 task，没构建就顺手把它构建了 ——
-		if (auto renderer_entity = context._entities.entity<renderer>())
+		if (auto renderer_entity = entities.entity<renderer>())
 		{
 			if (auto* const opening = renderer_entity->task<renderer::begin>())
 			{
@@ -313,6 +313,24 @@ struct foliage
 		}
 	}
 };
+
+// ---------------------------------------------------------------- 能力隔绝
+
+// 隔绝是**类型**层面的，不是命名约定：entity 在 build_task 里拿到的 view 上，
+// `add` / `build_all` 这两个名字根本不存在，手滑都调不到。
+//
+// 检测要经过模板形参才行：requires 表达式只对**依赖**构造做替换失败，
+// 直接写 `requires (entity_view<frame> v) { v.add(x); }` 会当场硬报错而不是求值成 false。
+template <class TargetType, class EntityType>
+concept can_add = requires (TargetType target, EntityType& object) { target.add(object); };
+
+template <class TargetType>
+concept can_look_up = requires (TargetType target) { target.template entity<camera>(); };
+
+static_assert(!can_add<entity_view<frame>, camera>, "entity_view 不该有 add");
+static_assert(can_add<entity_storage<frame>&, camera>, "entity_storage 应该有 add");
+static_assert(can_look_up<entity_view<frame>>, "entity_view 应该能查");
+static_assert(!can_look_up<entity_storage<frame>&>, "entity_storage 不该负责查 entity");
 
 // ------------------------------------------------------------------- 跑一帧
 
@@ -403,10 +421,11 @@ int main()
 	// 1. 基本：三个 entity 都参与
 	{
 		auto context = frame{scheduler, 1};
-		context._entities.add(eye);
-		context._entities.add(draw);
-		context._entities.add(grass);
-		context._entities.build_all();
+		auto world = entity_storage<frame>{};
+		world.add(eye);
+		world.add(draw);
+		world.add(grass);
+		build_all(world, context);
 		take_log();
 		auto const finished = run_frame(context);
 		check("1 基本 · 跑完没被取消", finished);
@@ -416,10 +435,11 @@ int main()
 	// 2. 注册顺序反过来，结果一致
 	{
 		auto context = frame{scheduler, 2};
-		context._entities.add(grass);
-		context._entities.add(draw);
-		context._entities.add(eye);
-		context._entities.build_all();
+		auto world = entity_storage<frame>{};
+		world.add(grass);
+		world.add(draw);
+		world.add(eye);
+		build_all(world, context);
 		take_log();
 		run_frame(context);
 		report("2 注册顺序无关", "begin view(main) record(grass) fence");
@@ -428,11 +448,12 @@ int main()
 	// 3. 依赖方先被 build_all 碰到，它把被依赖方拽起来
 	{
 		auto context = frame{scheduler, 3};
-		context._entities.add(grass);
-		context._entities.add(eye);
-		context._entities.add(draw);
+		auto world = entity_storage<frame>{};
+		world.add(grass);
+		world.add(eye);
+		world.add(draw);
 		take_log();
-		context._entities.build_all();
+		build_all(world, context);
 		report("3 依赖方先构建", "build:foliage build:camera build:renderer");
 		run_frame(context);
 		take_log();
@@ -441,11 +462,12 @@ int main()
 	// 4. 被依赖方先构建：foliage 走 task_built() 那条分支
 	{
 		auto context = frame{scheduler, 4};
-		context._entities.add(eye);
-		context._entities.add(draw);
-		context._entities.add(grass);
+		auto world = entity_storage<frame>{};
+		world.add(eye);
+		world.add(draw);
+		world.add(grass);
 		take_log();
-		context._entities.build_all();
+		build_all(world, context);
 		report("4 被依赖方先构建", "build:camera build:renderer build:foliage");
 		run_frame(context);
 		take_log();
@@ -454,9 +476,10 @@ int main()
 	// 5. camera 本帧不参与：entity<camera>() 返回 nullopt，foliage 自己降级
 	{
 		auto context = frame{scheduler, 5};
-		context._entities.add(draw);
-		context._entities.add(grass);
-		context._entities.build_all();
+		auto world = entity_storage<frame>{};
+		world.add(draw);
+		world.add(grass);
+		build_all(world, context);
 		take_log();
 		run_frame(context);
 		report("5 相机本帧不参与", "begin record(grass) fence");
@@ -466,10 +489,11 @@ int main()
 	{
 		eye._fail = true;
 		auto context = frame{scheduler, 6};
-		context._entities.add(eye);
-		context._entities.add(draw);
-		context._entities.add(grass);
-		context._entities.build_all();
+		auto world = entity_storage<frame>{};
+		world.add(eye);
+		world.add(draw);
+		world.add(grass);
+		build_all(world, context);
 		take_log();
 
 		auto caught = ::std::string{"(没抛)"};
@@ -492,10 +516,11 @@ int main()
 		source.request_stop();
 
 		auto context = frame{scheduler, 7, source.get_token()};
-		context._entities.add(eye);
-		context._entities.add(draw);
-		context._entities.add(grass);
-		context._entities.build_all();
+		auto world = entity_storage<frame>{};
+		world.add(eye);
+		world.add(draw);
+		world.add(grass);
+		build_all(world, context);
 		take_log();
 
 		auto const finished = run_frame(context);
@@ -508,10 +533,11 @@ int main()
 		for (auto index = ::std::uint64_t{8}; index != 10; ++index)
 		{
 			auto context = frame{scheduler, index};
-			context._entities.add(eye);
-			context._entities.add(draw);
-			context._entities.add(grass);
-			context._entities.build_all();
+			auto world = entity_storage<frame>{};
+			world.add(eye);
+			world.add(draw);
+			world.add(grass);
+			build_all(world, context);
 			take_log();
 			run_frame(context);
 			report(index == 8 ? "8 帧隔离 · 第一帧" : "8 帧隔离 · 第二帧",
