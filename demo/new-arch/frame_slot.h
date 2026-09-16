@@ -9,7 +9,8 @@
 #include <vkkl/vkkl.h>
 #include <bvn/graphics/renderer.h>
 
-#include "demo_vulkan.h"
+#include "./demo_vulkan.h"
+#include "./resource_pool.h"
 
 struct frame_slot
 {
@@ -38,6 +39,7 @@ struct frame_slot
 	constexpr auto extent() const noexcept { return _extent; }
 };
 static_assert(::bvn::graphics::frame_env_renderer<frame_slot>);
+
 struct frame_slot_resource
 {
 	using slot_type = frame_slot;

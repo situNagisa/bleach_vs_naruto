@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <memory>
 #include <optional>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -75,6 +76,100 @@ struct task_builder
 	}
 };
 
+/// 让 task 的成员类型**只写一遍**。这是库在这件事上管的**全部**——task 长什么样、
+/// 暴露几个节点、叫什么名字，都归 entity 自己。
+///
+/// C++ 的非静态数据成员不能用 `auto` 推导，于是想把一条表达式（比如一条 sender 管线）
+/// 存进 task，通常要写两遍：一遍 `decltype(工厂(::std::declval<...>()))` 当成员类型，
+/// 一遍真的调工厂拿值。
+///
+/// 把**工厂本身做成一个类型**就能合并：类型那一侧用 `::std::invoke_result_t`（里面没有
+/// 调用，只有类型），值那一侧在构造函数里调。管线文本只存在于工厂的 `operator()` 里。
+///
+/// 工厂用类型而不是函数指针当模板参数，还顺带绕开一个坑：嵌在 entity 里的工厂如果是
+/// 函数，它的**推导返回类型在 entity 闭合之前用不了**（成员函数体是延迟解析的）；
+/// 而类型只在**实例化**时才展开 `operator()` 的返回类型，那时候 entity 早就完整了。
+/// 于是工厂的返回类型也不必再写死。
+///
+/// **库不规定 task 长什么样**：`task_data` 直接**继承工厂的返回类型**，所以暴露几个节点、
+/// 叫什么名字、带不带方法，全写在 entity 自己那个返回类型里；成员类型靠 CTAD 推出来，
+/// 一遍都不用写。
+///
+/// ```cpp
+/// struct renderer
+/// {
+///     /// 名字住在这里。成员类型 CTAD 推导。
+///     template <class BeginSender, class FenceSender>
+///     struct node_set
+///     {
+///         BeginSender _begin;
+///         FenceSender _fence;
+///
+///         auto begin() noexcept -> auto& { return _begin; }
+///         auto fence() noexcept -> auto& { return _fence; }
+///     };
+///     template <class B, class F> node_set(B, F) -> node_set<B, F>;
+///
+///     struct make_nodes
+///     {
+///         auto operator()(frame& context) const
+///         {
+///             auto opening = /* ... */;
+///             auto joining = opening | /* ... */;
+///             return node_set{::std::move(opening), ::std::move(joining)};
+///         }
+///     };
+///
+///     using nodes = task_data<make_nodes, frame&>;   // 一行
+/// };
+///
+/// // 用的时候
+/// auto* const made = renderer_entity->task<renderer::nodes>();
+/// make_node(made->begin());
+/// ```
+///
+/// **task 必须写成别名。** 别名不实例化，于是 `invoke_result_t` 推迟到真正用到时才展开，
+/// 那时候 entity 早就完整了。写成 `struct nodes : task_data<...>` 会在 entity 还没闭合时
+/// 就实例化基类，工厂的推导返回类型那会儿还拿不到，两个编译器都报
+/// "no type named 'type' in 'std::invoke_result<...>'"。
+///
+/// @tparam Factory 无状态、可默认构造的函数对象；返回一个**类类型**
+template <class Factory, class... Args>
+struct task_data : ::std::invoke_result_t<Factory, Args...>
+{
+	using data_type = ::std::invoke_result_t<Factory, Args...>;
+
+	explicit task_data(Args... arguments)
+		: data_type(Factory{}(::std::forward<Args>(arguments)...))
+	{
+	}
+
+	// task 一律地址敏感（管线里常攥着自己成员的地址），而且不可移动才能躲开
+	// `::entt::basic_any` 去实例化 `::std::vector` 那条对只可移动元素不可用的拷贝构造。
+	task_data(task_data&&) = delete;
+	auto operator=(task_data&&) -> task_data & = delete;
+};
+
+/// 带自有状态的 task：状态作为**第一个基类**先构造好，再连同其余参数交给工厂——
+/// 于是工厂做出来的 sender 可以攥着状态的地址（汇合点引用录制名单就是这么来的）。
+///
+/// 状态不能塞进工厂的返回类型里：那东西要从工厂的返回值**移动**进基类，地址会变。
+template <class Factory, class StateType, class... Args>
+struct stateful_task_data
+	: StateType
+	, ::std::invoke_result_t<Factory, StateType&, Args...>
+{
+	using data_type = ::std::invoke_result_t<Factory, StateType&, Args...>;
+
+	explicit stateful_task_data(Args... arguments)
+		: data_type(Factory{}(static_cast<StateType&>(*this), ::std::forward<Args>(arguments)...))
+	{
+	}
+
+	stateful_task_data(stateful_task_data&&) = delete;
+	auto operator=(stateful_task_data&&) -> stateful_task_data & = delete;
+};
+
 /// entity 容器。**只有容器原语**：增、查、遍历。驱动构建是 `build_all` 的事。
 ///
 /// `view` 和 `slot` 嵌在里面，是为了解开声明环：`view` 要提 `entity_storage`、
@@ -101,7 +196,7 @@ struct entity_storage
 		void* _object = nullptr;
 		::entt::id_type _type = 0;
 		void (*_build_task)(void*, view, task_builder) = nullptr;
-		::entt::registry::context _tasks{::std::allocator<void>{}};
+		::entt::registry::context _tasks{ ::std::allocator<void>{} };
 		bool _is_built = false;
 		bool _is_building = false;
 	};
@@ -112,7 +207,7 @@ struct entity_storage
 
 	entity_storage() = default;
 	entity_storage(entity_storage&&) = delete;
-	auto operator=(entity_storage&&) -> entity_storage& = delete;
+	auto operator=(entity_storage&&) -> entity_storage & = delete;
 
 	~entity_storage()
 	{
@@ -131,10 +226,10 @@ struct entity_storage
 		// 约束写在体内而不是 requires 子句上：具名 concept 要提 `view`，而 `view` 是
 		// 本类的嵌套类型，在类外才能给它起名字。写成 static_assert 报错一样清楚。
 		static_assert(
-			requires (EntityType& target, ContextType& context, view seen, task_builder builder)
-			{
-				{ target.build_task(context, seen, builder) };
-			},
+			requires (EntityType & target, ContextType & context, view seen, task_builder builder)
+		{
+			{ target.build_task(context, seen, builder) };
+		},
 			"job arch: entity 必须提供 build_task(ContextType&, view, task_builder)");
 
 		auto const type = ::entt::type_hash<EntityType>::value();
@@ -144,9 +239,9 @@ struct entity_storage
 		made->_object = &object;
 		made->_type = type;
 		made->_build_task = [](void* target, view seen, task_builder builder)
-		{
-			static_cast<EntityType*>(target)->build_task(*seen._context, seen, builder);
-		};
+			{
+				static_cast<EntityType*>(target)->build_task(*seen._context, seen, builder);
+			};
 		_slots.push_back(::std::move(made));
 	}
 
@@ -175,14 +270,14 @@ using entity_view = typename entity_storage<ContextType>::view;
 /// @pre 不在构建中——递归撞回来就是环。
 template <class ContextType>
 auto build_entity(typename entity_storage<ContextType>::slot& target, entity_view<ContextType> seen)
-	-> built_entity
+-> built_entity
 {
 	assert(!target._is_building && "job arch: entity 构建期依赖成环");
 
 	target._is_building = true;
 	try
 	{
-		target._build_task(target._object, seen, task_builder{&target._tasks});
+		target._build_task(target._object, seen, task_builder{ &target._tasks });
 	}
 	catch (...)
 	{
@@ -192,7 +287,7 @@ auto build_entity(typename entity_storage<ContextType>::slot& target, entity_vie
 	target._is_building = false;
 	target._is_built = true;
 
-	return built_entity{&target._tasks};
+	return built_entity{ &target._tasks };
 }
 
 /// `entity_view::entity<T>()` 查到的东西。伪代码里那个 `entity` 壳。
@@ -238,7 +333,7 @@ auto entity_storage<ContextType>::view::entity() const
 	{
 		return ::std::optional<handle_type>{};
 	}
-	return ::std::optional<handle_type>{handle_type{found, *this}};
+	return ::std::optional<handle_type>{handle_type{ found, *this }};
 }
 
 /// 把容器里还没构建的 entity 都构建掉。顺序无所谓：依赖方会先把被依赖方拽起来。
@@ -247,10 +342,10 @@ auto entity_storage<ContextType>::view::entity() const
 template <class ContextType>
 auto build_all(entity_storage<ContextType>& entities, ContextType& context) -> void
 {
-	auto const seen = entity_view<ContextType>{&entities, &context};
+	auto const seen = entity_view<ContextType>{ &entities, &context };
 
 	// 用下标而不是迭代器：`build_task` 理论上可以往容器里塞新 entity。
-	for (auto index = ::std::size_t{0}; index != entities.size(); ++index)
+	for (auto index = ::std::size_t{ 0 }; index != entities.size(); ++index)
 	{
 		auto&& target = entities[index];
 		if (!target._is_built)

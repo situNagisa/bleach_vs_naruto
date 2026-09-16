@@ -97,7 +97,7 @@ struct resource_pool
 		[[nodiscard]] explicit operator bool() const noexcept { return _pool != nullptr; }
 		[[nodiscard]] auto operator*() const noexcept -> ValueType& { return *_value; }
 		[[nodiscard]] auto operator->() const noexcept -> ValueType* { return _value; }
-		[[nodiscard]] auto get() const noexcept -> ValueType* { return _value; }
+		[[nodiscard]] auto get() const noexcept -> ValueType& { return *_value; }
 	};
 
 	// ---------------------------------------------------------------- sender
