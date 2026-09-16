@@ -187,28 +187,9 @@ struct frame
 };
 
 // ------------------------------------------------------------------ renderer
-
-/// 开帧节点：申请帧槽 + 开始录制。所有录制者共享，所以过 `split`。
-template <class Functor>
-[[nodiscard]] auto make_begin_node(frame& context, Functor functor)
-{
-	return ::stdexec::starts_on(context._scheduler, ::stdexec::just())
-		| ::stdexec::then(::std::move(functor))
-		// 干活的节点自己把取消令牌写进环境。结构边一律不传取消——`::exec::split` 在订阅者
-		// 令牌已停止时直接 `set_stopped`、根本不启动共享体，取消要是沿结构边下压，
-		// 收尾节点就一次都不跑。
-		| ::stdexec::write_env(::stdexec::prop{::stdexec::get_stop_token, context._stop_token})
-		| ::exec::split();
-}
-
-/// 汇合节点：开帧完了排干录制名单、提交、等 GPU。
-template <class OpeningSender, class DrainFunctor, class WaitFunctor>
-[[nodiscard]] auto make_fence_node(OpeningSender opening, DrainFunctor drain, WaitFunctor wait)
-{
-	return ::std::move(opening)
-		| ::stdexec::let_value(::std::move(drain))
-		| ::stdexec::then(::std::move(wait));
-}
+//
+// 一个 task 暴露两个节点（开帧 / 汇合）+ 自有状态（录制名单）。
+// `node_set` 是 renderer 自己的结果类型：名字和方法归它，成员类型 CTAD 推出来。
 
 struct renderer
 {
@@ -218,6 +199,18 @@ struct renderer
 		: _gpu(&gpu)
 	{
 	}
+
+	template <class BeginSender, class FenceSender>
+	struct node_set
+	{
+		BeginSender _begin;
+		FenceSender _fence;
+
+		[[nodiscard]] auto begin() noexcept -> auto& { return _begin; }
+		[[nodiscard]] auto fence() noexcept -> auto& { return _fence; }
+	};
+	template <class B, class F>
+	node_set(B, F) -> node_set<B, F>;
 
 	struct open_frame
 	{
@@ -230,19 +223,6 @@ struct renderer
 			log_event("begin#" + ::std::to_string(_frame_index));
 			return ::std::make_shared<frame_target>(*_self->_gpu, *target);
 		}
-	};
-
-	struct begin
-	{
-		decltype(make_begin_node(::std::declval<frame&>(), ::std::declval<open_frame>())) _sender;
-
-		begin(renderer& self, frame& context)
-			: _sender(make_begin_node(context, open_frame{&self, context._index}))
-		{
-		}
-
-		begin(begin&&) = delete;
-		auto operator=(begin&&) -> begin& = delete;
 	};
 
 	/// 提交：把录制下来的命令交给"GPU"。
@@ -267,49 +247,11 @@ struct renderer
 		}
 	};
 
-	/// 汇合点的尾巴。写成具名别名，`drain_recorders` 才能写出显式返回类型——
-	/// 它嵌在 `renderer` 里，推导返回类型在 `fence` 的成员声明处还用不了。
-	using recorder_tail = decltype(
-		dynamic_when_all(::std::declval<::std::vector<node_sender>>())
-		| ::stdexec::continues_on(::std::declval<::exec::static_thread_pool::scheduler>())
-		| ::stdexec::then(::std::declval<submit_frame>()));
-
-	/// 排干录制名单。**在启动期才跑**，所以"谁先构建"不影响谁进得来。
-	struct drain_recorders
-	{
-		::std::vector<node_sender>* _recorders;
-		bool* _sealed;
-		::exec::static_thread_pool::scheduler _scheduler;
-
-		auto operator()(frame_handle const& target) const -> recorder_tail
-		{
-			*_sealed = true;
-			return dynamic_when_all(::std::move(*_recorders))
-				| ::stdexec::continues_on(_scheduler)
-				| ::stdexec::then(submit_frame{target});
-		}
-	};
-
-	struct fence
+	/// 汇合点自己的状态：录制名单 + 封存标志。
+	struct recorder_list
 	{
 		::std::vector<node_sender> _recorders;
 		bool _sealed = false;
-		decltype(make_fence_node(
-			::std::declval<decltype(begin::_sender)>(),
-			::std::declval<drain_recorders>(),
-			::std::declval<wait_frame>())) _sender;
-
-		fence(begin& opening, frame& context)
-			: _sender(make_fence_node(
-				opening._sender,
-				drain_recorders{&_recorders, &_sealed, context._scheduler},
-				wait_frame{}))
-		{
-		}
-
-		// 地址敏感：`_sender` 里攥着 `_recorders` / `_sealed` 的地址。
-		fence(fence&&) = delete;
-		auto operator=(fence&&) -> fence& = delete;
 
 		/// @pre 汇合点尚未封存（本帧还没开始跑）。
 		auto add_recorder(node_sender node) -> void
@@ -319,26 +261,54 @@ struct renderer
 		}
 	};
 
+	/// 排干录制名单再提交。**在启动期才跑**，所以"谁先构建"不影响谁进得来。
+	struct drain_recorders
+	{
+		recorder_list* _state;
+		::exec::static_thread_pool::scheduler _scheduler;
+
+		auto operator()(frame_handle const& target) const
+		{
+			_state->_sealed = true;
+			return dynamic_when_all(::std::move(_state->_recorders))
+				| ::stdexec::continues_on(_scheduler)
+				| ::stdexec::then(submit_frame{target});
+		}
+	};
+
+	struct make_nodes
+	{
+		auto operator()(recorder_list& state, renderer& self, frame& context) const
+		{
+			// 开帧：申请帧槽 + 开始录制。所有录制者共享，所以过 `split`。
+			auto opening = ::stdexec::starts_on(context._scheduler, ::stdexec::just())
+				| ::stdexec::then(open_frame{&self, context._index})
+				// 干活的节点自己把取消令牌写进环境。结构边一律不传取消——`::exec::split` 在
+				// 订阅者令牌已停止时直接 `set_stopped`、根本不启动共享体，取消要是沿结构边
+				// 下压，收尾节点就一次都不跑。
+				| ::stdexec::write_env(
+					::stdexec::prop{::stdexec::get_stop_token, context._stop_token})
+				| ::exec::split();
+
+			// 汇合：开帧完了排干录制名单、提交、等 GPU。
+			auto joining = opening
+				| ::stdexec::let_value(drain_recorders{&state, context._scheduler})
+				| ::stdexec::then(wait_frame{});
+
+			return node_set{::std::move(opening), ::std::move(joining)};
+		}
+	};
+
+	using nodes = stateful_task_data<make_nodes, recorder_list, renderer&, frame&>;
+
 	auto build_task(frame& context, entity_view<frame>, task_builder builder) -> void
 	{
-		auto&& opening = builder.emplace<begin>(*this, context);
-		auto&& joining = builder.emplace<fence>(opening, context);
-		context._roots.push_back(make_node(joining._sender));
+		auto&& made = builder.emplace<nodes>(*this, context);
+		context._roots.push_back(make_node(made.fence()));
 	}
 };
 
 // ---------------------------------------------------------------- draw entity
-
-/// 录制节点：等开帧拿到帧槽，切到 pool 上录，最后把值丢掉（`node_sender` 不传值）。
-template <class OpeningSender, class Functor>
-[[nodiscard]] auto make_record_node(
-	OpeningSender opening, ::exec::static_thread_pool::scheduler scheduler, Functor functor)
-{
-	return ::std::move(opening)
-		| ::stdexec::continues_on(scheduler)
-		| ::stdexec::then(::std::move(functor))
-		| ::stdexec::then([] {});
-}
 
 /// 一个类型至多一个 entity，所以多个录制者靠**类型**区分——`demo.cpp` 里的
 /// `template <::std::size_t EntityId> struct entity` 是同一套办法。
@@ -349,6 +319,16 @@ struct painter
 
 	::std::string _name;
 	bool _fail = false;
+
+	template <class RecordSender>
+	struct node_set
+	{
+		RecordSender _record;
+
+		[[nodiscard]] auto record() noexcept -> auto& { return _record; }
+	};
+	template <class R>
+	node_set(R) -> node_set<R>;
 
 	struct do_record
 	{
@@ -365,20 +345,18 @@ struct painter
 		}
 	};
 
-	struct record
+	/// 录制：等开帧拿到帧槽，切到 pool 上录，最后把值丢掉（`node_sender` 不传值）。
+	struct make_nodes
 	{
-		decltype(make_record_node(
-			::std::declval<decltype(renderer::begin::_sender)>(),
-			::std::declval<::exec::static_thread_pool::scheduler>(),
-			::std::declval<do_record>())) _sender;
-
-		record(painter& self, renderer::begin& opening, frame& context)
-			: _sender(make_record_node(opening._sender, context._scheduler, do_record{&self}))
+		template <class OpeningSender>
+		auto operator()(painter& self, OpeningSender opening, frame& context) const
 		{
+			return node_set{
+				::std::move(opening)
+				| ::stdexec::continues_on(context._scheduler)
+				| ::stdexec::then(do_record{&self})
+				| ::stdexec::then([] {})};
 		}
-
-		record(record&&) = delete;
-		auto operator=(record&&) -> record& = delete;
 	};
 
 	auto build_task(frame& context, entity_view<frame> entities, task_builder builder) -> void
@@ -392,14 +370,14 @@ struct painter
 		}
 
 		// 隐式构建：直接取 task，renderer 没构建就顺手把它构建了。
-		auto* const opening = renderer_entity->task<renderer::begin>();
-		assert(opening != nullptr && "consumer-arch: renderer 没有登记 begin");
+		// 一个 task 暴露多个节点，所以只查一次。
+		auto* const made = renderer_entity->task<renderer::nodes>();
+		assert(made != nullptr && "consumer-arch: renderer 没有登记 nodes");
 
-		auto&& recording = builder.emplace<record>(*this, *opening, context);
+		using nodes = task_data<make_nodes, painter&, decltype(made->begin()), frame&>;
+		auto&& recording = builder.emplace<nodes>(*this, made->begin(), context);
 
-		auto* const joining = renderer_entity->task<renderer::fence>();
-		assert(joining != nullptr && "consumer-arch: renderer 没有登记 fence");
-		joining->add_recorder(make_node(::std::move(recording._sender)));
+		made->add_recorder(make_node(::std::move(recording.record())));
 	}
 };
 

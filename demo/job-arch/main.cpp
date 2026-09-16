@@ -11,6 +11,7 @@
 #include <mutex>
 #include <stdexcept>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 #include <typeindex>
@@ -72,32 +73,25 @@ struct frame
 	}
 };
 
-/// 运行期才定名单的扇入的类型。从工厂反推，别自己拼——`dynamic_when_all` 存的是
-/// `::std::views::all_t<...>`（右值容器进来会包成 `owning_view`），写死会跟它失联。
-using recorder_join = decltype(dynamic_when_all(::std::declval<::std::vector<node_sender>>()));
-
 // ------------------------------------------------------------------- camera
-
-/// 视锥节点：在 scheduler 上算、可取消、被多方共享所以过 `split`。
-///
-/// 表达式只在这里写一遍，task 的成员类型用 `decltype` 反推。函数模板化**只是**因为
-/// 那个函数对象嵌在还没闭合的 entity 里（`camera::compute_view`），不是想搞成通用件。
-template <class Functor>
-[[nodiscard]] auto make_view_node(frame& context, Functor functor)
-{
-	return ::stdexec::starts_on(context._scheduler, ::stdexec::just())
-		| ::stdexec::then(::std::move(functor))
-		// 干活的节点自己把取消令牌写进环境。结构边一律不传取消——`::exec::split` 在订阅者
-		// 令牌已停止时直接 `set_stopped`、根本不启动共享体，取消要是沿结构边下压，
-		// 收尾节点就一次都不跑。
-		| ::stdexec::write_env(::stdexec::prop{::stdexec::get_stop_token, context._stop_token})
-		| ::exec::split();
-}
+//
+// 一个节点。`node_set` 是**这个 entity 自己的**结果类型：名字和方法归它，
+// 成员类型 CTAD 推出来。
 
 struct camera
 {
 	::std::string _name;
 	bool _fail = false;
+
+	template <class ViewSender>
+	struct node_set
+	{
+		ViewSender _view;
+
+		[[nodiscard]] auto view() noexcept -> auto& { return _view; }
+	};
+	template <class V>
+	node_set(V) -> node_set<V>;
 
 	struct compute_view
 	{
@@ -113,79 +107,54 @@ struct camera
 		}
 	};
 
-	struct view
+	/// 视锥：在 scheduler 上算、可取消、被多方共享所以过 `split`。
+	struct make_nodes
 	{
-		decltype(make_view_node(::std::declval<frame&>(), ::std::declval<compute_view>())) _sender;
-
-		view(camera& self, frame& context)
-			: _sender(make_view_node(context, compute_view{&self}))
+		auto operator()(camera& self, frame& context) const
 		{
+			return node_set{
+				::stdexec::starts_on(context._scheduler, ::stdexec::just())
+				| ::stdexec::then(compute_view{&self})
+				// 干活的节点自己把取消令牌写进环境。结构边一律不传取消——`::exec::split` 在
+				// 订阅者令牌已停止时直接 `set_stopped`、根本不启动共享体，取消要是沿结构边
+				// 下压，收尾节点就一次都不跑。
+				| ::stdexec::write_env(
+					::stdexec::prop{::stdexec::get_stop_token, context._stop_token})
+				| ::exec::split()};
 		}
-
-		view(view&&) = delete;
-		auto operator=(view&&) -> view& = delete;
 	};
+
+	using nodes = task_data<make_nodes, camera&, frame&>;
 
 	auto build_task(frame& context, entity_view<frame>, task_builder builder) -> void
 	{
 		log_event("build:camera");
-		builder.emplace<view>(*this, context);
+		builder.emplace<nodes>(*this, context);
 	}
 };
 
 // ------------------------------------------------------------------ renderer
-
-/// 开帧节点：录制者都挂在它后面，所以也过 `split`。
-template <class Functor>
-[[nodiscard]] auto make_begin_node(frame& context, Functor functor)
-{
-	return ::stdexec::starts_on(context._scheduler, ::stdexec::just())
-		| ::stdexec::then(::std::move(functor))
-		| ::stdexec::write_env(::stdexec::prop{::stdexec::get_stop_token, context._stop_token})
-		| ::exec::split();
-}
-
-/// 汇合节点：开帧完了排干录制名单，再收尾。
-template <class OpeningSender, class DrainFunctor, class CloseFunctor>
-[[nodiscard]] auto make_fence_node(OpeningSender opening, DrainFunctor drain, CloseFunctor close)
-{
-	return ::std::move(opening)
-		| ::stdexec::let_value(::std::move(drain))
-		| ::stdexec::then(::std::move(close));
-}
+//
+// 两个节点 + 自有状态：一个 task 同时暴露 `begin()` 和 `fence()`，
+// 消费方只查一次。
 
 struct renderer
 {
+	template <class BeginSender, class FenceSender>
+	struct node_set
+	{
+		BeginSender _begin;
+		FenceSender _fence;
+
+		[[nodiscard]] auto begin() noexcept -> auto& { return _begin; }
+		[[nodiscard]] auto fence() noexcept -> auto& { return _fence; }
+	};
+	template <class B, class F>
+	node_set(B, F) -> node_set<B, F>;
+
 	struct open_frame
 	{
 		auto operator()() const -> void { log_event("begin"); }
-	};
-
-	struct begin
-	{
-		decltype(make_begin_node(::std::declval<frame&>(), ::std::declval<open_frame>())) _sender;
-
-		explicit begin(frame& context)
-			: _sender(make_begin_node(context, open_frame{}))
-		{
-		}
-
-		begin(begin&&) = delete;
-		auto operator=(begin&&) -> begin& = delete;
-	};
-
-	/// 排干录制名单。**在启动期才跑**，所以"谁先构建"不影响谁进得来。
-	/// 返回类型写死：它嵌在 `renderer` 里，推导返回类型在 `fence` 的成员声明处还用不了。
-	struct drain_recorders
-	{
-		::std::vector<node_sender>* _recorders;
-		bool* _sealed;
-
-		auto operator()() const -> recorder_join
-		{
-			*_sealed = true;
-			return dynamic_when_all(::std::move(*_recorders));
-		}
 	};
 
 	struct close_frame
@@ -193,26 +162,11 @@ struct renderer
 		auto operator()() const -> void { log_event("fence"); }
 	};
 
-	struct fence
+	/// 汇合点自己的状态：录制名单 + 封存标志。
+	struct recorder_list
 	{
 		::std::vector<node_sender> _recorders;
 		bool _sealed = false;
-		decltype(make_fence_node(
-			::std::declval<decltype(begin::_sender)>(),
-			::std::declval<drain_recorders>(),
-			::std::declval<close_frame>())) _sender;
-
-		explicit fence(begin& opening)
-			: _sender(make_fence_node(
-				opening._sender, drain_recorders{&_recorders, &_sealed}, close_frame{}))
-		{
-		}
-
-		// 地址敏感：`_sender` 里攥着 `_recorders` / `_sealed` 的地址。
-		// 顺带也躲开 `::entt::basic_any` 去实例化 `::std::vector` 那条永远声明着、
-		// 但对只可移动元素不可用的拷贝构造。
-		fence(fence&&) = delete;
-		auto operator=(fence&&) -> fence& = delete;
 
 		/// @pre 汇合点尚未封存（本帧还没开始跑）。
 		auto add_recorder(node_sender node) -> void
@@ -222,27 +176,61 @@ struct renderer
 		}
 	};
 
+	/// 排干录制名单。**在启动期才跑**，所以"谁先构建"不影响谁进得来。
+	struct drain_recorders
+	{
+		recorder_list* _state;
+
+		auto operator()() const
+		{
+			_state->_sealed = true;
+			return dynamic_when_all(::std::move(_state->_recorders));
+		}
+	};
+
+	struct make_nodes
+	{
+		auto operator()(recorder_list& state, frame& context) const
+		{
+			auto opening = ::stdexec::starts_on(context._scheduler, ::stdexec::just())
+				| ::stdexec::then(open_frame{})
+				| ::stdexec::write_env(
+					::stdexec::prop{::stdexec::get_stop_token, context._stop_token})
+				| ::exec::split();
+
+			auto joining = opening
+				| ::stdexec::let_value(drain_recorders{&state})
+				| ::stdexec::then(close_frame{});
+
+			return node_set{::std::move(opening), ::std::move(joining)};
+		}
+	};
+
+	using nodes = stateful_task_data<make_nodes, recorder_list, frame&>;
+
 	auto build_task(frame& context, entity_view<frame>, task_builder builder) -> void
 	{
 		log_event("build:renderer");
-		auto&& opening = builder.emplace<begin>(context);
-		auto&& joining = builder.emplace<fence>(opening);
-		context._roots.push_back(make_node(joining._sender));
+		auto&& made = builder.emplace<nodes>(context);
+		context._roots.push_back(make_node(made.fence()));
 	}
 };
 
 // ------------------------------------------------------------------- foliage
 
-/// 录制节点：等齐全部依赖，然后录。
-template <class Functor>
-[[nodiscard]] auto make_record_node(::std::vector<node_sender> dependencies, Functor functor)
-{
-	return dynamic_when_all(::std::move(dependencies)) | ::stdexec::then(::std::move(functor));
-}
-
 struct foliage
 {
 	::std::string _name;
+
+	template <class RecordSender>
+	struct node_set
+	{
+		RecordSender _record;
+
+		[[nodiscard]] auto record() noexcept -> auto& { return _record; }
+	};
+	template <class R>
+	node_set(R) -> node_set<R>;
 
 	struct do_record
 	{
@@ -251,19 +239,17 @@ struct foliage
 		auto operator()() const -> void { log_event("record(" + _self->_name + ")"); }
 	};
 
-	struct record
+	/// 录制：等齐全部依赖，然后录。
+	struct make_nodes
 	{
-		decltype(make_record_node(
-			::std::declval<::std::vector<node_sender>>(), ::std::declval<do_record>())) _sender;
-
-		record(foliage& self, ::std::vector<node_sender> dependencies)
-			: _sender(make_record_node(::std::move(dependencies), do_record{&self}))
+		auto operator()(foliage& self, ::std::vector<node_sender> dependencies) const
 		{
+			return node_set{
+				dynamic_when_all(::std::move(dependencies)) | ::stdexec::then(do_record{&self})};
 		}
-
-		record(record&&) = delete;
-		auto operator=(record&&) -> record& = delete;
 	};
+
+	using nodes = task_data<make_nodes, foliage&, ::std::vector<node_sender>>;
 
 	auto build_task(frame&, entity_view<frame> entities, task_builder builder) -> void
 	{
@@ -277,14 +263,14 @@ struct foliage
 			if (!camera_entity->task_built())
 			{
 				auto const built = camera_entity->build_task();
-				if (auto* const seen = built.task<camera::view>())
+				if (auto* const seen = built.task<camera::nodes>())
 				{
-					dependencies.push_back(make_node(seen->_sender));
+					dependencies.push_back(make_node(seen->view()));
 				}
 			}
-			else if (auto* const seen = camera_entity->task<camera::view>())
+			else if (auto* const seen = camera_entity->task<camera::nodes>())
 			{
-				dependencies.push_back(make_node(seen->_sender));
+				dependencies.push_back(make_node(seen->view()));
 			}
 		}
 		else
@@ -295,17 +281,14 @@ struct foliage
 		// —— 隐式构建：直接取 task，没构建就顺手把它构建了 ——
 		if (auto renderer_entity = entities.entity<renderer>())
 		{
-			if (auto* const opening = renderer_entity->task<renderer::begin>())
-			{
-				dependencies.push_back(make_node(opening->_sender));
-			}
+			// 一个 task 暴露多个节点，所以只查一次。
+			auto* const made = renderer_entity->task<renderer::nodes>();
+			assert(made != nullptr && "job arch: renderer 没有登记 nodes");
 
-			auto&& recording = builder.emplace<record>(*this, ::std::move(dependencies));
+			dependencies.push_back(make_node(made->begin()));
 
-			if (auto* const joining = renderer_entity->task<renderer::fence>())
-			{
-				joining->add_recorder(make_node(::std::move(recording._sender)));
-			}
+			auto&& recording = builder.emplace<nodes>(*this, ::std::move(dependencies));
+			made->add_recorder(make_node(::std::move(recording.record())));
 		}
 	}
 };

@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <memory>
 #include <optional>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -73,6 +74,100 @@ struct task_builder
 		assert(!_tasks->contains<TaskType>() && "job arch: 同一个 task 类型重复 emplace");
 		return _tasks->emplace<TaskType>(::std::forward<Args>(arguments)...);
 	}
+};
+
+/// 让 task 的成员类型**只写一遍**。这是库在这件事上管的**全部**——task 长什么样、
+/// 暴露几个节点、叫什么名字，都归 entity 自己。
+///
+/// C++ 的非静态数据成员不能用 `auto` 推导，于是想把一条表达式（比如一条 sender 管线）
+/// 存进 task，通常要写两遍：一遍 `decltype(工厂(::std::declval<...>()))` 当成员类型，
+/// 一遍真的调工厂拿值。
+///
+/// 把**工厂本身做成一个类型**就能合并：类型那一侧用 `::std::invoke_result_t`（里面没有
+/// 调用，只有类型），值那一侧在构造函数里调。管线文本只存在于工厂的 `operator()` 里。
+///
+/// 工厂用类型而不是函数指针当模板参数，还顺带绕开一个坑：嵌在 entity 里的工厂如果是
+/// 函数，它的**推导返回类型在 entity 闭合之前用不了**（成员函数体是延迟解析的）；
+/// 而类型只在**实例化**时才展开 `operator()` 的返回类型，那时候 entity 早就完整了。
+/// 于是工厂的返回类型也不必再写死。
+///
+/// **库不规定 task 长什么样**：`task_data` 直接**继承工厂的返回类型**，所以暴露几个节点、
+/// 叫什么名字、带不带方法，全写在 entity 自己那个返回类型里；成员类型靠 CTAD 推出来，
+/// 一遍都不用写。
+///
+/// ```cpp
+/// struct renderer
+/// {
+///     /// 名字住在这里。成员类型 CTAD 推导。
+///     template <class BeginSender, class FenceSender>
+///     struct node_set
+///     {
+///         BeginSender _begin;
+///         FenceSender _fence;
+///
+///         auto begin() noexcept -> auto& { return _begin; }
+///         auto fence() noexcept -> auto& { return _fence; }
+///     };
+///     template <class B, class F> node_set(B, F) -> node_set<B, F>;
+///
+///     struct make_nodes
+///     {
+///         auto operator()(frame& context) const
+///         {
+///             auto opening = /* ... */;
+///             auto joining = opening | /* ... */;
+///             return node_set{::std::move(opening), ::std::move(joining)};
+///         }
+///     };
+///
+///     using nodes = task_data<make_nodes, frame&>;   // 一行
+/// };
+///
+/// // 用的时候
+/// auto* const made = renderer_entity->task<renderer::nodes>();
+/// make_node(made->begin());
+/// ```
+///
+/// **task 必须写成别名。** 别名不实例化，于是 `invoke_result_t` 推迟到真正用到时才展开，
+/// 那时候 entity 早就完整了。写成 `struct nodes : task_data<...>` 会在 entity 还没闭合时
+/// 就实例化基类，工厂的推导返回类型那会儿还拿不到，两个编译器都报
+/// "no type named 'type' in 'std::invoke_result<...>'"。
+///
+/// @tparam Factory 无状态、可默认构造的函数对象；返回一个**类类型**
+template <class Factory, class... Args>
+struct task_data : ::std::invoke_result_t<Factory, Args...>
+{
+	using data_type = ::std::invoke_result_t<Factory, Args...>;
+
+	explicit task_data(Args... arguments)
+		: data_type(Factory{}(::std::forward<Args>(arguments)...))
+	{
+	}
+
+	// task 一律地址敏感（管线里常攥着自己成员的地址），而且不可移动才能躲开
+	// `::entt::basic_any` 去实例化 `::std::vector` 那条对只可移动元素不可用的拷贝构造。
+	task_data(task_data&&) = delete;
+	auto operator=(task_data&&) -> task_data& = delete;
+};
+
+/// 带自有状态的 task：状态作为**第一个基类**先构造好，再连同其余参数交给工厂——
+/// 于是工厂做出来的 sender 可以攥着状态的地址（汇合点引用录制名单就是这么来的）。
+///
+/// 状态不能塞进工厂的返回类型里：那东西要从工厂的返回值**移动**进基类，地址会变。
+template <class Factory, class StateType, class... Args>
+struct stateful_task_data
+	: StateType
+	, ::std::invoke_result_t<Factory, StateType&, Args...>
+{
+	using data_type = ::std::invoke_result_t<Factory, StateType&, Args...>;
+
+	explicit stateful_task_data(Args... arguments)
+		: data_type(Factory{}(static_cast<StateType&>(*this), ::std::forward<Args>(arguments)...))
+	{
+	}
+
+	stateful_task_data(stateful_task_data&&) = delete;
+	auto operator=(stateful_task_data&&) -> stateful_task_data& = delete;
 };
 
 /// entity 容器。**只有容器原语**：增、查、遍历。驱动构建是 `build_all` 的事。
