@@ -94,6 +94,18 @@
     <ClInclude Include="demo\consumer-arch\barrier.h" />
     <ClInclude Include="demo\consumer-arch\consumer_task.h" />
     <ClInclude Include="demo\consumer-arch\demo_vulkan.h" />
+    <ClInclude Include="demo\consumer-arch\job.h" />
+    <ClInclude Include="demo\frame-graph\entities.h" />
+    <ClInclude Include="demo\frame-graph\frame_graph.h" />
+    <ClInclude Include="demo\frame-graph\renderer.h" />
+    <ClInclude Include="demo\job-arch\dynamic_when_all.h" />
+    <ClInclude Include="demo\job-arch\manual_lifetime.h" />
+    <ClInclude Include="demo\pull-graph\pull_graph.h" />
+    <ClInclude Include="demo\task-graph\dynamic_when_all.h" />
+    <ClInclude Include="demo\task-graph\frame_context.h" />
+    <ClInclude Include="demo\task-graph\job.h" />
+    <ClInclude Include="demo\task-graph\node_sender.h" />
+    <ClInclude Include="demo\task-graph\task_graph.h" />
     <ClInclude Include="include\bvn\animations\environment.h" />
     <ClInclude Include="include\bvn\animations\keyframe.h" />
     <ClInclude Include="include\bvn\assets\assets.h" />
@@ -150,9 +162,24 @@
     <ClInclude Include="source\client\preview_controller.h" />
     <ClInclude Include="source\client\preview_state.h" />
     <ClInclude Include="source\client\render_workflow.h" />
+    <ClInclude Include="vkfu\include\vkfu\branch_pipe.h" />
+    <ClInclude Include="vkfu\include\vkfu\chain.h" />
+    <ClInclude Include="vkfu\include\vkfu\expression.h" />
+    <ClInclude Include="vkfu\include\vkfu\extension.h" />
+    <ClInclude Include="vkfu\include\vkfu\generated\vulkan-v1.4.328.h" />
+    <ClInclude Include="vkfu\include\vkfu\generated\vulkan-v1.4.328\vulkan-v1.4.328.commands.h" />
+    <ClInclude Include="vkfu\include\vkfu\generated\vulkan-v1.4.328\vulkan-v1.4.328.enums.h" />
+    <ClInclude Include="vkfu\include\vkfu\generated\vulkan-v1.4.328\vulkan-v1.4.328.objects.h" />
+    <ClInclude Include="vkfu\include\vkfu\generated\vulkan-v1.4.328\vulkan-v1.4.328.param.h" />
+    <ClInclude Include="vkfu\include\vkfu\query.h" />
+    <ClInclude Include="vkfu\include\vkfu\reference.h" />
+    <ClInclude Include="vkfu\include\vkfu\storage.h" />
+    <ClInclude Include="vkfu\include\vkfu\vulkan_object.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="demo\consumer-arch\demo.cpp" />
+    <ClCompile Include="demo\job-arch\main.cpp" />
+    <ClCompile Include="demo\pull-graph\main.cpp" />
     <ClCompile Include="plugins\test_basic\test_plugin.cpp" />
     <ClCompile Include="source\assets\sprite_clip.cpp" />
     <ClCompile Include="source\platform\event.cpp" />

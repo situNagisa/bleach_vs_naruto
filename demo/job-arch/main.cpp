@@ -13,6 +13,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <typeindex>
 
 #include <exec/split.hpp>
 #include <exec/static_thread_pool.hpp>
