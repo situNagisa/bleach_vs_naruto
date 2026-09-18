@@ -114,7 +114,6 @@ struct vulkan_context
 	::std::vector<::VkImageView> _swapchain_image_view_handles;
 	::vkkl::pipeline_layout _triangle_pipeline_layout;
 	::vkkl::pipeline _triangle_pipeline;
-	temporary_queue_synchronization _temporary_queue_synchronization;
 };
 
 namespace detail
@@ -180,13 +179,6 @@ inline auto global_vulkan_env_renderer::swapchain_image_format() const noexcept 
 inline auto global_vulkan_env_renderer::swapchain_images() const noexcept -> ::std::span<::VkImage const> { return _context->_swapchain_images; }
 inline auto global_vulkan_env_renderer::swapchain_image_views() const noexcept -> ::std::span<::VkImageView const> { return _context->_swapchain_image_view_handles; }
 inline auto global_vulkan_env_renderer::triangle_pipeline() const noexcept -> ::VkPipeline { return _context->_triangle_pipeline.handle; }
-
-// TEMPORARY CODE: keep the temporary queue synchronization out of frame resources.
-[[nodiscard]] inline auto lock_temporary_queue_synchronization(global_vulkan_env_renderer renderer)
-	-> ::std::unique_lock<::std::mutex>
-{
-	return ::std::unique_lock{renderer._context->_temporary_queue_synchronization._mutex};
-}
 
 inline auto create_instance(vulkan_context& renderer, ::bvn::platform::window const& target_window) -> void
 {
