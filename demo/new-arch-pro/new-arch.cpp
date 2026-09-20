@@ -3,9 +3,6 @@
 #include <exception>
 #include <print>
 
-#include <SDL3/SDL_events.h>
-#include <SDL3/SDL_timer.h>
-
 #include <stdexec/execution.hpp>
 #include <exec/static_thread_pool.hpp>
 
@@ -13,10 +10,11 @@
 
 #include <bvn/platform/sdl_context.h>
 
-#include "./render.h"
-#include "./entity.h"
-#include "./entities.h"
-#include "./frame_context.h"
+#include "./entity/render.h"
+#include "./entity/input.h"
+#include "./entity/entity.h"
+#include "./framework/entities.h"
+#include "./framework/frame_context.h"
 
 
 int main() try
@@ -26,29 +24,12 @@ int main() try
 	auto stop_source = ::stdexec::inplace_stop_source{};
 
 	auto draw = renderer{  };
+	auto controls = input{*draw.window.handle};
 	auto a = entity{ };
 
 	auto frame_index = ::std::uint64_t{};
-	for (auto running = true; running;)
+	for (;;)
 	{
-		auto event = ::SDL_Event{};
-		while (::SDL_PollEvent(&event))
-		{
-			if (event.type == ::SDL_EVENT_QUIT || event.type == ::SDL_EVENT_WINDOW_CLOSE_REQUESTED)
-			{
-				running = false;
-			}
-		}
-		if (!running)
-		{
-			break;
-		}
-		if (::SDL_GetWindowFlags(draw.window.handle) & SDL_WINDOW_MINIMIZED)
-		{
-			::SDL_Delay(16);
-			continue;
-		}
-
 		frame_context context{
 			.index = frame_index,
 			.scheduler = pool.get_scheduler(),
@@ -56,8 +37,10 @@ int main() try
 		};
 
 		auto world = entity_storage<frame_context>{};
+		world.add(controls);
 		world.add(draw);
 		world.add(a);
+
 		::build_all(world, context);
 		::stdexec::sync_wait(::nagisa::concurrency::when_all_range(context.roots));
 		++frame_index;

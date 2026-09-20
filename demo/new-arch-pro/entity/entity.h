@@ -10,12 +10,12 @@
 #include <vkkl/command_pool.h>
 
 #include "./render.h"
-#include "./frame_context.h"
-#include "./entities.h"
-#include "./frame_slot.h"
-#include "./any_sender.h"
-#include "./demo_vulkan.h"
-#include "./immovable.h"
+#include "../framework/frame_context.h"
+#include "../framework/entities.h"
+#include "../framework/frame_slot.h"
+#include "../framework/any_sender.h"
+#include "./detail/demo_vulkan.h"
+#include "./detail/immovable.h"
 
 struct entity
 {

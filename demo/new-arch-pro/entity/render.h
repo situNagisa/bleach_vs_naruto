@@ -5,18 +5,22 @@
 #include <stdexec/execution.hpp>
 #include <exec/split.hpp>
 
+#include <nagisa/concurrency/lease.h>
 #include <nagisa/concurrency/when_all_range.h>
 
-#include "./frame_context.h"
-#include "./entities.h"
-#include "./frame_slot.h"
-#include "./demo_vulkan.h"
-#include "./any_sender.h"
-#include "./immovable.h"
-#include "./resource_pool.h"
+#include "../framework/frame_context.h"
+#include "../framework/entities.h"
+#include "../framework/frame_slot.h"
+#include "../framework/any_sender.h"
+
+#include "./detail/demo_vulkan.h"
+#include "./detail/immovable.h"
 
 struct renderer
 {
+	template<class T>
+	using resource_pool = ::nagisa::concurrency::bounded_lease_pool<T*, 4>;
+
 	template <class Begin, class End, class Fence>
 	struct _senders
 	{
