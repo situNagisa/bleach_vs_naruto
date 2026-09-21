@@ -24,7 +24,7 @@ int main() try
 	auto stop_source = ::stdexec::inplace_stop_source{};
 
 	auto draw = renderer{  };
-	auto controls = input{*draw.window.handle};
+	auto controls = input{draw.window};
 	auto a = entity{ };
 
 	auto frame_index = ::std::uint64_t{};
