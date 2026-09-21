@@ -12,7 +12,7 @@
 
 #include "./entity/render.h"
 #include "./entity/input.h"
-#include "./entity/entity.h"
+#include "./entity/main_menu.h"
 #include "./framework/entities.h"
 #include "./framework/frame_context.h"
 
@@ -25,7 +25,7 @@ int main() try
 
 	auto draw = renderer{  };
 	auto controls = input{draw.window};
-	auto a = entity{ };
+	auto a = main_menu{};
 
 	auto frame_index = ::std::uint64_t{};
 	for (;;)
@@ -40,7 +40,7 @@ int main() try
 		world.add(controls);
 		world.add(draw);
 		world.add(a);
-
+		
 		::build_all(world, context);
 		::stdexec::sync_wait(::nagisa::concurrency::when_all_range(context.roots));
 		++frame_index;
