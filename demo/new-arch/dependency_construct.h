@@ -25,10 +25,24 @@
 /// 仍然不满足这个语法层面的要求（clang/g++ 均拒绝，见 tmp/rev 的探测记录）。
 /// 数组下标没有这个限制，所以退而求其次：pack 展开只用来摊平成数组，
 /// 数组本身用普通循环变量去查。
+///
+/// 有反射（P2996）能用时换一种摊平方式：`^^T == ^^Target` 直接比较类型的
+/// 反射值，语义上跟 `is_same_v` 等价，换上它不是为了更快——两者都只实例化
+/// 这一份函数模板——而是反射版不需要 `<type_traits>` 那套 trait 机器，编译期
+/// 开销更低。宏保护用 `__cpp_impl_reflection`，不是标准最终定下的
+/// `__cpp_reflection`：目前 g++ 16 的实验实现只定义前者，且必须显式加
+/// `-freflection`；不加这个 flag 时宏不成立，预处理阶段整段 `#if` 连同里面
+/// 的 `^^` 语法一起被跳过，两个编译器默认构建都走下面 is_same_v 那条路，
+/// 不受影响。clang 22 目前完全没有反射支持（`^^` 会被当成 blocks 语法解析，
+/// 不是宏缺失的问题，探测记录同样在 tmp/rev）。
 template <class Target, class... T>
 consteval ::std::size_t pack_index_impl()
 {
+#if defined(__cpp_impl_reflection)
+	constexpr bool matches[] = { (^^T == ^^Target)... };
+#else
 	constexpr bool matches[] = { ::std::is_same_v<Target, T>... };
+#endif
 	for (::std::size_t index = 0; index < sizeof...(T); ++index)
 	{
 		if (matches[index])
@@ -144,4 +158,62 @@ struct static_dependency_construct : manual_lifetime<T>...
 	::std::bitset<sizeof...(T)> _building;
 	::std::array<::std::size_t, sizeof...(T)> _build_order{};
 	::std::size_t _build_count = 0;
+};
+
+
+/// 包一层引用，把已经存在的对象 D 转发过去，同时显式声明"我转发 T... 这些
+/// 类型"——自己不新造任何东西、不管生命周期，resolve<Target>() 原样转给
+/// _inner。
+///
+/// T... 必须显式给，不能从"D 满足 dependency_construct 概念"反推：那条
+/// concept 只保证 `self.resolve<Target>()` 这个调用点声明上合法，不保证
+/// "Target 其实不在 D 支持的范围内时，编译期能探测出来"——pack_index 找不到
+/// Target 是刻意设计成硬错误（consteval 里走到 throw），不是替换失败，
+/// `requires resolves_to<D, Target>` 这种约束因此对任何 Target 都成立（真探
+/// 测过：见 tmp/rev 的 probe_resolves_to.cpp），没法拿来当筛选依据。显式列出
+/// T... 把"这个转发器认领哪些类型"从"问 D 内部怎么实现"变成"构造时明说"，
+/// resolve<Target>() 上的约束换成纯类型匹配（`(same_as<Target, T> || ...)`），
+/// 不涉及任何 D 的具体实现，是真正 SFINAE 友好、能拿来做重载决议依据的判据。
+///
+/// @pre dependency_construct<D, T...> 成立——T... 必须都是 D 真的支持的类型，
+/// 这条前提本身没法在这里机械验证（原因同上），错的话会在真正 resolve 到
+/// D 内部时才暴露成一个硬编译错误。
+///
+/// 纯引用包装，没有所有权语义，拷贝/移动跟拷贝一个指针一样安全，不禁用。
+template <class D, class... T>
+struct forward_dependency_construct
+{
+	explicit forward_dependency_construct(D& inner) noexcept : _inner(&inner) {}
+
+	template <class Target>
+		requires (::std::same_as<Target, T> || ...)
+	[[nodiscard]] Target& resolve()
+	{
+		return _inner->template resolve<Target>();
+	}
+
+	D* _inner;
+};
+
+
+/// 把若干个 forward_dependency_construct<D, T...> 拼成一个：不新造任何存储，
+/// 纯粹多重继承起来，再用一条 pack 展开的 using 声明把各自的 resolve<Target>
+/// 重载合并到同一张候选表里。
+///
+/// 之所以不用手写的 if constexpr 分派链：合并之后剩下的就是一次普通的重载
+/// 决议——每个 Fwd::resolve 上 `(same_as<Target, T> || ...)` 这条约束是纯类型
+/// 匹配，跟 D 的实现无关，真正 SFINAE 友好，重载决议自己就能挑出唯一认识
+/// Target 的那个；如果两个 Fwd 的 T... 恰好有重叠（拼接前提是类型集合不
+/// 重叠，这种情况本该避免），调用点会是一次二义性错误，而不是悄悄选中某一
+/// 个——这正是我们想要的失败方式。
+///
+/// 构造函数直接搬进来（forward_dependency_construct 拷贝/移动跟拷贝一个
+/// 指针一样安全），CTAD 从构造参数自动推出 Fwd...，调用点不用重复写模板
+/// 参数列表。
+template <class... Fwd>
+struct cat_dependency_construct : Fwd...
+{
+	explicit cat_dependency_construct(Fwd... fwd) : Fwd(::std::move(fwd))... {}
+
+	using Fwd::resolve...;
 };
