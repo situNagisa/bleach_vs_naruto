@@ -5,38 +5,15 @@
 #include <cassert>
 #include <concepts>
 #include <cstddef>
+#include <map>
 #include <type_traits>
+#include <optional>
+#include <unordered_map>
 
-#include "manual_lifetime.h"
+#include <nagisa/concurrency/_manual_lifetime.h>
 
-
-/// Target 在 T... 里的下标，编译期常量，没有任何运行时查找。
-/// Target 不在 T... 里 => 编译错误（下面走到 throw，consteval 调用点
-/// 要求整个求值是常量表达式，求值中走到 throw 就不满足，这次调用本身
-/// 编译不过——不是 SFINAE 可探测的替换失败）。
-///
-/// 用一次 fold 表达式把"每个 T 是不是 Target"摊平成一个 bool 数组，
-/// 再在这个普通数组上线性找第一个 true——只实例化这一份函数模板，不像
-/// 逐层剥 First/Rest 的递归特化那样要为 N 个类型另外实例化 N 层特化。
-///
-/// C++26 的 pack indexing（`T...[i]`）本来看着更直接，试过了但用不了：
-/// 它要求下标是真正的常量表达式（模板参数、字面量），哪怕整个函数是
-/// consteval、下标变量的值在当前这次求值里确实已知，一个普通的循环变量
-/// 仍然不满足这个语法层面的要求（clang/g++ 均拒绝，见 tmp/rev 的探测记录）。
-/// 数组下标没有这个限制，所以退而求其次：pack 展开只用来摊平成数组，
-/// 数组本身用普通循环变量去查。
-///
-/// 有反射（P2996）能用时换一种摊平方式：`^^T == ^^Target` 直接比较类型的
-/// 反射值，语义上跟 `is_same_v` 等价，换上它不是为了更快——两者都只实例化
-/// 这一份函数模板——而是反射版不需要 `<type_traits>` 那套 trait 机器，编译期
-/// 开销更低。宏保护用 `__cpp_impl_reflection`，不是标准最终定下的
-/// `__cpp_reflection`：目前 g++ 16 的实验实现只定义前者，且必须显式加
-/// `-freflection`；不加这个 flag 时宏不成立，预处理阶段整段 `#if` 连同里面
-/// 的 `^^` 语法一起被跳过，两个编译器默认构建都走下面 is_same_v 那条路，
-/// 不受影响。clang 22 目前完全没有反射支持（`^^` 会被当成 blocks 语法解析，
-/// 不是宏缺失的问题，探测记录同样在 tmp/rev）。
 template <class Target, class... T>
-consteval ::std::size_t pack_index_impl()
+consteval ::std::optional<::std::size_t> pack_index_impl()
 {
 #if defined(__cpp_impl_reflection)
 	constexpr bool matches[] = { (^^T == ^^Target)... };
@@ -46,33 +23,25 @@ consteval ::std::size_t pack_index_impl()
 	for (::std::size_t index = 0; index < sizeof...(T); ++index)
 	{
 		if (matches[index])
-		{
 			return index;
-		}
 	}
-	throw "dependency_construct: Target 不在 T... 里";
+	return ::std::nullopt;
 }
 
 template <class Target, class... T>
-inline constexpr ::std::size_t pack_index_v = pack_index_impl<Target, T...>();
+inline constexpr ::std::optional<::std::size_t> pack_index_v = ::pack_index_impl<Target, T...>();
+::std::unordered_map<int, int>::at;
+template<class T>
 
 
-/// 单个类型这一半的约束，拆成独立的 concept 单独命名（而不是直接把
-/// `requires` 表达式塞进下面的折叠表达式）——两者语义等价，但把 `requires`
-/// 表达式直接摆进折叠表达式会踩到 GCC 处理这类构造时的一个已知内部错误。
 template <class D, class Target>
-concept resolves_to = requires (D& self) {
-	{ self.template resolve<Target>() } -> ::std::same_as<Target&>;
+concept resolves_to = requires (D self) 
+{
+	{ ::std::forward<decltype(self)>(self).template resolve<Target>() } -> ::std::convertible_to<Target&>;
 };
 
-/// D 是 T... 这一组类型的构造顺序原语：每个类型正好一份，构造顺序由谁在自己的
-/// 构造函数里递归 resolve 了谁来决定（路线 B），不预先声明依赖图。
-///
-/// 这条 concept 只规定行为：对每个 T，`self.resolve<T>()` 必须能编译、必须
-/// 返回 `T&`。存储怎么做、state 放哪、要不要一次性种几个根节点，都是实现
-/// 细节，concept 不管。
 template <class D, class... T>
-concept dependency_construct = (resolves_to<D, T> && ...);
+concept dependency_graph = (resolves_to<D, T> && ...);
 
 
 /// 静态情况的一份实现：T... 编译期定死，每个类型正好一份存储。
@@ -92,34 +61,33 @@ concept dependency_construct = (resolves_to<D, T> && ...);
 /// 因为被先声明的依赖而先造出来。真实构造顺序单独记一份定长数组，销毁
 /// 时逆着走；因为最多记 `sizeof...(T)` 条、数量编译期已知，不用堆分配。
 template <class... T>
-struct static_dependency_construct : manual_lifetime<T>...
+struct static_graph : ::nagisa::concurrency::details::manual_lifetime<T>...
 {
-	static_dependency_construct() = default;
-
-	static_dependency_construct(static_dependency_construct const&) = delete;
-	static_dependency_construct& operator=(static_dependency_construct const&) = delete;
-	static_dependency_construct(static_dependency_construct&&) = delete;
-	static_dependency_construct& operator=(static_dependency_construct&&) = delete;
-
-	~static_dependency_construct()
+private:
+	using self_type = static_graph;
+public:
+	constexpr static_graph() noexcept = default;
+	constexpr static_graph(self_type const&) noexcept = delete;
+	constexpr self_type& operator=(self_type const&) noexcept = delete;
+	constexpr static_graph(self_type&&) noexcept = delete;
+	constexpr self_type& operator=(self_type&&) noexcept = delete;
+	constexpr ~static_graph() noexcept
 	{
 		for (auto index = _build_count; index != 0; )
 		{
 			--index;
-			_destroy_at(_build_order[index]);
+			self_type::_destroy_at(_build_order[index]);
 		}
 	}
 
 	/// @pre 没有在 Target 自己的构造函数里再次 resolve 自己（会被 assert 抓住）。
 	template <class Target>
-	[[nodiscard]] Target& resolve()
+	constexpr [[nodiscard]] Target& resolve() noexcept(::std::is_nothrow_constructible_v<Target, self_type&>)
 	{
 		constexpr auto index = pack_index_v<Target, T...>;
 
 		if (_built[index])
-		{
-			return this->template manual_lifetime<Target>::get();
-		}
+			return ::nagisa::concurrency::details::manual_lifetime<Target>::get();
 
 		assert(!_building[index] && "dependency_construct: 构造顺序成环");
 		_building[index] = true;
@@ -148,8 +116,8 @@ struct static_dependency_construct : manual_lifetime<T>...
 		// 按下标把销毁请求分派到对应的 manual_lifetime<T>::destroy()。
 		// table 的第 i 项对应 T...里第 i 个类型——跟 fold 展开的顺序、跟
 		// pack_index_v 给出的下标，三者天然一致，不用另外核对。
-		static constexpr auto table = ::std::array<void (*)(static_dependency_construct&) noexcept, sizeof...(T)>{
-			(+[](static_dependency_construct& self) noexcept { self.template manual_lifetime<T>::destroy(); })...
+		static constexpr auto table = ::std::array<void (*)(static_graph&) noexcept, sizeof...(T)>{
+			(+[](static_graph& self) noexcept { self.template manual_lifetime<T>::destroy(); })...
 		};
 		table[index](*this);
 	}
