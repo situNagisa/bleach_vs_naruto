@@ -33,6 +33,7 @@
 
 - 使用东 `const`（`int const&`）。声明变量时同时初始化，不留下未初始化对象。只有确实需要未初始化存储时，才使用当前标准支持的 indeterminate 设施。
 - 激进使用 `auto`：初始化表达式已经表达类型时使用 `auto`。不要写冗余的声明符（例如 `auto*`）；借用引用且需要保留表达式引用类别时使用 `auto&&`。如果显式类型能表达重要契约或避免有意义的转换，则使用显式类型。
+- 函数返回类型默认用前置写法（`int foo();`、`widget const& bar();`），不要写成尾置 `auto foo() -> int`。只有前置写法做不到时才使用尾置返回类型：返回类型引用了参数（`auto foo(T&& t) -> decltype(t.value())`），返回 `decltype(auto)` 之外还需要在尾置位置表达约束（`auto foo() -> some_concept auto`），或者是本就要求尾置语法的场景（lambda、CPO 骨架里的 `decltype(auto)`）。`auto` 从函数体推导返回类型的用法遵循同一原则：能确定具体类型时优先写出来，不要仅仅因为“可以用 auto”就省略。
 - 能在编译期计算时标记 `constexpr`/`consteval`。不抛异常的函数标记 `noexcept`。
 - 无意引入隐式转换时加 `explicit`；语义明确且有意的隐式转换可以保留。
 - 忽略返回值很可能是错误时加 `[[nodiscard]]`。

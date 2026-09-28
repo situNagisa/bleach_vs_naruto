@@ -19,39 +19,44 @@ struct choice_result
 	bool nothrow;
 };
 
-consteval choice_result choice(auto&& expression) noexcept // 也允许直接从类型推导出值
+// choice 只按类型参数化，检测表达式用 declval 构造——原因见
+// CPO(custom point object).md：直接把运行期实参递给 noexcept()/requires()
+// 在目前的编译器上可能报错。
+template <class T>
+consteval choice_result choice() noexcept // 也允许直接从类型推导出值
 {
 	// 优先级为：成员函数，ADL，开洞
-	if constexpr (requires { ::std::forward<decltype(expression)>(expression).evaluate(); })
+	if constexpr (requires { ::std::declval<T>().evaluate(); })
 	{
-		return {choose::member, noexcept(::std::forward<decltype(expression)>(expression).evaluate())};
+		return {choose::member, noexcept(::std::declval<T>().evaluate())};
 	}
-	else if constexpr (requires { evaluate(::std::forward<decltype(expression)>(expression)); })
+	else if constexpr (requires { evaluate(::std::declval<T>()); })
 	{
-		return {choice::adl, noexcept(evaluate(::std::forward<decltype(expression)>(expression)))};
+		return {choose::adl, noexcept(evaluate(::std::declval<T>()))};
 	}
 	// 根据具体实现增加分支
-	else if constexpr (requires { _vkfu_evaluate(::std::forward<decltype(expression)>(expression)); })
+	else if constexpr (requires { _vkfu_evaluate(::std::declval<T>()); })
 	{
-		return {choice::prefixed, noexcept(_vkfu_evaluate(::std::forward<decltype(expression)>(expression))};
+		return {choose::prefixed, noexcept(_vkfu_evaluate(::std::declval<T>()))};
 	}
 	else
 	{
-		return {choice::none, true};
+		return {choose::none, true};
 	}
 }
 }
 struct evaluate_t
 {
-	constexpr decltype(auto) operator()(auto&& expression) const noexcept(evaluate_cpo::choice(::std::forward<decltype(expression)>(expression)).nothrow)
-		requires (evaluate_cpo::choice(::std::forward<decltype(expression)>(expression)).strategy != choose::none)
+	constexpr decltype(auto) operator()(auto&& expression) const
+		noexcept(evaluate_cpo::choice<decltype(expression)>().nothrow)
+		requires (evaluate_cpo::choice<decltype(expression)>().strategy != evaluate_cpo::choose::none)
 	{
-		constexpr auto strategy = evaluate_cpo::choice(::std::forward<decltype(expression)>(expression)).strategy;
-		if constexpr (strategy == choose::member)
+		constexpr auto strategy = evaluate_cpo::choice<decltype(expression)>().strategy;
+		if constexpr (strategy == evaluate_cpo::choose::member)
 		{
 			return ::std::forward<decltype(expression)>(expression).evaluate();
 		}
-		else if constexpr (strategy == choose::adl)
+		else if constexpr (strategy == evaluate_cpo::choose::adl)
 		{
 			return evaluate(::std::forward<decltype(expression)>(expression));
 		}
@@ -59,11 +64,11 @@ struct evaluate_t
 		{
 			return _vkfu_evaluate(::std::forward<decltype(expression)>(expression));
 		}
-		// 不可能会出现strategy == choice::none的情况，被约束排除了
+		// 不可能会出现strategy == choose::none的情况，被约束排除了
 	}
 };
-}
 inline constexpr evaluate_t evaluate{};
+```
 
 // 原语：类型特征（自定义点），编写方法参考 [类型特征](类型特征.md)
 template<class T>
