@@ -94,7 +94,7 @@ namespace vulkan_scenario
 	{
 		::std::puts("part 2: acquire -> consume -> transition -> clear -> transition -> submit -> present");
 		auto sc = ::gpu::mock::swapchain{};
-		auto dom = ::gpu::domain{};
+		auto dom = ::gpu::mock::domain{};
 
 		auto work = ::gpu::acquire(sc)
 			| ::gpu::consume()
@@ -107,7 +107,7 @@ namespace vulkan_scenario
 			| ::gpu::transition(::gpu::present_src{})
 			| ::gpu::submit(dom)
 			| ::gpu::present(sc)
-			| ::stdexec::write_env(::stdexec::prop{::gpu::get_domain, &dom});
+			| ::stdexec::write_env(::stdexec::prop{::gpu::mock::get_domain, &dom});
 
 		::stdexec::sync_wait(::std::move(work));
 

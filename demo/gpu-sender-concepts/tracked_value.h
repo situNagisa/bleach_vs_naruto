@@ -11,7 +11,12 @@
 #include "./mock_vulkan.h"
 
 /// domain、pending_value、tracked_value：默认实现，让 tracked_resource/pending_resource
-/// 这两个 concept 落地成能真的跑起来的东西。
+/// 这两个 concept 落地成能真的跑起来的东西。全部放进 gpu::mock（不是裸的
+/// gpu），跟 gpu::vk（vulkan_tracked_value.h）保持同一种结构——这不只是命名
+/// 一致性：本文件下面的 make_pending 要靠 ADL 被 algorithms.h 里的 make_pending
+/// CPO 找到，如果这些类型直接放在 gpu 里，跟 CPO 对象本身（gpu::make_pending）
+/// 撞在同一个命名空间，会变成"重定义"错误，不是简单的遮蔽——CPO 的分派必须靠
+/// ADL 在实参的关联命名空间里找到实现，实现和调用点对象不能同名同空间。
 ///
 /// domain 只做一件事——"当前在写哪个命令缓冲、结束这一批时要提交给谁"。它不做任何
 /// 资源状态判断：哪里要不要同步，已经由 transite/consume_external 在编译期声明好了，
@@ -19,27 +24,27 @@
 /// scheduler（对应 nvexec 的 stream_scheduler 那种 domain 改写），是另一个可以单独
 /// 决定的架构问题；这里先用一个能被 env 查到的引用作为占位实现，把"批次由谁负责"
 /// 和"原语/concept 的形状"这两个问题分开。
-namespace gpu::mock_domain
+namespace gpu::mock
 {
 class domain
 {
 public:
-	[[nodiscard]] ::gpu::mock::command_buffer_handle command_buffer() const noexcept { return _command; }
+	[[nodiscard]] command_buffer_handle command_buffer() const noexcept { return _command; }
 
-	void add_wait(::gpu::mock::signal_handle signal) { _waits.push_back(signal); }
+	void add_wait(signal_handle signal) { _waits.push_back(signal); }
 
 	/// 结束当前命令缓冲、提交、拿到这批的信号，开一个新的命令缓冲接着录。
-	[[nodiscard]] ::gpu::mock::signal_handle cut()
+	[[nodiscard]] signal_handle cut()
 	{
-		auto const signal = ::gpu::mock::queue_submit(_command, _waits);
+		auto const signal = queue_submit(_command, _waits);
 		_waits.clear();
-		_command = ::gpu::mock::next_handle();
+		_command = next_handle();
 		return signal;
 	}
 
 private:
-	::gpu::mock::command_buffer_handle _command = ::gpu::mock::next_handle();
-	::std::vector<::gpu::mock::signal_handle> _waits{};
+	command_buffer_handle _command = next_handle();
+	::std::vector<signal_handle> _waits{};
 };
 
 /// 给 transite/consume_external 的实现用的环境查询：这一步是不是还在某个 domain 的
@@ -87,7 +92,7 @@ struct consume_external_sender
 
 	Handle _handle;
 	State _state;
-	::gpu::mock::signal_handle _signal;
+	signal_handle _signal;
 
 	template <class Receiver>
 	struct operation
@@ -96,15 +101,15 @@ struct consume_external_sender
 
 		Handle _handle;
 		State _state;
-		::gpu::mock::signal_handle _signal;
+		signal_handle _signal;
 		Receiver _receiver;
 
 		void start() & noexcept
 		{
-			if (auto* dom = ::gpu::get_domain(::stdexec::get_env(_receiver)))
+			if (auto* dom = ::gpu::mock::get_domain(::stdexec::get_env(_receiver)))
 				dom->add_wait(_signal);
 			else
-				::gpu::mock::wait_signal(_signal);
+				wait_signal(_signal);
 			::stdexec::set_value(::std::move(_receiver), tracked_value<Handle, State>{_handle, _state});
 		}
 	};
@@ -124,7 +129,7 @@ struct pending_value
 {
 	Handle _handle;
 	State _state;
-	::gpu::mock::signal_handle _signal;
+	signal_handle _signal;
 
 	[[nodiscard]] consume_external_sender<Handle, State> consume_external() const
 	{
@@ -135,7 +140,7 @@ struct pending_value
 /// make_pending 的 ADL 实现：algorithms.h::submit 靠这个把"提交完的 tracked_resource
 /// + 这批的信号"包成本命名空间的 pending_value，不需要 submit 认识这个类型模板。
 template <class Handle, class State>
-[[nodiscard]] pending_value<Handle, State> make_pending(tracked_value<Handle, State> const& item, ::gpu::mock::signal_handle signal)
+[[nodiscard]] pending_value<Handle, State> make_pending(tracked_value<Handle, State> const& item, signal_handle signal)
 {
 	return {::gpu::resource(item), ::gpu::state(item), signal};
 }
@@ -165,22 +170,22 @@ struct transite_sender
 
 		void start() & noexcept
 		{
-			auto* dom = ::gpu::get_domain(::stdexec::get_env(_receiver));
+			auto* dom = ::gpu::mock::get_domain(::stdexec::get_env(_receiver));
 			assert(dom != nullptr && "transite: 只能在还有 domain 在录制的链路里调用");
-			if constexpr (image_state<From> && image_state<To>)
+			if constexpr (::gpu::image_state<From> && ::gpu::image_state<To>)
 			{
-				mock::cmd_pipeline_barrier(dom->command_buffer(),
+				cmd_pipeline_barrier(dom->command_buffer(),
 					_from.stage(), _from.access(), _to.stage(), _to.access(),
 					_from.layout(), _to.layout(), _handle);
 			}
-			else if constexpr (buffer_state<From> && buffer_state<To>)
+			else if constexpr (::gpu::buffer_state<From> && ::gpu::buffer_state<To>)
 			{
-				mock::cmd_buffer_barrier(dom->command_buffer(),
+				cmd_buffer_barrier(dom->command_buffer(),
 					_from.stage(), _from.access(), _to.stage(), _to.access(), _handle);
 			}
 			else
 			{
-				static_assert(detail::always_false<To>, "transite: From/To 必须同属 image_state 或同属 buffer_state");
+				static_assert(::gpu::detail::always_false<To>, "transite: From/To 必须同属 image_state 或同属 buffer_state");
 			}
 			::stdexec::set_value(::std::move(_receiver), tracked_value<Handle, To>{_handle, _to});
 		}
@@ -211,6 +216,6 @@ struct tracked_value
 	}
 };
 
-static_assert(tracked_resource<tracked_value<mock::image_handle, undefined>>);
-static_assert(pending_resource<pending_value<mock::image_handle, undefined>>);
+static_assert(::gpu::tracked_resource<tracked_value<image_handle, ::gpu::undefined>>);
+static_assert(::gpu::pending_resource<pending_value<image_handle, ::gpu::undefined>>);
 }

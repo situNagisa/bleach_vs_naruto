@@ -25,7 +25,7 @@ namespace gpu
 	return ::stdexec::just() | ::stdexec::then([&sc]
 	{
 		auto const result = mock::acquire_next_image(sc);
-		return pending_value<mock::image_handle, undefined>{result.image, undefined{}, result.image_available};
+		return mock::pending_value<mock::image_handle, undefined>{result.image, undefined{}, result.image_available};
 	});
 }
 
@@ -35,7 +35,7 @@ namespace gpu
 /// then 直接因为参数类型不匹配而编译失败。
 [[nodiscard]] inline auto present(mock::swapchain& sc)
 {
-	return ::stdexec::then([&sc](pending_value<mock::image_handle, present_src> const& p)
+	return ::stdexec::then([&sc](mock::pending_value<mock::image_handle, present_src> const& p)
 	{
 		mock::queue_present(sc, p._handle, p._signal);
 	});

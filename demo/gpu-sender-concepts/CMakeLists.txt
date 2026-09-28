@@ -90,3 +90,46 @@ set_target_properties(bvn_gpu_sender_concepts_demo PROPERTIES
 	OUTPUT_NAME gpu-sender-concepts
 	CXX_SCAN_FOR_MODULES OFF
 )
+
+# swapchain_frame.cpp / texture_upload.cpp：同一套 CPO/concept/算法接上真实的
+# vkfu/vkkl/VkImage 类型，逐行对照 demo/new-arch-pro 里 render.h、main_menu.cpp
+# 手写的 barrier/submit/present 序列。两个文件都没有 main()——只用来在真实类型下
+# 编译期验证，不打算被真正链接执行（这台开发机没有 Vulkan loader/驱动）。用一个
+# OBJECT 库把它们编译一遍，让 CI/构建流程能捕捉到这两个文件的真实破坏，同时不
+# 强求下游链接、不要求真的存在可用的 Vulkan 设备。
+find_package(Vulkan QUIET)
+if(TARGET Vulkan::Vulkan)
+	set(GPU_SENDER_CONCEPTS_BVN_ROOT "${CMAKE_CURRENT_LIST_DIR}/../..")
+	if(NOT TARGET vkfu::vkfu)
+		set(VKFU_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+		set(VKFU_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+		add_subdirectory("${GPU_SENDER_CONCEPTS_BVN_ROOT}/vkfu" "${CMAKE_CURRENT_BINARY_DIR}/vkfu" EXCLUDE_FROM_ALL)
+	endif()
+
+	add_library(bvn_gpu_sender_concepts_vulkan_scenes OBJECT EXCLUDE_FROM_ALL
+		swapchain_frame.cpp
+		texture_upload.cpp
+		algorithms.h
+		concepts.h
+		cpo.h
+		vulkan_image_state.h
+		vulkan_tracked_value.h
+	)
+	target_include_directories(bvn_gpu_sender_concepts_vulkan_scenes PRIVATE
+		"${GPU_SENDER_CONCEPTS_BVN_ROOT}/include"
+	)
+	target_link_libraries(bvn_gpu_sender_concepts_vulkan_scenes PRIVATE
+		${GPU_SENDER_CONCEPTS_PROJECT_LIBRARIES}
+		Vulkan::Vulkan
+		vkfu::vkfu
+	)
+	set_target_properties(bvn_gpu_sender_concepts_vulkan_scenes PROPERTIES
+		FOLDER demo
+		CXX_SCAN_FOR_MODULES OFF
+	)
+else()
+	message(STATUS
+		"gpu-sender-concepts: 找不到 Vulkan SDK，跳过 swapchain_frame.cpp/"
+		"texture_upload.cpp 的真实 Vulkan 编译期验证（mock 版本 demo 不受影响）"
+	)
+endif()
