@@ -19,25 +19,24 @@ struct choice_result
 	bool nothrow;
 };
 
-// choice 只按类型参数化，检测表达式用 declval 构造——原因见
-// CPO(custom point object).md：直接把运行期实参递给 noexcept()/requires()
-// 在目前的编译器上可能报错。
-template <class T>
-consteval choice_result choice() noexcept // 也允许直接从类型推导出值
+// choice 用 auto&&/forward 转发真实实参——检测表达式和 operator() 里真正执行
+// 的表达式必须同源，不能用 declval 替代（两者语义不等价：declval 只是"给定
+// 类型构造一个表达式"，不是"转发这次调用真正传入的实参"）。
+consteval choice_result choice(auto&& expression) noexcept
 {
 	// 优先级为：成员函数，ADL，开洞
-	if constexpr (requires { ::std::declval<T>().evaluate(); })
+	if constexpr (requires { ::std::forward<decltype(expression)>(expression).evaluate(); })
 	{
-		return {choose::member, noexcept(::std::declval<T>().evaluate())};
+		return {choose::member, noexcept(::std::forward<decltype(expression)>(expression).evaluate())};
 	}
-	else if constexpr (requires { evaluate(::std::declval<T>()); })
+	else if constexpr (requires { evaluate(::std::forward<decltype(expression)>(expression)); })
 	{
-		return {choose::adl, noexcept(evaluate(::std::declval<T>()))};
+		return {choose::adl, noexcept(evaluate(::std::forward<decltype(expression)>(expression)))};
 	}
 	// 根据具体实现增加分支
-	else if constexpr (requires { _vkfu_evaluate(::std::declval<T>()); })
+	else if constexpr (requires { _vkfu_evaluate(::std::forward<decltype(expression)>(expression)); })
 	{
-		return {choose::prefixed, noexcept(_vkfu_evaluate(::std::declval<T>()))};
+		return {choose::prefixed, noexcept(_vkfu_evaluate(::std::forward<decltype(expression)>(expression)))};
 	}
 	else
 	{
@@ -48,10 +47,10 @@ consteval choice_result choice() noexcept // 也允许直接从类型推导出�
 struct evaluate_t
 {
 	constexpr decltype(auto) operator()(auto&& expression) const
-		noexcept(evaluate_cpo::choice<decltype(expression)>().nothrow)
-		requires (evaluate_cpo::choice<decltype(expression)>().strategy != evaluate_cpo::choose::none)
+		noexcept(evaluate_cpo::choice(::std::forward<decltype(expression)>(expression)).nothrow)
+		requires (evaluate_cpo::choice(::std::forward<decltype(expression)>(expression)).strategy != evaluate_cpo::choose::none)
 	{
-		constexpr auto strategy = evaluate_cpo::choice<decltype(expression)>().strategy;
+		constexpr auto strategy = evaluate_cpo::choice(::std::forward<decltype(expression)>(expression)).strategy;
 		if constexpr (strategy == evaluate_cpo::choose::member)
 		{
 			return ::std::forward<decltype(expression)>(expression).evaluate();

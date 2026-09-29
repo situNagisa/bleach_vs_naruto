@@ -20,8 +20,9 @@ void expect(bool condition, char const* what)
 		throw ::std::runtime_error{what};
 }
 
-/// 第一部分：抽象层的验证，跟 Vulkan 完全无关——证明 tracked_resource/pending_resource
-/// 这两个 concept 是通用的，不是围着 image/buffer 量身定做的。
+/// 第一部分：抽象层的验证，跟 Vulkan 完全无关——证明 tracked_resource/
+/// transitible_tracked_resource/pending_resource 这几个 concept 是通用的，
+/// 不是围着 image/buffer 量身定做的。
 namespace abstract_check
 {
 	struct counter_state
@@ -30,7 +31,9 @@ namespace abstract_check
 		bool operator==(counter_state const&) const = default;
 	};
 
-	// 满足 tracked_resource：resource()/state() 都是 std::copyable，transite() 返回 sender。
+	// 满足 transitible_tracked_resource：resource()/state() 都是 std::copyable，
+	// transite() 产出的还是同一个类型（不是 sender）——这是新代数体系的闭环
+	// 契约，跟之前"transite 返回 sender"的旧版本不同。
 	struct counter_resource
 	{
 		int _id;
@@ -38,21 +41,26 @@ namespace abstract_check
 
 		[[nodiscard]] int resource() const noexcept { return _id; }
 		[[nodiscard]] counter_state state() const noexcept { return _state; }
-		[[nodiscard]] auto transite(counter_state to) const { return ::stdexec::just(counter_resource{_id, to}); }
+		[[nodiscard]] counter_resource transite(counter_state to) const { return {_id, to}; }
 	};
 	static_assert(::gpu::tracked_resource<counter_resource>);
+	static_assert(::gpu::transitible_tracked_resource<counter_resource>);
 
-	// 近似但不满足：缺 transite。
+	// 满足 tracked_resource，但不满足 transitible_tracked_resource：缺 transite。
+	// 在新代数体系里，"没有变换能力的资源"是合法的、更基础的一层，不是被拒绝的
+	// 近似——一个只读常量资源确实满足 tracked_resource，就是不满足它的细化版本。
 	struct missing_transite
 	{
 		[[nodiscard]] int resource() const noexcept { return 0; }
 		[[nodiscard]] counter_state state() const noexcept { return {}; }
 	};
-	static_assert(!::gpu::tracked_resource<missing_transite>);
+	static_assert(::gpu::tracked_resource<missing_transite>);
+	static_assert(!::gpu::transitible_tracked_resource<missing_transite>);
 
-	// 近似但不满足：state() 按引用返回——`{ expr } -> std::copyable` 直接判否，
-	// 因为 copyable 要求对象类型；这正是 tracked_resource 该拒绝的实现（见
-	// concepts.h 顶部的说明），不是约束表达能力不够。
+	// 近似但不满足 tracked_resource（因此也不满足它的细化版本）：state() 按引用
+	// 返回——`{ expr } -> std::copyable` 直接判否，因为 copyable 要求对象类型；
+	// 这正是 tracked_resource 该拒绝的实现（见 concepts.h 顶部的说明），不是约束
+	// 表达能力不够。
 	struct uncopyable_state
 	{
 		uncopyable_state() = default;
@@ -63,11 +71,13 @@ namespace abstract_check
 	{
 		[[nodiscard]] int resource() const noexcept { return 0; }
 		[[nodiscard]] uncopyable_state const& state() const noexcept { static uncopyable_state s; return s; }
-		[[nodiscard]] auto transite(uncopyable_state const&) const { return ::stdexec::just(); }
+		[[nodiscard]] bad_state_type transite(uncopyable_state const&) const { return *this; }
 	};
 	static_assert(!::gpu::tracked_resource<bad_state_type>);
+	static_assert(!::gpu::transitible_tracked_resource<bad_state_type>);
 
-	// pending_resource：只需要 consume_external 返回 sender，跟 resource()/state() 无关。
+	// pending_resource：只需要 consume_external 返回 sender，跟 resource()/state() 无关，
+	// 这一侧还没按 tracked_resource 的方式拆分（按第二轮设计讨论的结论，先搁置）。
 	struct counter_pending
 	{
 		int _id;
@@ -78,7 +88,9 @@ namespace abstract_check
 
 	void run()
 	{
-		::std::puts("part 1: abstract tracked_resource/pending_resource, no Vulkan involved");
+		::std::puts("part 1: abstract tracked_resource/transitible_tracked_resource/pending_resource, no Vulkan involved");
+		// transition 是 sender 世界的定制点：predecessor 没有 completion
+		// scheduler（just(...) 不提供），所以走默认路径，只调用 transite。
 		auto work = ::stdexec::just(counter_resource{1, counter_state{0}})
 			| ::gpu::transition(counter_state{7});
 		auto [result] = ::stdexec::sync_wait(::std::move(work)).value();
@@ -86,17 +98,29 @@ namespace abstract_check
 	}
 }
 
-/// 第二部分：真实场景——acquire -> consume -> transition -> clear -> transition ->
-/// submit -> present，跟本轮设计讨论里逐行对照手写 Vulkan 的那条链完全一致。
+/// 第二部分：真实场景——schedule(dom) -> acquire -> consume -> transition ->
+/// clear -> transition -> submit -> present，跟本轮设计讨论里逐行对照手写
+/// Vulkan 的那条链完全一致，只是 domain 现在通过标准的
+/// get_completion_scheduler<set_value_t> 机制沿链传递，不再靠 write_env。
 namespace vulkan_scenario
 {
 	void run()
 	{
-		::std::puts("part 2: acquire -> consume -> transition -> clear -> transition -> submit -> present");
+		::std::puts("part 2: schedule(dom) -> acquire -> consume -> transition -> clear -> transition -> submit -> present");
 		auto sc = ::gpu::mock::swapchain{};
 		auto dom = ::gpu::mock::domain{};
 
-		auto work = ::gpu::acquire(sc)
+		// acquire 不是从 schedule(dom) 起头的——它是纯 CPU 调用（vkAcquireNextImage2KHR
+		// 同步返回），跟"这条链在哪个域里录制"是两件独立的事：acquire 之后立刻
+		// consume()，从这一步开始才需要知道域，而域是通过 schedule(dom) 另外
+		// 接进来的，见下面 gpu::mock::schedule(dom) | acquire(sc) 的写法要求
+		// acquire 本身能接受一个 predecessor——为了不改 acquire 的签名，这里换成
+		// 更直接的写法：先 schedule(dom)，再 let_value 接 acquire，这样
+		// consume/transition 在 acquire 之后依然能查到 schedule(dom) 传下来的
+		// completion scheduler（let_value 转发 predecessor attrs 这件事已经
+		// 实测确认过）。
+		auto work = ::gpu::mock::schedule(dom)
+			| ::stdexec::let_value([&sc] { return ::gpu::acquire(sc); })
 			| ::gpu::consume()
 			| ::gpu::transition(::gpu::color_attachment{})
 			| ::stdexec::then([&dom](auto const& item)
@@ -106,8 +130,7 @@ namespace vulkan_scenario
 			})
 			| ::gpu::transition(::gpu::present_src{})
 			| ::gpu::submit(dom)
-			| ::gpu::present(sc)
-			| ::stdexec::write_env(::stdexec::prop{::gpu::mock::get_domain, &dom});
+			| ::gpu::present(sc);
 
 		::stdexec::sync_wait(::std::move(work));
 
@@ -128,9 +151,10 @@ namespace vulkan_scenario
 
 	/// 同一个 pending_value，consume_external 消费的方式随消费者而变，不随值本身而变：
 	/// 上面那条链从头到尾都在 domain 里，consume() 走的是"记一条 wait"；这里故意不给
-	/// 任何 domain，直接 sync_wait 消费同一个 pending_value，consume_external 就落到
-	/// 真正的 host_wait 那一支——跟 CUDA 里同一个 event，被 cudaStreamWaitEvent 还是
-	/// cudaEventSynchronize 消费完全取决于调用方，是同一个道理。
+	/// 任何 domain（不 schedule(dom)），直接 sync_wait 消费同一个 pending_value，
+	/// consume_external 就落到真正的 host_wait 那一支——跟 CUDA 里同一个 event，
+	/// 被 cudaStreamWaitEvent 还是 cudaEventSynchronize 消费完全取决于调用方，
+	/// 是同一个道理。
 	void run_cpu_side_consume()
 	{
 		::std::puts("part 3: the same pending_value, consumed with no domain in scope");

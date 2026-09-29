@@ -10,13 +10,18 @@
 /// （见 concepts.h）只组合这些原语、约束"调用得通、返回值是什么"，不关心谁来实现，
 /// 也不重复这里的查找/分派逻辑。
 ///
-/// choice 只按类型参数化（`choice<T>()`），不接受运行期实参：把运行期形参直接递给
-/// noexcept()/requires() 里的 consteval 调用，在这份 profile 用的编译器版本上
-/// GCC 会报 "use of parameter from containing function"（clang 没有这个限制）。
-/// choice 内部用 ::std::declval<T>() 在 requires/noexcept 这类不求值上下文构造
-/// 检测表达式——这是 declval 的设计用途；真正的调用发生在 operator() 里，用
-/// ::std::forward 转发实参本身，跟检测表达式一一对应，两者语义保持一致。
-/// operator() 本身用 auto&&，不显式写模板参数列表，类型通过 decltype(t) 取回。
+/// choice 用 auto&&/forward 转发真实的调用点实参：检测表达式和 operator() 函数体
+/// 里真正执行的表达式必须同源，不用 ::std::declval<T>() 替代——declval 只是"给定
+/// 类型构造一个表达式"，不等于"转发这次调用真正传入的实参"，两者在某些成员函数
+/// 只对特定值类别可调用的情况下会给出不同的检测结果。
+///
+/// GCC（截至这份原型验证时用到的版本）在 noexcept-specifier / requires 子句里
+/// 直接引用外层函数自身的形参（即便包在 forward<decltype(t)>(t) 里）会报
+/// "use of parameter from containing function"；clang 没有这个限制。这是编译器
+/// 缺陷，处理方式是隔离出一个不改变语义的等价写法（把调用结果套进
+/// noexcept(...) 运算符和 requires(requires{requires ...;}) 复合要求，两者都是
+/// 不求值上下文，GCC 不再判定为"直接消费外层形参"），不是换成语义不同的
+/// declval——choice() 本身、operator() 函数体内的真实调用，两个分支完全一样。
 namespace gpu
 {
 namespace resource_cpo
@@ -29,13 +34,12 @@ namespace resource_cpo
 	enum class choose { member, adl, none };
 	struct choice_result { choose strategy; bool nothrow; };
 
-	template <class T>
-	consteval choice_result choice() noexcept
+	consteval choice_result choice(auto&& t) noexcept
 	{
-		if constexpr (requires { ::std::declval<T>().resource(); })
-			return {choose::member, noexcept(::std::declval<T>().resource())};
-		else if constexpr (requires { resource(::std::declval<T>()); })
-			return {choose::adl, noexcept(resource(::std::declval<T>()))};
+		if constexpr (requires { ::std::forward<decltype(t)>(t).resource(); })
+			return {choose::member, noexcept(::std::forward<decltype(t)>(t).resource())};
+		else if constexpr (requires { resource(::std::forward<decltype(t)>(t)); })
+			return {choose::adl, noexcept(resource(::std::forward<decltype(t)>(t)))};
 		else
 			return {choose::none, true};
 	}
@@ -51,10 +55,15 @@ struct resource_t
 #if !__cpp_static_call_operator
 	const
 #endif
-		noexcept(resource_cpo::choice<decltype(t)>().nothrow)
-		requires (resource_cpo::choice<decltype(t)>().strategy != resource_cpo::choose::none)
+#if defined(__GNUC__) && !defined(__clang__)
+		noexcept(noexcept(resource_cpo::choice(::std::forward<decltype(t)>(t)).nothrow ? true : true))
+		requires (requires { requires resource_cpo::choice(::std::forward<decltype(t)>(t)).strategy != resource_cpo::choose::none; })
+#else
+		noexcept(resource_cpo::choice(::std::forward<decltype(t)>(t)).nothrow)
+		requires (resource_cpo::choice(::std::forward<decltype(t)>(t)).strategy != resource_cpo::choose::none)
+#endif
 	{
-		constexpr auto strategy = resource_cpo::choice<decltype(t)>().strategy;
+		constexpr auto strategy = resource_cpo::choice(::std::forward<decltype(t)>(t)).strategy;
 		if constexpr (strategy == resource_cpo::choose::member)
 			return ::std::forward<decltype(t)>(t).resource();
 		else
@@ -71,13 +80,12 @@ namespace state_cpo
 	enum class choose { member, adl, none };
 	struct choice_result { choose strategy; bool nothrow; };
 
-	template <class T>
-	consteval choice_result choice() noexcept
+	consteval choice_result choice(auto&& t) noexcept
 	{
-		if constexpr (requires { ::std::declval<T>().state(); })
-			return {choose::member, noexcept(::std::declval<T>().state())};
-		else if constexpr (requires { state(::std::declval<T>()); })
-			return {choose::adl, noexcept(state(::std::declval<T>()))};
+		if constexpr (requires { ::std::forward<decltype(t)>(t).state(); })
+			return {choose::member, noexcept(::std::forward<decltype(t)>(t).state())};
+		else if constexpr (requires { state(::std::forward<decltype(t)>(t)); })
+			return {choose::adl, noexcept(state(::std::forward<decltype(t)>(t)))};
 		else
 			return {choose::none, true};
 	}
@@ -93,10 +101,15 @@ struct state_t
 #if !__cpp_static_call_operator
 	const
 #endif
-		noexcept(state_cpo::choice<decltype(t)>().nothrow)
-		requires (state_cpo::choice<decltype(t)>().strategy != state_cpo::choose::none)
+#if defined(__GNUC__) && !defined(__clang__)
+		noexcept(noexcept(state_cpo::choice(::std::forward<decltype(t)>(t)).nothrow ? true : true))
+		requires (requires { requires state_cpo::choice(::std::forward<decltype(t)>(t)).strategy != state_cpo::choose::none; })
+#else
+		noexcept(state_cpo::choice(::std::forward<decltype(t)>(t)).nothrow)
+		requires (state_cpo::choice(::std::forward<decltype(t)>(t)).strategy != state_cpo::choose::none)
+#endif
 	{
-		constexpr auto strategy = state_cpo::choice<decltype(t)>().strategy;
+		constexpr auto strategy = state_cpo::choice(::std::forward<decltype(t)>(t)).strategy;
 		if constexpr (strategy == state_cpo::choose::member)
 			return ::std::forward<decltype(t)>(t).state();
 		else
@@ -115,13 +128,12 @@ namespace transite_cpo
 	enum class choose { member, adl, none };
 	struct choice_result { choose strategy; bool nothrow; };
 
-	template <class T, class To>
-	consteval choice_result choice() noexcept
+	consteval choice_result choice(auto&& t, auto&& to) noexcept
 	{
-		if constexpr (requires { ::std::declval<T>().transite(::std::declval<To>()); })
-			return {choose::member, noexcept(::std::declval<T>().transite(::std::declval<To>()))};
-		else if constexpr (requires { transite(::std::declval<T>(), ::std::declval<To>()); })
-			return {choose::adl, noexcept(transite(::std::declval<T>(), ::std::declval<To>()))};
+		if constexpr (requires { ::std::forward<decltype(t)>(t).transite(::std::forward<decltype(to)>(to)); })
+			return {choose::member, noexcept(::std::forward<decltype(t)>(t).transite(::std::forward<decltype(to)>(to)))};
+		else if constexpr (requires { transite(::std::forward<decltype(t)>(t), ::std::forward<decltype(to)>(to)); })
+			return {choose::adl, noexcept(transite(::std::forward<decltype(t)>(t), ::std::forward<decltype(to)>(to)))};
 		else
 			return {choose::none, true};
 	}
@@ -137,10 +149,15 @@ struct transite_t
 #if !__cpp_static_call_operator
 	const
 #endif
-		noexcept(transite_cpo::choice<decltype(t), decltype(to)>().nothrow)
-		requires (transite_cpo::choice<decltype(t), decltype(to)>().strategy != transite_cpo::choose::none)
+#if defined(__GNUC__) && !defined(__clang__)
+		noexcept(noexcept(transite_cpo::choice(::std::forward<decltype(t)>(t), ::std::forward<decltype(to)>(to)).nothrow ? true : true))
+		requires (requires { requires transite_cpo::choice(::std::forward<decltype(t)>(t), ::std::forward<decltype(to)>(to)).strategy != transite_cpo::choose::none; })
+#else
+		noexcept(transite_cpo::choice(::std::forward<decltype(t)>(t), ::std::forward<decltype(to)>(to)).nothrow)
+		requires (transite_cpo::choice(::std::forward<decltype(t)>(t), ::std::forward<decltype(to)>(to)).strategy != transite_cpo::choose::none)
+#endif
 	{
-		constexpr auto strategy = transite_cpo::choice<decltype(t), decltype(to)>().strategy;
+		constexpr auto strategy = transite_cpo::choice(::std::forward<decltype(t)>(t), ::std::forward<decltype(to)>(to)).strategy;
 		if constexpr (strategy == transite_cpo::choose::member)
 			return ::std::forward<decltype(t)>(t).transite(::std::forward<decltype(to)>(to));
 		else
@@ -159,13 +176,12 @@ namespace consume_external_cpo
 	enum class choose { member, adl, none };
 	struct choice_result { choose strategy; bool nothrow; };
 
-	template <class T>
-	consteval choice_result choice() noexcept
+	consteval choice_result choice(auto&& t) noexcept
 	{
-		if constexpr (requires { ::std::declval<T>().consume_external(); })
-			return {choose::member, noexcept(::std::declval<T>().consume_external())};
-		else if constexpr (requires { consume_external(::std::declval<T>()); })
-			return {choose::adl, noexcept(consume_external(::std::declval<T>()))};
+		if constexpr (requires { ::std::forward<decltype(t)>(t).consume_external(); })
+			return {choose::member, noexcept(::std::forward<decltype(t)>(t).consume_external())};
+		else if constexpr (requires { consume_external(::std::forward<decltype(t)>(t)); })
+			return {choose::adl, noexcept(consume_external(::std::forward<decltype(t)>(t)))};
 		else
 			return {choose::none, true};
 	}
@@ -181,10 +197,15 @@ struct consume_external_t
 #if !__cpp_static_call_operator
 	const
 #endif
-		noexcept(consume_external_cpo::choice<decltype(t)>().nothrow)
-		requires (consume_external_cpo::choice<decltype(t)>().strategy != consume_external_cpo::choose::none)
+#if defined(__GNUC__) && !defined(__clang__)
+		noexcept(noexcept(consume_external_cpo::choice(::std::forward<decltype(t)>(t)).nothrow ? true : true))
+		requires (requires { requires consume_external_cpo::choice(::std::forward<decltype(t)>(t)).strategy != consume_external_cpo::choose::none; })
+#else
+		noexcept(consume_external_cpo::choice(::std::forward<decltype(t)>(t)).nothrow)
+		requires (consume_external_cpo::choice(::std::forward<decltype(t)>(t)).strategy != consume_external_cpo::choose::none)
+#endif
 	{
-		constexpr auto strategy = consume_external_cpo::choice<decltype(t)>().strategy;
+		constexpr auto strategy = consume_external_cpo::choice(::std::forward<decltype(t)>(t)).strategy;
 		if constexpr (strategy == consume_external_cpo::choose::member)
 			return ::std::forward<decltype(t)>(t).consume_external();
 		else
