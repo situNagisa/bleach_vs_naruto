@@ -15,21 +15,30 @@
 /// pending_resource 这几个 concept，以及 cpo.h 里的 transite/consume_external
 /// 两个原语。
 ///
-/// transition/consume 是"定制点"，不是把 transite/consume_external 原语原样
-/// 包一层：它们在 connect 阶段用标准的
-/// stdexec::get_completion_scheduler<set_value_t> 查询查出 predecessor 的
-/// completion scheduler（这是标准 stdexec 机制，不是我们自定义的窄查询——
-/// 调查过 nvexec 的 stream_scheduler 用的就是这一套）；如果这个 scheduler
-/// 类型提供 transition_impl/consume_impl 成员（域自己的定制实现，比如
-/// gpu::mock::mock_scheduler、gpu::vk::vk_scheduler 各自提供的那份），就调用
-/// 它；查不到 scheduler，或者 scheduler 没提供定制点，就走默认行为——
-/// transition 默认只调用 transite（纯代数变换，不做任何 GPU 调用），consume
-/// 默认调用 consume_external 原语本身（它自己内部决定"没有域"时怎么办，比如
-/// mock 版本会真的等信号）。
+/// transition/consume 是"定制点"，但不是靠自己在算子内部手写"查 predecessor 的
+/// completion scheduler、if constexpr 分派"——那是我们最早的简化版，调查过
+/// nvexec 的 stream_scheduler/stream_domain 之后确认它们不这么做：真正的机制是
+/// stdexec::connect() 在真正 connect 之前先调 stdexec::transform_sender(sndr,
+/// get_env(rcvr))，这一步会顺着 attrs 转发链查出 predecessor 的 completion
+/// domain（stdexec::get_completion_domain_t），如果域提供了针对这个算子 tag 的
+/// transform_sender，就把整个 sender 换成域专属的实现——分派是 connect 之前的
+/// 一次性结构替换，不是算子内部每次运行时的分支判断。
+///
+/// transition_sender/consume_sender 因此只是"没有域介入时的默认行为"：跟标准库
+/// then_t/let_value_t 的写法一样，是一个普通聚合体——第一个成员是 tag 对象
+/// （transition_t/consume_t），第二个是 data，第三个开始是 child sender——
+/// stdexec::tag_of_t 靠这个形状（结构化绑定）认出 tag，不需要 stdexec 内部的
+/// __sexpr/__make_sexpr 这类不公开实现细节。域（比如 gpu::mock::mock_domain）
+/// 在 tracked_value.h 里针对 gpu::transition_t/gpu::consume_t 提供
+/// transform_sender，命中就换成调用 scheduler 自己的 transition_impl/
+/// consume_impl 的实现；没有域、或者域没接管这个 tag，就走这里的默认聚合体，
+/// 默认行为跟以前一致——transition 默认只调用 transite（纯代数变换，不做任何
+/// GPU 调用），consume 默认调用 consume_external 原语本身（它自己内部决定
+/// "没有域"时怎么办，比如 mock 版本会真的等信号）。
 ///
 /// submit 不一样：它是提交边界，Domain 是显式传入的引用（不是查出来的），
 /// 提交之后这条链就离开了域——所以 submit 之后如果还要 consume，走的是
-/// "没有 scheduler 可查"这条默认路径，这是有意的行为，不是遗漏。
+/// "没有域接管"这条默认路径，这是有意的行为，不是遗漏。
 namespace gpu
 {
 namespace detail
@@ -43,15 +52,16 @@ namespace detail
 	// fn()，是同一个直接初始化表达式的一部分，没有中间的"先有一个 T 值"这一步。
 	// stdexec 自己的 __emplace_from（__detail/__utility.hpp）就是同一个手法，
 	// 用在 let_value/finally/sequence 等需要就地 connect 出不可移动 opstate 的
-	// 场景——这里是同一模式在 std::optional 上的等价写法。
+	// 场景——这里是同一模式在 std::optional 上的等价写法，不依赖任何双下划线的
+	// stdexec 内部实体。
 	template <class Fn>
-	struct emplace_from
+	struct call_in_place
 	{
 		Fn _fn;
 		using __t = decltype(_fn());
 		operator __t() && { return static_cast<Fn&&>(_fn)(); }
 	};
-	template <class Fn> emplace_from(Fn) -> emplace_from<Fn>;
+	template <class Fn> call_in_place(Fn) -> call_in_place<Fn>;
 }
 namespace make_pending_cpo
 {
@@ -106,54 +116,38 @@ inline constexpr make_pending_t make_pending{};
 // transition：sender 世界的定制点。目标状态必须显式写出来——这正是"转到哪里"
 // 这个同步决策本身，系统不代替人做这个决定。
 
-/// 查 predecessor 的 completion scheduler，如果它提供 transition_impl 就用它，
-/// 否则退化成只调用 transite。两条路径的返回类型必须一致（都是变换后的
-/// tracked_resource），所以这里不是简单的 if constexpr 分派到不同返回类型。
-/// 第一个参数是 predecessor 的 env（不是整个 sender）：跟 dispatch_consume
-/// 的做法一致，只需要能查 get_completion_scheduler，不需要保留整个 predecessor
-/// sender 对象。
-template <class Env, class Value, class To>
-[[nodiscard]] auto dispatch_transition(Env const& pred_env, Value const& value, To to)
-{
-	if constexpr (requires { ::stdexec::get_completion_scheduler<::stdexec::set_value_t>(pred_env); })
-	{
-		auto sch = ::stdexec::get_completion_scheduler<::stdexec::set_value_t>(pred_env);
-		if constexpr (requires { sch.transition_impl(value, to); })
-			return sch.transition_impl(value, to);
-		else
-			return ::gpu::transite(value, ::std::move(to));
-	}
-	else
-	{
-		return ::gpu::transite(value, ::std::move(to));
-	}
-}
+/// transition 这个算子的 tag：既用来给 stdexec::tag_of_t 识别 transition_sender
+/// 这个聚合体，也是域（gpu::mock::mock_domain 等）用来分派 transform_sender 的
+/// key——跟标准库 then_t、nvexec then_sender 用同一个类型同时充当两个角色的做法
+/// 一致，不需要额外发明一个"算子 id"的概念。
+struct transition_t {};
 
-template <class Pred, class To>
+/// 没有域介入时的默认实现：只调用 transite 原语，纯代数变换，不做任何 GPU 调用。
+/// 第一个成员是 tag 对象，第二个是 data（目标状态 To），第三个是 child sender——
+/// 这三个公开成员的顺序和形状，就是 stdexec::tag_of_t 靠结构化绑定识别 tag 所要求
+/// 的全部条件，不需要继承/实现任何 stdexec 内部类型。
+template <class To, class Pred>
 struct transition_sender
 {
+	transition_t tag;
+	To to;
+	Pred pred;
+
 	using sender_concept = ::stdexec::sender_t;
 
-	using __env_t = ::stdexec::env_of_t<Pred>;
-
-	template <class Value>
-	using __result_t = decltype(dispatch_transition(::std::declval<__env_t const&>(), ::std::declval<Value const&>(), ::std::declval<To>()));
-
 	// Pred 满足 tracked_resource_sender：完成值唯一，且满足 tracked_resource。
-	// 用同一个 detail::single_value_t 提取出这个值类型，套进 __result_t 就是
-	// transition_sender 的完成值类型——跟 Pred 的错误/停止信道保持一致，
-	// transition 本身不引入新的错误来源（dispatch_transition 是 noexcept 的
-	// 纯计算，不会抛）。
+	// 默认行为只调用 transite(value, to)，完成值类型是 transite 的返回类型，
+	// 不是 Pred 本身的完成值类型——transite 前后状态标签会变（比如 undefined
+	// 变成 color_attachment），必须用 decltype(transite(...)) 才能拿到变换后
+	// 的真实类型，直接用 Pred 的 __value_t 会跟 set_value 实际传出的类型不一致。
 	using __value_t = ::stdexec::value_types_of_t<Pred, ::stdexec::env<>, detail::single_value_t, detail::single_value_t>;
+	using __result_t = decltype(::gpu::transite(::std::declval<__value_t const&>(), ::std::declval<To>()));
 	using completion_signatures = ::stdexec::completion_signatures<
-		::stdexec::set_value_t(__result_t<__value_t>),
+		::stdexec::set_value_t(__result_t),
 		::stdexec::set_error_t(::std::exception_ptr),
 		::stdexec::set_stopped_t()>;
 
-	Pred _pred;
-	To _to;
-
-	[[nodiscard]] decltype(auto) get_env() const noexcept { return ::stdexec::get_env(_pred); }
+	[[nodiscard]] decltype(auto) get_env() const noexcept { return ::stdexec::get_env(pred); }
 
 	template <class Receiver>
 	struct operation
@@ -168,8 +162,7 @@ struct transition_sender
 			template <transitible_tracked_resource Value>
 			void set_value(Value&& value) noexcept
 			{
-				::stdexec::set_value(::std::move(_op->_receiver),
-					dispatch_transition(::stdexec::get_env(_op->_pred), value, ::std::move(_op->_to)));
+				::stdexec::set_value(::std::move(_op->_receiver), ::gpu::transite(value, ::std::move(_op->_sndr.to)));
 			}
 
 			template <class Error>
@@ -180,25 +173,19 @@ struct transition_sender
 			[[nodiscard]] decltype(auto) get_env() const noexcept { return ::stdexec::get_env(_op->_receiver); }
 		};
 
-		// _pred 保留成 operation 自己的成员（生命周期跟 operation 一样长），
-		// 用 _pred（左值）去 connect，不是按值收一个函数形参再 move 走它——
+		// _sndr 保留成 operation 自己的成员（生命周期跟 operation 一样长），
+		// 用 _sndr.pred（左值）去 connect，不是按值收一个函数形参再 move 走它——
 		// 已经实测确认过：像 then(pred, fun) 这类标准算子的 get_env() 常常是
 		// __sync_attrs{sndr_}，__sndr_ 是指向 sender 表达式节点本身的引用，
 		// 不是深拷贝；如果只在一个即将被 move 走的局部形参上取一次 env 存成
-		// "快照"，pred 转手之后这个函数形参对象销毁，快照里的引用立刻悬空——
-		// 这不是我们自己实现的 bug，是 __sync_attrs 的设计前提（它假设你会一直
-		// 通过原来的 sender 对象去查，不会脱离对象生命周期单独保留 env）。
-		// dispatch_transition 因此改成直接接收 __env_t（一份不含悬空引用的
-		// snapshot 类型形状不变），但调用点从"提前存好的快照"换成"每次都从
-		// 活着的 _pred 现查"。
-		Pred _pred;
-		To _to;
+		// "快照"，pred 转手之后这个函数形参对象销毁，快照里的引用立刻悬空。
+		transition_sender _sndr;
 		Receiver _receiver;
 		::stdexec::connect_result_t<Pred&, inner_receiver> _inner;
 
-		operation(Pred pred, To to, Receiver receiver)
-			: _pred(::std::move(pred)), _to(::std::move(to)), _receiver(::std::move(receiver))
-			, _inner(::stdexec::connect(_pred, inner_receiver{this}))
+		operation(transition_sender sndr, Receiver receiver)
+			: _sndr(::std::move(sndr)), _receiver(::std::move(receiver))
+			, _inner(::stdexec::connect(_sndr.pred, inner_receiver{this}))
 		{
 		}
 
@@ -208,14 +195,14 @@ struct transition_sender
 	template <class Receiver>
 	[[nodiscard]] operation<Receiver> connect(Receiver receiver) const &
 	{
-		return operation<Receiver>{_pred, _to, ::std::move(receiver)};
+		return operation<Receiver>{*this, ::std::move(receiver)};
 	}
 };
 
 template <tracked_resource_sender Pred, class To>
-[[nodiscard]] transition_sender<::std::decay_t<Pred>, To> transition(Pred&& pred, To to)
+[[nodiscard]] transition_sender<To, ::std::decay_t<Pred>> transition(Pred&& pred, To to)
 {
-	return {::std::forward<Pred>(pred), ::std::move(to)};
+	return {{}, ::std::move(to), ::std::forward<Pred>(pred)};
 }
 
 template <class To>
@@ -271,55 +258,31 @@ template <class Domain>
 }
 
 // ---------------------------------------------------------------------------
-// consume：pending_resource -> tracked_resource。跟 transition 同一套分派模式——
-// 查 predecessor 的 completion scheduler，如果它提供 consume_impl 就用它（域的
-// 录制链里，记一条 wait，不做真正的等待），查不到就落回 consume_external 原语
-// 本身（它自己决定"没有域"时怎么办，比如 mock 版本会真的等信号）。两条分支都
-// 产出 sender，dispatch_consume 用 decltype 统一成同一个返回类型，跟
-// dispatch_transition 是同一个手法，不需要 variant/类型擦除去兼容两种形状。
-//
-// 第一个参数是 predecessor 的 env（不是整个 sender），第二个参数是完成值本身——
-// consume_impl 只对 gpu::mock::pending_value 这样的具体类型生效（pending_resource
-// 没有像 tracked_resource 那样拆出通用的字段读取原语，按设计讨论先搁置），
-// requires 检测不到这条路径就落回默认。
-template <class Env, class Value>
-[[nodiscard]] auto dispatch_consume(Env const& pred_env, Value const& value)
-{
-	if constexpr (requires { ::stdexec::get_completion_scheduler<::stdexec::set_value_t>(pred_env); })
-	{
-		auto sch = ::stdexec::get_completion_scheduler<::stdexec::set_value_t>(pred_env);
-		if constexpr (requires { sch.consume_impl(value); })
-			return sch.consume_impl(value);
-		else
-			return ::gpu::consume_external(value);
-	}
-	else
-	{
-		return ::gpu::consume_external(value);
-	}
-}
+// consume：pending_resource -> tracked_resource。跟 transition 同一套接入方式——
+// 默认聚合体只调用 consume_external 原语；域想接管就针对 gpu::consume_t 这个 tag
+// 提供 transform_sender，换成调用 scheduler 自己的 consume_impl 的实现。
 
-/// 即便走的是 consume_impl 这条定制路径，仍然不能用标准 let_value 简单包一层：
-/// 已实测确认——像 then(pred, fun) 这类标准算子的 get_env() 常常是
-/// __sync_attrs{sndr_}，__sndr_ 是指向 sender 表达式节点本身的引用，不是深拷贝。
-/// 如果在调用 let_value 之前，把 pred 的 env 取出来存成一份"快照"、通过闭包传给
-/// fun，pred 这个局部变量在函数返回后销毁，快照里的引用立刻悬空。正确做法跟
-/// transition_sender 一样：自己手写 operation，把 Pred 作为成员保留、用左值
-/// connect，每次查询直接对活着的 _pred 现查 env。
+/// consume 这个算子的 tag，跟 transition_t 是同一种角色。
+struct consume_t {};
+
+/// 没有域介入时的默认实现：只调用 consume_external 原语，原语自己决定"没有域"
+/// 时怎么办（比如 mock 版本会真的等信号）。没有 data，只有 tag + child 两个
+/// 公开成员——stdexec::tag_of_t 一样能靠结构化绑定识别，data 位置放
+/// stdexec::__ 这种占位类型没有必要，两个成员的聚合体同样合法。
 template <class Pred>
 struct consume_sender
 {
+	consume_t tag;
+	Pred pred;
+
 	using sender_concept = ::stdexec::sender_t;
 
-	using __env_t = ::stdexec::env_of_t<Pred>;
 	using __value_t = ::stdexec::value_types_of_t<Pred, ::stdexec::env<>, detail::single_value_t, detail::single_value_t>;
-	using __inner_sender_t = decltype(dispatch_consume(::std::declval<__env_t const&>(), ::std::declval<__value_t const&>()));
+	using __inner_sender_t = decltype(::gpu::consume_external(::std::declval<__value_t const&>()));
 
 	using completion_signatures = ::stdexec::completion_signatures_of_t<__inner_sender_t>;
 
-	Pred _pred;
-
-	[[nodiscard]] decltype(auto) get_env() const noexcept { return ::stdexec::get_env(_pred); }
+	[[nodiscard]] decltype(auto) get_env() const noexcept { return ::stdexec::get_env(pred); }
 
 	template <class Receiver>
 	struct operation
@@ -347,8 +310,14 @@ struct consume_sender
 			template <pending_resource Value>
 			void set_value(Value&& value) noexcept
 			{
-				auto& sender_slot = _op->_inner_sender.emplace(detail::emplace_from{[this, &value] { return dispatch_consume(::stdexec::get_env(_op->_pred), value); }});
-				auto& op_slot = _op->_inner_op.emplace(detail::emplace_from{[this, &sender_slot] { return ::stdexec::connect(sender_slot, forwarding_receiver{_op}); }});
+				// std::optional<T>::emplace(args...) 要求 is_constructible_v<T, Args...>——
+				// __inner_op 的元素类型是 stdexec::connect_result_t<...>，内部 opstate
+				// 不可移动，不能先调用 stdexec::connect(...) 拿到一个值再传给 emplace。
+				// __call_in_place 用一个只带隐式转换到 T 的包装类型让 emplace 走隐式
+				// 转换构造这条路——跟 stdexec 自己的 __emplace_from（__detail/
+				// __utility.hpp，let_value/finally/sequence 都在用）是同一个手法。
+				auto& sender_slot = _op->_inner_sender.emplace(::gpu::consume_external(value));
+				auto& op_slot = _op->_inner_op.emplace(detail::call_in_place{[this, &sender_slot] { return ::stdexec::connect(sender_slot, forwarding_receiver{_op}); }});
 				::stdexec::start(op_slot);
 			}
 
@@ -378,14 +347,14 @@ struct consume_sender
 	template <class Receiver>
 	[[nodiscard]] operation<Receiver> connect(Receiver receiver) const &
 	{
-		return operation<Receiver>{_pred, ::std::move(receiver)};
+		return operation<Receiver>{pred, ::std::move(receiver)};
 	}
 };
 
 template <pending_resource_sender Pred>
 [[nodiscard]] consume_sender<::std::decay_t<Pred>> consume(Pred&& pred)
 {
-	return {::std::forward<Pred>(pred)};
+	return {{}, ::std::forward<Pred>(pred)};
 }
 
 struct consume_closure : ::stdexec::sender_adaptor_closure<consume_closure>

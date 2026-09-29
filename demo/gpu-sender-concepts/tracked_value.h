@@ -6,6 +6,7 @@
 
 #include <stdexec/execution.hpp>
 
+#include "./algorithms.h"
 #include "./concepts.h"
 #include "./image_state.h"
 #include "./mock_vulkan.h"
@@ -18,22 +19,29 @@
 /// 撞在同一个命名空间，会变成"重定义"错误，不是简单的遮蔽——CPO 的分派必须靠
 /// ADL 在实参的关联命名空间里找到实现，实现和调用点对象不能同名同空间。
 ///
-/// domain 沿 sender 链的传递方式：前置 schedule(dom) 表达域，走标准 stdexec 的
-/// scheduler/completion-scheduler 机制，不走 env 侧信道，也不是自定义的窄查询。
-/// 具体调查过 nvexec 的 stream_scheduler：它给自己配一个满足 stdexec::scheduler
-/// 的类型，sender 的 attrs 应答标准查询 get_completion_scheduler_t<set_value_t>；
-/// 下游算子在 connect 阶段用 get_completion_scheduler<set_value_t>(get_env(pred))
-/// 查出这个 scheduler，从中取出真正的资源（CUDA stream / 这里的 domain）。
-/// mock_scheduler 就是 gpu::mock 这一侧对应 nvexec stream_scheduler 的角色。
+/// domain 沿 sender 链的传递、以及"域怎么接管标准算子"这两件事，都改成用 stdexec
+/// 真正的公开机制，不是我们自己模拟的简化版：
 ///
-/// transition（algorithms.h 里的 sender 算法）就是这套机制的消费者：它在
-/// connect 阶段查出 predecessor 的 completion scheduler，如果这个 scheduler
-/// 类型提供 transition_impl 这个定制点（mock_scheduler 在下面提供），就调用它
-/// （录 barrier）；没有提供就走默认行为（只调用 transite，不做任何 GPU 调用）。
-/// 这跟 nvexec 用 transform_sender_for<Tag> 做域改写是同一件事的简化版——我们
-/// 不借助 stdexec 内部依赖 tag_of_t/__sexpr 的 transform_sender 机制（那要求
-/// sender 是标准算子风格的表达式节点），而是在 transition 自己的算子状态里手写
-/// 同样的"查 scheduler、按需分派到定制实现"逻辑，效果一致。
+/// 1. scheduler 暴露自己：mock_scheduler 满足 stdexec::scheduler，
+///    mock_schedule_sender 的 attrs 应答标准查询
+///    get_completion_scheduler_t<set_value_t>，跟 nvexec::stream_scheduler
+///    完全一样的做法。
+/// 2. scheduler 暴露自己的 completion domain：mock_scheduler 额外应答
+///    get_completion_domain_t<set_value_t>，返回 mock_domain{}——这一步是
+///    nvexec::stream_scheduler 真实在做的事（stream_context.cuh 里
+///    attrs::query(get_completion_domain_t<set_value_t>) 返回 stream_domain{}），
+///    不是我们发明的。
+/// 3. 域接管标准算子：mock_domain 提供 transform_sender(set_value_t, sndr, env)
+///    成员，用 stdexec::tag_of_t<Sender> 认出这是 gpu::transition_t 还是
+///    gpu::consume_t，命中就换成下面的域专属 sender（调用
+///    mock_scheduler::transition_impl/consume_impl）；stdexec::connect() 会在
+///    真正 connect 之前自动调用 stdexec::transform_sender(sndr, get_env(rcvr))，
+///    这一步本身就会顺着 attrs 转发链查出 predecessor 的 completion domain 并
+///    调用这个函数——mock_domain 不需要被谁显式调用。
+///
+/// algorithms.h 里的 transition_sender/consume_sender 是"没有域接管时"的默认
+/// 聚合体，本身完全不知道 mock_domain 存在，也不做任何查询——分派已经在
+/// connect() 里被 transform_sender 处理掉了，两层职责严格分开。
 namespace gpu::mock
 {
 class domain
@@ -63,12 +71,22 @@ struct tracked_value;
 template <class Handle, class State>
 struct pending_value;
 
+/// mock_domain：mock_scheduler 的 completion domain，针对 gpu::transition_t/
+/// gpu::consume_t 提供 transform_sender——真正接管这两个算子的地方。前向声明在
+/// mock_scheduler 之前：mock_scheduler::query(get_completion_domain_t<...>) 要
+/// 把它当返回类型，函数体在类内给出（返回类型只是声明为 mock_domain，不要求
+/// 这里已经是完整类型，是函数体本身要构造它才需要），mock_domain 的完整定义
+/// 延后到 tracked_value/pending_value 都完整之后再给出。
+class mock_domain;
+
 /// mock_scheduler：满足 stdexec::scheduler，是 domain 对外暴露给 sender 链的
-/// 身份。algorithms.h::transition/consume 通过标准的
-/// get_completion_scheduler<set_value_t> 查询拿到它，再调用下面的
-/// transition_impl/consume_impl——这两个不是 cpo.h 里的原语，是这个具体域自己
-/// 提供的定制点实现，跟 transite（纯代数原语）是两层不同的东西：transite 只管
-/// "状态标签怎么变"，transition_impl 管"这次变换要不要在 domain 上录点什么"。
+/// 身份。它同时应答两个标准查询：get_completion_scheduler_t<set_value_t>（把
+/// 自己交出去）和 get_completion_domain_t<set_value_t>（把 mock_domain 交
+/// 出去）——跟 nvexec::stream_scheduler 完全一样的两步暴露方式（调查过
+/// stream_context.cuh 的 attrs::query 两个重载）。transition_impl/consume_impl
+/// 是这个具体域自己提供的定制点实现，不是 cpo.h 里的原语，也不是 sender 算法本身
+/// 直接调用它们——调用它们的是 mock_domain::transform_sender 换出来的专属
+/// sender，algorithms.h 里的默认聚合体完全不知道这两个函数存在。
 ///
 /// 定义在 mock_schedule_sender 之前：schedule() 返回的 sender 需要持有一份
 /// 完整的 mock_scheduler（不是前向声明），顺序反过来会是不完整类型错误。
@@ -88,6 +106,15 @@ public:
 	[[nodiscard]] mock_schedule_sender schedule() const noexcept;
 
 	[[nodiscard]] domain& get_domain() const noexcept { return *_domain; }
+
+	/// 跟 mock_schedule_sender::attrs 里那份是同一个查询，重复应答一次：
+	/// stdexec::get_completion_domain_t 内部有个一致性检查
+	/// （__check_domain_，__domain.hpp），如果只能从 attrs 查到 completion
+	/// domain、从 scheduler 本身查不到，会认为这是矛盾的状态而 static_assert
+	/// 失败——两处都要答，跟 nvexec::stream_scheduler 用 CRTP 基类
+	/// stream_scheduler_env 同时给 scheduler 和它的 sender 提供同一份查询是
+	/// 同一个原因。
+	[[nodiscard]] mock_domain query(::stdexec::get_completion_domain_t<::stdexec::set_value_t>) const noexcept;
 
 	/// transition 的定制实现：先做代数变换（transite），再在 domain 上录 barrier。
 	/// 按 From/To 是否同属 image_state 或 buffer_state 分支——只有这一处需要知道
@@ -122,17 +149,15 @@ public:
 	/// 接收整个 tracked_value 是同一种形状），由 mock_scheduler 自己读
 	/// _handle/_state/_signal 这几个字段——pending_resource 这一侧没有像
 	/// tracked_resource 那样拆出通用的字段读取原语（按设计讨论的结论，先搁置），
-	/// 所以这个定制点只对 gpu::mock::pending_value 这个具体类型生效，
-	/// algorithms.h::dispatch_consume 用 requires 检测这条路径是否可行，检测
-	/// 不到就落回 consume_external 原语。返回 sender（不是裸值）：跟
-	/// consume_external 原语的返回类型保持同一种形状，这样 dispatch_consume
-	/// 两条分支产出的东西可以用同一套标准组合子去接，不需要手写一个类型擦除的
-	/// 算子状态去兼容两种不同形状的返回值。
+	/// 所以这个定制点只对 gpu::mock::pending_value 这个具体类型生效。返回裸值
+	/// （不是 sender）：跟 transition_impl 保持同一种形状，调用方
+	/// （mock_domain::transform_sender 换出来的专属 sender）自己决定怎么包成
+	/// sender 的完成值。
 	template <class Handle, class State>
-	[[nodiscard]] auto consume_impl(pending_value<Handle, State> const& value) const
+	[[nodiscard]] tracked_value<Handle, State> consume_impl(pending_value<Handle, State> const& value) const
 	{
 		_domain->add_wait(value._signal);
-		return ::stdexec::just(tracked_value<Handle, State>{value._handle, value._state});
+		return {value._handle, value._state};
 	}
 
 private:
@@ -157,6 +182,11 @@ struct mock_schedule_sender
 		{
 			return _scheduler;
 		}
+
+		// mock_domain 还不完整（完整定义在文件靠后，需要 tracked_value/
+		// pending_value 都完整），函数体延后到 mock_domain 定义完再给出，跟
+		// mock_scheduler::schedule() 用的是同一个手法。
+		[[nodiscard]] mock_domain query(::stdexec::get_completion_domain_t<::stdexec::set_value_t>) const noexcept;
 	};
 
 	[[nodiscard]] attrs get_env() const noexcept { return {_scheduler}; }
@@ -241,4 +271,190 @@ struct tracked_value
 
 static_assert(::gpu::transitible_tracked_resource<tracked_value<image_handle, ::gpu::undefined>>);
 static_assert(::gpu::pending_resource<pending_value<image_handle, ::gpu::undefined>>);
+
+/// mock_domain::transform_sender 换出来的 transition 专属实现：调用
+/// mock_scheduler::transition_impl（会录 barrier），而不是默认聚合体
+/// 里的 ::gpu::transite（纯代数变换）。跟 algorithms.h::transition_sender
+/// 是同一种形状（聚合体、手写 operation、Pred 存成 operation 自己的成员避免
+/// 悬空引用），区别只在 set_value 里调哪个函数。
+template <class To, class Pred>
+struct domain_transition_sender
+{
+	To _to;
+	Pred _pred;
+	mock_scheduler _scheduler;
+
+	using sender_concept = ::stdexec::sender_t;
+
+	using __value_t = ::stdexec::value_types_of_t<Pred, ::stdexec::env<>, ::gpu::detail::single_value_t, ::gpu::detail::single_value_t>;
+	using __result_t = decltype(_scheduler.transition_impl(::std::declval<__value_t const&>(), ::std::declval<To>()));
+	using completion_signatures = ::stdexec::completion_signatures<
+		::stdexec::set_value_t(__result_t),
+		::stdexec::set_error_t(::std::exception_ptr),
+		::stdexec::set_stopped_t()>;
+
+	[[nodiscard]] decltype(auto) get_env() const noexcept { return ::stdexec::get_env(_pred); }
+
+	template <class Receiver>
+	struct operation
+	{
+		using operation_state_concept = ::stdexec::operation_state_t;
+
+		struct inner_receiver
+		{
+			using receiver_concept = ::stdexec::receiver_t;
+			operation* _op;
+
+			template <::gpu::transitible_tracked_resource Value>
+			void set_value(Value&& value) noexcept
+			{
+				::stdexec::set_value(::std::move(_op->_receiver), _op->_sndr._scheduler.transition_impl(value, ::std::move(_op->_sndr._to)));
+			}
+
+			template <class Error>
+			void set_error(Error&& error) noexcept { ::stdexec::set_error(::std::move(_op->_receiver), ::std::forward<Error>(error)); }
+
+			void set_stopped() noexcept { ::stdexec::set_stopped(::std::move(_op->_receiver)); }
+
+			[[nodiscard]] decltype(auto) get_env() const noexcept { return ::stdexec::get_env(_op->_receiver); }
+		};
+
+		domain_transition_sender _sndr;
+		Receiver _receiver;
+		::stdexec::connect_result_t<Pred&, inner_receiver> _inner;
+
+		operation(domain_transition_sender sndr, Receiver receiver)
+			: _sndr(::std::move(sndr)), _receiver(::std::move(receiver))
+			, _inner(::stdexec::connect(_sndr._pred, inner_receiver{this}))
+		{
+		}
+
+		void start() & noexcept { ::stdexec::start(_inner); }
+	};
+
+	template <class Receiver>
+	[[nodiscard]] operation<Receiver> connect(Receiver receiver) const &
+	{
+		return operation<Receiver>{*this, ::std::move(receiver)};
+	}
+};
+
+/// mock_domain::transform_sender 换出来的 consume 专属实现：调用
+/// mock_scheduler::consume_impl（记一条 wait），而不是默认聚合体里的
+/// ::gpu::consume_external（真正等待）。
+template <class Pred>
+struct domain_consume_sender
+{
+	Pred _pred;
+	mock_scheduler _scheduler;
+
+	using sender_concept = ::stdexec::sender_t;
+
+	using __value_t = ::stdexec::value_types_of_t<Pred, ::stdexec::env<>, ::gpu::detail::single_value_t, ::gpu::detail::single_value_t>;
+	using __result_t = decltype(_scheduler.consume_impl(::std::declval<__value_t const&>()));
+	using completion_signatures = ::stdexec::completion_signatures<
+		::stdexec::set_value_t(__result_t),
+		::stdexec::set_error_t(::std::exception_ptr),
+		::stdexec::set_stopped_t()>;
+
+	[[nodiscard]] decltype(auto) get_env() const noexcept { return ::stdexec::get_env(_pred); }
+
+	template <class Receiver>
+	struct operation
+	{
+		using operation_state_concept = ::stdexec::operation_state_t;
+
+		struct inner_receiver
+		{
+			using receiver_concept = ::stdexec::receiver_t;
+			operation* _op;
+
+			template <::gpu::pending_resource Value>
+			void set_value(Value&& value) noexcept
+			{
+				::stdexec::set_value(::std::move(_op->_receiver), _op->_sndr._scheduler.consume_impl(value));
+			}
+
+			template <class Error>
+			void set_error(Error&& error) noexcept { ::stdexec::set_error(::std::move(_op->_receiver), ::std::forward<Error>(error)); }
+
+			void set_stopped() noexcept { ::stdexec::set_stopped(::std::move(_op->_receiver)); }
+
+			[[nodiscard]] decltype(auto) get_env() const noexcept { return ::stdexec::get_env(_op->_receiver); }
+		};
+
+		domain_consume_sender _sndr;
+		Receiver _receiver;
+		::stdexec::connect_result_t<Pred&, inner_receiver> _inner;
+
+		operation(domain_consume_sender sndr, Receiver receiver)
+			: _sndr(::std::move(sndr)), _receiver(::std::move(receiver))
+			, _inner(::stdexec::connect(_sndr._pred, inner_receiver{this}))
+		{
+		}
+
+		void start() & noexcept { ::stdexec::start(_inner); }
+	};
+
+	template <class Receiver>
+	[[nodiscard]] operation<Receiver> connect(Receiver receiver) const &
+	{
+		return operation<Receiver>{*this, ::std::move(receiver)};
+	}
+};
+
+/// mock_domain：mock_scheduler 的 completion domain。跟 nvexec::stream_domain
+/// 是同一个角色——针对特定算子 tag 提供 transform_sender，stdexec::connect() 会
+/// 在真正 connect 之前自动调用 stdexec::transform_sender(sndr, get_env(rcvr))，
+/// 这一步顺着 attrs 转发链查出 predecessor 的 completion domain（也就是这个
+/// 类型），如果它对当前算子的 tag 提供 transform_sender 就调用，命中就把整条
+/// 链在这一节的 sender 换成域专属实现——是 connect 之前的一次性结构替换，不是
+/// 运行时判断。
+///
+/// 无状态、可默认构造：stdexec::get_completion_domain_t 内部有条路径需要能
+/// value-initialize 查到的这个域类型本身（__read_query_t::operator()，
+/// __domain.hpp），跟 nvexec::stream_domain 是空结构体一样，mock_domain 不带
+/// 任何字段——需要哪个具体的 mock_scheduler，在 transform_sender 内部用标准查询
+/// stdexec::get_completion_scheduler<set_value_t>(get_env(pred)) 从 predecessor
+/// sender 身上现查，不提前存进 mock_domain。
+///
+/// 用 stdexec::tag_of_t<Sender> 认出 gpu::transition_t/gpu::consume_t：
+/// transition_sender/consume_sender（algorithms.h）都是普通聚合体，第一个
+/// 公开成员是 tag 对象，tag_of_t 靠结构化绑定识别这个形状，不需要
+/// __sexpr/__make_sexpr 这类 stdexec 内部实现细节——跟 nvexec::stream_domain
+/// 用 tag_of_t<Sender> 分派到 transform_sender_for<Tag> 是同一件事，只是这里
+/// 没有再多一层 per-tag 特化模板，直接在 transform_sender 里用 if constexpr
+/// 分两支。
+class mock_domain
+{
+public:
+	template <class Sender, class Env>
+		requires ::std::same_as<::stdexec::tag_of_t<Sender>, ::gpu::transition_t>
+	[[nodiscard]] auto transform_sender(::stdexec::set_value_t, Sender&& sndr, Env const&) const
+	{
+		auto&& [tag, to, pred] = ::std::forward<Sender>(sndr);
+		auto scheduler = ::stdexec::get_completion_scheduler<::stdexec::set_value_t>(::stdexec::get_env(pred));
+		return domain_transition_sender<::std::decay_t<decltype(to)>, ::std::decay_t<decltype(pred)>>{
+			::std::forward<decltype(to)>(to), ::std::forward<decltype(pred)>(pred), scheduler};
+	}
+
+	template <class Sender, class Env>
+		requires ::std::same_as<::stdexec::tag_of_t<Sender>, ::gpu::consume_t>
+	[[nodiscard]] auto transform_sender(::stdexec::set_value_t, Sender&& sndr, Env const&) const
+	{
+		auto&& [tag, pred] = ::std::forward<Sender>(sndr);
+		auto scheduler = ::stdexec::get_completion_scheduler<::stdexec::set_value_t>(::stdexec::get_env(pred));
+		return domain_consume_sender<::std::decay_t<decltype(pred)>>{::std::forward<decltype(pred)>(pred), scheduler};
+	}
+};
+
+[[nodiscard]] inline mock_domain mock_scheduler::query(::stdexec::get_completion_domain_t<::stdexec::set_value_t>) const noexcept
+{
+	return {};
+}
+
+[[nodiscard]] inline mock_domain mock_schedule_sender::attrs::query(::stdexec::get_completion_domain_t<::stdexec::set_value_t>) const noexcept
+{
+	return _scheduler.query(::stdexec::get_completion_domain_t<::stdexec::set_value_t>{});
+}
 }
