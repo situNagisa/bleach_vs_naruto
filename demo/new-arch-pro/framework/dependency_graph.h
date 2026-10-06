@@ -30,8 +30,6 @@ consteval ::std::optional<::std::size_t> pack_index_impl()
 
 template <class Target, class... T>
 inline constexpr ::std::optional<::std::size_t> pack_index_v = ::pack_index_impl<Target, T...>();
-::std::unordered_map<int, int>::at;
-template<class T>
 
 
 template <class D, class Target>

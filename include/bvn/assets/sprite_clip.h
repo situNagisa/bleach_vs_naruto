@@ -22,6 +22,10 @@ namespace bvn::assets
 		std::vector<std::byte> frames_rgba8;
 	};
 
+/// @brief Loads an image as RGBA8 pixels; animated GIFs yield only the first frame.
+/// @throws std::runtime_error If the file cannot be read or decoded.
+[[nodiscard]] auto load_image(::std::filesystem::path const& path) -> image_rgba8;
+
 	auto load_sprite_clip(std::filesystem::path const& path) -> sprite_clip_data;
 	auto pack_horizontal_atlas(sprite_clip_data const& clip) -> image_rgba8;
 }

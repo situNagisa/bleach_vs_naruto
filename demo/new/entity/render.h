@@ -5,250 +5,78 @@
 #include <stdexec/execution.hpp>
 #include <exec/split.hpp>
 
+#include <nagisa/concurrency/lease.h>
 #include <nagisa/concurrency/when_all_range.h>
 
-#include <nagisa/vulkana/execution.h>
+#include "../framework/frame_context.h"
+#include "../framework/frame_slot.h"
+#include "../framework/any_sender.h"
 
-#include "./frame_context.h"
-#include "./entities.h"
-#include "./frame_slot.h"
-#include "./demo_vulkan.h"
-#include "./any_sender.h"
-#include "./immovable.h"
-#include "./resource_pool.h"
-
-struct image
-{
-	struct resource_type
-	{
-		::std::uint32_t index;
-		::VkImage image;
-		::VkImageView view;
-	} _resource{};
-
-	struct state_type
-	{
-		struct pipeline_stage_type
-		{
-			VkPipelineStageFlags2 top_of_pipe : 1 = 0;
-			VkPipelineStageFlags2 draw_indirect : 1 = 0;
-			VkPipelineStageFlags2 vertex_input : 1 = 0;
-			VkPipelineStageFlags2 vertex_shader : 1 = 0;
-			VkPipelineStageFlags2 tessellation_control_shader : 1 = 0;
-			VkPipelineStageFlags2 tessellation_evaluation_shader : 1 = 0;
-			VkPipelineStageFlags2 geometry_shader : 1 = 0;
-			VkPipelineStageFlags2 fragment_shader : 1 = 0;
-			VkPipelineStageFlags2 early_fragment_tests : 1 = 0;
-			VkPipelineStageFlags2 late_fragment_tests : 1 = 0;
-			VkPipelineStageFlags2 color_attachment_output : 1 = 0;
-			VkPipelineStageFlags2 compute_shader : 1 = 0;
-			VkPipelineStageFlags2 all_transfer : 1 = 0;
-			VkPipelineStageFlags2 bottom_of_pipe : 1 = 0;
-			VkPipelineStageFlags2 host : 1 = 0;
-			VkPipelineStageFlags2 all_graphics : 1 = 0;
-			VkPipelineStageFlags2 all_commands : 1 = 0;
-			VkPipelineStageFlags2 command_preprocess : 1 = 0;
-			VkPipelineStageFlags2 conditional_rendering : 1 = 0;
-			VkPipelineStageFlags2 task_shader : 1 = 0;
-			VkPipelineStageFlags2 mesh_shader : 1 = 0;
-			VkPipelineStageFlags2 ray_tracing_shader : 1 = 0;
-			VkPipelineStageFlags2 fragment_shading_rate_attachment : 1 = 0;
-			VkPipelineStageFlags2 fragment_density_process : 1 = 0;
-			VkPipelineStageFlags2 transform_feedback : 1 = 0;
-			VkPipelineStageFlags2 acceleration_structure_build : 1 = 0;
-			VkPipelineStageFlags2 video_decode : 1 = 0;
-			VkPipelineStageFlags2 video_encode : 1 = 0;
-			VkPipelineStageFlags2 acceleration_structure_copy : 1 = 0;
-			VkPipelineStageFlags2 optical_flow : 1 = 0;
-			VkPipelineStageFlags2 micromap_build : 1 = 0;
-			VkPipelineStageFlags2 _reserved_31 : 1 = 0;
-			VkPipelineStageFlags2 copy : 1 = 0;
-			VkPipelineStageFlags2 resolve : 1 = 0;
-			VkPipelineStageFlags2 blit : 1 = 0;
-			VkPipelineStageFlags2 clear : 1 = 0;
-			VkPipelineStageFlags2 index_input : 1 = 0;
-			VkPipelineStageFlags2 vertex_attribute_input : 1 = 0;
-			VkPipelineStageFlags2 pre_rasterization_shaders : 1 = 0;
-			VkPipelineStageFlags2 subpass_shader : 1 = 0;
-			VkPipelineStageFlags2 invocation_mask : 1 = 0;
-			VkPipelineStageFlags2 cluster_culling_shader : 1 = 0;
-			VkPipelineStageFlags2 data_graph : 1 = 0;
-			VkPipelineStageFlags2 _reserved_43 : 1 = 0;
-			VkPipelineStageFlags2 convert_cooperative_vector_matrix : 1 = 0;
-			VkPipelineStageFlags2 _reserved_45 : 1 = 0;
-			VkPipelineStageFlags2 copy_indirect : 1 = 0;
-			VkPipelineStageFlags2 _reserved_47 : 17 = 0;
-		} stage{};
-		struct access_type
-		{
-			VkAccessFlags2 indirect_command_read : 1 = 0;
-			VkAccessFlags2 index_read : 1 = 0;
-			VkAccessFlags2 vertex_attribute_read : 1 = 0;
-			VkAccessFlags2 uniform_read : 1 = 0;
-			VkAccessFlags2 input_attachment_read : 1 = 0;
-			VkAccessFlags2 shader_read : 1 = 0;
-			VkAccessFlags2 shader_write : 1 = 0;
-			VkAccessFlags2 color_attachment_read : 1 = 0;
-			VkAccessFlags2 color_attachment_write : 1 = 0;
-			VkAccessFlags2 depth_stencil_attachment_read : 1 = 0;
-			VkAccessFlags2 depth_stencil_attachment_write : 1 = 0;
-			VkAccessFlags2 transfer_read : 1 = 0;
-			VkAccessFlags2 transfer_write : 1 = 0;
-			VkAccessFlags2 host_read : 1 = 0;
-			VkAccessFlags2 host_write : 1 = 0;
-			VkAccessFlags2 memory_read : 1 = 0;
-			VkAccessFlags2 memory_write : 1 = 0;
-			VkAccessFlags2 command_preprocess_read : 1 = 0;
-			VkAccessFlags2 command_preprocess_write : 1 = 0;
-			VkAccessFlags2 color_attachment_read_noncoherent : 1 = 0;
-			VkAccessFlags2 conditional_rendering_read : 1 = 0;
-			VkAccessFlags2 acceleration_structure_read : 1 = 0;
-			VkAccessFlags2 acceleration_structure_write : 1 = 0;
-			VkAccessFlags2 fragment_shading_rate_attachment_read : 1 = 0;
-			VkAccessFlags2 fragment_density_map_read : 1 = 0;
-			VkAccessFlags2 transform_feedback_write : 1 = 0;
-			VkAccessFlags2 transform_feedback_counter_read : 1 = 0;
-			VkAccessFlags2 transform_feedback_counter_write : 1 = 0;
-			VkAccessFlags2 _reserved_28 : 4 = 0;
-			VkAccessFlags2 shader_sampled_read : 1 = 0;
-			VkAccessFlags2 shader_storage_read : 1 = 0;
-			VkAccessFlags2 shader_storage_write : 1 = 0;
-			VkAccessFlags2 video_decode_read : 1 = 0;
-			VkAccessFlags2 video_decode_write : 1 = 0;
-			VkAccessFlags2 video_encode_read : 1 = 0;
-			VkAccessFlags2 video_encode_write : 1 = 0;
-			VkAccessFlags2 invocation_mask_read : 1 = 0;
-			VkAccessFlags2 shader_binding_table_read : 1 = 0;
-			VkAccessFlags2 descriptor_buffer_read : 1 = 0;
-			VkAccessFlags2 optical_flow_read : 1 = 0;
-			VkAccessFlags2 optical_flow_write : 1 = 0;
-			VkAccessFlags2 micromap_read : 1 = 0;
-			VkAccessFlags2 micromap_write : 1 = 0;
-			VkAccessFlags2 _reserved_46 : 1 = 0;
-			VkAccessFlags2 data_graph_read : 1 = 0;
-			VkAccessFlags2 data_graph_write : 1 = 0;
-			VkAccessFlags2 _reserved_49 : 2 = 0;
-			VkAccessFlags2 shader_tile_attachment_read : 1 = 0;
-			VkAccessFlags2 shader_tile_attachment_write : 1 = 0;
-			VkAccessFlags2 _reserved_53 : 11 = 0;
-		} access{};
-		::vkfu::enums::image_layout layout{};
-	} _state{};
-
-	constexpr auto&& resource() noexcept { return _resource; }
-	constexpr auto&& resource() const noexcept { return _resource; }
-
-	constexpr auto&& state() noexcept { return _state; }
-	constexpr auto&& state() const noexcept { return _state; }
-
-	auto transite(state_type destination_state) const
-	{
-		::vkfu::param::memory_barrier2;
-		::vkfu::param::image_memory_barrier2{
-			.dst_stage_mask = destination_state.stage,
-			.dst_access_mask = destination_state.access,
-			.old_layout = _state.layout,
-			.new_layout = destination_state.layout,
-			.src_queue_family_index = VK_QUEUE_FAMILY_IGNORED,
-			.dst_queue_family_index = VK_QUEUE_FAMILY_IGNORED,
-			.image = _resource.image,
-			.subresource_range = {
-				.aspectMask = ::VK_IMAGE_ASPECT_COLOR_BIT,
-				.baseMipLevel = 0,
-				.levelCount = 1,
-				.baseArrayLayer = 0,
-				.layerCount = 1,
-			},
-		};
-	}
-};
+#include "./detail/demo_vulkan.h"
+#include "./detail/immovable.h"
 
 struct renderer
 {
-	template <class Begin, class End, class Fence>
-	struct _senders
-	{
-		Begin _begin;
-		End _end;
-		Fence _fence;
+	template<class T>
+	using resource_pool = ::nagisa::concurrency::bounded_lease_pool<T*, 4>;
 
-		[[nodiscard]] auto&& begin() const noexcept { return _begin; }
-		[[nodiscard]] auto&& end() const noexcept { return _end; }
-		[[nodiscard]] auto&& fence() const noexcept { return _fence; }
-	};
-
-	template <class B, class E, class F>
-	_senders(B, E, F) -> _senders<B, E, F>;
-
-	struct state : immovable
+	struct task
 	{
 		::std::vector<any_sender_type> recorders{};
 		struct
 		{
 			::std::mutex mutex{};
-				// Entity states own the buffers and keep them alive through fence completion.
-				::std::vector<::vkkl::command_buffer_observer> commands{};
+			// Entity states own the buffers and keep them alive through fence completion.
+			::std::vector<::vkkl::command_buffer_observer> commands{};
 		} secondary{};
 		any_scheduler_type scheduler{};
-	};
 
-	struct _task_fn
-	{
-		constexpr auto operator()(state& state, resource_pool<frame_slot>& slot,
-		                          consumer_arch_vulkan::vulkan_context& vulkan) const
-		{
-			auto begin = slot.acquire()
-				| ::stdexec::then([&vulkan](resource_pool<frame_slot>::lease slot) -> resource_pool<frame_slot>::lease
-				{
-					_begin(vulkan.global_env(), *slot.token());
-					return slot;
-				})
-				| ::exec::split()
-				| ::stdexec::then([](resource_pool<frame_slot>::lease const& frame)
-				{
-					return ::std::ref(*frame.token());
-				});
+		decltype(::exec::split(::std::declval<values_sender_type<resource_pool<frame_slot>::lease>>())) _begin;
+		decltype(::exec::split(::std::declval<values_sender_type<::std::reference_wrapper<frame_slot>>>())) _end;
+		decltype(::exec::split(::std::declval<values_sender_type<>>())) _fence;
 
-			auto end = begin
+		[[nodiscard]] auto begin() const noexcept { return _begin | ::stdexec::then([](resource_pool<frame_slot>::lease const& frame) noexcept { return ::std::ref(*frame.token()); }); }
+		[[nodiscard]] auto end() const noexcept { return _end; }
+		[[nodiscard]] auto fence() const noexcept { return _fence; }
+
+		task(renderer& r, any_scheduler_type sched)
+			: scheduler(::std::move(sched))
+			, _begin(values_sender_type<resource_pool<frame_slot>::lease>{r._pool.acquire()
+				| ::stdexec::then([&r](resource_pool<frame_slot>::lease slot) -> resource_pool<frame_slot>::lease
+					{
+						_begin_(r.vulkan.global_env(), *slot.token());
+						return slot;
+					})
+				} | ::exec::split())
+			, _end(values_sender_type<::std::reference_wrapper<frame_slot>>{begin()
 				| ::stdexec::let_value([&](::std::reference_wrapper<frame_slot> frame)
-				{
-					return ::nagisa::concurrency::when_all_range(state.recorders | ::std::views::as_rvalue)
-						| ::stdexec::continues_on(state.scheduler)
-						| ::stdexec::then([&, frame]
-						{
-							auto handles = state.secondary.commands
-								| ::std::views::transform([](::vkkl::command_buffer_observer command)
-									{
-										return command.handle;
-									})
-								| ::std::ranges::to<::std::vector>();
-							_submit_present_frame(vulkan.global_env(), frame.get(), handles);
-							return frame;
-						});
-				})
-				| ::exec::split();
-			auto fence = end
+					{
+						return ::nagisa::concurrency::when_all_range(recorders | ::std::views::as_rvalue)
+							| ::stdexec::continues_on(scheduler)
+							| ::stdexec::then([&, frame]
+								{
+									auto handles = secondary.commands
+										| ::std::views::transform([](::vkkl::command_buffer_observer command)
+											{
+												return command.handle;
+											})
+										| ::std::ranges::to<::std::vector>();
+									_submit_present_frame(r.vulkan.global_env(), frame.get(), handles);
+									return frame;
+								});
+					})
+				} | ::exec::split())
+			, _fence(values_sender_type<>{end()
 				| ::stdexec::then([&](::std::reference_wrapper<frame_slot> frame)
-				{
-					_wait_fence(vulkan.global_env(), frame.get());
-				})
-				| ::exec::split();
-
-			return _senders{
-				::std::move(begin),
-				::std::move(end),
-				::std::move(fence),
-			};
-		}
+					{
+						_wait_fence(r.vulkan.global_env(), frame.get());
+					})
+				} | ::exec::split())
+		{}
 	};
 
-	using task = task_data<_task_fn, state&, resource_pool<frame_slot>&, consumer_arch_vulkan::vulkan_context&>;
-
-	void build_task(frame_context& context, entity_view<frame_context>, task_builder builder)
+	void build_task(frame_context& context, task& t)
 	{
-		auto&& state = builder.emplace<renderer::state>();
-		state.scheduler = context.scheduler;
-		auto&& t = builder.emplace<task>(state, _pool, vulkan);
 		context.roots.emplace_back(t.fence());
 	}
 
@@ -289,7 +117,7 @@ struct renderer
 		return slot;
 	}
 
-	static void _begin(::consumer_arch_vulkan::global_vulkan_env_renderer const& global, frame_slot& frame)
+	static void _begin_(::consumer_arch_vulkan::global_vulkan_env_renderer const& global, frame_slot& frame)
 	{
 		frame._active_image_index = ::vkfu::khr::acquire_next_image2(global.device(),
 			::vkfu::param::khr::acquire_next_image{
@@ -299,7 +127,6 @@ struct renderer
 				.fence = VK_NULL_HANDLE,
 				.device_mask = (::std::numeric_limits<::std::uint32_t>::max)(),
 			});
-
 		frame._active_image = global.swapchain_images()[frame._active_image_index];
 		frame._active_image_view = global.swapchain_image_views()[frame._active_image_index];
 		frame._extent = global.swapchain_extent();

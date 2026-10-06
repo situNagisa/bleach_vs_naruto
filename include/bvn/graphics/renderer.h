@@ -285,7 +285,7 @@ auto dynamic_forward_global_env_renderer(R&& renderer)
 
 template <class R>
 	requires ::std::constructible_from<renderer_dynamic_forward::frame_env_renderer_eraser<R>, R>
-auto dynamic_forward_frame_env_renderer(R&& renderer)
+frame_dynamic_forward_env_renderer dynamic_forward_frame_env_renderer(R&& renderer)
 {
 	if constexpr (::std::is_pointer_v<::std::remove_cvref_t<R>>)
 	{

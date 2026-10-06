@@ -12,6 +12,7 @@
 
 #include "./detail/immovable.h"
 #include "../framework/entities.h"
+#include "./render.h"
 
 struct frame_context;
 
@@ -56,7 +57,7 @@ public:
 		::std::unique_ptr<implementation> _impl;
 	};
 
-	main_menu();
+	main_menu(renderer& r);
 	~main_menu();
 
 	auto build_task(frame_context& context, entity_view<frame_context> view, task_builder builder) -> void;

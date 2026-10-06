@@ -242,7 +242,7 @@ enum class choose
 struct choice_result
 {
 	choose strategy;
-	bool nothrow;
+	bool nothrow; 
 };
 
 consteval choice_result choice(auto&& graph, auto&& key) noexcept
