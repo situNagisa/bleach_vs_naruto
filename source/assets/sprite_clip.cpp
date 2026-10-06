@@ -2,8 +2,11 @@
 #include <cctype>
 #include <fstream>
 #include <limits>
+#include <memory>
 #include <ranges>
+#include <span>
 #include <stdexcept>
+#include <utility>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -12,91 +15,102 @@
 
 namespace bvn::assets
 {
-	auto load_sprite_clip(std::filesystem::path const& path) -> sprite_clip_data
+	namespace
 	{
-		auto bytes = ::std::vector<::std::byte>{};
-
-		//+ read asset bytes
+		auto read_asset_bytes(::std::filesystem::path const& path) -> ::std::vector<::std::byte>
 		{
-			auto file = ::std::ifstream{path, ::std::ios::binary | ::std::ios::ate};
+			auto bytes = ::std::vector<::std::byte>{};
 
-			if (!file)
+			//+ read asset bytes
 			{
-				throw ::std::runtime_error{"failed to open asset: " + path.string()};
+				auto file = ::std::ifstream{path, ::std::ios::binary | ::std::ios::ate};
+
+				if (!file)
+				{
+					throw ::std::runtime_error{"failed to open asset: " + path.string()};
+				}
+
+				auto size = file.tellg();
+
+				if (size < 0)
+				{
+					throw ::std::runtime_error{"failed to size asset: " + path.string()};
+				}
+
+				bytes.resize(static_cast<::std::size_t>(size));
+				file.seekg(0, ::std::ios::beg);
+
+				if (!bytes.empty() && !file.read(reinterpret_cast<char*>(bytes.data()), size))
+				{
+					throw ::std::runtime_error{"failed to read asset: " + path.string()};
+				}
 			}
 
-			auto size = file.tellg();
-
-			if (size < 0)
+			if (bytes.size() > static_cast<::std::size_t>(::std::numeric_limits<int>::max()))
 			{
-				throw ::std::runtime_error{"failed to size asset: " + path.string()};
+				throw ::std::runtime_error{"asset is too large for stb"};
 			}
 
-			bytes.resize(static_cast<::std::size_t>(size));
-			file.seekg(0, ::std::ios::beg);
-
-			if (!bytes.empty() && !file.read(reinterpret_cast<char*>(bytes.data()), size))
-			{
-				throw ::std::runtime_error{"failed to read asset: " + path.string()};
-			}
+			return bytes;
 		}
 
-		if (bytes.size() > static_cast<::std::size_t>(::std::numeric_limits<int>::max()))
+		auto decode_image(::std::span<::std::byte const> bytes) -> image_rgba8
 		{
-			throw ::std::runtime_error{"asset is too large for stb"};
-		}
-
-		auto extension = path.extension().string();
-		::std::ranges::transform(extension, extension.begin(), [](unsigned char value)
-		{
-			return static_cast<char>(::std::tolower(value));
-		});
-
-		if (extension == ".gif")
-		{
-			auto delays = static_cast<int*>(nullptr);
 			auto width = int{};
 			auto height = int{};
-			auto frame_count = int{};
 			auto components = int{};
-			auto pixels = stbi_load_gif_from_memory(reinterpret_cast<stbi_uc const*>(bytes.data()), static_cast<int>(bytes.size()), &delays, &width, &height, &frame_count, &components, STBI_rgb_alpha);
+			auto pixels = ::std::unique_ptr<::stbi_uc, decltype(&::stbi_image_free)>{
+				::stbi_load_from_memory(reinterpret_cast<::stbi_uc const*>(bytes.data()), static_cast<int>(bytes.size()), &width, &height, &components, STBI_rgb_alpha),
+				&::stbi_image_free
+			};
 
-			if (pixels == nullptr)
+			if (!pixels)
 			{
-				throw ::std::runtime_error{"failed to decode GIF: " + path.string() + ": " + stbi_failure_reason()};
+				throw ::std::runtime_error{::std::string("failed to decode image: ") + ::stbi_failure_reason()};
 			}
 
-			auto result = sprite_clip_data{};
-			result.frame_width = static_cast<std::uint32_t>(width);
-			result.frame_height = static_cast<std::uint32_t>(height);
-			result.frame_count = static_cast<::std::size_t>(frame_count);
-			result.frames_rgba8.resize(static_cast<std::size_t>(width) * static_cast<std::size_t>(height) * 4u * static_cast<std::size_t>(frame_count));
-			std::ranges::copy_n(reinterpret_cast<std::byte const*>(pixels), result.frames_rgba8.size(), result.frames_rgba8.begin());
-
-			STBI_FREE(delays);
-			stbi_image_free(pixels);
-
+			auto result = image_rgba8{
+				.width = static_cast<::std::uint32_t>(width),
+				.height = static_cast<::std::uint32_t>(height),
+				.pixels = ::std::vector<::std::byte>(static_cast<::std::size_t>(width) * static_cast<::std::size_t>(height) * 4u)
+			};
+			::std::ranges::copy_n(reinterpret_cast<::std::byte const*>(pixels.get()), result.pixels.size(), result.pixels.begin());
 			return result;
 		}
+	}
 
+	auto load_image(::std::filesystem::path const& path) -> image_rgba8
+	{
+		auto bytes = ::bvn::assets::read_asset_bytes(path);
+		return ::bvn::assets::decode_image(bytes);
+	}
+
+	auto load_sprite_clip(std::filesystem::path const& path) -> sprite_clip_data
+	{
+		auto bytes = ::bvn::assets::read_asset_bytes(path);
+
+		auto delays = static_cast<int*>(nullptr);
 		auto width = int{};
 		auto height = int{};
+		auto frame_count = int{};
 		auto components = int{};
-		auto pixels = stbi_load_from_memory(reinterpret_cast<stbi_uc const*>(bytes.data()), static_cast<int>(bytes.size()), &width, &height, &components, STBI_rgb_alpha);
+		auto pixels = stbi_load_gif_from_memory(reinterpret_cast<stbi_uc const*>(bytes.data()), static_cast<int>(bytes.size()), &delays, &width, &height, &frame_count, &components, STBI_rgb_alpha);
 
 		if (pixels == nullptr)
 		{
-			throw ::std::runtime_error{"failed to decode image: " + path.string() + ": " + stbi_failure_reason()};
+			throw ::std::runtime_error{ "failed to decode GIF: " + path.string() + ": " + stbi_failure_reason() };
 		}
 
 		auto result = sprite_clip_data{};
 		result.frame_width = static_cast<std::uint32_t>(width);
 		result.frame_height = static_cast<std::uint32_t>(height);
-		result.frame_count = 1;
-		result.frames_rgba8.resize(static_cast<std::size_t>(width) * static_cast<std::size_t>(height) * 4u);
+		result.frame_count = static_cast<::std::size_t>(frame_count);
+		result.frames_rgba8.resize(static_cast<std::size_t>(width) * static_cast<std::size_t>(height) * 4u * static_cast<std::size_t>(frame_count));
 		std::ranges::copy_n(reinterpret_cast<std::byte const*>(pixels), result.frames_rgba8.size(), result.frames_rgba8.begin());
 
+		STBI_FREE(delays);
 		stbi_image_free(pixels);
+
 		return result;
 	}
 
