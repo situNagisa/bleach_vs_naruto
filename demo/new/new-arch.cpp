@@ -21,9 +21,7 @@
 #include "./entity/main_menu.h"
 #include "./entity/setting_scene.h"
 #include "./framework/frame_context.h"
-#include "./settings.h"
-
-
+#include "./entity/setting_scene/settings.h"
 
 int main() try
 {
@@ -35,21 +33,18 @@ int main() try
 
 	struct entitites_t
 	{
-		::std::filesystem::path settings_path = ::settings_file_path();
-		game_settings preferences = ::load_settings(settings_path);
 		renderer draw{};
 		input controls{ draw.window };
 		union scene_t
 		{
 			exit_scene exit;
 			main_menu menu;
-			setting_scene settings;
 
 			~scene_t() noexcept {}
 		} scene{};
+		setting_scene settings{draw};
 	} entitites{};
-	entitites.draw.set_fullscreen(entitites.preferences.fullscreen);
-	auto saved_settings = entitites.preferences;
+	entitites.draw.set_fullscreen(entitites.settings.preferences().fullscreen);
 
 	auto frame_index = ::std::uint64_t{};
 
@@ -70,8 +65,7 @@ int main() try
 				, state<main_menu> + on_exit<_> / [] (entitites_t& entitites) noexcept { ::std::destroy_at(&entitites.scene.menu); }
 				, state<main_menu> + event<exit> = state<exit_scene>
 				, state<main_menu> + event<open_settings> = state<setting_scene>
-				, state<setting_scene> + on_entry<_> / [] (entitites_t& entitites) { ::std::construct_at(&entitites.scene.settings, entitites.draw, entitites.preferences); }
-				, state<setting_scene> + on_exit<_> / [] (entitites_t& entitites) noexcept { ::std::destroy_at(&entitites.scene.settings); }
+
 				, state<setting_scene> + event<back_to_menu> = state<main_menu>
 				, state<setting_scene> + event<exit> = state<exit_scene>
 				);
@@ -104,18 +98,11 @@ int main() try
 			}
 			else if (sm.is(::boost::sml::state<setting_scene>))
 			{
-				auto&& settings_task = st.emplace<setting_scene::task>(entitites.scene.settings, it, entitites.draw, rt);
-				entitites.scene.settings.build_task(context, settings_task, entitites.draw, rt);
+				auto&& settings_task = st.emplace<setting_scene::task>(entitites.settings, it, entitites.draw, rt);
+				entitites.settings.build_task(context, settings_task, entitites.draw, rt);
 			}
 
 			::stdexec::sync_wait(::nagisa::concurrency::when_all_range(context.roots));
-		}
-
-		if (entitites.preferences != saved_settings)
-		{
-			entitites.draw.set_fullscreen(entitites.preferences.fullscreen);
-			::save_settings(entitites.settings_path, entitites.preferences);
-			saved_settings = entitites.preferences;
 		}
 
 		// Scene resources can be released after the frame tasks and GPU fence have completed.
@@ -137,16 +124,16 @@ int main() try
 				break;
 			}
 		}
-		else if (sm.is(::boost::sml::state<setting_scene>) && entitites.scene.settings.current_state().back_requested)
+		else if (sm.is(::boost::sml::state<setting_scene>))
 		{
-			sm.process_event(back_to_menu{});
+			entitites.draw.set_fullscreen(entitites.settings.preferences().fullscreen);
+			if (entitites.settings.current_state().back_requested)
+			{
+				::save_settings(setting_path, entitites.settings.preferences());;
+				sm.process_event(back_to_menu{});
+			}
 		}
 		++frame_index;
-		if (entitites.preferences.frame_rate != 0)
-		{
-			auto const interval = ::std::chrono::duration<double>{ 1.0 / entitites.preferences.frame_rate };
-			::std::this_thread::sleep_until(frame_started + interval);
-		}
 	}
 	::std::println("Rendered {} frames.", frame_index);
 }

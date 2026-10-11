@@ -12,7 +12,10 @@
 #include "./render.h"
 #include "./detail/immovable.h"
 #include "../framework/frame_context.h"
-#include "../settings.h"
+
+#include "./setting_scene/settings.h"
+
+inline static auto setting_path = ::std::filesystem::path(".") / "settings.ini";
 
 /// 设置场景，持有跨帧状态与绘制资源。
 struct setting_scene : immovable
@@ -46,11 +49,13 @@ struct setting_scene : immovable
 		~task();
 	};
 
-	explicit setting_scene(renderer& r, game_settings& settings);
+	explicit setting_scene(renderer& r);
 	~setting_scene();
 
 	void build_task(frame_context& context, task& t, renderer& r, renderer::task& rt);
 	[[nodiscard]] auto current_state() const noexcept -> state const&;
+
+	game_settings const& preferences() const noexcept;
 
 	struct implementation;
 	::std::unique_ptr<implementation> _impl;

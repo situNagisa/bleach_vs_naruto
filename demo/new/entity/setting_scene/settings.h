@@ -16,6 +16,5 @@ struct game_settings
 	[[nodiscard]] constexpr auto volume_gain() const noexcept -> float { return volume / 100.0f; }
 };
 
-[[nodiscard]] auto settings_file_path() -> ::std::filesystem::path;
 [[nodiscard]] auto load_settings(::std::filesystem::path const& path) -> game_settings;
 void save_settings(::std::filesystem::path const& path, game_settings const& settings);

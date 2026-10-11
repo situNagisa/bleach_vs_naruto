@@ -19,12 +19,14 @@
 #include "./setting_scene.h"
 #include "./main_menu/drawing.h"
 
+#include "./setting_scene/settings.h"
+
 inline static constexpr auto ignore = ::stdexec::then([](auto&&...) noexcept {});
 
 struct setting_scene::implementation : immovable
 {
+	game_settings _settings;
 	::std::array<::std::string, 4> _options{};
-	game_settings& _settings;
 	::std::string _title = "Settings";
 	state _state{};
 	int _held_direction = 0;
@@ -38,8 +40,8 @@ struct setting_scene::implementation : immovable
 
 	::vkkl::command_pool _pool;
 
-	implementation(renderer& r, game_settings& settings)
-		: _settings(settings)
+	implementation(renderer& r)
+		: _settings(::load_settings(setting_path))
 		, _background(
 			::bvn::assets::load_image(resource_dir / "background.jpg")
 			, r.vulkan.global_env().device()
@@ -187,6 +189,10 @@ struct setting_scene::task::impl
 			| ::stdexec::then([&](setting_scene::state const& snapshot, setting_scene::delta const&, ::vkkl::command_buffer_observer command_buffer)
 				{
 					auto viewport = point(r.vulkan.global_env().swapchain_extent().width, r.vulkan.global_env().swapchain_extent().height);
+					// Convert to NDC after all local transforms.
+					auto const viewport_transform = ::glm::scale(
+						::glm::translate(::glm::mat3{ 1.0f }, ::glm::vec2{ -1.0f, -1.0f }),
+						::glm::vec2{ 2.0f / viewport.x, 2.0f / viewport.y });
 
 					auto&& impl = *scene._impl;
 					auto device = r.vulkan.global_env().device();
@@ -199,9 +205,8 @@ struct setting_scene::task::impl
 					auto const cover = (::std::max)(viewport.x / image_size.x, viewport.y / image_size.y);
 					auto const offset = (::glm::vec2{ viewport.x, viewport.y } - image_size * cover) * 0.5f;
 					auto const background_transform = ::glm::scale(::glm::translate(::glm::mat3{ 1.0f }, offset), ::glm::vec2{ cover });
-					auto bg = impl._background.draw(device, physical_device, command_buffer.handle, viewport, background_transform);
-					auto v1 = impl._vector_graph.draw_rectangle(device, physical_device, command_buffer.handle, viewport, viewport, { 0.02f, 0.03f, 0.06f, 0.32f },
-						::glm::translate(::glm::mat3{ 1.0f }, ::glm::vec2{ -1.0f, -1.0f }));
+					auto bg = impl._background.draw(device, physical_device, command_buffer.handle, viewport_transform * background_transform);
+					auto v1 = impl._vector_graph.draw_rectangle(device, physical_device, command_buffer.handle, viewport, { 0.02f, 0.03f, 0.06f, 0.32f }, viewport_transform);
 
 					// The split result keeps every draw buffer alive through the frame fence.
 					auto buffers = ::std::vector<buffer_type>{};
@@ -212,10 +217,9 @@ struct setting_scene::task::impl
 					{
 						auto draw_rectangle = [&](point minimum, point maximum, color fill)
 							{
-								auto origin = geometry::to_ndc(viewport, minimum);
-								auto transform = ::glm::translate(::glm::mat3{ 1.0f }, ::glm::vec2{ origin.x, origin.y });
+								auto transform = ::glm::translate(viewport_transform, ::glm::vec2{ minimum.x, minimum.y });
 								buffers.emplace_back(impl._vector_graph.draw_rectangle(
-									device, physical_device, command_buffer.handle, viewport,
+									device, physical_device, command_buffer.handle,
 									{ maximum.x - minimum.x, maximum.y - minimum.y }, fill, transform));
 							};
 
@@ -260,21 +264,25 @@ struct setting_scene::task::impl
 						auto const total = count * row_height + (count - 1.0f) * gap;
 						auto const top = (viewport.y - total) * 0.5f;
 						buffers.emplace_back(impl._text.label(
-							device, physical_device, command_buffer.handle, viewport,
-							impl._title, 44 * scale, top - 44 * scale, width));
+							device, physical_device, command_buffer.handle,
+							impl._title, 44 * scale, width,
+							::glm::translate(viewport_transform, ::glm::vec2{ viewport.x * 0.5f, top - 44 * scale })));
 						for (auto index = ::std::size_t{}; index < impl._options.size(); ++index)
 						{
 							auto const y = top + static_cast<float>(index) * (row_height + gap);
 							buffers.emplace_back(impl._text.label(
-								device, physical_device, command_buffer.handle, viewport,
-								impl._options[index], 28 * scale, y + row_height * 0.5f, width - 64 * scale));
+								device, physical_device, command_buffer.handle,
+								impl._options[index], 28 * scale, width - 64 * scale,
+								::glm::translate(viewport_transform, ::glm::vec2{ viewport.x * 0.5f, y + row_height * 0.5f })));
 						}
 						buffers.emplace_back(impl._text.label(
-							device, physical_device, command_buffer.handle, viewport,
-							"UP/DOWN - SELECT   LEFT/RIGHT - CHANGE", 16 * scale, top + total + 28 * scale, width));
+							device, physical_device, command_buffer.handle,
+							"UP/DOWN - SELECT   LEFT/RIGHT - CHANGE", 16 * scale, width,
+							::glm::translate(viewport_transform, ::glm::vec2{ viewport.x * 0.5f, top + total + 28 * scale })));
 						buffers.emplace_back(impl._text.label(
-							device, physical_device, command_buffer.handle, viewport,
-							"ESC - BACK   CHANGES SAVED AUTOMATICALLY", 16 * scale, top + total + 56 * scale, width));
+							device, physical_device, command_buffer.handle,
+							"ESC - BACK   CHANGES SAVED AUTOMATICALLY", 16 * scale, width,
+							::glm::translate(viewport_transform, ::glm::vec2{ viewport.x * 0.5f, top + total + 56 * scale })));
 					}
 
 					return buffers;
@@ -303,7 +311,7 @@ auto setting_scene::task::update() const noexcept -> update_sender_type
 	return _impl->update;
 }
 
-setting_scene::setting_scene(renderer& r, game_settings& settings) : _impl(::std::make_unique<implementation>(r, settings)) {}
+setting_scene::setting_scene(renderer& r) : _impl(::std::make_unique<implementation>(r)) {}
 setting_scene::~setting_scene() = default;
 
 void setting_scene::build_task(frame_context& context, task& t, renderer&, renderer::task& rt)
@@ -321,4 +329,9 @@ void setting_scene::build_task(frame_context& context, task& t, renderer&, rende
 auto setting_scene::current_state() const noexcept -> state const&
 {
 	return _impl->_state;
+}
+
+game_settings const& setting_scene::preferences() const noexcept
+{
+	return _impl->_settings;
 }

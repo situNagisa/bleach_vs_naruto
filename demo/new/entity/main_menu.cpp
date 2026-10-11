@@ -135,6 +135,10 @@ struct main_menu::task::impl
 			| ::stdexec::then([&](main_menu::state const& snapshot, main_menu::delta const&, ::vkkl::command_buffer_observer command_buffer)
 				{
 					auto viewport = point(r.vulkan.global_env().swapchain_extent().width, r.vulkan.global_env().swapchain_extent().height);
+					// Convert to NDC after all local transforms.
+					auto const viewport_transform = ::glm::scale(
+						::glm::translate(::glm::mat3{ 1.0f }, ::glm::vec2{ -1.0f, -1.0f }),
+						::glm::vec2{ 2.0f / viewport.x, 2.0f / viewport.y });
 
 					auto&& impl = *menu._impl;
 					auto device = r.vulkan.global_env().device();
@@ -147,9 +151,8 @@ struct main_menu::task::impl
 					auto const cover = (::std::max)(viewport.x / image_size.x, viewport.y / image_size.y);
 					auto const offset = (::glm::vec2{ viewport.x, viewport.y } - image_size * cover) * 0.5f;
 					auto const background_transform = ::glm::scale(::glm::translate(::glm::mat3{ 1.0f }, offset), ::glm::vec2{ cover });
-					auto bg = impl._background.draw(device, physical_device, command_buffer.handle, viewport, background_transform);
-					auto v1 = impl._vector_graph.draw_rectangle(device, physical_device, command_buffer.handle, viewport, viewport, { 0.02f, 0.03f, 0.06f, 0.32f },
-						::glm::translate(::glm::mat3{ 1.0f }, ::glm::vec2{ -1.0f, -1.0f }));
+					auto bg = impl._background.draw(device, physical_device, command_buffer.handle, viewport_transform * background_transform);
+					auto v1 = impl._vector_graph.draw_rectangle(device, physical_device, command_buffer.handle, viewport, { 0.02f, 0.03f, 0.06f, 0.32f }, viewport_transform);
 
 					// The split result keeps every draw buffer alive through the frame fence.
 					auto buffers = ::std::vector<buffer_type>{};
@@ -160,10 +163,9 @@ struct main_menu::task::impl
 					{
 						auto draw_rectangle = [&](point minimum, point maximum, color fill)
 							{
-								auto origin = geometry::to_ndc(viewport, minimum);
-								auto transform = ::glm::translate(::glm::mat3{ 1.0f }, ::glm::vec2{ origin.x, origin.y });
+								auto transform = ::glm::translate(viewport_transform, ::glm::vec2{ minimum.x, minimum.y });
 								buffers.emplace_back(impl._vector_graph.draw_rectangle(
-									device, physical_device, command_buffer.handle, viewport,
+									device, physical_device, command_buffer.handle,
 									{ maximum.x - minimum.x, maximum.y - minimum.y }, fill, transform));
 							};
 
@@ -208,22 +210,26 @@ struct main_menu::task::impl
 						auto const total = count * row_height + (count - 1.0f) * gap;
 						auto const top = (viewport.y - total) * 0.5f;
 						buffers.emplace_back(impl._text.label(
-							device, physical_device, command_buffer.handle, viewport,
-							impl._title, 44 * scale, top - 44 * scale, width));
+							device, physical_device, command_buffer.handle,
+							impl._title, 44 * scale, width,
+							::glm::translate(viewport_transform, ::glm::vec2{ viewport.x * 0.5f, top - 44 * scale })));
 						for (auto index = ::std::size_t{}; index < impl._options.size(); ++index)
 						{
 							auto const y = top + static_cast<float>(index) * (row_height + gap);
 							buffers.emplace_back(impl._text.label(
-								device, physical_device, command_buffer.handle, viewport,
-								impl._options[index], 28 * scale, y + row_height * 0.5f, width - 64 * scale));
+								device, physical_device, command_buffer.handle,
+								impl._options[index], 28 * scale, width - 64 * scale,
+								::glm::translate(viewport_transform, ::glm::vec2{ viewport.x * 0.5f, y + row_height * 0.5f })));
 						}
 						buffers.emplace_back(impl._text.label(
-							device, physical_device, command_buffer.handle, viewport,
-							"UP / DOWN - ENTER / SPACE", 16 * scale, top + total + 28 * scale, width));
+							device, physical_device, command_buffer.handle,
+							"UP / DOWN - ENTER / SPACE", 16 * scale, width,
+							::glm::translate(viewport_transform, ::glm::vec2{ viewport.x * 0.5f, top + total + 28 * scale })));
 						if (snapshot.activated)
 							buffers.emplace_back(impl._text.label(
-								device, physical_device, command_buffer.handle, viewport,
-								"SELECTED: " + impl._options[*snapshot.activated], 16 * scale, top + total + 56 * scale, width));
+								device, physical_device, command_buffer.handle,
+								"SELECTED: " + impl._options[*snapshot.activated], 16 * scale, width,
+								::glm::translate(viewport_transform, ::glm::vec2{ viewport.x * 0.5f, top + total + 56 * scale })));
 					}
 
 					return buffers;

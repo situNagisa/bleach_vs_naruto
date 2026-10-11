@@ -43,7 +43,6 @@ auto background::draw(
 	VkDevice device
 	, VkPhysicalDevice physical_device
 	, VkCommandBuffer command_buffer
-	, point viewport
 	, ::glm::mat3x3 transform
 	) const noexcept -> buffer_type
 {
@@ -55,7 +54,7 @@ auto background::draw(
 	auto transform_point = [&](point p) -> point
 		{
 			auto const result = transform * ::glm::vec3{ p.x, p.y, 1.0f };
-			return geometry::to_ndc(viewport, { result.x, result.y });
+			return { result.x, result.y };
 		};
 
 	auto const p0 = transform_point({ 0.0f, 0.0f });
@@ -85,17 +84,11 @@ auto vector_graph_type::draw_rectangle(
 	VkDevice device
 	, VkPhysicalDevice physical_device
 	, VkCommandBuffer command_buffer
-	, point viewport
 	, point size
 	, color color
 	, ::glm::mat3x3 transform
 ) const noexcept -> buffer_type
 {
-	auto const extent = point{
-		2.0f * static_cast<float>(size.x) / viewport.x,
-		2.0f * static_cast<float>(size.y) / viewport.y
-	};
-
 	auto transform_point = [&](point p) -> point
 		{
 			auto const result = transform * ::glm::vec3{ p.x, p.y, 1.0f };
@@ -103,9 +96,9 @@ auto vector_graph_type::draw_rectangle(
 		};
 
 	auto const p0 = transform_point({ 0.0f, 0.0f });
-	auto const p1 = transform_point({ extent.x, 0.0f });
-	auto const p2 = transform_point({ extent.x, extent.y });
-	auto const p3 = transform_point({ 0.0f, extent.y });
+	auto const p1 = transform_point({ size.x, 0.0f });
+	auto const p2 = transform_point({ size.x, size.y });
+	auto const p3 = transform_point({ 0.0f, size.y });
 
 	geometry g;
 	g.rectangle(p0, p1, p2, p3, color);
@@ -203,11 +196,10 @@ auto text_type::label(
 	VkDevice device
 	, VkPhysicalDevice physical_device
 	, VkCommandBuffer command_buffer
-	, point screen
 	, ::std::string_view label
 	, float size
-	, float center_y
 	, float available_width
+	, ::glm::mat3x3 transform
 	) const -> buffer_type
 {
 	geometry g;
@@ -223,17 +215,24 @@ auto text_type::label(
 		bottom = (::std::max)(bottom, glyph.y_offset + glyph.height);
 	}
 	auto const scale = (::std::min)(size / font.size, available_width / (::std::max)(advance, 1.0f));
-	auto x = (screen.x - advance * scale) * 0.5f;
-	auto const y = center_y - (top + bottom) * scale * 0.5f;
+	auto x = -advance * scale * 0.5f;
+	auto const y = -(top + bottom) * scale * 0.5f;
 	auto const font_size = point{ static_cast<float>(font.width), static_cast<float>(font.height) };
+	auto transform_point = [&](point p) -> point
+		{
+			auto const result = transform * ::glm::vec3{ p.x, p.y, 1.0f };
+			return { result.x, result.y };
+		};
 	for (auto character : label)
 	{
 		auto const& glyph = font.at(character);
 		auto const left = x + glyph.x_offset * scale;
 		auto const glyph_top = y + glyph.y_offset * scale;
-		g.texture_rectangle(
-			geometry::to_ndc(screen, { left, glyph_top })
-			, geometry::to_ndc(screen, { left + glyph.width * scale, glyph_top + glyph.height * scale })
+		g.texture(
+			transform_point({ left, glyph_top })
+			, transform_point({ left + glyph.width * scale, glyph_top })
+			, transform_point({ left + glyph.width * scale, glyph_top + glyph.height * scale })
+			, transform_point({ left, glyph_top + glyph.height * scale })
 			, { glyph.x / font_size.x, glyph.y / font_size.y }
 			, { (glyph.x + glyph.width) / font_size.x, (glyph.y + glyph.height) / font_size.y }
 		);

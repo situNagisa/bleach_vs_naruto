@@ -13,14 +13,6 @@
 
 #include "./settings.h"
 
-auto settings_file_path() -> ::std::filesystem::path
-{
-	auto directory = ::std::unique_ptr<char, decltype(&::SDL_free)>{ ::SDL_GetPrefPath("bvn", "demo-new"), &::SDL_free };
-	if (!directory)
-		throw ::std::runtime_error{ ::std::string{ "settings directory: " } + ::SDL_GetError() };
-	return ::std::filesystem::path{ ::std::u8string_view{ reinterpret_cast<char8_t const*>(directory.get()) } } / "settings.ini";
-}
-
 auto load_settings(::std::filesystem::path const& path) -> game_settings
 {
 	auto settings = game_settings{};

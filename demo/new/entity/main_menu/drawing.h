@@ -19,11 +19,10 @@ struct background
 	graphic_resource_type pipeline;
 	texture_type texture;
 
-	background(::bvn::assets::image_rgba8 img, VkDevice device, VkPhysicalDevice physical_device,
-		VkQueue graphics_queue, ::std::uint32_t graphics_queue_family, VkFormat format);
+	background(::bvn::assets::image_rgba8 img, VkDevice device, VkPhysicalDevice physical_device, VkQueue graphics_queue, ::std::uint32_t graphics_queue_family, VkFormat format);
 
-	auto draw(VkDevice device, VkPhysicalDevice physical_device, VkCommandBuffer command_buffer,
-		point viewport, ::glm::mat3x3 transform = ::glm::mat3{ 1.0f }) const noexcept -> buffer_type;
+	/// Applies the caller's complete transform to image coordinates.
+	auto draw(VkDevice device, VkPhysicalDevice physical_device, VkCommandBuffer command_buffer, ::glm::mat3x3 transform = ::glm::mat3{ 1.0f }) const noexcept -> buffer_type;
 };
 
 struct vector_graph_type
@@ -32,8 +31,8 @@ struct vector_graph_type
 
 	vector_graph_type(VkDevice device, VkFormat format);
 
-	auto draw_rectangle(VkDevice device, VkPhysicalDevice physical_device, VkCommandBuffer command_buffer,
-		point viewport, point size, color color, ::glm::mat3x3 transform = ::glm::mat3{ 1.0f }) const noexcept -> buffer_type;
+	/// Applies the caller's complete transform to a rectangle from (0, 0) to size.
+	auto draw_rectangle(VkDevice device, VkPhysicalDevice physical_device, VkCommandBuffer command_buffer, point size, color color, ::glm::mat3x3 transform = ::glm::mat3{ 1.0f }) const noexcept -> buffer_type;
 };
 
 struct _glyph
@@ -57,9 +56,8 @@ struct text_type
 	texture_type texture;
 	_bitmap_font font;
 
-	text_type(::bvn::assets::image_rgba8 img, VkDevice device, VkPhysicalDevice physical_device,
-		VkQueue graphics_queue, ::std::uint32_t graphics_queue_family, VkFormat format);
+	text_type(::bvn::assets::image_rgba8 img, VkDevice device, VkPhysicalDevice physical_device, VkQueue graphics_queue, ::std::uint32_t graphics_queue_family, VkFormat format);
 
-	auto label(VkDevice device, VkPhysicalDevice physical_device, VkCommandBuffer command_buffer,
-		point screen, ::std::string_view label, float size, float center_y, float available_width) const -> buffer_type;
+	/// Centers the label at the local origin before applying the caller's complete transform.
+	auto label(VkDevice device, VkPhysicalDevice physical_device, VkCommandBuffer command_buffer, ::std::string_view label, float size, float available_width, ::glm::mat3x3 transform = ::glm::mat3{ 1.0f }) const -> buffer_type;
 };
