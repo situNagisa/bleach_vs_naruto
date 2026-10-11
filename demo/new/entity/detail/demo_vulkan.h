@@ -438,6 +438,8 @@ inline auto create_swapchain(vulkan_context& renderer, ::bvn::platform::window c
 
 	renderer._swapchain_image_format = surface_format.format;
 	renderer._swapchain_extent = extent;
+	renderer._swapchain_image_views.clear();
+	renderer._swapchain_image_view_handles.clear();
 	renderer._swapchain = ::vkkl::swapchain{
 		renderer._device.handle,
 		::vkfu::khr::create_swapchain(renderer._device.handle, param::khr::swapchain{
@@ -454,6 +456,7 @@ inline auto create_swapchain(vulkan_context& renderer, ::bvn::platform::window c
 			.composite_alpha = composite_alpha::opaque,
 			.present_mode = static_cast<present_mode>(requested_mode),
 			.clipped = true,
+			.old_swapchain = renderer._swapchain.handle,
 		}),
 	};
 

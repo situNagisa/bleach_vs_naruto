@@ -56,10 +56,7 @@ struct renderer
 							| ::stdexec::then([&, frame]
 								{
 									auto handles = secondary.commands
-										| ::std::views::transform([](::vkkl::command_buffer_observer command)
-											{
-												return command.handle;
-											})
+										| ::std::views::transform(&::vkkl::command_buffer_observer::handle)
 										| ::std::ranges::to<::std::vector>();
 									_submit_present_frame(r.vulkan.global_env(), frame.get(), handles);
 									return frame;
@@ -74,6 +71,8 @@ struct renderer
 				} | ::exec::split())
 		{}
 	};
+
+	void set_fullscreen(bool enabled);
 
 	void build_task(frame_context& context, task& t)
 	{
@@ -125,7 +124,7 @@ struct renderer
 				.timeout = (::std::numeric_limits<::std::uint64_t>::max)(),
 				.semaphore = frame.image_available(),
 				.fence = VK_NULL_HANDLE,
-				.device_mask = (::std::numeric_limits<::std::uint32_t>::max)(),
+				.device_mask = 1
 			});
 		frame._active_image = global.swapchain_images()[frame._active_image_index];
 		frame._active_image_view = global.swapchain_image_views()[frame._active_image_index];
