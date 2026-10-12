@@ -11,9 +11,9 @@ std::expected.
 from __future__ import annotations
 
 from . import ir
+from .cpp import TAB, guard_close, guard_open
 from .naming import Table
 
-TAB = "\t"
 
 
 def shape_of(command: ir.Command) -> str:
@@ -24,14 +24,6 @@ def shape_of(command: ir.Command) -> str:
 	return "single"
 
 
-def _guard_open(lines: list[str], guards: list[str]) -> None:
-	if guards:
-		lines.append("#if " + " || ".join(f"defined({guard})" for guard in guards))
-
-
-def _guard_close(lines: list[str], guards: list[str]) -> None:
-	if guards:
-		lines.append("#endif")
 
 
 def _leading(command: ir.Command) -> tuple[str, str]:
@@ -182,7 +174,7 @@ def render(command: ir.Command, table: Table) -> list[str]:
 	tag = f"::vkfu::obj::{table.struct_name(command.info.type)}"
 	function = table.command_name(command.name).rpartition("::")[2]
 	lines: list[str] = []
-	_guard_open(lines, command.guards)
+	guard_open(lines, command.guards)
 	shape = shape_of(command)
 	if shape == "single":
 		lines.extend(_single(command, function, tag))
@@ -190,5 +182,5 @@ def render(command: ir.Command, table: Table) -> list[str]:
 		lines.extend(_counted(command, function, tag))
 	else:
 		lines.extend(_array(command, function, table.command_singular(command.name).rpartition("::")[2], tag))
-	_guard_close(lines, command.guards)
+	guard_close(lines, command.guards)
 	return lines

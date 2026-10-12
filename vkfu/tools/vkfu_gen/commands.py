@@ -15,27 +15,18 @@ every other name in the generated header they do not go through the table.
 from __future__ import annotations
 
 from . import ir, naming
+from .cpp import TAB, base_type, guard_close, guard_open, span_element_type
 from .naming import Table
 
-TAB = "\t"
 
 # Commands returning one of these hand the value straight back; anything else
 # returning VkResult gets the expected/throwing pair.
 SCALAR_RETURNS = frozenset({"uint32_t", "uint64_t", "VkDeviceAddress", "VkBool32", "size_t"})
 
-PRIMITIVES = {
-	"uint8_t": "::std::uint8_t",
-	"uint16_t": "::std::uint16_t",
-	"uint32_t": "::std::uint32_t",
-	"uint64_t": "::std::uint64_t",
-	"int32_t": "::std::int32_t",
-	"int64_t": "::std::int64_t",
-	"size_t": "::std::size_t",
-}
 
 
 def _type(name: str) -> str:
-	return PRIMITIVES.get(name, name)
+	return base_type(name)
 
 
 def _identifier(member: ir.Member) -> str:
@@ -55,23 +46,9 @@ def _declared(member: ir.Member) -> str:
 
 
 def _span_element(member: ir.Member) -> str:
-	text = _type(member.type)
-	if member.ptr_depth == 1:
-		return text + (" const" if member.elem_const else "")
-	text += " const" if member.elem_const else ""
-	text += "*"
-	text += " const" if member.ptr_const else ""
-	return text
+	return span_element_type(member)
 
 
-def _guard_open(lines: list[str], guards: list[str]) -> None:
-	if guards:
-		lines.append("#if " + " || ".join(f"defined({guard})" for guard in guards))
-
-
-def _guard_close(lines: list[str], guards: list[str]) -> None:
-	if guards:
-		lines.append("#endif")
 
 
 def _signature(command: ir.Wrapper, table: Table) -> tuple[list[str], list[str], str | None]:
@@ -162,7 +139,7 @@ def render(command: ir.Wrapper, table: Table) -> list[str]:
 	linkage = "" if template_line else "inline "
 
 	lines: list[str] = []
-	_guard_open(lines, command.guards)
+	guard_open(lines, command.guards)
 
 	if command.returns == "VkResult":
 		result = produced or "void"
@@ -232,7 +209,7 @@ def render(command: ir.Wrapper, table: Table) -> list[str]:
 			lines.append(f"{TAB}::{command.name}({call});")
 		lines.append("}")
 
-	_guard_close(lines, command.guards)
+	guard_close(lines, command.guards)
 	return lines
 
 

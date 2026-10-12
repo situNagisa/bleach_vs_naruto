@@ -15,7 +15,8 @@ from __future__ import annotations
 import dataclasses
 import re
 
-from . import emit, ir, producers
+from . import ir, producers
+from .plan import bit_layout, plan_struct, used_enums
 from .naming import CPP_KEYWORDS, Table
 
 
@@ -168,7 +169,7 @@ def check(registry: ir.Registry, table: Table, scope: str = "closure") -> list[P
 	for name in sorted(chain_objects):
 		if name not in registry.structs:
 			continue
-		plan = emit.plan_struct(registry.structs[name], registry)
+		plan = plan_struct(registry.structs[name], registry)
 		for entry in plan.unsupported:
 			sink.error("shape", f"struct.{name}", entry)
 
@@ -208,12 +209,12 @@ def check(registry: ir.Registry, table: Table, scope: str = "closure") -> list[P
 	for name in chain_objects:
 		if name not in registry.structs:
 			continue
-		for field in emit.plan_struct(registry.structs[name], registry).fields:
+		for field in plan_struct(registry.structs[name], registry).fields:
 			if field.kind == "flags":
 				used_bits.setdefault(field.flag_bits, name)
 
 	for flag_bits in sorted(used_bits):
-		layout = emit._bit_layout(registry.flagbits[flag_bits]) or []
+		layout = bit_layout(registry.flagbits[flag_bits]) or []
 		claimed = []
 		for bit in layout:
 			key = f"bit.{flag_bits}.{bit.name}"
@@ -227,7 +228,7 @@ def check(registry: ir.Registry, table: Table, scope: str = "closure") -> list[P
 		_unique(sink, "duplicate", f"bits.{flag_bits}", claimed)
 
 	# ------------------------------------------------------------ enums
-	enum_types = emit.used_enums(registry.closure, registry)
+	enum_types = used_enums(registry.closure, registry)
 	enum_names: list[tuple[str, str]] = []
 	for enum_type in enum_types:
 		key = f"enum.{enum_type}"

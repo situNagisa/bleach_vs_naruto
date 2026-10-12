@@ -25,20 +25,7 @@
 #include "../../../include/vkfu/storage.h"
 #include "../../../include/vkfu/vulkan_object.h"
 
-constexpr auto _vkfu_address(VkWidgetColourInfoEXT& value) noexcept -> void const*
-{
-	return ::std::addressof(value);
-}
-
-constexpr void _vkfu_set_next(VkWidgetColourInfoEXT& value, void const* next) noexcept
-{
-	value.pNext = next;
-}
-
-constexpr auto _vkfu_evaluate(VkWidgetColourInfoEXT const& value) noexcept -> VkWidgetColourInfoEXT
-{
-	return value;
-}
+// ---------------------------------------------------------------- VK_VERSION_1_0
 
 constexpr auto _vkfu_address(VkWidgetCreateInfo& value) noexcept -> void const*
 {
@@ -51,36 +38,6 @@ constexpr void _vkfu_set_next(VkWidgetCreateInfo& value, void const* next) noexc
 }
 
 constexpr auto _vkfu_evaluate(VkWidgetCreateInfo const& value) noexcept -> VkWidgetCreateInfo
-{
-	return value;
-}
-
-constexpr auto _vkfu_address(VkWidgetLabelInfoKHR& value) noexcept -> void const*
-{
-	return ::std::addressof(value);
-}
-
-constexpr void _vkfu_set_next(VkWidgetLabelInfoKHR& value, void const* next) noexcept
-{
-	value.pNext = next;
-}
-
-constexpr auto _vkfu_evaluate(VkWidgetLabelInfoKHR const& value) noexcept -> VkWidgetLabelInfoKHR
-{
-	return value;
-}
-
-constexpr auto _vkfu_address(VkWidgetLimits& value) noexcept -> void const*
-{
-	return ::std::addressof(value);
-}
-
-constexpr void _vkfu_set_next(VkWidgetLimits& value, void const* next) noexcept
-{
-	value.pNext = next;
-}
-
-constexpr auto _vkfu_evaluate(VkWidgetLimits const& value) noexcept -> VkWidgetLimits
 {
 	return value;
 }
@@ -115,38 +72,6 @@ constexpr auto _vkfu_evaluate(VkWidgetTuning const& value) noexcept -> VkWidgetT
 	return value;
 }
 
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
-constexpr auto _vkfu_address(VkWidgetWin32InfoKHR& value) noexcept -> void const*
-{
-	return ::std::addressof(value);
-}
-
-constexpr void _vkfu_set_next(VkWidgetWin32InfoKHR& value, void const* next) noexcept
-{
-	value.pNext = next;
-}
-
-constexpr auto _vkfu_evaluate(VkWidgetWin32InfoKHR const& value) noexcept -> VkWidgetWin32InfoKHR
-{
-	return value;
-}
-#endif
-
-constexpr auto _vkfu_address(VkWidgetDriverPropertiesEXT& value) noexcept -> void const*
-{
-	return ::std::addressof(value);
-}
-
-constexpr void _vkfu_set_next(VkWidgetDriverPropertiesEXT& value, void const* next) noexcept
-{
-	value.pNext = const_cast<void*>(next);
-}
-
-constexpr auto _vkfu_evaluate(VkWidgetDriverPropertiesEXT const& value) noexcept -> VkWidgetDriverPropertiesEXT
-{
-	return value;
-}
-
 constexpr auto _vkfu_address(VkWidgetProperties& value) noexcept -> void const*
 {
 	return ::std::addressof(value);
@@ -162,70 +87,34 @@ constexpr auto _vkfu_evaluate(VkWidgetProperties const& value) noexcept -> VkWid
 	return value;
 }
 
+namespace vkfu::enums
+{
+enum class widget_mode : ::std::underlying_type_t<VkWidgetMode>
+{
+	plain = VK_WIDGET_MODE_PLAIN,
+	fancy = VK_WIDGET_MODE_FANCY,
+};
+
+}
+
 namespace vkfu::obj
 {
 struct widget{};
 struct widget_part{};
 struct widget_tuning{};
-namespace khr
-{
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
-struct widget_win32{};
-#endif
-}
-namespace option
-{
-struct widget_limits{};
-}
-namespace option::ext
-{
-struct widget_colour{};
-}
-namespace option::khr
-{
-struct widget_label{};
-}
 namespace result
 {
 struct widget_properties{};
-}
-namespace result::ext
-{
-struct widget_driver_properties{};
 }
 }
 
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::widget_colour>
-{
-	constexpr static auto root = false;
-	constexpr static auto branch = false;
-	constexpr static auto allow_duplicate = false;
-};
-
-template<>
 struct vulkan_object_trait<obj::widget>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
-	constexpr static auto allow_duplicate = false;
-};
-
-template<>
-struct vulkan_object_trait<obj::option::khr::widget_label>
-{
-	constexpr static auto root = false;
-	constexpr static auto branch = false;
-	constexpr static auto allow_duplicate = true;
-};
-
-template<>
-struct vulkan_object_trait<obj::option::widget_limits>
-{
-	constexpr static auto root = false;
-	constexpr static auto branch = false;
 	constexpr static auto allow_duplicate = false;
 };
 
@@ -245,43 +134,12 @@ struct vulkan_object_trait<obj::widget_tuning>
 	constexpr static auto allow_duplicate = false;
 };
 
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
-template<>
-struct vulkan_object_trait<obj::khr::widget_win32>
-{
-	constexpr static auto root = true;
-	constexpr static auto branch = false;
-	constexpr static auto allow_duplicate = false;
-};
-#endif
-
-template<>
-struct vulkan_object_trait<obj::result::ext::widget_driver_properties>
-{
-	constexpr static auto root = false;
-	constexpr static auto branch = false;
-	constexpr static auto allow_duplicate = false;
-};
-
 template<>
 struct vulkan_object_trait<obj::result::widget_properties>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
 	constexpr static auto allow_duplicate = false;
-};
-
-template<>
-struct expression_vulkan_tag<VkWidgetColourInfoEXT>
-{
-	using type = obj::option::ext::widget_colour;
-};
-
-template<>
-struct vulkan_object_native<obj::option::ext::widget_colour>
-{
-	using type = VkWidgetColourInfoEXT;
-	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIDGET_COLOUR_INFO_EXT;
 };
 
 template<>
@@ -295,32 +153,6 @@ struct vulkan_object_native<obj::widget>
 {
 	using type = VkWidgetCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIDGET_CREATE_INFO;
-};
-
-template<>
-struct expression_vulkan_tag<VkWidgetLabelInfoKHR>
-{
-	using type = obj::option::khr::widget_label;
-};
-
-template<>
-struct vulkan_object_native<obj::option::khr::widget_label>
-{
-	using type = VkWidgetLabelInfoKHR;
-	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIDGET_LABEL_INFO_KHR;
-};
-
-template<>
-struct expression_vulkan_tag<VkWidgetLimits>
-{
-	using type = obj::option::widget_limits;
-};
-
-template<>
-struct vulkan_object_native<obj::option::widget_limits>
-{
-	using type = VkWidgetLimits;
-	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIDGET_LIMITS;
 };
 
 template<>
@@ -349,34 +181,6 @@ struct vulkan_object_native<obj::widget_tuning>
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIDGET_TUNING;
 };
 
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
-template<>
-struct expression_vulkan_tag<VkWidgetWin32InfoKHR>
-{
-	using type = obj::khr::widget_win32;
-};
-
-template<>
-struct vulkan_object_native<obj::khr::widget_win32>
-{
-	using type = VkWidgetWin32InfoKHR;
-	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIDGET_WIN32_INFO_KHR;
-};
-#endif
-
-template<>
-struct expression_vulkan_tag<VkWidgetDriverPropertiesEXT>
-{
-	using type = obj::result::ext::widget_driver_properties;
-};
-
-template<>
-struct vulkan_object_native<obj::result::ext::widget_driver_properties>
-{
-	using type = VkWidgetDriverPropertiesEXT;
-	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIDGET_DRIVER_PROPERTIES_EXT;
-};
-
 template<>
 struct expression_vulkan_tag<VkWidgetProperties>
 {
@@ -391,34 +195,10 @@ struct vulkan_object_native<obj::result::widget_properties>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::widget_colour>
-{
-	constexpr static ::std::array<char const*, 1> names{"VK_EXT_widget_colour"};
-	constexpr static ::std::uint32_t core = 0;
-	constexpr static auto instance = false;
-};
-
-template<>
 struct vulkan_object_extensions<obj::widget>
 {
 	constexpr static ::std::array<char const*, 0> names{};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_0;
-	constexpr static auto instance = false;
-};
-
-template<>
-struct vulkan_object_extensions<obj::option::khr::widget_label>
-{
-	constexpr static ::std::array<char const*, 1> names{"VK_KHR_widget_label"};
-	constexpr static ::std::uint32_t core = 0;
-	constexpr static auto instance = false;
-};
-
-template<>
-struct vulkan_object_extensions<obj::option::widget_limits>
-{
-	constexpr static ::std::array<char const*, 1> names{"VK_KHR_widget_limits"};
-	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
 	constexpr static auto instance = false;
 };
 
@@ -438,24 +218,6 @@ struct vulkan_object_extensions<obj::widget_tuning>
 	constexpr static auto instance = false;
 };
 
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
-template<>
-struct vulkan_object_extensions<obj::khr::widget_win32>
-{
-	constexpr static ::std::array<char const*, 1> names{"VK_KHR_widget_win32"};
-	constexpr static ::std::uint32_t core = 0;
-	constexpr static auto instance = true;
-};
-#endif
-
-template<>
-struct vulkan_object_extensions<obj::result::ext::widget_driver_properties>
-{
-	constexpr static ::std::array<char const*, 1> names{"VK_EXT_widget_colour"};
-	constexpr static ::std::uint32_t core = 0;
-	constexpr static auto instance = false;
-};
-
 template<>
 struct vulkan_object_extensions<obj::result::widget_properties>
 {
@@ -464,37 +226,7 @@ struct vulkan_object_extensions<obj::result::widget_properties>
 	constexpr static auto instance = false;
 };
 
-template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::widget, obj::option::ext::widget_colour> = true;
-template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::widget, obj::option::khr::widget_label> = true;
-template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::widget, obj::option::widget_limits> = true;
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
-template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::widget, obj::khr::widget_win32> = true;
-#endif
-template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::widget_properties, obj::result::ext::widget_driver_properties> = true;
 }
-
-namespace vkfu::obj
-{
-namespace option::khr
-{
-using widget_limits = ::vkfu::obj::option::widget_limits;
-}
-}
-namespace vkfu::enums
-{
-enum class widget_mode : ::std::underlying_type_t<VkWidgetMode>
-{
-	plain = VK_WIDGET_MODE_PLAIN,
-	fancy = VK_WIDGET_MODE_FANCY,
-};
-
-}
-
 
 namespace vkfu::param
 {
@@ -584,96 +316,6 @@ struct widget_tuning
 	}
 };
 
-namespace khr
-{
-using ::vkfu::operator|;
-
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
-struct widget_win32
-{
-	using vulkan_tag_type = obj::khr::widget_win32;
-
-	void* handle = nullptr;
-
-	constexpr auto evaluate() const noexcept -> VkWidgetWin32InfoKHR
-	{
-		return VkWidgetWin32InfoKHR{
-			.sType = VK_STRUCTURE_TYPE_WIDGET_WIN32_INFO_KHR,
-			.pNext = nullptr,
-			.handle = handle,
-		};
-	}
-};
-#endif
-
-}
-
-namespace option
-{
-using ::vkfu::operator|;
-
-struct widget_limits
-{
-	using vulkan_tag_type = obj::option::widget_limits;
-
-	::std::uint32_t max_parts{};
-
-	constexpr auto evaluate() const noexcept -> VkWidgetLimits
-	{
-		return VkWidgetLimits{
-			.sType = VK_STRUCTURE_TYPE_WIDGET_LIMITS,
-			.pNext = nullptr,
-			.maxParts = max_parts,
-		};
-	}
-};
-
-}
-
-namespace option::ext
-{
-using ::vkfu::operator|;
-
-struct widget_colour
-{
-	using vulkan_tag_type = obj::option::ext::widget_colour;
-
-	::vkfu::enums::widget_mode fallback_mode{};
-
-	constexpr auto evaluate() const noexcept -> VkWidgetColourInfoEXT
-	{
-		return VkWidgetColourInfoEXT{
-			.sType = VK_STRUCTURE_TYPE_WIDGET_COLOUR_INFO_EXT,
-			.pNext = nullptr,
-			.fallbackMode = static_cast<VkWidgetMode>(fallback_mode),
-		};
-	}
-};
-
-}
-
-namespace option::khr
-{
-using ::vkfu::operator|;
-
-struct widget_label
-{
-	using vulkan_tag_type = obj::option::khr::widget_label;
-
-	::std::uint32_t tag{};
-
-	constexpr auto evaluate() const noexcept -> VkWidgetLabelInfoKHR
-	{
-		return VkWidgetLabelInfoKHR{
-			.sType = VK_STRUCTURE_TYPE_WIDGET_LABEL_INFO_KHR,
-			.pNext = nullptr,
-			.tag = tag,
-		};
-	}
-};
-
-}
-
 struct extent
 {
 	::std::uint32_t width{};
@@ -687,13 +329,8 @@ struct extent
 		};
 	}
 };
-
-namespace option::khr
-{
-using widget_limits = ::vkfu::param::option::widget_limits;
 }
 
-}
 namespace vkfu
 {
 template<::vkfu::expression_for<::vkfu::obj::widget> Expression>
@@ -721,15 +358,6 @@ template<::vkfu::expression_for<::vkfu::obj::widget> Expression>
 	}
 	return *produced;
 }
-
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
-template<::vkfu::expression_for<::vkfu::obj::khr::widget_win32> Expression1>
-void cmd_set_win32_widget(VkRecorder recorder, Expression1&& info)
-{
-	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
-	::vkCmdSetWin32Widget(recorder, ::std::addressof(::vkfu::unpack(storage1)));
-}
-#endif
 
 inline void cmd_submit_parts(VkRecorder recorder, ::std::span<VkWidgetPart const> parts)
 {
@@ -795,5 +423,438 @@ template<::vkfu::query_extension_of<::vkfu::obj::result::widget_properties>... E
 	::vkGetWidgetProperties(device, ::std::addressof(chain.head()));
 	return chain;
 }
+}
 
+// ---------------------------------------------------------------- VK_VERSION_1_1
+
+constexpr auto _vkfu_address(VkWidgetLimits& value) noexcept -> void const*
+{
+	return ::std::addressof(value);
+}
+
+constexpr void _vkfu_set_next(VkWidgetLimits& value, void const* next) noexcept
+{
+	value.pNext = next;
+}
+
+constexpr auto _vkfu_evaluate(VkWidgetLimits const& value) noexcept -> VkWidgetLimits
+{
+	return value;
+}
+
+namespace vkfu::obj
+{
+namespace option
+{
+struct widget_limits{};
+}
+}
+
+namespace vkfu
+{
+template<>
+struct vulkan_object_trait<obj::option::widget_limits>
+{
+	constexpr static auto root = false;
+	constexpr static auto branch = false;
+	constexpr static auto allow_duplicate = false;
+};
+
+template<>
+struct expression_vulkan_tag<VkWidgetLimits>
+{
+	using type = obj::option::widget_limits;
+};
+
+template<>
+struct vulkan_object_native<obj::option::widget_limits>
+{
+	using type = VkWidgetLimits;
+	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIDGET_LIMITS;
+};
+
+template<>
+struct vulkan_object_extensions<obj::option::widget_limits>
+{
+	constexpr static ::std::array<char const*, 1> names{"VK_KHR_widget_limits"};
+	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
+	constexpr static auto instance = false;
+};
+
+template<>
+inline constexpr auto is_vulkan_object_compatible_with_v<obj::widget, obj::option::widget_limits> = true;
+}
+
+namespace vkfu::param
+{
+namespace option
+{
+using ::vkfu::operator|;
+
+struct widget_limits
+{
+	using vulkan_tag_type = obj::option::widget_limits;
+
+	::std::uint32_t max_parts{};
+
+	constexpr auto evaluate() const noexcept -> VkWidgetLimits
+	{
+		return VkWidgetLimits{
+			.sType = VK_STRUCTURE_TYPE_WIDGET_LIMITS,
+			.pNext = nullptr,
+			.maxParts = max_parts,
+		};
+	}
+};
+
+}
+}
+
+// ---------------------------------------------------------------- VK_EXT_widget_colour
+
+constexpr auto _vkfu_address(VkWidgetColourInfoEXT& value) noexcept -> void const*
+{
+	return ::std::addressof(value);
+}
+
+constexpr void _vkfu_set_next(VkWidgetColourInfoEXT& value, void const* next) noexcept
+{
+	value.pNext = next;
+}
+
+constexpr auto _vkfu_evaluate(VkWidgetColourInfoEXT const& value) noexcept -> VkWidgetColourInfoEXT
+{
+	return value;
+}
+
+constexpr auto _vkfu_address(VkWidgetDriverPropertiesEXT& value) noexcept -> void const*
+{
+	return ::std::addressof(value);
+}
+
+constexpr void _vkfu_set_next(VkWidgetDriverPropertiesEXT& value, void const* next) noexcept
+{
+	value.pNext = const_cast<void*>(next);
+}
+
+constexpr auto _vkfu_evaluate(VkWidgetDriverPropertiesEXT const& value) noexcept -> VkWidgetDriverPropertiesEXT
+{
+	return value;
+}
+
+namespace vkfu::obj
+{
+namespace option::ext
+{
+struct widget_colour{};
+}
+namespace result::ext
+{
+struct widget_driver_properties{};
+}
+}
+
+namespace vkfu
+{
+template<>
+struct vulkan_object_trait<obj::option::ext::widget_colour>
+{
+	constexpr static auto root = false;
+	constexpr static auto branch = false;
+	constexpr static auto allow_duplicate = false;
+};
+
+template<>
+struct vulkan_object_trait<obj::result::ext::widget_driver_properties>
+{
+	constexpr static auto root = false;
+	constexpr static auto branch = false;
+	constexpr static auto allow_duplicate = false;
+};
+
+template<>
+struct expression_vulkan_tag<VkWidgetColourInfoEXT>
+{
+	using type = obj::option::ext::widget_colour;
+};
+
+template<>
+struct vulkan_object_native<obj::option::ext::widget_colour>
+{
+	using type = VkWidgetColourInfoEXT;
+	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIDGET_COLOUR_INFO_EXT;
+};
+
+template<>
+struct expression_vulkan_tag<VkWidgetDriverPropertiesEXT>
+{
+	using type = obj::result::ext::widget_driver_properties;
+};
+
+template<>
+struct vulkan_object_native<obj::result::ext::widget_driver_properties>
+{
+	using type = VkWidgetDriverPropertiesEXT;
+	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIDGET_DRIVER_PROPERTIES_EXT;
+};
+
+template<>
+struct vulkan_object_extensions<obj::option::ext::widget_colour>
+{
+	constexpr static ::std::array<char const*, 1> names{"VK_EXT_widget_colour"};
+	constexpr static ::std::uint32_t core = 0;
+	constexpr static auto instance = false;
+};
+
+template<>
+struct vulkan_object_extensions<obj::result::ext::widget_driver_properties>
+{
+	constexpr static ::std::array<char const*, 1> names{"VK_EXT_widget_colour"};
+	constexpr static ::std::uint32_t core = 0;
+	constexpr static auto instance = false;
+};
+
+template<>
+inline constexpr auto is_vulkan_object_compatible_with_v<obj::widget, obj::option::ext::widget_colour> = true;
+template<>
+inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::widget_properties, obj::result::ext::widget_driver_properties> = true;
+}
+
+namespace vkfu::param
+{
+namespace option::ext
+{
+using ::vkfu::operator|;
+
+struct widget_colour
+{
+	using vulkan_tag_type = obj::option::ext::widget_colour;
+
+	::vkfu::enums::widget_mode fallback_mode{};
+
+	constexpr auto evaluate() const noexcept -> VkWidgetColourInfoEXT
+	{
+		return VkWidgetColourInfoEXT{
+			.sType = VK_STRUCTURE_TYPE_WIDGET_COLOUR_INFO_EXT,
+			.pNext = nullptr,
+			.fallbackMode = static_cast<VkWidgetMode>(fallback_mode),
+		};
+	}
+};
+
+}
+}
+
+// ---------------------------------------------------------------- VK_KHR_widget_label
+
+constexpr auto _vkfu_address(VkWidgetLabelInfoKHR& value) noexcept -> void const*
+{
+	return ::std::addressof(value);
+}
+
+constexpr void _vkfu_set_next(VkWidgetLabelInfoKHR& value, void const* next) noexcept
+{
+	value.pNext = next;
+}
+
+constexpr auto _vkfu_evaluate(VkWidgetLabelInfoKHR const& value) noexcept -> VkWidgetLabelInfoKHR
+{
+	return value;
+}
+
+namespace vkfu::obj
+{
+namespace option::khr
+{
+struct widget_label{};
+}
+}
+
+namespace vkfu
+{
+template<>
+struct vulkan_object_trait<obj::option::khr::widget_label>
+{
+	constexpr static auto root = false;
+	constexpr static auto branch = false;
+	constexpr static auto allow_duplicate = true;
+};
+
+template<>
+struct expression_vulkan_tag<VkWidgetLabelInfoKHR>
+{
+	using type = obj::option::khr::widget_label;
+};
+
+template<>
+struct vulkan_object_native<obj::option::khr::widget_label>
+{
+	using type = VkWidgetLabelInfoKHR;
+	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIDGET_LABEL_INFO_KHR;
+};
+
+template<>
+struct vulkan_object_extensions<obj::option::khr::widget_label>
+{
+	constexpr static ::std::array<char const*, 1> names{"VK_KHR_widget_label"};
+	constexpr static ::std::uint32_t core = 0;
+	constexpr static auto instance = false;
+};
+
+template<>
+inline constexpr auto is_vulkan_object_compatible_with_v<obj::widget, obj::option::khr::widget_label> = true;
+}
+
+namespace vkfu::param
+{
+namespace option::khr
+{
+using ::vkfu::operator|;
+
+struct widget_label
+{
+	using vulkan_tag_type = obj::option::khr::widget_label;
+
+	::std::uint32_t tag{};
+
+	constexpr auto evaluate() const noexcept -> VkWidgetLabelInfoKHR
+	{
+		return VkWidgetLabelInfoKHR{
+			.sType = VK_STRUCTURE_TYPE_WIDGET_LABEL_INFO_KHR,
+			.pNext = nullptr,
+			.tag = tag,
+		};
+	}
+};
+
+}
+}
+
+// ---------------------------------------------------------------- VK_KHR_widget_limits
+
+namespace vkfu::obj
+{
+namespace option::khr
+{
+using widget_limits = ::vkfu::obj::option::widget_limits;
+}
+}
+
+namespace vkfu::param
+{
+namespace option::khr
+{
+using widget_limits = ::vkfu::param::option::widget_limits;
+}
+}
+
+// ---------------------------------------------------------------- VK_KHR_widget_win32
+
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+constexpr auto _vkfu_address(VkWidgetWin32InfoKHR& value) noexcept -> void const*
+{
+	return ::std::addressof(value);
+}
+
+constexpr void _vkfu_set_next(VkWidgetWin32InfoKHR& value, void const* next) noexcept
+{
+	value.pNext = next;
+}
+
+constexpr auto _vkfu_evaluate(VkWidgetWin32InfoKHR const& value) noexcept -> VkWidgetWin32InfoKHR
+{
+	return value;
+}
+#endif
+
+namespace vkfu::obj
+{
+namespace khr
+{
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+struct widget_win32{};
+#endif
+}
+}
+
+namespace vkfu
+{
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+template<>
+struct vulkan_object_trait<obj::khr::widget_win32>
+{
+	constexpr static auto root = true;
+	constexpr static auto branch = false;
+	constexpr static auto allow_duplicate = false;
+};
+#endif
+
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+template<>
+struct expression_vulkan_tag<VkWidgetWin32InfoKHR>
+{
+	using type = obj::khr::widget_win32;
+};
+
+template<>
+struct vulkan_object_native<obj::khr::widget_win32>
+{
+	using type = VkWidgetWin32InfoKHR;
+	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIDGET_WIN32_INFO_KHR;
+};
+#endif
+
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+template<>
+struct vulkan_object_extensions<obj::khr::widget_win32>
+{
+	constexpr static ::std::array<char const*, 1> names{"VK_KHR_widget_win32"};
+	constexpr static ::std::uint32_t core = 0;
+	constexpr static auto instance = true;
+};
+#endif
+
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+template<>
+inline constexpr auto is_vulkan_object_compatible_with_v<obj::widget, obj::khr::widget_win32> = true;
+#endif
+}
+
+namespace vkfu::param
+{
+namespace khr
+{
+using ::vkfu::operator|;
+
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+struct widget_win32
+{
+	using vulkan_tag_type = obj::khr::widget_win32;
+
+	void* handle = nullptr;
+
+	constexpr auto evaluate() const noexcept -> VkWidgetWin32InfoKHR
+	{
+		return VkWidgetWin32InfoKHR{
+			.sType = VK_STRUCTURE_TYPE_WIDGET_WIN32_INFO_KHR,
+			.pNext = nullptr,
+			.handle = handle,
+		};
+	}
+};
+#endif
+
+}
+}
+
+namespace vkfu
+{
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+template<::vkfu::expression_for<::vkfu::obj::khr::widget_win32> Expression1>
+void cmd_set_win32_widget(VkRecorder recorder, Expression1&& info)
+{
+	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
+	::vkCmdSetWin32Widget(recorder, ::std::addressof(::vkfu::unpack(storage1)));
+}
+#endif
 }

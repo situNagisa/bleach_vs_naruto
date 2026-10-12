@@ -1,9 +1,47 @@
 # vkfu_gen —— vk.xml → vkfu 生成器
 
-把 vk.xml 转成 `vkfu/include/vkfu/generated/vulkan-v<version>.h`，内容是 vkfu 框架
+把 vk.xml 转成 `vkfu/include/vkfu/generated/vulkan-v<version>.h`（以及按模块拆开的
+`vulkan-v<version>/<模块>.h`，见下文"输出：按模块分文件"），内容是 vkfu 框架
 （`vulkan_object.h` / `storage.h` / `expression.h` / `branch_pipe.h`）所需的生成层：
 `vkfu::obj::*` 标签、`vulkan_object_trait` 特化、`is_vulkan_object_compatible_with_v`
 边、`vkfu::param::*` 参数结构体，以及原生 Vulkan 结构体的 `address`/`set_next` 胶水。
+
+## 代码结构
+
+| 文件 | 职责 |
+| --- | --- |
+| `ir.py` | vk.xml → IR，纯机械；含每个类型/命令的归属模块（`origins`） |
+| `naming.py` | 命名表的加载，以及只产出复核材料的建议算法 |
+| `plan.py` | 原生成员 → param 字段的规划（`emit` / `check` / `rebuild` 共用） |
+| `cpp.py` | 与 Vulkan 无关的 C++ 书写工具：类型拼写、`#if` 守卫、命名空间分组 |
+| `structs.py` | 单个结构体/枚举/别名的渲染：tag、glue、param、enum class、扩展需求 |
+| `producers.py` `commands.py` `queries.py` | 三类命令包装的渲染 |
+| `emit.py` | 校验 → 按模块归类 → 依赖排序 → 写文件 |
+| `check.py` | 命名表的机械性检查 |
+| `__main__.py` | 命令行：`dump-ir` `rebuild` `suggest` `promote` `check` `gen` |
+
+## 输出：按模块分文件
+
+`gen --split` 为每个 `<feature>` / `<extension>` 生成一个头文件，而不是按 enums / objects /
+param / commands 这样的种类切：
+
+```
+generated/vulkan-v1.4.328.h               # 伞头文件，按依赖顺序包含全部模块
+generated/vulkan-v1.4.328/vk_version_1_0.h
+generated/vulkan-v1.4.328/vk_khr_swapchain.h
+generated/vulkan-v1.4.328/vk_ext_mesh_shader.h
+...                                       # v1.4.328 下共 378 个
+```
+
+- **归属**：类型或命令属于 vk.xml 里**第一个** require 它的模块（核心版本按版本号，再按扩展编号）。
+  所以被提升进核心的类型归核心版本，它的旧名字别名归原扩展。
+- **一个模块里什么都有**：它引入的 tag、trait、pNext glue、enum class、param、别名和命令包装。
+- **依赖**：一个模块用到另一个模块声明的东西（枚举字段、槽的 tag、别名的目标、包装引用的 tag）
+  就 `#include` 它。兼容边 `is_vulkan_object_compatible_with_v<父, 子>` 放进两端中较晚的那个模块。
+  依赖成环会让生成硬失败；v1.4.328 下无环。
+- **每个模块头都能单独包含**（378 个逐一单独编译验证过）。只用到核心和交换链的翻译单元包含
+  `vk_version_1_0.h` 和 `vk_khr_swapchain.h` 即可。
+- 不加 `--split` 时输出单个文件，内容相同、按同样的模块顺序排列，各模块之间有分隔注释。
 
 ## 为什么是两段式
 

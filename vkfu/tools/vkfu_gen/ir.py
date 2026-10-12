@@ -189,6 +189,11 @@ class Registry:
 	references: list[tuple[str, str, str]]  # (owner, member, target) pointer slots
 	elements: list[tuple[str, str, str]]  # (owner, member, target) array element types
 	edges: list[tuple[str, str]]  # (parent, child) from structextends
+	# The <feature> or <extension> that first requires each type and command,
+	# i.e. the module it belongs to. `modules` is every one of them in registry
+	# order: core versions by number, then extensions by number.
+	origins: dict[str, str] = dataclasses.field(default_factory=dict)
+	modules: list[str] = dataclasses.field(default_factory=list)
 
 
 # ---------------------------------------------------------------- parsing
@@ -319,6 +324,45 @@ def _guards_for(requirements: dict[str, list[str | None]], name: str) -> list[st
 	if any(source is None for source in sources):
 		return []
 	return sorted({source for source in sources if source})
+
+
+def _origins(root: ET.Element, api: str, profile: Profile = EVERYTHING) -> tuple[dict[str, str], list[str]]:
+	"""type or command name -> the feature or extension that introduces it.
+
+	"Introduces" is the first one in registry order to require it, so a type
+	core promoted belongs to the core version, and a type two extensions share
+	belongs to the older one. No judgement involved: vk.xml numbers both.
+	"""
+	features = [
+		feature
+		for feature in root.iter("feature")
+		if _api_allows(feature, api) and profile.allows_feature(feature.get("name"))
+	]
+	features.sort(key=lambda feature: tuple(int(part) for part in (feature.get("number") or "0").split(".")))
+	extensions = []
+	for extension in root.iter("extension"):
+		supported = extension.get("supported")
+		if supported and api not in supported.split(","):
+			continue
+		if not profile.allows_extension(extension.get("name")):
+			continue
+		extensions.append(extension)
+	extensions.sort(key=lambda extension: int(extension.get("number") or "0"))
+
+	origins: dict[str, str] = {}
+	modules: list[str] = []
+	for container in features + extensions:
+		module = container.get("name")
+		if not module:
+			continue
+		modules.append(module)
+		for require in container.findall("require"):
+			if not _api_allows(require, api):
+				continue
+			for element in require.findall("type") + require.findall("command"):
+				if element.get("name"):
+					origins.setdefault(element.get("name"), module)
+	return origins, modules
 
 
 def _provenance(root: ET.Element, api: str, profile: Profile = EVERYTHING) -> dict[str, Provenance]:
@@ -1102,6 +1146,7 @@ def load(path: str, api: str = "vulkan", profile: Profile = EVERYTHING) -> Regis
 				edges.append((parent, name))
 
 	branches = sorted({parent for parent, _ in edges})
+	origins, modules = _origins(root, api, profile)
 
 	return Registry(
 		header_version=header_version,
@@ -1130,4 +1175,6 @@ def load(path: str, api: str = "vulkan", profile: Profile = EVERYTHING) -> Regis
 		references=references,
 		elements=elements,
 		edges=sorted(edges),
+		origins=origins,
+		modules=modules,
 	)

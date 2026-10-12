@@ -23,6 +23,29 @@ class LoadTest(unittest.TestCase):
 		self.assertEqual(self.registry.header_version, "42")
 		self.assertEqual(self.registry.author_tags, ["EXT", "KHR"])
 
+	def test_every_type_and_command_has_the_module_that_introduces_it(self) -> None:
+		origins = self.registry.origins
+		self.assertEqual(origins["VkWidgetCreateInfo"], "VK_VERSION_1_0")
+		self.assertEqual(origins["VkWidgetLimits"], "VK_VERSION_1_1")
+		# The alias is introduced by the extension, not by the core version.
+		self.assertEqual(origins["VkWidgetLimitsKHR"], "VK_KHR_widget_limits")
+		# Commands too, including one in a require block with no types.
+		self.assertEqual(origins["vkCreateWidget"], "VK_VERSION_1_0")
+		self.assertEqual(origins["vkCmdSetWin32Widget"], "VK_KHR_widget_win32")
+
+	def test_modules_are_core_versions_then_extensions_by_number(self) -> None:
+		self.assertEqual(
+			self.registry.modules,
+			[
+				"VK_VERSION_1_0",
+				"VK_VERSION_1_1",
+				"VK_EXT_widget_colour",
+				"VK_KHR_widget_label",
+				"VK_KHR_widget_limits",
+				"VK_KHR_widget_win32",
+			],
+		)
+
 	def test_roots_are_const_pointer_stype_parameters(self) -> None:
 		# VkWidgetPart is a root because vkCmdSubmitParts takes it directly, and
 		# VkExtent is not, because it has no sType.

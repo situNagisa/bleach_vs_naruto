@@ -175,17 +175,37 @@ class SplitTest(unittest.TestCase):
 		table = naming.load_table(TABLE)
 		cls.files, _ = emit.generate_split(registry, table, "closure", "fixture", PREFIX)
 
-	def test_one_file_per_section_plus_an_umbrella(self) -> None:
+	def test_one_file_per_module_plus_an_umbrella(self) -> None:
 		self.assertEqual(
 			sorted(self.files),
 			[
-				"fixture.commands.h",
-				"fixture.enums.h",
 				"fixture.h",
-				"fixture.objects.h",
-				"fixture.param.h",
+				"vk_ext_widget_colour.h",
+				"vk_khr_widget_label.h",
+				"vk_khr_widget_limits.h",
+				"vk_khr_widget_win32.h",
+				"vk_version_1_0.h",
+				"vk_version_1_1.h",
 			],
 		)
+
+	def test_a_module_holds_every_kind_of_thing_it_introduces(self) -> None:
+		core = self.files["vk_version_1_0.h"]
+		for marker in (
+			"struct widget{};",  # tag
+			"enum class widget_mode",  # enum
+			"struct vulkan_object_trait<obj::widget>",  # trait
+			"namespace vkfu::param",  # param
+			"auto create_widget(",  # command
+		):
+			self.assertIn(marker, core)
+
+	def test_nothing_lands_in_a_module_that_does_not_introduce_it(self) -> None:
+		self.assertNotIn("widget_colour", self.files["vk_version_1_0.h"])
+		self.assertNotIn("create_widget", self.files["vk_ext_widget_colour.h"])
+		# The win32 command lives with its extension, not with core.
+		self.assertIn("cmd_set_win32_widget", self.files["vk_khr_widget_win32.h"])
+		self.assertNotIn("cmd_set_win32_widget", self.files["vk_version_1_0.h"])
 
 	def test_every_part_stands_on_its_own(self) -> None:
 		for name, body in self.files.items():
@@ -194,27 +214,46 @@ class SplitTest(unittest.TestCase):
 			)
 			self.assertEqual(code.count("{"), code.count("}"), name)
 
-	def test_the_umbrella_includes_every_part_in_dependency_order(self) -> None:
-		umbrella = self.files["fixture.h"]
-		positions = [umbrella.index(f"fixture.{name}.h") for name in emit.SECTION_ORDER]
-		self.assertEqual(positions, sorted(positions))
+	def test_a_module_includes_what_it_depends_on(self) -> None:
+		colour = self.files["vk_ext_widget_colour.h"]
+		# Its param uses core's enum, and its compat edge names core's tag.
+		self.assertIn('#include "vk_version_1_0.h"', colour)
+		# An alias needs its target's module.
+		self.assertIn('#include "vk_version_1_1.h"', self.files["vk_khr_widget_limits.h"])
 
-	def test_a_part_declares_what_it_depends_on(self) -> None:
-		self.assertIn('#include "fixture.objects.h"', self.files["fixture.param.h"])
-		self.assertIn('#include "fixture.enums.h"', self.files["fixture.param.h"])
-		self.assertIn('#include "fixture.objects.h"', self.files["fixture.commands.h"])
-		# Nothing depends on the params, which is what makes the split worth doing.
-		self.assertNotIn('#include "fixture.param.h"', self.files["fixture.commands.h"])
+	def test_the_umbrella_puts_dependencies_first(self) -> None:
+		umbrella = self.files["fixture.h"]
+		for name, body in self.files.items():
+			if name == "fixture.h":
+				continue
+			for line in body.splitlines():
+				if line.startswith('#include "vk_'):
+					dependency = line.split('"')[1]
+					self.assertLess(umbrella.index(dependency), umbrella.index(name), f"{name} needs {dependency}")
 
 	def test_the_split_and_the_single_file_agree(self) -> None:
-		joined = "".join(
-			self.files[f"fixture.{name}.h"] for name in emit.SECTION_ORDER
-		)
-		for marker in ("struct widget", "namespace vkfu::enums", "namespace vkfu::obj"):
-			self.assertIn(marker, joined)
+		single = generate()
+		def declarations(text: str) -> list[str]:
+			return sorted(
+				line
+				for line in text.splitlines()
+				if line.strip() and not line.startswith(("#", "//", "namespace", "{", "}", "using ::vkfu::operator|"))
+			)
+		joined = "\n".join(body for name, body in self.files.items() if name != "fixture.h")
+		self.assertEqual(declarations(joined), declarations(single))
 
 
 class FailureTest(unittest.TestCase):
+	def test_a_dependency_cycle_between_modules_stops_generation(self) -> None:
+		registry = ir.load(FIXTURE)
+		table = naming.load_table(TABLE)
+		# Pretend core's create-info hangs off the colour extension's structure
+		# and the extension's enum came from core: each module would need the other.
+		registry.origins["VkWidgetMode"] = "VK_EXT_widget_colour"
+		with self.assertRaises(emit.GenerationError) as raised:
+			emit.generate(registry, table, "closure", PREFIX)
+		self.assertTrue(any("cycle" in problem for problem in raised.exception.problems))
+
 	def test_a_missing_name_stops_generation(self) -> None:
 		registry = ir.load(FIXTURE)
 		table = naming.load_table(TABLE)

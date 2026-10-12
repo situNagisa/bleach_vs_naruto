@@ -17,6 +17,7 @@ import sys
 import tomllib
 
 from . import check, emit, ir, naming, producers
+from .plan import bit_layout, plan_struct, positional_bits, used_enums
 
 
 NEWLINE = chr(10)
@@ -89,7 +90,7 @@ def _suggest(registry: ir.Registry, table: naming.Table) -> tuple[str, dict[str,
 
 	for name in list(registry.closure) + list(registry.plain):
 		struct = registry.structs[name]
-		plan = emit.plan_struct(struct, registry)
+		plan = plan_struct(struct, registry)
 		struct_suggestion = objects[name]
 		needs_struct = table.struct_name(name) is None
 		# Fields are named relative to the object, so they stop restating it.
@@ -133,7 +134,7 @@ def _suggest(registry: ir.Registry, table: naming.Table) -> tuple[str, dict[str,
 		for field in plan.fields:
 			if field.kind != "flags" or field.flag_bits in seen_bits:
 				continue
-			bits = emit.positional_bits(registry.flagbits[field.flag_bits])
+			bits = positional_bits(registry.flagbits[field.flag_bits])
 			pending_bits = [bit for bit in bits if table.bit_name(field.flag_bits, bit.name) is None]
 			if not pending_bits:
 				continue
@@ -151,7 +152,7 @@ def _suggest(registry: ir.Registry, table: naming.Table) -> tuple[str, dict[str,
 			lines.append("")
 
 
-	enum_types = emit.used_enums(registry.closure, registry)
+	enum_types = used_enums(registry.closure, registry)
 	enum_names = naming.suggest_enum_names(enum_types, author_tags)
 	for enum_type in enum_types:
 		values = registry.enums[enum_type].values
@@ -313,7 +314,7 @@ def _rebuild(registry: ir.Registry, overrides_path: str) -> tuple[str, dict[str,
 	for name in sorted(named_objects):
 		lines.append(f"[struct.{_quote(name)}]")
 		lines.append(f'name = "{objects[name]}"')
-		fields = emit.plan_struct(registry.structs[name], registry).fields
+		fields = plan_struct(registry.structs[name], registry).fields
 		if fields:
 			lines.append(f"[struct.{_quote(name)}.members]")
 			leaf = objects[name].rpartition("::")[2]
@@ -329,11 +330,11 @@ def _rebuild(registry: ir.Registry, overrides_path: str) -> tuple[str, dict[str,
 	used_bits = sorted({
 		field.flag_bits
 		for name in named_objects
-		for field in emit.plan_struct(registry.structs[name], registry).fields
+		for field in plan_struct(registry.structs[name], registry).fields
 		if field.kind == "flags"
 	})
 	for flag_bits in used_bits:
-		layout = emit._bit_layout(registry.flagbits[flag_bits]) or []
+		layout = bit_layout(registry.flagbits[flag_bits]) or []
 		prefix = naming.bit_prefix(flag_bits, [bit.name for bit in layout], author_tags)
 		lines.append(f"[bits.{_quote(flag_bits)}]")
 		named_bits = naming.suggest_enum_values([bit.name for bit in layout], prefix, author_tags)
@@ -344,7 +345,7 @@ def _rebuild(registry: ir.Registry, overrides_path: str) -> tuple[str, dict[str,
 			stats["bits"] += 1
 		lines.append("")
 
-	enum_types = emit.used_enums(registry.closure, registry)
+	enum_types = used_enums(registry.closure, registry)
 	enum_labels = naming.suggest_enum_names(enum_types, author_tags)
 	for enum_type in enum_types:
 		lines.append(f"[enum.{_quote(enum_type)}]")
@@ -446,7 +447,7 @@ def main(argv: list[str] | None = None) -> int:
 	parser.add_argument(
 		"--split",
 		action="store_true",
-		help="write one header per section plus an umbrella, instead of a single file",
+		help="write one header per Vulkan module (feature or extension) plus an umbrella, instead of a single file",
 	)
 	parser.add_argument(
 		"--core",
@@ -583,7 +584,7 @@ def main(argv: list[str] | None = None) -> int:
 	unnamed = len(registry.closure) - named
 	destination = arguments.out or "-"
 	if text is None:
-		# The umbrella keeps the single-file path working; the parts live in a
+		# The umbrella keeps the single-file path working; the modules live in a
 		# directory beside it, named after it.
 		root = pathlib.Path(destination).parent
 		(root / stem).mkdir(parents=True, exist_ok=True)
