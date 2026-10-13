@@ -44,7 +44,7 @@ VkResult vkEnumerateWidgetReports(VkDevice, ::std::uint32_t*, VkWidgetReport*);
 void vkGetWidgetProperties(VkDevice, VkWidgetProperties*);
 }
 
-#include "golden/fixture.h"
+#include "golden/vulkan/v1.1.42.h"
 
 namespace param = ::vkfu::param;
 namespace obj = ::vkfu::obj;

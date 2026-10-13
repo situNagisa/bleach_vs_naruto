@@ -2,7 +2,7 @@
 
 	python -m vkfu_gen dump-ir   --xml vk.xml
 	python -m vkfu_gen suggest   --xml vk.xml --table naming.toml --out naming.suggested.toml
-	python -m vkfu_gen gen       --xml vk.xml --table naming.toml --split --out ../include/vkfu
+	python -m vkfu_gen gen       --xml vk.xml --table naming.toml --out ../include/vkfu
 """
 
 from __future__ import annotations
@@ -435,18 +435,13 @@ def main(argv: list[str] | None = None) -> int:
 	parser.add_argument("--overrides", default="naming.overrides.toml")
 	parser.add_argument(
 		"--out",
-		help="gen --split: the directory holding vkfu's headers, the tree goes in its vulkan/ "
-		"(default ../include/vkfu); otherwise the file to write",
+		help="gen: the directory holding vkfu's headers, the tree goes in its vulkan/ "
+		"(default ../include/vkfu); other commands: the file to write",
 	)
 	parser.add_argument(
 		"--verbose",
 		action="store_true",
 		help="list warnings as well as errors",
-	)
-	parser.add_argument(
-		"--split",
-		action="store_true",
-		help="write a tree of headers -- core versions cut by area, extensions by vendor -- plus umbrellas, instead of a single file",
 	)
 	parser.add_argument(
 		"--core",
@@ -556,11 +551,7 @@ def main(argv: list[str] | None = None) -> int:
 		return _report(check.check(registry, merged, "table"), destination, verbose=arguments.verbose)
 
 	try:
-		if arguments.split:
-			files, warnings = emit.generate_split(registry, table, arguments.scope)
-			text = None
-		else:
-			text, warnings = emit.generate(registry, table, arguments.scope)
+		files, warnings = emit.generate(registry, table, arguments.scope)
 	except emit.GenerationError as error:
 		print(f"generation failed: {len(error.missing)} missing name(s), {len(error.problems)} problem(s)", file=sys.stderr)
 		for entry in error.missing[:40]:
@@ -577,26 +568,20 @@ def main(argv: list[str] | None = None) -> int:
 
 	named = sum(1 for name in registry.closure if table.struct_name(name))
 	unnamed = len(registry.closure) - named
-	if text is None:
-		# The generator owns the layout below the root: vulkan/v<version>.h and
-		# the tree beside it, both named after the registry's version.
-		root = pathlib.Path(arguments.out or "../include/vkfu")
-		destination = root / emit.OUTPUT_DIRECTORY / f"{emit.stem_of(registry)}.h"
-		for name, body in sorted(files.items()):
-			target = root / name
-			target.parent.mkdir(parents=True, exist_ok=True)
-			with open(target, "w", encoding="utf-8", newline=NEWLINE) as stream:
-				stream.write(body)
-		lines = sum(body.count(NEWLINE) for body in files.values())
-		print(f"{destination}: {len(files)} file(s), {lines} lines")
-		return 0
-	destination = arguments.out or "-"
-	if destination == "-":
-		print(text)
-	else:
-		with open(destination, "w", encoding="utf-8", newline=NEWLINE) as stream:
-			stream.write(text)
-	print(f"{destination}: {named} object(s) generated, {unnamed} of {len(registry.closure)} still unnamed")
+	# The generator owns the layout below the root: vulkan/v<version>.h and the
+	# tree beside it, both named after the registry's version.
+	root = pathlib.Path(arguments.out or "../include/vkfu")
+	destination = root / emit.OUTPUT_DIRECTORY / f"{emit.stem_of(registry)}.h"
+	for name, body in sorted(files.items()):
+		target = root / name
+		target.parent.mkdir(parents=True, exist_ok=True)
+		with open(target, "w", encoding="utf-8", newline=NEWLINE) as stream:
+			stream.write(body)
+	lines = sum(body.count(NEWLINE) for body in files.values())
+	print(
+		f"{destination}: {len(files)} file(s), {lines} lines; "
+		f"{named} object(s) generated, {unnamed} of {len(registry.closure)} still unnamed"
+	)
 	return 0
 
 

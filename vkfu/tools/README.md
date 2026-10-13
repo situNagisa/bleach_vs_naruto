@@ -23,7 +23,7 @@
 
 ## 输出：核心按功能、扩展按厂商
 
-`gen --split` 输出一棵树（v1.4.328 下 507 个文件）：
+`gen` 输出一棵树（v1.4.328 下 507 个文件）：
 
 ```
 vulkan/v1.4.328.h                       # 总伞头：全部核心版本和全部厂商
@@ -73,8 +73,6 @@ vulkan/v1.4.328/ext/mesh_shader.h
 - flags 逐位的 `static_assert` 对平台才有的位同样比对数值。
 - 一条兼容边两端分属不同文件时，放进**有宏的那一端**（两端都没有或都有时放较晚的一端），这样
   不需要宏的文件永远不会因为一条边而继承别人的宏。
-
-不加 `--split` 时输出单个文件，内容相同、顺序相同，有条件的文件整体包在一个 `#if` 里。
 
 ## 为什么是两段式
 
@@ -350,7 +348,7 @@ python -m vkfu_gen dump-ir  --xml vk.xml --out ir.json
 python -m vkfu_gen rebuild  --xml vk.xml --table naming.toml --overrides naming.overrides.toml
 python -m vkfu_gen suggest  --xml vk.xml --table naming.toml --out naming.suggested.toml
 python -m vkfu_gen promote  --xml vk.xml --table naming.toml --out naming.suggested.toml
-python -m vkfu_gen gen      --xml vk.xml --table naming.toml --scope closure --split
+python -m vkfu_gen gen      --xml vk.xml --table naming.toml --scope closure
     # 写到 ../include/vkfu/vulkan/v1.4.328.h 和 ../include/vkfu/vulkan/v1.4.328/
 ```
 

@@ -673,22 +673,6 @@ def _included(lines: list[str], includes: list[tuple[str, list[str]]]) -> None:
 		lines.append("#endif")
 
 
-def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list[str]]:
-	"""One header, every unit in include order, each under its condition."""
-	units, bodies, warnings = _build(registry, table, scope)
-	lines = ["#pragma once", "", _banner(registry), ""] + _CORE_INCLUDES + [""]
-	for unit in units:
-		lines.append(f"// ---------------------------------------------------------------- {unit.path}")
-		lines.append("")
-		if unit.condition:
-			lines.append(_condition(unit.condition))
-		lines.extend(bodies[unit.path])
-		if unit.condition:
-			lines.append("#endif")
-		lines.append("")
-	return NEWLINE.join(lines), warnings
-
-
 # Where the tree goes, relative to the directory that holds vkfu's own headers.
 # Consumers write `#include <vkfu/vulkan/v1.4.328.h>`.
 OUTPUT_DIRECTORY = "vulkan"
@@ -699,7 +683,7 @@ def stem_of(registry: ir.Registry) -> str:
 	return f"v{registry.api_version}"
 
 
-def generate_split(
+def generate(
 	registry: ir.Registry, table: Table, scope: str
 ) -> tuple[dict[str, str], list[str]]:
 	"""The tree under `vulkan/v<version>/`, plus `vulkan/v<version>.h` including everything.

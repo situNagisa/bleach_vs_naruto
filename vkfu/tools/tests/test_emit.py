@@ -1,4 +1,4 @@
-"""Stage 2 against a golden file.
+"""Stage 2 against a golden tree.
 
 The golden is the whole point: a diff against it is the review. Anything that
 changes generated code shows up as a reviewable text change rather than as a
@@ -7,7 +7,7 @@ compile error three steps later.
 To accept a new golden, read the diff first, then:
 
 	python -m vkfu_gen gen --xml tests/fixture.xml --table tests/fixture.naming.toml \\
-		--scope closure --out tests/golden/fixture.h
+		--scope closure --out tests/golden
 """
 
 from __future__ import annotations
@@ -20,37 +20,47 @@ from vkfu_gen import check, emit, ir, naming
 HERE = pathlib.Path(__file__).parent
 FIXTURE = str(HERE / "fixture.xml")
 TABLE = str(HERE / "fixture.naming.toml")
-GOLDEN = HERE / "golden" / "fixture.h"
+GOLDEN = HERE / "golden"
+
+
+def generate_files() -> dict[str, str]:
+	registry = ir.load(FIXTURE)
+	table = naming.load_table(TABLE)
+	files, _warnings = emit.generate(registry, table, "closure")
+	return files
 
 
 def generate() -> str:
-	registry = ir.load(FIXTURE)
-	table = naming.load_table(TABLE)
-	text, _warnings = emit.generate(registry, table, "closure")
-	return text
+	"""Every file, umbrellas first then units, for tests that look for a snippet."""
+	files = generate_files()
+	return "\n".join(files[name] for name in sorted(files, key=lambda name: (name.count("/"), name)))
 
 
 class GoldenTest(unittest.TestCase):
-	def test_matches_the_checked_in_header(self) -> None:
-		produced = generate()
-		expected = GOLDEN.read_text(encoding="utf-8")
-		if produced != expected:
-			produced_lines = produced.splitlines()
-			expected_lines = expected.splitlines()
-			for index, (left, right) in enumerate(zip(produced_lines, expected_lines), start=1):
+	def test_matches_the_checked_in_tree(self) -> None:
+		produced = generate_files()
+		expected = {
+			path.relative_to(GOLDEN).as_posix(): path.read_text(encoding="utf-8")
+			for path in GOLDEN.rglob("*.h")
+		}
+		self.assertEqual(sorted(produced), sorted(expected), "the golden tree has different files")
+		for name in sorted(produced):
+			if produced[name] == expected[name]:
+				continue
+			for index, (left, right) in enumerate(
+				zip(produced[name].splitlines(), expected[name].splitlines()), start=1
+			):
 				if left != right:
 					self.fail(
-						f"golden differs at line {index}:\n"
+						f"{name} differs at line {index}:\n"
 						f"  generated: {left}\n"
 						f"  golden:    {right}\n"
 						"read the diff, then regenerate as described in this module's docstring"
 					)
-			self.fail(
-				f"golden has {len(expected_lines)} lines, generated has {len(produced_lines)}"
-			)
+			self.fail(f"{name} differs in length")
 
 	def test_generation_is_deterministic(self) -> None:
-		self.assertEqual(generate(), generate())
+		self.assertEqual(generate_files(), generate_files())
 
 
 class ContentTest(unittest.TestCase):
@@ -104,7 +114,7 @@ class ContentTest(unittest.TestCase):
 		)
 
 	def test_a_platform_extension_is_guarded_once_as_a_whole(self) -> None:
-		# One #if around the win32 unit, nothing inside it.
+		# One #if around the win32 unit in its vendor's umbrella, nothing inside it.
 		self.assertEqual(self.text.count("#if defined(VK_USE_PLATFORM_WIN32_KHR)"), 1)
 		opens = sum(1 for line in self.text.splitlines() if line.startswith("#if"))
 		closes = sum(1 for line in self.text.splitlines() if line.startswith("#endif"))
@@ -171,7 +181,7 @@ class SplitTest(unittest.TestCase):
 	def setUpClass(cls) -> None:
 		registry = ir.load(FIXTURE)
 		table = naming.load_table(TABLE)
-		cls.files, _ = emit.generate_split(registry, table, "closure")
+		cls.files, _ = emit.generate(registry, table, "closure")
 
 	def test_the_tree_is_named_after_the_registry_version(self) -> None:
 		# vulkan/ under vkfu's headers, then v<major>.<minor>.<VK_HEADER_VERSION>.
@@ -259,17 +269,6 @@ class SplitTest(unittest.TestCase):
 					else:
 						resolved.append(part)
 				self.assertIn("/".join(resolved), self.files, f"{name}: {line}")
-
-	def test_the_split_and_the_single_file_agree(self) -> None:
-		def declarations(text: str) -> list[str]:
-			return sorted(
-				line
-				for line in text.splitlines()
-				if line.strip() and not line.startswith(("#", "//", "namespace", "{", "}", "using ::vkfu::operator|"))
-			)
-		joined = "\n".join(body for name, body in self.files.items() if name.count("/") >= 3)
-		self.assertEqual(declarations(joined), declarations(generate()))
-
 
 class FailureTest(unittest.TestCase):
 	def test_a_dependency_cycle_between_modules_stops_generation(self) -> None:
