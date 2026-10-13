@@ -197,6 +197,8 @@ def check(registry: ir.Registry, table: Table, scope: str = "closure") -> list[P
 				scope_entries.append((f"{value}_expression", f"{field.member.name} (slot)"))
 			if value == object_names.get(name, "").rpartition("::")[2]:
 				sink.warn("shadow", key, f"'{value}' is also the object's own name")
+			if field.kind == "enum" and value == table.enum_name(field.enum_type):
+				sink.warn("shadow", key, f"'{value}' hides the enum class it is typed with")
 
 		_unique(sink, "duplicate", f"struct.{name}", claimed)
 		_unique(sink, "scope", f"struct.{name}", [(source, entry) for entry, source in scope_entries])

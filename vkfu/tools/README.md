@@ -372,10 +372,11 @@ python -m vkfu_gen gen      --xml vk.xml --table naming.toml --scope closure
 `gen` 在这些情况下**硬失败**：缺名字、名字撞车、**类作用域撞名**（字段、槽的 `<字段>_expression`
 模板参数、`vulkan_tag_type` / `storage_type` 别名之间任意两者相撞）、枚举项撞名、遇到未支持的成员形态
 （多维数组、位无法一位一格的 flag 枚举）、生成的文件之间依赖成环。**只警告**：字段名与所属对象同名、
-表里命名了不在作用域内的标识符。v1.4.328 下一条警告都没有。
+字段名遮蔽它自己的枚举类型（合法，因为生成的代码始终写全限定名）、表里命名了不在作用域内的标识符。
 
-字段名和它的枚举类型同名（`format`、`index_type`）以前也会警告，一共 52 条（`check` 里 60 条），
-现在不再报：生成的代码总是写全限定名 `::vkfu::enums::format`，这种同名是合法的，而且读起来就是那个字段。
+v1.4.328 下 `gen` 报 52 条、`check` 报 60 条警告，全部是"字段名遮蔽它自己的枚举类型"一种，例如
+`param::image_view` 里的 `::vkfu::enums::format format{};`。`check` 多出的 8 条来自没有 sType 的结构体，
+`gen` 不对它们做这项检查。
 
 ## 无 sType 的结构体也有 param
 

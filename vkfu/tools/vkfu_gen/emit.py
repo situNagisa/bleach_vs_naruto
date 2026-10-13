@@ -113,9 +113,10 @@ def _select(registry: ir.Registry, table: Table, scope: str) -> tuple[Selection,
 				problems.append(f"field collision in {name}: {used[field_name]} and {field.member.name} -> '{field_name}'")
 			else:
 				used[field_name] = field.member.name
-			# A field named like its enum class (`format`, `index_type`) is not
-			# worth a warning: generated code always writes ::vkfu::enums::x in
-			# full, and the name reads as the field it is.
+			if field.kind == "enum" and field_name == table.enum_name(field.enum_type):
+				# Legal, because generated code always writes ::vkfu::enums::x in
+				# full, but the member does hide the enum name in class scope.
+				warnings.append(f"{name}: field '{field_name}' hides the enum class it is typed with")
 			# object_name is None when the struct itself is unnamed, which is
 			# already reported; keep going rather than crashing on it.
 			if object_name is not None and field_name == leaf_of(object_name):
