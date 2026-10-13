@@ -20,7 +20,7 @@
 #include <bvn/platform/window.h>
 #include <bvn/graphics/renderer.h>
 #include <vkkl/vkkl.h>
-#include <vkfu/generated/vulkan-v1.4.328.h>
+#include <vkfu/vulkan/v1.4.328.h>
 
 namespace consumer_arch_vulkan
 {

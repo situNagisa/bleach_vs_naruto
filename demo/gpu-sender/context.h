@@ -18,7 +18,7 @@
 #include <vulkan/vulkan.h>
 
 #include <vkkl/vkkl.h>
-#include <vkfu/generated/vulkan-v1.4.328.h>
+#include <vkfu/vulkan/v1.4.328.h>
 
 /// 原型的第一层：GPU 时间线。
 ///

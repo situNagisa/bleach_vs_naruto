@@ -4,7 +4,7 @@
 #include <ranges>
 
 #include <vkkl/vkkl.h>
-#include <vkfu/generated/vulkan-v1.4.328.h>
+#include <vkfu/vulkan/v1.4.328.h>
 
 #include "../detail/demo_vulkan.h"
 

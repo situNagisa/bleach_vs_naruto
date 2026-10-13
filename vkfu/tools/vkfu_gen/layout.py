@@ -5,7 +5,7 @@ VK_KHR_swapchain -> `khr/swapchain.h`. A core version is too big for one file,
 so it is cut along the <require> blocks vk.xml already groups it into --
 VK_VERSION_1_3's "Promoted from VK_KHR_synchronization2" block becomes
 `version_1_3/synchronization2.h`, VK_VERSION_1_0's "Buffer commands" becomes
-`version_1_0/buffer.h`. Every path is relative to the `vulkan-v<version>/`
+`version_1_0/buffer.h`. Every path is relative to the `v<version>/`
 directory.
 
 Platform and beta macros never appear inside a unit. A unit has a condition --

@@ -689,18 +689,32 @@ def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list
 	return NEWLINE.join(lines), warnings
 
 
+# Where the tree goes, relative to the directory that holds vkfu's own headers.
+# Consumers write `#include <vkfu/vulkan/v1.4.328.h>`.
+OUTPUT_DIRECTORY = "vulkan"
+
+
+def stem_of(registry: ir.Registry) -> str:
+	"""v1.4.328: names both the umbrella and the directory beside it."""
+	return f"v{registry.api_version}"
+
+
 def generate_split(
-	registry: ir.Registry, table: Table, scope: str, stem: str
+	registry: ir.Registry, table: Table, scope: str
 ) -> tuple[dict[str, str], list[str]]:
-	"""The tree under `<stem>/`, plus `<stem>.h` beside it including everything.
+	"""The tree under `vulkan/v<version>/`, plus `vulkan/v<version>.h` including everything.
 
-	    <stem>/version_1_0/buffer.h   a core version, cut by vk.xml's <require> blocks
-	    <stem>/version_1_0.h          that version's umbrella
-	    <stem>/khr/swapchain.h        one extension
-	    <stem>/khr.h                  that vendor's umbrella
+	    vulkan/v1.4.328.h                      every core version and every vendor
+	    vulkan/v1.4.328/version_1_0.h          a core version's umbrella
+	    vulkan/v1.4.328/version_1_0/buffer.h   cut by vk.xml's <require> blocks
+	    vulkan/v1.4.328/khr.h                  a vendor's umbrella
+	    vulkan/v1.4.328/khr/swapchain.h        one extension
 
-	Paths in the result are relative to the directory holding `<stem>.h`.
+	Paths in the result are relative to the directory holding vkfu's headers.
+	The umbrella's own includes are relative to it, so nothing below depends
+	on where that directory is.
 	"""
+	stem = stem_of(registry)
 	units, bodies, warnings = _build(registry, table, scope)
 	files: dict[str, str] = {}
 	groups: dict[str, list[Unit]] = {}
@@ -732,4 +746,4 @@ def generate_split(
 		["Every core version and every vendor's extensions."],
 		[(f"{stem}/{name}", []) for name in names],
 	)
-	return files, warnings
+	return {f"{OUTPUT_DIRECTORY}/{path}": body for path, body in files.items()}, warnings

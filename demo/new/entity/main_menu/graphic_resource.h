@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <span>
 
-#include <vkfu/generated/vulkan-v1.4.328.h>
+#include <vkfu/vulkan/v1.4.328.h>
 #include <vkkl/vkkl.h>
 
 #include "../detail/demo_vulkan.h"

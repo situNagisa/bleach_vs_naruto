@@ -2,7 +2,7 @@
 
 	python -m vkfu_gen dump-ir   --xml vk.xml
 	python -m vkfu_gen suggest   --xml vk.xml --table naming.toml --out naming.suggested.toml
-	python -m vkfu_gen gen       --xml vk.xml --table naming.toml --out ../include/vkfu/generated/vulkan-v1.4.328.h
+	python -m vkfu_gen gen       --xml vk.xml --table naming.toml --split --out ../include/vkfu
 """
 
 from __future__ import annotations
@@ -433,7 +433,11 @@ def main(argv: list[str] | None = None) -> int:
 	parser.add_argument("--xml", default="vk.xml")
 	parser.add_argument("--table", default="naming.toml")
 	parser.add_argument("--overrides", default="naming.overrides.toml")
-	parser.add_argument("--out")
+	parser.add_argument(
+		"--out",
+		help="gen --split: the directory holding vkfu's headers, the tree goes in its vulkan/ "
+		"(default ../include/vkfu); otherwise the file to write",
+	)
 	parser.add_argument(
 		"--verbose",
 		action="store_true",
@@ -552,9 +556,8 @@ def main(argv: list[str] | None = None) -> int:
 		return _report(check.check(registry, merged, "table"), destination, verbose=arguments.verbose)
 
 	try:
-		stem = pathlib.Path(arguments.out or "generated").stem
 		if arguments.split:
-			files, warnings = emit.generate_split(registry, table, arguments.scope, stem)
+			files, warnings = emit.generate_split(registry, table, arguments.scope)
 			text = None
 		else:
 			text, warnings = emit.generate(registry, table, arguments.scope)
@@ -574,11 +577,11 @@ def main(argv: list[str] | None = None) -> int:
 
 	named = sum(1 for name in registry.closure if table.struct_name(name))
 	unnamed = len(registry.closure) - named
-	destination = arguments.out or "-"
 	if text is None:
-		# The umbrella keeps the single-file path working; the tree lives in a
-		# directory beside it, named after it.
-		root = pathlib.Path(destination).parent
+		# The generator owns the layout below the root: vulkan/v<version>.h and
+		# the tree beside it, both named after the registry's version.
+		root = pathlib.Path(arguments.out or "../include/vkfu")
+		destination = root / emit.OUTPUT_DIRECTORY / f"{emit.stem_of(registry)}.h"
 		for name, body in sorted(files.items()):
 			target = root / name
 			target.parent.mkdir(parents=True, exist_ok=True)
@@ -587,6 +590,7 @@ def main(argv: list[str] | None = None) -> int:
 		lines = sum(body.count(NEWLINE) for body in files.values())
 		print(f"{destination}: {len(files)} file(s), {lines} lines")
 		return 0
+	destination = arguments.out or "-"
 	if destination == "-":
 		print(text)
 	else:

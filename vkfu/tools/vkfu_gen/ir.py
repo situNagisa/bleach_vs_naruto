@@ -186,6 +186,7 @@ class Origins:
 @dataclasses.dataclass
 class Registry:
 	header_version: str
+	api_version: str  # 1.4.328: what VK_HEADER_VERSION_COMPLETE spells out
 	author_tags: list[str]  # vk.xml <tags>, e.g. KHR / EXT / HUAWEI
 	structs: dict[str, Struct]
 	bitmask_to_flagbits: dict[str, str]  # VkXxxFlags -> VkXxxFlagBits
@@ -1043,6 +1044,30 @@ def _info_roots(root: ET.Element, structs: dict[str, Struct], api: str) -> tuple
 	return roots, commands
 
 
+def _api_version(root: ET.Element, api: str, header_version: str) -> str:
+	"""major.minor.patch of the registry, as VK_HEADER_VERSION_COMPLETE gives it.
+
+	vk.xml writes it as VK_MAKE_API_VERSION(variant, major, minor, VK_HEADER_VERSION).
+	A registry without that define gets the newest <feature> it declares instead.
+	"""
+	for element in root.iter("type"):
+		if element.get("category") != "define" or not _api_allows(element, api):
+			continue
+		if element.findtext("name") != "VK_HEADER_VERSION_COMPLETE":
+			continue
+		text = "".join(element.itertext())
+		match = re.search(r"\(\s*\w+\s*,\s*(\d+)\s*,\s*(\d+)\s*,", text)
+		if match:
+			return f"{match.group(1)}.{match.group(2)}.{header_version}"
+	numbers = [
+		tuple(int(part) for part in feature.get("number").split("."))
+		for feature in root.iter("feature")
+		if _api_allows(feature, api) and feature.get("number")
+	]
+	major, minor = max(numbers) if numbers else (1, 0)
+	return f"{major}.{minor}.{header_version}"
+
+
 def load(path: str, api: str = "vulkan", profile: Profile = EVERYTHING) -> Registry:
 	root = ET.parse(path).getroot()
 	requirements = _collect_requirements(root, api, profile)
@@ -1053,6 +1078,7 @@ def load(path: str, api: str = "vulkan", profile: Profile = EVERYTHING) -> Regis
 			tail = (type_element.find("name").tail or "").strip()
 			header_version = tail
 			break
+	api_version = _api_version(root, api, header_version)
 
 	structs: dict[str, Struct] = {}
 	bitmask_to_flagbits: dict[str, str] = {}
@@ -1199,6 +1225,7 @@ def load(path: str, api: str = "vulkan", profile: Profile = EVERYTHING) -> Regis
 
 	return Registry(
 		header_version=header_version,
+		api_version=api_version,
 		author_tags=sorted(tag.get("name") for tag in root.iter("tag") if tag.get("name")),
 		structs=structs,
 		bitmask_to_flagbits=bitmask_to_flagbits,

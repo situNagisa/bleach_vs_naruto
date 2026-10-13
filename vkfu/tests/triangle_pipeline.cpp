@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <span>
 
-#include "../include/vkfu/generated/vulkan-v1.4.328.h"
+#include "../include/vkfu/vulkan/v1.4.328.h"
 
 namespace param = ::vkfu::param;
 using namespace ::vkfu::enums;

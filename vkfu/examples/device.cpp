@@ -2,7 +2,7 @@
 #include <span>
 #include <tuple>
 
-#include "../include/vkfu/generated/vulkan-v1.4.328.h"
+#include "../include/vkfu/vulkan/v1.4.328.h"
 
 int main()
 {

@@ -13,7 +13,7 @@
 // Only for the negative test below: the generated header no longer needs it.
 #include <vector>
 
-#include "../include/vkfu/generated/vulkan-v1.4.328.h"
+#include "../include/vkfu/vulkan/v1.4.328.h"
 
 namespace obj = ::vkfu::obj;
 namespace param = ::vkfu::param;

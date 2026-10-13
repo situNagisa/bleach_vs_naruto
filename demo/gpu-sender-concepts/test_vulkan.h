@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.h>
 #include <vkkl/vkkl.h>
-#include <vkfu/generated/vulkan-v1.4.328.h>
+#include <vkfu/vulkan/v1.4.328.h>
 
 #include <nagisa/vkfu/execution_stream.h>
 

@@ -8,7 +8,7 @@
 #include <array>
 #include <string_view>
 
-#include "../include/vkfu/generated/vulkan-v1.4.328.h"
+#include "../include/vkfu/vulkan/v1.4.328.h"
 
 namespace obj = ::vkfu::obj;
 namespace param = ::vkfu::param;

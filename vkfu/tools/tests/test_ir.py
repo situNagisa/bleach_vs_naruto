@@ -21,6 +21,8 @@ class LoadTest(unittest.TestCase):
 
 	def test_header_version_and_tags(self) -> None:
 		self.assertEqual(self.registry.header_version, "42")
+		# No VK_HEADER_VERSION_COMPLETE in the fixture, so the newest <feature> is used.
+		self.assertEqual(self.registry.api_version, "1.1.42")
 		self.assertEqual(self.registry.author_tags, ["EXT", "KHR"])
 
 	def test_every_type_and_command_has_the_module_that_introduces_it(self) -> None:

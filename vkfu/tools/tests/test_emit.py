@@ -171,28 +171,33 @@ class SplitTest(unittest.TestCase):
 	def setUpClass(cls) -> None:
 		registry = ir.load(FIXTURE)
 		table = naming.load_table(TABLE)
-		cls.files, _ = emit.generate_split(registry, table, "closure", "fixture")
+		cls.files, _ = emit.generate_split(registry, table, "closure")
+
+	def test_the_tree_is_named_after_the_registry_version(self) -> None:
+		# vulkan/ under vkfu's headers, then v<major>.<minor>.<VK_HEADER_VERSION>.
+		self.assertTrue(all(name.startswith("vulkan/v1.1.42") for name in self.files))
+		self.assertIn("vulkan/v1.1.42.h", self.files)
 
 	def test_core_is_cut_by_area_and_extensions_are_filed_by_vendor(self) -> None:
 		self.assertEqual(
 			sorted(self.files),
 			[
-				"fixture.h",
-				"fixture/ext.h",
-				"fixture/ext/widget_colour.h",
-				"fixture/khr.h",
-				"fixture/khr/widget_label.h",
-				"fixture/khr/widget_limits.h",
-				"fixture/khr/widget_win32.h",
-				"fixture/version_1_0.h",
-				"fixture/version_1_0/core.h",
-				"fixture/version_1_1.h",
-				"fixture/version_1_1/core.h",
+				"vulkan/v1.1.42.h",
+				"vulkan/v1.1.42/ext.h",
+				"vulkan/v1.1.42/ext/widget_colour.h",
+				"vulkan/v1.1.42/khr.h",
+				"vulkan/v1.1.42/khr/widget_label.h",
+				"vulkan/v1.1.42/khr/widget_limits.h",
+				"vulkan/v1.1.42/khr/widget_win32.h",
+				"vulkan/v1.1.42/version_1_0.h",
+				"vulkan/v1.1.42/version_1_0/core.h",
+				"vulkan/v1.1.42/version_1_1.h",
+				"vulkan/v1.1.42/version_1_1/core.h",
 			],
 		)
 
 	def test_a_unit_holds_every_kind_of_thing_it_introduces(self) -> None:
-		core = self.files["fixture/version_1_0/core.h"]
+		core = self.files["vulkan/v1.1.42/version_1_0/core.h"]
 		for marker in (
 			"struct widget{};",  # tag
 			"enum class widget_mode",  # enum
@@ -203,35 +208,35 @@ class SplitTest(unittest.TestCase):
 			self.assertIn(marker, core)
 
 	def test_nothing_lands_in_a_unit_that_does_not_introduce_it(self) -> None:
-		self.assertNotIn("widget_colour", self.files["fixture/version_1_0/core.h"])
-		self.assertNotIn("create_widget", self.files["fixture/ext/widget_colour.h"])
-		self.assertIn("cmd_set_win32_widget", self.files["fixture/khr/widget_win32.h"])
+		self.assertNotIn("widget_colour", self.files["vulkan/v1.1.42/version_1_0/core.h"])
+		self.assertNotIn("create_widget", self.files["vulkan/v1.1.42/ext/widget_colour.h"])
+		self.assertIn("cmd_set_win32_widget", self.files["vulkan/v1.1.42/khr/widget_win32.h"])
 
 	def test_no_macro_guard_inside_a_unit(self) -> None:
 		for name, body in self.files.items():
-			if name.count("/") < 2:
+			if name.count("/") < 3:
 				continue  # an umbrella
 			guards = [line for line in body.splitlines() if line.startswith("#if") and "__clang__" not in line]
 			self.assertEqual(guards, [], name)
 
 	def test_the_vendor_umbrella_is_what_tests_the_platform(self) -> None:
-		umbrella = self.files["fixture/khr.h"]
+		umbrella = self.files["vulkan/v1.1.42/khr.h"]
 		self.assertIn(
 			'#if defined(VK_USE_PLATFORM_WIN32_KHR)\n#include "khr/widget_win32.h"\n#endif', umbrella
 		)
 		self.assertIn('#include "khr/widget_label.h"', umbrella)
-		self.assertNotIn("VK_USE_PLATFORM", self.files["fixture.h"])
+		self.assertNotIn("VK_USE_PLATFORM", self.files["vulkan/v1.1.42.h"])
 
 	def test_the_core_framework_is_included_by_its_install_path(self) -> None:
 		for name, body in self.files.items():
 			self.assertNotIn('"../../', body, name)
-		self.assertIn("#include <vkfu/expression.h>", self.files["fixture/version_1_0/core.h"])
+		self.assertIn("#include <vkfu/expression.h>", self.files["vulkan/v1.1.42/version_1_0/core.h"])
 
 	def test_generated_files_include_each_other_relatively(self) -> None:
-		colour = self.files["fixture/ext/widget_colour.h"]
+		colour = self.files["vulkan/v1.1.42/ext/widget_colour.h"]
 		self.assertIn('#include "../version_1_0/core.h"', colour)
-		self.assertIn('#include "version_1_1/core.h"', self.files["fixture/version_1_1.h"])
-		self.assertIn('#include "fixture/version_1_0.h"', self.files["fixture.h"])
+		self.assertIn('#include "version_1_1/core.h"', self.files["vulkan/v1.1.42/version_1_1.h"])
+		self.assertIn('#include "v1.1.42/version_1_0.h"', self.files["vulkan/v1.1.42.h"])
 
 	def test_every_part_stands_on_its_own(self) -> None:
 		for name, body in self.files.items():
@@ -262,7 +267,7 @@ class SplitTest(unittest.TestCase):
 				for line in text.splitlines()
 				if line.strip() and not line.startswith(("#", "//", "namespace", "{", "}", "using ::vkfu::operator|"))
 			)
-		joined = "\n".join(body for name, body in self.files.items() if name.count("/") >= 2)
+		joined = "\n".join(body for name, body in self.files.items() if name.count("/") >= 3)
 		self.assertEqual(declarations(joined), declarations(generate()))
 
 

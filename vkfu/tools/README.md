@@ -1,7 +1,7 @@
 # vkfu_gen —— vk.xml → vkfu 生成器
 
-把 vk.xml 转成 `vkfu/include/vkfu/generated/vulkan-v<version>.h` 以及它旁边的
-`vulkan-v<version>/` 目录（见下文"输出：核心按功能、扩展按厂商"），内容是 vkfu 框架
+把 vk.xml 转成 `vkfu/include/vkfu/vulkan/v<version>.h` 以及它旁边的
+`v<version>/` 目录（见下文"输出：核心按功能、扩展按厂商"），内容是 vkfu 框架
 （`vulkan_object.h` / `storage.h` / `expression.h` / `branch_pipe.h`）所需的生成层：
 `vkfu::obj::*` 标签、`vulkan_object_trait` 特化、`is_vulkan_object_compatible_with_v`
 边、`vkfu::param::*` 参数结构体，以及原生 Vulkan 结构体的 `address`/`set_next` 胶水。
@@ -26,15 +26,18 @@
 `gen --split` 输出一棵树（v1.4.328 下 507 个文件）：
 
 ```
-generated/vulkan-v1.4.328.h                       # 总伞头：全部核心版本和全部厂商
-generated/vulkan-v1.4.328/version_1_0.h           # 核心版本的伞头
-generated/vulkan-v1.4.328/version_1_0/buffer.h    # 按功能拆
-generated/vulkan-v1.4.328/version_1_3/synchronization2.h
-generated/vulkan-v1.4.328/khr.h                   # 厂商的伞头
-generated/vulkan-v1.4.328/khr/swapchain.h         # 一个扩展一个文件
-generated/vulkan-v1.4.328/ext/mesh_shader.h
+vulkan/v1.4.328.h                       # 总伞头：全部核心版本和全部厂商
+vulkan/v1.4.328/version_1_0.h           # 核心版本的伞头
+vulkan/v1.4.328/version_1_0/buffer.h    # 按功能拆
+vulkan/v1.4.328/version_1_3/synchronization2.h
+vulkan/v1.4.328/khr.h                   # 厂商的伞头
+vulkan/v1.4.328/khr/swapchain.h         # 一个扩展一个文件
+vulkan/v1.4.328/ext/mesh_shader.h
 ```
 
+- **目录名由生成器决定**：`--out` 只给 vkfu 头文件所在的目录（默认 `../include/vkfu`），
+  下面固定是 `vulkan/`，再下面是 `v<major>.<minor>.<VK_HEADER_VERSION>`，版本取自 vk.xml 的
+  `VK_HEADER_VERSION_COMPLETE`。所以使用方写 `#include <vkfu/vulkan/v1.4.328.h>`。
 - **归属**：类型或命令属于 vk.xml 里**第一个** require 它的 `<feature>` / `<extension>`（核心版本按
   版本号，再按扩展编号）。被提升进核心的类型归核心版本，旧名字别名归原扩展。
 - **核心版本按功能拆**：直接用 vk.xml 把每个核心版本分成的 `<require>` 块。1.1 起的块注释是
@@ -44,7 +47,7 @@ generated/vulkan-v1.4.328/ext/mesh_shader.h
   这类），叫 `core.h`。
 - **扩展按厂商**：`VK_KHR_swapchain` → `khr/swapchain.h`，去掉 `VK_` 和厂商前缀。
 - **一个文件里什么都有**：它引入的 tag、trait、pNext glue、enum class、param、别名和命令包装。
-- **include**：vkfu 框架头一律 `<vkfu/xxx.h>`；同在 `vulkan-v<version>/` 下的生成文件之间用相对路径
+- **include**：vkfu 框架头一律 `<vkfu/xxx.h>`；同在 `v<version>/` 下的生成文件之间用相对路径
   （`"surface.h"`、`"../version_1_0/buffer.h"`）。一个文件用到哪个文件声明的东西就 include 它，
   所以每个文件都能单独包含。依赖成环会让生成硬失败；v1.4.328 下无环。
 
@@ -347,8 +350,8 @@ python -m vkfu_gen dump-ir  --xml vk.xml --out ir.json
 python -m vkfu_gen rebuild  --xml vk.xml --table naming.toml --overrides naming.overrides.toml
 python -m vkfu_gen suggest  --xml vk.xml --table naming.toml --out naming.suggested.toml
 python -m vkfu_gen promote  --xml vk.xml --table naming.toml --out naming.suggested.toml
-python -m vkfu_gen gen      --xml vk.xml --table naming.toml --scope closure --split \
-    --out ../include/vkfu/generated/vulkan-v1.4.328.h
+python -m vkfu_gen gen      --xml vk.xml --table naming.toml --scope closure --split
+    # 写到 ../include/vkfu/vulkan/v1.4.328.h 和 ../include/vkfu/vulkan/v1.4.328/
 ```
 
 `suggest` 只列出表里还没有的条目；复核并就地改完后 `promote` 把它折进 `naming.toml`
