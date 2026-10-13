@@ -60,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceImageSlicedViewOf3DFeaturesEXT con
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -75,7 +75,7 @@ struct image_view_sliced{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::image_view_sliced>
+struct vulkan_object_trait<tag::option::ext::image_view_sliced>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -83,7 +83,7 @@ struct vulkan_object_trait<obj::option::ext::image_view_sliced>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::ext::image_sliced_view_of_3d>
+struct vulkan_object_trait<tag::feature::ext::image_sliced_view_of_3d>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -93,11 +93,11 @@ struct vulkan_object_trait<obj::feature::ext::image_sliced_view_of_3d>
 template<>
 struct expression_vulkan_tag<VkImageViewSlicedCreateInfoEXT>
 {
-	using type = obj::option::ext::image_view_sliced;
+	using type = tag::option::ext::image_view_sliced;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::image_view_sliced>
+struct vulkan_object_native<tag::option::ext::image_view_sliced>
 {
 	using type = VkImageViewSlicedCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_VIEW_SLICED_CREATE_INFO_EXT;
@@ -106,18 +106,18 @@ struct vulkan_object_native<obj::option::ext::image_view_sliced>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceImageSlicedViewOf3DFeaturesEXT>
 {
-	using type = obj::feature::ext::image_sliced_view_of_3d;
+	using type = tag::feature::ext::image_sliced_view_of_3d;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::image_sliced_view_of_3d>
+struct vulkan_object_native<tag::feature::ext::image_sliced_view_of_3d>
 {
 	using type = VkPhysicalDeviceImageSlicedViewOf3DFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_SLICED_VIEW_OF_3D_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::image_view_sliced>
+struct vulkan_object_extensions<tag::option::ext::image_view_sliced>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_image_sliced_view_of_3d"};
 	constexpr static ::std::uint32_t core = 0;
@@ -125,7 +125,7 @@ struct vulkan_object_extensions<obj::option::ext::image_view_sliced>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::image_sliced_view_of_3d>
+struct vulkan_object_extensions<tag::feature::ext::image_sliced_view_of_3d>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_image_sliced_view_of_3d"};
 	constexpr static ::std::uint32_t core = 0;
@@ -133,11 +133,11 @@ struct vulkan_object_extensions<obj::feature::ext::image_sliced_view_of_3d>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::image_sliced_view_of_3d> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::image_sliced_view_of_3d> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image_view, obj::option::ext::image_view_sliced> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image_view, tag::option::ext::image_view_sliced> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::image_sliced_view_of_3d> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::image_sliced_view_of_3d> = true;
 }
 
 namespace vkfu::param
@@ -148,7 +148,7 @@ using ::vkfu::operator|;
 
 struct image_sliced_view_of_3d
 {
-	using vulkan_tag_type = obj::feature::ext::image_sliced_view_of_3d;
+	using vulkan_tag_type = tag::feature::ext::image_sliced_view_of_3d;
 
 	bool enable = false;
 
@@ -170,7 +170,7 @@ using ::vkfu::operator|;
 
 struct image_view_sliced
 {
-	using vulkan_tag_type = obj::option::ext::image_view_sliced;
+	using vulkan_tag_type = tag::option::ext::image_view_sliced;
 
 	::std::uint32_t slice_offset{};
 	::std::uint32_t slice_count{};

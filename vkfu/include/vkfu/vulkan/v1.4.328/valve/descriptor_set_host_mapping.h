@@ -74,7 +74,7 @@ constexpr auto _vkfu_evaluate(VkDescriptorSetLayoutHostMappingInfoVALVE const& v
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::valve
 {
@@ -93,7 +93,7 @@ struct descriptor_set_binding_reference{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::valve::descriptor_set_binding_reference>
+struct vulkan_object_trait<tag::valve::descriptor_set_binding_reference>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -101,7 +101,7 @@ struct vulkan_object_trait<obj::valve::descriptor_set_binding_reference>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::valve::descriptor_set_host_mapping>
+struct vulkan_object_trait<tag::feature::valve::descriptor_set_host_mapping>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -109,7 +109,7 @@ struct vulkan_object_trait<obj::feature::valve::descriptor_set_host_mapping>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::valve::descriptor_set_layout_host_mapping>
+struct vulkan_object_trait<tag::result::valve::descriptor_set_layout_host_mapping>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -119,11 +119,11 @@ struct vulkan_object_trait<obj::result::valve::descriptor_set_layout_host_mappin
 template<>
 struct expression_vulkan_tag<VkDescriptorSetBindingReferenceVALVE>
 {
-	using type = obj::valve::descriptor_set_binding_reference;
+	using type = tag::valve::descriptor_set_binding_reference;
 };
 
 template<>
-struct vulkan_object_native<obj::valve::descriptor_set_binding_reference>
+struct vulkan_object_native<tag::valve::descriptor_set_binding_reference>
 {
 	using type = VkDescriptorSetBindingReferenceVALVE;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_BINDING_REFERENCE_VALVE;
@@ -132,11 +132,11 @@ struct vulkan_object_native<obj::valve::descriptor_set_binding_reference>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDescriptorSetHostMappingFeaturesVALVE>
 {
-	using type = obj::feature::valve::descriptor_set_host_mapping;
+	using type = tag::feature::valve::descriptor_set_host_mapping;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::valve::descriptor_set_host_mapping>
+struct vulkan_object_native<tag::feature::valve::descriptor_set_host_mapping>
 {
 	using type = VkPhysicalDeviceDescriptorSetHostMappingFeaturesVALVE;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_SET_HOST_MAPPING_FEATURES_VALVE;
@@ -145,18 +145,18 @@ struct vulkan_object_native<obj::feature::valve::descriptor_set_host_mapping>
 template<>
 struct expression_vulkan_tag<VkDescriptorSetLayoutHostMappingInfoVALVE>
 {
-	using type = obj::result::valve::descriptor_set_layout_host_mapping;
+	using type = tag::result::valve::descriptor_set_layout_host_mapping;
 };
 
 template<>
-struct vulkan_object_native<obj::result::valve::descriptor_set_layout_host_mapping>
+struct vulkan_object_native<tag::result::valve::descriptor_set_layout_host_mapping>
 {
 	using type = VkDescriptorSetLayoutHostMappingInfoVALVE;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_HOST_MAPPING_INFO_VALVE;
 };
 
 template<>
-struct vulkan_object_extensions<obj::valve::descriptor_set_binding_reference>
+struct vulkan_object_extensions<tag::valve::descriptor_set_binding_reference>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_VALVE_descriptor_set_host_mapping"};
 	constexpr static ::std::uint32_t core = 0;
@@ -164,7 +164,7 @@ struct vulkan_object_extensions<obj::valve::descriptor_set_binding_reference>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::valve::descriptor_set_host_mapping>
+struct vulkan_object_extensions<tag::feature::valve::descriptor_set_host_mapping>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_VALVE_descriptor_set_host_mapping"};
 	constexpr static ::std::uint32_t core = 0;
@@ -172,7 +172,7 @@ struct vulkan_object_extensions<obj::feature::valve::descriptor_set_host_mapping
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::valve::descriptor_set_layout_host_mapping>
+struct vulkan_object_extensions<tag::result::valve::descriptor_set_layout_host_mapping>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_VALVE_descriptor_set_host_mapping"};
 	constexpr static ::std::uint32_t core = 0;
@@ -180,9 +180,9 @@ struct vulkan_object_extensions<obj::result::valve::descriptor_set_layout_host_m
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::valve::descriptor_set_host_mapping> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::valve::descriptor_set_host_mapping> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::valve::descriptor_set_host_mapping> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::valve::descriptor_set_host_mapping> = true;
 }
 
 namespace vkfu::param
@@ -193,7 +193,7 @@ using ::vkfu::operator|;
 
 struct descriptor_set_host_mapping
 {
-	using vulkan_tag_type = obj::feature::valve::descriptor_set_host_mapping;
+	using vulkan_tag_type = tag::feature::valve::descriptor_set_host_mapping;
 
 	bool enable = false;
 
@@ -215,7 +215,7 @@ using ::vkfu::operator|;
 
 struct descriptor_set_binding_reference
 {
-	using vulkan_tag_type = obj::valve::descriptor_set_binding_reference;
+	using vulkan_tag_type = tag::valve::descriptor_set_binding_reference;
 
 	VkDescriptorSetLayout descriptor_set_layout{};
 	::std::uint32_t binding{};
@@ -238,7 +238,7 @@ namespace vkfu
 {
 namespace valve
 {
-template<::vkfu::expression_for<::vkfu::obj::valve::descriptor_set_binding_reference> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::valve::descriptor_set_binding_reference> Expression1>
 [[nodiscard]] auto get_descriptor_set_layout_host_mapping_info(VkDevice device, Expression1&& binding_reference) -> VkDescriptorSetLayoutHostMappingInfoVALVE
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(binding_reference));

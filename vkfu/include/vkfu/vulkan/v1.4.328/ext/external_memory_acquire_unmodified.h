@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkExternalMemoryAcquireUnmodifiedEXT const& value)
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::ext
 {
@@ -55,7 +55,7 @@ struct external_memory_acquire_unmodified{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::external_memory_acquire_unmodified>
+struct vulkan_object_trait<tag::option::ext::external_memory_acquire_unmodified>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::option::ext::external_memory_acquire_unmodified>
 template<>
 struct expression_vulkan_tag<VkExternalMemoryAcquireUnmodifiedEXT>
 {
-	using type = obj::option::ext::external_memory_acquire_unmodified;
+	using type = tag::option::ext::external_memory_acquire_unmodified;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::external_memory_acquire_unmodified>
+struct vulkan_object_native<tag::option::ext::external_memory_acquire_unmodified>
 {
 	using type = VkExternalMemoryAcquireUnmodifiedEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_ACQUIRE_UNMODIFIED_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::external_memory_acquire_unmodified>
+struct vulkan_object_extensions<tag::option::ext::external_memory_acquire_unmodified>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_external_memory_acquire_unmodified"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,13 +84,13 @@ struct vulkan_object_extensions<obj::option::ext::external_memory_acquire_unmodi
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::buffer_memory_barrier, obj::option::ext::external_memory_acquire_unmodified> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::buffer_memory_barrier, tag::option::ext::external_memory_acquire_unmodified> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::buffer_memory_barrier2, obj::option::ext::external_memory_acquire_unmodified> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::buffer_memory_barrier2, tag::option::ext::external_memory_acquire_unmodified> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image_memory_barrier, obj::option::ext::external_memory_acquire_unmodified> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image_memory_barrier, tag::option::ext::external_memory_acquire_unmodified> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image_memory_barrier2, obj::option::ext::external_memory_acquire_unmodified> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image_memory_barrier2, tag::option::ext::external_memory_acquire_unmodified> = true;
 }
 
 namespace vkfu::param
@@ -101,7 +101,7 @@ using ::vkfu::operator|;
 
 struct external_memory_acquire_unmodified
 {
-	using vulkan_tag_type = obj::option::ext::external_memory_acquire_unmodified;
+	using vulkan_tag_type = tag::option::ext::external_memory_acquire_unmodified;
 
 	bool acquire_unmodified_memory = false;
 

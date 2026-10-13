@@ -28,24 +28,24 @@
 
 #include "../version_1_2/descriptor_indexing.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
-using descriptor_indexing = ::vkfu::obj::feature::descriptor_indexing;
+using descriptor_indexing = ::vkfu::tag::feature::descriptor_indexing;
 }
 namespace option::ext
 {
-using descriptor_set_layout_binding_flags = ::vkfu::obj::option::descriptor_set_layout_binding_flags;
-using descriptor_set_variable_descriptor_count = ::vkfu::obj::option::descriptor_set_variable_descriptor_count;
+using descriptor_set_layout_binding_flags = ::vkfu::tag::option::descriptor_set_layout_binding_flags;
+using descriptor_set_variable_descriptor_count = ::vkfu::tag::option::descriptor_set_variable_descriptor_count;
 }
 namespace property::ext
 {
-using descriptor_indexing = ::vkfu::obj::property::descriptor_indexing;
+using descriptor_indexing = ::vkfu::tag::property::descriptor_indexing;
 }
 namespace result::ext
 {
-using descriptor_set_variable_descriptor_count_layout_support = ::vkfu::obj::result::descriptor_set_variable_descriptor_count_layout_support;
+using descriptor_set_variable_descriptor_count_layout_support = ::vkfu::tag::result::descriptor_set_variable_descriptor_count_layout_support;
 }
 }
 

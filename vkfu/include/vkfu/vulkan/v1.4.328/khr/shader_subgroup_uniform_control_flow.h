@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceShaderSubgroupUniformControlFlowFe
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -55,7 +55,7 @@ struct shader_subgroup_uniform_control_flow{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::shader_subgroup_uniform_control_flow>
+struct vulkan_object_trait<tag::feature::khr::shader_subgroup_uniform_control_flow>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::khr::shader_subgroup_uniform_control_fl
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderSubgroupUniformControlFlowFeaturesKHR>
 {
-	using type = obj::feature::khr::shader_subgroup_uniform_control_flow;
+	using type = tag::feature::khr::shader_subgroup_uniform_control_flow;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::shader_subgroup_uniform_control_flow>
+struct vulkan_object_native<tag::feature::khr::shader_subgroup_uniform_control_flow>
 {
 	using type = VkPhysicalDeviceShaderSubgroupUniformControlFlowFeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SUBGROUP_UNIFORM_CONTROL_FLOW_FEATURES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::shader_subgroup_uniform_control_flow>
+struct vulkan_object_extensions<tag::feature::khr::shader_subgroup_uniform_control_flow>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_shader_subgroup_uniform_control_flow"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::khr::shader_subgroup_uniform_contr
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::shader_subgroup_uniform_control_flow> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::shader_subgroup_uniform_control_flow> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::shader_subgroup_uniform_control_flow> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::shader_subgroup_uniform_control_flow> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct shader_subgroup_uniform_control_flow
 {
-	using vulkan_tag_type = obj::feature::khr::shader_subgroup_uniform_control_flow;
+	using vulkan_tag_type = tag::feature::khr::shader_subgroup_uniform_control_flow;
 
 	bool enable = false;
 

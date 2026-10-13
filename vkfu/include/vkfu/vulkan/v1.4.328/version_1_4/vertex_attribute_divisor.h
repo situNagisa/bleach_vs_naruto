@@ -75,7 +75,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceVertexAttributeDivisorProperties c
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -94,7 +94,7 @@ struct vertex_input_divisor{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::vertex_attribute_divisor>
+struct vulkan_object_trait<tag::feature::vertex_attribute_divisor>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -102,7 +102,7 @@ struct vulkan_object_trait<obj::feature::vertex_attribute_divisor>
 };
 
 template<>
-struct vulkan_object_trait<obj::state::vertex_input_divisor>
+struct vulkan_object_trait<tag::state::vertex_input_divisor>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -110,7 +110,7 @@ struct vulkan_object_trait<obj::state::vertex_input_divisor>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::vertex_attribute_divisor>
+struct vulkan_object_trait<tag::property::vertex_attribute_divisor>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -120,11 +120,11 @@ struct vulkan_object_trait<obj::property::vertex_attribute_divisor>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceVertexAttributeDivisorFeatures>
 {
-	using type = obj::feature::vertex_attribute_divisor;
+	using type = tag::feature::vertex_attribute_divisor;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::vertex_attribute_divisor>
+struct vulkan_object_native<tag::feature::vertex_attribute_divisor>
 {
 	using type = VkPhysicalDeviceVertexAttributeDivisorFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VERTEX_ATTRIBUTE_DIVISOR_FEATURES;
@@ -133,11 +133,11 @@ struct vulkan_object_native<obj::feature::vertex_attribute_divisor>
 template<>
 struct expression_vulkan_tag<VkPipelineVertexInputDivisorStateCreateInfo>
 {
-	using type = obj::state::vertex_input_divisor;
+	using type = tag::state::vertex_input_divisor;
 };
 
 template<>
-struct vulkan_object_native<obj::state::vertex_input_divisor>
+struct vulkan_object_native<tag::state::vertex_input_divisor>
 {
 	using type = VkPipelineVertexInputDivisorStateCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_DIVISOR_STATE_CREATE_INFO;
@@ -146,18 +146,18 @@ struct vulkan_object_native<obj::state::vertex_input_divisor>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceVertexAttributeDivisorProperties>
 {
-	using type = obj::property::vertex_attribute_divisor;
+	using type = tag::property::vertex_attribute_divisor;
 };
 
 template<>
-struct vulkan_object_native<obj::property::vertex_attribute_divisor>
+struct vulkan_object_native<tag::property::vertex_attribute_divisor>
 {
 	using type = VkPhysicalDeviceVertexAttributeDivisorProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VERTEX_ATTRIBUTE_DIVISOR_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::vertex_attribute_divisor>
+struct vulkan_object_extensions<tag::feature::vertex_attribute_divisor>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_vertex_attribute_divisor", "VK_KHR_vertex_attribute_divisor"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -165,7 +165,7 @@ struct vulkan_object_extensions<obj::feature::vertex_attribute_divisor>
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::vertex_input_divisor>
+struct vulkan_object_extensions<tag::state::vertex_input_divisor>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_vertex_attribute_divisor", "VK_KHR_vertex_attribute_divisor"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -173,7 +173,7 @@ struct vulkan_object_extensions<obj::state::vertex_input_divisor>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::vertex_attribute_divisor>
+struct vulkan_object_extensions<tag::property::vertex_attribute_divisor>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_vertex_attribute_divisor"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -181,13 +181,13 @@ struct vulkan_object_extensions<obj::property::vertex_attribute_divisor>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::vertex_attribute_divisor> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::vertex_attribute_divisor> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::vertex_attribute_divisor> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::vertex_attribute_divisor> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::vertex_attribute_divisor> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::vertex_attribute_divisor> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::vertex_input, obj::state::vertex_input_divisor> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::vertex_input, tag::state::vertex_input_divisor> = true;
 }
 
 namespace vkfu::param
@@ -198,7 +198,7 @@ using ::vkfu::operator|;
 
 struct vertex_attribute_divisor
 {
-	using vulkan_tag_type = obj::feature::vertex_attribute_divisor;
+	using vulkan_tag_type = tag::feature::vertex_attribute_divisor;
 
 	bool vertex_attribute_instance_rate_divisor = false;
 	bool vertex_attribute_instance_rate_zero_divisor = false;
@@ -222,7 +222,7 @@ using ::vkfu::operator|;
 
 struct vertex_input_divisor
 {
-	using vulkan_tag_type = obj::state::vertex_input_divisor;
+	using vulkan_tag_type = tag::state::vertex_input_divisor;
 
 	::std::span<VkVertexInputBindingDivisorDescription const> vertex_binding_divisors{};
 

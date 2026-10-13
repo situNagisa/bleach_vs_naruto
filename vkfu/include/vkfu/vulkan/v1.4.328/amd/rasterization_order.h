@@ -53,7 +53,7 @@ enum class rasterization_order : ::std::underlying_type_t<VkRasterizationOrderAM
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace state::amd
 {
@@ -64,7 +64,7 @@ struct rasterization_order{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::state::amd::rasterization_order>
+struct vulkan_object_trait<tag::state::amd::rasterization_order>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -74,18 +74,18 @@ struct vulkan_object_trait<obj::state::amd::rasterization_order>
 template<>
 struct expression_vulkan_tag<VkPipelineRasterizationStateRasterizationOrderAMD>
 {
-	using type = obj::state::amd::rasterization_order;
+	using type = tag::state::amd::rasterization_order;
 };
 
 template<>
-struct vulkan_object_native<obj::state::amd::rasterization_order>
+struct vulkan_object_native<tag::state::amd::rasterization_order>
 {
 	using type = VkPipelineRasterizationStateRasterizationOrderAMD;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_RASTERIZATION_ORDER_AMD;
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::amd::rasterization_order>
+struct vulkan_object_extensions<tag::state::amd::rasterization_order>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_AMD_rasterization_order"};
 	constexpr static ::std::uint32_t core = 0;
@@ -93,7 +93,7 @@ struct vulkan_object_extensions<obj::state::amd::rasterization_order>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::rasterization, obj::state::amd::rasterization_order> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::rasterization, tag::state::amd::rasterization_order> = true;
 }
 
 namespace vkfu::param
@@ -104,7 +104,7 @@ using ::vkfu::operator|;
 
 struct rasterization_order
 {
-	using vulkan_tag_type = obj::state::amd::rasterization_order;
+	using vulkan_tag_type = tag::state::amd::rasterization_order;
 
 	::vkfu::enums::rasterization_order order{};
 

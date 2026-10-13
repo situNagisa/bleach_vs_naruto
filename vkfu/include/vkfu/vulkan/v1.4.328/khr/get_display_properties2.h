@@ -101,7 +101,7 @@ constexpr auto _vkfu_evaluate(VkDisplayProperties2KHR const& value) noexcept -> 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
@@ -119,7 +119,7 @@ struct display_properties2{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::khr::display_plane2>
+struct vulkan_object_trait<tag::khr::display_plane2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -127,7 +127,7 @@ struct vulkan_object_trait<obj::khr::display_plane2>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::display_mode_properties2>
+struct vulkan_object_trait<tag::result::khr::display_mode_properties2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -135,7 +135,7 @@ struct vulkan_object_trait<obj::result::khr::display_mode_properties2>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::display_plane_capabilities2>
+struct vulkan_object_trait<tag::result::khr::display_plane_capabilities2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -143,7 +143,7 @@ struct vulkan_object_trait<obj::result::khr::display_plane_capabilities2>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::display_plane_properties2>
+struct vulkan_object_trait<tag::result::khr::display_plane_properties2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -151,7 +151,7 @@ struct vulkan_object_trait<obj::result::khr::display_plane_properties2>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::display_properties2>
+struct vulkan_object_trait<tag::result::khr::display_properties2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -161,11 +161,11 @@ struct vulkan_object_trait<obj::result::khr::display_properties2>
 template<>
 struct expression_vulkan_tag<VkDisplayPlaneInfo2KHR>
 {
-	using type = obj::khr::display_plane2;
+	using type = tag::khr::display_plane2;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::display_plane2>
+struct vulkan_object_native<tag::khr::display_plane2>
 {
 	using type = VkDisplayPlaneInfo2KHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DISPLAY_PLANE_INFO_2_KHR;
@@ -174,11 +174,11 @@ struct vulkan_object_native<obj::khr::display_plane2>
 template<>
 struct expression_vulkan_tag<VkDisplayModeProperties2KHR>
 {
-	using type = obj::result::khr::display_mode_properties2;
+	using type = tag::result::khr::display_mode_properties2;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::display_mode_properties2>
+struct vulkan_object_native<tag::result::khr::display_mode_properties2>
 {
 	using type = VkDisplayModeProperties2KHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DISPLAY_MODE_PROPERTIES_2_KHR;
@@ -187,11 +187,11 @@ struct vulkan_object_native<obj::result::khr::display_mode_properties2>
 template<>
 struct expression_vulkan_tag<VkDisplayPlaneCapabilities2KHR>
 {
-	using type = obj::result::khr::display_plane_capabilities2;
+	using type = tag::result::khr::display_plane_capabilities2;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::display_plane_capabilities2>
+struct vulkan_object_native<tag::result::khr::display_plane_capabilities2>
 {
 	using type = VkDisplayPlaneCapabilities2KHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DISPLAY_PLANE_CAPABILITIES_2_KHR;
@@ -200,11 +200,11 @@ struct vulkan_object_native<obj::result::khr::display_plane_capabilities2>
 template<>
 struct expression_vulkan_tag<VkDisplayPlaneProperties2KHR>
 {
-	using type = obj::result::khr::display_plane_properties2;
+	using type = tag::result::khr::display_plane_properties2;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::display_plane_properties2>
+struct vulkan_object_native<tag::result::khr::display_plane_properties2>
 {
 	using type = VkDisplayPlaneProperties2KHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DISPLAY_PLANE_PROPERTIES_2_KHR;
@@ -213,18 +213,18 @@ struct vulkan_object_native<obj::result::khr::display_plane_properties2>
 template<>
 struct expression_vulkan_tag<VkDisplayProperties2KHR>
 {
-	using type = obj::result::khr::display_properties2;
+	using type = tag::result::khr::display_properties2;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::display_properties2>
+struct vulkan_object_native<tag::result::khr::display_properties2>
 {
 	using type = VkDisplayProperties2KHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DISPLAY_PROPERTIES_2_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::display_plane2>
+struct vulkan_object_extensions<tag::khr::display_plane2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_display_properties2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -232,7 +232,7 @@ struct vulkan_object_extensions<obj::khr::display_plane2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::display_mode_properties2>
+struct vulkan_object_extensions<tag::result::khr::display_mode_properties2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_display_properties2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -240,7 +240,7 @@ struct vulkan_object_extensions<obj::result::khr::display_mode_properties2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::display_plane_capabilities2>
+struct vulkan_object_extensions<tag::result::khr::display_plane_capabilities2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_display_properties2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -248,7 +248,7 @@ struct vulkan_object_extensions<obj::result::khr::display_plane_capabilities2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::display_plane_properties2>
+struct vulkan_object_extensions<tag::result::khr::display_plane_properties2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_display_properties2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -256,7 +256,7 @@ struct vulkan_object_extensions<obj::result::khr::display_plane_properties2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::display_properties2>
+struct vulkan_object_extensions<tag::result::khr::display_properties2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_display_properties2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -273,7 +273,7 @@ using ::vkfu::operator|;
 
 struct display_plane2
 {
-	using vulkan_tag_type = obj::khr::display_plane2;
+	using vulkan_tag_type = tag::khr::display_plane2;
 
 	VkDisplayModeKHR mode{};
 	::std::uint32_t plane_index{};
@@ -296,7 +296,7 @@ namespace vkfu
 {
 namespace khr
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::display_plane2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::display_plane2> Expression1>
 [[nodiscard]] auto get_display_plane_capabilities2(VkPhysicalDevice physical_device, Expression1&& display_plane_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkDisplayPlaneCapabilities2KHR, ::VkResult>
 {
@@ -310,7 +310,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::display_plane2> Expression1>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::display_plane2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::display_plane2> Expression1>
 [[nodiscard]] auto get_display_plane_capabilities2(VkPhysicalDevice physical_device, Expression1&& display_plane_info) -> VkDisplayPlaneCapabilities2KHR
 {
 	auto outcome = get_display_plane_capabilities2(physical_device, ::std::forward<Expression1>(display_plane_info), ::std::nothrow);

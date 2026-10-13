@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDevicePageableDeviceLocalMemoryFeaturesE
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct pageable_device_local_memory{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::pageable_device_local_memory>
+struct vulkan_object_trait<tag::feature::ext::pageable_device_local_memory>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::pageable_device_local_memory>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT>
 {
-	using type = obj::feature::ext::pageable_device_local_memory;
+	using type = tag::feature::ext::pageable_device_local_memory;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::pageable_device_local_memory>
+struct vulkan_object_native<tag::feature::ext::pageable_device_local_memory>
 {
 	using type = VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PAGEABLE_DEVICE_LOCAL_MEMORY_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::pageable_device_local_memory>
+struct vulkan_object_extensions<tag::feature::ext::pageable_device_local_memory>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_pageable_device_local_memory"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::pageable_device_local_memory>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::pageable_device_local_memory> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::pageable_device_local_memory> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::pageable_device_local_memory> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::pageable_device_local_memory> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct pageable_device_local_memory
 {
-	using vulkan_tag_type = obj::feature::ext::pageable_device_local_memory;
+	using vulkan_tag_type = tag::feature::ext::pageable_device_local_memory;
 
 	bool enable = false;
 

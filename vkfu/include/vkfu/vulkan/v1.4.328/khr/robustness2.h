@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceRobustness2PropertiesKHR const& va
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -74,7 +74,7 @@ struct robustness2{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::robustness2>
+struct vulkan_object_trait<tag::feature::khr::robustness2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::feature::khr::robustness2>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::khr::robustness2>
+struct vulkan_object_trait<tag::property::khr::robustness2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::property::khr::robustness2>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceRobustness2FeaturesKHR>
 {
-	using type = obj::feature::khr::robustness2;
+	using type = tag::feature::khr::robustness2;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::robustness2>
+struct vulkan_object_native<tag::feature::khr::robustness2>
 {
 	using type = VkPhysicalDeviceRobustness2FeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_KHR;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::feature::khr::robustness2>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceRobustness2PropertiesKHR>
 {
-	using type = obj::property::khr::robustness2;
+	using type = tag::property::khr::robustness2;
 };
 
 template<>
-struct vulkan_object_native<obj::property::khr::robustness2>
+struct vulkan_object_native<tag::property::khr::robustness2>
 {
 	using type = VkPhysicalDeviceRobustness2PropertiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_PROPERTIES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::robustness2>
+struct vulkan_object_extensions<tag::feature::khr::robustness2>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_robustness2", "VK_KHR_robustness2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::feature::khr::robustness2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::khr::robustness2>
+struct vulkan_object_extensions<tag::property::khr::robustness2>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_robustness2", "VK_KHR_robustness2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -132,11 +132,11 @@ struct vulkan_object_extensions<obj::property::khr::robustness2>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::robustness2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::robustness2> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::robustness2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::robustness2> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::khr::robustness2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::khr::robustness2> = true;
 }
 
 namespace vkfu::param
@@ -147,7 +147,7 @@ using ::vkfu::operator|;
 
 struct robustness2
 {
-	using vulkan_tag_type = obj::feature::khr::robustness2;
+	using vulkan_tag_type = tag::feature::khr::robustness2;
 
 	bool robust_buffer_access2 = false;
 	bool robust_image_access2 = false;

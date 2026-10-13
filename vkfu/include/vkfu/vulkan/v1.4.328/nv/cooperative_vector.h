@@ -121,7 +121,7 @@ enum class cooperative_vector_matrix_layout : ::std::underlying_type_t<VkCoopera
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -144,7 +144,7 @@ struct cooperative_vector_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::nv::convert_cooperative_vector_matrix>
+struct vulkan_object_trait<tag::nv::convert_cooperative_vector_matrix>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -152,7 +152,7 @@ struct vulkan_object_trait<obj::nv::convert_cooperative_vector_matrix>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::nv::cooperative_vector>
+struct vulkan_object_trait<tag::feature::nv::cooperative_vector>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -160,7 +160,7 @@ struct vulkan_object_trait<obj::feature::nv::cooperative_vector>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::nv::cooperative_vector_properties>
+struct vulkan_object_trait<tag::result::nv::cooperative_vector_properties>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -168,7 +168,7 @@ struct vulkan_object_trait<obj::result::nv::cooperative_vector_properties>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::nv::cooperative_vector>
+struct vulkan_object_trait<tag::property::nv::cooperative_vector>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -178,11 +178,11 @@ struct vulkan_object_trait<obj::property::nv::cooperative_vector>
 template<>
 struct expression_vulkan_tag<VkConvertCooperativeVectorMatrixInfoNV>
 {
-	using type = obj::nv::convert_cooperative_vector_matrix;
+	using type = tag::nv::convert_cooperative_vector_matrix;
 };
 
 template<>
-struct vulkan_object_native<obj::nv::convert_cooperative_vector_matrix>
+struct vulkan_object_native<tag::nv::convert_cooperative_vector_matrix>
 {
 	using type = VkConvertCooperativeVectorMatrixInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_CONVERT_COOPERATIVE_VECTOR_MATRIX_INFO_NV;
@@ -191,11 +191,11 @@ struct vulkan_object_native<obj::nv::convert_cooperative_vector_matrix>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceCooperativeVectorFeaturesNV>
 {
-	using type = obj::feature::nv::cooperative_vector;
+	using type = tag::feature::nv::cooperative_vector;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::cooperative_vector>
+struct vulkan_object_native<tag::feature::nv::cooperative_vector>
 {
 	using type = VkPhysicalDeviceCooperativeVectorFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_VECTOR_FEATURES_NV;
@@ -204,11 +204,11 @@ struct vulkan_object_native<obj::feature::nv::cooperative_vector>
 template<>
 struct expression_vulkan_tag<VkCooperativeVectorPropertiesNV>
 {
-	using type = obj::result::nv::cooperative_vector_properties;
+	using type = tag::result::nv::cooperative_vector_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::nv::cooperative_vector_properties>
+struct vulkan_object_native<tag::result::nv::cooperative_vector_properties>
 {
 	using type = VkCooperativeVectorPropertiesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_COOPERATIVE_VECTOR_PROPERTIES_NV;
@@ -217,18 +217,18 @@ struct vulkan_object_native<obj::result::nv::cooperative_vector_properties>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceCooperativeVectorPropertiesNV>
 {
-	using type = obj::property::nv::cooperative_vector;
+	using type = tag::property::nv::cooperative_vector;
 };
 
 template<>
-struct vulkan_object_native<obj::property::nv::cooperative_vector>
+struct vulkan_object_native<tag::property::nv::cooperative_vector>
 {
 	using type = VkPhysicalDeviceCooperativeVectorPropertiesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_VECTOR_PROPERTIES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::nv::convert_cooperative_vector_matrix>
+struct vulkan_object_extensions<tag::nv::convert_cooperative_vector_matrix>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_cooperative_vector"};
 	constexpr static ::std::uint32_t core = 0;
@@ -236,7 +236,7 @@ struct vulkan_object_extensions<obj::nv::convert_cooperative_vector_matrix>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::cooperative_vector>
+struct vulkan_object_extensions<tag::feature::nv::cooperative_vector>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_cooperative_vector"};
 	constexpr static ::std::uint32_t core = 0;
@@ -244,7 +244,7 @@ struct vulkan_object_extensions<obj::feature::nv::cooperative_vector>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::nv::cooperative_vector_properties>
+struct vulkan_object_extensions<tag::result::nv::cooperative_vector_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_cooperative_vector"};
 	constexpr static ::std::uint32_t core = 0;
@@ -252,7 +252,7 @@ struct vulkan_object_extensions<obj::result::nv::cooperative_vector_properties>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::nv::cooperative_vector>
+struct vulkan_object_extensions<tag::property::nv::cooperative_vector>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_cooperative_vector"};
 	constexpr static ::std::uint32_t core = 0;
@@ -260,11 +260,11 @@ struct vulkan_object_extensions<obj::property::nv::cooperative_vector>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::cooperative_vector> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::cooperative_vector> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::cooperative_vector> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::cooperative_vector> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::nv::cooperative_vector> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::nv::cooperative_vector> = true;
 }
 
 namespace vkfu::param
@@ -275,7 +275,7 @@ using ::vkfu::operator|;
 
 struct cooperative_vector
 {
-	using vulkan_tag_type = obj::feature::nv::cooperative_vector;
+	using vulkan_tag_type = tag::feature::nv::cooperative_vector;
 
 	bool enable = false;
 	bool training = false;
@@ -299,7 +299,7 @@ using ::vkfu::operator|;
 
 struct convert_cooperative_vector_matrix
 {
-	using vulkan_tag_type = obj::nv::convert_cooperative_vector_matrix;
+	using vulkan_tag_type = tag::nv::convert_cooperative_vector_matrix;
 
 	::std::size_t src_size{};
 	VkDeviceOrHostAddressConstKHR src_data{};
@@ -347,7 +347,7 @@ inline void cmd_convert_cooperative_vector_matrix(VkCommandBuffer command_buffer
 	::vkCmdConvertCooperativeVectorMatrixNV(command_buffer, static_cast<::std::uint32_t>(infos.size()), infos.data());
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nv::convert_cooperative_vector_matrix> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::nv::convert_cooperative_vector_matrix> Expression1>
 [[nodiscard]] auto convert_cooperative_vector_matrix(VkDevice device, Expression1&& info, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -360,7 +360,7 @@ template<::vkfu::expression_for<::vkfu::obj::nv::convert_cooperative_vector_matr
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nv::convert_cooperative_vector_matrix> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::nv::convert_cooperative_vector_matrix> Expression1>
 void convert_cooperative_vector_matrix(VkDevice device, Expression1&& info)
 {
 	auto outcome = convert_cooperative_vector_matrix(device, ::std::forward<Expression1>(info), ::std::nothrow);

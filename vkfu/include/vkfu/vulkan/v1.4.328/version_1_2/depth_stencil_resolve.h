@@ -73,7 +73,7 @@ enum class resolve_mode : ::std::underlying_type_t<VkResolveModeFlagBits>
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option
 {
@@ -88,7 +88,7 @@ struct depth_stencil_resolve{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::subpass_description_depth_stencil_resolve>
+struct vulkan_object_trait<tag::option::subpass_description_depth_stencil_resolve>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -96,7 +96,7 @@ struct vulkan_object_trait<obj::option::subpass_description_depth_stencil_resolv
 };
 
 template<>
-struct vulkan_object_trait<obj::property::depth_stencil_resolve>
+struct vulkan_object_trait<tag::property::depth_stencil_resolve>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -106,11 +106,11 @@ struct vulkan_object_trait<obj::property::depth_stencil_resolve>
 template<>
 struct expression_vulkan_tag<VkSubpassDescriptionDepthStencilResolve>
 {
-	using type = obj::option::subpass_description_depth_stencil_resolve;
+	using type = tag::option::subpass_description_depth_stencil_resolve;
 };
 
 template<>
-struct vulkan_object_native<obj::option::subpass_description_depth_stencil_resolve>
+struct vulkan_object_native<tag::option::subpass_description_depth_stencil_resolve>
 {
 	using type = VkSubpassDescriptionDepthStencilResolve;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_DEPTH_STENCIL_RESOLVE;
@@ -119,18 +119,18 @@ struct vulkan_object_native<obj::option::subpass_description_depth_stencil_resol
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDepthStencilResolveProperties>
 {
-	using type = obj::property::depth_stencil_resolve;
+	using type = tag::property::depth_stencil_resolve;
 };
 
 template<>
-struct vulkan_object_native<obj::property::depth_stencil_resolve>
+struct vulkan_object_native<tag::property::depth_stencil_resolve>
 {
 	using type = VkPhysicalDeviceDepthStencilResolveProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_STENCIL_RESOLVE_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::subpass_description_depth_stencil_resolve>
+struct vulkan_object_extensions<tag::option::subpass_description_depth_stencil_resolve>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_depth_stencil_resolve"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -138,7 +138,7 @@ struct vulkan_object_extensions<obj::option::subpass_description_depth_stencil_r
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::depth_stencil_resolve>
+struct vulkan_object_extensions<tag::property::depth_stencil_resolve>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_depth_stencil_resolve"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -146,9 +146,9 @@ struct vulkan_object_extensions<obj::property::depth_stencil_resolve>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::depth_stencil_resolve> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::depth_stencil_resolve> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::subpass_description2, obj::option::subpass_description_depth_stencil_resolve> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::subpass_description2, tag::option::subpass_description_depth_stencil_resolve> = true;
 }
 
 namespace vkfu::param
@@ -157,10 +157,10 @@ namespace option
 {
 using ::vkfu::operator|;
 
-template<::vkfu::reference_expression_for<obj::attachment_reference2> depth_stencil_resolve_attachment_expression = ::vkfu::absent_expression>
+template<::vkfu::reference_expression_for<tag::attachment_reference2> depth_stencil_resolve_attachment_expression = ::vkfu::absent_expression>
 struct subpass_description_depth_stencil_resolve
 {
-	using vulkan_tag_type = obj::option::subpass_description_depth_stencil_resolve;
+	using vulkan_tag_type = tag::option::subpass_description_depth_stencil_resolve;
 	using storage_type = ::vkfu::reference_storage<VkSubpassDescriptionDepthStencilResolve
 		, ::vkfu::reference_slot<&VkSubpassDescriptionDepthStencilResolve::pDepthStencilResolveAttachment, ::vkfu::reference_storage_of_t<depth_stencil_resolve_attachment_expression>>
 		>;

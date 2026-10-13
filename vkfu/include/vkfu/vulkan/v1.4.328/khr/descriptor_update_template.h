@@ -28,11 +28,11 @@
 
 #include "../version_1_1/descriptor_update_template.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
-using descriptor_update_template = ::vkfu::obj::descriptor_update_template;
+using descriptor_update_template = ::vkfu::tag::descriptor_update_template;
 }
 }
 

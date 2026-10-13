@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceNonSeamlessCubeMapFeaturesEXT cons
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct non_seamless_cube_map{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::non_seamless_cube_map>
+struct vulkan_object_trait<tag::feature::ext::non_seamless_cube_map>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::non_seamless_cube_map>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceNonSeamlessCubeMapFeaturesEXT>
 {
-	using type = obj::feature::ext::non_seamless_cube_map;
+	using type = tag::feature::ext::non_seamless_cube_map;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::non_seamless_cube_map>
+struct vulkan_object_native<tag::feature::ext::non_seamless_cube_map>
 {
 	using type = VkPhysicalDeviceNonSeamlessCubeMapFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_NON_SEAMLESS_CUBE_MAP_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::non_seamless_cube_map>
+struct vulkan_object_extensions<tag::feature::ext::non_seamless_cube_map>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_non_seamless_cube_map"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::non_seamless_cube_map>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::non_seamless_cube_map> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::non_seamless_cube_map> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::non_seamless_cube_map> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::non_seamless_cube_map> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct non_seamless_cube_map
 {
-	using vulkan_tag_type = obj::feature::ext::non_seamless_cube_map;
+	using vulkan_tag_type = tag::feature::ext::non_seamless_cube_map;
 
 	bool enable = false;
 

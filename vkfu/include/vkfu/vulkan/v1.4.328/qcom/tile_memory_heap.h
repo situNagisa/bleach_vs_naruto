@@ -109,7 +109,7 @@ constexpr auto _vkfu_evaluate(VkTileMemoryRequirementsQCOM const& value) noexcep
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::qcom
 {
@@ -136,7 +136,7 @@ struct tile_memory_requirements{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::qcom::tile_memory_heap>
+struct vulkan_object_trait<tag::feature::qcom::tile_memory_heap>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -144,7 +144,7 @@ struct vulkan_object_trait<obj::feature::qcom::tile_memory_heap>
 };
 
 template<>
-struct vulkan_object_trait<obj::qcom::tile_memory_bind>
+struct vulkan_object_trait<tag::qcom::tile_memory_bind>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -152,7 +152,7 @@ struct vulkan_object_trait<obj::qcom::tile_memory_bind>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::qcom::tile_memory_size>
+struct vulkan_object_trait<tag::option::qcom::tile_memory_size>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -160,7 +160,7 @@ struct vulkan_object_trait<obj::option::qcom::tile_memory_size>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::qcom::tile_memory_heap>
+struct vulkan_object_trait<tag::property::qcom::tile_memory_heap>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -168,7 +168,7 @@ struct vulkan_object_trait<obj::property::qcom::tile_memory_heap>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::qcom::tile_memory_requirements>
+struct vulkan_object_trait<tag::result::qcom::tile_memory_requirements>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -178,11 +178,11 @@ struct vulkan_object_trait<obj::result::qcom::tile_memory_requirements>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceTileMemoryHeapFeaturesQCOM>
 {
-	using type = obj::feature::qcom::tile_memory_heap;
+	using type = tag::feature::qcom::tile_memory_heap;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::qcom::tile_memory_heap>
+struct vulkan_object_native<tag::feature::qcom::tile_memory_heap>
 {
 	using type = VkPhysicalDeviceTileMemoryHeapFeaturesQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TILE_MEMORY_HEAP_FEATURES_QCOM;
@@ -191,11 +191,11 @@ struct vulkan_object_native<obj::feature::qcom::tile_memory_heap>
 template<>
 struct expression_vulkan_tag<VkTileMemoryBindInfoQCOM>
 {
-	using type = obj::qcom::tile_memory_bind;
+	using type = tag::qcom::tile_memory_bind;
 };
 
 template<>
-struct vulkan_object_native<obj::qcom::tile_memory_bind>
+struct vulkan_object_native<tag::qcom::tile_memory_bind>
 {
 	using type = VkTileMemoryBindInfoQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_TILE_MEMORY_BIND_INFO_QCOM;
@@ -204,11 +204,11 @@ struct vulkan_object_native<obj::qcom::tile_memory_bind>
 template<>
 struct expression_vulkan_tag<VkTileMemorySizeInfoQCOM>
 {
-	using type = obj::option::qcom::tile_memory_size;
+	using type = tag::option::qcom::tile_memory_size;
 };
 
 template<>
-struct vulkan_object_native<obj::option::qcom::tile_memory_size>
+struct vulkan_object_native<tag::option::qcom::tile_memory_size>
 {
 	using type = VkTileMemorySizeInfoQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_TILE_MEMORY_SIZE_INFO_QCOM;
@@ -217,11 +217,11 @@ struct vulkan_object_native<obj::option::qcom::tile_memory_size>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceTileMemoryHeapPropertiesQCOM>
 {
-	using type = obj::property::qcom::tile_memory_heap;
+	using type = tag::property::qcom::tile_memory_heap;
 };
 
 template<>
-struct vulkan_object_native<obj::property::qcom::tile_memory_heap>
+struct vulkan_object_native<tag::property::qcom::tile_memory_heap>
 {
 	using type = VkPhysicalDeviceTileMemoryHeapPropertiesQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TILE_MEMORY_HEAP_PROPERTIES_QCOM;
@@ -230,18 +230,18 @@ struct vulkan_object_native<obj::property::qcom::tile_memory_heap>
 template<>
 struct expression_vulkan_tag<VkTileMemoryRequirementsQCOM>
 {
-	using type = obj::result::qcom::tile_memory_requirements;
+	using type = tag::result::qcom::tile_memory_requirements;
 };
 
 template<>
-struct vulkan_object_native<obj::result::qcom::tile_memory_requirements>
+struct vulkan_object_native<tag::result::qcom::tile_memory_requirements>
 {
 	using type = VkTileMemoryRequirementsQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_TILE_MEMORY_REQUIREMENTS_QCOM;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::qcom::tile_memory_heap>
+struct vulkan_object_extensions<tag::feature::qcom::tile_memory_heap>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_tile_memory_heap"};
 	constexpr static ::std::uint32_t core = 0;
@@ -249,7 +249,7 @@ struct vulkan_object_extensions<obj::feature::qcom::tile_memory_heap>
 };
 
 template<>
-struct vulkan_object_extensions<obj::qcom::tile_memory_bind>
+struct vulkan_object_extensions<tag::qcom::tile_memory_bind>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_tile_memory_heap"};
 	constexpr static ::std::uint32_t core = 0;
@@ -257,7 +257,7 @@ struct vulkan_object_extensions<obj::qcom::tile_memory_bind>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::qcom::tile_memory_size>
+struct vulkan_object_extensions<tag::option::qcom::tile_memory_size>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_tile_memory_heap"};
 	constexpr static ::std::uint32_t core = 0;
@@ -265,7 +265,7 @@ struct vulkan_object_extensions<obj::option::qcom::tile_memory_size>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::qcom::tile_memory_heap>
+struct vulkan_object_extensions<tag::property::qcom::tile_memory_heap>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_tile_memory_heap"};
 	constexpr static ::std::uint32_t core = 0;
@@ -273,7 +273,7 @@ struct vulkan_object_extensions<obj::property::qcom::tile_memory_heap>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::qcom::tile_memory_requirements>
+struct vulkan_object_extensions<tag::result::qcom::tile_memory_requirements>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_tile_memory_heap"};
 	constexpr static ::std::uint32_t core = 0;
@@ -281,21 +281,21 @@ struct vulkan_object_extensions<obj::result::qcom::tile_memory_requirements>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::command_buffer_inheritance, obj::qcom::tile_memory_bind> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::command_buffer_inheritance, tag::qcom::tile_memory_bind> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::qcom::tile_memory_heap> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::qcom::tile_memory_heap> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::memory_requirements2, obj::result::qcom::tile_memory_requirements> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::memory_requirements2, tag::result::qcom::tile_memory_requirements> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::qcom::tile_memory_heap> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::qcom::tile_memory_heap> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::qcom::tile_memory_heap> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::qcom::tile_memory_heap> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::render_pass, obj::option::qcom::tile_memory_size> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::render_pass, tag::option::qcom::tile_memory_size> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::render_pass2, obj::option::qcom::tile_memory_size> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::render_pass2, tag::option::qcom::tile_memory_size> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::rendering, obj::option::qcom::tile_memory_size> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::rendering, tag::option::qcom::tile_memory_size> = true;
 }
 
 namespace vkfu::param
@@ -306,7 +306,7 @@ using ::vkfu::operator|;
 
 struct tile_memory_heap
 {
-	using vulkan_tag_type = obj::feature::qcom::tile_memory_heap;
+	using vulkan_tag_type = tag::feature::qcom::tile_memory_heap;
 
 	bool enable = false;
 
@@ -328,7 +328,7 @@ using ::vkfu::operator|;
 
 struct tile_memory_size
 {
-	using vulkan_tag_type = obj::option::qcom::tile_memory_size;
+	using vulkan_tag_type = tag::option::qcom::tile_memory_size;
 
 	VkDeviceSize size{};
 
@@ -350,7 +350,7 @@ using ::vkfu::operator|;
 
 struct tile_memory_bind
 {
-	using vulkan_tag_type = obj::qcom::tile_memory_bind;
+	using vulkan_tag_type = tag::qcom::tile_memory_bind;
 
 	VkDeviceMemory memory{};
 
@@ -371,7 +371,7 @@ namespace vkfu
 {
 namespace qcom
 {
-template<::vkfu::expression_for<::vkfu::obj::qcom::tile_memory_bind> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::qcom::tile_memory_bind> Expression1>
 void cmd_bind_tile_memory(VkCommandBuffer command_buffer, Expression1&& tile_memory_bind_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(tile_memory_bind_info));

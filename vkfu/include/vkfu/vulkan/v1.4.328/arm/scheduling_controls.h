@@ -74,7 +74,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceSchedulingControlsPropertiesARM co
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::arm
 {
@@ -93,7 +93,7 @@ struct scheduling_controls{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::arm::device_queue_shader_core_control>
+struct vulkan_object_trait<tag::option::arm::device_queue_shader_core_control>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -101,7 +101,7 @@ struct vulkan_object_trait<obj::option::arm::device_queue_shader_core_control>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::arm::scheduling_controls>
+struct vulkan_object_trait<tag::feature::arm::scheduling_controls>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -109,7 +109,7 @@ struct vulkan_object_trait<obj::feature::arm::scheduling_controls>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::arm::scheduling_controls>
+struct vulkan_object_trait<tag::property::arm::scheduling_controls>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -119,11 +119,11 @@ struct vulkan_object_trait<obj::property::arm::scheduling_controls>
 template<>
 struct expression_vulkan_tag<VkDeviceQueueShaderCoreControlCreateInfoARM>
 {
-	using type = obj::option::arm::device_queue_shader_core_control;
+	using type = tag::option::arm::device_queue_shader_core_control;
 };
 
 template<>
-struct vulkan_object_native<obj::option::arm::device_queue_shader_core_control>
+struct vulkan_object_native<tag::option::arm::device_queue_shader_core_control>
 {
 	using type = VkDeviceQueueShaderCoreControlCreateInfoARM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEVICE_QUEUE_SHADER_CORE_CONTROL_CREATE_INFO_ARM;
@@ -132,11 +132,11 @@ struct vulkan_object_native<obj::option::arm::device_queue_shader_core_control>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceSchedulingControlsFeaturesARM>
 {
-	using type = obj::feature::arm::scheduling_controls;
+	using type = tag::feature::arm::scheduling_controls;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::arm::scheduling_controls>
+struct vulkan_object_native<tag::feature::arm::scheduling_controls>
 {
 	using type = VkPhysicalDeviceSchedulingControlsFeaturesARM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCHEDULING_CONTROLS_FEATURES_ARM;
@@ -145,18 +145,18 @@ struct vulkan_object_native<obj::feature::arm::scheduling_controls>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceSchedulingControlsPropertiesARM>
 {
-	using type = obj::property::arm::scheduling_controls;
+	using type = tag::property::arm::scheduling_controls;
 };
 
 template<>
-struct vulkan_object_native<obj::property::arm::scheduling_controls>
+struct vulkan_object_native<tag::property::arm::scheduling_controls>
 {
 	using type = VkPhysicalDeviceSchedulingControlsPropertiesARM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCHEDULING_CONTROLS_PROPERTIES_ARM;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::arm::device_queue_shader_core_control>
+struct vulkan_object_extensions<tag::option::arm::device_queue_shader_core_control>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ARM_scheduling_controls"};
 	constexpr static ::std::uint32_t core = 0;
@@ -164,7 +164,7 @@ struct vulkan_object_extensions<obj::option::arm::device_queue_shader_core_contr
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::arm::scheduling_controls>
+struct vulkan_object_extensions<tag::feature::arm::scheduling_controls>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ARM_scheduling_controls"};
 	constexpr static ::std::uint32_t core = 0;
@@ -172,7 +172,7 @@ struct vulkan_object_extensions<obj::feature::arm::scheduling_controls>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::arm::scheduling_controls>
+struct vulkan_object_extensions<tag::property::arm::scheduling_controls>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ARM_scheduling_controls"};
 	constexpr static ::std::uint32_t core = 0;
@@ -180,15 +180,15 @@ struct vulkan_object_extensions<obj::property::arm::scheduling_controls>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::option::arm::device_queue_shader_core_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::option::arm::device_queue_shader_core_control> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::arm::scheduling_controls> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::arm::scheduling_controls> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device_queue, obj::option::arm::device_queue_shader_core_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device_queue, tag::option::arm::device_queue_shader_core_control> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::arm::scheduling_controls> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::arm::scheduling_controls> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::arm::scheduling_controls> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::arm::scheduling_controls> = true;
 }
 
 namespace vkfu::param
@@ -199,7 +199,7 @@ using ::vkfu::operator|;
 
 struct scheduling_controls
 {
-	using vulkan_tag_type = obj::feature::arm::scheduling_controls;
+	using vulkan_tag_type = tag::feature::arm::scheduling_controls;
 
 	bool enable = false;
 
@@ -221,7 +221,7 @@ using ::vkfu::operator|;
 
 struct device_queue_shader_core_control
 {
-	using vulkan_tag_type = obj::option::arm::device_queue_shader_core_control;
+	using vulkan_tag_type = tag::option::arm::device_queue_shader_core_control;
 
 	::std::uint32_t shader_core_count{};
 

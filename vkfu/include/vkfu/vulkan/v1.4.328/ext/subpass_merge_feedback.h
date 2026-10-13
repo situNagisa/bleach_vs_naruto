@@ -112,7 +112,7 @@ enum class subpass_merge_status : ::std::underlying_type_t<VkSubpassMergeStatusE
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -129,7 +129,7 @@ struct render_pass_subpass_feedback{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::subpass_merge_feedback>
+struct vulkan_object_trait<tag::feature::ext::subpass_merge_feedback>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -137,7 +137,7 @@ struct vulkan_object_trait<obj::feature::ext::subpass_merge_feedback>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::ext::render_pass_creation_control>
+struct vulkan_object_trait<tag::option::ext::render_pass_creation_control>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -145,7 +145,7 @@ struct vulkan_object_trait<obj::option::ext::render_pass_creation_control>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::ext::render_pass_creation_feedback>
+struct vulkan_object_trait<tag::option::ext::render_pass_creation_feedback>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -153,7 +153,7 @@ struct vulkan_object_trait<obj::option::ext::render_pass_creation_feedback>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::ext::render_pass_subpass_feedback>
+struct vulkan_object_trait<tag::option::ext::render_pass_subpass_feedback>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -163,11 +163,11 @@ struct vulkan_object_trait<obj::option::ext::render_pass_subpass_feedback>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceSubpassMergeFeedbackFeaturesEXT>
 {
-	using type = obj::feature::ext::subpass_merge_feedback;
+	using type = tag::feature::ext::subpass_merge_feedback;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::subpass_merge_feedback>
+struct vulkan_object_native<tag::feature::ext::subpass_merge_feedback>
 {
 	using type = VkPhysicalDeviceSubpassMergeFeedbackFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBPASS_MERGE_FEEDBACK_FEATURES_EXT;
@@ -176,11 +176,11 @@ struct vulkan_object_native<obj::feature::ext::subpass_merge_feedback>
 template<>
 struct expression_vulkan_tag<VkRenderPassCreationControlEXT>
 {
-	using type = obj::option::ext::render_pass_creation_control;
+	using type = tag::option::ext::render_pass_creation_control;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::render_pass_creation_control>
+struct vulkan_object_native<tag::option::ext::render_pass_creation_control>
 {
 	using type = VkRenderPassCreationControlEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RENDER_PASS_CREATION_CONTROL_EXT;
@@ -189,11 +189,11 @@ struct vulkan_object_native<obj::option::ext::render_pass_creation_control>
 template<>
 struct expression_vulkan_tag<VkRenderPassCreationFeedbackCreateInfoEXT>
 {
-	using type = obj::option::ext::render_pass_creation_feedback;
+	using type = tag::option::ext::render_pass_creation_feedback;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::render_pass_creation_feedback>
+struct vulkan_object_native<tag::option::ext::render_pass_creation_feedback>
 {
 	using type = VkRenderPassCreationFeedbackCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RENDER_PASS_CREATION_FEEDBACK_CREATE_INFO_EXT;
@@ -202,18 +202,18 @@ struct vulkan_object_native<obj::option::ext::render_pass_creation_feedback>
 template<>
 struct expression_vulkan_tag<VkRenderPassSubpassFeedbackCreateInfoEXT>
 {
-	using type = obj::option::ext::render_pass_subpass_feedback;
+	using type = tag::option::ext::render_pass_subpass_feedback;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::render_pass_subpass_feedback>
+struct vulkan_object_native<tag::option::ext::render_pass_subpass_feedback>
 {
 	using type = VkRenderPassSubpassFeedbackCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RENDER_PASS_SUBPASS_FEEDBACK_CREATE_INFO_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::subpass_merge_feedback>
+struct vulkan_object_extensions<tag::feature::ext::subpass_merge_feedback>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_subpass_merge_feedback"};
 	constexpr static ::std::uint32_t core = 0;
@@ -221,7 +221,7 @@ struct vulkan_object_extensions<obj::feature::ext::subpass_merge_feedback>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::render_pass_creation_control>
+struct vulkan_object_extensions<tag::option::ext::render_pass_creation_control>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_subpass_merge_feedback"};
 	constexpr static ::std::uint32_t core = 0;
@@ -229,7 +229,7 @@ struct vulkan_object_extensions<obj::option::ext::render_pass_creation_control>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::render_pass_creation_feedback>
+struct vulkan_object_extensions<tag::option::ext::render_pass_creation_feedback>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_subpass_merge_feedback"};
 	constexpr static ::std::uint32_t core = 0;
@@ -237,7 +237,7 @@ struct vulkan_object_extensions<obj::option::ext::render_pass_creation_feedback>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::render_pass_subpass_feedback>
+struct vulkan_object_extensions<tag::option::ext::render_pass_subpass_feedback>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_subpass_merge_feedback"};
 	constexpr static ::std::uint32_t core = 0;
@@ -245,17 +245,17 @@ struct vulkan_object_extensions<obj::option::ext::render_pass_subpass_feedback>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::subpass_merge_feedback> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::subpass_merge_feedback> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::subpass_merge_feedback> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::subpass_merge_feedback> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::render_pass2, obj::option::ext::render_pass_creation_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::render_pass2, tag::option::ext::render_pass_creation_control> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::render_pass2, obj::option::ext::render_pass_creation_feedback> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::render_pass2, tag::option::ext::render_pass_creation_feedback> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::subpass_description2, obj::option::ext::render_pass_creation_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::subpass_description2, tag::option::ext::render_pass_creation_control> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::subpass_description2, obj::option::ext::render_pass_subpass_feedback> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::subpass_description2, tag::option::ext::render_pass_subpass_feedback> = true;
 }
 
 namespace vkfu::param
@@ -266,7 +266,7 @@ using ::vkfu::operator|;
 
 struct subpass_merge_feedback
 {
-	using vulkan_tag_type = obj::feature::ext::subpass_merge_feedback;
+	using vulkan_tag_type = tag::feature::ext::subpass_merge_feedback;
 
 	bool enable = false;
 
@@ -288,7 +288,7 @@ using ::vkfu::operator|;
 
 struct render_pass_creation_control
 {
-	using vulkan_tag_type = obj::option::ext::render_pass_creation_control;
+	using vulkan_tag_type = tag::option::ext::render_pass_creation_control;
 
 	bool disallow_merging = false;
 
@@ -304,7 +304,7 @@ struct render_pass_creation_control
 
 struct render_pass_creation_feedback
 {
-	using vulkan_tag_type = obj::option::ext::render_pass_creation_feedback;
+	using vulkan_tag_type = tag::option::ext::render_pass_creation_feedback;
 
 	VkRenderPassCreationFeedbackInfoEXT* render_pass_feedback = nullptr;
 
@@ -320,7 +320,7 @@ struct render_pass_creation_feedback
 
 struct render_pass_subpass_feedback
 {
-	using vulkan_tag_type = obj::option::ext::render_pass_subpass_feedback;
+	using vulkan_tag_type = tag::option::ext::render_pass_subpass_feedback;
 
 	VkRenderPassSubpassFeedbackInfoEXT* subpass_feedback = nullptr;
 

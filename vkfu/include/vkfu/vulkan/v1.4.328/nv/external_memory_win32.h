@@ -28,6 +28,7 @@
 #include <vkfu/vulkan_object.h>
 
 #include "../version_1_0/memory.h"
+#include "external_memory_capabilities.h"
 
 constexpr auto _vkfu_address(VkExportMemoryWin32HandleInfoNV& value) noexcept -> void const*
 {
@@ -59,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkImportMemoryWin32HandleInfoNV const& value) noex
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::nv
 {
@@ -71,7 +72,7 @@ struct import_memory_win32_handle{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::nv::export_memory_win32_handle>
+struct vulkan_object_trait<tag::option::nv::export_memory_win32_handle>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -79,7 +80,7 @@ struct vulkan_object_trait<obj::option::nv::export_memory_win32_handle>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::nv::import_memory_win32_handle>
+struct vulkan_object_trait<tag::option::nv::import_memory_win32_handle>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -89,11 +90,11 @@ struct vulkan_object_trait<obj::option::nv::import_memory_win32_handle>
 template<>
 struct expression_vulkan_tag<VkExportMemoryWin32HandleInfoNV>
 {
-	using type = obj::option::nv::export_memory_win32_handle;
+	using type = tag::option::nv::export_memory_win32_handle;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::export_memory_win32_handle>
+struct vulkan_object_native<tag::option::nv::export_memory_win32_handle>
 {
 	using type = VkExportMemoryWin32HandleInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXPORT_MEMORY_WIN32_HANDLE_INFO_NV;
@@ -102,18 +103,18 @@ struct vulkan_object_native<obj::option::nv::export_memory_win32_handle>
 template<>
 struct expression_vulkan_tag<VkImportMemoryWin32HandleInfoNV>
 {
-	using type = obj::option::nv::import_memory_win32_handle;
+	using type = tag::option::nv::import_memory_win32_handle;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::import_memory_win32_handle>
+struct vulkan_object_native<tag::option::nv::import_memory_win32_handle>
 {
 	using type = VkImportMemoryWin32HandleInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::export_memory_win32_handle>
+struct vulkan_object_extensions<tag::option::nv::export_memory_win32_handle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_external_memory_win32"};
 	constexpr static ::std::uint32_t core = 0;
@@ -121,7 +122,7 @@ struct vulkan_object_extensions<obj::option::nv::export_memory_win32_handle>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::import_memory_win32_handle>
+struct vulkan_object_extensions<tag::option::nv::import_memory_win32_handle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_external_memory_win32"};
 	constexpr static ::std::uint32_t core = 0;
@@ -129,9 +130,9 @@ struct vulkan_object_extensions<obj::option::nv::import_memory_win32_handle>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::memory, obj::option::nv::export_memory_win32_handle> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::memory, tag::option::nv::export_memory_win32_handle> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::memory, obj::option::nv::import_memory_win32_handle> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::memory, tag::option::nv::import_memory_win32_handle> = true;
 }
 
 namespace vkfu::param
@@ -142,7 +143,7 @@ using ::vkfu::operator|;
 
 struct export_memory_win32_handle
 {
-	using vulkan_tag_type = obj::option::nv::export_memory_win32_handle;
+	using vulkan_tag_type = tag::option::nv::export_memory_win32_handle;
 
 	SECURITY_ATTRIBUTES const* attributes = nullptr;
 	DWORD dw_access{};
@@ -160,18 +161,9 @@ struct export_memory_win32_handle
 
 struct import_memory_win32_handle
 {
-	using vulkan_tag_type = obj::option::nv::import_memory_win32_handle;
+	using vulkan_tag_type = tag::option::nv::import_memory_win32_handle;
 
-	struct handle_type_type
-	{
-		VkExternalMemoryHandleTypeFlagsNV opaque_win32 : 1 = 0;
-		VkExternalMemoryHandleTypeFlagsNV opaque_win32_kmt : 1 = 0;
-		VkExternalMemoryHandleTypeFlagsNV d3d11_image : 1 = 0;
-		VkExternalMemoryHandleTypeFlagsNV d3d11_image_kmt : 1 = 0;
-		VkExternalMemoryHandleTypeFlagsNV _reserved_4 : 28 = 0;
-	};
-
-	handle_type_type handle_type{};
+	::vkfu::flags::external_memory_handle_type_nv handle_type{};
 	HANDLE handle{};
 
 	constexpr auto evaluate() const noexcept -> VkImportMemoryWin32HandleInfoNV
@@ -184,14 +176,6 @@ struct import_memory_win32_handle
 		};
 	}
 };
-
-static_assert(sizeof(import_memory_win32_handle::handle_type_type) == sizeof(VkExternalMemoryHandleTypeFlagsNV));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlagsNV>(import_memory_win32_handle::handle_type_type{.opaque_win32 = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT_NV);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlagsNV>(import_memory_win32_handle::handle_type_type{.opaque_win32_kmt = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT_NV);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlagsNV>(import_memory_win32_handle::handle_type_type{.d3d11_image = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_IMAGE_BIT_NV);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlagsNV>(import_memory_win32_handle::handle_type_type{.d3d11_image_kmt = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_IMAGE_KMT_BIT_NV);
-#endif
 
 }
 }

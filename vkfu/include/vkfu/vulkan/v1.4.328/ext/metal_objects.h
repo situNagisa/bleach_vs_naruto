@@ -230,7 +230,7 @@ enum class export_metal_object_type : ::std::underlying_type_t<VkExportMetalObje
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::ext
 {
@@ -255,7 +255,7 @@ struct export_metal_texture{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::export_metal_object>
+struct vulkan_object_trait<tag::option::ext::export_metal_object>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -263,7 +263,7 @@ struct vulkan_object_trait<obj::option::ext::export_metal_object>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::ext::import_metal_buffer>
+struct vulkan_object_trait<tag::option::ext::import_metal_buffer>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -271,7 +271,7 @@ struct vulkan_object_trait<obj::option::ext::import_metal_buffer>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::ext::import_metal_io_surface>
+struct vulkan_object_trait<tag::option::ext::import_metal_io_surface>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -279,7 +279,7 @@ struct vulkan_object_trait<obj::option::ext::import_metal_io_surface>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::ext::import_metal_shared_event>
+struct vulkan_object_trait<tag::option::ext::import_metal_shared_event>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -287,7 +287,7 @@ struct vulkan_object_trait<obj::option::ext::import_metal_shared_event>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::ext::import_metal_texture>
+struct vulkan_object_trait<tag::option::ext::import_metal_texture>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -295,7 +295,7 @@ struct vulkan_object_trait<obj::option::ext::import_metal_texture>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::export_metal_buffer>
+struct vulkan_object_trait<tag::result::ext::export_metal_buffer>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -303,7 +303,7 @@ struct vulkan_object_trait<obj::result::ext::export_metal_buffer>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::export_metal_command_queue>
+struct vulkan_object_trait<tag::result::ext::export_metal_command_queue>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -311,7 +311,7 @@ struct vulkan_object_trait<obj::result::ext::export_metal_command_queue>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::export_metal_device>
+struct vulkan_object_trait<tag::result::ext::export_metal_device>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -319,7 +319,7 @@ struct vulkan_object_trait<obj::result::ext::export_metal_device>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::export_metal_io_surface>
+struct vulkan_object_trait<tag::result::ext::export_metal_io_surface>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -327,7 +327,7 @@ struct vulkan_object_trait<obj::result::ext::export_metal_io_surface>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::export_metal_objects>
+struct vulkan_object_trait<tag::result::ext::export_metal_objects>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -335,7 +335,7 @@ struct vulkan_object_trait<obj::result::ext::export_metal_objects>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::export_metal_shared_event>
+struct vulkan_object_trait<tag::result::ext::export_metal_shared_event>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -343,7 +343,7 @@ struct vulkan_object_trait<obj::result::ext::export_metal_shared_event>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::export_metal_texture>
+struct vulkan_object_trait<tag::result::ext::export_metal_texture>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -353,11 +353,11 @@ struct vulkan_object_trait<obj::result::ext::export_metal_texture>
 template<>
 struct expression_vulkan_tag<VkExportMetalObjectCreateInfoEXT>
 {
-	using type = obj::option::ext::export_metal_object;
+	using type = tag::option::ext::export_metal_object;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::export_metal_object>
+struct vulkan_object_native<tag::option::ext::export_metal_object>
 {
 	using type = VkExportMetalObjectCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXPORT_METAL_OBJECT_CREATE_INFO_EXT;
@@ -366,11 +366,11 @@ struct vulkan_object_native<obj::option::ext::export_metal_object>
 template<>
 struct expression_vulkan_tag<VkImportMetalBufferInfoEXT>
 {
-	using type = obj::option::ext::import_metal_buffer;
+	using type = tag::option::ext::import_metal_buffer;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::import_metal_buffer>
+struct vulkan_object_native<tag::option::ext::import_metal_buffer>
 {
 	using type = VkImportMetalBufferInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMPORT_METAL_BUFFER_INFO_EXT;
@@ -379,11 +379,11 @@ struct vulkan_object_native<obj::option::ext::import_metal_buffer>
 template<>
 struct expression_vulkan_tag<VkImportMetalIOSurfaceInfoEXT>
 {
-	using type = obj::option::ext::import_metal_io_surface;
+	using type = tag::option::ext::import_metal_io_surface;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::import_metal_io_surface>
+struct vulkan_object_native<tag::option::ext::import_metal_io_surface>
 {
 	using type = VkImportMetalIOSurfaceInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMPORT_METAL_IO_SURFACE_INFO_EXT;
@@ -392,11 +392,11 @@ struct vulkan_object_native<obj::option::ext::import_metal_io_surface>
 template<>
 struct expression_vulkan_tag<VkImportMetalSharedEventInfoEXT>
 {
-	using type = obj::option::ext::import_metal_shared_event;
+	using type = tag::option::ext::import_metal_shared_event;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::import_metal_shared_event>
+struct vulkan_object_native<tag::option::ext::import_metal_shared_event>
 {
 	using type = VkImportMetalSharedEventInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMPORT_METAL_SHARED_EVENT_INFO_EXT;
@@ -405,11 +405,11 @@ struct vulkan_object_native<obj::option::ext::import_metal_shared_event>
 template<>
 struct expression_vulkan_tag<VkImportMetalTextureInfoEXT>
 {
-	using type = obj::option::ext::import_metal_texture;
+	using type = tag::option::ext::import_metal_texture;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::import_metal_texture>
+struct vulkan_object_native<tag::option::ext::import_metal_texture>
 {
 	using type = VkImportMetalTextureInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMPORT_METAL_TEXTURE_INFO_EXT;
@@ -418,11 +418,11 @@ struct vulkan_object_native<obj::option::ext::import_metal_texture>
 template<>
 struct expression_vulkan_tag<VkExportMetalBufferInfoEXT>
 {
-	using type = obj::result::ext::export_metal_buffer;
+	using type = tag::result::ext::export_metal_buffer;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::export_metal_buffer>
+struct vulkan_object_native<tag::result::ext::export_metal_buffer>
 {
 	using type = VkExportMetalBufferInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXPORT_METAL_BUFFER_INFO_EXT;
@@ -431,11 +431,11 @@ struct vulkan_object_native<obj::result::ext::export_metal_buffer>
 template<>
 struct expression_vulkan_tag<VkExportMetalCommandQueueInfoEXT>
 {
-	using type = obj::result::ext::export_metal_command_queue;
+	using type = tag::result::ext::export_metal_command_queue;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::export_metal_command_queue>
+struct vulkan_object_native<tag::result::ext::export_metal_command_queue>
 {
 	using type = VkExportMetalCommandQueueInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXPORT_METAL_COMMAND_QUEUE_INFO_EXT;
@@ -444,11 +444,11 @@ struct vulkan_object_native<obj::result::ext::export_metal_command_queue>
 template<>
 struct expression_vulkan_tag<VkExportMetalDeviceInfoEXT>
 {
-	using type = obj::result::ext::export_metal_device;
+	using type = tag::result::ext::export_metal_device;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::export_metal_device>
+struct vulkan_object_native<tag::result::ext::export_metal_device>
 {
 	using type = VkExportMetalDeviceInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXPORT_METAL_DEVICE_INFO_EXT;
@@ -457,11 +457,11 @@ struct vulkan_object_native<obj::result::ext::export_metal_device>
 template<>
 struct expression_vulkan_tag<VkExportMetalIOSurfaceInfoEXT>
 {
-	using type = obj::result::ext::export_metal_io_surface;
+	using type = tag::result::ext::export_metal_io_surface;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::export_metal_io_surface>
+struct vulkan_object_native<tag::result::ext::export_metal_io_surface>
 {
 	using type = VkExportMetalIOSurfaceInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXPORT_METAL_IO_SURFACE_INFO_EXT;
@@ -470,11 +470,11 @@ struct vulkan_object_native<obj::result::ext::export_metal_io_surface>
 template<>
 struct expression_vulkan_tag<VkExportMetalObjectsInfoEXT>
 {
-	using type = obj::result::ext::export_metal_objects;
+	using type = tag::result::ext::export_metal_objects;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::export_metal_objects>
+struct vulkan_object_native<tag::result::ext::export_metal_objects>
 {
 	using type = VkExportMetalObjectsInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXPORT_METAL_OBJECTS_INFO_EXT;
@@ -483,11 +483,11 @@ struct vulkan_object_native<obj::result::ext::export_metal_objects>
 template<>
 struct expression_vulkan_tag<VkExportMetalSharedEventInfoEXT>
 {
-	using type = obj::result::ext::export_metal_shared_event;
+	using type = tag::result::ext::export_metal_shared_event;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::export_metal_shared_event>
+struct vulkan_object_native<tag::result::ext::export_metal_shared_event>
 {
 	using type = VkExportMetalSharedEventInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXPORT_METAL_SHARED_EVENT_INFO_EXT;
@@ -496,18 +496,18 @@ struct vulkan_object_native<obj::result::ext::export_metal_shared_event>
 template<>
 struct expression_vulkan_tag<VkExportMetalTextureInfoEXT>
 {
-	using type = obj::result::ext::export_metal_texture;
+	using type = tag::result::ext::export_metal_texture;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::export_metal_texture>
+struct vulkan_object_native<tag::result::ext::export_metal_texture>
 {
 	using type = VkExportMetalTextureInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXPORT_METAL_TEXTURE_INFO_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::export_metal_object>
+struct vulkan_object_extensions<tag::option::ext::export_metal_object>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_metal_objects"};
 	constexpr static ::std::uint32_t core = 0;
@@ -515,7 +515,7 @@ struct vulkan_object_extensions<obj::option::ext::export_metal_object>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::import_metal_buffer>
+struct vulkan_object_extensions<tag::option::ext::import_metal_buffer>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_metal_objects"};
 	constexpr static ::std::uint32_t core = 0;
@@ -523,7 +523,7 @@ struct vulkan_object_extensions<obj::option::ext::import_metal_buffer>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::import_metal_io_surface>
+struct vulkan_object_extensions<tag::option::ext::import_metal_io_surface>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_metal_objects"};
 	constexpr static ::std::uint32_t core = 0;
@@ -531,7 +531,7 @@ struct vulkan_object_extensions<obj::option::ext::import_metal_io_surface>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::import_metal_shared_event>
+struct vulkan_object_extensions<tag::option::ext::import_metal_shared_event>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_metal_objects"};
 	constexpr static ::std::uint32_t core = 0;
@@ -539,7 +539,7 @@ struct vulkan_object_extensions<obj::option::ext::import_metal_shared_event>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::import_metal_texture>
+struct vulkan_object_extensions<tag::option::ext::import_metal_texture>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_metal_objects"};
 	constexpr static ::std::uint32_t core = 0;
@@ -547,7 +547,7 @@ struct vulkan_object_extensions<obj::option::ext::import_metal_texture>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::export_metal_buffer>
+struct vulkan_object_extensions<tag::result::ext::export_metal_buffer>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_metal_objects"};
 	constexpr static ::std::uint32_t core = 0;
@@ -555,7 +555,7 @@ struct vulkan_object_extensions<obj::result::ext::export_metal_buffer>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::export_metal_command_queue>
+struct vulkan_object_extensions<tag::result::ext::export_metal_command_queue>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_metal_objects"};
 	constexpr static ::std::uint32_t core = 0;
@@ -563,7 +563,7 @@ struct vulkan_object_extensions<obj::result::ext::export_metal_command_queue>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::export_metal_device>
+struct vulkan_object_extensions<tag::result::ext::export_metal_device>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_metal_objects"};
 	constexpr static ::std::uint32_t core = 0;
@@ -571,7 +571,7 @@ struct vulkan_object_extensions<obj::result::ext::export_metal_device>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::export_metal_io_surface>
+struct vulkan_object_extensions<tag::result::ext::export_metal_io_surface>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_metal_objects"};
 	constexpr static ::std::uint32_t core = 0;
@@ -579,7 +579,7 @@ struct vulkan_object_extensions<obj::result::ext::export_metal_io_surface>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::export_metal_objects>
+struct vulkan_object_extensions<tag::result::ext::export_metal_objects>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_metal_objects"};
 	constexpr static ::std::uint32_t core = 0;
@@ -587,7 +587,7 @@ struct vulkan_object_extensions<obj::result::ext::export_metal_objects>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::export_metal_shared_event>
+struct vulkan_object_extensions<tag::result::ext::export_metal_shared_event>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_metal_objects"};
 	constexpr static ::std::uint32_t core = 0;
@@ -595,7 +595,7 @@ struct vulkan_object_extensions<obj::result::ext::export_metal_shared_event>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::export_metal_texture>
+struct vulkan_object_extensions<tag::result::ext::export_metal_texture>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_metal_objects"};
 	constexpr static ::std::uint32_t core = 0;
@@ -603,41 +603,41 @@ struct vulkan_object_extensions<obj::result::ext::export_metal_texture>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::buffer_view, obj::option::ext::export_metal_object> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::buffer_view, tag::option::ext::export_metal_object> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::event, obj::option::ext::export_metal_object> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::event, tag::option::ext::export_metal_object> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::event, obj::option::ext::import_metal_shared_event> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::event, tag::option::ext::import_metal_shared_event> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::ext::export_metal_objects, obj::result::ext::export_metal_buffer> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::ext::export_metal_objects, tag::result::ext::export_metal_buffer> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::ext::export_metal_objects, obj::result::ext::export_metal_command_queue> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::ext::export_metal_objects, tag::result::ext::export_metal_command_queue> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::ext::export_metal_objects, obj::result::ext::export_metal_device> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::ext::export_metal_objects, tag::result::ext::export_metal_device> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::ext::export_metal_objects, obj::result::ext::export_metal_io_surface> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::ext::export_metal_objects, tag::result::ext::export_metal_io_surface> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::ext::export_metal_objects, obj::result::ext::export_metal_shared_event> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::ext::export_metal_objects, tag::result::ext::export_metal_shared_event> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::ext::export_metal_objects, obj::result::ext::export_metal_texture> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::ext::export_metal_objects, tag::result::ext::export_metal_texture> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image, obj::option::ext::export_metal_object> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image, tag::option::ext::export_metal_object> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image, obj::option::ext::import_metal_io_surface> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image, tag::option::ext::import_metal_io_surface> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image, obj::option::ext::import_metal_texture> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image, tag::option::ext::import_metal_texture> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image_view, obj::option::ext::export_metal_object> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image_view, tag::option::ext::export_metal_object> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::instance, obj::option::ext::export_metal_object> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::instance, tag::option::ext::export_metal_object> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::memory, obj::option::ext::export_metal_object> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::memory, tag::option::ext::export_metal_object> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::memory, obj::option::ext::import_metal_buffer> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::memory, tag::option::ext::import_metal_buffer> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::semaphore, obj::option::ext::export_metal_object> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::semaphore, tag::option::ext::export_metal_object> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::semaphore, obj::option::ext::import_metal_shared_event> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::semaphore, tag::option::ext::import_metal_shared_event> = true;
 }
 
 namespace vkfu::param
@@ -648,7 +648,7 @@ using ::vkfu::operator|;
 
 struct export_metal_object
 {
-	using vulkan_tag_type = obj::option::ext::export_metal_object;
+	using vulkan_tag_type = tag::option::ext::export_metal_object;
 
 	::vkfu::enums::export_metal_object_type export_object_type{};
 
@@ -664,7 +664,7 @@ struct export_metal_object
 
 struct import_metal_buffer
 {
-	using vulkan_tag_type = obj::option::ext::import_metal_buffer;
+	using vulkan_tag_type = tag::option::ext::import_metal_buffer;
 
 	MTLBuffer_id mtl_buffer{};
 
@@ -680,7 +680,7 @@ struct import_metal_buffer
 
 struct import_metal_io_surface
 {
-	using vulkan_tag_type = obj::option::ext::import_metal_io_surface;
+	using vulkan_tag_type = tag::option::ext::import_metal_io_surface;
 
 	IOSurfaceRef io_surface{};
 
@@ -696,7 +696,7 @@ struct import_metal_io_surface
 
 struct import_metal_shared_event
 {
-	using vulkan_tag_type = obj::option::ext::import_metal_shared_event;
+	using vulkan_tag_type = tag::option::ext::import_metal_shared_event;
 
 	MTLSharedEvent_id mtl_shared_event{};
 
@@ -712,7 +712,7 @@ struct import_metal_shared_event
 
 struct import_metal_texture
 {
-	using vulkan_tag_type = obj::option::ext::import_metal_texture;
+	using vulkan_tag_type = tag::option::ext::import_metal_texture;
 
 	::vkfu::enums::image_aspect plane{};
 	MTLTexture_id mtl_texture{};
@@ -735,10 +735,10 @@ namespace vkfu
 {
 namespace ext
 {
-template<::vkfu::query_extension_of<::vkfu::obj::result::ext::export_metal_objects>... Extras>
-[[nodiscard]] auto export_metal_objects(VkDevice device) -> ::vkfu::query_chain<::vkfu::obj::result::ext::export_metal_objects, Extras...>
+template<::vkfu::query_extension_of<::vkfu::tag::result::ext::export_metal_objects>... Extras>
+[[nodiscard]] auto export_metal_objects(VkDevice device) -> ::vkfu::query_chain<::vkfu::tag::result::ext::export_metal_objects, Extras...>
 {
-	auto chain = ::vkfu::query_chain<::vkfu::obj::result::ext::export_metal_objects, Extras...>{};
+	auto chain = ::vkfu::query_chain<::vkfu::tag::result::ext::export_metal_objects, Extras...>{};
 	::vkExportMetalObjectsEXT(device, ::std::addressof(chain.head()));
 	return chain;
 }

@@ -62,6 +62,7 @@ def sound_table(registry: ir.Registry) -> naming.Table:
 		counts={"vkEnumerateWidgetReports": "count_widget_reports"},
 		aliases={"VkWidgetLimitsKHR": "option::khr::widget_limits"},
 		enums={"VkWidgetMode": "widget_mode"},
+		flags={"VkWidgetFlags": "widget"},
 		values={"VkWidgetMode": {"VK_WIDGET_MODE_PLAIN": "plain", "VK_WIDGET_MODE_FANCY": "fancy"}},
 	)
 
@@ -171,13 +172,11 @@ class CheckTest(unittest.TestCase):
 
 	# ------------------------------------------------------------ structural
 
-	def test_a_field_colliding_with_its_own_flags_type(self) -> None:
-		# `flags` generates a nested `flags_type`, so a sibling field cannot be
-		# called that -- and nothing about the two names looks alike.
-		problem = self.assert_error(
-			"scope", lambda t: t.members["VkWidgetCreateInfo"].update({"mode": "flags_type"})
-		)
-		self.assertIn("flags_type", problem.detail)
+	def test_a_flags_name_is_checked_like_any_other(self) -> None:
+		self.assert_error("keyword", lambda t: t.flags.update({"VkWidgetFlags": "class"}))
+
+	def test_a_flags_type_needs_a_name(self) -> None:
+		self.assert_error("missing", lambda t: t.flags.clear())
 
 	def test_a_field_colliding_with_a_slot_template_parameter(self) -> None:
 		self.assert_error(

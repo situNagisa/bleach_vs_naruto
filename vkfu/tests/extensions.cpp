@@ -10,23 +10,23 @@
 
 #include "../include/vkfu/vulkan/v1.4.328.h"
 
-namespace obj = ::vkfu::obj;
+namespace tag = ::vkfu::tag;
 namespace param = ::vkfu::param;
 
 // A structure an extension introduced and core never promoted.
-static_assert(::vkfu::vulkan_object_extensions<obj::feature::ext::mesh_shader>::names.size() == 1);
-static_assert(::std::string_view{::vkfu::vulkan_object_extensions<obj::feature::ext::mesh_shader>::names[0]}
+static_assert(::vkfu::vulkan_object_extensions<tag::feature::ext::mesh_shader>::names.size() == 1);
+static_assert(::std::string_view{::vkfu::vulkan_object_extensions<tag::feature::ext::mesh_shader>::names[0]}
 	== "VK_EXT_mesh_shader");
-static_assert(::vkfu::vulkan_object_extensions<obj::feature::ext::mesh_shader>::core == 0);
+static_assert(::vkfu::vulkan_object_extensions<tag::feature::ext::mesh_shader>::core == 0);
 
 // A promoted one: core 1.2 has it, and below that the extension does.
-static_assert(::vkfu::vulkan_object_extensions<obj::feature::timeline_semaphore>::core == VK_API_VERSION_1_2);
-static_assert(::std::string_view{::vkfu::vulkan_object_extensions<obj::feature::timeline_semaphore>::names[0]}
+static_assert(::vkfu::vulkan_object_extensions<tag::feature::timeline_semaphore>::core == VK_API_VERSION_1_2);
+static_assert(::std::string_view{::vkfu::vulkan_object_extensions<tag::feature::timeline_semaphore>::names[0]}
 	== "VK_KHR_timeline_semaphore");
 
 // Core since 1.0: nothing to enable, ever.
-static_assert(::vkfu::vulkan_object_extensions<obj::buffer>::names.empty());
-static_assert(::vkfu::vulkan_object_extensions<obj::buffer>::core == VK_API_VERSION_1_0);
+static_assert(::vkfu::vulkan_object_extensions<tag::buffer>::names.empty());
+static_assert(::vkfu::vulkan_object_extensions<tag::buffer>::core == VK_API_VERSION_1_0);
 
 // ------------------------------------------------- derived from a chain
 

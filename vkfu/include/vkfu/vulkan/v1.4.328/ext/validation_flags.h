@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkValidationFlagsEXT const& value) noexcept -> VkV
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::ext
 {
@@ -54,7 +54,7 @@ struct validation_flags{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::validation_flags>
+struct vulkan_object_trait<tag::option::ext::validation_flags>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::option::ext::validation_flags>
 template<>
 struct expression_vulkan_tag<VkValidationFlagsEXT>
 {
-	using type = obj::option::ext::validation_flags;
+	using type = tag::option::ext::validation_flags;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::validation_flags>
+struct vulkan_object_native<tag::option::ext::validation_flags>
 {
 	using type = VkValidationFlagsEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VALIDATION_FLAGS_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::validation_flags>
+struct vulkan_object_extensions<tag::option::ext::validation_flags>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_validation_flags"};
 	constexpr static ::std::uint32_t core = 0;
@@ -83,7 +83,7 @@ struct vulkan_object_extensions<obj::option::ext::validation_flags>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::instance, obj::option::ext::validation_flags> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::instance, tag::option::ext::validation_flags> = true;
 }
 
 namespace vkfu::param
@@ -94,7 +94,7 @@ using ::vkfu::operator|;
 
 struct validation_flags
 {
-	using vulkan_tag_type = obj::option::ext::validation_flags;
+	using vulkan_tag_type = tag::option::ext::validation_flags;
 
 	::std::span<VkValidationCheckEXT const> disabled_validation_checks{};
 

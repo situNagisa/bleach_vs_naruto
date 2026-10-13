@@ -88,7 +88,7 @@ constexpr auto _vkfu_evaluate(VkQueueFamilyCheckpointPropertiesNV const& value) 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace result::nv
 {
@@ -102,7 +102,7 @@ struct queue_family_checkpoint_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::result::nv::checkpoint_data2>
+struct vulkan_object_trait<tag::result::nv::checkpoint_data2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -110,7 +110,7 @@ struct vulkan_object_trait<obj::result::nv::checkpoint_data2>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::nv::checkpoint_data>
+struct vulkan_object_trait<tag::result::nv::checkpoint_data>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -118,7 +118,7 @@ struct vulkan_object_trait<obj::result::nv::checkpoint_data>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::nv::queue_family_checkpoint_properties2>
+struct vulkan_object_trait<tag::result::nv::queue_family_checkpoint_properties2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -126,7 +126,7 @@ struct vulkan_object_trait<obj::result::nv::queue_family_checkpoint_properties2>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::nv::queue_family_checkpoint_properties>
+struct vulkan_object_trait<tag::result::nv::queue_family_checkpoint_properties>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -136,11 +136,11 @@ struct vulkan_object_trait<obj::result::nv::queue_family_checkpoint_properties>
 template<>
 struct expression_vulkan_tag<VkCheckpointData2NV>
 {
-	using type = obj::result::nv::checkpoint_data2;
+	using type = tag::result::nv::checkpoint_data2;
 };
 
 template<>
-struct vulkan_object_native<obj::result::nv::checkpoint_data2>
+struct vulkan_object_native<tag::result::nv::checkpoint_data2>
 {
 	using type = VkCheckpointData2NV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_CHECKPOINT_DATA_2_NV;
@@ -149,11 +149,11 @@ struct vulkan_object_native<obj::result::nv::checkpoint_data2>
 template<>
 struct expression_vulkan_tag<VkCheckpointDataNV>
 {
-	using type = obj::result::nv::checkpoint_data;
+	using type = tag::result::nv::checkpoint_data;
 };
 
 template<>
-struct vulkan_object_native<obj::result::nv::checkpoint_data>
+struct vulkan_object_native<tag::result::nv::checkpoint_data>
 {
 	using type = VkCheckpointDataNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_CHECKPOINT_DATA_NV;
@@ -162,11 +162,11 @@ struct vulkan_object_native<obj::result::nv::checkpoint_data>
 template<>
 struct expression_vulkan_tag<VkQueueFamilyCheckpointProperties2NV>
 {
-	using type = obj::result::nv::queue_family_checkpoint_properties2;
+	using type = tag::result::nv::queue_family_checkpoint_properties2;
 };
 
 template<>
-struct vulkan_object_native<obj::result::nv::queue_family_checkpoint_properties2>
+struct vulkan_object_native<tag::result::nv::queue_family_checkpoint_properties2>
 {
 	using type = VkQueueFamilyCheckpointProperties2NV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_QUEUE_FAMILY_CHECKPOINT_PROPERTIES_2_NV;
@@ -175,18 +175,18 @@ struct vulkan_object_native<obj::result::nv::queue_family_checkpoint_properties2
 template<>
 struct expression_vulkan_tag<VkQueueFamilyCheckpointPropertiesNV>
 {
-	using type = obj::result::nv::queue_family_checkpoint_properties;
+	using type = tag::result::nv::queue_family_checkpoint_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::nv::queue_family_checkpoint_properties>
+struct vulkan_object_native<tag::result::nv::queue_family_checkpoint_properties>
 {
 	using type = VkQueueFamilyCheckpointPropertiesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_QUEUE_FAMILY_CHECKPOINT_PROPERTIES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::nv::checkpoint_data2>
+struct vulkan_object_extensions<tag::result::nv::checkpoint_data2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_device_diagnostic_checkpoints"};
 	constexpr static ::std::uint32_t core = 0;
@@ -194,7 +194,7 @@ struct vulkan_object_extensions<obj::result::nv::checkpoint_data2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::nv::checkpoint_data>
+struct vulkan_object_extensions<tag::result::nv::checkpoint_data>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_device_diagnostic_checkpoints"};
 	constexpr static ::std::uint32_t core = 0;
@@ -202,7 +202,7 @@ struct vulkan_object_extensions<obj::result::nv::checkpoint_data>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::nv::queue_family_checkpoint_properties2>
+struct vulkan_object_extensions<tag::result::nv::queue_family_checkpoint_properties2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_device_diagnostic_checkpoints"};
 	constexpr static ::std::uint32_t core = 0;
@@ -210,7 +210,7 @@ struct vulkan_object_extensions<obj::result::nv::queue_family_checkpoint_propert
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::nv::queue_family_checkpoint_properties>
+struct vulkan_object_extensions<tag::result::nv::queue_family_checkpoint_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_device_diagnostic_checkpoints"};
 	constexpr static ::std::uint32_t core = 0;
@@ -218,9 +218,9 @@ struct vulkan_object_extensions<obj::result::nv::queue_family_checkpoint_propert
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::queue_family_properties2, obj::result::nv::queue_family_checkpoint_properties2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::queue_family_properties2, tag::result::nv::queue_family_checkpoint_properties2> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::queue_family_properties2, obj::result::nv::queue_family_checkpoint_properties> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::queue_family_properties2, tag::result::nv::queue_family_checkpoint_properties> = true;
 }
 
 namespace vkfu

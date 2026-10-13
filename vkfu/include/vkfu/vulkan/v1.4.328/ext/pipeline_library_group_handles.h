@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDevicePipelineLibraryGroupHandlesFeature
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct pipeline_library_group_handles{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::pipeline_library_group_handles>
+struct vulkan_object_trait<tag::feature::ext::pipeline_library_group_handles>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::pipeline_library_group_handles>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePipelineLibraryGroupHandlesFeaturesEXT>
 {
-	using type = obj::feature::ext::pipeline_library_group_handles;
+	using type = tag::feature::ext::pipeline_library_group_handles;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::pipeline_library_group_handles>
+struct vulkan_object_native<tag::feature::ext::pipeline_library_group_handles>
 {
 	using type = VkPhysicalDevicePipelineLibraryGroupHandlesFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_LIBRARY_GROUP_HANDLES_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::pipeline_library_group_handles>
+struct vulkan_object_extensions<tag::feature::ext::pipeline_library_group_handles>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_pipeline_library_group_handles"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::pipeline_library_group_handle
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::pipeline_library_group_handles> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::pipeline_library_group_handles> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::pipeline_library_group_handles> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::pipeline_library_group_handles> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct pipeline_library_group_handles
 {
-	using vulkan_tag_type = obj::feature::ext::pipeline_library_group_handles;
+	using vulkan_tag_type = tag::feature::ext::pipeline_library_group_handles;
 
 	bool enable = false;
 

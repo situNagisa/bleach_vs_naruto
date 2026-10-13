@@ -42,7 +42,7 @@ constexpr auto _vkfu_evaluate(VkStreamDescriptorSurfaceCreateInfoGGP const& valu
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace ggp
 {
@@ -53,7 +53,7 @@ struct stream_descriptor_surface{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::ggp::stream_descriptor_surface>
+struct vulkan_object_trait<tag::ggp::stream_descriptor_surface>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -63,18 +63,18 @@ struct vulkan_object_trait<obj::ggp::stream_descriptor_surface>
 template<>
 struct expression_vulkan_tag<VkStreamDescriptorSurfaceCreateInfoGGP>
 {
-	using type = obj::ggp::stream_descriptor_surface;
+	using type = tag::ggp::stream_descriptor_surface;
 };
 
 template<>
-struct vulkan_object_native<obj::ggp::stream_descriptor_surface>
+struct vulkan_object_native<tag::ggp::stream_descriptor_surface>
 {
 	using type = VkStreamDescriptorSurfaceCreateInfoGGP;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_STREAM_DESCRIPTOR_SURFACE_CREATE_INFO_GGP;
 };
 
 template<>
-struct vulkan_object_extensions<obj::ggp::stream_descriptor_surface>
+struct vulkan_object_extensions<tag::ggp::stream_descriptor_surface>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_GGP_stream_descriptor_surface"};
 	constexpr static ::std::uint32_t core = 0;
@@ -91,7 +91,7 @@ using ::vkfu::operator|;
 
 struct stream_descriptor_surface
 {
-	using vulkan_tag_type = obj::ggp::stream_descriptor_surface;
+	using vulkan_tag_type = tag::ggp::stream_descriptor_surface;
 
 	VkStreamDescriptorSurfaceCreateFlagsGGP flags{};
 	GgpStreamDescriptor stream_descriptor{};
@@ -114,7 +114,7 @@ namespace vkfu
 {
 namespace ggp
 {
-template<::vkfu::expression_for<::vkfu::obj::ggp::stream_descriptor_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::ggp::stream_descriptor_surface> Expression>
 [[nodiscard]] auto create_stream_descriptor_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkSurfaceKHR, ::VkResult>
 {
@@ -129,7 +129,7 @@ template<::vkfu::expression_for<::vkfu::obj::ggp::stream_descriptor_surface> Exp
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ggp::stream_descriptor_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::ggp::stream_descriptor_surface> Expression>
 [[nodiscard]] auto create_stream_descriptor_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkSurfaceKHR
 {
 	auto produced = create_stream_descriptor_surface(instance, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

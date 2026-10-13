@@ -42,7 +42,7 @@ constexpr auto _vkfu_evaluate(VkSurfaceCreateInfoOHOS const& value) noexcept -> 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace ohos
 {
@@ -53,7 +53,7 @@ struct surface{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::ohos::surface>
+struct vulkan_object_trait<tag::ohos::surface>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -63,18 +63,18 @@ struct vulkan_object_trait<obj::ohos::surface>
 template<>
 struct expression_vulkan_tag<VkSurfaceCreateInfoOHOS>
 {
-	using type = obj::ohos::surface;
+	using type = tag::ohos::surface;
 };
 
 template<>
-struct vulkan_object_native<obj::ohos::surface>
+struct vulkan_object_native<tag::ohos::surface>
 {
 	using type = VkSurfaceCreateInfoOHOS;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SURFACE_CREATE_INFO_OHOS;
 };
 
 template<>
-struct vulkan_object_extensions<obj::ohos::surface>
+struct vulkan_object_extensions<tag::ohos::surface>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_OHOS_surface"};
 	constexpr static ::std::uint32_t core = 0;
@@ -91,7 +91,7 @@ using ::vkfu::operator|;
 
 struct surface
 {
-	using vulkan_tag_type = obj::ohos::surface;
+	using vulkan_tag_type = tag::ohos::surface;
 
 	VkSurfaceCreateFlagsOHOS flags{};
 	OHNativeWindow* window = nullptr;
@@ -114,7 +114,7 @@ namespace vkfu
 {
 namespace ohos
 {
-template<::vkfu::expression_for<::vkfu::obj::ohos::surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::ohos::surface> Expression>
 [[nodiscard]] auto create_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkSurfaceKHR, ::VkResult>
 {
@@ -129,7 +129,7 @@ template<::vkfu::expression_for<::vkfu::obj::ohos::surface> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ohos::surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::ohos::surface> Expression>
 [[nodiscard]] auto create_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkSurfaceKHR
 {
 	auto produced = create_surface(instance, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

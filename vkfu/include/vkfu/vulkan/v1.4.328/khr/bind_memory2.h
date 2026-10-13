@@ -28,12 +28,12 @@
 
 #include "../version_1_1/bind_memory2.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
-using bind_buffer_memory = ::vkfu::obj::bind_buffer_memory;
-using bind_image_memory = ::vkfu::obj::bind_image_memory;
+using bind_buffer_memory = ::vkfu::tag::bind_buffer_memory;
+using bind_image_memory = ::vkfu::tag::bind_image_memory;
 }
 }
 

@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceMemoryBudgetPropertiesEXT const& v
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property::ext
 {
@@ -54,7 +54,7 @@ struct memory_budget{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::property::ext::memory_budget>
+struct vulkan_object_trait<tag::property::ext::memory_budget>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::property::ext::memory_budget>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMemoryBudgetPropertiesEXT>
 {
-	using type = obj::property::ext::memory_budget;
+	using type = tag::property::ext::memory_budget;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::memory_budget>
+struct vulkan_object_native<tag::property::ext::memory_budget>
 {
 	using type = VkPhysicalDeviceMemoryBudgetPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::memory_budget>
+struct vulkan_object_extensions<tag::property::ext::memory_budget>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_memory_budget"};
 	constexpr static ::std::uint32_t core = 0;
@@ -83,5 +83,5 @@ struct vulkan_object_extensions<obj::property::ext::memory_budget>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::memory2, obj::property::ext::memory_budget> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::memory2, tag::property::ext::memory_budget> = true;
 }

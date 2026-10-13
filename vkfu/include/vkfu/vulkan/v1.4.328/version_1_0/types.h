@@ -27,6 +27,7 @@
 #include <vkfu/vulkan_object.h>
 
 #include "image.h"
+#include "render_pass.h"
 
 constexpr auto _vkfu_address(VkBufferMemoryBarrier& value) noexcept -> void const*
 {
@@ -139,7 +140,7 @@ enum class object_type : ::std::underlying_type_t<VkObjectType>
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct buffer_memory_barrier{};
 struct image_memory_barrier{};
@@ -149,7 +150,7 @@ struct memory_barrier{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::buffer_memory_barrier>
+struct vulkan_object_trait<tag::buffer_memory_barrier>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -157,7 +158,7 @@ struct vulkan_object_trait<obj::buffer_memory_barrier>
 };
 
 template<>
-struct vulkan_object_trait<obj::image_memory_barrier>
+struct vulkan_object_trait<tag::image_memory_barrier>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -165,7 +166,7 @@ struct vulkan_object_trait<obj::image_memory_barrier>
 };
 
 template<>
-struct vulkan_object_trait<obj::memory_barrier>
+struct vulkan_object_trait<tag::memory_barrier>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -175,11 +176,11 @@ struct vulkan_object_trait<obj::memory_barrier>
 template<>
 struct expression_vulkan_tag<VkBufferMemoryBarrier>
 {
-	using type = obj::buffer_memory_barrier;
+	using type = tag::buffer_memory_barrier;
 };
 
 template<>
-struct vulkan_object_native<obj::buffer_memory_barrier>
+struct vulkan_object_native<tag::buffer_memory_barrier>
 {
 	using type = VkBufferMemoryBarrier;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
@@ -188,11 +189,11 @@ struct vulkan_object_native<obj::buffer_memory_barrier>
 template<>
 struct expression_vulkan_tag<VkImageMemoryBarrier>
 {
-	using type = obj::image_memory_barrier;
+	using type = tag::image_memory_barrier;
 };
 
 template<>
-struct vulkan_object_native<obj::image_memory_barrier>
+struct vulkan_object_native<tag::image_memory_barrier>
 {
 	using type = VkImageMemoryBarrier;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -201,18 +202,18 @@ struct vulkan_object_native<obj::image_memory_barrier>
 template<>
 struct expression_vulkan_tag<VkMemoryBarrier>
 {
-	using type = obj::memory_barrier;
+	using type = tag::memory_barrier;
 };
 
 template<>
-struct vulkan_object_native<obj::memory_barrier>
+struct vulkan_object_native<tag::memory_barrier>
 {
 	using type = VkMemoryBarrier;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
 };
 
 template<>
-struct vulkan_object_extensions<obj::buffer_memory_barrier>
+struct vulkan_object_extensions<tag::buffer_memory_barrier>
 {
 	constexpr static ::std::array<char const*, 0> names{};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_0;
@@ -220,7 +221,7 @@ struct vulkan_object_extensions<obj::buffer_memory_barrier>
 };
 
 template<>
-struct vulkan_object_extensions<obj::image_memory_barrier>
+struct vulkan_object_extensions<tag::image_memory_barrier>
 {
 	constexpr static ::std::array<char const*, 0> names{};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_0;
@@ -228,7 +229,7 @@ struct vulkan_object_extensions<obj::image_memory_barrier>
 };
 
 template<>
-struct vulkan_object_extensions<obj::memory_barrier>
+struct vulkan_object_extensions<tag::memory_barrier>
 {
 	constexpr static ::std::array<char const*, 0> names{};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_0;
@@ -243,76 +244,10 @@ using ::vkfu::operator|;
 
 struct buffer_memory_barrier
 {
-	using vulkan_tag_type = obj::buffer_memory_barrier;
+	using vulkan_tag_type = tag::buffer_memory_barrier;
 
-	struct src_access_mask_type
-	{
-		VkAccessFlags indirect_command_read : 1 = 0;
-		VkAccessFlags index_read : 1 = 0;
-		VkAccessFlags vertex_attribute_read : 1 = 0;
-		VkAccessFlags uniform_read : 1 = 0;
-		VkAccessFlags input_attachment_read : 1 = 0;
-		VkAccessFlags shader_read : 1 = 0;
-		VkAccessFlags shader_write : 1 = 0;
-		VkAccessFlags color_attachment_read : 1 = 0;
-		VkAccessFlags color_attachment_write : 1 = 0;
-		VkAccessFlags depth_stencil_attachment_read : 1 = 0;
-		VkAccessFlags depth_stencil_attachment_write : 1 = 0;
-		VkAccessFlags transfer_read : 1 = 0;
-		VkAccessFlags transfer_write : 1 = 0;
-		VkAccessFlags host_read : 1 = 0;
-		VkAccessFlags host_write : 1 = 0;
-		VkAccessFlags memory_read : 1 = 0;
-		VkAccessFlags memory_write : 1 = 0;
-		VkAccessFlags command_preprocess_read : 1 = 0;
-		VkAccessFlags command_preprocess_write : 1 = 0;
-		VkAccessFlags color_attachment_read_noncoherent : 1 = 0;
-		VkAccessFlags conditional_rendering_read : 1 = 0;
-		VkAccessFlags acceleration_structure_read : 1 = 0;
-		VkAccessFlags acceleration_structure_write : 1 = 0;
-		VkAccessFlags fragment_shading_rate_attachment_read : 1 = 0;
-		VkAccessFlags fragment_density_map_read : 1 = 0;
-		VkAccessFlags transform_feedback_write : 1 = 0;
-		VkAccessFlags transform_feedback_counter_read : 1 = 0;
-		VkAccessFlags transform_feedback_counter_write : 1 = 0;
-		VkAccessFlags _reserved_28 : 4 = 0;
-	};
-
-	src_access_mask_type src_access_mask{};
-	struct dst_access_mask_type
-	{
-		VkAccessFlags indirect_command_read : 1 = 0;
-		VkAccessFlags index_read : 1 = 0;
-		VkAccessFlags vertex_attribute_read : 1 = 0;
-		VkAccessFlags uniform_read : 1 = 0;
-		VkAccessFlags input_attachment_read : 1 = 0;
-		VkAccessFlags shader_read : 1 = 0;
-		VkAccessFlags shader_write : 1 = 0;
-		VkAccessFlags color_attachment_read : 1 = 0;
-		VkAccessFlags color_attachment_write : 1 = 0;
-		VkAccessFlags depth_stencil_attachment_read : 1 = 0;
-		VkAccessFlags depth_stencil_attachment_write : 1 = 0;
-		VkAccessFlags transfer_read : 1 = 0;
-		VkAccessFlags transfer_write : 1 = 0;
-		VkAccessFlags host_read : 1 = 0;
-		VkAccessFlags host_write : 1 = 0;
-		VkAccessFlags memory_read : 1 = 0;
-		VkAccessFlags memory_write : 1 = 0;
-		VkAccessFlags command_preprocess_read : 1 = 0;
-		VkAccessFlags command_preprocess_write : 1 = 0;
-		VkAccessFlags color_attachment_read_noncoherent : 1 = 0;
-		VkAccessFlags conditional_rendering_read : 1 = 0;
-		VkAccessFlags acceleration_structure_read : 1 = 0;
-		VkAccessFlags acceleration_structure_write : 1 = 0;
-		VkAccessFlags fragment_shading_rate_attachment_read : 1 = 0;
-		VkAccessFlags fragment_density_map_read : 1 = 0;
-		VkAccessFlags transform_feedback_write : 1 = 0;
-		VkAccessFlags transform_feedback_counter_read : 1 = 0;
-		VkAccessFlags transform_feedback_counter_write : 1 = 0;
-		VkAccessFlags _reserved_28 : 4 = 0;
-	};
-
-	dst_access_mask_type dst_access_mask{};
+	::vkfu::flags::access src_access_mask{};
+	::vkfu::flags::access dst_access_mask{};
 	::std::uint32_t src_queue_family_index{};
 	::std::uint32_t dst_queue_family_index{};
 	VkBuffer buffer{};
@@ -335,142 +270,12 @@ struct buffer_memory_barrier
 	}
 };
 
-static_assert(sizeof(buffer_memory_barrier::src_access_mask_type) == sizeof(VkAccessFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.indirect_command_read = 1}) == VK_ACCESS_INDIRECT_COMMAND_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.index_read = 1}) == VK_ACCESS_INDEX_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.vertex_attribute_read = 1}) == VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.uniform_read = 1}) == VK_ACCESS_UNIFORM_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.input_attachment_read = 1}) == VK_ACCESS_INPUT_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.shader_read = 1}) == VK_ACCESS_SHADER_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.shader_write = 1}) == VK_ACCESS_SHADER_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.color_attachment_read = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.color_attachment_write = 1}) == VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.depth_stencil_attachment_read = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.depth_stencil_attachment_write = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.transfer_read = 1}) == VK_ACCESS_TRANSFER_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.transfer_write = 1}) == VK_ACCESS_TRANSFER_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.host_read = 1}) == VK_ACCESS_HOST_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.host_write = 1}) == VK_ACCESS_HOST_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.memory_read = 1}) == VK_ACCESS_MEMORY_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.memory_write = 1}) == VK_ACCESS_MEMORY_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.command_preprocess_read = 1}) == VK_ACCESS_COMMAND_PREPROCESS_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.command_preprocess_write = 1}) == VK_ACCESS_COMMAND_PREPROCESS_WRITE_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.color_attachment_read_noncoherent = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_NONCOHERENT_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.conditional_rendering_read = 1}) == VK_ACCESS_CONDITIONAL_RENDERING_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.acceleration_structure_read = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.acceleration_structure_write = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.fragment_shading_rate_attachment_read = 1}) == VK_ACCESS_FRAGMENT_SHADING_RATE_ATTACHMENT_READ_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.fragment_density_map_read = 1}) == VK_ACCESS_FRAGMENT_DENSITY_MAP_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.transform_feedback_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_WRITE_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.transform_feedback_counter_read = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::src_access_mask_type{.transform_feedback_counter_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT);
-#endif
-
-static_assert(sizeof(buffer_memory_barrier::dst_access_mask_type) == sizeof(VkAccessFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.indirect_command_read = 1}) == VK_ACCESS_INDIRECT_COMMAND_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.index_read = 1}) == VK_ACCESS_INDEX_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.vertex_attribute_read = 1}) == VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.uniform_read = 1}) == VK_ACCESS_UNIFORM_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.input_attachment_read = 1}) == VK_ACCESS_INPUT_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.shader_read = 1}) == VK_ACCESS_SHADER_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.shader_write = 1}) == VK_ACCESS_SHADER_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.color_attachment_read = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.color_attachment_write = 1}) == VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.depth_stencil_attachment_read = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.depth_stencil_attachment_write = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.transfer_read = 1}) == VK_ACCESS_TRANSFER_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.transfer_write = 1}) == VK_ACCESS_TRANSFER_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.host_read = 1}) == VK_ACCESS_HOST_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.host_write = 1}) == VK_ACCESS_HOST_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.memory_read = 1}) == VK_ACCESS_MEMORY_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.memory_write = 1}) == VK_ACCESS_MEMORY_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.command_preprocess_read = 1}) == VK_ACCESS_COMMAND_PREPROCESS_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.command_preprocess_write = 1}) == VK_ACCESS_COMMAND_PREPROCESS_WRITE_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.color_attachment_read_noncoherent = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_NONCOHERENT_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.conditional_rendering_read = 1}) == VK_ACCESS_CONDITIONAL_RENDERING_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.acceleration_structure_read = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.acceleration_structure_write = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.fragment_shading_rate_attachment_read = 1}) == VK_ACCESS_FRAGMENT_SHADING_RATE_ATTACHMENT_READ_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.fragment_density_map_read = 1}) == VK_ACCESS_FRAGMENT_DENSITY_MAP_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.transform_feedback_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_WRITE_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.transform_feedback_counter_read = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(buffer_memory_barrier::dst_access_mask_type{.transform_feedback_counter_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT);
-#endif
-
 struct image_memory_barrier
 {
-	using vulkan_tag_type = obj::image_memory_barrier;
+	using vulkan_tag_type = tag::image_memory_barrier;
 
-	struct src_access_mask_type
-	{
-		VkAccessFlags indirect_command_read : 1 = 0;
-		VkAccessFlags index_read : 1 = 0;
-		VkAccessFlags vertex_attribute_read : 1 = 0;
-		VkAccessFlags uniform_read : 1 = 0;
-		VkAccessFlags input_attachment_read : 1 = 0;
-		VkAccessFlags shader_read : 1 = 0;
-		VkAccessFlags shader_write : 1 = 0;
-		VkAccessFlags color_attachment_read : 1 = 0;
-		VkAccessFlags color_attachment_write : 1 = 0;
-		VkAccessFlags depth_stencil_attachment_read : 1 = 0;
-		VkAccessFlags depth_stencil_attachment_write : 1 = 0;
-		VkAccessFlags transfer_read : 1 = 0;
-		VkAccessFlags transfer_write : 1 = 0;
-		VkAccessFlags host_read : 1 = 0;
-		VkAccessFlags host_write : 1 = 0;
-		VkAccessFlags memory_read : 1 = 0;
-		VkAccessFlags memory_write : 1 = 0;
-		VkAccessFlags command_preprocess_read : 1 = 0;
-		VkAccessFlags command_preprocess_write : 1 = 0;
-		VkAccessFlags color_attachment_read_noncoherent : 1 = 0;
-		VkAccessFlags conditional_rendering_read : 1 = 0;
-		VkAccessFlags acceleration_structure_read : 1 = 0;
-		VkAccessFlags acceleration_structure_write : 1 = 0;
-		VkAccessFlags fragment_shading_rate_attachment_read : 1 = 0;
-		VkAccessFlags fragment_density_map_read : 1 = 0;
-		VkAccessFlags transform_feedback_write : 1 = 0;
-		VkAccessFlags transform_feedback_counter_read : 1 = 0;
-		VkAccessFlags transform_feedback_counter_write : 1 = 0;
-		VkAccessFlags _reserved_28 : 4 = 0;
-	};
-
-	src_access_mask_type src_access_mask{};
-	struct dst_access_mask_type
-	{
-		VkAccessFlags indirect_command_read : 1 = 0;
-		VkAccessFlags index_read : 1 = 0;
-		VkAccessFlags vertex_attribute_read : 1 = 0;
-		VkAccessFlags uniform_read : 1 = 0;
-		VkAccessFlags input_attachment_read : 1 = 0;
-		VkAccessFlags shader_read : 1 = 0;
-		VkAccessFlags shader_write : 1 = 0;
-		VkAccessFlags color_attachment_read : 1 = 0;
-		VkAccessFlags color_attachment_write : 1 = 0;
-		VkAccessFlags depth_stencil_attachment_read : 1 = 0;
-		VkAccessFlags depth_stencil_attachment_write : 1 = 0;
-		VkAccessFlags transfer_read : 1 = 0;
-		VkAccessFlags transfer_write : 1 = 0;
-		VkAccessFlags host_read : 1 = 0;
-		VkAccessFlags host_write : 1 = 0;
-		VkAccessFlags memory_read : 1 = 0;
-		VkAccessFlags memory_write : 1 = 0;
-		VkAccessFlags command_preprocess_read : 1 = 0;
-		VkAccessFlags command_preprocess_write : 1 = 0;
-		VkAccessFlags color_attachment_read_noncoherent : 1 = 0;
-		VkAccessFlags conditional_rendering_read : 1 = 0;
-		VkAccessFlags acceleration_structure_read : 1 = 0;
-		VkAccessFlags acceleration_structure_write : 1 = 0;
-		VkAccessFlags fragment_shading_rate_attachment_read : 1 = 0;
-		VkAccessFlags fragment_density_map_read : 1 = 0;
-		VkAccessFlags transform_feedback_write : 1 = 0;
-		VkAccessFlags transform_feedback_counter_read : 1 = 0;
-		VkAccessFlags transform_feedback_counter_write : 1 = 0;
-		VkAccessFlags _reserved_28 : 4 = 0;
-	};
-
-	dst_access_mask_type dst_access_mask{};
+	::vkfu::flags::access src_access_mask{};
+	::vkfu::flags::access dst_access_mask{};
 	::vkfu::enums::image_layout old_layout{};
 	::vkfu::enums::image_layout new_layout{};
 	::std::uint32_t src_queue_family_index{};
@@ -495,142 +300,12 @@ struct image_memory_barrier
 	}
 };
 
-static_assert(sizeof(image_memory_barrier::src_access_mask_type) == sizeof(VkAccessFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.indirect_command_read = 1}) == VK_ACCESS_INDIRECT_COMMAND_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.index_read = 1}) == VK_ACCESS_INDEX_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.vertex_attribute_read = 1}) == VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.uniform_read = 1}) == VK_ACCESS_UNIFORM_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.input_attachment_read = 1}) == VK_ACCESS_INPUT_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.shader_read = 1}) == VK_ACCESS_SHADER_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.shader_write = 1}) == VK_ACCESS_SHADER_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.color_attachment_read = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.color_attachment_write = 1}) == VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.depth_stencil_attachment_read = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.depth_stencil_attachment_write = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.transfer_read = 1}) == VK_ACCESS_TRANSFER_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.transfer_write = 1}) == VK_ACCESS_TRANSFER_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.host_read = 1}) == VK_ACCESS_HOST_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.host_write = 1}) == VK_ACCESS_HOST_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.memory_read = 1}) == VK_ACCESS_MEMORY_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.memory_write = 1}) == VK_ACCESS_MEMORY_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.command_preprocess_read = 1}) == VK_ACCESS_COMMAND_PREPROCESS_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.command_preprocess_write = 1}) == VK_ACCESS_COMMAND_PREPROCESS_WRITE_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.color_attachment_read_noncoherent = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_NONCOHERENT_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.conditional_rendering_read = 1}) == VK_ACCESS_CONDITIONAL_RENDERING_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.acceleration_structure_read = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.acceleration_structure_write = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.fragment_shading_rate_attachment_read = 1}) == VK_ACCESS_FRAGMENT_SHADING_RATE_ATTACHMENT_READ_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.fragment_density_map_read = 1}) == VK_ACCESS_FRAGMENT_DENSITY_MAP_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.transform_feedback_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_WRITE_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.transform_feedback_counter_read = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::src_access_mask_type{.transform_feedback_counter_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT);
-#endif
-
-static_assert(sizeof(image_memory_barrier::dst_access_mask_type) == sizeof(VkAccessFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.indirect_command_read = 1}) == VK_ACCESS_INDIRECT_COMMAND_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.index_read = 1}) == VK_ACCESS_INDEX_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.vertex_attribute_read = 1}) == VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.uniform_read = 1}) == VK_ACCESS_UNIFORM_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.input_attachment_read = 1}) == VK_ACCESS_INPUT_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.shader_read = 1}) == VK_ACCESS_SHADER_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.shader_write = 1}) == VK_ACCESS_SHADER_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.color_attachment_read = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.color_attachment_write = 1}) == VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.depth_stencil_attachment_read = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.depth_stencil_attachment_write = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.transfer_read = 1}) == VK_ACCESS_TRANSFER_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.transfer_write = 1}) == VK_ACCESS_TRANSFER_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.host_read = 1}) == VK_ACCESS_HOST_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.host_write = 1}) == VK_ACCESS_HOST_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.memory_read = 1}) == VK_ACCESS_MEMORY_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.memory_write = 1}) == VK_ACCESS_MEMORY_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.command_preprocess_read = 1}) == VK_ACCESS_COMMAND_PREPROCESS_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.command_preprocess_write = 1}) == VK_ACCESS_COMMAND_PREPROCESS_WRITE_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.color_attachment_read_noncoherent = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_NONCOHERENT_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.conditional_rendering_read = 1}) == VK_ACCESS_CONDITIONAL_RENDERING_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.acceleration_structure_read = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.acceleration_structure_write = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.fragment_shading_rate_attachment_read = 1}) == VK_ACCESS_FRAGMENT_SHADING_RATE_ATTACHMENT_READ_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.fragment_density_map_read = 1}) == VK_ACCESS_FRAGMENT_DENSITY_MAP_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.transform_feedback_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_WRITE_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.transform_feedback_counter_read = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(image_memory_barrier::dst_access_mask_type{.transform_feedback_counter_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT);
-#endif
-
 struct memory_barrier
 {
-	using vulkan_tag_type = obj::memory_barrier;
+	using vulkan_tag_type = tag::memory_barrier;
 
-	struct src_access_mask_type
-	{
-		VkAccessFlags indirect_command_read : 1 = 0;
-		VkAccessFlags index_read : 1 = 0;
-		VkAccessFlags vertex_attribute_read : 1 = 0;
-		VkAccessFlags uniform_read : 1 = 0;
-		VkAccessFlags input_attachment_read : 1 = 0;
-		VkAccessFlags shader_read : 1 = 0;
-		VkAccessFlags shader_write : 1 = 0;
-		VkAccessFlags color_attachment_read : 1 = 0;
-		VkAccessFlags color_attachment_write : 1 = 0;
-		VkAccessFlags depth_stencil_attachment_read : 1 = 0;
-		VkAccessFlags depth_stencil_attachment_write : 1 = 0;
-		VkAccessFlags transfer_read : 1 = 0;
-		VkAccessFlags transfer_write : 1 = 0;
-		VkAccessFlags host_read : 1 = 0;
-		VkAccessFlags host_write : 1 = 0;
-		VkAccessFlags memory_read : 1 = 0;
-		VkAccessFlags memory_write : 1 = 0;
-		VkAccessFlags command_preprocess_read : 1 = 0;
-		VkAccessFlags command_preprocess_write : 1 = 0;
-		VkAccessFlags color_attachment_read_noncoherent : 1 = 0;
-		VkAccessFlags conditional_rendering_read : 1 = 0;
-		VkAccessFlags acceleration_structure_read : 1 = 0;
-		VkAccessFlags acceleration_structure_write : 1 = 0;
-		VkAccessFlags fragment_shading_rate_attachment_read : 1 = 0;
-		VkAccessFlags fragment_density_map_read : 1 = 0;
-		VkAccessFlags transform_feedback_write : 1 = 0;
-		VkAccessFlags transform_feedback_counter_read : 1 = 0;
-		VkAccessFlags transform_feedback_counter_write : 1 = 0;
-		VkAccessFlags _reserved_28 : 4 = 0;
-	};
-
-	src_access_mask_type src_access_mask{};
-	struct dst_access_mask_type
-	{
-		VkAccessFlags indirect_command_read : 1 = 0;
-		VkAccessFlags index_read : 1 = 0;
-		VkAccessFlags vertex_attribute_read : 1 = 0;
-		VkAccessFlags uniform_read : 1 = 0;
-		VkAccessFlags input_attachment_read : 1 = 0;
-		VkAccessFlags shader_read : 1 = 0;
-		VkAccessFlags shader_write : 1 = 0;
-		VkAccessFlags color_attachment_read : 1 = 0;
-		VkAccessFlags color_attachment_write : 1 = 0;
-		VkAccessFlags depth_stencil_attachment_read : 1 = 0;
-		VkAccessFlags depth_stencil_attachment_write : 1 = 0;
-		VkAccessFlags transfer_read : 1 = 0;
-		VkAccessFlags transfer_write : 1 = 0;
-		VkAccessFlags host_read : 1 = 0;
-		VkAccessFlags host_write : 1 = 0;
-		VkAccessFlags memory_read : 1 = 0;
-		VkAccessFlags memory_write : 1 = 0;
-		VkAccessFlags command_preprocess_read : 1 = 0;
-		VkAccessFlags command_preprocess_write : 1 = 0;
-		VkAccessFlags color_attachment_read_noncoherent : 1 = 0;
-		VkAccessFlags conditional_rendering_read : 1 = 0;
-		VkAccessFlags acceleration_structure_read : 1 = 0;
-		VkAccessFlags acceleration_structure_write : 1 = 0;
-		VkAccessFlags fragment_shading_rate_attachment_read : 1 = 0;
-		VkAccessFlags fragment_density_map_read : 1 = 0;
-		VkAccessFlags transform_feedback_write : 1 = 0;
-		VkAccessFlags transform_feedback_counter_read : 1 = 0;
-		VkAccessFlags transform_feedback_counter_write : 1 = 0;
-		VkAccessFlags _reserved_28 : 4 = 0;
-	};
-
-	dst_access_mask_type dst_access_mask{};
+	::vkfu::flags::access src_access_mask{};
+	::vkfu::flags::access dst_access_mask{};
 
 	constexpr auto evaluate() const noexcept -> VkMemoryBarrier
 	{
@@ -642,70 +317,6 @@ struct memory_barrier
 		};
 	}
 };
-
-static_assert(sizeof(memory_barrier::src_access_mask_type) == sizeof(VkAccessFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.indirect_command_read = 1}) == VK_ACCESS_INDIRECT_COMMAND_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.index_read = 1}) == VK_ACCESS_INDEX_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.vertex_attribute_read = 1}) == VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.uniform_read = 1}) == VK_ACCESS_UNIFORM_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.input_attachment_read = 1}) == VK_ACCESS_INPUT_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.shader_read = 1}) == VK_ACCESS_SHADER_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.shader_write = 1}) == VK_ACCESS_SHADER_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.color_attachment_read = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.color_attachment_write = 1}) == VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.depth_stencil_attachment_read = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.depth_stencil_attachment_write = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.transfer_read = 1}) == VK_ACCESS_TRANSFER_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.transfer_write = 1}) == VK_ACCESS_TRANSFER_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.host_read = 1}) == VK_ACCESS_HOST_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.host_write = 1}) == VK_ACCESS_HOST_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.memory_read = 1}) == VK_ACCESS_MEMORY_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.memory_write = 1}) == VK_ACCESS_MEMORY_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.command_preprocess_read = 1}) == VK_ACCESS_COMMAND_PREPROCESS_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.command_preprocess_write = 1}) == VK_ACCESS_COMMAND_PREPROCESS_WRITE_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.color_attachment_read_noncoherent = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_NONCOHERENT_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.conditional_rendering_read = 1}) == VK_ACCESS_CONDITIONAL_RENDERING_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.acceleration_structure_read = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.acceleration_structure_write = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.fragment_shading_rate_attachment_read = 1}) == VK_ACCESS_FRAGMENT_SHADING_RATE_ATTACHMENT_READ_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.fragment_density_map_read = 1}) == VK_ACCESS_FRAGMENT_DENSITY_MAP_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.transform_feedback_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_WRITE_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.transform_feedback_counter_read = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::src_access_mask_type{.transform_feedback_counter_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT);
-#endif
-
-static_assert(sizeof(memory_barrier::dst_access_mask_type) == sizeof(VkAccessFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.indirect_command_read = 1}) == VK_ACCESS_INDIRECT_COMMAND_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.index_read = 1}) == VK_ACCESS_INDEX_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.vertex_attribute_read = 1}) == VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.uniform_read = 1}) == VK_ACCESS_UNIFORM_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.input_attachment_read = 1}) == VK_ACCESS_INPUT_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.shader_read = 1}) == VK_ACCESS_SHADER_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.shader_write = 1}) == VK_ACCESS_SHADER_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.color_attachment_read = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.color_attachment_write = 1}) == VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.depth_stencil_attachment_read = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.depth_stencil_attachment_write = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.transfer_read = 1}) == VK_ACCESS_TRANSFER_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.transfer_write = 1}) == VK_ACCESS_TRANSFER_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.host_read = 1}) == VK_ACCESS_HOST_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.host_write = 1}) == VK_ACCESS_HOST_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.memory_read = 1}) == VK_ACCESS_MEMORY_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.memory_write = 1}) == VK_ACCESS_MEMORY_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.command_preprocess_read = 1}) == VK_ACCESS_COMMAND_PREPROCESS_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.command_preprocess_write = 1}) == VK_ACCESS_COMMAND_PREPROCESS_WRITE_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.color_attachment_read_noncoherent = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_NONCOHERENT_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.conditional_rendering_read = 1}) == VK_ACCESS_CONDITIONAL_RENDERING_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.acceleration_structure_read = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.acceleration_structure_write = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.fragment_shading_rate_attachment_read = 1}) == VK_ACCESS_FRAGMENT_SHADING_RATE_ATTACHMENT_READ_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.fragment_density_map_read = 1}) == VK_ACCESS_FRAGMENT_DENSITY_MAP_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.transform_feedback_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_WRITE_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.transform_feedback_counter_read = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(memory_barrier::dst_access_mask_type{.transform_feedback_counter_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT);
-#endif
 
 struct extent_2d
 {

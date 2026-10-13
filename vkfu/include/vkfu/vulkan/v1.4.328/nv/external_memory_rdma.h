@@ -60,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceExternalMemoryRDMAFeaturesNV const
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -75,7 +75,7 @@ struct memory_get_remote_address{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::nv::memory_get_remote_address>
+struct vulkan_object_trait<tag::nv::memory_get_remote_address>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -83,7 +83,7 @@ struct vulkan_object_trait<obj::nv::memory_get_remote_address>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::nv::external_memory_rdma>
+struct vulkan_object_trait<tag::feature::nv::external_memory_rdma>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -93,11 +93,11 @@ struct vulkan_object_trait<obj::feature::nv::external_memory_rdma>
 template<>
 struct expression_vulkan_tag<VkMemoryGetRemoteAddressInfoNV>
 {
-	using type = obj::nv::memory_get_remote_address;
+	using type = tag::nv::memory_get_remote_address;
 };
 
 template<>
-struct vulkan_object_native<obj::nv::memory_get_remote_address>
+struct vulkan_object_native<tag::nv::memory_get_remote_address>
 {
 	using type = VkMemoryGetRemoteAddressInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MEMORY_GET_REMOTE_ADDRESS_INFO_NV;
@@ -106,18 +106,18 @@ struct vulkan_object_native<obj::nv::memory_get_remote_address>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceExternalMemoryRDMAFeaturesNV>
 {
-	using type = obj::feature::nv::external_memory_rdma;
+	using type = tag::feature::nv::external_memory_rdma;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::external_memory_rdma>
+struct vulkan_object_native<tag::feature::nv::external_memory_rdma>
 {
 	using type = VkPhysicalDeviceExternalMemoryRDMAFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_MEMORY_RDMA_FEATURES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::nv::memory_get_remote_address>
+struct vulkan_object_extensions<tag::nv::memory_get_remote_address>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_external_memory_rdma"};
 	constexpr static ::std::uint32_t core = 0;
@@ -125,7 +125,7 @@ struct vulkan_object_extensions<obj::nv::memory_get_remote_address>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::external_memory_rdma>
+struct vulkan_object_extensions<tag::feature::nv::external_memory_rdma>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_external_memory_rdma"};
 	constexpr static ::std::uint32_t core = 0;
@@ -133,9 +133,9 @@ struct vulkan_object_extensions<obj::feature::nv::external_memory_rdma>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::external_memory_rdma> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::external_memory_rdma> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::external_memory_rdma> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::external_memory_rdma> = true;
 }
 
 namespace vkfu::param
@@ -146,7 +146,7 @@ using ::vkfu::operator|;
 
 struct external_memory_rdma
 {
-	using vulkan_tag_type = obj::feature::nv::external_memory_rdma;
+	using vulkan_tag_type = tag::feature::nv::external_memory_rdma;
 
 	bool enable = false;
 
@@ -168,7 +168,7 @@ using ::vkfu::operator|;
 
 struct memory_get_remote_address
 {
-	using vulkan_tag_type = obj::nv::memory_get_remote_address;
+	using vulkan_tag_type = tag::nv::memory_get_remote_address;
 
 	VkDeviceMemory memory{};
 	::vkfu::enums::external_memory_handle_type handle_type{};
@@ -191,7 +191,7 @@ namespace vkfu
 {
 namespace nv
 {
-template<::vkfu::expression_for<::vkfu::obj::nv::memory_get_remote_address> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::nv::memory_get_remote_address> Expression1>
 [[nodiscard]] auto get_memory_remote_address(VkDevice device, Expression1&& memory_get_remote_address_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkRemoteAddressNV, ::VkResult>
 {
@@ -205,7 +205,7 @@ template<::vkfu::expression_for<::vkfu::obj::nv::memory_get_remote_address> Expr
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nv::memory_get_remote_address> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::nv::memory_get_remote_address> Expression1>
 [[nodiscard]] auto get_memory_remote_address(VkDevice device, Expression1&& memory_get_remote_address_info) -> VkRemoteAddressNV
 {
 	auto outcome = get_memory_remote_address(device, ::std::forward<Expression1>(memory_get_remote_address_info), ::std::nothrow);

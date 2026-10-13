@@ -26,6 +26,7 @@
 #include <vkfu/storage.h>
 #include <vkfu/vulkan_object.h>
 
+#include "../version_1_0/pipeline.h"
 #include "../version_1_0/pipeline_layout.h"
 #include "../version_1_4/maintenance6.h"
 
@@ -59,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkSetDescriptorBufferOffsetsInfoEXT const& value) 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace ext
 {
@@ -71,7 +72,7 @@ struct set_descriptor_buffer_offsets{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::ext::bind_descriptor_buffer_embedded_samplers>
+struct vulkan_object_trait<tag::ext::bind_descriptor_buffer_embedded_samplers>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -79,7 +80,7 @@ struct vulkan_object_trait<obj::ext::bind_descriptor_buffer_embedded_samplers>
 };
 
 template<>
-struct vulkan_object_trait<obj::ext::set_descriptor_buffer_offsets>
+struct vulkan_object_trait<tag::ext::set_descriptor_buffer_offsets>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -89,11 +90,11 @@ struct vulkan_object_trait<obj::ext::set_descriptor_buffer_offsets>
 template<>
 struct expression_vulkan_tag<VkBindDescriptorBufferEmbeddedSamplersInfoEXT>
 {
-	using type = obj::ext::bind_descriptor_buffer_embedded_samplers;
+	using type = tag::ext::bind_descriptor_buffer_embedded_samplers;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::bind_descriptor_buffer_embedded_samplers>
+struct vulkan_object_native<tag::ext::bind_descriptor_buffer_embedded_samplers>
 {
 	using type = VkBindDescriptorBufferEmbeddedSamplersInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_BIND_DESCRIPTOR_BUFFER_EMBEDDED_SAMPLERS_INFO_EXT;
@@ -102,18 +103,18 @@ struct vulkan_object_native<obj::ext::bind_descriptor_buffer_embedded_samplers>
 template<>
 struct expression_vulkan_tag<VkSetDescriptorBufferOffsetsInfoEXT>
 {
-	using type = obj::ext::set_descriptor_buffer_offsets;
+	using type = tag::ext::set_descriptor_buffer_offsets;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::set_descriptor_buffer_offsets>
+struct vulkan_object_native<tag::ext::set_descriptor_buffer_offsets>
 {
 	using type = VkSetDescriptorBufferOffsetsInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SET_DESCRIPTOR_BUFFER_OFFSETS_INFO_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::bind_descriptor_buffer_embedded_samplers>
+struct vulkan_object_extensions<tag::ext::bind_descriptor_buffer_embedded_samplers>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance6"};
 	constexpr static ::std::uint32_t core = 0;
@@ -121,7 +122,7 @@ struct vulkan_object_extensions<obj::ext::bind_descriptor_buffer_embedded_sample
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::set_descriptor_buffer_offsets>
+struct vulkan_object_extensions<tag::ext::set_descriptor_buffer_offsets>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance6"};
 	constexpr static ::std::uint32_t core = 0;
@@ -129,31 +130,31 @@ struct vulkan_object_extensions<obj::ext::set_descriptor_buffer_offsets>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::ext::bind_descriptor_buffer_embedded_samplers, obj::pipeline_layout> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::ext::bind_descriptor_buffer_embedded_samplers, tag::pipeline_layout> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::ext::set_descriptor_buffer_offsets, obj::pipeline_layout> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::ext::set_descriptor_buffer_offsets, tag::pipeline_layout> = true;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using maintenance6 = ::vkfu::obj::feature::maintenance6;
+using maintenance6 = ::vkfu::tag::feature::maintenance6;
 }
 namespace khr
 {
-using bind_descriptor_sets = ::vkfu::obj::bind_descriptor_sets;
-using push_constants = ::vkfu::obj::push_constants;
-using push_descriptor_set = ::vkfu::obj::push_descriptor_set;
-using push_descriptor_set_with_template = ::vkfu::obj::push_descriptor_set_with_template;
+using bind_descriptor_sets = ::vkfu::tag::bind_descriptor_sets;
+using push_constants = ::vkfu::tag::push_constants;
+using push_descriptor_set = ::vkfu::tag::push_descriptor_set;
+using push_descriptor_set_with_template = ::vkfu::tag::push_descriptor_set_with_template;
 }
 namespace option::khr
 {
-using bind_memory_status = ::vkfu::obj::option::bind_memory_status;
+using bind_memory_status = ::vkfu::tag::option::bind_memory_status;
 }
 namespace property::khr
 {
-using maintenance6 = ::vkfu::obj::property::maintenance6;
+using maintenance6 = ::vkfu::tag::property::maintenance6;
 }
 }
 
@@ -165,31 +166,9 @@ using ::vkfu::operator|;
 
 struct bind_descriptor_buffer_embedded_samplers
 {
-	using vulkan_tag_type = obj::ext::bind_descriptor_buffer_embedded_samplers;
+	using vulkan_tag_type = tag::ext::bind_descriptor_buffer_embedded_samplers;
 
-	struct stage_flags_type
-	{
-		VkShaderStageFlags vertex : 1 = 0;
-		VkShaderStageFlags tessellation_control : 1 = 0;
-		VkShaderStageFlags tessellation_evaluation : 1 = 0;
-		VkShaderStageFlags geometry : 1 = 0;
-		VkShaderStageFlags fragment : 1 = 0;
-		VkShaderStageFlags compute : 1 = 0;
-		VkShaderStageFlags task : 1 = 0;
-		VkShaderStageFlags mesh : 1 = 0;
-		VkShaderStageFlags raygen : 1 = 0;
-		VkShaderStageFlags any_hit : 1 = 0;
-		VkShaderStageFlags closest_hit : 1 = 0;
-		VkShaderStageFlags miss : 1 = 0;
-		VkShaderStageFlags intersection : 1 = 0;
-		VkShaderStageFlags callable : 1 = 0;
-		VkShaderStageFlags subpass_shading : 1 = 0;
-		VkShaderStageFlags _reserved_15 : 4 = 0;
-		VkShaderStageFlags cluster_culling : 1 = 0;
-		VkShaderStageFlags _reserved_20 : 12 = 0;
-	};
-
-	stage_flags_type stage_flags{};
+	::vkfu::flags::shader_stage stage_flags{};
 	VkPipelineLayout layout{};
 	::std::uint32_t set{};
 
@@ -205,53 +184,11 @@ struct bind_descriptor_buffer_embedded_samplers
 	}
 };
 
-static_assert(sizeof(bind_descriptor_buffer_embedded_samplers::stage_flags_type) == sizeof(VkShaderStageFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_buffer_embedded_samplers::stage_flags_type{.vertex = 1}) == VK_SHADER_STAGE_VERTEX_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_buffer_embedded_samplers::stage_flags_type{.tessellation_control = 1}) == VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_buffer_embedded_samplers::stage_flags_type{.tessellation_evaluation = 1}) == VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_buffer_embedded_samplers::stage_flags_type{.geometry = 1}) == VK_SHADER_STAGE_GEOMETRY_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_buffer_embedded_samplers::stage_flags_type{.fragment = 1}) == VK_SHADER_STAGE_FRAGMENT_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_buffer_embedded_samplers::stage_flags_type{.compute = 1}) == VK_SHADER_STAGE_COMPUTE_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_buffer_embedded_samplers::stage_flags_type{.task = 1}) == VK_SHADER_STAGE_TASK_BIT_EXT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_buffer_embedded_samplers::stage_flags_type{.mesh = 1}) == VK_SHADER_STAGE_MESH_BIT_EXT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_buffer_embedded_samplers::stage_flags_type{.raygen = 1}) == VK_SHADER_STAGE_RAYGEN_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_buffer_embedded_samplers::stage_flags_type{.any_hit = 1}) == VK_SHADER_STAGE_ANY_HIT_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_buffer_embedded_samplers::stage_flags_type{.closest_hit = 1}) == VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_buffer_embedded_samplers::stage_flags_type{.miss = 1}) == VK_SHADER_STAGE_MISS_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_buffer_embedded_samplers::stage_flags_type{.intersection = 1}) == VK_SHADER_STAGE_INTERSECTION_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_buffer_embedded_samplers::stage_flags_type{.callable = 1}) == VK_SHADER_STAGE_CALLABLE_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_buffer_embedded_samplers::stage_flags_type{.subpass_shading = 1}) == VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_buffer_embedded_samplers::stage_flags_type{.cluster_culling = 1}) == VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI);
-#endif
-
 struct set_descriptor_buffer_offsets
 {
-	using vulkan_tag_type = obj::ext::set_descriptor_buffer_offsets;
+	using vulkan_tag_type = tag::ext::set_descriptor_buffer_offsets;
 
-	struct stage_flags_type
-	{
-		VkShaderStageFlags vertex : 1 = 0;
-		VkShaderStageFlags tessellation_control : 1 = 0;
-		VkShaderStageFlags tessellation_evaluation : 1 = 0;
-		VkShaderStageFlags geometry : 1 = 0;
-		VkShaderStageFlags fragment : 1 = 0;
-		VkShaderStageFlags compute : 1 = 0;
-		VkShaderStageFlags task : 1 = 0;
-		VkShaderStageFlags mesh : 1 = 0;
-		VkShaderStageFlags raygen : 1 = 0;
-		VkShaderStageFlags any_hit : 1 = 0;
-		VkShaderStageFlags closest_hit : 1 = 0;
-		VkShaderStageFlags miss : 1 = 0;
-		VkShaderStageFlags intersection : 1 = 0;
-		VkShaderStageFlags callable : 1 = 0;
-		VkShaderStageFlags subpass_shading : 1 = 0;
-		VkShaderStageFlags _reserved_15 : 4 = 0;
-		VkShaderStageFlags cluster_culling : 1 = 0;
-		VkShaderStageFlags _reserved_20 : 12 = 0;
-	};
-
-	stage_flags_type stage_flags{};
+	::vkfu::flags::shader_stage stage_flags{};
 	VkPipelineLayout layout{};
 	::std::uint32_t first_set{};
 	::std::uint32_t set_count{};
@@ -272,26 +209,6 @@ struct set_descriptor_buffer_offsets
 		};
 	}
 };
-
-static_assert(sizeof(set_descriptor_buffer_offsets::stage_flags_type) == sizeof(VkShaderStageFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkShaderStageFlags>(set_descriptor_buffer_offsets::stage_flags_type{.vertex = 1}) == VK_SHADER_STAGE_VERTEX_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(set_descriptor_buffer_offsets::stage_flags_type{.tessellation_control = 1}) == VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(set_descriptor_buffer_offsets::stage_flags_type{.tessellation_evaluation = 1}) == VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(set_descriptor_buffer_offsets::stage_flags_type{.geometry = 1}) == VK_SHADER_STAGE_GEOMETRY_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(set_descriptor_buffer_offsets::stage_flags_type{.fragment = 1}) == VK_SHADER_STAGE_FRAGMENT_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(set_descriptor_buffer_offsets::stage_flags_type{.compute = 1}) == VK_SHADER_STAGE_COMPUTE_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(set_descriptor_buffer_offsets::stage_flags_type{.task = 1}) == VK_SHADER_STAGE_TASK_BIT_EXT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(set_descriptor_buffer_offsets::stage_flags_type{.mesh = 1}) == VK_SHADER_STAGE_MESH_BIT_EXT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(set_descriptor_buffer_offsets::stage_flags_type{.raygen = 1}) == VK_SHADER_STAGE_RAYGEN_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(set_descriptor_buffer_offsets::stage_flags_type{.any_hit = 1}) == VK_SHADER_STAGE_ANY_HIT_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(set_descriptor_buffer_offsets::stage_flags_type{.closest_hit = 1}) == VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(set_descriptor_buffer_offsets::stage_flags_type{.miss = 1}) == VK_SHADER_STAGE_MISS_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(set_descriptor_buffer_offsets::stage_flags_type{.intersection = 1}) == VK_SHADER_STAGE_INTERSECTION_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(set_descriptor_buffer_offsets::stage_flags_type{.callable = 1}) == VK_SHADER_STAGE_CALLABLE_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(set_descriptor_buffer_offsets::stage_flags_type{.subpass_shading = 1}) == VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI);
-static_assert(::std::bit_cast<VkShaderStageFlags>(set_descriptor_buffer_offsets::stage_flags_type{.cluster_culling = 1}) == VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI);
-#endif
 
 }
 
@@ -318,14 +235,14 @@ namespace vkfu
 {
 namespace ext
 {
-template<::vkfu::expression_for<::vkfu::obj::ext::bind_descriptor_buffer_embedded_samplers> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::bind_descriptor_buffer_embedded_samplers> Expression1>
 void cmd_bind_descriptor_buffer_embedded_samplers2(VkCommandBuffer command_buffer, Expression1&& bind_descriptor_buffer_embedded_samplers_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(bind_descriptor_buffer_embedded_samplers_info));
 	::vkCmdBindDescriptorBufferEmbeddedSamplers2EXT(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::set_descriptor_buffer_offsets> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::set_descriptor_buffer_offsets> Expression1>
 void cmd_set_descriptor_buffer_offsets2(VkCommandBuffer command_buffer, Expression1&& set_descriptor_buffer_offsets_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(set_descriptor_buffer_offsets_info));

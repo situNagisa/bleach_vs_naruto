@@ -28,11 +28,11 @@
 
 #include "../version_1_3/pipeline_creation_cache_control.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
-using pipeline_creation_cache_control = ::vkfu::obj::feature::pipeline_creation_cache_control;
+using pipeline_creation_cache_control = ::vkfu::tag::feature::pipeline_creation_cache_control;
 }
 }
 

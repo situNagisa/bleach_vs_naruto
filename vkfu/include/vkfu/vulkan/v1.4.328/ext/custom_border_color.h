@@ -76,7 +76,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceCustomBorderColorPropertiesEXT con
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -95,7 +95,7 @@ struct custom_border_color{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::custom_border_color>
+struct vulkan_object_trait<tag::feature::ext::custom_border_color>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -103,7 +103,7 @@ struct vulkan_object_trait<obj::feature::ext::custom_border_color>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::ext::sampler_custom_border_color>
+struct vulkan_object_trait<tag::option::ext::sampler_custom_border_color>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -111,7 +111,7 @@ struct vulkan_object_trait<obj::option::ext::sampler_custom_border_color>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::ext::custom_border_color>
+struct vulkan_object_trait<tag::property::ext::custom_border_color>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -121,11 +121,11 @@ struct vulkan_object_trait<obj::property::ext::custom_border_color>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceCustomBorderColorFeaturesEXT>
 {
-	using type = obj::feature::ext::custom_border_color;
+	using type = tag::feature::ext::custom_border_color;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::custom_border_color>
+struct vulkan_object_native<tag::feature::ext::custom_border_color>
 {
 	using type = VkPhysicalDeviceCustomBorderColorFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CUSTOM_BORDER_COLOR_FEATURES_EXT;
@@ -134,11 +134,11 @@ struct vulkan_object_native<obj::feature::ext::custom_border_color>
 template<>
 struct expression_vulkan_tag<VkSamplerCustomBorderColorCreateInfoEXT>
 {
-	using type = obj::option::ext::sampler_custom_border_color;
+	using type = tag::option::ext::sampler_custom_border_color;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::sampler_custom_border_color>
+struct vulkan_object_native<tag::option::ext::sampler_custom_border_color>
 {
 	using type = VkSamplerCustomBorderColorCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SAMPLER_CUSTOM_BORDER_COLOR_CREATE_INFO_EXT;
@@ -147,18 +147,18 @@ struct vulkan_object_native<obj::option::ext::sampler_custom_border_color>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceCustomBorderColorPropertiesEXT>
 {
-	using type = obj::property::ext::custom_border_color;
+	using type = tag::property::ext::custom_border_color;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::custom_border_color>
+struct vulkan_object_native<tag::property::ext::custom_border_color>
 {
 	using type = VkPhysicalDeviceCustomBorderColorPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CUSTOM_BORDER_COLOR_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::custom_border_color>
+struct vulkan_object_extensions<tag::feature::ext::custom_border_color>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_custom_border_color"};
 	constexpr static ::std::uint32_t core = 0;
@@ -166,7 +166,7 @@ struct vulkan_object_extensions<obj::feature::ext::custom_border_color>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::sampler_custom_border_color>
+struct vulkan_object_extensions<tag::option::ext::sampler_custom_border_color>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_custom_border_color"};
 	constexpr static ::std::uint32_t core = 0;
@@ -174,7 +174,7 @@ struct vulkan_object_extensions<obj::option::ext::sampler_custom_border_color>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::custom_border_color>
+struct vulkan_object_extensions<tag::property::ext::custom_border_color>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_custom_border_color"};
 	constexpr static ::std::uint32_t core = 0;
@@ -182,13 +182,13 @@ struct vulkan_object_extensions<obj::property::ext::custom_border_color>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::custom_border_color> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::custom_border_color> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::custom_border_color> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::custom_border_color> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::custom_border_color> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::custom_border_color> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::sampler, obj::option::ext::sampler_custom_border_color> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::sampler, tag::option::ext::sampler_custom_border_color> = true;
 }
 
 namespace vkfu::param
@@ -199,7 +199,7 @@ using ::vkfu::operator|;
 
 struct custom_border_color
 {
-	using vulkan_tag_type = obj::feature::ext::custom_border_color;
+	using vulkan_tag_type = tag::feature::ext::custom_border_color;
 
 	bool custom_border_colors = false;
 	bool without_format = false;
@@ -223,7 +223,7 @@ using ::vkfu::operator|;
 
 struct sampler_custom_border_color
 {
-	using vulkan_tag_type = obj::option::ext::sampler_custom_border_color;
+	using vulkan_tag_type = tag::option::ext::sampler_custom_border_color;
 
 	VkClearColorValue custom_border_color{};
 	::vkfu::enums::format format{};

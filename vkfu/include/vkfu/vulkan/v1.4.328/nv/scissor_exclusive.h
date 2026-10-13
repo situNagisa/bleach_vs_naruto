@@ -60,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkPipelineViewportExclusiveScissorStateCreateInfoN
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -75,7 +75,7 @@ struct viewport_exclusive_scissor{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::exclusive_scissor>
+struct vulkan_object_trait<tag::feature::nv::exclusive_scissor>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -83,7 +83,7 @@ struct vulkan_object_trait<obj::feature::nv::exclusive_scissor>
 };
 
 template<>
-struct vulkan_object_trait<obj::state::nv::viewport_exclusive_scissor>
+struct vulkan_object_trait<tag::state::nv::viewport_exclusive_scissor>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -93,11 +93,11 @@ struct vulkan_object_trait<obj::state::nv::viewport_exclusive_scissor>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceExclusiveScissorFeaturesNV>
 {
-	using type = obj::feature::nv::exclusive_scissor;
+	using type = tag::feature::nv::exclusive_scissor;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::exclusive_scissor>
+struct vulkan_object_native<tag::feature::nv::exclusive_scissor>
 {
 	using type = VkPhysicalDeviceExclusiveScissorFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXCLUSIVE_SCISSOR_FEATURES_NV;
@@ -106,18 +106,18 @@ struct vulkan_object_native<obj::feature::nv::exclusive_scissor>
 template<>
 struct expression_vulkan_tag<VkPipelineViewportExclusiveScissorStateCreateInfoNV>
 {
-	using type = obj::state::nv::viewport_exclusive_scissor;
+	using type = tag::state::nv::viewport_exclusive_scissor;
 };
 
 template<>
-struct vulkan_object_native<obj::state::nv::viewport_exclusive_scissor>
+struct vulkan_object_native<tag::state::nv::viewport_exclusive_scissor>
 {
 	using type = VkPipelineViewportExclusiveScissorStateCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_EXCLUSIVE_SCISSOR_STATE_CREATE_INFO_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::exclusive_scissor>
+struct vulkan_object_extensions<tag::feature::nv::exclusive_scissor>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_scissor_exclusive"};
 	constexpr static ::std::uint32_t core = 0;
@@ -125,7 +125,7 @@ struct vulkan_object_extensions<obj::feature::nv::exclusive_scissor>
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::nv::viewport_exclusive_scissor>
+struct vulkan_object_extensions<tag::state::nv::viewport_exclusive_scissor>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_scissor_exclusive"};
 	constexpr static ::std::uint32_t core = 0;
@@ -133,11 +133,11 @@ struct vulkan_object_extensions<obj::state::nv::viewport_exclusive_scissor>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::exclusive_scissor> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::exclusive_scissor> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::exclusive_scissor> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::exclusive_scissor> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::viewport, obj::state::nv::viewport_exclusive_scissor> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::viewport, tag::state::nv::viewport_exclusive_scissor> = true;
 }
 
 namespace vkfu::param
@@ -148,7 +148,7 @@ using ::vkfu::operator|;
 
 struct exclusive_scissor
 {
-	using vulkan_tag_type = obj::feature::nv::exclusive_scissor;
+	using vulkan_tag_type = tag::feature::nv::exclusive_scissor;
 
 	bool enable = false;
 
@@ -170,7 +170,7 @@ using ::vkfu::operator|;
 
 struct viewport_exclusive_scissor
 {
-	using vulkan_tag_type = obj::state::nv::viewport_exclusive_scissor;
+	using vulkan_tag_type = tag::state::nv::viewport_exclusive_scissor;
 
 	::std::span<VkRect2D const> exclusive_scissors{};
 

@@ -28,15 +28,15 @@
 
 #include "../khr/robustness2.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr::ext
 {
-using robustness2 = ::vkfu::obj::feature::khr::robustness2;
+using robustness2 = ::vkfu::tag::feature::khr::robustness2;
 }
 namespace property::khr::ext
 {
-using robustness2 = ::vkfu::obj::property::khr::robustness2;
+using robustness2 = ::vkfu::tag::property::khr::robustness2;
 }
 }
 

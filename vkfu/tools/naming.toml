@@ -6907,6 +6907,312 @@ flags = "flags"
 dpy = "dpy"
 window = "window"
 
+[flags."VkAccelerationStructureCreateFlagsKHR"]
+name = "acceleration_structure_create"
+
+[flags."VkAccessFlags"]
+name = "access"
+
+[flags."VkAccessFlags2"]
+name = "access2"
+
+[flags."VkAddressCopyFlagsKHR"]
+name = "address_copy"
+
+[flags."VkAttachmentDescriptionFlags"]
+name = "attachment_description"
+
+[flags."VkBufferCreateFlags"]
+name = "buffer_create"
+
+[flags."VkBufferUsageFlags"]
+name = "buffer_usage"
+
+[flags."VkBufferUsageFlags2"]
+name = "buffer_usage2"
+
+[flags."VkBuildAccelerationStructureFlagsKHR"]
+name = "build_acceleration_structure"
+
+[flags."VkBuildMicromapFlagsEXT"]
+name = "build_micromap"
+
+[flags."VkClusterAccelerationStructureAddressResolutionFlagsNV"]
+name = "cluster_acceleration_structure_address_resolution"
+
+[flags."VkColorComponentFlags"]
+name = "color_component"
+
+[flags."VkCommandBufferUsageFlags"]
+name = "command_buffer_usage"
+
+[flags."VkCommandPoolCreateFlags"]
+name = "command_pool_create"
+
+[flags."VkConditionalRenderingFlagsEXT"]
+name = "conditional_rendering"
+
+[flags."VkCullModeFlags"]
+name = "cull_mode"
+
+[flags."VkDataGraphPipelineSessionCreateFlagsARM"]
+name = "data_graph_pipeline_session_create"
+
+[flags."VkDebugReportFlagsEXT"]
+name = "debug_report"
+
+[flags."VkDebugUtilsMessageSeverityFlagsEXT"]
+name = "debug_utils_message_severity"
+
+[flags."VkDebugUtilsMessageTypeFlagsEXT"]
+name = "debug_utils_message_type"
+
+[flags."VkDependencyFlags"]
+name = "dependency"
+
+[flags."VkDescriptorPoolCreateFlags"]
+name = "descriptor_pool_create"
+
+[flags."VkDescriptorSetLayoutCreateFlags"]
+name = "descriptor_set_layout_create"
+
+[flags."VkDeviceAddressBindingFlagsEXT"]
+name = "device_address_binding"
+
+[flags."VkDeviceDiagnosticsConfigFlagsNV"]
+name = "device_diagnostics_config"
+
+[flags."VkDeviceGroupPresentModeFlagsKHR"]
+name = "device_group_present_mode"
+
+[flags."VkDeviceQueueCreateFlags"]
+name = "device_queue_create"
+
+[flags."VkEventCreateFlags"]
+name = "event_create"
+
+[flags."VkExternalFenceHandleTypeFlags"]
+name = "external_fence_handle_type"
+
+[flags."VkExternalMemoryHandleTypeFlags"]
+name = "external_memory_handle_type"
+
+[flags."VkExternalMemoryHandleTypeFlagsNV"]
+name = "external_memory_handle_type_nv"
+
+[flags."VkExternalSemaphoreHandleTypeFlags"]
+name = "external_semaphore_handle_type"
+
+[flags."VkFenceCreateFlags"]
+name = "fence_create"
+
+[flags."VkFenceImportFlags"]
+name = "fence_import"
+
+[flags."VkFormatFeatureFlags"]
+name = "format_feature"
+
+[flags."VkFrameBoundaryFlagsEXT"]
+name = "frame_boundary"
+
+[flags."VkFramebufferCreateFlags"]
+name = "framebuffer_create"
+
+[flags."VkGeometryFlagsKHR"]
+name = "geometry"
+
+[flags."VkGraphicsPipelineLibraryFlagsEXT"]
+name = "graphics_pipeline_library"
+
+[flags."VkHostImageCopyFlags"]
+name = "host_image_copy"
+
+[flags."VkImageAspectFlags"]
+name = "image_aspect"
+
+[flags."VkImageCompressionFlagsEXT"]
+name = "image_compression"
+
+[flags."VkImageConstraintsInfoFlagsFUCHSIA"]
+name = "image_constraints_info"
+
+[flags."VkImageCreateFlags"]
+name = "image_create"
+
+[flags."VkImageUsageFlags"]
+name = "image_usage"
+
+[flags."VkImageViewCreateFlags"]
+name = "image_view_create"
+
+[flags."VkIndirectCommandsLayoutUsageFlagsEXT"]
+name = "indirect_commands_layout_usage_ext"
+
+[flags."VkIndirectCommandsLayoutUsageFlagsNV"]
+name = "indirect_commands_layout_usage_nv"
+
+[flags."VkIndirectStateFlagsNV"]
+name = "indirect_state"
+
+[flags."VkInstanceCreateFlags"]
+name = "instance_create"
+
+[flags."VkMemoryAllocateFlags"]
+name = "memory_allocate"
+
+[flags."VkMemoryMapFlags"]
+name = "memory_map"
+
+[flags."VkMemoryUnmapFlags"]
+name = "memory_unmap"
+
+[flags."VkMicromapCreateFlagsEXT"]
+name = "micromap_create"
+
+[flags."VkOpticalFlowExecuteFlagsNV"]
+name = "optical_flow_execute"
+
+[flags."VkOpticalFlowGridSizeFlagsNV"]
+name = "optical_flow_grid_size"
+
+[flags."VkOpticalFlowSessionCreateFlagsNV"]
+name = "optical_flow_session_create"
+
+[flags."VkOpticalFlowUsageFlagsNV"]
+name = "optical_flow_usage"
+
+[flags."VkPipelineCacheCreateFlags"]
+name = "pipeline_cache_create"
+
+[flags."VkPipelineColorBlendStateCreateFlags"]
+name = "pipeline_color_blend_state_create"
+
+[flags."VkPipelineCreateFlags"]
+name = "pipeline_create"
+
+[flags."VkPipelineCreateFlags2"]
+name = "pipeline_create2"
+
+[flags."VkPipelineCreationFeedbackFlags"]
+name = "pipeline_creation_feedback"
+
+[flags."VkPipelineDepthStencilStateCreateFlags"]
+name = "pipeline_depth_stencil_state_create"
+
+[flags."VkPipelineLayoutCreateFlags"]
+name = "pipeline_layout_create"
+
+[flags."VkPipelineShaderStageCreateFlags"]
+name = "pipeline_shader_stage_create"
+
+[flags."VkPipelineStageFlags"]
+name = "pipeline_stage"
+
+[flags."VkPipelineStageFlags2"]
+name = "pipeline_stage2"
+
+[flags."VkPresentGravityFlagsKHR"]
+name = "present_gravity"
+
+[flags."VkPresentScalingFlagsKHR"]
+name = "present_scaling"
+
+[flags."VkQueryControlFlags"]
+name = "query_control"
+
+[flags."VkQueryPipelineStatisticFlags"]
+name = "query_pipeline_statistic"
+
+[flags."VkQueryPoolCreateFlags"]
+name = "query_pool_create"
+
+[flags."VkRenderPassCreateFlags"]
+name = "render_pass_create"
+
+[flags."VkRenderingFlags"]
+name = "rendering"
+
+[flags."VkSamplerCreateFlags"]
+name = "sampler_create"
+
+[flags."VkSemaphoreImportFlags"]
+name = "semaphore_import"
+
+[flags."VkSemaphoreWaitFlags"]
+name = "semaphore_wait"
+
+[flags."VkShaderCreateFlagsEXT"]
+name = "shader_create"
+
+[flags."VkShaderStageFlags"]
+name = "shader_stage"
+
+[flags."VkSparseMemoryBindFlags"]
+name = "sparse_memory_bind"
+
+[flags."VkSubmitFlags"]
+name = "submit"
+
+[flags."VkSubpassDescriptionFlags"]
+name = "subpass_description"
+
+[flags."VkSurfaceCounterFlagsEXT"]
+name = "surface_counter"
+
+[flags."VkSwapchainCreateFlagsKHR"]
+name = "swapchain_create"
+
+[flags."VkTensorCreateFlagsARM"]
+name = "tensor_create"
+
+[flags."VkTensorUsageFlagsARM"]
+name = "tensor_usage"
+
+[flags."VkTensorViewCreateFlagsARM"]
+name = "tensor_view_create"
+
+[flags."VkTileShadingRenderPassFlagsQCOM"]
+name = "tile_shading_render_pass"
+
+[flags."VkVideoChromaSubsamplingFlagsKHR"]
+name = "video_chroma_subsampling"
+
+[flags."VkVideoCodingControlFlagsKHR"]
+name = "video_coding_control"
+
+[flags."VkVideoComponentBitDepthFlagsKHR"]
+name = "video_component_bit_depth"
+
+[flags."VkVideoDecodeUsageFlagsKHR"]
+name = "video_decode_usage"
+
+[flags."VkVideoEncodeAV1RateControlFlagsKHR"]
+name = "video_encode_av1_rate_control"
+
+[flags."VkVideoEncodeContentFlagsKHR"]
+name = "video_encode_content"
+
+[flags."VkVideoEncodeFeedbackFlagsKHR"]
+name = "video_encode_feedback"
+
+[flags."VkVideoEncodeFlagsKHR"]
+name = "video_encode"
+
+[flags."VkVideoEncodeH264RateControlFlagsKHR"]
+name = "video_encode_h264_rate_control"
+
+[flags."VkVideoEncodeH265RateControlFlagsKHR"]
+name = "video_encode_h265_rate_control"
+
+[flags."VkVideoEncodeUsageFlagsKHR"]
+name = "video_encode_usage"
+
+[flags."VkVideoSessionCreateFlagsKHR"]
+name = "video_session_create"
+
+[flags."VkVideoSessionParametersCreateFlagsKHR"]
+name = "video_session_parameters_create"
+
 [bits."VkAccelerationStructureCreateFlagBitsKHR"]
 VK_ACCELERATION_STRUCTURE_CREATE_DEVICE_ADDRESS_CAPTURE_REPLAY_BIT_KHR = "device_address_capture_replay"
 VK_ACCELERATION_STRUCTURE_CREATE_MOTION_BIT_NV = "motion"
@@ -7789,6 +8095,13 @@ VK_VIDEO_SESSION_CREATE_INLINE_SESSION_PARAMETERS_BIT_KHR = "inline_session_para
 [bits."VkVideoSessionParametersCreateFlagBitsKHR"]
 VK_VIDEO_SESSION_PARAMETERS_CREATE_QUANTIZATION_MAP_COMPATIBLE_BIT_KHR = "quantization_map_compatible"
 
+[enum."VkAccelerationStructureBuildTypeKHR"]
+name = "acceleration_structure_build_type"
+[enum."VkAccelerationStructureBuildTypeKHR".values]
+VK_ACCELERATION_STRUCTURE_BUILD_TYPE_HOST_KHR = "host"
+VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR = "device"
+VK_ACCELERATION_STRUCTURE_BUILD_TYPE_HOST_OR_DEVICE_KHR = "host_or_device"
+
 [enum."VkAccelerationStructureMemoryRequirementsTypeNV"]
 name = "acceleration_structure_memory_requirements_type"
 [enum."VkAccelerationStructureMemoryRequirementsTypeNV".values]
@@ -8160,6 +8473,14 @@ VK_DEBUG_REPORT_OBJECT_TYPE_ACCELERATION_STRUCTURE_NV_EXT = "acceleration_struct
 VK_DEBUG_REPORT_OBJECT_TYPE_CUDA_MODULE_NV_EXT = "cuda_module_nv"
 VK_DEBUG_REPORT_OBJECT_TYPE_CUDA_FUNCTION_NV_EXT = "cuda_function_nv"
 VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_COLLECTION_FUCHSIA_EXT = "buffer_collection_fuchsia"
+
+[enum."VkDebugUtilsMessageSeverityFlagBitsEXT"]
+name = "debug_utils_message_severity"
+[enum."VkDebugUtilsMessageSeverityFlagBitsEXT".values]
+VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT = "verbose"
+VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT = "info"
+VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT = "warning"
+VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT = "error"
 
 [enum."VkDepthBiasRepresentationEXT"]
 name = "depth_bias_representation"
@@ -9114,6 +9435,13 @@ name = "shader_code_type"
 [enum."VkShaderCodeTypeEXT".values]
 VK_SHADER_CODE_TYPE_BINARY_EXT = "binary"
 VK_SHADER_CODE_TYPE_SPIRV_EXT = "spirv"
+
+[enum."VkShaderInfoTypeAMD"]
+name = "shader_info_type"
+[enum."VkShaderInfoTypeAMD".values]
+VK_SHADER_INFO_TYPE_STATISTICS_AMD = "statistics"
+VK_SHADER_INFO_TYPE_BINARY_AMD = "binary"
+VK_SHADER_INFO_TYPE_DISASSEMBLY_AMD = "disassembly"
 
 [enum."VkShaderStageFlagBits"]
 name = "shader_stage"

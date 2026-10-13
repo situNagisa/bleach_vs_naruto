@@ -28,11 +28,11 @@
 
 #include "../version_1_3/zero_initialize_workgroup_memory.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using zero_initialize_workgroup_memory = ::vkfu::obj::feature::zero_initialize_workgroup_memory;
+using zero_initialize_workgroup_memory = ::vkfu::tag::feature::zero_initialize_workgroup_memory;
 }
 }
 

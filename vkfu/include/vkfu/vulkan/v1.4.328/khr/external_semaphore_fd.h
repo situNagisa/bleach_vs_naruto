@@ -27,6 +27,7 @@
 #include <vkfu/vulkan_object.h>
 
 #include "../version_1_1/external_semaphore_capabilities.h"
+#include "../version_1_1/external_semaphore.h"
 
 constexpr auto _vkfu_address(VkImportSemaphoreFdInfoKHR& value) noexcept -> void const*
 {
@@ -58,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkSemaphoreGetFdInfoKHR const& value) noexcept -> 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
@@ -70,7 +71,7 @@ struct semaphore_get_fd{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::khr::import_semaphore_fd>
+struct vulkan_object_trait<tag::khr::import_semaphore_fd>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -78,7 +79,7 @@ struct vulkan_object_trait<obj::khr::import_semaphore_fd>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::semaphore_get_fd>
+struct vulkan_object_trait<tag::khr::semaphore_get_fd>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -88,11 +89,11 @@ struct vulkan_object_trait<obj::khr::semaphore_get_fd>
 template<>
 struct expression_vulkan_tag<VkImportSemaphoreFdInfoKHR>
 {
-	using type = obj::khr::import_semaphore_fd;
+	using type = tag::khr::import_semaphore_fd;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::import_semaphore_fd>
+struct vulkan_object_native<tag::khr::import_semaphore_fd>
 {
 	using type = VkImportSemaphoreFdInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR;
@@ -101,18 +102,18 @@ struct vulkan_object_native<obj::khr::import_semaphore_fd>
 template<>
 struct expression_vulkan_tag<VkSemaphoreGetFdInfoKHR>
 {
-	using type = obj::khr::semaphore_get_fd;
+	using type = tag::khr::semaphore_get_fd;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::semaphore_get_fd>
+struct vulkan_object_native<tag::khr::semaphore_get_fd>
 {
 	using type = VkSemaphoreGetFdInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::import_semaphore_fd>
+struct vulkan_object_extensions<tag::khr::import_semaphore_fd>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_semaphore_fd"};
 	constexpr static ::std::uint32_t core = 0;
@@ -120,7 +121,7 @@ struct vulkan_object_extensions<obj::khr::import_semaphore_fd>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::semaphore_get_fd>
+struct vulkan_object_extensions<tag::khr::semaphore_get_fd>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_semaphore_fd"};
 	constexpr static ::std::uint32_t core = 0;
@@ -137,16 +138,10 @@ using ::vkfu::operator|;
 
 struct import_semaphore_fd
 {
-	using vulkan_tag_type = obj::khr::import_semaphore_fd;
+	using vulkan_tag_type = tag::khr::import_semaphore_fd;
 
 	VkSemaphore semaphore{};
-	struct flags_type
-	{
-		VkSemaphoreImportFlags temporary : 1 = 0;
-		VkSemaphoreImportFlags _reserved_1 : 31 = 0;
-	};
-
-	flags_type flags{};
+	::vkfu::flags::semaphore_import flags{};
 	::vkfu::enums::external_semaphore_handle_type handle_type{};
 	int fd{};
 
@@ -163,14 +158,9 @@ struct import_semaphore_fd
 	}
 };
 
-static_assert(sizeof(import_semaphore_fd::flags_type) == sizeof(VkSemaphoreImportFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkSemaphoreImportFlags>(import_semaphore_fd::flags_type{.temporary = 1}) == VK_SEMAPHORE_IMPORT_TEMPORARY_BIT);
-#endif
-
 struct semaphore_get_fd
 {
-	using vulkan_tag_type = obj::khr::semaphore_get_fd;
+	using vulkan_tag_type = tag::khr::semaphore_get_fd;
 
 	VkSemaphore semaphore{};
 	::vkfu::enums::external_semaphore_handle_type handle_type{};
@@ -193,7 +183,7 @@ namespace vkfu
 {
 namespace khr
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::semaphore_get_fd> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::semaphore_get_fd> Expression1>
 [[nodiscard]] auto get_semaphore_fd(VkDevice device, Expression1&& get_fd_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<int, ::VkResult>
 {
@@ -207,7 +197,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::semaphore_get_fd> Expression1>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::semaphore_get_fd> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::semaphore_get_fd> Expression1>
 [[nodiscard]] auto get_semaphore_fd(VkDevice device, Expression1&& get_fd_info) -> int
 {
 	auto outcome = get_semaphore_fd(device, ::std::forward<Expression1>(get_fd_info), ::std::nothrow);
@@ -218,7 +208,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::semaphore_get_fd> Expression1>
 	return *outcome;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::import_semaphore_fd> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::import_semaphore_fd> Expression1>
 [[nodiscard]] auto import_semaphore_fd(VkDevice device, Expression1&& import_semaphore_fd_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -231,7 +221,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::import_semaphore_fd> Expressio
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::import_semaphore_fd> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::import_semaphore_fd> Expression1>
 void import_semaphore_fd(VkDevice device, Expression1&& import_semaphore_fd_info)
 {
 	auto outcome = import_semaphore_fd(device, ::std::forward<Expression1>(import_semaphore_fd_info), ::std::nothrow);

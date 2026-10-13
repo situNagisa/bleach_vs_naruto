@@ -28,11 +28,11 @@
 
 #include "../version_1_2/scalar_block_layout.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
-using scalar_block_layout = ::vkfu::obj::feature::scalar_block_layout;
+using scalar_block_layout = ::vkfu::tag::feature::scalar_block_layout;
 }
 }
 

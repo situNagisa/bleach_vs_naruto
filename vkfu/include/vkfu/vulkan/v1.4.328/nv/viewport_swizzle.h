@@ -59,7 +59,7 @@ enum class viewport_coordinate_swizzle : ::std::underlying_type_t<VkViewportCoor
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace state::nv
 {
@@ -70,7 +70,7 @@ struct viewport_swizzle{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::state::nv::viewport_swizzle>
+struct vulkan_object_trait<tag::state::nv::viewport_swizzle>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -80,18 +80,18 @@ struct vulkan_object_trait<obj::state::nv::viewport_swizzle>
 template<>
 struct expression_vulkan_tag<VkPipelineViewportSwizzleStateCreateInfoNV>
 {
-	using type = obj::state::nv::viewport_swizzle;
+	using type = tag::state::nv::viewport_swizzle;
 };
 
 template<>
-struct vulkan_object_native<obj::state::nv::viewport_swizzle>
+struct vulkan_object_native<tag::state::nv::viewport_swizzle>
 {
 	using type = VkPipelineViewportSwizzleStateCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_SWIZZLE_STATE_CREATE_INFO_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::nv::viewport_swizzle>
+struct vulkan_object_extensions<tag::state::nv::viewport_swizzle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_viewport_swizzle"};
 	constexpr static ::std::uint32_t core = 0;
@@ -99,7 +99,7 @@ struct vulkan_object_extensions<obj::state::nv::viewport_swizzle>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::viewport, obj::state::nv::viewport_swizzle> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::viewport, tag::state::nv::viewport_swizzle> = true;
 }
 
 namespace vkfu::param
@@ -110,7 +110,7 @@ using ::vkfu::operator|;
 
 struct viewport_swizzle
 {
-	using vulkan_tag_type = obj::state::nv::viewport_swizzle;
+	using vulkan_tag_type = tag::state::nv::viewport_swizzle;
 
 	VkPipelineViewportSwizzleStateCreateFlagsNV flags{};
 	::std::span<VkViewportSwizzleNV const> viewport_swizzles{};

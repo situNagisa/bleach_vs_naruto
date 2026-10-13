@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkQueryLowLatencySupportNV const& value) noexcept 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::nv
 {
@@ -54,7 +54,7 @@ struct query_low_latency_support{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::nv::query_low_latency_support>
+struct vulkan_object_trait<tag::option::nv::query_low_latency_support>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::option::nv::query_low_latency_support>
 template<>
 struct expression_vulkan_tag<VkQueryLowLatencySupportNV>
 {
-	using type = obj::option::nv::query_low_latency_support;
+	using type = tag::option::nv::query_low_latency_support;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::query_low_latency_support>
+struct vulkan_object_native<tag::option::nv::query_low_latency_support>
 {
 	using type = VkQueryLowLatencySupportNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_QUERY_LOW_LATENCY_SUPPORT_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::query_low_latency_support>
+struct vulkan_object_extensions<tag::option::nv::query_low_latency_support>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_low_latency"};
 	constexpr static ::std::uint32_t core = 0;
@@ -83,7 +83,7 @@ struct vulkan_object_extensions<obj::option::nv::query_low_latency_support>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::semaphore, obj::option::nv::query_low_latency_support> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::semaphore, tag::option::nv::query_low_latency_support> = true;
 }
 
 namespace vkfu::param
@@ -94,7 +94,7 @@ using ::vkfu::operator|;
 
 struct query_low_latency_support
 {
-	using vulkan_tag_type = obj::option::nv::query_low_latency_support;
+	using vulkan_tag_type = tag::option::nv::query_low_latency_support;
 
 	void* queried_low_latency_data = nullptr;
 

@@ -88,7 +88,7 @@ enum class cubic_filter_weights : ::std::underlying_type_t<VkCubicFilterWeightsQ
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::qcom
 {
@@ -104,7 +104,7 @@ struct sampler_cubic_weights{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::qcom::blit_image_cubic_weights>
+struct vulkan_object_trait<tag::option::qcom::blit_image_cubic_weights>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -112,7 +112,7 @@ struct vulkan_object_trait<obj::option::qcom::blit_image_cubic_weights>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::qcom::cubic_weights>
+struct vulkan_object_trait<tag::feature::qcom::cubic_weights>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -120,7 +120,7 @@ struct vulkan_object_trait<obj::feature::qcom::cubic_weights>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::qcom::sampler_cubic_weights>
+struct vulkan_object_trait<tag::option::qcom::sampler_cubic_weights>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -130,11 +130,11 @@ struct vulkan_object_trait<obj::option::qcom::sampler_cubic_weights>
 template<>
 struct expression_vulkan_tag<VkBlitImageCubicWeightsInfoQCOM>
 {
-	using type = obj::option::qcom::blit_image_cubic_weights;
+	using type = tag::option::qcom::blit_image_cubic_weights;
 };
 
 template<>
-struct vulkan_object_native<obj::option::qcom::blit_image_cubic_weights>
+struct vulkan_object_native<tag::option::qcom::blit_image_cubic_weights>
 {
 	using type = VkBlitImageCubicWeightsInfoQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_BLIT_IMAGE_CUBIC_WEIGHTS_INFO_QCOM;
@@ -143,11 +143,11 @@ struct vulkan_object_native<obj::option::qcom::blit_image_cubic_weights>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceCubicWeightsFeaturesQCOM>
 {
-	using type = obj::feature::qcom::cubic_weights;
+	using type = tag::feature::qcom::cubic_weights;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::qcom::cubic_weights>
+struct vulkan_object_native<tag::feature::qcom::cubic_weights>
 {
 	using type = VkPhysicalDeviceCubicWeightsFeaturesQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CUBIC_WEIGHTS_FEATURES_QCOM;
@@ -156,18 +156,18 @@ struct vulkan_object_native<obj::feature::qcom::cubic_weights>
 template<>
 struct expression_vulkan_tag<VkSamplerCubicWeightsCreateInfoQCOM>
 {
-	using type = obj::option::qcom::sampler_cubic_weights;
+	using type = tag::option::qcom::sampler_cubic_weights;
 };
 
 template<>
-struct vulkan_object_native<obj::option::qcom::sampler_cubic_weights>
+struct vulkan_object_native<tag::option::qcom::sampler_cubic_weights>
 {
 	using type = VkSamplerCubicWeightsCreateInfoQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SAMPLER_CUBIC_WEIGHTS_CREATE_INFO_QCOM;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::qcom::blit_image_cubic_weights>
+struct vulkan_object_extensions<tag::option::qcom::blit_image_cubic_weights>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_filter_cubic_weights"};
 	constexpr static ::std::uint32_t core = 0;
@@ -175,7 +175,7 @@ struct vulkan_object_extensions<obj::option::qcom::blit_image_cubic_weights>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::qcom::cubic_weights>
+struct vulkan_object_extensions<tag::feature::qcom::cubic_weights>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_filter_cubic_weights"};
 	constexpr static ::std::uint32_t core = 0;
@@ -183,7 +183,7 @@ struct vulkan_object_extensions<obj::feature::qcom::cubic_weights>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::qcom::sampler_cubic_weights>
+struct vulkan_object_extensions<tag::option::qcom::sampler_cubic_weights>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_filter_cubic_weights"};
 	constexpr static ::std::uint32_t core = 0;
@@ -191,13 +191,13 @@ struct vulkan_object_extensions<obj::option::qcom::sampler_cubic_weights>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::blit_image2, obj::option::qcom::blit_image_cubic_weights> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::blit_image2, tag::option::qcom::blit_image_cubic_weights> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::qcom::cubic_weights> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::qcom::cubic_weights> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::qcom::cubic_weights> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::qcom::cubic_weights> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::sampler, obj::option::qcom::sampler_cubic_weights> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::sampler, tag::option::qcom::sampler_cubic_weights> = true;
 }
 
 namespace vkfu::param
@@ -208,7 +208,7 @@ using ::vkfu::operator|;
 
 struct cubic_weights
 {
-	using vulkan_tag_type = obj::feature::qcom::cubic_weights;
+	using vulkan_tag_type = tag::feature::qcom::cubic_weights;
 
 	bool selectable_cubic_weights = false;
 
@@ -230,7 +230,7 @@ using ::vkfu::operator|;
 
 struct blit_image_cubic_weights
 {
-	using vulkan_tag_type = obj::option::qcom::blit_image_cubic_weights;
+	using vulkan_tag_type = tag::option::qcom::blit_image_cubic_weights;
 
 	::vkfu::enums::cubic_filter_weights cubic_weights{};
 
@@ -246,7 +246,7 @@ struct blit_image_cubic_weights
 
 struct sampler_cubic_weights
 {
-	using vulkan_tag_type = obj::option::qcom::sampler_cubic_weights;
+	using vulkan_tag_type = tag::option::qcom::sampler_cubic_weights;
 
 	::vkfu::enums::cubic_filter_weights cubic_weights{};
 

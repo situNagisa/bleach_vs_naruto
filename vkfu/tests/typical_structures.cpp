@@ -6,24 +6,24 @@
 
 #include "../include/vkfu/vulkan/v1.4.328.h"
 
-namespace obj = vkfu::obj;
+namespace tag = vkfu::tag;
 namespace param = vkfu::param;
 
-static_assert(vkfu::vulkan_root_object<obj::device>);
-static_assert(vkfu::vulkan_branch_object<obj::device>);
-static_assert(vkfu::vulkan_branch_object<obj::feature::core>);
-static_assert(vkfu::vulkan_branch_object<obj::feature::huawei::cluster_culling_shader>);
-static_assert(vkfu::duplicatable_vulkan_object<obj::option::device_private_data>);
-static_assert(!vkfu::duplicatable_vulkan_object<obj::feature::timeline_semaphore>);
+static_assert(vkfu::vulkan_root_object<tag::device>);
+static_assert(vkfu::vulkan_branch_object<tag::device>);
+static_assert(vkfu::vulkan_branch_object<tag::feature::core>);
+static_assert(vkfu::vulkan_branch_object<tag::feature::huawei::cluster_culling_shader>);
+static_assert(vkfu::duplicatable_vulkan_object<tag::option::device_private_data>);
+static_assert(!vkfu::duplicatable_vulkan_object<tag::feature::timeline_semaphore>);
 
-static_assert(vkfu::vulkan_object_compatible_with<obj::device, obj::feature::core>);
-static_assert(vkfu::vulkan_object_compatible_with<obj::feature::core, obj::feature::timeline_semaphore>);
-static_assert(vkfu::vulkan_object_compatible_with<obj::feature::core, obj::feature::host_query_reset>);
-static_assert(vkfu::vulkan_object_compatible_with<obj::feature::core, obj::feature::huawei::cluster_culling_shader>);
-static_assert(vkfu::vulkan_object_compatible_with<obj::feature::huawei::cluster_culling_shader, obj::feature::huawei::cluster_culling_shader_vrs>);
-static_assert(vkfu::vulkan_object_compatible_with<obj::device, obj::option::device_private_data>);
+static_assert(vkfu::vulkan_object_compatible_with<tag::device, tag::feature::core>);
+static_assert(vkfu::vulkan_object_compatible_with<tag::feature::core, tag::feature::timeline_semaphore>);
+static_assert(vkfu::vulkan_object_compatible_with<tag::feature::core, tag::feature::host_query_reset>);
+static_assert(vkfu::vulkan_object_compatible_with<tag::feature::core, tag::feature::huawei::cluster_culling_shader>);
+static_assert(vkfu::vulkan_object_compatible_with<tag::feature::huawei::cluster_culling_shader, tag::feature::huawei::cluster_culling_shader_vrs>);
+static_assert(vkfu::vulkan_object_compatible_with<tag::device, tag::option::device_private_data>);
 // vk.xml has no structextends edge here, so the pipe must not compile.
-static_assert(!vkfu::vulkan_object_compatible_with<obj::feature::core, obj::option::device_private_data>);
+static_assert(!vkfu::vulkan_object_compatible_with<tag::feature::core, tag::option::device_private_data>);
 
 static_assert(vkfu::expression<param::device>);
 static_assert(vkfu::expression<param::feature::core>);

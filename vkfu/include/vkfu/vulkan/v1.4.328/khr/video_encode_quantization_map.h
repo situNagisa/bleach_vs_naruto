@@ -181,7 +181,7 @@ constexpr auto _vkfu_evaluate(VkVideoFormatQuantizationMapPropertiesKHR const& v
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -207,7 +207,7 @@ struct video_format_quantization_map_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::video_encode_quantization_map>
+struct vulkan_object_trait<tag::feature::khr::video_encode_quantization_map>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -215,7 +215,7 @@ struct vulkan_object_trait<obj::feature::khr::video_encode_quantization_map>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::video_encode_quantization_map>
+struct vulkan_object_trait<tag::option::khr::video_encode_quantization_map>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -223,7 +223,7 @@ struct vulkan_object_trait<obj::option::khr::video_encode_quantization_map>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::video_encode_quantization_map_session_parameters>
+struct vulkan_object_trait<tag::option::khr::video_encode_quantization_map_session_parameters>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -231,7 +231,7 @@ struct vulkan_object_trait<obj::option::khr::video_encode_quantization_map_sessi
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::video_encode_av1_quantization_map_capabilities>
+struct vulkan_object_trait<tag::result::khr::video_encode_av1_quantization_map_capabilities>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -239,7 +239,7 @@ struct vulkan_object_trait<obj::result::khr::video_encode_av1_quantization_map_c
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::video_encode_h264_quantization_map_capabilities>
+struct vulkan_object_trait<tag::result::khr::video_encode_h264_quantization_map_capabilities>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -247,7 +247,7 @@ struct vulkan_object_trait<obj::result::khr::video_encode_h264_quantization_map_
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::video_encode_h265_quantization_map_capabilities>
+struct vulkan_object_trait<tag::result::khr::video_encode_h265_quantization_map_capabilities>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -255,7 +255,7 @@ struct vulkan_object_trait<obj::result::khr::video_encode_h265_quantization_map_
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::video_encode_quantization_map_capabilities>
+struct vulkan_object_trait<tag::result::khr::video_encode_quantization_map_capabilities>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -263,7 +263,7 @@ struct vulkan_object_trait<obj::result::khr::video_encode_quantization_map_capab
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::video_format_av1_quantization_map_properties>
+struct vulkan_object_trait<tag::result::khr::video_format_av1_quantization_map_properties>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -271,7 +271,7 @@ struct vulkan_object_trait<obj::result::khr::video_format_av1_quantization_map_p
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::video_format_h265_quantization_map_properties>
+struct vulkan_object_trait<tag::result::khr::video_format_h265_quantization_map_properties>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -279,7 +279,7 @@ struct vulkan_object_trait<obj::result::khr::video_format_h265_quantization_map_
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::video_format_quantization_map_properties>
+struct vulkan_object_trait<tag::result::khr::video_format_quantization_map_properties>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -289,11 +289,11 @@ struct vulkan_object_trait<obj::result::khr::video_format_quantization_map_prope
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceVideoEncodeQuantizationMapFeaturesKHR>
 {
-	using type = obj::feature::khr::video_encode_quantization_map;
+	using type = tag::feature::khr::video_encode_quantization_map;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::video_encode_quantization_map>
+struct vulkan_object_native<tag::feature::khr::video_encode_quantization_map>
 {
 	using type = VkPhysicalDeviceVideoEncodeQuantizationMapFeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VIDEO_ENCODE_QUANTIZATION_MAP_FEATURES_KHR;
@@ -302,11 +302,11 @@ struct vulkan_object_native<obj::feature::khr::video_encode_quantization_map>
 template<>
 struct expression_vulkan_tag<VkVideoEncodeQuantizationMapInfoKHR>
 {
-	using type = obj::option::khr::video_encode_quantization_map;
+	using type = tag::option::khr::video_encode_quantization_map;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::video_encode_quantization_map>
+struct vulkan_object_native<tag::option::khr::video_encode_quantization_map>
 {
 	using type = VkVideoEncodeQuantizationMapInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_ENCODE_QUANTIZATION_MAP_INFO_KHR;
@@ -315,11 +315,11 @@ struct vulkan_object_native<obj::option::khr::video_encode_quantization_map>
 template<>
 struct expression_vulkan_tag<VkVideoEncodeQuantizationMapSessionParametersCreateInfoKHR>
 {
-	using type = obj::option::khr::video_encode_quantization_map_session_parameters;
+	using type = tag::option::khr::video_encode_quantization_map_session_parameters;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::video_encode_quantization_map_session_parameters>
+struct vulkan_object_native<tag::option::khr::video_encode_quantization_map_session_parameters>
 {
 	using type = VkVideoEncodeQuantizationMapSessionParametersCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_ENCODE_QUANTIZATION_MAP_SESSION_PARAMETERS_CREATE_INFO_KHR;
@@ -328,11 +328,11 @@ struct vulkan_object_native<obj::option::khr::video_encode_quantization_map_sess
 template<>
 struct expression_vulkan_tag<VkVideoEncodeAV1QuantizationMapCapabilitiesKHR>
 {
-	using type = obj::result::khr::video_encode_av1_quantization_map_capabilities;
+	using type = tag::result::khr::video_encode_av1_quantization_map_capabilities;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::video_encode_av1_quantization_map_capabilities>
+struct vulkan_object_native<tag::result::khr::video_encode_av1_quantization_map_capabilities>
 {
 	using type = VkVideoEncodeAV1QuantizationMapCapabilitiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_ENCODE_AV1_QUANTIZATION_MAP_CAPABILITIES_KHR;
@@ -341,11 +341,11 @@ struct vulkan_object_native<obj::result::khr::video_encode_av1_quantization_map_
 template<>
 struct expression_vulkan_tag<VkVideoEncodeH264QuantizationMapCapabilitiesKHR>
 {
-	using type = obj::result::khr::video_encode_h264_quantization_map_capabilities;
+	using type = tag::result::khr::video_encode_h264_quantization_map_capabilities;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::video_encode_h264_quantization_map_capabilities>
+struct vulkan_object_native<tag::result::khr::video_encode_h264_quantization_map_capabilities>
 {
 	using type = VkVideoEncodeH264QuantizationMapCapabilitiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_ENCODE_H264_QUANTIZATION_MAP_CAPABILITIES_KHR;
@@ -354,11 +354,11 @@ struct vulkan_object_native<obj::result::khr::video_encode_h264_quantization_map
 template<>
 struct expression_vulkan_tag<VkVideoEncodeH265QuantizationMapCapabilitiesKHR>
 {
-	using type = obj::result::khr::video_encode_h265_quantization_map_capabilities;
+	using type = tag::result::khr::video_encode_h265_quantization_map_capabilities;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::video_encode_h265_quantization_map_capabilities>
+struct vulkan_object_native<tag::result::khr::video_encode_h265_quantization_map_capabilities>
 {
 	using type = VkVideoEncodeH265QuantizationMapCapabilitiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_ENCODE_H265_QUANTIZATION_MAP_CAPABILITIES_KHR;
@@ -367,11 +367,11 @@ struct vulkan_object_native<obj::result::khr::video_encode_h265_quantization_map
 template<>
 struct expression_vulkan_tag<VkVideoEncodeQuantizationMapCapabilitiesKHR>
 {
-	using type = obj::result::khr::video_encode_quantization_map_capabilities;
+	using type = tag::result::khr::video_encode_quantization_map_capabilities;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::video_encode_quantization_map_capabilities>
+struct vulkan_object_native<tag::result::khr::video_encode_quantization_map_capabilities>
 {
 	using type = VkVideoEncodeQuantizationMapCapabilitiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_ENCODE_QUANTIZATION_MAP_CAPABILITIES_KHR;
@@ -380,11 +380,11 @@ struct vulkan_object_native<obj::result::khr::video_encode_quantization_map_capa
 template<>
 struct expression_vulkan_tag<VkVideoFormatAV1QuantizationMapPropertiesKHR>
 {
-	using type = obj::result::khr::video_format_av1_quantization_map_properties;
+	using type = tag::result::khr::video_format_av1_quantization_map_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::video_format_av1_quantization_map_properties>
+struct vulkan_object_native<tag::result::khr::video_format_av1_quantization_map_properties>
 {
 	using type = VkVideoFormatAV1QuantizationMapPropertiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_FORMAT_AV1_QUANTIZATION_MAP_PROPERTIES_KHR;
@@ -393,11 +393,11 @@ struct vulkan_object_native<obj::result::khr::video_format_av1_quantization_map_
 template<>
 struct expression_vulkan_tag<VkVideoFormatH265QuantizationMapPropertiesKHR>
 {
-	using type = obj::result::khr::video_format_h265_quantization_map_properties;
+	using type = tag::result::khr::video_format_h265_quantization_map_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::video_format_h265_quantization_map_properties>
+struct vulkan_object_native<tag::result::khr::video_format_h265_quantization_map_properties>
 {
 	using type = VkVideoFormatH265QuantizationMapPropertiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_FORMAT_H265_QUANTIZATION_MAP_PROPERTIES_KHR;
@@ -406,18 +406,18 @@ struct vulkan_object_native<obj::result::khr::video_format_h265_quantization_map
 template<>
 struct expression_vulkan_tag<VkVideoFormatQuantizationMapPropertiesKHR>
 {
-	using type = obj::result::khr::video_format_quantization_map_properties;
+	using type = tag::result::khr::video_format_quantization_map_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::video_format_quantization_map_properties>
+struct vulkan_object_native<tag::result::khr::video_format_quantization_map_properties>
 {
 	using type = VkVideoFormatQuantizationMapPropertiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_FORMAT_QUANTIZATION_MAP_PROPERTIES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::video_encode_quantization_map>
+struct vulkan_object_extensions<tag::feature::khr::video_encode_quantization_map>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_encode_quantization_map"};
 	constexpr static ::std::uint32_t core = 0;
@@ -425,7 +425,7 @@ struct vulkan_object_extensions<obj::feature::khr::video_encode_quantization_map
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::video_encode_quantization_map>
+struct vulkan_object_extensions<tag::option::khr::video_encode_quantization_map>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_encode_quantization_map"};
 	constexpr static ::std::uint32_t core = 0;
@@ -433,7 +433,7 @@ struct vulkan_object_extensions<obj::option::khr::video_encode_quantization_map>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::video_encode_quantization_map_session_parameters>
+struct vulkan_object_extensions<tag::option::khr::video_encode_quantization_map_session_parameters>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_encode_quantization_map"};
 	constexpr static ::std::uint32_t core = 0;
@@ -441,7 +441,7 @@ struct vulkan_object_extensions<obj::option::khr::video_encode_quantization_map_
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::video_encode_av1_quantization_map_capabilities>
+struct vulkan_object_extensions<tag::result::khr::video_encode_av1_quantization_map_capabilities>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_encode_quantization_map"};
 	constexpr static ::std::uint32_t core = 0;
@@ -449,7 +449,7 @@ struct vulkan_object_extensions<obj::result::khr::video_encode_av1_quantization_
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::video_encode_h264_quantization_map_capabilities>
+struct vulkan_object_extensions<tag::result::khr::video_encode_h264_quantization_map_capabilities>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_encode_quantization_map"};
 	constexpr static ::std::uint32_t core = 0;
@@ -457,7 +457,7 @@ struct vulkan_object_extensions<obj::result::khr::video_encode_h264_quantization
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::video_encode_h265_quantization_map_capabilities>
+struct vulkan_object_extensions<tag::result::khr::video_encode_h265_quantization_map_capabilities>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_encode_quantization_map"};
 	constexpr static ::std::uint32_t core = 0;
@@ -465,7 +465,7 @@ struct vulkan_object_extensions<obj::result::khr::video_encode_h265_quantization
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::video_encode_quantization_map_capabilities>
+struct vulkan_object_extensions<tag::result::khr::video_encode_quantization_map_capabilities>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_encode_quantization_map"};
 	constexpr static ::std::uint32_t core = 0;
@@ -473,7 +473,7 @@ struct vulkan_object_extensions<obj::result::khr::video_encode_quantization_map_
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::video_format_av1_quantization_map_properties>
+struct vulkan_object_extensions<tag::result::khr::video_format_av1_quantization_map_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_encode_quantization_map"};
 	constexpr static ::std::uint32_t core = 0;
@@ -481,7 +481,7 @@ struct vulkan_object_extensions<obj::result::khr::video_format_av1_quantization_
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::video_format_h265_quantization_map_properties>
+struct vulkan_object_extensions<tag::result::khr::video_format_h265_quantization_map_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_encode_quantization_map"};
 	constexpr static ::std::uint32_t core = 0;
@@ -489,7 +489,7 @@ struct vulkan_object_extensions<obj::result::khr::video_format_h265_quantization
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::video_format_quantization_map_properties>
+struct vulkan_object_extensions<tag::result::khr::video_format_quantization_map_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_encode_quantization_map"};
 	constexpr static ::std::uint32_t core = 0;
@@ -497,27 +497,27 @@ struct vulkan_object_extensions<obj::result::khr::video_format_quantization_map_
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::video_encode_quantization_map> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::video_encode_quantization_map> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::video_encode_quantization_map> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::video_encode_quantization_map> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::video_capabilities, obj::result::khr::video_encode_av1_quantization_map_capabilities> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::video_capabilities, tag::result::khr::video_encode_av1_quantization_map_capabilities> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::video_capabilities, obj::result::khr::video_encode_h264_quantization_map_capabilities> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::video_capabilities, tag::result::khr::video_encode_h264_quantization_map_capabilities> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::video_capabilities, obj::result::khr::video_encode_h265_quantization_map_capabilities> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::video_capabilities, tag::result::khr::video_encode_h265_quantization_map_capabilities> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::video_capabilities, obj::result::khr::video_encode_quantization_map_capabilities> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::video_capabilities, tag::result::khr::video_encode_quantization_map_capabilities> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_encode, obj::option::khr::video_encode_quantization_map> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_encode, tag::option::khr::video_encode_quantization_map> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::video_format_properties, obj::result::khr::video_format_av1_quantization_map_properties> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::video_format_properties, tag::result::khr::video_format_av1_quantization_map_properties> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::video_format_properties, obj::result::khr::video_format_h265_quantization_map_properties> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::video_format_properties, tag::result::khr::video_format_h265_quantization_map_properties> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::video_format_properties, obj::result::khr::video_format_quantization_map_properties> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::video_format_properties, tag::result::khr::video_format_quantization_map_properties> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_session_parameters, obj::option::khr::video_encode_quantization_map_session_parameters> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_session_parameters, tag::option::khr::video_encode_quantization_map_session_parameters> = true;
 }
 
 namespace vkfu::param
@@ -528,7 +528,7 @@ using ::vkfu::operator|;
 
 struct video_encode_quantization_map
 {
-	using vulkan_tag_type = obj::feature::khr::video_encode_quantization_map;
+	using vulkan_tag_type = tag::feature::khr::video_encode_quantization_map;
 
 	bool enable = false;
 
@@ -550,7 +550,7 @@ using ::vkfu::operator|;
 
 struct video_encode_quantization_map
 {
-	using vulkan_tag_type = obj::option::khr::video_encode_quantization_map;
+	using vulkan_tag_type = tag::option::khr::video_encode_quantization_map;
 
 	VkImageView quantization_map{};
 	VkExtent2D quantization_map_extent{};
@@ -568,7 +568,7 @@ struct video_encode_quantization_map
 
 struct video_encode_quantization_map_session_parameters
 {
-	using vulkan_tag_type = obj::option::khr::video_encode_quantization_map_session_parameters;
+	using vulkan_tag_type = tag::option::khr::video_encode_quantization_map_session_parameters;
 
 	VkExtent2D quantization_map_texel_size{};
 

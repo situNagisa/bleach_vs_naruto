@@ -26,6 +26,7 @@
 #include <vkfu/storage.h>
 #include <vkfu/vulkan_object.h>
 
+#include "../version_1_0/render_pass.h"
 #include "../version_1_1/get_physical_device_properties2.h"
 
 constexpr auto _vkfu_address(VkPhysicalDevicePushDescriptorProperties& value) noexcept -> void const*
@@ -43,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDevicePushDescriptorProperties const& va
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property
 {
@@ -54,7 +55,7 @@ struct push_descriptor{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::property::push_descriptor>
+struct vulkan_object_trait<tag::property::push_descriptor>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +65,18 @@ struct vulkan_object_trait<obj::property::push_descriptor>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePushDescriptorProperties>
 {
-	using type = obj::property::push_descriptor;
+	using type = tag::property::push_descriptor;
 };
 
 template<>
-struct vulkan_object_native<obj::property::push_descriptor>
+struct vulkan_object_native<tag::property::push_descriptor>
 {
 	using type = VkPhysicalDevicePushDescriptorProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PUSH_DESCRIPTOR_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::push_descriptor>
+struct vulkan_object_extensions<tag::property::push_descriptor>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_push_descriptor"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -83,13 +84,13 @@ struct vulkan_object_extensions<obj::property::push_descriptor>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::push_descriptor> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::push_descriptor> = true;
 }
 
 namespace vkfu
 {
-inline void cmd_push_descriptor_set(VkCommandBuffer command_buffer, VkPipelineBindPoint pipeline_bind_point, VkPipelineLayout layout, ::std::uint32_t set, ::std::span<VkWriteDescriptorSet const> descriptor_writes)
+inline void cmd_push_descriptor_set(VkCommandBuffer command_buffer, ::vkfu::enums::pipeline_bind_point pipeline_bind_point, VkPipelineLayout layout, ::std::uint32_t set, ::std::span<VkWriteDescriptorSet const> descriptor_writes)
 {
-	::vkCmdPushDescriptorSet(command_buffer, pipeline_bind_point, layout, set, static_cast<::std::uint32_t>(descriptor_writes.size()), descriptor_writes.data());
+	::vkCmdPushDescriptorSet(command_buffer, static_cast<VkPipelineBindPoint>(pipeline_bind_point), layout, set, static_cast<::std::uint32_t>(descriptor_writes.size()), descriptor_writes.data());
 }
 }

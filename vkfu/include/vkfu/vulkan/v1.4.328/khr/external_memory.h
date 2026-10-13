@@ -28,13 +28,13 @@
 
 #include "../version_1_1/external_memory.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::khr
 {
-using export_memory = ::vkfu::obj::option::export_memory;
-using external_memory_buffer = ::vkfu::obj::option::external_memory_buffer;
-using external_memory_image = ::vkfu::obj::option::external_memory_image;
+using export_memory = ::vkfu::tag::option::export_memory;
+using external_memory_buffer = ::vkfu::tag::option::external_memory_buffer;
+using external_memory_image = ::vkfu::tag::option::external_memory_image;
 }
 }
 

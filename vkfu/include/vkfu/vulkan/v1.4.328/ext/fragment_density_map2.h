@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceFragmentDensityMap2PropertiesEXT c
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -74,7 +74,7 @@ struct fragment_density_map2{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::fragment_density_map2>
+struct vulkan_object_trait<tag::feature::ext::fragment_density_map2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::feature::ext::fragment_density_map2>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::ext::fragment_density_map2>
+struct vulkan_object_trait<tag::property::ext::fragment_density_map2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::property::ext::fragment_density_map2>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceFragmentDensityMap2FeaturesEXT>
 {
-	using type = obj::feature::ext::fragment_density_map2;
+	using type = tag::feature::ext::fragment_density_map2;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::fragment_density_map2>
+struct vulkan_object_native<tag::feature::ext::fragment_density_map2>
 {
 	using type = VkPhysicalDeviceFragmentDensityMap2FeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_2_FEATURES_EXT;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::feature::ext::fragment_density_map2>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceFragmentDensityMap2PropertiesEXT>
 {
-	using type = obj::property::ext::fragment_density_map2;
+	using type = tag::property::ext::fragment_density_map2;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::fragment_density_map2>
+struct vulkan_object_native<tag::property::ext::fragment_density_map2>
 {
 	using type = VkPhysicalDeviceFragmentDensityMap2PropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_2_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::fragment_density_map2>
+struct vulkan_object_extensions<tag::feature::ext::fragment_density_map2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_fragment_density_map2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::feature::ext::fragment_density_map2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::fragment_density_map2>
+struct vulkan_object_extensions<tag::property::ext::fragment_density_map2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_fragment_density_map2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -132,11 +132,11 @@ struct vulkan_object_extensions<obj::property::ext::fragment_density_map2>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::fragment_density_map2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::fragment_density_map2> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::fragment_density_map2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::fragment_density_map2> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::fragment_density_map2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::fragment_density_map2> = true;
 }
 
 namespace vkfu::param
@@ -147,7 +147,7 @@ using ::vkfu::operator|;
 
 struct fragment_density_map2
 {
-	using vulkan_tag_type = obj::feature::ext::fragment_density_map2;
+	using vulkan_tag_type = tag::feature::ext::fragment_density_map2;
 
 	bool fragment_density_map_deferred = false;
 

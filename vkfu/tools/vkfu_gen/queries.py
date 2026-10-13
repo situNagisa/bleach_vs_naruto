@@ -19,6 +19,7 @@ from __future__ import annotations
 from . import commands, ir
 from .cpp import TAB
 from .naming import Table
+from .values import Values
 
 
 
@@ -42,7 +43,7 @@ def _classified(members: list[ir.Member], registry: ir.Registry) -> list[ir.Argu
 	return arguments
 
 
-def _signature(arguments: list[ir.Argument], table: Table) -> tuple[list[str], list[str]]:
+def _signature(arguments: list[ir.Argument], table: Table, values: Values) -> tuple[list[str], list[str]]:
 	templates: list[str] = []
 	parameters: list[str] = []
 	index = 0
@@ -51,13 +52,13 @@ def _signature(arguments: list[ir.Argument], table: Table) -> tuple[list[str], l
 		name = _identifier(member)
 		if argument.kind == "info":
 			index += 1
-			tag = f"::vkfu::obj::{table.struct_name(member.type)}"
+			tag = f"::vkfu::tag::{table.struct_name(member.type)}"
 			templates.append(f"::vkfu::expression_for<{tag}> Expression{index}")
 			parameters.append(f"Expression{index}&& {name}")
 		elif argument.kind == "allocator":
 			parameters.append("::VkAllocationCallbacks const* allocation_callbacks = nullptr")
 		else:
-			parameters.append(f"{commands._declared(member)} {name}")
+			parameters.append(f"{values.spelled(member) or commands._declared(member)} {name}")
 	return templates, parameters
 
 
@@ -75,7 +76,7 @@ def _evaluations(arguments: list[ir.Argument]) -> list[str]:
 	return lines
 
 
-def _call(params: list[ir.Member], arguments: list[ir.Argument], substitutions: dict[str, str]) -> str:
+def _call(params: list[ir.Member], arguments: list[ir.Argument], substitutions: dict[str, str], values: Values) -> str:
 	kinds = {argument.member.name: argument.kind for argument in arguments}
 	rendered: list[str] = []
 	index = 0
@@ -89,19 +90,19 @@ def _call(params: list[ir.Member], arguments: list[ir.Argument], substitutions: 
 		elif kinds.get(member.name) == "allocator":
 			rendered.append("allocation_callbacks")
 		else:
-			rendered.append(_identifier(member))
+			rendered.append(values.native(member, _identifier(member)))
 	return ", ".join(rendered)
 
 
 # ---------------------------------------------------------------- enumerate
 
 
-def render_query(query: ir.Query, table: Table, registry: ir.Registry) -> list[str]:
+def render_query(query: ir.Query, table: Table, registry: ir.Registry, values: Values) -> list[str]:
 	"""count_* to ask how many, then one call that writes where you say."""
 	function = table.command_name(query.name).rpartition("::")[2]
 	counter = table.command_count(query.name).rpartition("::")[2]
 	arguments = _classified(query.leading, registry)
-	templates, parameters = _signature(arguments, table)
+	templates, parameters = _signature(arguments, table, values)
 	prefix = f"{', '.join(templates)}" if templates else ""
 
 	# `void* pData` is an opaque blob sized in bytes -- a pipeline cache, a shader
@@ -124,7 +125,10 @@ def render_query(query: ir.Query, table: Table, registry: ir.Registry) -> list[s
 
 	# ---------------------------------------------------------- count_*
 	probe = _call(
-		query.params, arguments, {query.count.name: "::std::addressof(count)", query.out.name: "nullptr"}
+		query.params,
+		arguments,
+		{query.count.name: "::std::addressof(count)", query.out.name: "nullptr"},
+		values,
 	)
 	head, linkage = declare([])
 	if fails:
@@ -176,6 +180,7 @@ def render_query(query: ir.Query, table: Table, registry: ir.Registry) -> list[s
 			query.count.name: "::std::addressof(count)",
 			query.out.name: "static_cast<void*>(out.data())" if opaque else "out.data()",
 		},
+		values,
 	)
 	stamp = []
 	if stype is not None:
@@ -266,11 +271,11 @@ def render_query(query: ir.Query, table: Table, registry: ir.Registry) -> list[s
 # ---------------------------------------------------------------- chain
 
 
-def render_chain_query(query: ir.ChainQuery, table: Table, registry: ir.Registry) -> list[str]:
+def render_chain_query(query: ir.ChainQuery, table: Table, registry: ir.Registry, values: Values) -> list[str]:
 	"""One sType out parameter, turned into a chain the caller shapes."""
 	function = table.command_name(query.name).rpartition("::")[2]
-	head = f"::vkfu::obj::{table.struct_name(query.out.type)}"
-	templates, parameters = _signature(query.arguments, table)
+	head = f"::vkfu::tag::{table.struct_name(query.out.type)}"
+	templates, parameters = _signature(query.arguments, table, values)
 	chain = f"::vkfu::query_chain<{head}, Extras...>"
 
 	# The pack goes first: everything after it is deduced from the call, which is
@@ -278,7 +283,7 @@ def render_chain_query(query: ir.ChainQuery, table: Table, registry: ir.Registry
 	declarations = [f"::vkfu::query_extension_of<{head}>... Extras"] + templates
 	template_line = f"template<{', '.join(declarations)}>"
 	substitutions = {query.out.name: "::std::addressof(chain.head())"}
-	call = _call(query.params, query.arguments, substitutions)
+	call = _call(query.params, query.arguments, substitutions, values)
 
 	lines: list[str] = []
 

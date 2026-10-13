@@ -28,15 +28,15 @@
 
 #include "../version_1_1/external_fence_capabilities.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
-using physical_device_external_fence = ::vkfu::obj::physical_device_external_fence;
+using physical_device_external_fence = ::vkfu::tag::physical_device_external_fence;
 }
 namespace result::khr
 {
-using external_fence_properties = ::vkfu::obj::result::external_fence_properties;
+using external_fence_properties = ::vkfu::tag::result::external_fence_properties;
 }
 }
 

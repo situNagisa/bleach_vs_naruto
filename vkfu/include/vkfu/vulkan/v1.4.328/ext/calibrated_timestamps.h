@@ -28,11 +28,11 @@
 
 #include "../khr/calibrated_timestamps.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr::ext
 {
-using calibrated_timestamp = ::vkfu::obj::khr::calibrated_timestamp;
+using calibrated_timestamp = ::vkfu::tag::khr::calibrated_timestamp;
 }
 }
 

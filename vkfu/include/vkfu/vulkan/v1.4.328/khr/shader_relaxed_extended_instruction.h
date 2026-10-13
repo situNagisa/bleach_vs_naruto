@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceShaderRelaxedExtendedInstructionFe
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -55,7 +55,7 @@ struct shader_relaxed_extended_instruction{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::shader_relaxed_extended_instruction>
+struct vulkan_object_trait<tag::feature::khr::shader_relaxed_extended_instruction>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::khr::shader_relaxed_extended_instructio
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderRelaxedExtendedInstructionFeaturesKHR>
 {
-	using type = obj::feature::khr::shader_relaxed_extended_instruction;
+	using type = tag::feature::khr::shader_relaxed_extended_instruction;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::shader_relaxed_extended_instruction>
+struct vulkan_object_native<tag::feature::khr::shader_relaxed_extended_instruction>
 {
 	using type = VkPhysicalDeviceShaderRelaxedExtendedInstructionFeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_RELAXED_EXTENDED_INSTRUCTION_FEATURES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::shader_relaxed_extended_instruction>
+struct vulkan_object_extensions<tag::feature::khr::shader_relaxed_extended_instruction>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_shader_relaxed_extended_instruction"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::khr::shader_relaxed_extended_instr
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::shader_relaxed_extended_instruction> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::shader_relaxed_extended_instruction> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::shader_relaxed_extended_instruction> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::shader_relaxed_extended_instruction> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct shader_relaxed_extended_instruction
 {
-	using vulkan_tag_type = obj::feature::khr::shader_relaxed_extended_instruction;
+	using vulkan_tag_type = tag::feature::khr::shader_relaxed_extended_instruction;
 
 	bool enable = false;
 

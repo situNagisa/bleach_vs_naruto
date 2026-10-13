@@ -60,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDevicePortabilitySubsetPropertiesKHR con
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -75,7 +75,7 @@ struct portability_subset{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::portability_subset>
+struct vulkan_object_trait<tag::feature::khr::portability_subset>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -83,7 +83,7 @@ struct vulkan_object_trait<obj::feature::khr::portability_subset>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::khr::portability_subset>
+struct vulkan_object_trait<tag::property::khr::portability_subset>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -93,11 +93,11 @@ struct vulkan_object_trait<obj::property::khr::portability_subset>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePortabilitySubsetFeaturesKHR>
 {
-	using type = obj::feature::khr::portability_subset;
+	using type = tag::feature::khr::portability_subset;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::portability_subset>
+struct vulkan_object_native<tag::feature::khr::portability_subset>
 {
 	using type = VkPhysicalDevicePortabilitySubsetFeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PORTABILITY_SUBSET_FEATURES_KHR;
@@ -106,18 +106,18 @@ struct vulkan_object_native<obj::feature::khr::portability_subset>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePortabilitySubsetPropertiesKHR>
 {
-	using type = obj::property::khr::portability_subset;
+	using type = tag::property::khr::portability_subset;
 };
 
 template<>
-struct vulkan_object_native<obj::property::khr::portability_subset>
+struct vulkan_object_native<tag::property::khr::portability_subset>
 {
 	using type = VkPhysicalDevicePortabilitySubsetPropertiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PORTABILITY_SUBSET_PROPERTIES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::portability_subset>
+struct vulkan_object_extensions<tag::feature::khr::portability_subset>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_portability_subset"};
 	constexpr static ::std::uint32_t core = 0;
@@ -125,7 +125,7 @@ struct vulkan_object_extensions<obj::feature::khr::portability_subset>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::khr::portability_subset>
+struct vulkan_object_extensions<tag::property::khr::portability_subset>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_portability_subset"};
 	constexpr static ::std::uint32_t core = 0;
@@ -133,11 +133,11 @@ struct vulkan_object_extensions<obj::property::khr::portability_subset>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::portability_subset> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::portability_subset> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::portability_subset> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::portability_subset> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::khr::portability_subset> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::khr::portability_subset> = true;
 }
 
 namespace vkfu::param
@@ -148,7 +148,7 @@ using ::vkfu::operator|;
 
 struct portability_subset
 {
-	using vulkan_tag_type = obj::feature::khr::portability_subset;
+	using vulkan_tag_type = tag::feature::khr::portability_subset;
 
 	bool constant_alpha_color_blend_factors = false;
 	bool events = false;

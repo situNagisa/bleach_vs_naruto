@@ -166,7 +166,7 @@ constexpr auto _vkfu_evaluate(VkSparseImageFormatProperties2 const& value) noexc
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct physical_device_image_format2{};
 struct physical_device_sparse_image_format2{};
@@ -191,7 +191,7 @@ struct sparse_image_format_properties2{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::core>
+struct vulkan_object_trait<tag::feature::core>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = true;
@@ -199,7 +199,7 @@ struct vulkan_object_trait<obj::feature::core>
 };
 
 template<>
-struct vulkan_object_trait<obj::physical_device_image_format2>
+struct vulkan_object_trait<tag::physical_device_image_format2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -207,7 +207,7 @@ struct vulkan_object_trait<obj::physical_device_image_format2>
 };
 
 template<>
-struct vulkan_object_trait<obj::physical_device_sparse_image_format2>
+struct vulkan_object_trait<tag::physical_device_sparse_image_format2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -215,7 +215,7 @@ struct vulkan_object_trait<obj::physical_device_sparse_image_format2>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::format_properties2>
+struct vulkan_object_trait<tag::result::format_properties2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -223,7 +223,7 @@ struct vulkan_object_trait<obj::result::format_properties2>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::image_format_properties2>
+struct vulkan_object_trait<tag::result::image_format_properties2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -231,7 +231,7 @@ struct vulkan_object_trait<obj::result::image_format_properties2>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::memory2>
+struct vulkan_object_trait<tag::property::memory2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -239,7 +239,7 @@ struct vulkan_object_trait<obj::property::memory2>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::core>
+struct vulkan_object_trait<tag::property::core>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -247,7 +247,7 @@ struct vulkan_object_trait<obj::property::core>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::queue_family_properties2>
+struct vulkan_object_trait<tag::result::queue_family_properties2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -255,7 +255,7 @@ struct vulkan_object_trait<obj::result::queue_family_properties2>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::sparse_image_format_properties2>
+struct vulkan_object_trait<tag::result::sparse_image_format_properties2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -265,11 +265,11 @@ struct vulkan_object_trait<obj::result::sparse_image_format_properties2>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceFeatures2>
 {
-	using type = obj::feature::core;
+	using type = tag::feature::core;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::core>
+struct vulkan_object_native<tag::feature::core>
 {
 	using type = VkPhysicalDeviceFeatures2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
@@ -278,11 +278,11 @@ struct vulkan_object_native<obj::feature::core>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceImageFormatInfo2>
 {
-	using type = obj::physical_device_image_format2;
+	using type = tag::physical_device_image_format2;
 };
 
 template<>
-struct vulkan_object_native<obj::physical_device_image_format2>
+struct vulkan_object_native<tag::physical_device_image_format2>
 {
 	using type = VkPhysicalDeviceImageFormatInfo2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2;
@@ -291,11 +291,11 @@ struct vulkan_object_native<obj::physical_device_image_format2>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceSparseImageFormatInfo2>
 {
-	using type = obj::physical_device_sparse_image_format2;
+	using type = tag::physical_device_sparse_image_format2;
 };
 
 template<>
-struct vulkan_object_native<obj::physical_device_sparse_image_format2>
+struct vulkan_object_native<tag::physical_device_sparse_image_format2>
 {
 	using type = VkPhysicalDeviceSparseImageFormatInfo2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SPARSE_IMAGE_FORMAT_INFO_2;
@@ -304,11 +304,11 @@ struct vulkan_object_native<obj::physical_device_sparse_image_format2>
 template<>
 struct expression_vulkan_tag<VkFormatProperties2>
 {
-	using type = obj::result::format_properties2;
+	using type = tag::result::format_properties2;
 };
 
 template<>
-struct vulkan_object_native<obj::result::format_properties2>
+struct vulkan_object_native<tag::result::format_properties2>
 {
 	using type = VkFormatProperties2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_2;
@@ -317,11 +317,11 @@ struct vulkan_object_native<obj::result::format_properties2>
 template<>
 struct expression_vulkan_tag<VkImageFormatProperties2>
 {
-	using type = obj::result::image_format_properties2;
+	using type = tag::result::image_format_properties2;
 };
 
 template<>
-struct vulkan_object_native<obj::result::image_format_properties2>
+struct vulkan_object_native<tag::result::image_format_properties2>
 {
 	using type = VkImageFormatProperties2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2;
@@ -330,11 +330,11 @@ struct vulkan_object_native<obj::result::image_format_properties2>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMemoryProperties2>
 {
-	using type = obj::property::memory2;
+	using type = tag::property::memory2;
 };
 
 template<>
-struct vulkan_object_native<obj::property::memory2>
+struct vulkan_object_native<tag::property::memory2>
 {
 	using type = VkPhysicalDeviceMemoryProperties2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2;
@@ -343,11 +343,11 @@ struct vulkan_object_native<obj::property::memory2>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceProperties2>
 {
-	using type = obj::property::core;
+	using type = tag::property::core;
 };
 
 template<>
-struct vulkan_object_native<obj::property::core>
+struct vulkan_object_native<tag::property::core>
 {
 	using type = VkPhysicalDeviceProperties2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
@@ -356,11 +356,11 @@ struct vulkan_object_native<obj::property::core>
 template<>
 struct expression_vulkan_tag<VkQueueFamilyProperties2>
 {
-	using type = obj::result::queue_family_properties2;
+	using type = tag::result::queue_family_properties2;
 };
 
 template<>
-struct vulkan_object_native<obj::result::queue_family_properties2>
+struct vulkan_object_native<tag::result::queue_family_properties2>
 {
 	using type = VkQueueFamilyProperties2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2;
@@ -369,18 +369,18 @@ struct vulkan_object_native<obj::result::queue_family_properties2>
 template<>
 struct expression_vulkan_tag<VkSparseImageFormatProperties2>
 {
-	using type = obj::result::sparse_image_format_properties2;
+	using type = tag::result::sparse_image_format_properties2;
 };
 
 template<>
-struct vulkan_object_native<obj::result::sparse_image_format_properties2>
+struct vulkan_object_native<tag::result::sparse_image_format_properties2>
 {
 	using type = VkSparseImageFormatProperties2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SPARSE_IMAGE_FORMAT_PROPERTIES_2;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::core>
+struct vulkan_object_extensions<tag::feature::core>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_physical_device_properties2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -388,7 +388,7 @@ struct vulkan_object_extensions<obj::feature::core>
 };
 
 template<>
-struct vulkan_object_extensions<obj::physical_device_image_format2>
+struct vulkan_object_extensions<tag::physical_device_image_format2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_physical_device_properties2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -396,7 +396,7 @@ struct vulkan_object_extensions<obj::physical_device_image_format2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::physical_device_sparse_image_format2>
+struct vulkan_object_extensions<tag::physical_device_sparse_image_format2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_physical_device_properties2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -404,7 +404,7 @@ struct vulkan_object_extensions<obj::physical_device_sparse_image_format2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::format_properties2>
+struct vulkan_object_extensions<tag::result::format_properties2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_physical_device_properties2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -412,7 +412,7 @@ struct vulkan_object_extensions<obj::result::format_properties2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::image_format_properties2>
+struct vulkan_object_extensions<tag::result::image_format_properties2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_physical_device_properties2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -420,7 +420,7 @@ struct vulkan_object_extensions<obj::result::image_format_properties2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::memory2>
+struct vulkan_object_extensions<tag::property::memory2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_physical_device_properties2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -428,7 +428,7 @@ struct vulkan_object_extensions<obj::property::memory2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::core>
+struct vulkan_object_extensions<tag::property::core>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_physical_device_properties2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -436,7 +436,7 @@ struct vulkan_object_extensions<obj::property::core>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::queue_family_properties2>
+struct vulkan_object_extensions<tag::result::queue_family_properties2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_physical_device_properties2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -444,7 +444,7 @@ struct vulkan_object_extensions<obj::result::queue_family_properties2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::sparse_image_format_properties2>
+struct vulkan_object_extensions<tag::result::sparse_image_format_properties2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_physical_device_properties2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -452,11 +452,11 @@ struct vulkan_object_extensions<obj::result::sparse_image_format_properties2>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::core> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::core> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::storage_16bit> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::storage_16bit> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::subgroup> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::subgroup> = true;
 }
 
 namespace vkfu::param
@@ -465,71 +465,13 @@ using ::vkfu::operator|;
 
 struct physical_device_image_format2
 {
-	using vulkan_tag_type = obj::physical_device_image_format2;
+	using vulkan_tag_type = tag::physical_device_image_format2;
 
 	::vkfu::enums::format format{};
 	::vkfu::enums::image_type type{};
 	::vkfu::enums::image_tiling tiling{};
-	struct usage_type
-	{
-		VkImageUsageFlags transfer_src : 1 = 0;
-		VkImageUsageFlags transfer_dst : 1 = 0;
-		VkImageUsageFlags sampled : 1 = 0;
-		VkImageUsageFlags storage : 1 = 0;
-		VkImageUsageFlags color_attachment : 1 = 0;
-		VkImageUsageFlags depth_stencil_attachment : 1 = 0;
-		VkImageUsageFlags transient_attachment : 1 = 0;
-		VkImageUsageFlags input_attachment : 1 = 0;
-		VkImageUsageFlags fragment_shading_rate_attachment : 1 = 0;
-		VkImageUsageFlags fragment_density_map : 1 = 0;
-		VkImageUsageFlags video_decode_dst : 1 = 0;
-		VkImageUsageFlags video_decode_src : 1 = 0;
-		VkImageUsageFlags video_decode_dpb : 1 = 0;
-		VkImageUsageFlags video_encode_dst : 1 = 0;
-		VkImageUsageFlags video_encode_src : 1 = 0;
-		VkImageUsageFlags video_encode_dpb : 1 = 0;
-		VkImageUsageFlags _reserved_16 : 2 = 0;
-		VkImageUsageFlags invocation_mask : 1 = 0;
-		VkImageUsageFlags attachment_feedback_loop : 1 = 0;
-		VkImageUsageFlags sample_weight : 1 = 0;
-		VkImageUsageFlags sample_block_match : 1 = 0;
-		VkImageUsageFlags host_transfer : 1 = 0;
-		VkImageUsageFlags tensor_aliasing : 1 = 0;
-		VkImageUsageFlags _reserved_24 : 1 = 0;
-		VkImageUsageFlags video_encode_quantization_delta_map : 1 = 0;
-		VkImageUsageFlags video_encode_emphasis_map : 1 = 0;
-		VkImageUsageFlags tile_memory : 1 = 0;
-		VkImageUsageFlags _reserved_28 : 4 = 0;
-	};
-
-	usage_type usage{};
-	struct flags_type
-	{
-		VkImageCreateFlags sparse_binding : 1 = 0;
-		VkImageCreateFlags sparse_residency : 1 = 0;
-		VkImageCreateFlags sparse_aliased : 1 = 0;
-		VkImageCreateFlags mutable_format : 1 = 0;
-		VkImageCreateFlags cube_compatible : 1 = 0;
-		VkImageCreateFlags view_2d_array_compatible : 1 = 0;
-		VkImageCreateFlags split_instance_bind_regions : 1 = 0;
-		VkImageCreateFlags block_texel_view_compatible : 1 = 0;
-		VkImageCreateFlags extended_usage : 1 = 0;
-		VkImageCreateFlags disjoint : 1 = 0;
-		VkImageCreateFlags alias : 1 = 0;
-		VkImageCreateFlags protected_ : 1 = 0;
-		VkImageCreateFlags sample_locations_compatible_depth : 1 = 0;
-		VkImageCreateFlags corner_sampled : 1 = 0;
-		VkImageCreateFlags subsampled : 1 = 0;
-		VkImageCreateFlags fragment_density_map_offset : 1 = 0;
-		VkImageCreateFlags descriptor_buffer_capture_replay : 1 = 0;
-		VkImageCreateFlags view_2d_compatible : 1 = 0;
-		VkImageCreateFlags multisampled_render_to_single_sampled : 1 = 0;
-		VkImageCreateFlags _reserved_19 : 1 = 0;
-		VkImageCreateFlags video_profile_independent : 1 = 0;
-		VkImageCreateFlags _reserved_21 : 11 = 0;
-	};
-
-	flags_type flags{};
+	::vkfu::flags::image_usage usage{};
+	::vkfu::flags::image_create flags{};
 
 	constexpr auto evaluate() const noexcept -> VkPhysicalDeviceImageFormatInfo2
 	{
@@ -545,99 +487,14 @@ struct physical_device_image_format2
 	}
 };
 
-static_assert(sizeof(physical_device_image_format2::usage_type) == sizeof(VkImageUsageFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.transfer_src = 1}) == VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.transfer_dst = 1}) == VK_IMAGE_USAGE_TRANSFER_DST_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.sampled = 1}) == VK_IMAGE_USAGE_SAMPLED_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.storage = 1}) == VK_IMAGE_USAGE_STORAGE_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.color_attachment = 1}) == VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.depth_stencil_attachment = 1}) == VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.transient_attachment = 1}) == VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.input_attachment = 1}) == VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.fragment_shading_rate_attachment = 1}) == VK_IMAGE_USAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.fragment_density_map = 1}) == VK_IMAGE_USAGE_FRAGMENT_DENSITY_MAP_BIT_EXT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.video_decode_dst = 1}) == VK_IMAGE_USAGE_VIDEO_DECODE_DST_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.video_decode_src = 1}) == VK_IMAGE_USAGE_VIDEO_DECODE_SRC_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.video_decode_dpb = 1}) == VK_IMAGE_USAGE_VIDEO_DECODE_DPB_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.video_encode_dst = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_DST_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.video_encode_src = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_SRC_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.video_encode_dpb = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_DPB_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.invocation_mask = 1}) == VK_IMAGE_USAGE_INVOCATION_MASK_BIT_HUAWEI);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.attachment_feedback_loop = 1}) == VK_IMAGE_USAGE_ATTACHMENT_FEEDBACK_LOOP_BIT_EXT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.sample_weight = 1}) == VK_IMAGE_USAGE_SAMPLE_WEIGHT_BIT_QCOM);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.sample_block_match = 1}) == VK_IMAGE_USAGE_SAMPLE_BLOCK_MATCH_BIT_QCOM);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.host_transfer = 1}) == VK_IMAGE_USAGE_HOST_TRANSFER_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.tensor_aliasing = 1}) == VK_IMAGE_USAGE_TENSOR_ALIASING_BIT_ARM);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.video_encode_quantization_delta_map = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_QUANTIZATION_DELTA_MAP_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.video_encode_emphasis_map = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_EMPHASIS_MAP_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_image_format2::usage_type{.tile_memory = 1}) == VK_IMAGE_USAGE_TILE_MEMORY_BIT_QCOM);
-#endif
-
-static_assert(sizeof(physical_device_image_format2::flags_type) == sizeof(VkImageCreateFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.sparse_binding = 1}) == VK_IMAGE_CREATE_SPARSE_BINDING_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.sparse_residency = 1}) == VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.sparse_aliased = 1}) == VK_IMAGE_CREATE_SPARSE_ALIASED_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.mutable_format = 1}) == VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.cube_compatible = 1}) == VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.view_2d_array_compatible = 1}) == VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.split_instance_bind_regions = 1}) == VK_IMAGE_CREATE_SPLIT_INSTANCE_BIND_REGIONS_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.block_texel_view_compatible = 1}) == VK_IMAGE_CREATE_BLOCK_TEXEL_VIEW_COMPATIBLE_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.extended_usage = 1}) == VK_IMAGE_CREATE_EXTENDED_USAGE_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.disjoint = 1}) == VK_IMAGE_CREATE_DISJOINT_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.alias = 1}) == VK_IMAGE_CREATE_ALIAS_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.protected_ = 1}) == VK_IMAGE_CREATE_PROTECTED_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.sample_locations_compatible_depth = 1}) == VK_IMAGE_CREATE_SAMPLE_LOCATIONS_COMPATIBLE_DEPTH_BIT_EXT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.corner_sampled = 1}) == VK_IMAGE_CREATE_CORNER_SAMPLED_BIT_NV);
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.subsampled = 1}) == VK_IMAGE_CREATE_SUBSAMPLED_BIT_EXT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.fragment_density_map_offset = 1}) == VK_IMAGE_CREATE_FRAGMENT_DENSITY_MAP_OFFSET_BIT_EXT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.descriptor_buffer_capture_replay = 1}) == VK_IMAGE_CREATE_DESCRIPTOR_BUFFER_CAPTURE_REPLAY_BIT_EXT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.view_2d_compatible = 1}) == VK_IMAGE_CREATE_2D_VIEW_COMPATIBLE_BIT_EXT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.multisampled_render_to_single_sampled = 1}) == VK_IMAGE_CREATE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_BIT_EXT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(physical_device_image_format2::flags_type{.video_profile_independent = 1}) == VK_IMAGE_CREATE_VIDEO_PROFILE_INDEPENDENT_BIT_KHR);
-#endif
-
 struct physical_device_sparse_image_format2
 {
-	using vulkan_tag_type = obj::physical_device_sparse_image_format2;
+	using vulkan_tag_type = tag::physical_device_sparse_image_format2;
 
 	::vkfu::enums::format format{};
 	::vkfu::enums::image_type type{};
 	::vkfu::enums::sample_count samples{};
-	struct usage_type
-	{
-		VkImageUsageFlags transfer_src : 1 = 0;
-		VkImageUsageFlags transfer_dst : 1 = 0;
-		VkImageUsageFlags sampled : 1 = 0;
-		VkImageUsageFlags storage : 1 = 0;
-		VkImageUsageFlags color_attachment : 1 = 0;
-		VkImageUsageFlags depth_stencil_attachment : 1 = 0;
-		VkImageUsageFlags transient_attachment : 1 = 0;
-		VkImageUsageFlags input_attachment : 1 = 0;
-		VkImageUsageFlags fragment_shading_rate_attachment : 1 = 0;
-		VkImageUsageFlags fragment_density_map : 1 = 0;
-		VkImageUsageFlags video_decode_dst : 1 = 0;
-		VkImageUsageFlags video_decode_src : 1 = 0;
-		VkImageUsageFlags video_decode_dpb : 1 = 0;
-		VkImageUsageFlags video_encode_dst : 1 = 0;
-		VkImageUsageFlags video_encode_src : 1 = 0;
-		VkImageUsageFlags video_encode_dpb : 1 = 0;
-		VkImageUsageFlags _reserved_16 : 2 = 0;
-		VkImageUsageFlags invocation_mask : 1 = 0;
-		VkImageUsageFlags attachment_feedback_loop : 1 = 0;
-		VkImageUsageFlags sample_weight : 1 = 0;
-		VkImageUsageFlags sample_block_match : 1 = 0;
-		VkImageUsageFlags host_transfer : 1 = 0;
-		VkImageUsageFlags tensor_aliasing : 1 = 0;
-		VkImageUsageFlags _reserved_24 : 1 = 0;
-		VkImageUsageFlags video_encode_quantization_delta_map : 1 = 0;
-		VkImageUsageFlags video_encode_emphasis_map : 1 = 0;
-		VkImageUsageFlags tile_memory : 1 = 0;
-		VkImageUsageFlags _reserved_28 : 4 = 0;
-	};
-
-	usage_type usage{};
+	::vkfu::flags::image_usage usage{};
 	::vkfu::enums::image_tiling tiling{};
 
 	constexpr auto evaluate() const noexcept -> VkPhysicalDeviceSparseImageFormatInfo2
@@ -654,42 +511,13 @@ struct physical_device_sparse_image_format2
 	}
 };
 
-static_assert(sizeof(physical_device_sparse_image_format2::usage_type) == sizeof(VkImageUsageFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.transfer_src = 1}) == VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.transfer_dst = 1}) == VK_IMAGE_USAGE_TRANSFER_DST_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.sampled = 1}) == VK_IMAGE_USAGE_SAMPLED_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.storage = 1}) == VK_IMAGE_USAGE_STORAGE_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.color_attachment = 1}) == VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.depth_stencil_attachment = 1}) == VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.transient_attachment = 1}) == VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.input_attachment = 1}) == VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.fragment_shading_rate_attachment = 1}) == VK_IMAGE_USAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.fragment_density_map = 1}) == VK_IMAGE_USAGE_FRAGMENT_DENSITY_MAP_BIT_EXT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.video_decode_dst = 1}) == VK_IMAGE_USAGE_VIDEO_DECODE_DST_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.video_decode_src = 1}) == VK_IMAGE_USAGE_VIDEO_DECODE_SRC_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.video_decode_dpb = 1}) == VK_IMAGE_USAGE_VIDEO_DECODE_DPB_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.video_encode_dst = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_DST_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.video_encode_src = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_SRC_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.video_encode_dpb = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_DPB_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.invocation_mask = 1}) == VK_IMAGE_USAGE_INVOCATION_MASK_BIT_HUAWEI);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.attachment_feedback_loop = 1}) == VK_IMAGE_USAGE_ATTACHMENT_FEEDBACK_LOOP_BIT_EXT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.sample_weight = 1}) == VK_IMAGE_USAGE_SAMPLE_WEIGHT_BIT_QCOM);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.sample_block_match = 1}) == VK_IMAGE_USAGE_SAMPLE_BLOCK_MATCH_BIT_QCOM);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.host_transfer = 1}) == VK_IMAGE_USAGE_HOST_TRANSFER_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.tensor_aliasing = 1}) == VK_IMAGE_USAGE_TENSOR_ALIASING_BIT_ARM);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.video_encode_quantization_delta_map = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_QUANTIZATION_DELTA_MAP_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.video_encode_emphasis_map = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_EMPHASIS_MAP_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(physical_device_sparse_image_format2::usage_type{.tile_memory = 1}) == VK_IMAGE_USAGE_TILE_MEMORY_BIT_QCOM);
-#endif
-
 namespace feature
 {
 using ::vkfu::operator|;
 
 struct core
 {
-	using vulkan_tag_type = obj::feature::core;
+	using vulkan_tag_type = tag::feature::core;
 
 	VkPhysicalDeviceFeatures features{};
 
@@ -736,7 +564,7 @@ template<::std::contiguous_iterator Out>
 	return out + static_cast<::std::iter_difference_t<Out>>(written.size());
 }
 
-template<::vkfu::expression_for<::vkfu::obj::physical_device_sparse_image_format2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::physical_device_sparse_image_format2> Expression1>
 [[nodiscard]] auto count_physical_device_sparse_image_format_properties2(VkPhysicalDevice physical_device, Expression1&& format_info) -> ::std::uint32_t
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(format_info));
@@ -745,7 +573,7 @@ template<::vkfu::expression_for<::vkfu::obj::physical_device_sparse_image_format
 	return count;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::physical_device_sparse_image_format2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::physical_device_sparse_image_format2> Expression1>
 [[nodiscard]] auto get_physical_device_sparse_image_format_properties2(VkPhysicalDevice physical_device, Expression1&& format_info, ::std::span<VkSparseImageFormatProperties2> out) -> ::std::span<VkSparseImageFormatProperties2>
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(format_info));
@@ -759,7 +587,7 @@ template<::vkfu::expression_for<::vkfu::obj::physical_device_sparse_image_format
 	return out.first(count);
 }
 
-template<::vkfu::expression_for<::vkfu::obj::physical_device_sparse_image_format2> Expression1, ::std::contiguous_iterator Out>
+template<::vkfu::expression_for<::vkfu::tag::physical_device_sparse_image_format2> Expression1, ::std::contiguous_iterator Out>
 	requires ::std::same_as<::std::iter_value_t<Out>, VkSparseImageFormatProperties2>
 [[nodiscard]] auto get_physical_device_sparse_image_format_properties2(VkPhysicalDevice physical_device, Expression1&& format_info, Out out) -> Out
 {
@@ -768,28 +596,28 @@ template<::vkfu::expression_for<::vkfu::obj::physical_device_sparse_image_format
 	return out + static_cast<::std::iter_difference_t<Out>>(written.size());
 }
 
-template<::vkfu::query_extension_of<::vkfu::obj::feature::core>... Extras>
-[[nodiscard]] auto get_physical_device_features2(VkPhysicalDevice physical_device) -> ::vkfu::query_chain<::vkfu::obj::feature::core, Extras...>
+template<::vkfu::query_extension_of<::vkfu::tag::feature::core>... Extras>
+[[nodiscard]] auto get_physical_device_features2(VkPhysicalDevice physical_device) -> ::vkfu::query_chain<::vkfu::tag::feature::core, Extras...>
 {
-	auto chain = ::vkfu::query_chain<::vkfu::obj::feature::core, Extras...>{};
+	auto chain = ::vkfu::query_chain<::vkfu::tag::feature::core, Extras...>{};
 	::vkGetPhysicalDeviceFeatures2(physical_device, ::std::addressof(chain.head()));
 	return chain;
 }
 
-template<::vkfu::query_extension_of<::vkfu::obj::result::format_properties2>... Extras>
-[[nodiscard]] auto get_physical_device_format_properties2(VkPhysicalDevice physical_device, VkFormat format) -> ::vkfu::query_chain<::vkfu::obj::result::format_properties2, Extras...>
+template<::vkfu::query_extension_of<::vkfu::tag::result::format_properties2>... Extras>
+[[nodiscard]] auto get_physical_device_format_properties2(VkPhysicalDevice physical_device, ::vkfu::enums::format format) -> ::vkfu::query_chain<::vkfu::tag::result::format_properties2, Extras...>
 {
-	auto chain = ::vkfu::query_chain<::vkfu::obj::result::format_properties2, Extras...>{};
-	::vkGetPhysicalDeviceFormatProperties2(physical_device, format, ::std::addressof(chain.head()));
+	auto chain = ::vkfu::query_chain<::vkfu::tag::result::format_properties2, Extras...>{};
+	::vkGetPhysicalDeviceFormatProperties2(physical_device, static_cast<VkFormat>(format), ::std::addressof(chain.head()));
 	return chain;
 }
 
-template<::vkfu::query_extension_of<::vkfu::obj::result::image_format_properties2>... Extras, ::vkfu::expression_for<::vkfu::obj::physical_device_image_format2> Expression1>
+template<::vkfu::query_extension_of<::vkfu::tag::result::image_format_properties2>... Extras, ::vkfu::expression_for<::vkfu::tag::physical_device_image_format2> Expression1>
 [[nodiscard]] auto get_physical_device_image_format_properties2(VkPhysicalDevice physical_device, Expression1&& image_format_info, ::std::nothrow_t)
-	-> ::std::expected<::vkfu::query_chain<::vkfu::obj::result::image_format_properties2, Extras...>, ::VkResult>
+	-> ::std::expected<::vkfu::query_chain<::vkfu::tag::result::image_format_properties2, Extras...>, ::VkResult>
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(image_format_info));
-	auto chain = ::vkfu::query_chain<::vkfu::obj::result::image_format_properties2, Extras...>{};
+	auto chain = ::vkfu::query_chain<::vkfu::tag::result::image_format_properties2, Extras...>{};
 	if (auto const outcome = ::vkGetPhysicalDeviceImageFormatProperties2(physical_device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(chain.head())); outcome != ::VK_SUCCESS)
 	{
 		return ::std::unexpected{outcome};
@@ -797,8 +625,8 @@ template<::vkfu::query_extension_of<::vkfu::obj::result::image_format_properties
 	return chain;
 }
 
-template<::vkfu::query_extension_of<::vkfu::obj::result::image_format_properties2>... Extras, ::vkfu::expression_for<::vkfu::obj::physical_device_image_format2> Expression1>
-[[nodiscard]] auto get_physical_device_image_format_properties2(VkPhysicalDevice physical_device, Expression1&& image_format_info) -> ::vkfu::query_chain<::vkfu::obj::result::image_format_properties2, Extras...>
+template<::vkfu::query_extension_of<::vkfu::tag::result::image_format_properties2>... Extras, ::vkfu::expression_for<::vkfu::tag::physical_device_image_format2> Expression1>
+[[nodiscard]] auto get_physical_device_image_format_properties2(VkPhysicalDevice physical_device, Expression1&& image_format_info) -> ::vkfu::query_chain<::vkfu::tag::result::image_format_properties2, Extras...>
 {
 	auto outcome = get_physical_device_image_format_properties2<Extras...>(physical_device, ::std::forward<Expression1>(image_format_info), ::std::nothrow);
 	if (!outcome)
@@ -808,18 +636,18 @@ template<::vkfu::query_extension_of<::vkfu::obj::result::image_format_properties
 	return *::std::move(outcome);
 }
 
-template<::vkfu::query_extension_of<::vkfu::obj::property::memory2>... Extras>
-[[nodiscard]] auto get_physical_device_memory_properties2(VkPhysicalDevice physical_device) -> ::vkfu::query_chain<::vkfu::obj::property::memory2, Extras...>
+template<::vkfu::query_extension_of<::vkfu::tag::property::memory2>... Extras>
+[[nodiscard]] auto get_physical_device_memory_properties2(VkPhysicalDevice physical_device) -> ::vkfu::query_chain<::vkfu::tag::property::memory2, Extras...>
 {
-	auto chain = ::vkfu::query_chain<::vkfu::obj::property::memory2, Extras...>{};
+	auto chain = ::vkfu::query_chain<::vkfu::tag::property::memory2, Extras...>{};
 	::vkGetPhysicalDeviceMemoryProperties2(physical_device, ::std::addressof(chain.head()));
 	return chain;
 }
 
-template<::vkfu::query_extension_of<::vkfu::obj::property::core>... Extras>
-[[nodiscard]] auto get_physical_device_properties2(VkPhysicalDevice physical_device) -> ::vkfu::query_chain<::vkfu::obj::property::core, Extras...>
+template<::vkfu::query_extension_of<::vkfu::tag::property::core>... Extras>
+[[nodiscard]] auto get_physical_device_properties2(VkPhysicalDevice physical_device) -> ::vkfu::query_chain<::vkfu::tag::property::core, Extras...>
 {
-	auto chain = ::vkfu::query_chain<::vkfu::obj::property::core, Extras...>{};
+	auto chain = ::vkfu::query_chain<::vkfu::tag::property::core, Extras...>{};
 	::vkGetPhysicalDeviceProperties2(physical_device, ::std::addressof(chain.head()));
 	return chain;
 }

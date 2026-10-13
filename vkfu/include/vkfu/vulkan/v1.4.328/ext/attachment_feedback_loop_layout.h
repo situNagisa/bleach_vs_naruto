@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceAttachmentFeedbackLoopLayoutFeatur
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct attachment_feedback_loop_layout{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::attachment_feedback_loop_layout>
+struct vulkan_object_trait<tag::feature::ext::attachment_feedback_loop_layout>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::attachment_feedback_loop_layout>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceAttachmentFeedbackLoopLayoutFeaturesEXT>
 {
-	using type = obj::feature::ext::attachment_feedback_loop_layout;
+	using type = tag::feature::ext::attachment_feedback_loop_layout;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::attachment_feedback_loop_layout>
+struct vulkan_object_native<tag::feature::ext::attachment_feedback_loop_layout>
 {
 	using type = VkPhysicalDeviceAttachmentFeedbackLoopLayoutFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ATTACHMENT_FEEDBACK_LOOP_LAYOUT_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::attachment_feedback_loop_layout>
+struct vulkan_object_extensions<tag::feature::ext::attachment_feedback_loop_layout>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_attachment_feedback_loop_layout"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::attachment_feedback_loop_layo
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::attachment_feedback_loop_layout> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::attachment_feedback_loop_layout> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::attachment_feedback_loop_layout> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::attachment_feedback_loop_layout> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct attachment_feedback_loop_layout
 {
-	using vulkan_tag_type = obj::feature::ext::attachment_feedback_loop_layout;
+	using vulkan_tag_type = tag::feature::ext::attachment_feedback_loop_layout;
 
 	bool enable = false;
 

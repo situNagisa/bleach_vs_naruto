@@ -41,7 +41,7 @@ constexpr auto _vkfu_evaluate(VkShaderModuleCreateInfo const& value) noexcept ->
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct shader_module{};
 }
@@ -49,7 +49,7 @@ struct shader_module{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::shader_module>
+struct vulkan_object_trait<tag::shader_module>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -59,18 +59,18 @@ struct vulkan_object_trait<obj::shader_module>
 template<>
 struct expression_vulkan_tag<VkShaderModuleCreateInfo>
 {
-	using type = obj::shader_module;
+	using type = tag::shader_module;
 };
 
 template<>
-struct vulkan_object_native<obj::shader_module>
+struct vulkan_object_native<tag::shader_module>
 {
 	using type = VkShaderModuleCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 };
 
 template<>
-struct vulkan_object_extensions<obj::shader_module>
+struct vulkan_object_extensions<tag::shader_module>
 {
 	constexpr static ::std::array<char const*, 0> names{};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_0;
@@ -85,7 +85,7 @@ using ::vkfu::operator|;
 
 struct shader_module
 {
-	using vulkan_tag_type = obj::shader_module;
+	using vulkan_tag_type = tag::shader_module;
 
 	VkShaderModuleCreateFlags flags{};
 	::std::size_t code_size{};
@@ -106,7 +106,7 @@ struct shader_module
 
 namespace vkfu
 {
-template<::vkfu::expression_for<::vkfu::obj::shader_module> Expression>
+template<::vkfu::expression_for<::vkfu::tag::shader_module> Expression>
 [[nodiscard]] auto create_shader_module(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkShaderModule, ::VkResult>
 {
@@ -121,7 +121,7 @@ template<::vkfu::expression_for<::vkfu::obj::shader_module> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::shader_module> Expression>
+template<::vkfu::expression_for<::vkfu::tag::shader_module> Expression>
 [[nodiscard]] auto create_shader_module(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkShaderModule
 {
 	auto produced = create_shader_module(device, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

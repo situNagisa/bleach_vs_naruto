@@ -41,7 +41,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceToolProperties const& value) noexc
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property
 {
@@ -52,7 +52,7 @@ struct tool{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::property::tool>
+struct vulkan_object_trait<tag::property::tool>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -62,18 +62,18 @@ struct vulkan_object_trait<obj::property::tool>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceToolProperties>
 {
-	using type = obj::property::tool;
+	using type = tag::property::tool;
 };
 
 template<>
-struct vulkan_object_native<obj::property::tool>
+struct vulkan_object_native<tag::property::tool>
 {
 	using type = VkPhysicalDeviceToolProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TOOL_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::tool>
+struct vulkan_object_extensions<tag::property::tool>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_tooling_info"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;

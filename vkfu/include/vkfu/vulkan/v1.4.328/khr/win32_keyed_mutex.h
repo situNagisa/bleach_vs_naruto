@@ -45,7 +45,7 @@ constexpr auto _vkfu_evaluate(VkWin32KeyedMutexAcquireReleaseInfoKHR const& valu
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::khr
 {
@@ -56,7 +56,7 @@ struct win32_keyed_mutex_acquire_release{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::khr::win32_keyed_mutex_acquire_release>
+struct vulkan_object_trait<tag::option::khr::win32_keyed_mutex_acquire_release>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -66,18 +66,18 @@ struct vulkan_object_trait<obj::option::khr::win32_keyed_mutex_acquire_release>
 template<>
 struct expression_vulkan_tag<VkWin32KeyedMutexAcquireReleaseInfoKHR>
 {
-	using type = obj::option::khr::win32_keyed_mutex_acquire_release;
+	using type = tag::option::khr::win32_keyed_mutex_acquire_release;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::win32_keyed_mutex_acquire_release>
+struct vulkan_object_native<tag::option::khr::win32_keyed_mutex_acquire_release>
 {
 	using type = VkWin32KeyedMutexAcquireReleaseInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIN32_KEYED_MUTEX_ACQUIRE_RELEASE_INFO_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::win32_keyed_mutex_acquire_release>
+struct vulkan_object_extensions<tag::option::khr::win32_keyed_mutex_acquire_release>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_win32_keyed_mutex"};
 	constexpr static ::std::uint32_t core = 0;
@@ -85,9 +85,9 @@ struct vulkan_object_extensions<obj::option::khr::win32_keyed_mutex_acquire_rele
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::submit, obj::option::khr::win32_keyed_mutex_acquire_release> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::submit, tag::option::khr::win32_keyed_mutex_acquire_release> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::submit2, obj::option::khr::win32_keyed_mutex_acquire_release> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::submit2, tag::option::khr::win32_keyed_mutex_acquire_release> = true;
 }
 
 namespace vkfu::param
@@ -98,7 +98,7 @@ using ::vkfu::operator|;
 
 struct win32_keyed_mutex_acquire_release
 {
-	using vulkan_tag_type = obj::option::khr::win32_keyed_mutex_acquire_release;
+	using vulkan_tag_type = tag::option::khr::win32_keyed_mutex_acquire_release;
 
 	::std::uint32_t acquire_count{};
 	VkDeviceMemory const* acquire_syncs = nullptr;

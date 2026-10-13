@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceRayTracingValidationFeaturesNV con
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -55,7 +55,7 @@ struct ray_tracing_validation{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::ray_tracing_validation>
+struct vulkan_object_trait<tag::feature::nv::ray_tracing_validation>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::nv::ray_tracing_validation>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceRayTracingValidationFeaturesNV>
 {
-	using type = obj::feature::nv::ray_tracing_validation;
+	using type = tag::feature::nv::ray_tracing_validation;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::ray_tracing_validation>
+struct vulkan_object_native<tag::feature::nv::ray_tracing_validation>
 {
 	using type = VkPhysicalDeviceRayTracingValidationFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_VALIDATION_FEATURES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::ray_tracing_validation>
+struct vulkan_object_extensions<tag::feature::nv::ray_tracing_validation>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_ray_tracing_validation"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::nv::ray_tracing_validation>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::ray_tracing_validation> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::ray_tracing_validation> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::ray_tracing_validation> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::ray_tracing_validation> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct ray_tracing_validation
 {
-	using vulkan_tag_type = obj::feature::nv::ray_tracing_validation;
+	using vulkan_tag_type = tag::feature::nv::ray_tracing_validation;
 
 	bool enable = false;
 

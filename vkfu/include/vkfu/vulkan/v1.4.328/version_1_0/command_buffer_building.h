@@ -26,6 +26,12 @@
 #include <vkfu/storage.h>
 #include <vkfu/vulkan_object.h>
 
+#include "queue.h"
+#include "sparse_memory.h"
+#include "image.h"
+#include "sampler.h"
+#include "render_pass.h"
+
 constexpr auto _vkfu_address(VkRenderPassBeginInfo& value) noexcept -> void const*
 {
 	return ::std::addressof(value);
@@ -60,7 +66,7 @@ enum class subpass_contents : ::std::underlying_type_t<VkSubpassContents>
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct render_pass_begin{};
 }
@@ -68,7 +74,7 @@ struct render_pass_begin{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::render_pass_begin>
+struct vulkan_object_trait<tag::render_pass_begin>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -78,18 +84,18 @@ struct vulkan_object_trait<obj::render_pass_begin>
 template<>
 struct expression_vulkan_tag<VkRenderPassBeginInfo>
 {
-	using type = obj::render_pass_begin;
+	using type = tag::render_pass_begin;
 };
 
 template<>
-struct vulkan_object_native<obj::render_pass_begin>
+struct vulkan_object_native<tag::render_pass_begin>
 {
 	using type = VkRenderPassBeginInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 };
 
 template<>
-struct vulkan_object_extensions<obj::render_pass_begin>
+struct vulkan_object_extensions<tag::render_pass_begin>
 {
 	constexpr static ::std::array<char const*, 0> names{};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_0;
@@ -104,7 +110,7 @@ using ::vkfu::operator|;
 
 struct render_pass_begin
 {
-	using vulkan_tag_type = obj::render_pass_begin;
+	using vulkan_tag_type = tag::render_pass_begin;
 
 	VkRenderPass render_pass{};
 	VkFramebuffer framebuffer{};
@@ -127,23 +133,7 @@ struct render_pass_begin
 
 struct image_subresource_layers
 {
-	struct aspect_mask_type
-	{
-		VkImageAspectFlags color : 1 = 0;
-		VkImageAspectFlags depth : 1 = 0;
-		VkImageAspectFlags stencil : 1 = 0;
-		VkImageAspectFlags metadata : 1 = 0;
-		VkImageAspectFlags plane_0 : 1 = 0;
-		VkImageAspectFlags plane_1 : 1 = 0;
-		VkImageAspectFlags plane_2 : 1 = 0;
-		VkImageAspectFlags memory_plane_0 : 1 = 0;
-		VkImageAspectFlags memory_plane_1 : 1 = 0;
-		VkImageAspectFlags memory_plane_2 : 1 = 0;
-		VkImageAspectFlags memory_plane_3 : 1 = 0;
-		VkImageAspectFlags _reserved_11 : 21 = 0;
-	};
-
-	aspect_mask_type aspect_mask{};
+	::vkfu::flags::image_aspect aspect_mask{};
 	::std::uint32_t mip_level{};
 	::std::uint32_t base_array_layer{};
 	::std::uint32_t layer_count{};
@@ -158,35 +148,20 @@ struct image_subresource_layers
 		};
 	}
 };
-
-static_assert(sizeof(image_subresource_layers::aspect_mask_type) == sizeof(VkImageAspectFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.color = 1}) == VK_IMAGE_ASPECT_COLOR_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.depth = 1}) == VK_IMAGE_ASPECT_DEPTH_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.stencil = 1}) == VK_IMAGE_ASPECT_STENCIL_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.metadata = 1}) == VK_IMAGE_ASPECT_METADATA_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.plane_0 = 1}) == VK_IMAGE_ASPECT_PLANE_0_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.plane_1 = 1}) == VK_IMAGE_ASPECT_PLANE_1_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.plane_2 = 1}) == VK_IMAGE_ASPECT_PLANE_2_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.memory_plane_0 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_0_BIT_EXT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.memory_plane_1 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_1_BIT_EXT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.memory_plane_2 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_2_BIT_EXT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(image_subresource_layers::aspect_mask_type{.memory_plane_3 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_3_BIT_EXT);
-#endif
 }
 
 namespace vkfu
 {
-template<::vkfu::expression_for<::vkfu::obj::render_pass_begin> Expression1>
-void cmd_begin_render_pass(VkCommandBuffer command_buffer, Expression1&& render_pass_begin, VkSubpassContents contents)
+template<::vkfu::expression_for<::vkfu::tag::render_pass_begin> Expression1>
+void cmd_begin_render_pass(VkCommandBuffer command_buffer, Expression1&& render_pass_begin, ::vkfu::enums::subpass_contents contents)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(render_pass_begin));
-	::vkCmdBeginRenderPass(command_buffer, ::std::addressof(::vkfu::unpack(storage1)), contents);
+	::vkCmdBeginRenderPass(command_buffer, ::std::addressof(::vkfu::unpack(storage1)), static_cast<VkSubpassContents>(contents));
 }
 
-inline void cmd_bind_descriptor_sets(VkCommandBuffer command_buffer, VkPipelineBindPoint pipeline_bind_point, VkPipelineLayout layout, ::std::uint32_t first_set, ::std::span<VkDescriptorSet const> descriptor_sets, ::std::span<::std::uint32_t const> dynamic_offsets)
+inline void cmd_bind_descriptor_sets(VkCommandBuffer command_buffer, ::vkfu::enums::pipeline_bind_point pipeline_bind_point, VkPipelineLayout layout, ::std::uint32_t first_set, ::std::span<VkDescriptorSet const> descriptor_sets, ::std::span<::std::uint32_t const> dynamic_offsets)
 {
-	::vkCmdBindDescriptorSets(command_buffer, pipeline_bind_point, layout, first_set, static_cast<::std::uint32_t>(descriptor_sets.size()), descriptor_sets.data(), static_cast<::std::uint32_t>(dynamic_offsets.size()), dynamic_offsets.data());
+	::vkCmdBindDescriptorSets(command_buffer, static_cast<VkPipelineBindPoint>(pipeline_bind_point), layout, first_set, static_cast<::std::uint32_t>(descriptor_sets.size()), descriptor_sets.data(), static_cast<::std::uint32_t>(dynamic_offsets.size()), dynamic_offsets.data());
 }
 
 inline void cmd_bind_vertex_buffers(VkCommandBuffer command_buffer, ::std::uint32_t first_binding, ::std::span<VkBuffer const> buffers, ::std::span<VkDeviceSize const> offsets)
@@ -194,9 +169,9 @@ inline void cmd_bind_vertex_buffers(VkCommandBuffer command_buffer, ::std::uint3
 	::vkCmdBindVertexBuffers(command_buffer, first_binding, static_cast<::std::uint32_t>(offsets.size()), buffers.data(), offsets.data());
 }
 
-inline void cmd_blit_image(VkCommandBuffer command_buffer, VkImage src_image, VkImageLayout src_image_layout, VkImage dst_image, VkImageLayout dst_image_layout, ::std::span<VkImageBlit const> regions, VkFilter filter)
+inline void cmd_blit_image(VkCommandBuffer command_buffer, VkImage src_image, ::vkfu::enums::image_layout src_image_layout, VkImage dst_image, ::vkfu::enums::image_layout dst_image_layout, ::std::span<VkImageBlit const> regions, ::vkfu::enums::filter filter)
 {
-	::vkCmdBlitImage(command_buffer, src_image, src_image_layout, dst_image, dst_image_layout, static_cast<::std::uint32_t>(regions.size()), regions.data(), filter);
+	::vkCmdBlitImage(command_buffer, src_image, static_cast<VkImageLayout>(src_image_layout), dst_image, static_cast<VkImageLayout>(dst_image_layout), static_cast<::std::uint32_t>(regions.size()), regions.data(), static_cast<VkFilter>(filter));
 }
 
 inline void cmd_clear_attachments(VkCommandBuffer command_buffer, ::std::span<VkClearAttachment const> attachments, ::std::span<VkClearRect const> rects)
@@ -204,14 +179,14 @@ inline void cmd_clear_attachments(VkCommandBuffer command_buffer, ::std::span<Vk
 	::vkCmdClearAttachments(command_buffer, static_cast<::std::uint32_t>(attachments.size()), attachments.data(), static_cast<::std::uint32_t>(rects.size()), rects.data());
 }
 
-inline void cmd_clear_color_image(VkCommandBuffer command_buffer, VkImage image, VkImageLayout image_layout, VkClearColorValue const* color, ::std::span<VkImageSubresourceRange const> ranges)
+inline void cmd_clear_color_image(VkCommandBuffer command_buffer, VkImage image, ::vkfu::enums::image_layout image_layout, VkClearColorValue const* color, ::std::span<VkImageSubresourceRange const> ranges)
 {
-	::vkCmdClearColorImage(command_buffer, image, image_layout, color, static_cast<::std::uint32_t>(ranges.size()), ranges.data());
+	::vkCmdClearColorImage(command_buffer, image, static_cast<VkImageLayout>(image_layout), color, static_cast<::std::uint32_t>(ranges.size()), ranges.data());
 }
 
-inline void cmd_clear_depth_stencil_image(VkCommandBuffer command_buffer, VkImage image, VkImageLayout image_layout, VkClearDepthStencilValue const* depth_stencil, ::std::span<VkImageSubresourceRange const> ranges)
+inline void cmd_clear_depth_stencil_image(VkCommandBuffer command_buffer, VkImage image, ::vkfu::enums::image_layout image_layout, VkClearDepthStencilValue const* depth_stencil, ::std::span<VkImageSubresourceRange const> ranges)
 {
-	::vkCmdClearDepthStencilImage(command_buffer, image, image_layout, depth_stencil, static_cast<::std::uint32_t>(ranges.size()), ranges.data());
+	::vkCmdClearDepthStencilImage(command_buffer, image, static_cast<VkImageLayout>(image_layout), depth_stencil, static_cast<::std::uint32_t>(ranges.size()), ranges.data());
 }
 
 inline void cmd_copy_buffer(VkCommandBuffer command_buffer, VkBuffer src_buffer, VkBuffer dst_buffer, ::std::span<VkBufferCopy const> regions)
@@ -219,19 +194,19 @@ inline void cmd_copy_buffer(VkCommandBuffer command_buffer, VkBuffer src_buffer,
 	::vkCmdCopyBuffer(command_buffer, src_buffer, dst_buffer, static_cast<::std::uint32_t>(regions.size()), regions.data());
 }
 
-inline void cmd_copy_buffer_to_image(VkCommandBuffer command_buffer, VkBuffer src_buffer, VkImage dst_image, VkImageLayout dst_image_layout, ::std::span<VkBufferImageCopy const> regions)
+inline void cmd_copy_buffer_to_image(VkCommandBuffer command_buffer, VkBuffer src_buffer, VkImage dst_image, ::vkfu::enums::image_layout dst_image_layout, ::std::span<VkBufferImageCopy const> regions)
 {
-	::vkCmdCopyBufferToImage(command_buffer, src_buffer, dst_image, dst_image_layout, static_cast<::std::uint32_t>(regions.size()), regions.data());
+	::vkCmdCopyBufferToImage(command_buffer, src_buffer, dst_image, static_cast<VkImageLayout>(dst_image_layout), static_cast<::std::uint32_t>(regions.size()), regions.data());
 }
 
-inline void cmd_copy_image(VkCommandBuffer command_buffer, VkImage src_image, VkImageLayout src_image_layout, VkImage dst_image, VkImageLayout dst_image_layout, ::std::span<VkImageCopy const> regions)
+inline void cmd_copy_image(VkCommandBuffer command_buffer, VkImage src_image, ::vkfu::enums::image_layout src_image_layout, VkImage dst_image, ::vkfu::enums::image_layout dst_image_layout, ::std::span<VkImageCopy const> regions)
 {
-	::vkCmdCopyImage(command_buffer, src_image, src_image_layout, dst_image, dst_image_layout, static_cast<::std::uint32_t>(regions.size()), regions.data());
+	::vkCmdCopyImage(command_buffer, src_image, static_cast<VkImageLayout>(src_image_layout), dst_image, static_cast<VkImageLayout>(dst_image_layout), static_cast<::std::uint32_t>(regions.size()), regions.data());
 }
 
-inline void cmd_copy_image_to_buffer(VkCommandBuffer command_buffer, VkImage src_image, VkImageLayout src_image_layout, VkBuffer dst_buffer, ::std::span<VkBufferImageCopy const> regions)
+inline void cmd_copy_image_to_buffer(VkCommandBuffer command_buffer, VkImage src_image, ::vkfu::enums::image_layout src_image_layout, VkBuffer dst_buffer, ::std::span<VkBufferImageCopy const> regions)
 {
-	::vkCmdCopyImageToBuffer(command_buffer, src_image, src_image_layout, dst_buffer, static_cast<::std::uint32_t>(regions.size()), regions.data());
+	::vkCmdCopyImageToBuffer(command_buffer, src_image, static_cast<VkImageLayout>(src_image_layout), dst_buffer, static_cast<::std::uint32_t>(regions.size()), regions.data());
 }
 
 inline void cmd_execute_commands(VkCommandBuffer command_buffer, ::std::span<VkCommandBuffer const> command_buffers)
@@ -239,14 +214,14 @@ inline void cmd_execute_commands(VkCommandBuffer command_buffer, ::std::span<VkC
 	::vkCmdExecuteCommands(command_buffer, static_cast<::std::uint32_t>(command_buffers.size()), command_buffers.data());
 }
 
-inline void cmd_pipeline_barrier(VkCommandBuffer command_buffer, VkPipelineStageFlags src_stage_mask, VkPipelineStageFlags dst_stage_mask, VkDependencyFlags dependency_flags, ::std::span<VkMemoryBarrier const> memory_barriers, ::std::span<VkBufferMemoryBarrier const> buffer_memory_barriers, ::std::span<VkImageMemoryBarrier const> image_memory_barriers)
+inline void cmd_pipeline_barrier(VkCommandBuffer command_buffer, ::vkfu::flags::pipeline_stage src_stage_mask, ::vkfu::flags::pipeline_stage dst_stage_mask, ::vkfu::flags::dependency dependency_flags, ::std::span<VkMemoryBarrier const> memory_barriers, ::std::span<VkBufferMemoryBarrier const> buffer_memory_barriers, ::std::span<VkImageMemoryBarrier const> image_memory_barriers)
 {
-	::vkCmdPipelineBarrier(command_buffer, src_stage_mask, dst_stage_mask, dependency_flags, static_cast<::std::uint32_t>(memory_barriers.size()), memory_barriers.data(), static_cast<::std::uint32_t>(buffer_memory_barriers.size()), buffer_memory_barriers.data(), static_cast<::std::uint32_t>(image_memory_barriers.size()), image_memory_barriers.data());
+	::vkCmdPipelineBarrier(command_buffer, ::std::bit_cast<VkPipelineStageFlags>(src_stage_mask), ::std::bit_cast<VkPipelineStageFlags>(dst_stage_mask), ::std::bit_cast<VkDependencyFlags>(dependency_flags), static_cast<::std::uint32_t>(memory_barriers.size()), memory_barriers.data(), static_cast<::std::uint32_t>(buffer_memory_barriers.size()), buffer_memory_barriers.data(), static_cast<::std::uint32_t>(image_memory_barriers.size()), image_memory_barriers.data());
 }
 
-inline void cmd_resolve_image(VkCommandBuffer command_buffer, VkImage src_image, VkImageLayout src_image_layout, VkImage dst_image, VkImageLayout dst_image_layout, ::std::span<VkImageResolve const> regions)
+inline void cmd_resolve_image(VkCommandBuffer command_buffer, VkImage src_image, ::vkfu::enums::image_layout src_image_layout, VkImage dst_image, ::vkfu::enums::image_layout dst_image_layout, ::std::span<VkImageResolve const> regions)
 {
-	::vkCmdResolveImage(command_buffer, src_image, src_image_layout, dst_image, dst_image_layout, static_cast<::std::uint32_t>(regions.size()), regions.data());
+	::vkCmdResolveImage(command_buffer, src_image, static_cast<VkImageLayout>(src_image_layout), dst_image, static_cast<VkImageLayout>(dst_image_layout), static_cast<::std::uint32_t>(regions.size()), regions.data());
 }
 
 inline void cmd_set_scissor(VkCommandBuffer command_buffer, ::std::uint32_t first_scissor, ::std::span<VkRect2D const> scissors)
@@ -259,8 +234,8 @@ inline void cmd_set_viewport(VkCommandBuffer command_buffer, ::std::uint32_t fir
 	::vkCmdSetViewport(command_buffer, first_viewport, static_cast<::std::uint32_t>(viewports.size()), viewports.data());
 }
 
-inline void cmd_wait_events(VkCommandBuffer command_buffer, ::std::span<VkEvent const> events, VkPipelineStageFlags src_stage_mask, VkPipelineStageFlags dst_stage_mask, ::std::span<VkMemoryBarrier const> memory_barriers, ::std::span<VkBufferMemoryBarrier const> buffer_memory_barriers, ::std::span<VkImageMemoryBarrier const> image_memory_barriers)
+inline void cmd_wait_events(VkCommandBuffer command_buffer, ::std::span<VkEvent const> events, ::vkfu::flags::pipeline_stage src_stage_mask, ::vkfu::flags::pipeline_stage dst_stage_mask, ::std::span<VkMemoryBarrier const> memory_barriers, ::std::span<VkBufferMemoryBarrier const> buffer_memory_barriers, ::std::span<VkImageMemoryBarrier const> image_memory_barriers)
 {
-	::vkCmdWaitEvents(command_buffer, static_cast<::std::uint32_t>(events.size()), events.data(), src_stage_mask, dst_stage_mask, static_cast<::std::uint32_t>(memory_barriers.size()), memory_barriers.data(), static_cast<::std::uint32_t>(buffer_memory_barriers.size()), buffer_memory_barriers.data(), static_cast<::std::uint32_t>(image_memory_barriers.size()), image_memory_barriers.data());
+	::vkCmdWaitEvents(command_buffer, static_cast<::std::uint32_t>(events.size()), events.data(), ::std::bit_cast<VkPipelineStageFlags>(src_stage_mask), ::std::bit_cast<VkPipelineStageFlags>(dst_stage_mask), static_cast<::std::uint32_t>(memory_barriers.size()), memory_barriers.data(), static_cast<::std::uint32_t>(buffer_memory_barriers.size()), buffer_memory_barriers.data(), static_cast<::std::uint32_t>(image_memory_barriers.size()), image_memory_barriers.data());
 }
 }

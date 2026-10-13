@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceComputeShaderDerivativesProperties
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -74,7 +74,7 @@ struct compute_shader_derivatives{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::compute_shader_derivatives>
+struct vulkan_object_trait<tag::feature::khr::compute_shader_derivatives>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::feature::khr::compute_shader_derivatives>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::khr::compute_shader_derivatives>
+struct vulkan_object_trait<tag::property::khr::compute_shader_derivatives>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::property::khr::compute_shader_derivatives>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceComputeShaderDerivativesFeaturesKHR>
 {
-	using type = obj::feature::khr::compute_shader_derivatives;
+	using type = tag::feature::khr::compute_shader_derivatives;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::compute_shader_derivatives>
+struct vulkan_object_native<tag::feature::khr::compute_shader_derivatives>
 {
 	using type = VkPhysicalDeviceComputeShaderDerivativesFeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COMPUTE_SHADER_DERIVATIVES_FEATURES_KHR;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::feature::khr::compute_shader_derivatives>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceComputeShaderDerivativesPropertiesKHR>
 {
-	using type = obj::property::khr::compute_shader_derivatives;
+	using type = tag::property::khr::compute_shader_derivatives;
 };
 
 template<>
-struct vulkan_object_native<obj::property::khr::compute_shader_derivatives>
+struct vulkan_object_native<tag::property::khr::compute_shader_derivatives>
 {
 	using type = VkPhysicalDeviceComputeShaderDerivativesPropertiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COMPUTE_SHADER_DERIVATIVES_PROPERTIES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::compute_shader_derivatives>
+struct vulkan_object_extensions<tag::feature::khr::compute_shader_derivatives>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_KHR_compute_shader_derivatives", "VK_NV_compute_shader_derivatives"};
 	constexpr static ::std::uint32_t core = 0;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::feature::khr::compute_shader_derivatives>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::khr::compute_shader_derivatives>
+struct vulkan_object_extensions<tag::property::khr::compute_shader_derivatives>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_compute_shader_derivatives"};
 	constexpr static ::std::uint32_t core = 0;
@@ -132,11 +132,11 @@ struct vulkan_object_extensions<obj::property::khr::compute_shader_derivatives>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::compute_shader_derivatives> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::compute_shader_derivatives> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::compute_shader_derivatives> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::compute_shader_derivatives> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::khr::compute_shader_derivatives> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::khr::compute_shader_derivatives> = true;
 }
 
 namespace vkfu::param
@@ -147,7 +147,7 @@ using ::vkfu::operator|;
 
 struct compute_shader_derivatives
 {
-	using vulkan_tag_type = obj::feature::khr::compute_shader_derivatives;
+	using vulkan_tag_type = tag::feature::khr::compute_shader_derivatives;
 
 	bool compute_derivative_group_quads = false;
 	bool compute_derivative_group_linear = false;

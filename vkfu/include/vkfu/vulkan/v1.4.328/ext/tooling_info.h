@@ -28,10 +28,10 @@
 
 #include "../version_1_3/tooling_info.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property::ext
 {
-using tool = ::vkfu::obj::property::tool;
+using tool = ::vkfu::tag::property::tool;
 }
 }

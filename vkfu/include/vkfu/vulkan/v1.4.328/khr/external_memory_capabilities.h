@@ -28,24 +28,24 @@
 
 #include "../version_1_1/external_memory_capabilities.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
-using physical_device_external_buffer = ::vkfu::obj::physical_device_external_buffer;
+using physical_device_external_buffer = ::vkfu::tag::physical_device_external_buffer;
 }
 namespace option::khr
 {
-using physical_device_external_image_format = ::vkfu::obj::option::physical_device_external_image_format;
+using physical_device_external_image_format = ::vkfu::tag::option::physical_device_external_image_format;
 }
 namespace property::khr
 {
-using id = ::vkfu::obj::property::id;
+using id = ::vkfu::tag::property::id;
 }
 namespace result::khr
 {
-using external_buffer_properties = ::vkfu::obj::result::external_buffer_properties;
-using external_image_format_properties = ::vkfu::obj::result::external_image_format_properties;
+using external_buffer_properties = ::vkfu::tag::result::external_buffer_properties;
+using external_image_format_properties = ::vkfu::tag::result::external_image_format_properties;
 }
 }
 

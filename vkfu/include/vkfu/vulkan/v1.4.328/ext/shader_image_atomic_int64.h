@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct shader_image_atomic_int64{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::shader_image_atomic_int64>
+struct vulkan_object_trait<tag::feature::ext::shader_image_atomic_int64>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::shader_image_atomic_int64>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT>
 {
-	using type = obj::feature::ext::shader_image_atomic_int64;
+	using type = tag::feature::ext::shader_image_atomic_int64;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::shader_image_atomic_int64>
+struct vulkan_object_native<tag::feature::ext::shader_image_atomic_int64>
 {
 	using type = VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_ATOMIC_INT64_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::shader_image_atomic_int64>
+struct vulkan_object_extensions<tag::feature::ext::shader_image_atomic_int64>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_shader_image_atomic_int64"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::shader_image_atomic_int64>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::shader_image_atomic_int64> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::shader_image_atomic_int64> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::shader_image_atomic_int64> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::shader_image_atomic_int64> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct shader_image_atomic_int64
 {
-	using vulkan_tag_type = obj::feature::ext::shader_image_atomic_int64;
+	using vulkan_tag_type = tag::feature::ext::shader_image_atomic_int64;
 
 	bool shader_image_int64_atomics = false;
 	bool sparse_image_int64_atomics = false;

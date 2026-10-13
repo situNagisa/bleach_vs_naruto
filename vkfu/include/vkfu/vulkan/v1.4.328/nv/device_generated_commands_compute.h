@@ -77,7 +77,7 @@ constexpr auto _vkfu_evaluate(VkPipelineIndirectDeviceAddressInfoNV const& value
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -96,7 +96,7 @@ struct compute_pipeline_indirect_buffer{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::nv::compute_pipeline_indirect_buffer>
+struct vulkan_object_trait<tag::option::nv::compute_pipeline_indirect_buffer>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -104,7 +104,7 @@ struct vulkan_object_trait<obj::option::nv::compute_pipeline_indirect_buffer>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::nv::device_generated_commands_compute>
+struct vulkan_object_trait<tag::feature::nv::device_generated_commands_compute>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -112,7 +112,7 @@ struct vulkan_object_trait<obj::feature::nv::device_generated_commands_compute>
 };
 
 template<>
-struct vulkan_object_trait<obj::nv::pipeline_indirect_device_address>
+struct vulkan_object_trait<tag::nv::pipeline_indirect_device_address>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -122,11 +122,11 @@ struct vulkan_object_trait<obj::nv::pipeline_indirect_device_address>
 template<>
 struct expression_vulkan_tag<VkComputePipelineIndirectBufferInfoNV>
 {
-	using type = obj::option::nv::compute_pipeline_indirect_buffer;
+	using type = tag::option::nv::compute_pipeline_indirect_buffer;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::compute_pipeline_indirect_buffer>
+struct vulkan_object_native<tag::option::nv::compute_pipeline_indirect_buffer>
 {
 	using type = VkComputePipelineIndirectBufferInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_INDIRECT_BUFFER_INFO_NV;
@@ -135,11 +135,11 @@ struct vulkan_object_native<obj::option::nv::compute_pipeline_indirect_buffer>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDeviceGeneratedCommandsComputeFeaturesNV>
 {
-	using type = obj::feature::nv::device_generated_commands_compute;
+	using type = tag::feature::nv::device_generated_commands_compute;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::device_generated_commands_compute>
+struct vulkan_object_native<tag::feature::nv::device_generated_commands_compute>
 {
 	using type = VkPhysicalDeviceDeviceGeneratedCommandsComputeFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_GENERATED_COMMANDS_COMPUTE_FEATURES_NV;
@@ -148,18 +148,18 @@ struct vulkan_object_native<obj::feature::nv::device_generated_commands_compute>
 template<>
 struct expression_vulkan_tag<VkPipelineIndirectDeviceAddressInfoNV>
 {
-	using type = obj::nv::pipeline_indirect_device_address;
+	using type = tag::nv::pipeline_indirect_device_address;
 };
 
 template<>
-struct vulkan_object_native<obj::nv::pipeline_indirect_device_address>
+struct vulkan_object_native<tag::nv::pipeline_indirect_device_address>
 {
 	using type = VkPipelineIndirectDeviceAddressInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_INDIRECT_DEVICE_ADDRESS_INFO_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::compute_pipeline_indirect_buffer>
+struct vulkan_object_extensions<tag::option::nv::compute_pipeline_indirect_buffer>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_device_generated_commands_compute"};
 	constexpr static ::std::uint32_t core = 0;
@@ -167,7 +167,7 @@ struct vulkan_object_extensions<obj::option::nv::compute_pipeline_indirect_buffe
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::device_generated_commands_compute>
+struct vulkan_object_extensions<tag::feature::nv::device_generated_commands_compute>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_device_generated_commands_compute"};
 	constexpr static ::std::uint32_t core = 0;
@@ -175,7 +175,7 @@ struct vulkan_object_extensions<obj::feature::nv::device_generated_commands_comp
 };
 
 template<>
-struct vulkan_object_extensions<obj::nv::pipeline_indirect_device_address>
+struct vulkan_object_extensions<tag::nv::pipeline_indirect_device_address>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_device_generated_commands_compute"};
 	constexpr static ::std::uint32_t core = 0;
@@ -183,11 +183,11 @@ struct vulkan_object_extensions<obj::nv::pipeline_indirect_device_address>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::compute_pipeline, obj::option::nv::compute_pipeline_indirect_buffer> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::compute_pipeline, tag::option::nv::compute_pipeline_indirect_buffer> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::device_generated_commands_compute> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::device_generated_commands_compute> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::device_generated_commands_compute> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::device_generated_commands_compute> = true;
 }
 
 namespace vkfu::param
@@ -198,7 +198,7 @@ using ::vkfu::operator|;
 
 struct device_generated_commands_compute
 {
-	using vulkan_tag_type = obj::feature::nv::device_generated_commands_compute;
+	using vulkan_tag_type = tag::feature::nv::device_generated_commands_compute;
 
 	bool device_generated_compute = false;
 	bool device_generated_compute_pipelines = false;
@@ -224,7 +224,7 @@ using ::vkfu::operator|;
 
 struct pipeline_indirect_device_address
 {
-	using vulkan_tag_type = obj::nv::pipeline_indirect_device_address;
+	using vulkan_tag_type = tag::nv::pipeline_indirect_device_address;
 
 	::vkfu::enums::pipeline_bind_point pipeline_bind_point{};
 	VkPipeline pipeline{};
@@ -248,7 +248,7 @@ using ::vkfu::operator|;
 
 struct compute_pipeline_indirect_buffer
 {
-	using vulkan_tag_type = obj::option::nv::compute_pipeline_indirect_buffer;
+	using vulkan_tag_type = tag::option::nv::compute_pipeline_indirect_buffer;
 
 	VkDeviceAddress device_address{};
 	VkDeviceSize size{};
@@ -273,18 +273,18 @@ namespace vkfu
 {
 namespace nv
 {
-template<::vkfu::expression_for<::vkfu::obj::nv::pipeline_indirect_device_address> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::nv::pipeline_indirect_device_address> Expression1>
 [[nodiscard]] auto get_pipeline_indirect_device_address(VkDevice device, Expression1&& info) -> VkDeviceAddress
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
 	return ::vkGetPipelineIndirectDeviceAddressNV(device, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::query_extension_of<::vkfu::obj::result::memory_requirements2>... Extras, ::vkfu::expression_for<::vkfu::obj::compute_pipeline> Expression1>
-[[nodiscard]] auto get_pipeline_indirect_memory_requirements(VkDevice device, Expression1&& create_info) -> ::vkfu::query_chain<::vkfu::obj::result::memory_requirements2, Extras...>
+template<::vkfu::query_extension_of<::vkfu::tag::result::memory_requirements2>... Extras, ::vkfu::expression_for<::vkfu::tag::compute_pipeline> Expression1>
+[[nodiscard]] auto get_pipeline_indirect_memory_requirements(VkDevice device, Expression1&& create_info) -> ::vkfu::query_chain<::vkfu::tag::result::memory_requirements2, Extras...>
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(create_info));
-	auto chain = ::vkfu::query_chain<::vkfu::obj::result::memory_requirements2, Extras...>{};
+	auto chain = ::vkfu::query_chain<::vkfu::tag::result::memory_requirements2, Extras...>{};
 	::vkGetPipelineIndirectMemoryRequirementsNV(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(chain.head()));
 	return chain;
 }

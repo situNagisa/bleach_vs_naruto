@@ -60,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkPresentIdKHR const& value) noexcept -> VkPresent
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -75,7 +75,7 @@ struct present_id{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::present_id>
+struct vulkan_object_trait<tag::feature::khr::present_id>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -83,7 +83,7 @@ struct vulkan_object_trait<obj::feature::khr::present_id>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::present_id>
+struct vulkan_object_trait<tag::option::khr::present_id>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -93,11 +93,11 @@ struct vulkan_object_trait<obj::option::khr::present_id>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePresentIdFeaturesKHR>
 {
-	using type = obj::feature::khr::present_id;
+	using type = tag::feature::khr::present_id;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::present_id>
+struct vulkan_object_native<tag::feature::khr::present_id>
 {
 	using type = VkPhysicalDevicePresentIdFeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRESENT_ID_FEATURES_KHR;
@@ -106,18 +106,18 @@ struct vulkan_object_native<obj::feature::khr::present_id>
 template<>
 struct expression_vulkan_tag<VkPresentIdKHR>
 {
-	using type = obj::option::khr::present_id;
+	using type = tag::option::khr::present_id;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::present_id>
+struct vulkan_object_native<tag::option::khr::present_id>
 {
 	using type = VkPresentIdKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PRESENT_ID_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::present_id>
+struct vulkan_object_extensions<tag::feature::khr::present_id>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_present_id"};
 	constexpr static ::std::uint32_t core = 0;
@@ -125,7 +125,7 @@ struct vulkan_object_extensions<obj::feature::khr::present_id>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::present_id>
+struct vulkan_object_extensions<tag::option::khr::present_id>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_present_id"};
 	constexpr static ::std::uint32_t core = 0;
@@ -133,11 +133,11 @@ struct vulkan_object_extensions<obj::option::khr::present_id>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::present_id> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::present_id> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::present_id> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::present_id> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::present, obj::option::khr::present_id> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::present, tag::option::khr::present_id> = true;
 }
 
 namespace vkfu::param
@@ -148,7 +148,7 @@ using ::vkfu::operator|;
 
 struct present_id
 {
-	using vulkan_tag_type = obj::feature::khr::present_id;
+	using vulkan_tag_type = tag::feature::khr::present_id;
 
 	bool enable = false;
 
@@ -170,7 +170,7 @@ using ::vkfu::operator|;
 
 struct present_id
 {
-	using vulkan_tag_type = obj::option::khr::present_id;
+	using vulkan_tag_type = tag::option::khr::present_id;
 
 	::std::uint32_t swapchain_count{};
 	::std::uint64_t const* present_ids = nullptr;

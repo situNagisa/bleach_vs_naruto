@@ -42,7 +42,7 @@ constexpr auto _vkfu_evaluate(VkViSurfaceCreateInfoNN const& value) noexcept -> 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace nn
 {
@@ -53,7 +53,7 @@ struct vi_surface{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::nn::vi_surface>
+struct vulkan_object_trait<tag::nn::vi_surface>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -63,18 +63,18 @@ struct vulkan_object_trait<obj::nn::vi_surface>
 template<>
 struct expression_vulkan_tag<VkViSurfaceCreateInfoNN>
 {
-	using type = obj::nn::vi_surface;
+	using type = tag::nn::vi_surface;
 };
 
 template<>
-struct vulkan_object_native<obj::nn::vi_surface>
+struct vulkan_object_native<tag::nn::vi_surface>
 {
 	using type = VkViSurfaceCreateInfoNN;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VI_SURFACE_CREATE_INFO_NN;
 };
 
 template<>
-struct vulkan_object_extensions<obj::nn::vi_surface>
+struct vulkan_object_extensions<tag::nn::vi_surface>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NN_vi_surface"};
 	constexpr static ::std::uint32_t core = 0;
@@ -91,7 +91,7 @@ using ::vkfu::operator|;
 
 struct vi_surface
 {
-	using vulkan_tag_type = obj::nn::vi_surface;
+	using vulkan_tag_type = tag::nn::vi_surface;
 
 	VkViSurfaceCreateFlagsNN flags{};
 	void* window = nullptr;
@@ -114,7 +114,7 @@ namespace vkfu
 {
 namespace nn
 {
-template<::vkfu::expression_for<::vkfu::obj::nn::vi_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::nn::vi_surface> Expression>
 [[nodiscard]] auto create_vi_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkSurfaceKHR, ::VkResult>
 {
@@ -129,7 +129,7 @@ template<::vkfu::expression_for<::vkfu::obj::nn::vi_surface> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nn::vi_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::nn::vi_surface> Expression>
 [[nodiscard]] auto create_vi_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkSurfaceKHR
 {
 	auto produced = create_vi_surface(instance, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

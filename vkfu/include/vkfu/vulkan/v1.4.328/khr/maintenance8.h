@@ -61,7 +61,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceMaintenance8FeaturesKHR const& val
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -76,7 +76,7 @@ struct memory_barrier_access_flags3{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::khr::memory_barrier_access_flags3>
+struct vulkan_object_trait<tag::option::khr::memory_barrier_access_flags3>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -84,7 +84,7 @@ struct vulkan_object_trait<obj::option::khr::memory_barrier_access_flags3>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::khr::maintenance8>
+struct vulkan_object_trait<tag::feature::khr::maintenance8>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -94,11 +94,11 @@ struct vulkan_object_trait<obj::feature::khr::maintenance8>
 template<>
 struct expression_vulkan_tag<VkMemoryBarrierAccessFlags3KHR>
 {
-	using type = obj::option::khr::memory_barrier_access_flags3;
+	using type = tag::option::khr::memory_barrier_access_flags3;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::memory_barrier_access_flags3>
+struct vulkan_object_native<tag::option::khr::memory_barrier_access_flags3>
 {
 	using type = VkMemoryBarrierAccessFlags3KHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MEMORY_BARRIER_ACCESS_FLAGS_3_KHR;
@@ -107,18 +107,18 @@ struct vulkan_object_native<obj::option::khr::memory_barrier_access_flags3>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMaintenance8FeaturesKHR>
 {
-	using type = obj::feature::khr::maintenance8;
+	using type = tag::feature::khr::maintenance8;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::maintenance8>
+struct vulkan_object_native<tag::feature::khr::maintenance8>
 {
 	using type = VkPhysicalDeviceMaintenance8FeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_8_FEATURES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::memory_barrier_access_flags3>
+struct vulkan_object_extensions<tag::option::khr::memory_barrier_access_flags3>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance8"};
 	constexpr static ::std::uint32_t core = 0;
@@ -126,7 +126,7 @@ struct vulkan_object_extensions<obj::option::khr::memory_barrier_access_flags3>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::maintenance8>
+struct vulkan_object_extensions<tag::feature::khr::maintenance8>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance8"};
 	constexpr static ::std::uint32_t core = 0;
@@ -134,15 +134,15 @@ struct vulkan_object_extensions<obj::feature::khr::maintenance8>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::buffer_memory_barrier2, obj::option::khr::memory_barrier_access_flags3> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::buffer_memory_barrier2, tag::option::khr::memory_barrier_access_flags3> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::maintenance8> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::maintenance8> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image_memory_barrier2, obj::option::khr::memory_barrier_access_flags3> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image_memory_barrier2, tag::option::khr::memory_barrier_access_flags3> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::maintenance8> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::maintenance8> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::subpass_dependency2, obj::option::khr::memory_barrier_access_flags3> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::subpass_dependency2, tag::option::khr::memory_barrier_access_flags3> = true;
 }
 
 namespace vkfu::param
@@ -153,7 +153,7 @@ using ::vkfu::operator|;
 
 struct maintenance8
 {
-	using vulkan_tag_type = obj::feature::khr::maintenance8;
+	using vulkan_tag_type = tag::feature::khr::maintenance8;
 
 	bool enable = false;
 
@@ -175,7 +175,7 @@ using ::vkfu::operator|;
 
 struct memory_barrier_access_flags3
 {
-	using vulkan_tag_type = obj::option::khr::memory_barrier_access_flags3;
+	using vulkan_tag_type = tag::option::khr::memory_barrier_access_flags3;
 
 	VkAccessFlags3KHR src_access_mask3{};
 	VkAccessFlags3KHR dst_access_mask3{};

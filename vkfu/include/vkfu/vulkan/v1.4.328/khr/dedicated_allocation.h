@@ -28,15 +28,15 @@
 
 #include "../version_1_1/dedicated_allocation.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::khr
 {
-using memory_dedicated = ::vkfu::obj::option::memory_dedicated;
+using memory_dedicated = ::vkfu::tag::option::memory_dedicated;
 }
 namespace result::khr
 {
-using memory_dedicated_requirements = ::vkfu::obj::result::memory_dedicated_requirements;
+using memory_dedicated_requirements = ::vkfu::tag::result::memory_dedicated_requirements;
 }
 }
 

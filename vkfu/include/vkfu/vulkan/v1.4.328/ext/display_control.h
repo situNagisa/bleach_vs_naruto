@@ -27,6 +27,7 @@
 #include <vkfu/vulkan_object.h>
 
 #include "../khr/swapchain.h"
+#include "display_surface_counter.h"
 
 constexpr auto _vkfu_address(VkDeviceEventInfoEXT& value) noexcept -> void const*
 {
@@ -109,7 +110,7 @@ enum class display_power_state : ::std::underlying_type_t<VkDisplayPowerStateEXT
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace ext
 {
@@ -126,7 +127,7 @@ struct swapchain_counter{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::ext::device_event>
+struct vulkan_object_trait<tag::ext::device_event>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -134,7 +135,7 @@ struct vulkan_object_trait<obj::ext::device_event>
 };
 
 template<>
-struct vulkan_object_trait<obj::ext::display_event>
+struct vulkan_object_trait<tag::ext::display_event>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -142,7 +143,7 @@ struct vulkan_object_trait<obj::ext::display_event>
 };
 
 template<>
-struct vulkan_object_trait<obj::ext::display_power>
+struct vulkan_object_trait<tag::ext::display_power>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -150,7 +151,7 @@ struct vulkan_object_trait<obj::ext::display_power>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::ext::swapchain_counter>
+struct vulkan_object_trait<tag::option::ext::swapchain_counter>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -160,11 +161,11 @@ struct vulkan_object_trait<obj::option::ext::swapchain_counter>
 template<>
 struct expression_vulkan_tag<VkDeviceEventInfoEXT>
 {
-	using type = obj::ext::device_event;
+	using type = tag::ext::device_event;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::device_event>
+struct vulkan_object_native<tag::ext::device_event>
 {
 	using type = VkDeviceEventInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEVICE_EVENT_INFO_EXT;
@@ -173,11 +174,11 @@ struct vulkan_object_native<obj::ext::device_event>
 template<>
 struct expression_vulkan_tag<VkDisplayEventInfoEXT>
 {
-	using type = obj::ext::display_event;
+	using type = tag::ext::display_event;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::display_event>
+struct vulkan_object_native<tag::ext::display_event>
 {
 	using type = VkDisplayEventInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DISPLAY_EVENT_INFO_EXT;
@@ -186,11 +187,11 @@ struct vulkan_object_native<obj::ext::display_event>
 template<>
 struct expression_vulkan_tag<VkDisplayPowerInfoEXT>
 {
-	using type = obj::ext::display_power;
+	using type = tag::ext::display_power;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::display_power>
+struct vulkan_object_native<tag::ext::display_power>
 {
 	using type = VkDisplayPowerInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DISPLAY_POWER_INFO_EXT;
@@ -199,18 +200,18 @@ struct vulkan_object_native<obj::ext::display_power>
 template<>
 struct expression_vulkan_tag<VkSwapchainCounterCreateInfoEXT>
 {
-	using type = obj::option::ext::swapchain_counter;
+	using type = tag::option::ext::swapchain_counter;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::swapchain_counter>
+struct vulkan_object_native<tag::option::ext::swapchain_counter>
 {
 	using type = VkSwapchainCounterCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SWAPCHAIN_COUNTER_CREATE_INFO_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::device_event>
+struct vulkan_object_extensions<tag::ext::device_event>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_display_control"};
 	constexpr static ::std::uint32_t core = 0;
@@ -218,7 +219,7 @@ struct vulkan_object_extensions<obj::ext::device_event>
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::display_event>
+struct vulkan_object_extensions<tag::ext::display_event>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_display_control"};
 	constexpr static ::std::uint32_t core = 0;
@@ -226,7 +227,7 @@ struct vulkan_object_extensions<obj::ext::display_event>
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::display_power>
+struct vulkan_object_extensions<tag::ext::display_power>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_display_control"};
 	constexpr static ::std::uint32_t core = 0;
@@ -234,7 +235,7 @@ struct vulkan_object_extensions<obj::ext::display_power>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::swapchain_counter>
+struct vulkan_object_extensions<tag::option::ext::swapchain_counter>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_display_control"};
 	constexpr static ::std::uint32_t core = 0;
@@ -242,7 +243,7 @@ struct vulkan_object_extensions<obj::option::ext::swapchain_counter>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::swapchain, obj::option::ext::swapchain_counter> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::swapchain, tag::option::ext::swapchain_counter> = true;
 }
 
 namespace vkfu::param
@@ -253,7 +254,7 @@ using ::vkfu::operator|;
 
 struct device_event
 {
-	using vulkan_tag_type = obj::ext::device_event;
+	using vulkan_tag_type = tag::ext::device_event;
 
 	::vkfu::enums::device_event_type event{};
 
@@ -269,7 +270,7 @@ struct device_event
 
 struct display_event
 {
-	using vulkan_tag_type = obj::ext::display_event;
+	using vulkan_tag_type = tag::ext::display_event;
 
 	::vkfu::enums::display_event_type event{};
 
@@ -285,7 +286,7 @@ struct display_event
 
 struct display_power
 {
-	using vulkan_tag_type = obj::ext::display_power;
+	using vulkan_tag_type = tag::ext::display_power;
 
 	::vkfu::enums::display_power_state power_state{};
 
@@ -307,15 +308,9 @@ using ::vkfu::operator|;
 
 struct swapchain_counter
 {
-	using vulkan_tag_type = obj::option::ext::swapchain_counter;
+	using vulkan_tag_type = tag::option::ext::swapchain_counter;
 
-	struct surface_counters_type
-	{
-		VkSurfaceCounterFlagsEXT vblank : 1 = 0;
-		VkSurfaceCounterFlagsEXT _reserved_1 : 31 = 0;
-	};
-
-	surface_counters_type surface_counters{};
+	::vkfu::flags::surface_counter surface_counters{};
 
 	constexpr auto evaluate() const noexcept -> VkSwapchainCounterCreateInfoEXT
 	{
@@ -327,11 +322,6 @@ struct swapchain_counter
 	}
 };
 
-static_assert(sizeof(swapchain_counter::surface_counters_type) == sizeof(VkSurfaceCounterFlagsEXT));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkSurfaceCounterFlagsEXT>(swapchain_counter::surface_counters_type{.vblank = 1}) == VK_SURFACE_COUNTER_VBLANK_BIT_EXT);
-#endif
-
 }
 }
 
@@ -339,7 +329,7 @@ namespace vkfu
 {
 namespace ext
 {
-template<::vkfu::expression_for<::vkfu::obj::ext::display_power> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::display_power> Expression1>
 [[nodiscard]] auto display_power_control(VkDevice device, VkDisplayKHR display, Expression1&& display_power_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -352,7 +342,7 @@ template<::vkfu::expression_for<::vkfu::obj::ext::display_power> Expression1>
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::display_power> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::display_power> Expression1>
 void display_power_control(VkDevice device, VkDisplayKHR display, Expression1&& display_power_info)
 {
 	auto outcome = display_power_control(device, display, ::std::forward<Expression1>(display_power_info), ::std::nothrow);
@@ -362,7 +352,7 @@ void display_power_control(VkDevice device, VkDisplayKHR display, Expression1&& 
 	}
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::device_event> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::device_event> Expression1>
 [[nodiscard]] auto register_device_event(VkDevice device, Expression1&& device_event_info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkFence, ::VkResult>
 {
@@ -376,7 +366,7 @@ template<::vkfu::expression_for<::vkfu::obj::ext::device_event> Expression1>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::device_event> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::device_event> Expression1>
 [[nodiscard]] auto register_device_event(VkDevice device, Expression1&& device_event_info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkFence
 {
 	auto outcome = register_device_event(device, ::std::forward<Expression1>(device_event_info), allocation_callbacks, ::std::nothrow);
@@ -387,7 +377,7 @@ template<::vkfu::expression_for<::vkfu::obj::ext::device_event> Expression1>
 	return *outcome;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::display_event> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::display_event> Expression1>
 [[nodiscard]] auto register_display_event(VkDevice device, VkDisplayKHR display, Expression1&& display_event_info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkFence, ::VkResult>
 {
@@ -401,7 +391,7 @@ template<::vkfu::expression_for<::vkfu::obj::ext::display_event> Expression1>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::display_event> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::display_event> Expression1>
 [[nodiscard]] auto register_display_event(VkDevice device, VkDisplayKHR display, Expression1&& display_event_info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkFence
 {
 	auto outcome = register_display_event(device, display, ::std::forward<Expression1>(display_event_info), allocation_callbacks, ::std::nothrow);

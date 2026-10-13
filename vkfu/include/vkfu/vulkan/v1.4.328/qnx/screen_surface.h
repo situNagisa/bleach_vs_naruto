@@ -42,7 +42,7 @@ constexpr auto _vkfu_evaluate(VkScreenSurfaceCreateInfoQNX const& value) noexcep
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace qnx
 {
@@ -53,7 +53,7 @@ struct screen_surface{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::qnx::screen_surface>
+struct vulkan_object_trait<tag::qnx::screen_surface>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -63,18 +63,18 @@ struct vulkan_object_trait<obj::qnx::screen_surface>
 template<>
 struct expression_vulkan_tag<VkScreenSurfaceCreateInfoQNX>
 {
-	using type = obj::qnx::screen_surface;
+	using type = tag::qnx::screen_surface;
 };
 
 template<>
-struct vulkan_object_native<obj::qnx::screen_surface>
+struct vulkan_object_native<tag::qnx::screen_surface>
 {
 	using type = VkScreenSurfaceCreateInfoQNX;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SCREEN_SURFACE_CREATE_INFO_QNX;
 };
 
 template<>
-struct vulkan_object_extensions<obj::qnx::screen_surface>
+struct vulkan_object_extensions<tag::qnx::screen_surface>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QNX_screen_surface"};
 	constexpr static ::std::uint32_t core = 0;
@@ -91,7 +91,7 @@ using ::vkfu::operator|;
 
 struct screen_surface
 {
-	using vulkan_tag_type = obj::qnx::screen_surface;
+	using vulkan_tag_type = tag::qnx::screen_surface;
 
 	VkScreenSurfaceCreateFlagsQNX flags{};
 	_screen_context* context = nullptr;
@@ -116,7 +116,7 @@ namespace vkfu
 {
 namespace qnx
 {
-template<::vkfu::expression_for<::vkfu::obj::qnx::screen_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::qnx::screen_surface> Expression>
 [[nodiscard]] auto create_screen_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkSurfaceKHR, ::VkResult>
 {
@@ -131,7 +131,7 @@ template<::vkfu::expression_for<::vkfu::obj::qnx::screen_surface> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::qnx::screen_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::qnx::screen_surface> Expression>
 [[nodiscard]] auto create_screen_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkSurfaceKHR
 {
 	auto produced = create_screen_surface(instance, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

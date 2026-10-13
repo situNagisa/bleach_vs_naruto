@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkBufferViewCreateInfo const& value) noexcept -> V
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct buffer_view{};
 }
@@ -51,7 +51,7 @@ struct buffer_view{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::buffer_view>
+struct vulkan_object_trait<tag::buffer_view>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -61,18 +61,18 @@ struct vulkan_object_trait<obj::buffer_view>
 template<>
 struct expression_vulkan_tag<VkBufferViewCreateInfo>
 {
-	using type = obj::buffer_view;
+	using type = tag::buffer_view;
 };
 
 template<>
-struct vulkan_object_native<obj::buffer_view>
+struct vulkan_object_native<tag::buffer_view>
 {
 	using type = VkBufferViewCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO;
 };
 
 template<>
-struct vulkan_object_extensions<obj::buffer_view>
+struct vulkan_object_extensions<tag::buffer_view>
 {
 	constexpr static ::std::array<char const*, 0> names{};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_0;
@@ -87,7 +87,7 @@ using ::vkfu::operator|;
 
 struct buffer_view
 {
-	using vulkan_tag_type = obj::buffer_view;
+	using vulkan_tag_type = tag::buffer_view;
 
 	VkBufferViewCreateFlags flags{};
 	VkBuffer buffer{};
@@ -112,7 +112,7 @@ struct buffer_view
 
 namespace vkfu
 {
-template<::vkfu::expression_for<::vkfu::obj::buffer_view> Expression>
+template<::vkfu::expression_for<::vkfu::tag::buffer_view> Expression>
 [[nodiscard]] auto create_buffer_view(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkBufferView, ::VkResult>
 {
@@ -127,7 +127,7 @@ template<::vkfu::expression_for<::vkfu::obj::buffer_view> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::buffer_view> Expression>
+template<::vkfu::expression_for<::vkfu::tag::buffer_view> Expression>
 [[nodiscard]] auto create_buffer_view(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkBufferView
 {
 	auto produced = create_buffer_view(device, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

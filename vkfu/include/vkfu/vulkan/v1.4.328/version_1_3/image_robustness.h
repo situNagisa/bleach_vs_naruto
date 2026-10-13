@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceImageRobustnessFeatures const& val
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -55,7 +55,7 @@ struct image_robustness{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::image_robustness>
+struct vulkan_object_trait<tag::feature::image_robustness>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::image_robustness>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceImageRobustnessFeatures>
 {
-	using type = obj::feature::image_robustness;
+	using type = tag::feature::image_robustness;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::image_robustness>
+struct vulkan_object_native<tag::feature::image_robustness>
 {
 	using type = VkPhysicalDeviceImageRobustnessFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_ROBUSTNESS_FEATURES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::image_robustness>
+struct vulkan_object_extensions<tag::feature::image_robustness>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_image_robustness"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::image_robustness>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::image_robustness> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::image_robustness> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::image_robustness> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::image_robustness> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct image_robustness
 {
-	using vulkan_tag_type = obj::feature::image_robustness;
+	using vulkan_tag_type = tag::feature::image_robustness;
 
 	bool robust_image_access = false;
 

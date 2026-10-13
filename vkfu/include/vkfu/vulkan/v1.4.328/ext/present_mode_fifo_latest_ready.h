@@ -28,11 +28,11 @@
 
 #include "../khr/present_mode_fifo_latest_ready.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr::ext
 {
-using present_mode_fifo_latest_ready = ::vkfu::obj::feature::khr::present_mode_fifo_latest_ready;
+using present_mode_fifo_latest_ready = ::vkfu::tag::feature::khr::present_mode_fifo_latest_ready;
 }
 }
 

@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceShaderDemoteToHelperInvocationFeat
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -55,7 +55,7 @@ struct shader_demote_to_helper_invocation{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::shader_demote_to_helper_invocation>
+struct vulkan_object_trait<tag::feature::shader_demote_to_helper_invocation>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::shader_demote_to_helper_invocation>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderDemoteToHelperInvocationFeatures>
 {
-	using type = obj::feature::shader_demote_to_helper_invocation;
+	using type = tag::feature::shader_demote_to_helper_invocation;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::shader_demote_to_helper_invocation>
+struct vulkan_object_native<tag::feature::shader_demote_to_helper_invocation>
 {
 	using type = VkPhysicalDeviceShaderDemoteToHelperInvocationFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DEMOTE_TO_HELPER_INVOCATION_FEATURES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::shader_demote_to_helper_invocation>
+struct vulkan_object_extensions<tag::feature::shader_demote_to_helper_invocation>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_shader_demote_to_helper_invocation"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::shader_demote_to_helper_invocation
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::shader_demote_to_helper_invocation> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::shader_demote_to_helper_invocation> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::shader_demote_to_helper_invocation> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::shader_demote_to_helper_invocation> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct shader_demote_to_helper_invocation
 {
-	using vulkan_tag_type = obj::feature::shader_demote_to_helper_invocation;
+	using vulkan_tag_type = tag::feature::shader_demote_to_helper_invocation;
 
 	bool enable = false;
 

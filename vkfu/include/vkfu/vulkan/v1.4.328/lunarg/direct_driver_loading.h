@@ -68,7 +68,7 @@ enum class direct_driver_loading_mode : ::std::underlying_type_t<VkDirectDriverL
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace lunarg
 {
@@ -83,7 +83,7 @@ struct direct_driver_loading_list{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::lunarg::direct_driver_loading>
+struct vulkan_object_trait<tag::lunarg::direct_driver_loading>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -91,7 +91,7 @@ struct vulkan_object_trait<obj::lunarg::direct_driver_loading>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::lunarg::direct_driver_loading_list>
+struct vulkan_object_trait<tag::option::lunarg::direct_driver_loading_list>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -101,11 +101,11 @@ struct vulkan_object_trait<obj::option::lunarg::direct_driver_loading_list>
 template<>
 struct expression_vulkan_tag<VkDirectDriverLoadingInfoLUNARG>
 {
-	using type = obj::lunarg::direct_driver_loading;
+	using type = tag::lunarg::direct_driver_loading;
 };
 
 template<>
-struct vulkan_object_native<obj::lunarg::direct_driver_loading>
+struct vulkan_object_native<tag::lunarg::direct_driver_loading>
 {
 	using type = VkDirectDriverLoadingInfoLUNARG;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DIRECT_DRIVER_LOADING_INFO_LUNARG;
@@ -114,18 +114,18 @@ struct vulkan_object_native<obj::lunarg::direct_driver_loading>
 template<>
 struct expression_vulkan_tag<VkDirectDriverLoadingListLUNARG>
 {
-	using type = obj::option::lunarg::direct_driver_loading_list;
+	using type = tag::option::lunarg::direct_driver_loading_list;
 };
 
 template<>
-struct vulkan_object_native<obj::option::lunarg::direct_driver_loading_list>
+struct vulkan_object_native<tag::option::lunarg::direct_driver_loading_list>
 {
 	using type = VkDirectDriverLoadingListLUNARG;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DIRECT_DRIVER_LOADING_LIST_LUNARG;
 };
 
 template<>
-struct vulkan_object_extensions<obj::lunarg::direct_driver_loading>
+struct vulkan_object_extensions<tag::lunarg::direct_driver_loading>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_LUNARG_direct_driver_loading"};
 	constexpr static ::std::uint32_t core = 0;
@@ -133,7 +133,7 @@ struct vulkan_object_extensions<obj::lunarg::direct_driver_loading>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::lunarg::direct_driver_loading_list>
+struct vulkan_object_extensions<tag::option::lunarg::direct_driver_loading_list>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_LUNARG_direct_driver_loading"};
 	constexpr static ::std::uint32_t core = 0;
@@ -141,7 +141,7 @@ struct vulkan_object_extensions<obj::option::lunarg::direct_driver_loading_list>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::instance, obj::option::lunarg::direct_driver_loading_list> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::instance, tag::option::lunarg::direct_driver_loading_list> = true;
 }
 
 namespace vkfu::param
@@ -152,7 +152,7 @@ using ::vkfu::operator|;
 
 struct direct_driver_loading
 {
-	using vulkan_tag_type = obj::lunarg::direct_driver_loading;
+	using vulkan_tag_type = tag::lunarg::direct_driver_loading;
 
 	VkDirectDriverLoadingFlagsLUNARG flags{};
 	PFN_vkGetInstanceProcAddrLUNARG get_instance_proc_addr{};
@@ -176,7 +176,7 @@ using ::vkfu::operator|;
 
 struct direct_driver_loading_list
 {
-	using vulkan_tag_type = obj::option::lunarg::direct_driver_loading_list;
+	using vulkan_tag_type = tag::option::lunarg::direct_driver_loading_list;
 
 	::vkfu::enums::direct_driver_loading_mode mode{};
 	::std::span<VkDirectDriverLoadingInfoLUNARG const> drivers{};

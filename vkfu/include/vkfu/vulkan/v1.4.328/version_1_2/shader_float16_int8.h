@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceShaderFloat16Int8Features const& v
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -55,7 +55,7 @@ struct shader_float16_int8{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::shader_float16_int8>
+struct vulkan_object_trait<tag::feature::shader_float16_int8>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::shader_float16_int8>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderFloat16Int8Features>
 {
-	using type = obj::feature::shader_float16_int8;
+	using type = tag::feature::shader_float16_int8;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::shader_float16_int8>
+struct vulkan_object_native<tag::feature::shader_float16_int8>
 {
 	using type = VkPhysicalDeviceShaderFloat16Int8Features;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::shader_float16_int8>
+struct vulkan_object_extensions<tag::feature::shader_float16_int8>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_shader_float16_int8"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::shader_float16_int8>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::shader_float16_int8> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::shader_float16_int8> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::shader_float16_int8> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::shader_float16_int8> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct shader_float16_int8
 {
-	using vulkan_tag_type = obj::feature::shader_float16_int8;
+	using vulkan_tag_type = tag::feature::shader_float16_int8;
 
 	bool shader_float16 = false;
 	bool shader_int8 = false;

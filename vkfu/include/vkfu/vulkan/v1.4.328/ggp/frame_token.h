@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPresentFrameTokenGGP const& value) noexcept -> V
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::ggp
 {
@@ -55,7 +55,7 @@ struct present_frame_token{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ggp::present_frame_token>
+struct vulkan_object_trait<tag::option::ggp::present_frame_token>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::option::ggp::present_frame_token>
 template<>
 struct expression_vulkan_tag<VkPresentFrameTokenGGP>
 {
-	using type = obj::option::ggp::present_frame_token;
+	using type = tag::option::ggp::present_frame_token;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ggp::present_frame_token>
+struct vulkan_object_native<tag::option::ggp::present_frame_token>
 {
 	using type = VkPresentFrameTokenGGP;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PRESENT_FRAME_TOKEN_GGP;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ggp::present_frame_token>
+struct vulkan_object_extensions<tag::option::ggp::present_frame_token>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_GGP_frame_token"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,7 +84,7 @@ struct vulkan_object_extensions<obj::option::ggp::present_frame_token>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::present, obj::option::ggp::present_frame_token> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::present, tag::option::ggp::present_frame_token> = true;
 }
 
 namespace vkfu::param
@@ -95,7 +95,7 @@ using ::vkfu::operator|;
 
 struct present_frame_token
 {
-	using vulkan_tag_type = obj::option::ggp::present_frame_token;
+	using vulkan_tag_type = tag::option::ggp::present_frame_token;
 
 	GgpFrameToken frame_token{};
 

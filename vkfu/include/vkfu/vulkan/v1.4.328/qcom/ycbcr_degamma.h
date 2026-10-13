@@ -60,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkSamplerYcbcrConversionYcbcrDegammaCreateInfoQCOM
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::qcom
 {
@@ -75,7 +75,7 @@ struct ycbcr_degamma{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::qcom::ycbcr_degamma>
+struct vulkan_object_trait<tag::feature::qcom::ycbcr_degamma>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -83,7 +83,7 @@ struct vulkan_object_trait<obj::feature::qcom::ycbcr_degamma>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::qcom::ycbcr_degamma>
+struct vulkan_object_trait<tag::option::qcom::ycbcr_degamma>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -93,11 +93,11 @@ struct vulkan_object_trait<obj::option::qcom::ycbcr_degamma>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceYcbcrDegammaFeaturesQCOM>
 {
-	using type = obj::feature::qcom::ycbcr_degamma;
+	using type = tag::feature::qcom::ycbcr_degamma;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::qcom::ycbcr_degamma>
+struct vulkan_object_native<tag::feature::qcom::ycbcr_degamma>
 {
 	using type = VkPhysicalDeviceYcbcrDegammaFeaturesQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_YCBCR_DEGAMMA_FEATURES_QCOM;
@@ -106,18 +106,18 @@ struct vulkan_object_native<obj::feature::qcom::ycbcr_degamma>
 template<>
 struct expression_vulkan_tag<VkSamplerYcbcrConversionYcbcrDegammaCreateInfoQCOM>
 {
-	using type = obj::option::qcom::ycbcr_degamma;
+	using type = tag::option::qcom::ycbcr_degamma;
 };
 
 template<>
-struct vulkan_object_native<obj::option::qcom::ycbcr_degamma>
+struct vulkan_object_native<tag::option::qcom::ycbcr_degamma>
 {
 	using type = VkSamplerYcbcrConversionYcbcrDegammaCreateInfoQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_YCBCR_DEGAMMA_CREATE_INFO_QCOM;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::qcom::ycbcr_degamma>
+struct vulkan_object_extensions<tag::feature::qcom::ycbcr_degamma>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_ycbcr_degamma"};
 	constexpr static ::std::uint32_t core = 0;
@@ -125,7 +125,7 @@ struct vulkan_object_extensions<obj::feature::qcom::ycbcr_degamma>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::qcom::ycbcr_degamma>
+struct vulkan_object_extensions<tag::option::qcom::ycbcr_degamma>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_ycbcr_degamma"};
 	constexpr static ::std::uint32_t core = 0;
@@ -133,11 +133,11 @@ struct vulkan_object_extensions<obj::option::qcom::ycbcr_degamma>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::qcom::ycbcr_degamma> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::qcom::ycbcr_degamma> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::qcom::ycbcr_degamma> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::qcom::ycbcr_degamma> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::sampler_ycbcr_conversion, obj::option::qcom::ycbcr_degamma> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::sampler_ycbcr_conversion, tag::option::qcom::ycbcr_degamma> = true;
 }
 
 namespace vkfu::param
@@ -148,7 +148,7 @@ using ::vkfu::operator|;
 
 struct ycbcr_degamma
 {
-	using vulkan_tag_type = obj::feature::qcom::ycbcr_degamma;
+	using vulkan_tag_type = tag::feature::qcom::ycbcr_degamma;
 
 	bool enable = false;
 
@@ -170,7 +170,7 @@ using ::vkfu::operator|;
 
 struct ycbcr_degamma
 {
-	using vulkan_tag_type = obj::option::qcom::ycbcr_degamma;
+	using vulkan_tag_type = tag::option::qcom::ycbcr_degamma;
 
 	bool enable_y_degamma = false;
 	bool enable_cb_cr_degamma = false;

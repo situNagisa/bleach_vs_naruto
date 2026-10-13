@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceShaderSMBuiltinsPropertiesNV const
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -74,7 +74,7 @@ struct shader_sm_builtins{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::shader_sm_builtins>
+struct vulkan_object_trait<tag::feature::nv::shader_sm_builtins>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::feature::nv::shader_sm_builtins>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::nv::shader_sm_builtins>
+struct vulkan_object_trait<tag::property::nv::shader_sm_builtins>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::property::nv::shader_sm_builtins>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderSMBuiltinsFeaturesNV>
 {
-	using type = obj::feature::nv::shader_sm_builtins;
+	using type = tag::feature::nv::shader_sm_builtins;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::shader_sm_builtins>
+struct vulkan_object_native<tag::feature::nv::shader_sm_builtins>
 {
 	using type = VkPhysicalDeviceShaderSMBuiltinsFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SM_BUILTINS_FEATURES_NV;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::feature::nv::shader_sm_builtins>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderSMBuiltinsPropertiesNV>
 {
-	using type = obj::property::nv::shader_sm_builtins;
+	using type = tag::property::nv::shader_sm_builtins;
 };
 
 template<>
-struct vulkan_object_native<obj::property::nv::shader_sm_builtins>
+struct vulkan_object_native<tag::property::nv::shader_sm_builtins>
 {
 	using type = VkPhysicalDeviceShaderSMBuiltinsPropertiesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SM_BUILTINS_PROPERTIES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::shader_sm_builtins>
+struct vulkan_object_extensions<tag::feature::nv::shader_sm_builtins>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_shader_sm_builtins"};
 	constexpr static ::std::uint32_t core = 0;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::feature::nv::shader_sm_builtins>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::nv::shader_sm_builtins>
+struct vulkan_object_extensions<tag::property::nv::shader_sm_builtins>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_shader_sm_builtins"};
 	constexpr static ::std::uint32_t core = 0;
@@ -132,11 +132,11 @@ struct vulkan_object_extensions<obj::property::nv::shader_sm_builtins>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::shader_sm_builtins> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::shader_sm_builtins> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::shader_sm_builtins> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::shader_sm_builtins> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::nv::shader_sm_builtins> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::nv::shader_sm_builtins> = true;
 }
 
 namespace vkfu::param
@@ -147,7 +147,7 @@ using ::vkfu::operator|;
 
 struct shader_sm_builtins
 {
-	using vulkan_tag_type = obj::feature::nv::shader_sm_builtins;
+	using vulkan_tag_type = tag::feature::nv::shader_sm_builtins;
 
 	bool enable = false;
 

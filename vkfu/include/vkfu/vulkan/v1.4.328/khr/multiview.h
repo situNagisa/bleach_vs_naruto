@@ -28,19 +28,19 @@
 
 #include "../version_1_1/multiview.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using multiview = ::vkfu::obj::feature::multiview;
+using multiview = ::vkfu::tag::feature::multiview;
 }
 namespace option::khr
 {
-using render_pass_multiview = ::vkfu::obj::option::render_pass_multiview;
+using render_pass_multiview = ::vkfu::tag::option::render_pass_multiview;
 }
 namespace property::khr
 {
-using multiview = ::vkfu::obj::property::multiview;
+using multiview = ::vkfu::tag::property::multiview;
 }
 }
 

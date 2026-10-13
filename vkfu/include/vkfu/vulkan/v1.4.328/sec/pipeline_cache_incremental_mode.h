@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDevicePipelineCacheIncrementalModeFeatur
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::sec
 {
@@ -55,7 +55,7 @@ struct pipeline_cache_incremental_mode{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::sec::pipeline_cache_incremental_mode>
+struct vulkan_object_trait<tag::feature::sec::pipeline_cache_incremental_mode>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::sec::pipeline_cache_incremental_mode>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePipelineCacheIncrementalModeFeaturesSEC>
 {
-	using type = obj::feature::sec::pipeline_cache_incremental_mode;
+	using type = tag::feature::sec::pipeline_cache_incremental_mode;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::sec::pipeline_cache_incremental_mode>
+struct vulkan_object_native<tag::feature::sec::pipeline_cache_incremental_mode>
 {
 	using type = VkPhysicalDevicePipelineCacheIncrementalModeFeaturesSEC;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_CACHE_INCREMENTAL_MODE_FEATURES_SEC;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::sec::pipeline_cache_incremental_mode>
+struct vulkan_object_extensions<tag::feature::sec::pipeline_cache_incremental_mode>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_SEC_pipeline_cache_incremental_mode"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::sec::pipeline_cache_incremental_mo
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::sec::pipeline_cache_incremental_mode> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::sec::pipeline_cache_incremental_mode> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::sec::pipeline_cache_incremental_mode> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::sec::pipeline_cache_incremental_mode> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct pipeline_cache_incremental_mode
 {
-	using vulkan_tag_type = obj::feature::sec::pipeline_cache_incremental_mode;
+	using vulkan_tag_type = tag::feature::sec::pipeline_cache_incremental_mode;
 
 	bool enable = false;
 

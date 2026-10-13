@@ -28,11 +28,11 @@
 
 #include "../version_1_2/vulkan_memory_model.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using vulkan_memory_model = ::vkfu::obj::feature::vulkan_memory_model;
+using vulkan_memory_model = ::vkfu::tag::feature::vulkan_memory_model;
 }
 }
 

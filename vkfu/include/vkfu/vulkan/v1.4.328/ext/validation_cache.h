@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkValidationCacheCreateInfoEXT const& value) noexc
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace ext
 {
@@ -74,7 +74,7 @@ struct shader_module_validation_cache{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::shader_module_validation_cache>
+struct vulkan_object_trait<tag::option::ext::shader_module_validation_cache>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::option::ext::shader_module_validation_cache>
 };
 
 template<>
-struct vulkan_object_trait<obj::ext::validation_cache>
+struct vulkan_object_trait<tag::ext::validation_cache>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::ext::validation_cache>
 template<>
 struct expression_vulkan_tag<VkShaderModuleValidationCacheCreateInfoEXT>
 {
-	using type = obj::option::ext::shader_module_validation_cache;
+	using type = tag::option::ext::shader_module_validation_cache;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::shader_module_validation_cache>
+struct vulkan_object_native<tag::option::ext::shader_module_validation_cache>
 {
 	using type = VkShaderModuleValidationCacheCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SHADER_MODULE_VALIDATION_CACHE_CREATE_INFO_EXT;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::option::ext::shader_module_validation_cache>
 template<>
 struct expression_vulkan_tag<VkValidationCacheCreateInfoEXT>
 {
-	using type = obj::ext::validation_cache;
+	using type = tag::ext::validation_cache;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::validation_cache>
+struct vulkan_object_native<tag::ext::validation_cache>
 {
 	using type = VkValidationCacheCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VALIDATION_CACHE_CREATE_INFO_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::shader_module_validation_cache>
+struct vulkan_object_extensions<tag::option::ext::shader_module_validation_cache>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_validation_cache"};
 	constexpr static ::std::uint32_t core = 0;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::option::ext::shader_module_validation_cache
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::validation_cache>
+struct vulkan_object_extensions<tag::ext::validation_cache>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_validation_cache"};
 	constexpr static ::std::uint32_t core = 0;
@@ -132,9 +132,9 @@ struct vulkan_object_extensions<obj::ext::validation_cache>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::shader_stage, obj::option::ext::shader_module_validation_cache> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::shader_stage, tag::option::ext::shader_module_validation_cache> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::shader_module, obj::option::ext::shader_module_validation_cache> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::shader_module, tag::option::ext::shader_module_validation_cache> = true;
 }
 
 namespace vkfu::param
@@ -145,7 +145,7 @@ using ::vkfu::operator|;
 
 struct validation_cache
 {
-	using vulkan_tag_type = obj::ext::validation_cache;
+	using vulkan_tag_type = tag::ext::validation_cache;
 
 	VkValidationCacheCreateFlagsEXT flags{};
 	::std::size_t initial_data_size{};
@@ -171,7 +171,7 @@ using ::vkfu::operator|;
 
 struct shader_module_validation_cache
 {
-	using vulkan_tag_type = obj::option::ext::shader_module_validation_cache;
+	using vulkan_tag_type = tag::option::ext::shader_module_validation_cache;
 
 	VkValidationCacheEXT validation_cache{};
 
@@ -192,7 +192,7 @@ namespace vkfu
 {
 namespace ext
 {
-template<::vkfu::expression_for<::vkfu::obj::ext::validation_cache> Expression>
+template<::vkfu::expression_for<::vkfu::tag::ext::validation_cache> Expression>
 [[nodiscard]] auto create_validation_cache(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkValidationCacheEXT, ::VkResult>
 {
@@ -207,7 +207,7 @@ template<::vkfu::expression_for<::vkfu::obj::ext::validation_cache> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::validation_cache> Expression>
+template<::vkfu::expression_for<::vkfu::tag::ext::validation_cache> Expression>
 [[nodiscard]] auto create_validation_cache(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkValidationCacheEXT
 {
 	auto produced = create_validation_cache(device, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

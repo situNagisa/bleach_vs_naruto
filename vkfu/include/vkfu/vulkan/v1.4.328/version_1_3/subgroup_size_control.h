@@ -75,7 +75,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceSubgroupSizeControlProperties cons
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -94,7 +94,7 @@ struct shader_stage_required_subgroup_size{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::subgroup_size_control>
+struct vulkan_object_trait<tag::feature::subgroup_size_control>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -102,7 +102,7 @@ struct vulkan_object_trait<obj::feature::subgroup_size_control>
 };
 
 template<>
-struct vulkan_object_trait<obj::state::shader_stage_required_subgroup_size>
+struct vulkan_object_trait<tag::state::shader_stage_required_subgroup_size>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -110,7 +110,7 @@ struct vulkan_object_trait<obj::state::shader_stage_required_subgroup_size>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::subgroup_size_control>
+struct vulkan_object_trait<tag::property::subgroup_size_control>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -120,11 +120,11 @@ struct vulkan_object_trait<obj::property::subgroup_size_control>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceSubgroupSizeControlFeatures>
 {
-	using type = obj::feature::subgroup_size_control;
+	using type = tag::feature::subgroup_size_control;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::subgroup_size_control>
+struct vulkan_object_native<tag::feature::subgroup_size_control>
 {
 	using type = VkPhysicalDeviceSubgroupSizeControlFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_FEATURES;
@@ -133,11 +133,11 @@ struct vulkan_object_native<obj::feature::subgroup_size_control>
 template<>
 struct expression_vulkan_tag<VkPipelineShaderStageRequiredSubgroupSizeCreateInfo>
 {
-	using type = obj::state::shader_stage_required_subgroup_size;
+	using type = tag::state::shader_stage_required_subgroup_size;
 };
 
 template<>
-struct vulkan_object_native<obj::state::shader_stage_required_subgroup_size>
+struct vulkan_object_native<tag::state::shader_stage_required_subgroup_size>
 {
 	using type = VkPipelineShaderStageRequiredSubgroupSizeCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_REQUIRED_SUBGROUP_SIZE_CREATE_INFO;
@@ -146,18 +146,18 @@ struct vulkan_object_native<obj::state::shader_stage_required_subgroup_size>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceSubgroupSizeControlProperties>
 {
-	using type = obj::property::subgroup_size_control;
+	using type = tag::property::subgroup_size_control;
 };
 
 template<>
-struct vulkan_object_native<obj::property::subgroup_size_control>
+struct vulkan_object_native<tag::property::subgroup_size_control>
 {
 	using type = VkPhysicalDeviceSubgroupSizeControlProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::subgroup_size_control>
+struct vulkan_object_extensions<tag::feature::subgroup_size_control>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_subgroup_size_control"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -165,7 +165,7 @@ struct vulkan_object_extensions<obj::feature::subgroup_size_control>
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::shader_stage_required_subgroup_size>
+struct vulkan_object_extensions<tag::state::shader_stage_required_subgroup_size>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_shader_object", "VK_EXT_subgroup_size_control"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -173,7 +173,7 @@ struct vulkan_object_extensions<obj::state::shader_stage_required_subgroup_size>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::subgroup_size_control>
+struct vulkan_object_extensions<tag::property::subgroup_size_control>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_subgroup_size_control"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -181,13 +181,13 @@ struct vulkan_object_extensions<obj::property::subgroup_size_control>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::subgroup_size_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::subgroup_size_control> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::subgroup_size_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::subgroup_size_control> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::subgroup_size_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::subgroup_size_control> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::shader_stage, obj::state::shader_stage_required_subgroup_size> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::shader_stage, tag::state::shader_stage_required_subgroup_size> = true;
 }
 
 namespace vkfu::param
@@ -198,7 +198,7 @@ using ::vkfu::operator|;
 
 struct subgroup_size_control
 {
-	using vulkan_tag_type = obj::feature::subgroup_size_control;
+	using vulkan_tag_type = tag::feature::subgroup_size_control;
 
 	bool enable = false;
 	bool compute_full_subgroups = false;
@@ -222,7 +222,7 @@ using ::vkfu::operator|;
 
 struct shader_stage_required_subgroup_size
 {
-	using vulkan_tag_type = obj::state::shader_stage_required_subgroup_size;
+	using vulkan_tag_type = tag::state::shader_stage_required_subgroup_size;
 
 	::std::uint32_t required_subgroup_size{};
 

@@ -120,7 +120,7 @@ enum class ray_tracing_shader_group_type : ::std::underlying_type_t<VkRayTracing
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -141,7 +141,7 @@ struct ray_tracing_pipeline{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::ray_tracing_pipeline>
+struct vulkan_object_trait<tag::feature::khr::ray_tracing_pipeline>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -149,7 +149,7 @@ struct vulkan_object_trait<obj::feature::khr::ray_tracing_pipeline>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::ray_tracing_pipeline>
+struct vulkan_object_trait<tag::khr::ray_tracing_pipeline>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -157,7 +157,7 @@ struct vulkan_object_trait<obj::khr::ray_tracing_pipeline>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::ray_tracing_pipeline_interface>
+struct vulkan_object_trait<tag::khr::ray_tracing_pipeline_interface>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -165,7 +165,7 @@ struct vulkan_object_trait<obj::khr::ray_tracing_pipeline_interface>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::ray_tracing_shader_group>
+struct vulkan_object_trait<tag::khr::ray_tracing_shader_group>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -173,7 +173,7 @@ struct vulkan_object_trait<obj::khr::ray_tracing_shader_group>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::khr::ray_tracing_pipeline>
+struct vulkan_object_trait<tag::property::khr::ray_tracing_pipeline>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -183,11 +183,11 @@ struct vulkan_object_trait<obj::property::khr::ray_tracing_pipeline>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceRayTracingPipelineFeaturesKHR>
 {
-	using type = obj::feature::khr::ray_tracing_pipeline;
+	using type = tag::feature::khr::ray_tracing_pipeline;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::ray_tracing_pipeline>
+struct vulkan_object_native<tag::feature::khr::ray_tracing_pipeline>
 {
 	using type = VkPhysicalDeviceRayTracingPipelineFeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
@@ -196,11 +196,11 @@ struct vulkan_object_native<obj::feature::khr::ray_tracing_pipeline>
 template<>
 struct expression_vulkan_tag<VkRayTracingPipelineCreateInfoKHR>
 {
-	using type = obj::khr::ray_tracing_pipeline;
+	using type = tag::khr::ray_tracing_pipeline;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::ray_tracing_pipeline>
+struct vulkan_object_native<tag::khr::ray_tracing_pipeline>
 {
 	using type = VkRayTracingPipelineCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR;
@@ -209,11 +209,11 @@ struct vulkan_object_native<obj::khr::ray_tracing_pipeline>
 template<>
 struct expression_vulkan_tag<VkRayTracingPipelineInterfaceCreateInfoKHR>
 {
-	using type = obj::khr::ray_tracing_pipeline_interface;
+	using type = tag::khr::ray_tracing_pipeline_interface;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::ray_tracing_pipeline_interface>
+struct vulkan_object_native<tag::khr::ray_tracing_pipeline_interface>
 {
 	using type = VkRayTracingPipelineInterfaceCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_INTERFACE_CREATE_INFO_KHR;
@@ -222,11 +222,11 @@ struct vulkan_object_native<obj::khr::ray_tracing_pipeline_interface>
 template<>
 struct expression_vulkan_tag<VkRayTracingShaderGroupCreateInfoKHR>
 {
-	using type = obj::khr::ray_tracing_shader_group;
+	using type = tag::khr::ray_tracing_shader_group;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::ray_tracing_shader_group>
+struct vulkan_object_native<tag::khr::ray_tracing_shader_group>
 {
 	using type = VkRayTracingShaderGroupCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
@@ -235,18 +235,18 @@ struct vulkan_object_native<obj::khr::ray_tracing_shader_group>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceRayTracingPipelinePropertiesKHR>
 {
-	using type = obj::property::khr::ray_tracing_pipeline;
+	using type = tag::property::khr::ray_tracing_pipeline;
 };
 
 template<>
-struct vulkan_object_native<obj::property::khr::ray_tracing_pipeline>
+struct vulkan_object_native<tag::property::khr::ray_tracing_pipeline>
 {
 	using type = VkPhysicalDeviceRayTracingPipelinePropertiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::ray_tracing_pipeline>
+struct vulkan_object_extensions<tag::feature::khr::ray_tracing_pipeline>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_ray_tracing_pipeline"};
 	constexpr static ::std::uint32_t core = 0;
@@ -254,7 +254,7 @@ struct vulkan_object_extensions<obj::feature::khr::ray_tracing_pipeline>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::ray_tracing_pipeline>
+struct vulkan_object_extensions<tag::khr::ray_tracing_pipeline>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_ray_tracing_pipeline"};
 	constexpr static ::std::uint32_t core = 0;
@@ -262,7 +262,7 @@ struct vulkan_object_extensions<obj::khr::ray_tracing_pipeline>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::ray_tracing_pipeline_interface>
+struct vulkan_object_extensions<tag::khr::ray_tracing_pipeline_interface>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_ray_tracing_pipeline"};
 	constexpr static ::std::uint32_t core = 0;
@@ -270,7 +270,7 @@ struct vulkan_object_extensions<obj::khr::ray_tracing_pipeline_interface>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::ray_tracing_shader_group>
+struct vulkan_object_extensions<tag::khr::ray_tracing_shader_group>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_ray_tracing_pipeline"};
 	constexpr static ::std::uint32_t core = 0;
@@ -278,7 +278,7 @@ struct vulkan_object_extensions<obj::khr::ray_tracing_shader_group>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::khr::ray_tracing_pipeline>
+struct vulkan_object_extensions<tag::property::khr::ray_tracing_pipeline>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_ray_tracing_pipeline"};
 	constexpr static ::std::uint32_t core = 0;
@@ -286,17 +286,17 @@ struct vulkan_object_extensions<obj::property::khr::ray_tracing_pipeline>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::ray_tracing_pipeline> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::ray_tracing_pipeline> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::ray_tracing_pipeline> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::ray_tracing_pipeline> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::khr::ray_tracing_pipeline> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::khr::ray_tracing_pipeline> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::ray_tracing_pipeline, obj::option::pipeline_create_flags2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::ray_tracing_pipeline, tag::option::pipeline_create_flags2> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::ray_tracing_pipeline, obj::option::pipeline_creation_feedback> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::ray_tracing_pipeline, tag::option::pipeline_creation_feedback> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::ray_tracing_pipeline, obj::state::robustness> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::ray_tracing_pipeline, tag::state::robustness> = true;
 }
 
 namespace vkfu::param
@@ -307,7 +307,7 @@ using ::vkfu::operator|;
 
 struct ray_tracing_pipeline
 {
-	using vulkan_tag_type = obj::feature::khr::ray_tracing_pipeline;
+	using vulkan_tag_type = tag::feature::khr::ray_tracing_pipeline;
 
 	bool enable = false;
 	bool shader_group_handle_capture_replay = false;
@@ -335,53 +335,17 @@ namespace khr
 {
 using ::vkfu::operator|;
 
-template<::vkfu::reference_expression_for<obj::state::khr::library> library_info_expression = ::vkfu::absent_expression, ::vkfu::reference_expression_for<obj::khr::ray_tracing_pipeline_interface> library_interface_expression = ::vkfu::absent_expression, ::vkfu::reference_expression_for<obj::state::dynamic> dynamic_state_expression = ::vkfu::absent_expression>
+template<::vkfu::reference_expression_for<tag::state::khr::library> library_info_expression = ::vkfu::absent_expression, ::vkfu::reference_expression_for<tag::khr::ray_tracing_pipeline_interface> library_interface_expression = ::vkfu::absent_expression, ::vkfu::reference_expression_for<tag::state::dynamic> dynamic_state_expression = ::vkfu::absent_expression>
 struct ray_tracing_pipeline
 {
-	using vulkan_tag_type = obj::khr::ray_tracing_pipeline;
+	using vulkan_tag_type = tag::khr::ray_tracing_pipeline;
 	using storage_type = ::vkfu::reference_storage<VkRayTracingPipelineCreateInfoKHR
 		, ::vkfu::reference_slot<&VkRayTracingPipelineCreateInfoKHR::pLibraryInfo, ::vkfu::reference_storage_of_t<library_info_expression>>
 		, ::vkfu::reference_slot<&VkRayTracingPipelineCreateInfoKHR::pLibraryInterface, ::vkfu::reference_storage_of_t<library_interface_expression>>
 		, ::vkfu::reference_slot<&VkRayTracingPipelineCreateInfoKHR::pDynamicState, ::vkfu::reference_storage_of_t<dynamic_state_expression>>
 		>;
 
-	struct flags_type
-	{
-		VkPipelineCreateFlags disable_optimization : 1 = 0;
-		VkPipelineCreateFlags allow_derivatives : 1 = 0;
-		VkPipelineCreateFlags derivative : 1 = 0;
-		VkPipelineCreateFlags view_index_from_device_index : 1 = 0;
-		VkPipelineCreateFlags dispatch_base : 1 = 0;
-		VkPipelineCreateFlags defer_compile : 1 = 0;
-		VkPipelineCreateFlags capture_statistics : 1 = 0;
-		VkPipelineCreateFlags capture_internal_representations : 1 = 0;
-		VkPipelineCreateFlags fail_on_pipeline_compile_required : 1 = 0;
-		VkPipelineCreateFlags early_return_on_failure : 1 = 0;
-		VkPipelineCreateFlags link_time_optimization : 1 = 0;
-		VkPipelineCreateFlags library : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_skip_triangles : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_skip_aabbs : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_no_null_any_hit_shaders : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_no_null_closest_hit_shaders : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_no_null_miss_shaders : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_no_null_intersection_shaders : 1 = 0;
-		VkPipelineCreateFlags indirect_bindable : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_shader_group_handle_capture_replay : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_allow_motion : 1 = 0;
-		VkPipelineCreateFlags rendering_fragment_shading_rate_attachment : 1 = 0;
-		VkPipelineCreateFlags rendering_fragment_density_map_attachment : 1 = 0;
-		VkPipelineCreateFlags retain_link_time_optimization_info : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_opacity_micromap : 1 = 0;
-		VkPipelineCreateFlags color_attachment_feedback_loop : 1 = 0;
-		VkPipelineCreateFlags depth_stencil_attachment_feedback_loop : 1 = 0;
-		VkPipelineCreateFlags no_protected_access : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_displacement_micromap : 1 = 0;
-		VkPipelineCreateFlags descriptor_buffer : 1 = 0;
-		VkPipelineCreateFlags protected_access_only : 1 = 0;
-		VkPipelineCreateFlags _reserved_31 : 1 = 0;
-	};
-
-	flags_type flags{};
+	::vkfu::flags::pipeline_create flags{};
 	::std::span<VkPipelineShaderStageCreateInfo const> stages{};
 	::std::span<VkRayTracingShaderGroupCreateInfoKHR const> groups{};
 	::std::uint32_t max_pipeline_ray_recursion_depth{};
@@ -418,44 +382,9 @@ struct ray_tracing_pipeline
 	}
 };
 
-static_assert(sizeof(ray_tracing_pipeline<>::flags_type) == sizeof(VkPipelineCreateFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.disable_optimization = 1}) == VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.allow_derivatives = 1}) == VK_PIPELINE_CREATE_ALLOW_DERIVATIVES_BIT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.derivative = 1}) == VK_PIPELINE_CREATE_DERIVATIVE_BIT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.view_index_from_device_index = 1}) == VK_PIPELINE_CREATE_VIEW_INDEX_FROM_DEVICE_INDEX_BIT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.dispatch_base = 1}) == VK_PIPELINE_CREATE_DISPATCH_BASE_BIT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.defer_compile = 1}) == VK_PIPELINE_CREATE_DEFER_COMPILE_BIT_NV);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.capture_statistics = 1}) == VK_PIPELINE_CREATE_CAPTURE_STATISTICS_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.capture_internal_representations = 1}) == VK_PIPELINE_CREATE_CAPTURE_INTERNAL_REPRESENTATIONS_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.fail_on_pipeline_compile_required = 1}) == VK_PIPELINE_CREATE_FAIL_ON_PIPELINE_COMPILE_REQUIRED_BIT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.early_return_on_failure = 1}) == VK_PIPELINE_CREATE_EARLY_RETURN_ON_FAILURE_BIT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.link_time_optimization = 1}) == VK_PIPELINE_CREATE_LINK_TIME_OPTIMIZATION_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.library = 1}) == VK_PIPELINE_CREATE_LIBRARY_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.ray_tracing_skip_triangles = 1}) == VK_PIPELINE_CREATE_RAY_TRACING_SKIP_TRIANGLES_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.ray_tracing_skip_aabbs = 1}) == VK_PIPELINE_CREATE_RAY_TRACING_SKIP_AABBS_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.ray_tracing_no_null_any_hit_shaders = 1}) == VK_PIPELINE_CREATE_RAY_TRACING_NO_NULL_ANY_HIT_SHADERS_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.ray_tracing_no_null_closest_hit_shaders = 1}) == VK_PIPELINE_CREATE_RAY_TRACING_NO_NULL_CLOSEST_HIT_SHADERS_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.ray_tracing_no_null_miss_shaders = 1}) == VK_PIPELINE_CREATE_RAY_TRACING_NO_NULL_MISS_SHADERS_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.ray_tracing_no_null_intersection_shaders = 1}) == VK_PIPELINE_CREATE_RAY_TRACING_NO_NULL_INTERSECTION_SHADERS_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.indirect_bindable = 1}) == VK_PIPELINE_CREATE_INDIRECT_BINDABLE_BIT_NV);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.ray_tracing_shader_group_handle_capture_replay = 1}) == VK_PIPELINE_CREATE_RAY_TRACING_SHADER_GROUP_HANDLE_CAPTURE_REPLAY_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.ray_tracing_allow_motion = 1}) == VK_PIPELINE_CREATE_RAY_TRACING_ALLOW_MOTION_BIT_NV);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.rendering_fragment_shading_rate_attachment = 1}) == VK_PIPELINE_CREATE_RENDERING_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.rendering_fragment_density_map_attachment = 1}) == VK_PIPELINE_CREATE_RENDERING_FRAGMENT_DENSITY_MAP_ATTACHMENT_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.retain_link_time_optimization_info = 1}) == VK_PIPELINE_CREATE_RETAIN_LINK_TIME_OPTIMIZATION_INFO_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.ray_tracing_opacity_micromap = 1}) == VK_PIPELINE_CREATE_RAY_TRACING_OPACITY_MICROMAP_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.color_attachment_feedback_loop = 1}) == VK_PIPELINE_CREATE_COLOR_ATTACHMENT_FEEDBACK_LOOP_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.depth_stencil_attachment_feedback_loop = 1}) == VK_PIPELINE_CREATE_DEPTH_STENCIL_ATTACHMENT_FEEDBACK_LOOP_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.no_protected_access = 1}) == VK_PIPELINE_CREATE_NO_PROTECTED_ACCESS_BIT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.ray_tracing_displacement_micromap = 1}) == 0x10000000);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.descriptor_buffer = 1}) == VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline<>::flags_type{.protected_access_only = 1}) == VK_PIPELINE_CREATE_PROTECTED_ACCESS_ONLY_BIT);
-#endif
-
 struct ray_tracing_pipeline_interface
 {
-	using vulkan_tag_type = obj::khr::ray_tracing_pipeline_interface;
+	using vulkan_tag_type = tag::khr::ray_tracing_pipeline_interface;
 
 	::std::uint32_t max_pipeline_ray_payload_size{};
 	::std::uint32_t max_pipeline_ray_hit_attribute_size{};
@@ -473,7 +402,7 @@ struct ray_tracing_pipeline_interface
 
 struct ray_tracing_shader_group
 {
-	using vulkan_tag_type = obj::khr::ray_tracing_shader_group;
+	using vulkan_tag_type = tag::khr::ray_tracing_shader_group;
 
 	::vkfu::enums::ray_tracing_shader_group_type type{};
 	::std::uint32_t general_shader{};
@@ -525,7 +454,7 @@ namespace vkfu
 namespace khr
 {
 template<class... Expressions>
-	requires (sizeof...(Expressions) != 0 && (::vkfu::expression_for<Expressions, ::vkfu::obj::khr::ray_tracing_pipeline> && ...))
+	requires (sizeof...(Expressions) != 0 && (::vkfu::expression_for<Expressions, ::vkfu::tag::khr::ray_tracing_pipeline> && ...))
 [[nodiscard]] auto create_ray_tracing_pipelines(VkDevice device, VkDeferredOperationKHR deferredOperation, VkPipelineCache pipelineCache, ::VkAllocationCallbacks const* allocation_callbacks,
 	::std::nothrow_t, Expressions&&... infos) noexcept
 	-> ::std::expected<::std::array<VkPipeline, sizeof...(Expressions)>, ::VkResult>
@@ -547,7 +476,7 @@ template<class... Expressions>
 }
 
 template<class... Expressions>
-	requires (sizeof...(Expressions) != 0 && (::vkfu::expression_for<Expressions, ::vkfu::obj::khr::ray_tracing_pipeline> && ...))
+	requires (sizeof...(Expressions) != 0 && (::vkfu::expression_for<Expressions, ::vkfu::tag::khr::ray_tracing_pipeline> && ...))
 [[nodiscard]] auto create_ray_tracing_pipelines(VkDevice device, VkDeferredOperationKHR deferredOperation, VkPipelineCache pipelineCache, ::VkAllocationCallbacks const* allocation_callbacks,
 	Expressions&&... infos) -> ::std::array<VkPipeline, sizeof...(Expressions)>
 {
@@ -560,14 +489,14 @@ template<class... Expressions>
 }
 
 // One structure is the common case, and reads better than a one-element array.
-template<::vkfu::expression_for<::vkfu::obj::khr::ray_tracing_pipeline> Expression>
+template<::vkfu::expression_for<::vkfu::tag::khr::ray_tracing_pipeline> Expression>
 [[nodiscard]] auto create_ray_tracing_pipeline(VkDevice device, VkDeferredOperationKHR deferredOperation, VkPipelineCache pipelineCache, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr)
 	-> VkPipeline
 {
 	return create_ray_tracing_pipelines(device, deferredOperation, pipelineCache, allocation_callbacks, ::std::forward<Expression>(info))[0];
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::ray_tracing_pipeline> Expression>
+template<::vkfu::expression_for<::vkfu::tag::khr::ray_tracing_pipeline> Expression>
 [[nodiscard]] auto create_ray_tracing_pipeline(VkDevice device, VkDeferredOperationKHR deferredOperation, VkPipelineCache pipelineCache, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkPipeline, ::VkResult>
 {

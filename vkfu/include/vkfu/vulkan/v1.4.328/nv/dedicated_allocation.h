@@ -75,7 +75,7 @@ constexpr auto _vkfu_evaluate(VkDedicatedAllocationMemoryAllocateInfoNV const& v
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::nv
 {
@@ -88,7 +88,7 @@ struct dedicated_allocation_memory{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::nv::dedicated_allocation_buffer>
+struct vulkan_object_trait<tag::option::nv::dedicated_allocation_buffer>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -96,7 +96,7 @@ struct vulkan_object_trait<obj::option::nv::dedicated_allocation_buffer>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::nv::dedicated_allocation_image>
+struct vulkan_object_trait<tag::option::nv::dedicated_allocation_image>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -104,7 +104,7 @@ struct vulkan_object_trait<obj::option::nv::dedicated_allocation_image>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::nv::dedicated_allocation_memory>
+struct vulkan_object_trait<tag::option::nv::dedicated_allocation_memory>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -114,11 +114,11 @@ struct vulkan_object_trait<obj::option::nv::dedicated_allocation_memory>
 template<>
 struct expression_vulkan_tag<VkDedicatedAllocationBufferCreateInfoNV>
 {
-	using type = obj::option::nv::dedicated_allocation_buffer;
+	using type = tag::option::nv::dedicated_allocation_buffer;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::dedicated_allocation_buffer>
+struct vulkan_object_native<tag::option::nv::dedicated_allocation_buffer>
 {
 	using type = VkDedicatedAllocationBufferCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEDICATED_ALLOCATION_BUFFER_CREATE_INFO_NV;
@@ -127,11 +127,11 @@ struct vulkan_object_native<obj::option::nv::dedicated_allocation_buffer>
 template<>
 struct expression_vulkan_tag<VkDedicatedAllocationImageCreateInfoNV>
 {
-	using type = obj::option::nv::dedicated_allocation_image;
+	using type = tag::option::nv::dedicated_allocation_image;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::dedicated_allocation_image>
+struct vulkan_object_native<tag::option::nv::dedicated_allocation_image>
 {
 	using type = VkDedicatedAllocationImageCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEDICATED_ALLOCATION_IMAGE_CREATE_INFO_NV;
@@ -140,18 +140,18 @@ struct vulkan_object_native<obj::option::nv::dedicated_allocation_image>
 template<>
 struct expression_vulkan_tag<VkDedicatedAllocationMemoryAllocateInfoNV>
 {
-	using type = obj::option::nv::dedicated_allocation_memory;
+	using type = tag::option::nv::dedicated_allocation_memory;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::dedicated_allocation_memory>
+struct vulkan_object_native<tag::option::nv::dedicated_allocation_memory>
 {
 	using type = VkDedicatedAllocationMemoryAllocateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEDICATED_ALLOCATION_MEMORY_ALLOCATE_INFO_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::dedicated_allocation_buffer>
+struct vulkan_object_extensions<tag::option::nv::dedicated_allocation_buffer>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_dedicated_allocation"};
 	constexpr static ::std::uint32_t core = 0;
@@ -159,7 +159,7 @@ struct vulkan_object_extensions<obj::option::nv::dedicated_allocation_buffer>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::dedicated_allocation_image>
+struct vulkan_object_extensions<tag::option::nv::dedicated_allocation_image>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_dedicated_allocation"};
 	constexpr static ::std::uint32_t core = 0;
@@ -167,7 +167,7 @@ struct vulkan_object_extensions<obj::option::nv::dedicated_allocation_image>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::dedicated_allocation_memory>
+struct vulkan_object_extensions<tag::option::nv::dedicated_allocation_memory>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_dedicated_allocation"};
 	constexpr static ::std::uint32_t core = 0;
@@ -175,11 +175,11 @@ struct vulkan_object_extensions<obj::option::nv::dedicated_allocation_memory>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::buffer, obj::option::nv::dedicated_allocation_buffer> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::buffer, tag::option::nv::dedicated_allocation_buffer> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image, obj::option::nv::dedicated_allocation_image> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image, tag::option::nv::dedicated_allocation_image> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::memory, obj::option::nv::dedicated_allocation_memory> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::memory, tag::option::nv::dedicated_allocation_memory> = true;
 }
 
 namespace vkfu::param
@@ -190,7 +190,7 @@ using ::vkfu::operator|;
 
 struct dedicated_allocation_buffer
 {
-	using vulkan_tag_type = obj::option::nv::dedicated_allocation_buffer;
+	using vulkan_tag_type = tag::option::nv::dedicated_allocation_buffer;
 
 	bool dedicated_allocation = false;
 
@@ -206,7 +206,7 @@ struct dedicated_allocation_buffer
 
 struct dedicated_allocation_image
 {
-	using vulkan_tag_type = obj::option::nv::dedicated_allocation_image;
+	using vulkan_tag_type = tag::option::nv::dedicated_allocation_image;
 
 	bool dedicated_allocation = false;
 
@@ -222,7 +222,7 @@ struct dedicated_allocation_image
 
 struct dedicated_allocation_memory
 {
-	using vulkan_tag_type = obj::option::nv::dedicated_allocation_memory;
+	using vulkan_tag_type = tag::option::nv::dedicated_allocation_memory;
 
 	VkImage image{};
 	VkBuffer buffer{};

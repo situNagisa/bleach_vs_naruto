@@ -123,7 +123,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceFragmentShadingRatePropertiesKHR c
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -148,7 +148,7 @@ struct physical_device_fragment_shading_rate{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::khr::fragment_shading_rate_attachment>
+struct vulkan_object_trait<tag::option::khr::fragment_shading_rate_attachment>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -156,7 +156,7 @@ struct vulkan_object_trait<obj::option::khr::fragment_shading_rate_attachment>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::khr::fragment_shading_rate>
+struct vulkan_object_trait<tag::feature::khr::fragment_shading_rate>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -164,7 +164,7 @@ struct vulkan_object_trait<obj::feature::khr::fragment_shading_rate>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::pipeline_fragment_shading_rate_state>
+struct vulkan_object_trait<tag::option::khr::pipeline_fragment_shading_rate_state>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -172,7 +172,7 @@ struct vulkan_object_trait<obj::option::khr::pipeline_fragment_shading_rate_stat
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::rendering_fragment_shading_rate_attachment>
+struct vulkan_object_trait<tag::option::khr::rendering_fragment_shading_rate_attachment>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -180,7 +180,7 @@ struct vulkan_object_trait<obj::option::khr::rendering_fragment_shading_rate_att
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::physical_device_fragment_shading_rate>
+struct vulkan_object_trait<tag::result::khr::physical_device_fragment_shading_rate>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -188,7 +188,7 @@ struct vulkan_object_trait<obj::result::khr::physical_device_fragment_shading_ra
 };
 
 template<>
-struct vulkan_object_trait<obj::property::khr::fragment_shading_rate>
+struct vulkan_object_trait<tag::property::khr::fragment_shading_rate>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -198,11 +198,11 @@ struct vulkan_object_trait<obj::property::khr::fragment_shading_rate>
 template<>
 struct expression_vulkan_tag<VkFragmentShadingRateAttachmentInfoKHR>
 {
-	using type = obj::option::khr::fragment_shading_rate_attachment;
+	using type = tag::option::khr::fragment_shading_rate_attachment;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::fragment_shading_rate_attachment>
+struct vulkan_object_native<tag::option::khr::fragment_shading_rate_attachment>
 {
 	using type = VkFragmentShadingRateAttachmentInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_FRAGMENT_SHADING_RATE_ATTACHMENT_INFO_KHR;
@@ -211,11 +211,11 @@ struct vulkan_object_native<obj::option::khr::fragment_shading_rate_attachment>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceFragmentShadingRateFeaturesKHR>
 {
-	using type = obj::feature::khr::fragment_shading_rate;
+	using type = tag::feature::khr::fragment_shading_rate;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::fragment_shading_rate>
+struct vulkan_object_native<tag::feature::khr::fragment_shading_rate>
 {
 	using type = VkPhysicalDeviceFragmentShadingRateFeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_FEATURES_KHR;
@@ -224,11 +224,11 @@ struct vulkan_object_native<obj::feature::khr::fragment_shading_rate>
 template<>
 struct expression_vulkan_tag<VkPipelineFragmentShadingRateStateCreateInfoKHR>
 {
-	using type = obj::option::khr::pipeline_fragment_shading_rate_state;
+	using type = tag::option::khr::pipeline_fragment_shading_rate_state;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::pipeline_fragment_shading_rate_state>
+struct vulkan_object_native<tag::option::khr::pipeline_fragment_shading_rate_state>
 {
 	using type = VkPipelineFragmentShadingRateStateCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_FRAGMENT_SHADING_RATE_STATE_CREATE_INFO_KHR;
@@ -237,11 +237,11 @@ struct vulkan_object_native<obj::option::khr::pipeline_fragment_shading_rate_sta
 template<>
 struct expression_vulkan_tag<VkRenderingFragmentShadingRateAttachmentInfoKHR>
 {
-	using type = obj::option::khr::rendering_fragment_shading_rate_attachment;
+	using type = tag::option::khr::rendering_fragment_shading_rate_attachment;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::rendering_fragment_shading_rate_attachment>
+struct vulkan_object_native<tag::option::khr::rendering_fragment_shading_rate_attachment>
 {
 	using type = VkRenderingFragmentShadingRateAttachmentInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RENDERING_FRAGMENT_SHADING_RATE_ATTACHMENT_INFO_KHR;
@@ -250,11 +250,11 @@ struct vulkan_object_native<obj::option::khr::rendering_fragment_shading_rate_at
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceFragmentShadingRateKHR>
 {
-	using type = obj::result::khr::physical_device_fragment_shading_rate;
+	using type = tag::result::khr::physical_device_fragment_shading_rate;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::physical_device_fragment_shading_rate>
+struct vulkan_object_native<tag::result::khr::physical_device_fragment_shading_rate>
 {
 	using type = VkPhysicalDeviceFragmentShadingRateKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_KHR;
@@ -263,18 +263,18 @@ struct vulkan_object_native<obj::result::khr::physical_device_fragment_shading_r
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceFragmentShadingRatePropertiesKHR>
 {
-	using type = obj::property::khr::fragment_shading_rate;
+	using type = tag::property::khr::fragment_shading_rate;
 };
 
 template<>
-struct vulkan_object_native<obj::property::khr::fragment_shading_rate>
+struct vulkan_object_native<tag::property::khr::fragment_shading_rate>
 {
 	using type = VkPhysicalDeviceFragmentShadingRatePropertiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_PROPERTIES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::fragment_shading_rate_attachment>
+struct vulkan_object_extensions<tag::option::khr::fragment_shading_rate_attachment>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_fragment_shading_rate"};
 	constexpr static ::std::uint32_t core = 0;
@@ -282,7 +282,7 @@ struct vulkan_object_extensions<obj::option::khr::fragment_shading_rate_attachme
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::fragment_shading_rate>
+struct vulkan_object_extensions<tag::feature::khr::fragment_shading_rate>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_fragment_shading_rate"};
 	constexpr static ::std::uint32_t core = 0;
@@ -290,7 +290,7 @@ struct vulkan_object_extensions<obj::feature::khr::fragment_shading_rate>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::pipeline_fragment_shading_rate_state>
+struct vulkan_object_extensions<tag::option::khr::pipeline_fragment_shading_rate_state>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_fragment_shading_rate"};
 	constexpr static ::std::uint32_t core = 0;
@@ -298,7 +298,7 @@ struct vulkan_object_extensions<obj::option::khr::pipeline_fragment_shading_rate
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::rendering_fragment_shading_rate_attachment>
+struct vulkan_object_extensions<tag::option::khr::rendering_fragment_shading_rate_attachment>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_fragment_shading_rate"};
 	constexpr static ::std::uint32_t core = 0;
@@ -306,7 +306,7 @@ struct vulkan_object_extensions<obj::option::khr::rendering_fragment_shading_rat
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::physical_device_fragment_shading_rate>
+struct vulkan_object_extensions<tag::result::khr::physical_device_fragment_shading_rate>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_fragment_shading_rate"};
 	constexpr static ::std::uint32_t core = 0;
@@ -314,7 +314,7 @@ struct vulkan_object_extensions<obj::result::khr::physical_device_fragment_shadi
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::khr::fragment_shading_rate>
+struct vulkan_object_extensions<tag::property::khr::fragment_shading_rate>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_fragment_shading_rate"};
 	constexpr static ::std::uint32_t core = 0;
@@ -322,17 +322,17 @@ struct vulkan_object_extensions<obj::property::khr::fragment_shading_rate>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::fragment_shading_rate> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::fragment_shading_rate> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::graphics_pipeline, obj::option::khr::pipeline_fragment_shading_rate_state> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::graphics_pipeline, tag::option::khr::pipeline_fragment_shading_rate_state> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::fragment_shading_rate> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::fragment_shading_rate> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::khr::fragment_shading_rate> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::khr::fragment_shading_rate> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::rendering, obj::option::khr::rendering_fragment_shading_rate_attachment> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::rendering, tag::option::khr::rendering_fragment_shading_rate_attachment> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::subpass_description2, obj::option::khr::fragment_shading_rate_attachment> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::subpass_description2, tag::option::khr::fragment_shading_rate_attachment> = true;
 }
 
 namespace vkfu::param
@@ -343,7 +343,7 @@ using ::vkfu::operator|;
 
 struct fragment_shading_rate
 {
-	using vulkan_tag_type = obj::feature::khr::fragment_shading_rate;
+	using vulkan_tag_type = tag::feature::khr::fragment_shading_rate;
 
 	bool pipeline_fragment_shading_rate = false;
 	bool primitive_fragment_shading_rate = false;
@@ -367,10 +367,10 @@ namespace option::khr
 {
 using ::vkfu::operator|;
 
-template<::vkfu::reference_expression_for<obj::attachment_reference2> attachment_expression = ::vkfu::absent_expression>
+template<::vkfu::reference_expression_for<tag::attachment_reference2> attachment_expression = ::vkfu::absent_expression>
 struct fragment_shading_rate_attachment
 {
-	using vulkan_tag_type = obj::option::khr::fragment_shading_rate_attachment;
+	using vulkan_tag_type = tag::option::khr::fragment_shading_rate_attachment;
 	using storage_type = ::vkfu::reference_storage<VkFragmentShadingRateAttachmentInfoKHR
 		, ::vkfu::reference_slot<&VkFragmentShadingRateAttachmentInfoKHR::pFragmentShadingRateAttachment, ::vkfu::reference_storage_of_t<attachment_expression>>
 		>;
@@ -394,7 +394,7 @@ struct fragment_shading_rate_attachment
 
 struct pipeline_fragment_shading_rate_state
 {
-	using vulkan_tag_type = obj::option::khr::pipeline_fragment_shading_rate_state;
+	using vulkan_tag_type = tag::option::khr::pipeline_fragment_shading_rate_state;
 
 	VkExtent2D fragment_size{};
 	::std::array<VkFragmentShadingRateCombinerOpKHR, 2> combiner_ops{};
@@ -414,7 +414,7 @@ struct pipeline_fragment_shading_rate_state
 
 struct rendering_fragment_shading_rate_attachment
 {
-	using vulkan_tag_type = obj::option::khr::rendering_fragment_shading_rate_attachment;
+	using vulkan_tag_type = tag::option::khr::rendering_fragment_shading_rate_attachment;
 
 	VkImageView image_view{};
 	::vkfu::enums::image_layout image_layout{};

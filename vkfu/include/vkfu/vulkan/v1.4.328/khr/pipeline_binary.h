@@ -181,7 +181,7 @@ constexpr auto _vkfu_evaluate(VkPipelineBinaryKeyKHR const& value) noexcept -> V
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -216,7 +216,7 @@ struct create{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::khr::device_pipeline_binary_internal_cache_control>
+struct vulkan_object_trait<tag::option::khr::device_pipeline_binary_internal_cache_control>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -224,7 +224,7 @@ struct vulkan_object_trait<obj::option::khr::device_pipeline_binary_internal_cac
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::khr::pipeline_binary>
+struct vulkan_object_trait<tag::feature::khr::pipeline_binary>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -232,7 +232,7 @@ struct vulkan_object_trait<obj::feature::khr::pipeline_binary>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::pipeline_binary>
+struct vulkan_object_trait<tag::khr::pipeline_binary>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -240,7 +240,7 @@ struct vulkan_object_trait<obj::khr::pipeline_binary>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::pipeline_binary_data_info>
+struct vulkan_object_trait<tag::khr::pipeline_binary_data_info>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -248,7 +248,7 @@ struct vulkan_object_trait<obj::khr::pipeline_binary_data_info>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::pipeline_binaries>
+struct vulkan_object_trait<tag::option::khr::pipeline_binaries>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -256,7 +256,7 @@ struct vulkan_object_trait<obj::option::khr::pipeline_binaries>
 };
 
 template<>
-struct vulkan_object_trait<obj::state::khr::create>
+struct vulkan_object_trait<tag::state::khr::create>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -264,7 +264,7 @@ struct vulkan_object_trait<obj::state::khr::create>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::release_captured_pipeline_data>
+struct vulkan_object_trait<tag::khr::release_captured_pipeline_data>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -272,7 +272,7 @@ struct vulkan_object_trait<obj::khr::release_captured_pipeline_data>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::khr::pipeline_binary>
+struct vulkan_object_trait<tag::property::khr::pipeline_binary>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -280,7 +280,7 @@ struct vulkan_object_trait<obj::property::khr::pipeline_binary>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::pipeline_binary_handles>
+struct vulkan_object_trait<tag::result::khr::pipeline_binary_handles>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -288,7 +288,7 @@ struct vulkan_object_trait<obj::result::khr::pipeline_binary_handles>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::pipeline_binary_key>
+struct vulkan_object_trait<tag::result::khr::pipeline_binary_key>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -298,11 +298,11 @@ struct vulkan_object_trait<obj::result::khr::pipeline_binary_key>
 template<>
 struct expression_vulkan_tag<VkDevicePipelineBinaryInternalCacheControlKHR>
 {
-	using type = obj::option::khr::device_pipeline_binary_internal_cache_control;
+	using type = tag::option::khr::device_pipeline_binary_internal_cache_control;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::device_pipeline_binary_internal_cache_control>
+struct vulkan_object_native<tag::option::khr::device_pipeline_binary_internal_cache_control>
 {
 	using type = VkDevicePipelineBinaryInternalCacheControlKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEVICE_PIPELINE_BINARY_INTERNAL_CACHE_CONTROL_KHR;
@@ -311,11 +311,11 @@ struct vulkan_object_native<obj::option::khr::device_pipeline_binary_internal_ca
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePipelineBinaryFeaturesKHR>
 {
-	using type = obj::feature::khr::pipeline_binary;
+	using type = tag::feature::khr::pipeline_binary;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::pipeline_binary>
+struct vulkan_object_native<tag::feature::khr::pipeline_binary>
 {
 	using type = VkPhysicalDevicePipelineBinaryFeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_BINARY_FEATURES_KHR;
@@ -324,11 +324,11 @@ struct vulkan_object_native<obj::feature::khr::pipeline_binary>
 template<>
 struct expression_vulkan_tag<VkPipelineBinaryCreateInfoKHR>
 {
-	using type = obj::khr::pipeline_binary;
+	using type = tag::khr::pipeline_binary;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::pipeline_binary>
+struct vulkan_object_native<tag::khr::pipeline_binary>
 {
 	using type = VkPipelineBinaryCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_BINARY_CREATE_INFO_KHR;
@@ -337,11 +337,11 @@ struct vulkan_object_native<obj::khr::pipeline_binary>
 template<>
 struct expression_vulkan_tag<VkPipelineBinaryDataInfoKHR>
 {
-	using type = obj::khr::pipeline_binary_data_info;
+	using type = tag::khr::pipeline_binary_data_info;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::pipeline_binary_data_info>
+struct vulkan_object_native<tag::khr::pipeline_binary_data_info>
 {
 	using type = VkPipelineBinaryDataInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_BINARY_DATA_INFO_KHR;
@@ -350,11 +350,11 @@ struct vulkan_object_native<obj::khr::pipeline_binary_data_info>
 template<>
 struct expression_vulkan_tag<VkPipelineBinaryInfoKHR>
 {
-	using type = obj::option::khr::pipeline_binaries;
+	using type = tag::option::khr::pipeline_binaries;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::pipeline_binaries>
+struct vulkan_object_native<tag::option::khr::pipeline_binaries>
 {
 	using type = VkPipelineBinaryInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_BINARY_INFO_KHR;
@@ -363,11 +363,11 @@ struct vulkan_object_native<obj::option::khr::pipeline_binaries>
 template<>
 struct expression_vulkan_tag<VkPipelineCreateInfoKHR>
 {
-	using type = obj::state::khr::create;
+	using type = tag::state::khr::create;
 };
 
 template<>
-struct vulkan_object_native<obj::state::khr::create>
+struct vulkan_object_native<tag::state::khr::create>
 {
 	using type = VkPipelineCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_CREATE_INFO_KHR;
@@ -376,11 +376,11 @@ struct vulkan_object_native<obj::state::khr::create>
 template<>
 struct expression_vulkan_tag<VkReleaseCapturedPipelineDataInfoKHR>
 {
-	using type = obj::khr::release_captured_pipeline_data;
+	using type = tag::khr::release_captured_pipeline_data;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::release_captured_pipeline_data>
+struct vulkan_object_native<tag::khr::release_captured_pipeline_data>
 {
 	using type = VkReleaseCapturedPipelineDataInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RELEASE_CAPTURED_PIPELINE_DATA_INFO_KHR;
@@ -389,11 +389,11 @@ struct vulkan_object_native<obj::khr::release_captured_pipeline_data>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePipelineBinaryPropertiesKHR>
 {
-	using type = obj::property::khr::pipeline_binary;
+	using type = tag::property::khr::pipeline_binary;
 };
 
 template<>
-struct vulkan_object_native<obj::property::khr::pipeline_binary>
+struct vulkan_object_native<tag::property::khr::pipeline_binary>
 {
 	using type = VkPhysicalDevicePipelineBinaryPropertiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_BINARY_PROPERTIES_KHR;
@@ -402,11 +402,11 @@ struct vulkan_object_native<obj::property::khr::pipeline_binary>
 template<>
 struct expression_vulkan_tag<VkPipelineBinaryHandlesInfoKHR>
 {
-	using type = obj::result::khr::pipeline_binary_handles;
+	using type = tag::result::khr::pipeline_binary_handles;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::pipeline_binary_handles>
+struct vulkan_object_native<tag::result::khr::pipeline_binary_handles>
 {
 	using type = VkPipelineBinaryHandlesInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_BINARY_HANDLES_INFO_KHR;
@@ -415,18 +415,18 @@ struct vulkan_object_native<obj::result::khr::pipeline_binary_handles>
 template<>
 struct expression_vulkan_tag<VkPipelineBinaryKeyKHR>
 {
-	using type = obj::result::khr::pipeline_binary_key;
+	using type = tag::result::khr::pipeline_binary_key;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::pipeline_binary_key>
+struct vulkan_object_native<tag::result::khr::pipeline_binary_key>
 {
 	using type = VkPipelineBinaryKeyKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_BINARY_KEY_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::device_pipeline_binary_internal_cache_control>
+struct vulkan_object_extensions<tag::option::khr::device_pipeline_binary_internal_cache_control>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_pipeline_binary"};
 	constexpr static ::std::uint32_t core = 0;
@@ -434,7 +434,7 @@ struct vulkan_object_extensions<obj::option::khr::device_pipeline_binary_interna
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::pipeline_binary>
+struct vulkan_object_extensions<tag::feature::khr::pipeline_binary>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_pipeline_binary"};
 	constexpr static ::std::uint32_t core = 0;
@@ -442,7 +442,7 @@ struct vulkan_object_extensions<obj::feature::khr::pipeline_binary>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::pipeline_binary>
+struct vulkan_object_extensions<tag::khr::pipeline_binary>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_pipeline_binary"};
 	constexpr static ::std::uint32_t core = 0;
@@ -450,7 +450,7 @@ struct vulkan_object_extensions<obj::khr::pipeline_binary>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::pipeline_binary_data_info>
+struct vulkan_object_extensions<tag::khr::pipeline_binary_data_info>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_pipeline_binary"};
 	constexpr static ::std::uint32_t core = 0;
@@ -458,7 +458,7 @@ struct vulkan_object_extensions<obj::khr::pipeline_binary_data_info>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::pipeline_binaries>
+struct vulkan_object_extensions<tag::option::khr::pipeline_binaries>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_pipeline_binary"};
 	constexpr static ::std::uint32_t core = 0;
@@ -466,7 +466,7 @@ struct vulkan_object_extensions<obj::option::khr::pipeline_binaries>
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::khr::create>
+struct vulkan_object_extensions<tag::state::khr::create>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_pipeline_binary"};
 	constexpr static ::std::uint32_t core = 0;
@@ -474,7 +474,7 @@ struct vulkan_object_extensions<obj::state::khr::create>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::release_captured_pipeline_data>
+struct vulkan_object_extensions<tag::khr::release_captured_pipeline_data>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_pipeline_binary"};
 	constexpr static ::std::uint32_t core = 0;
@@ -482,7 +482,7 @@ struct vulkan_object_extensions<obj::khr::release_captured_pipeline_data>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::khr::pipeline_binary>
+struct vulkan_object_extensions<tag::property::khr::pipeline_binary>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_pipeline_binary"};
 	constexpr static ::std::uint32_t core = 0;
@@ -490,7 +490,7 @@ struct vulkan_object_extensions<obj::property::khr::pipeline_binary>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::pipeline_binary_handles>
+struct vulkan_object_extensions<tag::result::khr::pipeline_binary_handles>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_pipeline_binary"};
 	constexpr static ::std::uint32_t core = 0;
@@ -498,7 +498,7 @@ struct vulkan_object_extensions<obj::result::khr::pipeline_binary_handles>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::pipeline_binary_key>
+struct vulkan_object_extensions<tag::result::khr::pipeline_binary_key>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_pipeline_binary"};
 	constexpr static ::std::uint32_t core = 0;
@@ -506,19 +506,19 @@ struct vulkan_object_extensions<obj::result::khr::pipeline_binary_key>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::compute_pipeline, obj::option::khr::pipeline_binaries> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::compute_pipeline, tag::option::khr::pipeline_binaries> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::option::khr::device_pipeline_binary_internal_cache_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::option::khr::device_pipeline_binary_internal_cache_control> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::pipeline_binary> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::pipeline_binary> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::graphics_pipeline, obj::option::khr::pipeline_binaries> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::graphics_pipeline, tag::option::khr::pipeline_binaries> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::pipeline_binary> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::pipeline_binary> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::khr::pipeline_binary> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::khr::pipeline_binary> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::ray_tracing_pipeline, obj::option::khr::pipeline_binaries> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::ray_tracing_pipeline, tag::option::khr::pipeline_binaries> = true;
 }
 
 namespace vkfu::param
@@ -529,7 +529,7 @@ using ::vkfu::operator|;
 
 struct pipeline_binary
 {
-	using vulkan_tag_type = obj::feature::khr::pipeline_binary;
+	using vulkan_tag_type = tag::feature::khr::pipeline_binary;
 
 	bool pipeline_binaries = false;
 
@@ -549,10 +549,10 @@ namespace khr
 {
 using ::vkfu::operator|;
 
-template<::vkfu::reference_expression_for<obj::state::khr::create> pipeline_create_info_expression = ::vkfu::absent_expression>
+template<::vkfu::reference_expression_for<tag::state::khr::create> pipeline_create_info_expression = ::vkfu::absent_expression>
 struct pipeline_binary
 {
-	using vulkan_tag_type = obj::khr::pipeline_binary;
+	using vulkan_tag_type = tag::khr::pipeline_binary;
 	using storage_type = ::vkfu::reference_storage<VkPipelineBinaryCreateInfoKHR
 		, ::vkfu::reference_slot<&VkPipelineBinaryCreateInfoKHR::pPipelineCreateInfo, ::vkfu::reference_storage_of_t<pipeline_create_info_expression>>
 		>;
@@ -578,7 +578,7 @@ struct pipeline_binary
 
 struct pipeline_binary_data_info
 {
-	using vulkan_tag_type = obj::khr::pipeline_binary_data_info;
+	using vulkan_tag_type = tag::khr::pipeline_binary_data_info;
 
 	VkPipelineBinaryKHR pipeline_binary{};
 
@@ -594,7 +594,7 @@ struct pipeline_binary_data_info
 
 struct release_captured_pipeline_data
 {
-	using vulkan_tag_type = obj::khr::release_captured_pipeline_data;
+	using vulkan_tag_type = tag::khr::release_captured_pipeline_data;
 
 	VkPipeline pipeline{};
 
@@ -616,7 +616,7 @@ using ::vkfu::operator|;
 
 struct device_pipeline_binary_internal_cache_control
 {
-	using vulkan_tag_type = obj::option::khr::device_pipeline_binary_internal_cache_control;
+	using vulkan_tag_type = tag::option::khr::device_pipeline_binary_internal_cache_control;
 
 	bool disable_internal_cache = false;
 
@@ -632,7 +632,7 @@ struct device_pipeline_binary_internal_cache_control
 
 struct pipeline_binaries
 {
-	using vulkan_tag_type = obj::option::khr::pipeline_binaries;
+	using vulkan_tag_type = tag::option::khr::pipeline_binaries;
 
 	::std::span<VkPipelineBinaryKHR const> binaries{};
 
@@ -655,7 +655,7 @@ using ::vkfu::operator|;
 
 struct create
 {
-	using vulkan_tag_type = obj::state::khr::create;
+	using vulkan_tag_type = tag::state::khr::create;
 
 
 	constexpr auto evaluate() const noexcept -> VkPipelineCreateInfoKHR
@@ -708,7 +708,7 @@ namespace vkfu
 {
 namespace khr
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_binary> Expression>
+template<::vkfu::expression_for<::vkfu::tag::khr::pipeline_binary> Expression>
 [[nodiscard]] auto create_pipeline_binaries(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkPipelineBinaryHandlesInfoKHR, ::VkResult>
 {
@@ -723,7 +723,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_binary> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_binary> Expression>
+template<::vkfu::expression_for<::vkfu::tag::khr::pipeline_binary> Expression>
 [[nodiscard]] auto create_pipeline_binaries(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkPipelineBinaryHandlesInfoKHR
 {
 	auto produced = create_pipeline_binaries(device, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);
@@ -734,7 +734,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_binary> Expression>
 	return *produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::state::khr::create> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::state::khr::create> Expression1>
 [[nodiscard]] auto get_pipeline_key(VkDevice device, Expression1&& pipeline_create_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkPipelineBinaryKeyKHR, ::VkResult>
 {
@@ -748,7 +748,7 @@ template<::vkfu::expression_for<::vkfu::obj::state::khr::create> Expression1>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::state::khr::create> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::state::khr::create> Expression1>
 [[nodiscard]] auto get_pipeline_key(VkDevice device, Expression1&& pipeline_create_info) -> VkPipelineBinaryKeyKHR
 {
 	auto outcome = get_pipeline_key(device, ::std::forward<Expression1>(pipeline_create_info), ::std::nothrow);
@@ -759,7 +759,7 @@ template<::vkfu::expression_for<::vkfu::obj::state::khr::create> Expression1>
 	return *outcome;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::release_captured_pipeline_data> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::release_captured_pipeline_data> Expression1>
 [[nodiscard]] auto release_captured_pipeline_data(VkDevice device, Expression1&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -772,7 +772,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::release_captured_pipeline_data
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::release_captured_pipeline_data> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::release_captured_pipeline_data> Expression1>
 void release_captured_pipeline_data(VkDevice device, Expression1&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr)
 {
 	auto outcome = release_captured_pipeline_data(device, ::std::forward<Expression1>(info), allocation_callbacks, ::std::nothrow);

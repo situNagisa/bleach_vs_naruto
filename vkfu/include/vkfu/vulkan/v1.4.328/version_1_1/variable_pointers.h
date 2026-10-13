@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceVariablePointersFeatures const& va
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -55,7 +55,7 @@ struct variable_pointers{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::variable_pointers>
+struct vulkan_object_trait<tag::feature::variable_pointers>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::variable_pointers>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceVariablePointersFeatures>
 {
-	using type = obj::feature::variable_pointers;
+	using type = tag::feature::variable_pointers;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::variable_pointers>
+struct vulkan_object_native<tag::feature::variable_pointers>
 {
 	using type = VkPhysicalDeviceVariablePointersFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VARIABLE_POINTERS_FEATURES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::variable_pointers>
+struct vulkan_object_extensions<tag::feature::variable_pointers>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_variable_pointers"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::variable_pointers>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::variable_pointers> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::variable_pointers> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::variable_pointers> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::variable_pointers> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct variable_pointers
 {
-	using vulkan_tag_type = obj::feature::variable_pointers;
+	using vulkan_tag_type = tag::feature::variable_pointers;
 
 	bool storage_buffer = false;
 	bool enable = false;

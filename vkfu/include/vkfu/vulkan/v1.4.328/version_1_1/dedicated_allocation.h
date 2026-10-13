@@ -58,7 +58,7 @@ constexpr auto _vkfu_evaluate(VkMemoryDedicatedRequirements const& value) noexce
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option
 {
@@ -73,7 +73,7 @@ struct memory_dedicated_requirements{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::memory_dedicated>
+struct vulkan_object_trait<tag::option::memory_dedicated>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -81,7 +81,7 @@ struct vulkan_object_trait<obj::option::memory_dedicated>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::memory_dedicated_requirements>
+struct vulkan_object_trait<tag::result::memory_dedicated_requirements>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -91,11 +91,11 @@ struct vulkan_object_trait<obj::result::memory_dedicated_requirements>
 template<>
 struct expression_vulkan_tag<VkMemoryDedicatedAllocateInfo>
 {
-	using type = obj::option::memory_dedicated;
+	using type = tag::option::memory_dedicated;
 };
 
 template<>
-struct vulkan_object_native<obj::option::memory_dedicated>
+struct vulkan_object_native<tag::option::memory_dedicated>
 {
 	using type = VkMemoryDedicatedAllocateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO;
@@ -104,18 +104,18 @@ struct vulkan_object_native<obj::option::memory_dedicated>
 template<>
 struct expression_vulkan_tag<VkMemoryDedicatedRequirements>
 {
-	using type = obj::result::memory_dedicated_requirements;
+	using type = tag::result::memory_dedicated_requirements;
 };
 
 template<>
-struct vulkan_object_native<obj::result::memory_dedicated_requirements>
+struct vulkan_object_native<tag::result::memory_dedicated_requirements>
 {
 	using type = VkMemoryDedicatedRequirements;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::memory_dedicated>
+struct vulkan_object_extensions<tag::option::memory_dedicated>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_dedicated_allocation"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -123,7 +123,7 @@ struct vulkan_object_extensions<obj::option::memory_dedicated>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::memory_dedicated_requirements>
+struct vulkan_object_extensions<tag::result::memory_dedicated_requirements>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_dedicated_allocation"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -131,7 +131,7 @@ struct vulkan_object_extensions<obj::result::memory_dedicated_requirements>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::memory, obj::option::memory_dedicated> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::memory, tag::option::memory_dedicated> = true;
 }
 
 namespace vkfu::param
@@ -142,7 +142,7 @@ using ::vkfu::operator|;
 
 struct memory_dedicated
 {
-	using vulkan_tag_type = obj::option::memory_dedicated;
+	using vulkan_tag_type = tag::option::memory_dedicated;
 
 	VkImage image{};
 	VkBuffer buffer{};

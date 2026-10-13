@@ -60,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceHdrVividFeaturesHUAWEI const& valu
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::huawei
 {
@@ -75,7 +75,7 @@ struct hdr_vivid_dynamic_metadata{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::huawei::hdr_vivid_dynamic_metadata>
+struct vulkan_object_trait<tag::option::huawei::hdr_vivid_dynamic_metadata>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -83,7 +83,7 @@ struct vulkan_object_trait<obj::option::huawei::hdr_vivid_dynamic_metadata>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::huawei::hdr_vivid>
+struct vulkan_object_trait<tag::feature::huawei::hdr_vivid>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -93,11 +93,11 @@ struct vulkan_object_trait<obj::feature::huawei::hdr_vivid>
 template<>
 struct expression_vulkan_tag<VkHdrVividDynamicMetadataHUAWEI>
 {
-	using type = obj::option::huawei::hdr_vivid_dynamic_metadata;
+	using type = tag::option::huawei::hdr_vivid_dynamic_metadata;
 };
 
 template<>
-struct vulkan_object_native<obj::option::huawei::hdr_vivid_dynamic_metadata>
+struct vulkan_object_native<tag::option::huawei::hdr_vivid_dynamic_metadata>
 {
 	using type = VkHdrVividDynamicMetadataHUAWEI;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_HDR_VIVID_DYNAMIC_METADATA_HUAWEI;
@@ -106,18 +106,18 @@ struct vulkan_object_native<obj::option::huawei::hdr_vivid_dynamic_metadata>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceHdrVividFeaturesHUAWEI>
 {
-	using type = obj::feature::huawei::hdr_vivid;
+	using type = tag::feature::huawei::hdr_vivid;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::huawei::hdr_vivid>
+struct vulkan_object_native<tag::feature::huawei::hdr_vivid>
 {
 	using type = VkPhysicalDeviceHdrVividFeaturesHUAWEI;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HDR_VIVID_FEATURES_HUAWEI;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::huawei::hdr_vivid_dynamic_metadata>
+struct vulkan_object_extensions<tag::option::huawei::hdr_vivid_dynamic_metadata>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_HUAWEI_hdr_vivid"};
 	constexpr static ::std::uint32_t core = 0;
@@ -125,7 +125,7 @@ struct vulkan_object_extensions<obj::option::huawei::hdr_vivid_dynamic_metadata>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::huawei::hdr_vivid>
+struct vulkan_object_extensions<tag::feature::huawei::hdr_vivid>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_HUAWEI_hdr_vivid"};
 	constexpr static ::std::uint32_t core = 0;
@@ -133,11 +133,11 @@ struct vulkan_object_extensions<obj::feature::huawei::hdr_vivid>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::huawei::hdr_vivid> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::huawei::hdr_vivid> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::ext::hdr_metadata, obj::option::huawei::hdr_vivid_dynamic_metadata> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::ext::hdr_metadata, tag::option::huawei::hdr_vivid_dynamic_metadata> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::huawei::hdr_vivid> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::huawei::hdr_vivid> = true;
 }
 
 namespace vkfu::param
@@ -148,7 +148,7 @@ using ::vkfu::operator|;
 
 struct hdr_vivid
 {
-	using vulkan_tag_type = obj::feature::huawei::hdr_vivid;
+	using vulkan_tag_type = tag::feature::huawei::hdr_vivid;
 
 	bool enable = false;
 
@@ -170,7 +170,7 @@ using ::vkfu::operator|;
 
 struct hdr_vivid_dynamic_metadata
 {
-	using vulkan_tag_type = obj::option::huawei::hdr_vivid_dynamic_metadata;
+	using vulkan_tag_type = tag::option::huawei::hdr_vivid_dynamic_metadata;
 
 	::std::size_t dynamic_metadata_size{};
 	void const* dynamic_metadata = nullptr;

@@ -58,7 +58,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceGroupProperties const& value) noex
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option
 {
@@ -73,7 +73,7 @@ struct group{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::device_group>
+struct vulkan_object_trait<tag::option::device_group>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -81,7 +81,7 @@ struct vulkan_object_trait<obj::option::device_group>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::group>
+struct vulkan_object_trait<tag::property::group>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -91,11 +91,11 @@ struct vulkan_object_trait<obj::property::group>
 template<>
 struct expression_vulkan_tag<VkDeviceGroupDeviceCreateInfo>
 {
-	using type = obj::option::device_group;
+	using type = tag::option::device_group;
 };
 
 template<>
-struct vulkan_object_native<obj::option::device_group>
+struct vulkan_object_native<tag::option::device_group>
 {
 	using type = VkDeviceGroupDeviceCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEVICE_GROUP_DEVICE_CREATE_INFO;
@@ -104,18 +104,18 @@ struct vulkan_object_native<obj::option::device_group>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceGroupProperties>
 {
-	using type = obj::property::group;
+	using type = tag::property::group;
 };
 
 template<>
-struct vulkan_object_native<obj::property::group>
+struct vulkan_object_native<tag::property::group>
 {
 	using type = VkPhysicalDeviceGroupProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_GROUP_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::device_group>
+struct vulkan_object_extensions<tag::option::device_group>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_device_group_creation"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -123,7 +123,7 @@ struct vulkan_object_extensions<obj::option::device_group>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::group>
+struct vulkan_object_extensions<tag::property::group>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_device_group_creation"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -131,7 +131,7 @@ struct vulkan_object_extensions<obj::property::group>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::option::device_group> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::option::device_group> = true;
 }
 
 namespace vkfu::param
@@ -142,7 +142,7 @@ using ::vkfu::operator|;
 
 struct device_group
 {
-	using vulkan_tag_type = obj::option::device_group;
+	using vulkan_tag_type = tag::option::device_group;
 
 	::std::span<VkPhysicalDevice const> physical_devices{};
 

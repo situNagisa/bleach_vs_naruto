@@ -76,7 +76,7 @@ constexpr auto _vkfu_evaluate(VkSurfaceCapabilitiesPresentBarrierNV const& value
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -95,7 +95,7 @@ struct surface_capabilities_present_barrier{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::present_barrier>
+struct vulkan_object_trait<tag::feature::nv::present_barrier>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -103,7 +103,7 @@ struct vulkan_object_trait<obj::feature::nv::present_barrier>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::nv::swapchain_present_barrier>
+struct vulkan_object_trait<tag::option::nv::swapchain_present_barrier>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -111,7 +111,7 @@ struct vulkan_object_trait<obj::option::nv::swapchain_present_barrier>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::nv::surface_capabilities_present_barrier>
+struct vulkan_object_trait<tag::result::nv::surface_capabilities_present_barrier>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -121,11 +121,11 @@ struct vulkan_object_trait<obj::result::nv::surface_capabilities_present_barrier
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePresentBarrierFeaturesNV>
 {
-	using type = obj::feature::nv::present_barrier;
+	using type = tag::feature::nv::present_barrier;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::present_barrier>
+struct vulkan_object_native<tag::feature::nv::present_barrier>
 {
 	using type = VkPhysicalDevicePresentBarrierFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRESENT_BARRIER_FEATURES_NV;
@@ -134,11 +134,11 @@ struct vulkan_object_native<obj::feature::nv::present_barrier>
 template<>
 struct expression_vulkan_tag<VkSwapchainPresentBarrierCreateInfoNV>
 {
-	using type = obj::option::nv::swapchain_present_barrier;
+	using type = tag::option::nv::swapchain_present_barrier;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::swapchain_present_barrier>
+struct vulkan_object_native<tag::option::nv::swapchain_present_barrier>
 {
 	using type = VkSwapchainPresentBarrierCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SWAPCHAIN_PRESENT_BARRIER_CREATE_INFO_NV;
@@ -147,18 +147,18 @@ struct vulkan_object_native<obj::option::nv::swapchain_present_barrier>
 template<>
 struct expression_vulkan_tag<VkSurfaceCapabilitiesPresentBarrierNV>
 {
-	using type = obj::result::nv::surface_capabilities_present_barrier;
+	using type = tag::result::nv::surface_capabilities_present_barrier;
 };
 
 template<>
-struct vulkan_object_native<obj::result::nv::surface_capabilities_present_barrier>
+struct vulkan_object_native<tag::result::nv::surface_capabilities_present_barrier>
 {
 	using type = VkSurfaceCapabilitiesPresentBarrierNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SURFACE_CAPABILITIES_PRESENT_BARRIER_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::present_barrier>
+struct vulkan_object_extensions<tag::feature::nv::present_barrier>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_present_barrier"};
 	constexpr static ::std::uint32_t core = 0;
@@ -166,7 +166,7 @@ struct vulkan_object_extensions<obj::feature::nv::present_barrier>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::swapchain_present_barrier>
+struct vulkan_object_extensions<tag::option::nv::swapchain_present_barrier>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_present_barrier"};
 	constexpr static ::std::uint32_t core = 0;
@@ -174,7 +174,7 @@ struct vulkan_object_extensions<obj::option::nv::swapchain_present_barrier>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::nv::surface_capabilities_present_barrier>
+struct vulkan_object_extensions<tag::result::nv::surface_capabilities_present_barrier>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_present_barrier"};
 	constexpr static ::std::uint32_t core = 0;
@@ -182,13 +182,13 @@ struct vulkan_object_extensions<obj::result::nv::surface_capabilities_present_ba
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::present_barrier> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::present_barrier> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::present_barrier> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::present_barrier> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::surface_capabilities2, obj::result::nv::surface_capabilities_present_barrier> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::surface_capabilities2, tag::result::nv::surface_capabilities_present_barrier> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::swapchain, obj::option::nv::swapchain_present_barrier> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::swapchain, tag::option::nv::swapchain_present_barrier> = true;
 }
 
 namespace vkfu::param
@@ -199,7 +199,7 @@ using ::vkfu::operator|;
 
 struct present_barrier
 {
-	using vulkan_tag_type = obj::feature::nv::present_barrier;
+	using vulkan_tag_type = tag::feature::nv::present_barrier;
 
 	bool enable = false;
 
@@ -221,7 +221,7 @@ using ::vkfu::operator|;
 
 struct swapchain_present_barrier
 {
-	using vulkan_tag_type = obj::option::nv::swapchain_present_barrier;
+	using vulkan_tag_type = tag::option::nv::swapchain_present_barrier;
 
 	bool present_barrier_enable = false;
 

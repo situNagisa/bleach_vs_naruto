@@ -177,7 +177,7 @@ enum class out_of_band_queue_type : ::std::underlying_type_t<VkOutOfBandQueueTyp
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace nv
 {
@@ -201,7 +201,7 @@ struct latency_surface_capabilities{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::nv::latency_sleep>
+struct vulkan_object_trait<tag::nv::latency_sleep>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -209,7 +209,7 @@ struct vulkan_object_trait<obj::nv::latency_sleep>
 };
 
 template<>
-struct vulkan_object_trait<obj::nv::latency_sleep_mode>
+struct vulkan_object_trait<tag::nv::latency_sleep_mode>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -217,7 +217,7 @@ struct vulkan_object_trait<obj::nv::latency_sleep_mode>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::nv::latency_submission_present_id>
+struct vulkan_object_trait<tag::option::nv::latency_submission_present_id>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -225,7 +225,7 @@ struct vulkan_object_trait<obj::option::nv::latency_submission_present_id>
 };
 
 template<>
-struct vulkan_object_trait<obj::nv::out_of_band_queue_type>
+struct vulkan_object_trait<tag::nv::out_of_band_queue_type>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -233,7 +233,7 @@ struct vulkan_object_trait<obj::nv::out_of_band_queue_type>
 };
 
 template<>
-struct vulkan_object_trait<obj::nv::set_latency_marker>
+struct vulkan_object_trait<tag::nv::set_latency_marker>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -241,7 +241,7 @@ struct vulkan_object_trait<obj::nv::set_latency_marker>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::nv::swapchain_latency>
+struct vulkan_object_trait<tag::option::nv::swapchain_latency>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -249,7 +249,7 @@ struct vulkan_object_trait<obj::option::nv::swapchain_latency>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::nv::get_latency_marker>
+struct vulkan_object_trait<tag::result::nv::get_latency_marker>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -257,7 +257,7 @@ struct vulkan_object_trait<obj::result::nv::get_latency_marker>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::nv::latency_surface_capabilities>
+struct vulkan_object_trait<tag::result::nv::latency_surface_capabilities>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -267,11 +267,11 @@ struct vulkan_object_trait<obj::result::nv::latency_surface_capabilities>
 template<>
 struct expression_vulkan_tag<VkLatencySleepInfoNV>
 {
-	using type = obj::nv::latency_sleep;
+	using type = tag::nv::latency_sleep;
 };
 
 template<>
-struct vulkan_object_native<obj::nv::latency_sleep>
+struct vulkan_object_native<tag::nv::latency_sleep>
 {
 	using type = VkLatencySleepInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_LATENCY_SLEEP_INFO_NV;
@@ -280,11 +280,11 @@ struct vulkan_object_native<obj::nv::latency_sleep>
 template<>
 struct expression_vulkan_tag<VkLatencySleepModeInfoNV>
 {
-	using type = obj::nv::latency_sleep_mode;
+	using type = tag::nv::latency_sleep_mode;
 };
 
 template<>
-struct vulkan_object_native<obj::nv::latency_sleep_mode>
+struct vulkan_object_native<tag::nv::latency_sleep_mode>
 {
 	using type = VkLatencySleepModeInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_LATENCY_SLEEP_MODE_INFO_NV;
@@ -293,11 +293,11 @@ struct vulkan_object_native<obj::nv::latency_sleep_mode>
 template<>
 struct expression_vulkan_tag<VkLatencySubmissionPresentIdNV>
 {
-	using type = obj::option::nv::latency_submission_present_id;
+	using type = tag::option::nv::latency_submission_present_id;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::latency_submission_present_id>
+struct vulkan_object_native<tag::option::nv::latency_submission_present_id>
 {
 	using type = VkLatencySubmissionPresentIdNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_LATENCY_SUBMISSION_PRESENT_ID_NV;
@@ -306,11 +306,11 @@ struct vulkan_object_native<obj::option::nv::latency_submission_present_id>
 template<>
 struct expression_vulkan_tag<VkOutOfBandQueueTypeInfoNV>
 {
-	using type = obj::nv::out_of_band_queue_type;
+	using type = tag::nv::out_of_band_queue_type;
 };
 
 template<>
-struct vulkan_object_native<obj::nv::out_of_band_queue_type>
+struct vulkan_object_native<tag::nv::out_of_band_queue_type>
 {
 	using type = VkOutOfBandQueueTypeInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_OUT_OF_BAND_QUEUE_TYPE_INFO_NV;
@@ -319,11 +319,11 @@ struct vulkan_object_native<obj::nv::out_of_band_queue_type>
 template<>
 struct expression_vulkan_tag<VkSetLatencyMarkerInfoNV>
 {
-	using type = obj::nv::set_latency_marker;
+	using type = tag::nv::set_latency_marker;
 };
 
 template<>
-struct vulkan_object_native<obj::nv::set_latency_marker>
+struct vulkan_object_native<tag::nv::set_latency_marker>
 {
 	using type = VkSetLatencyMarkerInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SET_LATENCY_MARKER_INFO_NV;
@@ -332,11 +332,11 @@ struct vulkan_object_native<obj::nv::set_latency_marker>
 template<>
 struct expression_vulkan_tag<VkSwapchainLatencyCreateInfoNV>
 {
-	using type = obj::option::nv::swapchain_latency;
+	using type = tag::option::nv::swapchain_latency;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::swapchain_latency>
+struct vulkan_object_native<tag::option::nv::swapchain_latency>
 {
 	using type = VkSwapchainLatencyCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SWAPCHAIN_LATENCY_CREATE_INFO_NV;
@@ -345,11 +345,11 @@ struct vulkan_object_native<obj::option::nv::swapchain_latency>
 template<>
 struct expression_vulkan_tag<VkGetLatencyMarkerInfoNV>
 {
-	using type = obj::result::nv::get_latency_marker;
+	using type = tag::result::nv::get_latency_marker;
 };
 
 template<>
-struct vulkan_object_native<obj::result::nv::get_latency_marker>
+struct vulkan_object_native<tag::result::nv::get_latency_marker>
 {
 	using type = VkGetLatencyMarkerInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_GET_LATENCY_MARKER_INFO_NV;
@@ -358,18 +358,18 @@ struct vulkan_object_native<obj::result::nv::get_latency_marker>
 template<>
 struct expression_vulkan_tag<VkLatencySurfaceCapabilitiesNV>
 {
-	using type = obj::result::nv::latency_surface_capabilities;
+	using type = tag::result::nv::latency_surface_capabilities;
 };
 
 template<>
-struct vulkan_object_native<obj::result::nv::latency_surface_capabilities>
+struct vulkan_object_native<tag::result::nv::latency_surface_capabilities>
 {
 	using type = VkLatencySurfaceCapabilitiesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_LATENCY_SURFACE_CAPABILITIES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::nv::latency_sleep>
+struct vulkan_object_extensions<tag::nv::latency_sleep>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_low_latency2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -377,7 +377,7 @@ struct vulkan_object_extensions<obj::nv::latency_sleep>
 };
 
 template<>
-struct vulkan_object_extensions<obj::nv::latency_sleep_mode>
+struct vulkan_object_extensions<tag::nv::latency_sleep_mode>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_low_latency2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -385,7 +385,7 @@ struct vulkan_object_extensions<obj::nv::latency_sleep_mode>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::latency_submission_present_id>
+struct vulkan_object_extensions<tag::option::nv::latency_submission_present_id>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_low_latency2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -393,7 +393,7 @@ struct vulkan_object_extensions<obj::option::nv::latency_submission_present_id>
 };
 
 template<>
-struct vulkan_object_extensions<obj::nv::out_of_band_queue_type>
+struct vulkan_object_extensions<tag::nv::out_of_band_queue_type>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_low_latency2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -401,7 +401,7 @@ struct vulkan_object_extensions<obj::nv::out_of_band_queue_type>
 };
 
 template<>
-struct vulkan_object_extensions<obj::nv::set_latency_marker>
+struct vulkan_object_extensions<tag::nv::set_latency_marker>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_low_latency2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -409,7 +409,7 @@ struct vulkan_object_extensions<obj::nv::set_latency_marker>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::swapchain_latency>
+struct vulkan_object_extensions<tag::option::nv::swapchain_latency>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_low_latency2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -417,7 +417,7 @@ struct vulkan_object_extensions<obj::option::nv::swapchain_latency>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::nv::get_latency_marker>
+struct vulkan_object_extensions<tag::result::nv::get_latency_marker>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_low_latency2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -425,7 +425,7 @@ struct vulkan_object_extensions<obj::result::nv::get_latency_marker>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::nv::latency_surface_capabilities>
+struct vulkan_object_extensions<tag::result::nv::latency_surface_capabilities>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_low_latency2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -433,13 +433,13 @@ struct vulkan_object_extensions<obj::result::nv::latency_surface_capabilities>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::submit, obj::option::nv::latency_submission_present_id> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::submit, tag::option::nv::latency_submission_present_id> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::submit2, obj::option::nv::latency_submission_present_id> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::submit2, tag::option::nv::latency_submission_present_id> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::surface_capabilities2, obj::result::nv::latency_surface_capabilities> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::surface_capabilities2, tag::result::nv::latency_surface_capabilities> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::swapchain, obj::option::nv::swapchain_latency> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::swapchain, tag::option::nv::swapchain_latency> = true;
 }
 
 namespace vkfu::param
@@ -450,7 +450,7 @@ using ::vkfu::operator|;
 
 struct latency_sleep
 {
-	using vulkan_tag_type = obj::nv::latency_sleep;
+	using vulkan_tag_type = tag::nv::latency_sleep;
 
 	VkSemaphore signal_semaphore{};
 	::std::uint64_t value{};
@@ -468,7 +468,7 @@ struct latency_sleep
 
 struct latency_sleep_mode
 {
-	using vulkan_tag_type = obj::nv::latency_sleep_mode;
+	using vulkan_tag_type = tag::nv::latency_sleep_mode;
 
 	bool low_latency_mode = false;
 	bool low_latency_boost = false;
@@ -488,7 +488,7 @@ struct latency_sleep_mode
 
 struct out_of_band_queue_type
 {
-	using vulkan_tag_type = obj::nv::out_of_band_queue_type;
+	using vulkan_tag_type = tag::nv::out_of_band_queue_type;
 
 	::vkfu::enums::out_of_band_queue_type queue_type{};
 
@@ -504,7 +504,7 @@ struct out_of_band_queue_type
 
 struct set_latency_marker
 {
-	using vulkan_tag_type = obj::nv::set_latency_marker;
+	using vulkan_tag_type = tag::nv::set_latency_marker;
 
 	::std::uint64_t present_id{};
 	::vkfu::enums::latency_marker marker{};
@@ -528,7 +528,7 @@ using ::vkfu::operator|;
 
 struct latency_submission_present_id
 {
-	using vulkan_tag_type = obj::option::nv::latency_submission_present_id;
+	using vulkan_tag_type = tag::option::nv::latency_submission_present_id;
 
 	::std::uint64_t present_id{};
 
@@ -544,7 +544,7 @@ struct latency_submission_present_id
 
 struct swapchain_latency
 {
-	using vulkan_tag_type = obj::option::nv::swapchain_latency;
+	using vulkan_tag_type = tag::option::nv::swapchain_latency;
 
 	bool latency_mode_enable = false;
 
@@ -565,7 +565,7 @@ namespace vkfu
 {
 namespace nv
 {
-template<::vkfu::expression_for<::vkfu::obj::nv::latency_sleep> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::nv::latency_sleep> Expression1>
 [[nodiscard]] auto latency_sleep(VkDevice device, VkSwapchainKHR swapchain, Expression1&& sleep_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -578,7 +578,7 @@ template<::vkfu::expression_for<::vkfu::obj::nv::latency_sleep> Expression1>
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nv::latency_sleep> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::nv::latency_sleep> Expression1>
 void latency_sleep(VkDevice device, VkSwapchainKHR swapchain, Expression1&& sleep_info)
 {
 	auto outcome = latency_sleep(device, swapchain, ::std::forward<Expression1>(sleep_info), ::std::nothrow);
@@ -588,21 +588,21 @@ void latency_sleep(VkDevice device, VkSwapchainKHR swapchain, Expression1&& slee
 	}
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nv::out_of_band_queue_type> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::nv::out_of_band_queue_type> Expression1>
 void queue_notify_out_of_band(VkQueue queue, Expression1&& queue_type_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(queue_type_info));
 	::vkQueueNotifyOutOfBandNV(queue, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nv::set_latency_marker> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::nv::set_latency_marker> Expression1>
 void set_latency_marker(VkDevice device, VkSwapchainKHR swapchain, Expression1&& latency_marker_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(latency_marker_info));
 	::vkSetLatencyMarkerNV(device, swapchain, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nv::latency_sleep_mode> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::nv::latency_sleep_mode> Expression1>
 [[nodiscard]] auto set_latency_sleep_mode(VkDevice device, VkSwapchainKHR swapchain, Expression1&& sleep_mode_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -615,7 +615,7 @@ template<::vkfu::expression_for<::vkfu::obj::nv::latency_sleep_mode> Expression1
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nv::latency_sleep_mode> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::nv::latency_sleep_mode> Expression1>
 void set_latency_sleep_mode(VkDevice device, VkSwapchainKHR swapchain, Expression1&& sleep_mode_info)
 {
 	auto outcome = set_latency_sleep_mode(device, swapchain, ::std::forward<Expression1>(sleep_mode_info), ::std::nothrow);

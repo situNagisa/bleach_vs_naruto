@@ -76,7 +76,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceExternalFormatResolvePropertiesAND
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::android
 {
@@ -95,7 +95,7 @@ struct android_hardware_buffer_format_resolve_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::android::external_format_resolve>
+struct vulkan_object_trait<tag::feature::android::external_format_resolve>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -103,7 +103,7 @@ struct vulkan_object_trait<obj::feature::android::external_format_resolve>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::android::android_hardware_buffer_format_resolve_properties>
+struct vulkan_object_trait<tag::result::android::android_hardware_buffer_format_resolve_properties>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -111,7 +111,7 @@ struct vulkan_object_trait<obj::result::android::android_hardware_buffer_format_
 };
 
 template<>
-struct vulkan_object_trait<obj::property::android::external_format_resolve>
+struct vulkan_object_trait<tag::property::android::external_format_resolve>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -121,11 +121,11 @@ struct vulkan_object_trait<obj::property::android::external_format_resolve>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceExternalFormatResolveFeaturesANDROID>
 {
-	using type = obj::feature::android::external_format_resolve;
+	using type = tag::feature::android::external_format_resolve;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::android::external_format_resolve>
+struct vulkan_object_native<tag::feature::android::external_format_resolve>
 {
 	using type = VkPhysicalDeviceExternalFormatResolveFeaturesANDROID;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_FORMAT_RESOLVE_FEATURES_ANDROID;
@@ -134,11 +134,11 @@ struct vulkan_object_native<obj::feature::android::external_format_resolve>
 template<>
 struct expression_vulkan_tag<VkAndroidHardwareBufferFormatResolvePropertiesANDROID>
 {
-	using type = obj::result::android::android_hardware_buffer_format_resolve_properties;
+	using type = tag::result::android::android_hardware_buffer_format_resolve_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::android::android_hardware_buffer_format_resolve_properties>
+struct vulkan_object_native<tag::result::android::android_hardware_buffer_format_resolve_properties>
 {
 	using type = VkAndroidHardwareBufferFormatResolvePropertiesANDROID;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_FORMAT_RESOLVE_PROPERTIES_ANDROID;
@@ -147,18 +147,18 @@ struct vulkan_object_native<obj::result::android::android_hardware_buffer_format
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceExternalFormatResolvePropertiesANDROID>
 {
-	using type = obj::property::android::external_format_resolve;
+	using type = tag::property::android::external_format_resolve;
 };
 
 template<>
-struct vulkan_object_native<obj::property::android::external_format_resolve>
+struct vulkan_object_native<tag::property::android::external_format_resolve>
 {
 	using type = VkPhysicalDeviceExternalFormatResolvePropertiesANDROID;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_FORMAT_RESOLVE_PROPERTIES_ANDROID;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::android::external_format_resolve>
+struct vulkan_object_extensions<tag::feature::android::external_format_resolve>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ANDROID_external_format_resolve"};
 	constexpr static ::std::uint32_t core = 0;
@@ -166,7 +166,7 @@ struct vulkan_object_extensions<obj::feature::android::external_format_resolve>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::android::android_hardware_buffer_format_resolve_properties>
+struct vulkan_object_extensions<tag::result::android::android_hardware_buffer_format_resolve_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ANDROID_external_format_resolve"};
 	constexpr static ::std::uint32_t core = 0;
@@ -174,7 +174,7 @@ struct vulkan_object_extensions<obj::result::android::android_hardware_buffer_fo
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::android::external_format_resolve>
+struct vulkan_object_extensions<tag::property::android::external_format_resolve>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ANDROID_external_format_resolve"};
 	constexpr static ::std::uint32_t core = 0;
@@ -182,13 +182,13 @@ struct vulkan_object_extensions<obj::property::android::external_format_resolve>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::android::android_hardware_buffer_properties, obj::result::android::android_hardware_buffer_format_resolve_properties> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::android::android_hardware_buffer_properties, tag::result::android::android_hardware_buffer_format_resolve_properties> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::android::external_format_resolve> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::android::external_format_resolve> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::android::external_format_resolve> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::android::external_format_resolve> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::android::external_format_resolve> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::android::external_format_resolve> = true;
 }
 
 namespace vkfu::param
@@ -199,7 +199,7 @@ using ::vkfu::operator|;
 
 struct external_format_resolve
 {
-	using vulkan_tag_type = obj::feature::android::external_format_resolve;
+	using vulkan_tag_type = tag::feature::android::external_format_resolve;
 
 	bool enable = false;
 

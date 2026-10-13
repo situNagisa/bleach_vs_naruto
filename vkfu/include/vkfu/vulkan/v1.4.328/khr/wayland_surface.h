@@ -42,7 +42,7 @@ constexpr auto _vkfu_evaluate(VkWaylandSurfaceCreateInfoKHR const& value) noexce
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
@@ -53,7 +53,7 @@ struct wayland_surface{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::khr::wayland_surface>
+struct vulkan_object_trait<tag::khr::wayland_surface>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -63,18 +63,18 @@ struct vulkan_object_trait<obj::khr::wayland_surface>
 template<>
 struct expression_vulkan_tag<VkWaylandSurfaceCreateInfoKHR>
 {
-	using type = obj::khr::wayland_surface;
+	using type = tag::khr::wayland_surface;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::wayland_surface>
+struct vulkan_object_native<tag::khr::wayland_surface>
 {
 	using type = VkWaylandSurfaceCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::wayland_surface>
+struct vulkan_object_extensions<tag::khr::wayland_surface>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_wayland_surface"};
 	constexpr static ::std::uint32_t core = 0;
@@ -91,7 +91,7 @@ using ::vkfu::operator|;
 
 struct wayland_surface
 {
-	using vulkan_tag_type = obj::khr::wayland_surface;
+	using vulkan_tag_type = tag::khr::wayland_surface;
 
 	VkWaylandSurfaceCreateFlagsKHR flags{};
 	wl_display* display = nullptr;
@@ -116,7 +116,7 @@ namespace vkfu
 {
 namespace khr
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::wayland_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::khr::wayland_surface> Expression>
 [[nodiscard]] auto create_wayland_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkSurfaceKHR, ::VkResult>
 {
@@ -131,7 +131,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::wayland_surface> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::wayland_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::khr::wayland_surface> Expression>
 [[nodiscard]] auto create_wayland_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkSurfaceKHR
 {
 	auto produced = create_wayland_surface(instance, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

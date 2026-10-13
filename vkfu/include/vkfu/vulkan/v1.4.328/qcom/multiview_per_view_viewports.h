@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceMultiviewPerViewViewportsFeaturesQ
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::qcom
 {
@@ -55,7 +55,7 @@ struct multiview_per_view_viewports{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::qcom::multiview_per_view_viewports>
+struct vulkan_object_trait<tag::feature::qcom::multiview_per_view_viewports>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::qcom::multiview_per_view_viewports>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMultiviewPerViewViewportsFeaturesQCOM>
 {
-	using type = obj::feature::qcom::multiview_per_view_viewports;
+	using type = tag::feature::qcom::multiview_per_view_viewports;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::qcom::multiview_per_view_viewports>
+struct vulkan_object_native<tag::feature::qcom::multiview_per_view_viewports>
 {
 	using type = VkPhysicalDeviceMultiviewPerViewViewportsFeaturesQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_PER_VIEW_VIEWPORTS_FEATURES_QCOM;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::qcom::multiview_per_view_viewports>
+struct vulkan_object_extensions<tag::feature::qcom::multiview_per_view_viewports>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_multiview_per_view_viewports"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::qcom::multiview_per_view_viewports
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::qcom::multiview_per_view_viewports> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::qcom::multiview_per_view_viewports> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::qcom::multiview_per_view_viewports> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::qcom::multiview_per_view_viewports> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct multiview_per_view_viewports
 {
-	using vulkan_tag_type = obj::feature::qcom::multiview_per_view_viewports;
+	using vulkan_tag_type = tag::feature::qcom::multiview_per_view_viewports;
 
 	bool enable = false;
 

@@ -77,7 +77,7 @@ constexpr auto _vkfu_evaluate(VkSubpassResolvePerformanceQueryEXT const& value) 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -96,7 +96,7 @@ struct subpass_resolve_performance_query{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::multisampled_render_to_single_sampled>
+struct vulkan_object_trait<tag::option::ext::multisampled_render_to_single_sampled>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -104,7 +104,7 @@ struct vulkan_object_trait<obj::option::ext::multisampled_render_to_single_sampl
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::ext::multisampled_render_to_single_sampled>
+struct vulkan_object_trait<tag::feature::ext::multisampled_render_to_single_sampled>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -112,7 +112,7 @@ struct vulkan_object_trait<obj::feature::ext::multisampled_render_to_single_samp
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::subpass_resolve_performance_query>
+struct vulkan_object_trait<tag::result::ext::subpass_resolve_performance_query>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -122,11 +122,11 @@ struct vulkan_object_trait<obj::result::ext::subpass_resolve_performance_query>
 template<>
 struct expression_vulkan_tag<VkMultisampledRenderToSingleSampledInfoEXT>
 {
-	using type = obj::option::ext::multisampled_render_to_single_sampled;
+	using type = tag::option::ext::multisampled_render_to_single_sampled;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::multisampled_render_to_single_sampled>
+struct vulkan_object_native<tag::option::ext::multisampled_render_to_single_sampled>
 {
 	using type = VkMultisampledRenderToSingleSampledInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_INFO_EXT;
@@ -135,11 +135,11 @@ struct vulkan_object_native<obj::option::ext::multisampled_render_to_single_samp
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMultisampledRenderToSingleSampledFeaturesEXT>
 {
-	using type = obj::feature::ext::multisampled_render_to_single_sampled;
+	using type = tag::feature::ext::multisampled_render_to_single_sampled;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::multisampled_render_to_single_sampled>
+struct vulkan_object_native<tag::feature::ext::multisampled_render_to_single_sampled>
 {
 	using type = VkPhysicalDeviceMultisampledRenderToSingleSampledFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_FEATURES_EXT;
@@ -148,18 +148,18 @@ struct vulkan_object_native<obj::feature::ext::multisampled_render_to_single_sam
 template<>
 struct expression_vulkan_tag<VkSubpassResolvePerformanceQueryEXT>
 {
-	using type = obj::result::ext::subpass_resolve_performance_query;
+	using type = tag::result::ext::subpass_resolve_performance_query;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::subpass_resolve_performance_query>
+struct vulkan_object_native<tag::result::ext::subpass_resolve_performance_query>
 {
 	using type = VkSubpassResolvePerformanceQueryEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SUBPASS_RESOLVE_PERFORMANCE_QUERY_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::multisampled_render_to_single_sampled>
+struct vulkan_object_extensions<tag::option::ext::multisampled_render_to_single_sampled>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_multisampled_render_to_single_sampled"};
 	constexpr static ::std::uint32_t core = 0;
@@ -167,7 +167,7 @@ struct vulkan_object_extensions<obj::option::ext::multisampled_render_to_single_
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::multisampled_render_to_single_sampled>
+struct vulkan_object_extensions<tag::feature::ext::multisampled_render_to_single_sampled>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_multisampled_render_to_single_sampled"};
 	constexpr static ::std::uint32_t core = 0;
@@ -175,7 +175,7 @@ struct vulkan_object_extensions<obj::feature::ext::multisampled_render_to_single
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::subpass_resolve_performance_query>
+struct vulkan_object_extensions<tag::result::ext::subpass_resolve_performance_query>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_multisampled_render_to_single_sampled"};
 	constexpr static ::std::uint32_t core = 0;
@@ -183,15 +183,15 @@ struct vulkan_object_extensions<obj::result::ext::subpass_resolve_performance_qu
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::multisampled_render_to_single_sampled> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::multisampled_render_to_single_sampled> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::format_properties2, obj::result::ext::subpass_resolve_performance_query> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::format_properties2, tag::result::ext::subpass_resolve_performance_query> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::multisampled_render_to_single_sampled> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::multisampled_render_to_single_sampled> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::rendering, obj::option::ext::multisampled_render_to_single_sampled> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::rendering, tag::option::ext::multisampled_render_to_single_sampled> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::subpass_description2, obj::option::ext::multisampled_render_to_single_sampled> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::subpass_description2, tag::option::ext::multisampled_render_to_single_sampled> = true;
 }
 
 namespace vkfu::param
@@ -202,7 +202,7 @@ using ::vkfu::operator|;
 
 struct multisampled_render_to_single_sampled
 {
-	using vulkan_tag_type = obj::feature::ext::multisampled_render_to_single_sampled;
+	using vulkan_tag_type = tag::feature::ext::multisampled_render_to_single_sampled;
 
 	bool enable = false;
 
@@ -224,7 +224,7 @@ using ::vkfu::operator|;
 
 struct multisampled_render_to_single_sampled
 {
-	using vulkan_tag_type = obj::option::ext::multisampled_render_to_single_sampled;
+	using vulkan_tag_type = tag::option::ext::multisampled_render_to_single_sampled;
 
 	bool enable = false;
 	::vkfu::enums::sample_count rasterization_samples{};

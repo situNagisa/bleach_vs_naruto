@@ -74,7 +74,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceMaintenance7PropertiesKHR const& v
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -93,7 +93,7 @@ struct physical_device_layered_api_properties_list{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::maintenance7>
+struct vulkan_object_trait<tag::feature::khr::maintenance7>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -101,7 +101,7 @@ struct vulkan_object_trait<obj::feature::khr::maintenance7>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::physical_device_layered_api_properties_list>
+struct vulkan_object_trait<tag::result::khr::physical_device_layered_api_properties_list>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -109,7 +109,7 @@ struct vulkan_object_trait<obj::result::khr::physical_device_layered_api_propert
 };
 
 template<>
-struct vulkan_object_trait<obj::property::khr::maintenance7>
+struct vulkan_object_trait<tag::property::khr::maintenance7>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -119,11 +119,11 @@ struct vulkan_object_trait<obj::property::khr::maintenance7>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMaintenance7FeaturesKHR>
 {
-	using type = obj::feature::khr::maintenance7;
+	using type = tag::feature::khr::maintenance7;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::maintenance7>
+struct vulkan_object_native<tag::feature::khr::maintenance7>
 {
 	using type = VkPhysicalDeviceMaintenance7FeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_7_FEATURES_KHR;
@@ -132,11 +132,11 @@ struct vulkan_object_native<obj::feature::khr::maintenance7>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceLayeredApiPropertiesListKHR>
 {
-	using type = obj::result::khr::physical_device_layered_api_properties_list;
+	using type = tag::result::khr::physical_device_layered_api_properties_list;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::physical_device_layered_api_properties_list>
+struct vulkan_object_native<tag::result::khr::physical_device_layered_api_properties_list>
 {
 	using type = VkPhysicalDeviceLayeredApiPropertiesListKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LAYERED_API_PROPERTIES_LIST_KHR;
@@ -145,18 +145,18 @@ struct vulkan_object_native<obj::result::khr::physical_device_layered_api_proper
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMaintenance7PropertiesKHR>
 {
-	using type = obj::property::khr::maintenance7;
+	using type = tag::property::khr::maintenance7;
 };
 
 template<>
-struct vulkan_object_native<obj::property::khr::maintenance7>
+struct vulkan_object_native<tag::property::khr::maintenance7>
 {
 	using type = VkPhysicalDeviceMaintenance7PropertiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_7_PROPERTIES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::maintenance7>
+struct vulkan_object_extensions<tag::feature::khr::maintenance7>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance7"};
 	constexpr static ::std::uint32_t core = 0;
@@ -164,7 +164,7 @@ struct vulkan_object_extensions<obj::feature::khr::maintenance7>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::physical_device_layered_api_properties_list>
+struct vulkan_object_extensions<tag::result::khr::physical_device_layered_api_properties_list>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance7"};
 	constexpr static ::std::uint32_t core = 0;
@@ -172,7 +172,7 @@ struct vulkan_object_extensions<obj::result::khr::physical_device_layered_api_pr
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::khr::maintenance7>
+struct vulkan_object_extensions<tag::property::khr::maintenance7>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance7"};
 	constexpr static ::std::uint32_t core = 0;
@@ -180,13 +180,13 @@ struct vulkan_object_extensions<obj::property::khr::maintenance7>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::maintenance7> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::maintenance7> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::maintenance7> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::maintenance7> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::result::khr::physical_device_layered_api_properties_list> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::result::khr::physical_device_layered_api_properties_list> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::khr::maintenance7> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::khr::maintenance7> = true;
 }
 
 namespace vkfu::param
@@ -197,7 +197,7 @@ using ::vkfu::operator|;
 
 struct maintenance7
 {
-	using vulkan_tag_type = obj::feature::khr::maintenance7;
+	using vulkan_tag_type = tag::feature::khr::maintenance7;
 
 	bool enable = false;
 

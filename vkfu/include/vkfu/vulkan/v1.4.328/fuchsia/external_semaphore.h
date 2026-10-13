@@ -28,6 +28,7 @@
 #include <vkfu/vulkan_object.h>
 
 #include "../version_1_1/external_semaphore_capabilities.h"
+#include "../version_1_1/external_semaphore.h"
 
 constexpr auto _vkfu_address(VkImportSemaphoreZirconHandleInfoFUCHSIA& value) noexcept -> void const*
 {
@@ -59,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkSemaphoreGetZirconHandleInfoFUCHSIA const& value
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace fuchsia
 {
@@ -71,7 +72,7 @@ struct semaphore_get_zircon_handle{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::fuchsia::import_semaphore_zircon_handle>
+struct vulkan_object_trait<tag::fuchsia::import_semaphore_zircon_handle>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -79,7 +80,7 @@ struct vulkan_object_trait<obj::fuchsia::import_semaphore_zircon_handle>
 };
 
 template<>
-struct vulkan_object_trait<obj::fuchsia::semaphore_get_zircon_handle>
+struct vulkan_object_trait<tag::fuchsia::semaphore_get_zircon_handle>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -89,11 +90,11 @@ struct vulkan_object_trait<obj::fuchsia::semaphore_get_zircon_handle>
 template<>
 struct expression_vulkan_tag<VkImportSemaphoreZirconHandleInfoFUCHSIA>
 {
-	using type = obj::fuchsia::import_semaphore_zircon_handle;
+	using type = tag::fuchsia::import_semaphore_zircon_handle;
 };
 
 template<>
-struct vulkan_object_native<obj::fuchsia::import_semaphore_zircon_handle>
+struct vulkan_object_native<tag::fuchsia::import_semaphore_zircon_handle>
 {
 	using type = VkImportSemaphoreZirconHandleInfoFUCHSIA;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_ZIRCON_HANDLE_INFO_FUCHSIA;
@@ -102,18 +103,18 @@ struct vulkan_object_native<obj::fuchsia::import_semaphore_zircon_handle>
 template<>
 struct expression_vulkan_tag<VkSemaphoreGetZirconHandleInfoFUCHSIA>
 {
-	using type = obj::fuchsia::semaphore_get_zircon_handle;
+	using type = tag::fuchsia::semaphore_get_zircon_handle;
 };
 
 template<>
-struct vulkan_object_native<obj::fuchsia::semaphore_get_zircon_handle>
+struct vulkan_object_native<tag::fuchsia::semaphore_get_zircon_handle>
 {
 	using type = VkSemaphoreGetZirconHandleInfoFUCHSIA;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SEMAPHORE_GET_ZIRCON_HANDLE_INFO_FUCHSIA;
 };
 
 template<>
-struct vulkan_object_extensions<obj::fuchsia::import_semaphore_zircon_handle>
+struct vulkan_object_extensions<tag::fuchsia::import_semaphore_zircon_handle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_FUCHSIA_external_semaphore"};
 	constexpr static ::std::uint32_t core = 0;
@@ -121,7 +122,7 @@ struct vulkan_object_extensions<obj::fuchsia::import_semaphore_zircon_handle>
 };
 
 template<>
-struct vulkan_object_extensions<obj::fuchsia::semaphore_get_zircon_handle>
+struct vulkan_object_extensions<tag::fuchsia::semaphore_get_zircon_handle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_FUCHSIA_external_semaphore"};
 	constexpr static ::std::uint32_t core = 0;
@@ -138,16 +139,10 @@ using ::vkfu::operator|;
 
 struct import_semaphore_zircon_handle
 {
-	using vulkan_tag_type = obj::fuchsia::import_semaphore_zircon_handle;
+	using vulkan_tag_type = tag::fuchsia::import_semaphore_zircon_handle;
 
 	VkSemaphore semaphore{};
-	struct flags_type
-	{
-		VkSemaphoreImportFlags temporary : 1 = 0;
-		VkSemaphoreImportFlags _reserved_1 : 31 = 0;
-	};
-
-	flags_type flags{};
+	::vkfu::flags::semaphore_import flags{};
 	::vkfu::enums::external_semaphore_handle_type handle_type{};
 	zx_handle_t zircon_handle{};
 
@@ -164,14 +159,9 @@ struct import_semaphore_zircon_handle
 	}
 };
 
-static_assert(sizeof(import_semaphore_zircon_handle::flags_type) == sizeof(VkSemaphoreImportFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkSemaphoreImportFlags>(import_semaphore_zircon_handle::flags_type{.temporary = 1}) == VK_SEMAPHORE_IMPORT_TEMPORARY_BIT);
-#endif
-
 struct semaphore_get_zircon_handle
 {
-	using vulkan_tag_type = obj::fuchsia::semaphore_get_zircon_handle;
+	using vulkan_tag_type = tag::fuchsia::semaphore_get_zircon_handle;
 
 	VkSemaphore semaphore{};
 	::vkfu::enums::external_semaphore_handle_type handle_type{};
@@ -194,7 +184,7 @@ namespace vkfu
 {
 namespace fuchsia
 {
-template<::vkfu::expression_for<::vkfu::obj::fuchsia::semaphore_get_zircon_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::fuchsia::semaphore_get_zircon_handle> Expression1>
 [[nodiscard]] auto get_semaphore_zircon_handle(VkDevice device, Expression1&& get_zircon_handle_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<zx_handle_t, ::VkResult>
 {
@@ -208,7 +198,7 @@ template<::vkfu::expression_for<::vkfu::obj::fuchsia::semaphore_get_zircon_handl
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::fuchsia::semaphore_get_zircon_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::fuchsia::semaphore_get_zircon_handle> Expression1>
 [[nodiscard]] auto get_semaphore_zircon_handle(VkDevice device, Expression1&& get_zircon_handle_info) -> zx_handle_t
 {
 	auto outcome = get_semaphore_zircon_handle(device, ::std::forward<Expression1>(get_zircon_handle_info), ::std::nothrow);
@@ -219,7 +209,7 @@ template<::vkfu::expression_for<::vkfu::obj::fuchsia::semaphore_get_zircon_handl
 	return *outcome;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::fuchsia::import_semaphore_zircon_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::fuchsia::import_semaphore_zircon_handle> Expression1>
 [[nodiscard]] auto import_semaphore_zircon_handle(VkDevice device, Expression1&& import_semaphore_zircon_handle_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -232,7 +222,7 @@ template<::vkfu::expression_for<::vkfu::obj::fuchsia::import_semaphore_zircon_ha
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::fuchsia::import_semaphore_zircon_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::fuchsia::import_semaphore_zircon_handle> Expression1>
 void import_semaphore_zircon_handle(VkDevice device, Expression1&& import_semaphore_zircon_handle_info)
 {
 	auto outcome = import_semaphore_zircon_handle(device, ::std::forward<Expression1>(import_semaphore_zircon_handle_info), ::std::nothrow);

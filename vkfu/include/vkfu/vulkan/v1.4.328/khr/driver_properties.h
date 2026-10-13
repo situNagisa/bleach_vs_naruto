@@ -28,10 +28,10 @@
 
 #include "../version_1_2/driver_properties.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property::khr
 {
-using driver = ::vkfu::obj::property::driver;
+using driver = ::vkfu::tag::property::driver;
 }
 }

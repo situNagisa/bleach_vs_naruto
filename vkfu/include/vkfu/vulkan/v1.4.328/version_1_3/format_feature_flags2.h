@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkFormatProperties3 const& value) noexcept -> VkFo
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace result
 {
@@ -54,7 +54,7 @@ struct format_properties3{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::result::format_properties3>
+struct vulkan_object_trait<tag::result::format_properties3>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::result::format_properties3>
 template<>
 struct expression_vulkan_tag<VkFormatProperties3>
 {
-	using type = obj::result::format_properties3;
+	using type = tag::result::format_properties3;
 };
 
 template<>
-struct vulkan_object_native<obj::result::format_properties3>
+struct vulkan_object_native<tag::result::format_properties3>
 {
 	using type = VkFormatProperties3;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_3;
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::format_properties3>
+struct vulkan_object_extensions<tag::result::format_properties3>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_format_feature_flags2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -83,5 +83,5 @@ struct vulkan_object_extensions<obj::result::format_properties3>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::format_properties2, obj::result::format_properties3> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::format_properties2, tag::result::format_properties3> = true;
 }

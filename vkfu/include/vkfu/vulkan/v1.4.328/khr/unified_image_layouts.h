@@ -60,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceUnifiedImageLayoutsFeaturesKHR con
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -75,7 +75,7 @@ struct attachment_feedback_loop{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::attachment_feedback_loop>
+struct vulkan_object_trait<tag::option::ext::attachment_feedback_loop>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -83,7 +83,7 @@ struct vulkan_object_trait<obj::option::ext::attachment_feedback_loop>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::khr::unified_image_layouts>
+struct vulkan_object_trait<tag::feature::khr::unified_image_layouts>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -93,11 +93,11 @@ struct vulkan_object_trait<obj::feature::khr::unified_image_layouts>
 template<>
 struct expression_vulkan_tag<VkAttachmentFeedbackLoopInfoEXT>
 {
-	using type = obj::option::ext::attachment_feedback_loop;
+	using type = tag::option::ext::attachment_feedback_loop;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::attachment_feedback_loop>
+struct vulkan_object_native<tag::option::ext::attachment_feedback_loop>
 {
 	using type = VkAttachmentFeedbackLoopInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ATTACHMENT_FEEDBACK_LOOP_INFO_EXT;
@@ -106,18 +106,18 @@ struct vulkan_object_native<obj::option::ext::attachment_feedback_loop>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceUnifiedImageLayoutsFeaturesKHR>
 {
-	using type = obj::feature::khr::unified_image_layouts;
+	using type = tag::feature::khr::unified_image_layouts;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::unified_image_layouts>
+struct vulkan_object_native<tag::feature::khr::unified_image_layouts>
 {
 	using type = VkPhysicalDeviceUnifiedImageLayoutsFeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFIED_IMAGE_LAYOUTS_FEATURES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::attachment_feedback_loop>
+struct vulkan_object_extensions<tag::option::ext::attachment_feedback_loop>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_unified_image_layouts"};
 	constexpr static ::std::uint32_t core = 0;
@@ -125,7 +125,7 @@ struct vulkan_object_extensions<obj::option::ext::attachment_feedback_loop>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::unified_image_layouts>
+struct vulkan_object_extensions<tag::feature::khr::unified_image_layouts>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_unified_image_layouts"};
 	constexpr static ::std::uint32_t core = 0;
@@ -133,11 +133,11 @@ struct vulkan_object_extensions<obj::feature::khr::unified_image_layouts>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::unified_image_layouts> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::unified_image_layouts> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::unified_image_layouts> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::unified_image_layouts> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::rendering_attachment, obj::option::ext::attachment_feedback_loop> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::rendering_attachment, tag::option::ext::attachment_feedback_loop> = true;
 }
 
 namespace vkfu::param
@@ -148,7 +148,7 @@ using ::vkfu::operator|;
 
 struct unified_image_layouts
 {
-	using vulkan_tag_type = obj::feature::khr::unified_image_layouts;
+	using vulkan_tag_type = tag::feature::khr::unified_image_layouts;
 
 	bool enable = false;
 	bool video = false;
@@ -172,7 +172,7 @@ using ::vkfu::operator|;
 
 struct attachment_feedback_loop
 {
-	using vulkan_tag_type = obj::option::ext::attachment_feedback_loop;
+	using vulkan_tag_type = tag::option::ext::attachment_feedback_loop;
 
 	bool feedback_loop_enable = false;
 

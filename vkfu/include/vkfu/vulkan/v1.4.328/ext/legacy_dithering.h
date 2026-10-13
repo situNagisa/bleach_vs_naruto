@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceLegacyDitheringFeaturesEXT const& 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct legacy_dithering{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::legacy_dithering>
+struct vulkan_object_trait<tag::feature::ext::legacy_dithering>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::legacy_dithering>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceLegacyDitheringFeaturesEXT>
 {
-	using type = obj::feature::ext::legacy_dithering;
+	using type = tag::feature::ext::legacy_dithering;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::legacy_dithering>
+struct vulkan_object_native<tag::feature::ext::legacy_dithering>
 {
 	using type = VkPhysicalDeviceLegacyDitheringFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LEGACY_DITHERING_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::legacy_dithering>
+struct vulkan_object_extensions<tag::feature::ext::legacy_dithering>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_legacy_dithering"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::legacy_dithering>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::legacy_dithering> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::legacy_dithering> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::legacy_dithering> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::legacy_dithering> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct legacy_dithering
 {
-	using vulkan_tag_type = obj::feature::ext::legacy_dithering;
+	using vulkan_tag_type = tag::feature::ext::legacy_dithering;
 
 	bool enable = false;
 

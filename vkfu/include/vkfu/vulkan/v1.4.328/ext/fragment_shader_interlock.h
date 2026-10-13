@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct fragment_shader_interlock{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::fragment_shader_interlock>
+struct vulkan_object_trait<tag::feature::ext::fragment_shader_interlock>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::fragment_shader_interlock>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT>
 {
-	using type = obj::feature::ext::fragment_shader_interlock;
+	using type = tag::feature::ext::fragment_shader_interlock;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::fragment_shader_interlock>
+struct vulkan_object_native<tag::feature::ext::fragment_shader_interlock>
 {
 	using type = VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADER_INTERLOCK_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::fragment_shader_interlock>
+struct vulkan_object_extensions<tag::feature::ext::fragment_shader_interlock>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_fragment_shader_interlock"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::fragment_shader_interlock>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::fragment_shader_interlock> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::fragment_shader_interlock> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::fragment_shader_interlock> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::fragment_shader_interlock> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct fragment_shader_interlock
 {
-	using vulkan_tag_type = obj::feature::ext::fragment_shader_interlock;
+	using vulkan_tag_type = tag::feature::ext::fragment_shader_interlock;
 
 	bool fragment_shader_sample_interlock = false;
 	bool fragment_shader_pixel_interlock = false;

@@ -28,11 +28,11 @@
 
 #include "../version_1_4/global_priority.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::ext
 {
-using device_queue_global_priority = ::vkfu::obj::option::device_queue_global_priority;
+using device_queue_global_priority = ::vkfu::tag::option::device_queue_global_priority;
 }
 }
 

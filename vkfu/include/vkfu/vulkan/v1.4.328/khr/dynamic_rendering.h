@@ -28,21 +28,21 @@
 
 #include "../version_1_3/dynamic_rendering.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using dynamic_rendering = ::vkfu::obj::feature::dynamic_rendering;
+using dynamic_rendering = ::vkfu::tag::feature::dynamic_rendering;
 }
 namespace khr
 {
-using rendering_attachment = ::vkfu::obj::rendering_attachment;
-using rendering = ::vkfu::obj::rendering;
+using rendering_attachment = ::vkfu::tag::rendering_attachment;
+using rendering = ::vkfu::tag::rendering;
 }
 namespace option::khr
 {
-using command_buffer_inheritance_rendering = ::vkfu::obj::option::command_buffer_inheritance_rendering;
-using pipeline_rendering = ::vkfu::obj::option::pipeline_rendering;
+using command_buffer_inheritance_rendering = ::vkfu::tag::option::command_buffer_inheritance_rendering;
+using pipeline_rendering = ::vkfu::tag::option::pipeline_rendering;
 }
 }
 
@@ -56,7 +56,7 @@ using dynamic_rendering = ::vkfu::param::feature::dynamic_rendering;
 namespace khr
 {
 using rendering_attachment = ::vkfu::param::rendering_attachment;
-template<::vkfu::reference_expression_for<::vkfu::obj::rendering_attachment> depth_attachment_expression = ::vkfu::absent_expression, ::vkfu::reference_expression_for<::vkfu::obj::rendering_attachment> stencil_attachment_expression = ::vkfu::absent_expression>
+template<::vkfu::reference_expression_for<::vkfu::tag::rendering_attachment> depth_attachment_expression = ::vkfu::absent_expression, ::vkfu::reference_expression_for<::vkfu::tag::rendering_attachment> stencil_attachment_expression = ::vkfu::absent_expression>
 using rendering = ::vkfu::param::rendering<depth_attachment_expression, stencil_attachment_expression>;
 }
 

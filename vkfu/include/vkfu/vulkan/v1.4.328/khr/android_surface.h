@@ -42,7 +42,7 @@ constexpr auto _vkfu_evaluate(VkAndroidSurfaceCreateInfoKHR const& value) noexce
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
@@ -53,7 +53,7 @@ struct android_surface{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::khr::android_surface>
+struct vulkan_object_trait<tag::khr::android_surface>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -63,18 +63,18 @@ struct vulkan_object_trait<obj::khr::android_surface>
 template<>
 struct expression_vulkan_tag<VkAndroidSurfaceCreateInfoKHR>
 {
-	using type = obj::khr::android_surface;
+	using type = tag::khr::android_surface;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::android_surface>
+struct vulkan_object_native<tag::khr::android_surface>
 {
 	using type = VkAndroidSurfaceCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::android_surface>
+struct vulkan_object_extensions<tag::khr::android_surface>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_android_surface"};
 	constexpr static ::std::uint32_t core = 0;
@@ -91,7 +91,7 @@ using ::vkfu::operator|;
 
 struct android_surface
 {
-	using vulkan_tag_type = obj::khr::android_surface;
+	using vulkan_tag_type = tag::khr::android_surface;
 
 	VkAndroidSurfaceCreateFlagsKHR flags{};
 	ANativeWindow* window = nullptr;
@@ -114,7 +114,7 @@ namespace vkfu
 {
 namespace khr
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::android_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::khr::android_surface> Expression>
 [[nodiscard]] auto create_android_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkSurfaceKHR, ::VkResult>
 {
@@ -129,7 +129,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::android_surface> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::android_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::khr::android_surface> Expression>
 [[nodiscard]] auto create_android_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkSurfaceKHR
 {
 	auto produced = create_android_surface(instance, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

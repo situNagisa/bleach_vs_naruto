@@ -28,21 +28,21 @@
 
 #include "../version_1_2/buffer_device_address.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using buffer_device_address = ::vkfu::obj::feature::buffer_device_address;
+using buffer_device_address = ::vkfu::tag::feature::buffer_device_address;
 }
 namespace khr
 {
-using buffer_device_address = ::vkfu::obj::buffer_device_address;
-using device_memory_opaque_capture_address = ::vkfu::obj::device_memory_opaque_capture_address;
+using buffer_device_address = ::vkfu::tag::buffer_device_address;
+using device_memory_opaque_capture_address = ::vkfu::tag::device_memory_opaque_capture_address;
 }
 namespace option::khr
 {
-using buffer_opaque_capture_address = ::vkfu::obj::option::buffer_opaque_capture_address;
-using memory_opaque_capture_address = ::vkfu::obj::option::memory_opaque_capture_address;
+using buffer_opaque_capture_address = ::vkfu::tag::option::buffer_opaque_capture_address;
+using memory_opaque_capture_address = ::vkfu::tag::option::memory_opaque_capture_address;
 }
 }
 

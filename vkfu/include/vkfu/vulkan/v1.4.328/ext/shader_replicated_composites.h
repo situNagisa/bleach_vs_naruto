@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceShaderReplicatedCompositesFeatures
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct shader_replicated_composites{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::shader_replicated_composites>
+struct vulkan_object_trait<tag::feature::ext::shader_replicated_composites>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::shader_replicated_composites>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderReplicatedCompositesFeaturesEXT>
 {
-	using type = obj::feature::ext::shader_replicated_composites;
+	using type = tag::feature::ext::shader_replicated_composites;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::shader_replicated_composites>
+struct vulkan_object_native<tag::feature::ext::shader_replicated_composites>
 {
 	using type = VkPhysicalDeviceShaderReplicatedCompositesFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_REPLICATED_COMPOSITES_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::shader_replicated_composites>
+struct vulkan_object_extensions<tag::feature::ext::shader_replicated_composites>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_shader_replicated_composites"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::shader_replicated_composites>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::shader_replicated_composites> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::shader_replicated_composites> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::shader_replicated_composites> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::shader_replicated_composites> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct shader_replicated_composites
 {
-	using vulkan_tag_type = obj::feature::ext::shader_replicated_composites;
+	using vulkan_tag_type = tag::feature::ext::shader_replicated_composites;
 
 	bool enable = false;
 

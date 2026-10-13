@@ -28,15 +28,15 @@
 
 #include "../ext/mutable_descriptor_type.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext::valve
 {
-using mutable_descriptor_type = ::vkfu::obj::feature::ext::mutable_descriptor_type;
+using mutable_descriptor_type = ::vkfu::tag::feature::ext::mutable_descriptor_type;
 }
 namespace option::ext::valve
 {
-using mutable_descriptor_type = ::vkfu::obj::option::ext::mutable_descriptor_type;
+using mutable_descriptor_type = ::vkfu::tag::option::ext::mutable_descriptor_type;
 }
 }
 

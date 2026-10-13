@@ -76,7 +76,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceSeparateDepthStencilLayoutsFeature
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -92,7 +92,7 @@ struct attachment_reference_stencil_layout{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::attachment_description_stencil_layout>
+struct vulkan_object_trait<tag::option::attachment_description_stencil_layout>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -100,7 +100,7 @@ struct vulkan_object_trait<obj::option::attachment_description_stencil_layout>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::attachment_reference_stencil_layout>
+struct vulkan_object_trait<tag::option::attachment_reference_stencil_layout>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -108,7 +108,7 @@ struct vulkan_object_trait<obj::option::attachment_reference_stencil_layout>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::separate_depth_stencil_layouts>
+struct vulkan_object_trait<tag::feature::separate_depth_stencil_layouts>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -118,11 +118,11 @@ struct vulkan_object_trait<obj::feature::separate_depth_stencil_layouts>
 template<>
 struct expression_vulkan_tag<VkAttachmentDescriptionStencilLayout>
 {
-	using type = obj::option::attachment_description_stencil_layout;
+	using type = tag::option::attachment_description_stencil_layout;
 };
 
 template<>
-struct vulkan_object_native<obj::option::attachment_description_stencil_layout>
+struct vulkan_object_native<tag::option::attachment_description_stencil_layout>
 {
 	using type = VkAttachmentDescriptionStencilLayout;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_STENCIL_LAYOUT;
@@ -131,11 +131,11 @@ struct vulkan_object_native<obj::option::attachment_description_stencil_layout>
 template<>
 struct expression_vulkan_tag<VkAttachmentReferenceStencilLayout>
 {
-	using type = obj::option::attachment_reference_stencil_layout;
+	using type = tag::option::attachment_reference_stencil_layout;
 };
 
 template<>
-struct vulkan_object_native<obj::option::attachment_reference_stencil_layout>
+struct vulkan_object_native<tag::option::attachment_reference_stencil_layout>
 {
 	using type = VkAttachmentReferenceStencilLayout;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_STENCIL_LAYOUT;
@@ -144,18 +144,18 @@ struct vulkan_object_native<obj::option::attachment_reference_stencil_layout>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures>
 {
-	using type = obj::feature::separate_depth_stencil_layouts;
+	using type = tag::feature::separate_depth_stencil_layouts;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::separate_depth_stencil_layouts>
+struct vulkan_object_native<tag::feature::separate_depth_stencil_layouts>
 {
 	using type = VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SEPARATE_DEPTH_STENCIL_LAYOUTS_FEATURES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::attachment_description_stencil_layout>
+struct vulkan_object_extensions<tag::option::attachment_description_stencil_layout>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_separate_depth_stencil_layouts"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -163,7 +163,7 @@ struct vulkan_object_extensions<obj::option::attachment_description_stencil_layo
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::attachment_reference_stencil_layout>
+struct vulkan_object_extensions<tag::option::attachment_reference_stencil_layout>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_separate_depth_stencil_layouts"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -171,7 +171,7 @@ struct vulkan_object_extensions<obj::option::attachment_reference_stencil_layout
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::separate_depth_stencil_layouts>
+struct vulkan_object_extensions<tag::feature::separate_depth_stencil_layouts>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_separate_depth_stencil_layouts"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -179,13 +179,13 @@ struct vulkan_object_extensions<obj::feature::separate_depth_stencil_layouts>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::attachment_description2, obj::option::attachment_description_stencil_layout> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::attachment_description2, tag::option::attachment_description_stencil_layout> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::attachment_reference2, obj::option::attachment_reference_stencil_layout> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::attachment_reference2, tag::option::attachment_reference_stencil_layout> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::separate_depth_stencil_layouts> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::separate_depth_stencil_layouts> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::separate_depth_stencil_layouts> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::separate_depth_stencil_layouts> = true;
 }
 
 namespace vkfu::param
@@ -196,7 +196,7 @@ using ::vkfu::operator|;
 
 struct separate_depth_stencil_layouts
 {
-	using vulkan_tag_type = obj::feature::separate_depth_stencil_layouts;
+	using vulkan_tag_type = tag::feature::separate_depth_stencil_layouts;
 
 	bool enable = false;
 
@@ -218,7 +218,7 @@ using ::vkfu::operator|;
 
 struct attachment_description_stencil_layout
 {
-	using vulkan_tag_type = obj::option::attachment_description_stencil_layout;
+	using vulkan_tag_type = tag::option::attachment_description_stencil_layout;
 
 	::vkfu::enums::image_layout stencil_initial_layout{};
 	::vkfu::enums::image_layout stencil_final_layout{};
@@ -236,7 +236,7 @@ struct attachment_description_stencil_layout
 
 struct attachment_reference_stencil_layout
 {
-	using vulkan_tag_type = obj::option::attachment_reference_stencil_layout;
+	using vulkan_tag_type = tag::option::attachment_reference_stencil_layout;
 
 	::vkfu::enums::image_layout stencil_layout{};
 

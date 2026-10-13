@@ -91,7 +91,7 @@ enum class anti_lag_stage : ::std::underlying_type_t<VkAntiLagStageAMD>
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace amd
 {
@@ -107,7 +107,7 @@ struct anti_lag{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::amd::anti_lag_data>
+struct vulkan_object_trait<tag::amd::anti_lag_data>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -115,7 +115,7 @@ struct vulkan_object_trait<obj::amd::anti_lag_data>
 };
 
 template<>
-struct vulkan_object_trait<obj::amd::anti_lag_presentation>
+struct vulkan_object_trait<tag::amd::anti_lag_presentation>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -123,7 +123,7 @@ struct vulkan_object_trait<obj::amd::anti_lag_presentation>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::amd::anti_lag>
+struct vulkan_object_trait<tag::feature::amd::anti_lag>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -133,11 +133,11 @@ struct vulkan_object_trait<obj::feature::amd::anti_lag>
 template<>
 struct expression_vulkan_tag<VkAntiLagDataAMD>
 {
-	using type = obj::amd::anti_lag_data;
+	using type = tag::amd::anti_lag_data;
 };
 
 template<>
-struct vulkan_object_native<obj::amd::anti_lag_data>
+struct vulkan_object_native<tag::amd::anti_lag_data>
 {
 	using type = VkAntiLagDataAMD;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ANTI_LAG_DATA_AMD;
@@ -146,11 +146,11 @@ struct vulkan_object_native<obj::amd::anti_lag_data>
 template<>
 struct expression_vulkan_tag<VkAntiLagPresentationInfoAMD>
 {
-	using type = obj::amd::anti_lag_presentation;
+	using type = tag::amd::anti_lag_presentation;
 };
 
 template<>
-struct vulkan_object_native<obj::amd::anti_lag_presentation>
+struct vulkan_object_native<tag::amd::anti_lag_presentation>
 {
 	using type = VkAntiLagPresentationInfoAMD;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ANTI_LAG_PRESENTATION_INFO_AMD;
@@ -159,18 +159,18 @@ struct vulkan_object_native<obj::amd::anti_lag_presentation>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceAntiLagFeaturesAMD>
 {
-	using type = obj::feature::amd::anti_lag;
+	using type = tag::feature::amd::anti_lag;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::amd::anti_lag>
+struct vulkan_object_native<tag::feature::amd::anti_lag>
 {
 	using type = VkPhysicalDeviceAntiLagFeaturesAMD;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ANTI_LAG_FEATURES_AMD;
 };
 
 template<>
-struct vulkan_object_extensions<obj::amd::anti_lag_data>
+struct vulkan_object_extensions<tag::amd::anti_lag_data>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_AMD_anti_lag"};
 	constexpr static ::std::uint32_t core = 0;
@@ -178,7 +178,7 @@ struct vulkan_object_extensions<obj::amd::anti_lag_data>
 };
 
 template<>
-struct vulkan_object_extensions<obj::amd::anti_lag_presentation>
+struct vulkan_object_extensions<tag::amd::anti_lag_presentation>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_AMD_anti_lag"};
 	constexpr static ::std::uint32_t core = 0;
@@ -186,7 +186,7 @@ struct vulkan_object_extensions<obj::amd::anti_lag_presentation>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::amd::anti_lag>
+struct vulkan_object_extensions<tag::feature::amd::anti_lag>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_AMD_anti_lag"};
 	constexpr static ::std::uint32_t core = 0;
@@ -194,9 +194,9 @@ struct vulkan_object_extensions<obj::feature::amd::anti_lag>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::amd::anti_lag> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::amd::anti_lag> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::amd::anti_lag> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::amd::anti_lag> = true;
 }
 
 namespace vkfu::param
@@ -205,10 +205,10 @@ namespace amd
 {
 using ::vkfu::operator|;
 
-template<::vkfu::reference_expression_for<obj::amd::anti_lag_presentation> presentation_info_expression = ::vkfu::absent_expression>
+template<::vkfu::reference_expression_for<tag::amd::anti_lag_presentation> presentation_info_expression = ::vkfu::absent_expression>
 struct anti_lag_data
 {
-	using vulkan_tag_type = obj::amd::anti_lag_data;
+	using vulkan_tag_type = tag::amd::anti_lag_data;
 	using storage_type = ::vkfu::reference_storage<VkAntiLagDataAMD
 		, ::vkfu::reference_slot<&VkAntiLagDataAMD::pPresentationInfo, ::vkfu::reference_storage_of_t<presentation_info_expression>>
 		>;
@@ -234,7 +234,7 @@ struct anti_lag_data
 
 struct anti_lag_presentation
 {
-	using vulkan_tag_type = obj::amd::anti_lag_presentation;
+	using vulkan_tag_type = tag::amd::anti_lag_presentation;
 
 	::vkfu::enums::anti_lag_stage stage{};
 	::std::uint64_t frame_index{};
@@ -258,7 +258,7 @@ using ::vkfu::operator|;
 
 struct anti_lag
 {
-	using vulkan_tag_type = obj::feature::amd::anti_lag;
+	using vulkan_tag_type = tag::feature::amd::anti_lag;
 
 	bool enable = false;
 
@@ -279,7 +279,7 @@ namespace vkfu
 {
 namespace amd
 {
-template<::vkfu::expression_for<::vkfu::obj::amd::anti_lag_data> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::amd::anti_lag_data> Expression1>
 void anti_lag_update(VkDevice device, Expression1&& data)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(data));

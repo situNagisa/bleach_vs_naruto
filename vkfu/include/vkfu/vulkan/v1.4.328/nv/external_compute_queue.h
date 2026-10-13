@@ -89,7 +89,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceExternalComputeQueuePropertiesNV c
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace nv
 {
@@ -112,7 +112,7 @@ struct external_compute_queue_data_params{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::nv::external_compute_queue>
+struct vulkan_object_trait<tag::nv::external_compute_queue>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -120,7 +120,7 @@ struct vulkan_object_trait<obj::nv::external_compute_queue>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::nv::external_compute_queue_device>
+struct vulkan_object_trait<tag::option::nv::external_compute_queue_device>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -128,7 +128,7 @@ struct vulkan_object_trait<obj::option::nv::external_compute_queue_device>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::nv::external_compute_queue_data_params>
+struct vulkan_object_trait<tag::result::nv::external_compute_queue_data_params>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -136,7 +136,7 @@ struct vulkan_object_trait<obj::result::nv::external_compute_queue_data_params>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::nv::external_compute_queue>
+struct vulkan_object_trait<tag::property::nv::external_compute_queue>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -146,11 +146,11 @@ struct vulkan_object_trait<obj::property::nv::external_compute_queue>
 template<>
 struct expression_vulkan_tag<VkExternalComputeQueueCreateInfoNV>
 {
-	using type = obj::nv::external_compute_queue;
+	using type = tag::nv::external_compute_queue;
 };
 
 template<>
-struct vulkan_object_native<obj::nv::external_compute_queue>
+struct vulkan_object_native<tag::nv::external_compute_queue>
 {
 	using type = VkExternalComputeQueueCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXTERNAL_COMPUTE_QUEUE_CREATE_INFO_NV;
@@ -159,11 +159,11 @@ struct vulkan_object_native<obj::nv::external_compute_queue>
 template<>
 struct expression_vulkan_tag<VkExternalComputeQueueDeviceCreateInfoNV>
 {
-	using type = obj::option::nv::external_compute_queue_device;
+	using type = tag::option::nv::external_compute_queue_device;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::external_compute_queue_device>
+struct vulkan_object_native<tag::option::nv::external_compute_queue_device>
 {
 	using type = VkExternalComputeQueueDeviceCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXTERNAL_COMPUTE_QUEUE_DEVICE_CREATE_INFO_NV;
@@ -172,11 +172,11 @@ struct vulkan_object_native<obj::option::nv::external_compute_queue_device>
 template<>
 struct expression_vulkan_tag<VkExternalComputeQueueDataParamsNV>
 {
-	using type = obj::result::nv::external_compute_queue_data_params;
+	using type = tag::result::nv::external_compute_queue_data_params;
 };
 
 template<>
-struct vulkan_object_native<obj::result::nv::external_compute_queue_data_params>
+struct vulkan_object_native<tag::result::nv::external_compute_queue_data_params>
 {
 	using type = VkExternalComputeQueueDataParamsNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXTERNAL_COMPUTE_QUEUE_DATA_PARAMS_NV;
@@ -185,18 +185,18 @@ struct vulkan_object_native<obj::result::nv::external_compute_queue_data_params>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceExternalComputeQueuePropertiesNV>
 {
-	using type = obj::property::nv::external_compute_queue;
+	using type = tag::property::nv::external_compute_queue;
 };
 
 template<>
-struct vulkan_object_native<obj::property::nv::external_compute_queue>
+struct vulkan_object_native<tag::property::nv::external_compute_queue>
 {
 	using type = VkPhysicalDeviceExternalComputeQueuePropertiesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_COMPUTE_QUEUE_PROPERTIES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::nv::external_compute_queue>
+struct vulkan_object_extensions<tag::nv::external_compute_queue>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_external_compute_queue"};
 	constexpr static ::std::uint32_t core = 0;
@@ -204,7 +204,7 @@ struct vulkan_object_extensions<obj::nv::external_compute_queue>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::external_compute_queue_device>
+struct vulkan_object_extensions<tag::option::nv::external_compute_queue_device>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_external_compute_queue"};
 	constexpr static ::std::uint32_t core = 0;
@@ -212,7 +212,7 @@ struct vulkan_object_extensions<obj::option::nv::external_compute_queue_device>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::nv::external_compute_queue_data_params>
+struct vulkan_object_extensions<tag::result::nv::external_compute_queue_data_params>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_external_compute_queue"};
 	constexpr static ::std::uint32_t core = 0;
@@ -220,7 +220,7 @@ struct vulkan_object_extensions<obj::result::nv::external_compute_queue_data_par
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::nv::external_compute_queue>
+struct vulkan_object_extensions<tag::property::nv::external_compute_queue>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_external_compute_queue"};
 	constexpr static ::std::uint32_t core = 0;
@@ -228,9 +228,9 @@ struct vulkan_object_extensions<obj::property::nv::external_compute_queue>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::option::nv::external_compute_queue_device> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::option::nv::external_compute_queue_device> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::nv::external_compute_queue> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::nv::external_compute_queue> = true;
 }
 
 namespace vkfu::param
@@ -241,7 +241,7 @@ using ::vkfu::operator|;
 
 struct external_compute_queue
 {
-	using vulkan_tag_type = obj::nv::external_compute_queue;
+	using vulkan_tag_type = tag::nv::external_compute_queue;
 
 	VkQueue preferred_queue{};
 
@@ -263,7 +263,7 @@ using ::vkfu::operator|;
 
 struct external_compute_queue_device
 {
-	using vulkan_tag_type = obj::option::nv::external_compute_queue_device;
+	using vulkan_tag_type = tag::option::nv::external_compute_queue_device;
 
 	::std::uint32_t reserved_external_queues{};
 
@@ -284,7 +284,7 @@ namespace vkfu
 {
 namespace nv
 {
-template<::vkfu::expression_for<::vkfu::obj::nv::external_compute_queue> Expression>
+template<::vkfu::expression_for<::vkfu::tag::nv::external_compute_queue> Expression>
 [[nodiscard]] auto create_external_compute_queue(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkExternalComputeQueueNV, ::VkResult>
 {
@@ -299,7 +299,7 @@ template<::vkfu::expression_for<::vkfu::obj::nv::external_compute_queue> Express
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nv::external_compute_queue> Expression>
+template<::vkfu::expression_for<::vkfu::tag::nv::external_compute_queue> Expression>
 [[nodiscard]] auto create_external_compute_queue(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkExternalComputeQueueNV
 {
 	auto produced = create_external_compute_queue(device, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDevicePipelineCreationCacheControlFeatur
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -55,7 +55,7 @@ struct pipeline_creation_cache_control{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::pipeline_creation_cache_control>
+struct vulkan_object_trait<tag::feature::pipeline_creation_cache_control>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::pipeline_creation_cache_control>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePipelineCreationCacheControlFeatures>
 {
-	using type = obj::feature::pipeline_creation_cache_control;
+	using type = tag::feature::pipeline_creation_cache_control;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::pipeline_creation_cache_control>
+struct vulkan_object_native<tag::feature::pipeline_creation_cache_control>
 {
 	using type = VkPhysicalDevicePipelineCreationCacheControlFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_CREATION_CACHE_CONTROL_FEATURES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::pipeline_creation_cache_control>
+struct vulkan_object_extensions<tag::feature::pipeline_creation_cache_control>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_pipeline_creation_cache_control"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::pipeline_creation_cache_control>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::pipeline_creation_cache_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::pipeline_creation_cache_control> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::pipeline_creation_cache_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::pipeline_creation_cache_control> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct pipeline_creation_cache_control
 {
-	using vulkan_tag_type = obj::feature::pipeline_creation_cache_control;
+	using vulkan_tag_type = tag::feature::pipeline_creation_cache_control;
 
 	bool enable = false;
 

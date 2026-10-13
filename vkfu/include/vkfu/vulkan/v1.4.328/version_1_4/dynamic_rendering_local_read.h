@@ -76,7 +76,7 @@ constexpr auto _vkfu_evaluate(VkRenderingInputAttachmentIndexInfo const& value) 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct rendering_attachment_location{};
 struct rendering_input_attachment_index{};
@@ -89,7 +89,7 @@ struct dynamic_rendering_local_read{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::dynamic_rendering_local_read>
+struct vulkan_object_trait<tag::feature::dynamic_rendering_local_read>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -97,7 +97,7 @@ struct vulkan_object_trait<obj::feature::dynamic_rendering_local_read>
 };
 
 template<>
-struct vulkan_object_trait<obj::rendering_attachment_location>
+struct vulkan_object_trait<tag::rendering_attachment_location>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -105,7 +105,7 @@ struct vulkan_object_trait<obj::rendering_attachment_location>
 };
 
 template<>
-struct vulkan_object_trait<obj::rendering_input_attachment_index>
+struct vulkan_object_trait<tag::rendering_input_attachment_index>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -115,11 +115,11 @@ struct vulkan_object_trait<obj::rendering_input_attachment_index>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDynamicRenderingLocalReadFeatures>
 {
-	using type = obj::feature::dynamic_rendering_local_read;
+	using type = tag::feature::dynamic_rendering_local_read;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::dynamic_rendering_local_read>
+struct vulkan_object_native<tag::feature::dynamic_rendering_local_read>
 {
 	using type = VkPhysicalDeviceDynamicRenderingLocalReadFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_LOCAL_READ_FEATURES;
@@ -128,11 +128,11 @@ struct vulkan_object_native<obj::feature::dynamic_rendering_local_read>
 template<>
 struct expression_vulkan_tag<VkRenderingAttachmentLocationInfo>
 {
-	using type = obj::rendering_attachment_location;
+	using type = tag::rendering_attachment_location;
 };
 
 template<>
-struct vulkan_object_native<obj::rendering_attachment_location>
+struct vulkan_object_native<tag::rendering_attachment_location>
 {
 	using type = VkRenderingAttachmentLocationInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_LOCATION_INFO;
@@ -141,18 +141,18 @@ struct vulkan_object_native<obj::rendering_attachment_location>
 template<>
 struct expression_vulkan_tag<VkRenderingInputAttachmentIndexInfo>
 {
-	using type = obj::rendering_input_attachment_index;
+	using type = tag::rendering_input_attachment_index;
 };
 
 template<>
-struct vulkan_object_native<obj::rendering_input_attachment_index>
+struct vulkan_object_native<tag::rendering_input_attachment_index>
 {
 	using type = VkRenderingInputAttachmentIndexInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RENDERING_INPUT_ATTACHMENT_INDEX_INFO;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::dynamic_rendering_local_read>
+struct vulkan_object_extensions<tag::feature::dynamic_rendering_local_read>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_dynamic_rendering_local_read"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -160,7 +160,7 @@ struct vulkan_object_extensions<obj::feature::dynamic_rendering_local_read>
 };
 
 template<>
-struct vulkan_object_extensions<obj::rendering_attachment_location>
+struct vulkan_object_extensions<tag::rendering_attachment_location>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_dynamic_rendering_local_read"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -168,7 +168,7 @@ struct vulkan_object_extensions<obj::rendering_attachment_location>
 };
 
 template<>
-struct vulkan_object_extensions<obj::rendering_input_attachment_index>
+struct vulkan_object_extensions<tag::rendering_input_attachment_index>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_dynamic_rendering_local_read"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -176,17 +176,17 @@ struct vulkan_object_extensions<obj::rendering_input_attachment_index>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::command_buffer_inheritance, obj::rendering_attachment_location> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::command_buffer_inheritance, tag::rendering_attachment_location> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::command_buffer_inheritance, obj::rendering_input_attachment_index> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::command_buffer_inheritance, tag::rendering_input_attachment_index> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::dynamic_rendering_local_read> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::dynamic_rendering_local_read> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::graphics_pipeline, obj::rendering_attachment_location> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::graphics_pipeline, tag::rendering_attachment_location> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::graphics_pipeline, obj::rendering_input_attachment_index> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::graphics_pipeline, tag::rendering_input_attachment_index> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::dynamic_rendering_local_read> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::dynamic_rendering_local_read> = true;
 }
 
 namespace vkfu::param
@@ -195,7 +195,7 @@ using ::vkfu::operator|;
 
 struct rendering_attachment_location
 {
-	using vulkan_tag_type = obj::rendering_attachment_location;
+	using vulkan_tag_type = tag::rendering_attachment_location;
 
 	::std::span<::std::uint32_t const> color_attachment_locations{};
 
@@ -212,7 +212,7 @@ struct rendering_attachment_location
 
 struct rendering_input_attachment_index
 {
-	using vulkan_tag_type = obj::rendering_input_attachment_index;
+	using vulkan_tag_type = tag::rendering_input_attachment_index;
 
 	::std::uint32_t color_attachment_count{};
 	::std::uint32_t const* color_attachment_input_indices = nullptr;
@@ -238,7 +238,7 @@ using ::vkfu::operator|;
 
 struct dynamic_rendering_local_read
 {
-	using vulkan_tag_type = obj::feature::dynamic_rendering_local_read;
+	using vulkan_tag_type = tag::feature::dynamic_rendering_local_read;
 
 	bool enable = false;
 
@@ -257,14 +257,14 @@ struct dynamic_rendering_local_read
 
 namespace vkfu
 {
-template<::vkfu::expression_for<::vkfu::obj::rendering_attachment_location> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::rendering_attachment_location> Expression1>
 void cmd_set_rendering_attachment_locations(VkCommandBuffer command_buffer, Expression1&& location_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(location_info));
 	::vkCmdSetRenderingAttachmentLocations(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::rendering_input_attachment_index> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::rendering_input_attachment_index> Expression1>
 void cmd_set_rendering_input_attachment_indices(VkCommandBuffer command_buffer, Expression1&& input_attachment_index_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(input_attachment_index_info));

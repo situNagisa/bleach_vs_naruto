@@ -28,11 +28,11 @@
 
 #include "../version_1_2/image_format_list.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::khr
 {
-using image_format_list = ::vkfu::obj::option::image_format_list;
+using image_format_list = ::vkfu::tag::option::image_format_list;
 }
 }
 

@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceDynamicRenderingUnusedAttachmentsF
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct dynamic_rendering_unused_attachments{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::dynamic_rendering_unused_attachments>
+struct vulkan_object_trait<tag::feature::ext::dynamic_rendering_unused_attachments>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::dynamic_rendering_unused_attachmen
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDynamicRenderingUnusedAttachmentsFeaturesEXT>
 {
-	using type = obj::feature::ext::dynamic_rendering_unused_attachments;
+	using type = tag::feature::ext::dynamic_rendering_unused_attachments;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::dynamic_rendering_unused_attachments>
+struct vulkan_object_native<tag::feature::ext::dynamic_rendering_unused_attachments>
 {
 	using type = VkPhysicalDeviceDynamicRenderingUnusedAttachmentsFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_UNUSED_ATTACHMENTS_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::dynamic_rendering_unused_attachments>
+struct vulkan_object_extensions<tag::feature::ext::dynamic_rendering_unused_attachments>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_dynamic_rendering_unused_attachments"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::dynamic_rendering_unused_atta
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::dynamic_rendering_unused_attachments> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::dynamic_rendering_unused_attachments> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::dynamic_rendering_unused_attachments> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::dynamic_rendering_unused_attachments> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct dynamic_rendering_unused_attachments
 {
-	using vulkan_tag_type = obj::feature::ext::dynamic_rendering_unused_attachments;
+	using vulkan_tag_type = tag::feature::ext::dynamic_rendering_unused_attachments;
 
 	bool enable = false;
 

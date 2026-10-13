@@ -76,7 +76,7 @@ constexpr auto _vkfu_evaluate(VkVertexInputBindingDescription2EXT const& value) 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace ext
 {
@@ -92,7 +92,7 @@ struct vertex_input_dynamic_state{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::vertex_input_dynamic_state>
+struct vulkan_object_trait<tag::feature::ext::vertex_input_dynamic_state>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -100,7 +100,7 @@ struct vulkan_object_trait<obj::feature::ext::vertex_input_dynamic_state>
 };
 
 template<>
-struct vulkan_object_trait<obj::ext::vertex_input_attribute_description2>
+struct vulkan_object_trait<tag::ext::vertex_input_attribute_description2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -108,7 +108,7 @@ struct vulkan_object_trait<obj::ext::vertex_input_attribute_description2>
 };
 
 template<>
-struct vulkan_object_trait<obj::ext::vertex_input_binding_description2>
+struct vulkan_object_trait<tag::ext::vertex_input_binding_description2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -118,11 +118,11 @@ struct vulkan_object_trait<obj::ext::vertex_input_binding_description2>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT>
 {
-	using type = obj::feature::ext::vertex_input_dynamic_state;
+	using type = tag::feature::ext::vertex_input_dynamic_state;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::vertex_input_dynamic_state>
+struct vulkan_object_native<tag::feature::ext::vertex_input_dynamic_state>
 {
 	using type = VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VERTEX_INPUT_DYNAMIC_STATE_FEATURES_EXT;
@@ -131,11 +131,11 @@ struct vulkan_object_native<obj::feature::ext::vertex_input_dynamic_state>
 template<>
 struct expression_vulkan_tag<VkVertexInputAttributeDescription2EXT>
 {
-	using type = obj::ext::vertex_input_attribute_description2;
+	using type = tag::ext::vertex_input_attribute_description2;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::vertex_input_attribute_description2>
+struct vulkan_object_native<tag::ext::vertex_input_attribute_description2>
 {
 	using type = VkVertexInputAttributeDescription2EXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION_2_EXT;
@@ -144,18 +144,18 @@ struct vulkan_object_native<obj::ext::vertex_input_attribute_description2>
 template<>
 struct expression_vulkan_tag<VkVertexInputBindingDescription2EXT>
 {
-	using type = obj::ext::vertex_input_binding_description2;
+	using type = tag::ext::vertex_input_binding_description2;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::vertex_input_binding_description2>
+struct vulkan_object_native<tag::ext::vertex_input_binding_description2>
 {
 	using type = VkVertexInputBindingDescription2EXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VERTEX_INPUT_BINDING_DESCRIPTION_2_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::vertex_input_dynamic_state>
+struct vulkan_object_extensions<tag::feature::ext::vertex_input_dynamic_state>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_vertex_input_dynamic_state"};
 	constexpr static ::std::uint32_t core = 0;
@@ -163,7 +163,7 @@ struct vulkan_object_extensions<obj::feature::ext::vertex_input_dynamic_state>
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::vertex_input_attribute_description2>
+struct vulkan_object_extensions<tag::ext::vertex_input_attribute_description2>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_shader_object", "VK_EXT_vertex_input_dynamic_state"};
 	constexpr static ::std::uint32_t core = 0;
@@ -171,7 +171,7 @@ struct vulkan_object_extensions<obj::ext::vertex_input_attribute_description2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::vertex_input_binding_description2>
+struct vulkan_object_extensions<tag::ext::vertex_input_binding_description2>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_shader_object", "VK_EXT_vertex_input_dynamic_state"};
 	constexpr static ::std::uint32_t core = 0;
@@ -179,9 +179,9 @@ struct vulkan_object_extensions<obj::ext::vertex_input_binding_description2>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::vertex_input_dynamic_state> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::vertex_input_dynamic_state> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::vertex_input_dynamic_state> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::vertex_input_dynamic_state> = true;
 }
 
 namespace vkfu::param
@@ -192,7 +192,7 @@ using ::vkfu::operator|;
 
 struct vertex_input_attribute_description2
 {
-	using vulkan_tag_type = obj::ext::vertex_input_attribute_description2;
+	using vulkan_tag_type = tag::ext::vertex_input_attribute_description2;
 
 	::std::uint32_t location{};
 	::std::uint32_t binding{};
@@ -214,7 +214,7 @@ struct vertex_input_attribute_description2
 
 struct vertex_input_binding_description2
 {
-	using vulkan_tag_type = obj::ext::vertex_input_binding_description2;
+	using vulkan_tag_type = tag::ext::vertex_input_binding_description2;
 
 	::std::uint32_t binding{};
 	::std::uint32_t stride{};
@@ -242,7 +242,7 @@ using ::vkfu::operator|;
 
 struct vertex_input_dynamic_state
 {
-	using vulkan_tag_type = obj::feature::ext::vertex_input_dynamic_state;
+	using vulkan_tag_type = tag::feature::ext::vertex_input_dynamic_state;
 
 	bool enable = false;
 

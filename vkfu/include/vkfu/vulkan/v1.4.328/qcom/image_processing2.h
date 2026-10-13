@@ -85,7 +85,7 @@ enum class block_match_window_compare_mode : ::std::underlying_type_t<VkBlockMat
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::qcom
 {
@@ -104,7 +104,7 @@ struct image_processing2{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::qcom::image_processing2>
+struct vulkan_object_trait<tag::feature::qcom::image_processing2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -112,7 +112,7 @@ struct vulkan_object_trait<obj::feature::qcom::image_processing2>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::qcom::sampler_block_match_window>
+struct vulkan_object_trait<tag::option::qcom::sampler_block_match_window>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -120,7 +120,7 @@ struct vulkan_object_trait<obj::option::qcom::sampler_block_match_window>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::qcom::image_processing2>
+struct vulkan_object_trait<tag::property::qcom::image_processing2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -130,11 +130,11 @@ struct vulkan_object_trait<obj::property::qcom::image_processing2>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceImageProcessing2FeaturesQCOM>
 {
-	using type = obj::feature::qcom::image_processing2;
+	using type = tag::feature::qcom::image_processing2;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::qcom::image_processing2>
+struct vulkan_object_native<tag::feature::qcom::image_processing2>
 {
 	using type = VkPhysicalDeviceImageProcessing2FeaturesQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_PROCESSING_2_FEATURES_QCOM;
@@ -143,11 +143,11 @@ struct vulkan_object_native<obj::feature::qcom::image_processing2>
 template<>
 struct expression_vulkan_tag<VkSamplerBlockMatchWindowCreateInfoQCOM>
 {
-	using type = obj::option::qcom::sampler_block_match_window;
+	using type = tag::option::qcom::sampler_block_match_window;
 };
 
 template<>
-struct vulkan_object_native<obj::option::qcom::sampler_block_match_window>
+struct vulkan_object_native<tag::option::qcom::sampler_block_match_window>
 {
 	using type = VkSamplerBlockMatchWindowCreateInfoQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SAMPLER_BLOCK_MATCH_WINDOW_CREATE_INFO_QCOM;
@@ -156,18 +156,18 @@ struct vulkan_object_native<obj::option::qcom::sampler_block_match_window>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceImageProcessing2PropertiesQCOM>
 {
-	using type = obj::property::qcom::image_processing2;
+	using type = tag::property::qcom::image_processing2;
 };
 
 template<>
-struct vulkan_object_native<obj::property::qcom::image_processing2>
+struct vulkan_object_native<tag::property::qcom::image_processing2>
 {
 	using type = VkPhysicalDeviceImageProcessing2PropertiesQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_PROCESSING_2_PROPERTIES_QCOM;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::qcom::image_processing2>
+struct vulkan_object_extensions<tag::feature::qcom::image_processing2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_image_processing2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -175,7 +175,7 @@ struct vulkan_object_extensions<obj::feature::qcom::image_processing2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::qcom::sampler_block_match_window>
+struct vulkan_object_extensions<tag::option::qcom::sampler_block_match_window>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_image_processing2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -183,7 +183,7 @@ struct vulkan_object_extensions<obj::option::qcom::sampler_block_match_window>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::qcom::image_processing2>
+struct vulkan_object_extensions<tag::property::qcom::image_processing2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_image_processing2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -191,13 +191,13 @@ struct vulkan_object_extensions<obj::property::qcom::image_processing2>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::qcom::image_processing2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::qcom::image_processing2> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::qcom::image_processing2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::qcom::image_processing2> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::qcom::image_processing2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::qcom::image_processing2> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::sampler, obj::option::qcom::sampler_block_match_window> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::sampler, tag::option::qcom::sampler_block_match_window> = true;
 }
 
 namespace vkfu::param
@@ -208,7 +208,7 @@ using ::vkfu::operator|;
 
 struct image_processing2
 {
-	using vulkan_tag_type = obj::feature::qcom::image_processing2;
+	using vulkan_tag_type = tag::feature::qcom::image_processing2;
 
 	bool texture_block_match2 = false;
 
@@ -230,7 +230,7 @@ using ::vkfu::operator|;
 
 struct sampler_block_match_window
 {
-	using vulkan_tag_type = obj::option::qcom::sampler_block_match_window;
+	using vulkan_tag_type = tag::option::qcom::sampler_block_match_window;
 
 	VkExtent2D window_extent{};
 	::vkfu::enums::block_match_window_compare_mode window_compare_mode{};

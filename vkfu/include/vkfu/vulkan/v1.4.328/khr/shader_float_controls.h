@@ -28,10 +28,10 @@
 
 #include "../version_1_2/shader_float_controls.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property::khr
 {
-using float_controls = ::vkfu::obj::property::float_controls;
+using float_controls = ::vkfu::tag::property::float_controls;
 }
 }

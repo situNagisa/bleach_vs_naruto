@@ -106,7 +106,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceBufferDeviceAddressFeatures const&
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct buffer_device_address{};
 struct device_memory_opaque_capture_address{};
@@ -124,7 +124,7 @@ struct memory_opaque_capture_address{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::buffer_device_address>
+struct vulkan_object_trait<tag::buffer_device_address>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -132,7 +132,7 @@ struct vulkan_object_trait<obj::buffer_device_address>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::buffer_opaque_capture_address>
+struct vulkan_object_trait<tag::option::buffer_opaque_capture_address>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -140,7 +140,7 @@ struct vulkan_object_trait<obj::option::buffer_opaque_capture_address>
 };
 
 template<>
-struct vulkan_object_trait<obj::device_memory_opaque_capture_address>
+struct vulkan_object_trait<tag::device_memory_opaque_capture_address>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -148,7 +148,7 @@ struct vulkan_object_trait<obj::device_memory_opaque_capture_address>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::memory_opaque_capture_address>
+struct vulkan_object_trait<tag::option::memory_opaque_capture_address>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -156,7 +156,7 @@ struct vulkan_object_trait<obj::option::memory_opaque_capture_address>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::buffer_device_address>
+struct vulkan_object_trait<tag::feature::buffer_device_address>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -166,11 +166,11 @@ struct vulkan_object_trait<obj::feature::buffer_device_address>
 template<>
 struct expression_vulkan_tag<VkBufferDeviceAddressInfo>
 {
-	using type = obj::buffer_device_address;
+	using type = tag::buffer_device_address;
 };
 
 template<>
-struct vulkan_object_native<obj::buffer_device_address>
+struct vulkan_object_native<tag::buffer_device_address>
 {
 	using type = VkBufferDeviceAddressInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
@@ -179,11 +179,11 @@ struct vulkan_object_native<obj::buffer_device_address>
 template<>
 struct expression_vulkan_tag<VkBufferOpaqueCaptureAddressCreateInfo>
 {
-	using type = obj::option::buffer_opaque_capture_address;
+	using type = tag::option::buffer_opaque_capture_address;
 };
 
 template<>
-struct vulkan_object_native<obj::option::buffer_opaque_capture_address>
+struct vulkan_object_native<tag::option::buffer_opaque_capture_address>
 {
 	using type = VkBufferOpaqueCaptureAddressCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_BUFFER_OPAQUE_CAPTURE_ADDRESS_CREATE_INFO;
@@ -192,11 +192,11 @@ struct vulkan_object_native<obj::option::buffer_opaque_capture_address>
 template<>
 struct expression_vulkan_tag<VkDeviceMemoryOpaqueCaptureAddressInfo>
 {
-	using type = obj::device_memory_opaque_capture_address;
+	using type = tag::device_memory_opaque_capture_address;
 };
 
 template<>
-struct vulkan_object_native<obj::device_memory_opaque_capture_address>
+struct vulkan_object_native<tag::device_memory_opaque_capture_address>
 {
 	using type = VkDeviceMemoryOpaqueCaptureAddressInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEVICE_MEMORY_OPAQUE_CAPTURE_ADDRESS_INFO;
@@ -205,11 +205,11 @@ struct vulkan_object_native<obj::device_memory_opaque_capture_address>
 template<>
 struct expression_vulkan_tag<VkMemoryOpaqueCaptureAddressAllocateInfo>
 {
-	using type = obj::option::memory_opaque_capture_address;
+	using type = tag::option::memory_opaque_capture_address;
 };
 
 template<>
-struct vulkan_object_native<obj::option::memory_opaque_capture_address>
+struct vulkan_object_native<tag::option::memory_opaque_capture_address>
 {
 	using type = VkMemoryOpaqueCaptureAddressAllocateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MEMORY_OPAQUE_CAPTURE_ADDRESS_ALLOCATE_INFO;
@@ -218,18 +218,18 @@ struct vulkan_object_native<obj::option::memory_opaque_capture_address>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceBufferDeviceAddressFeatures>
 {
-	using type = obj::feature::buffer_device_address;
+	using type = tag::feature::buffer_device_address;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::buffer_device_address>
+struct vulkan_object_native<tag::feature::buffer_device_address>
 {
 	using type = VkPhysicalDeviceBufferDeviceAddressFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::buffer_device_address>
+struct vulkan_object_extensions<tag::buffer_device_address>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_buffer_device_address", "VK_KHR_buffer_device_address"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -237,7 +237,7 @@ struct vulkan_object_extensions<obj::buffer_device_address>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::buffer_opaque_capture_address>
+struct vulkan_object_extensions<tag::option::buffer_opaque_capture_address>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_buffer_device_address"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -245,7 +245,7 @@ struct vulkan_object_extensions<obj::option::buffer_opaque_capture_address>
 };
 
 template<>
-struct vulkan_object_extensions<obj::device_memory_opaque_capture_address>
+struct vulkan_object_extensions<tag::device_memory_opaque_capture_address>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_buffer_device_address"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -253,7 +253,7 @@ struct vulkan_object_extensions<obj::device_memory_opaque_capture_address>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::memory_opaque_capture_address>
+struct vulkan_object_extensions<tag::option::memory_opaque_capture_address>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_buffer_device_address"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -261,7 +261,7 @@ struct vulkan_object_extensions<obj::option::memory_opaque_capture_address>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::buffer_device_address>
+struct vulkan_object_extensions<tag::feature::buffer_device_address>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_buffer_device_address"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -269,13 +269,13 @@ struct vulkan_object_extensions<obj::feature::buffer_device_address>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::buffer, obj::option::buffer_opaque_capture_address> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::buffer, tag::option::buffer_opaque_capture_address> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::buffer_device_address> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::buffer_device_address> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::memory, obj::option::memory_opaque_capture_address> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::memory, tag::option::memory_opaque_capture_address> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::buffer_device_address> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::buffer_device_address> = true;
 }
 
 namespace vkfu::param
@@ -284,7 +284,7 @@ using ::vkfu::operator|;
 
 struct buffer_device_address
 {
-	using vulkan_tag_type = obj::buffer_device_address;
+	using vulkan_tag_type = tag::buffer_device_address;
 
 	VkBuffer buffer{};
 
@@ -300,7 +300,7 @@ struct buffer_device_address
 
 struct device_memory_opaque_capture_address
 {
-	using vulkan_tag_type = obj::device_memory_opaque_capture_address;
+	using vulkan_tag_type = tag::device_memory_opaque_capture_address;
 
 	VkDeviceMemory memory{};
 
@@ -320,7 +320,7 @@ using ::vkfu::operator|;
 
 struct buffer_device_address
 {
-	using vulkan_tag_type = obj::feature::buffer_device_address;
+	using vulkan_tag_type = tag::feature::buffer_device_address;
 
 	bool enable = false;
 	bool capture_replay = false;
@@ -346,7 +346,7 @@ using ::vkfu::operator|;
 
 struct buffer_opaque_capture_address
 {
-	using vulkan_tag_type = obj::option::buffer_opaque_capture_address;
+	using vulkan_tag_type = tag::option::buffer_opaque_capture_address;
 
 	::std::uint64_t opaque_capture_address{};
 
@@ -362,7 +362,7 @@ struct buffer_opaque_capture_address
 
 struct memory_opaque_capture_address
 {
-	using vulkan_tag_type = obj::option::memory_opaque_capture_address;
+	using vulkan_tag_type = tag::option::memory_opaque_capture_address;
 
 	::std::uint64_t opaque_capture_address{};
 
@@ -381,21 +381,21 @@ struct memory_opaque_capture_address
 
 namespace vkfu
 {
-template<::vkfu::expression_for<::vkfu::obj::buffer_device_address> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::buffer_device_address> Expression1>
 [[nodiscard]] auto get_buffer_device_address(VkDevice device, Expression1&& info) -> VkDeviceAddress
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
 	return ::vkGetBufferDeviceAddress(device, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::buffer_device_address> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::buffer_device_address> Expression1>
 [[nodiscard]] auto get_buffer_opaque_capture_address(VkDevice device, Expression1&& info) -> ::std::uint64_t
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
 	return ::vkGetBufferOpaqueCaptureAddress(device, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::device_memory_opaque_capture_address> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::device_memory_opaque_capture_address> Expression1>
 [[nodiscard]] auto get_device_memory_opaque_capture_address(VkDevice device, Expression1&& info) -> ::std::uint64_t
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));

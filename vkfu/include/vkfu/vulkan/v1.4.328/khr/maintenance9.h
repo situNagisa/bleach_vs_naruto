@@ -74,7 +74,7 @@ constexpr auto _vkfu_evaluate(VkQueueFamilyOwnershipTransferPropertiesKHR const&
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -93,7 +93,7 @@ struct queue_family_ownership_transfer_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::maintenance9>
+struct vulkan_object_trait<tag::feature::khr::maintenance9>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -101,7 +101,7 @@ struct vulkan_object_trait<obj::feature::khr::maintenance9>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::khr::maintenance9>
+struct vulkan_object_trait<tag::property::khr::maintenance9>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -109,7 +109,7 @@ struct vulkan_object_trait<obj::property::khr::maintenance9>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::queue_family_ownership_transfer_properties>
+struct vulkan_object_trait<tag::result::khr::queue_family_ownership_transfer_properties>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -119,11 +119,11 @@ struct vulkan_object_trait<obj::result::khr::queue_family_ownership_transfer_pro
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMaintenance9FeaturesKHR>
 {
-	using type = obj::feature::khr::maintenance9;
+	using type = tag::feature::khr::maintenance9;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::maintenance9>
+struct vulkan_object_native<tag::feature::khr::maintenance9>
 {
 	using type = VkPhysicalDeviceMaintenance9FeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_9_FEATURES_KHR;
@@ -132,11 +132,11 @@ struct vulkan_object_native<obj::feature::khr::maintenance9>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMaintenance9PropertiesKHR>
 {
-	using type = obj::property::khr::maintenance9;
+	using type = tag::property::khr::maintenance9;
 };
 
 template<>
-struct vulkan_object_native<obj::property::khr::maintenance9>
+struct vulkan_object_native<tag::property::khr::maintenance9>
 {
 	using type = VkPhysicalDeviceMaintenance9PropertiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_9_PROPERTIES_KHR;
@@ -145,18 +145,18 @@ struct vulkan_object_native<obj::property::khr::maintenance9>
 template<>
 struct expression_vulkan_tag<VkQueueFamilyOwnershipTransferPropertiesKHR>
 {
-	using type = obj::result::khr::queue_family_ownership_transfer_properties;
+	using type = tag::result::khr::queue_family_ownership_transfer_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::queue_family_ownership_transfer_properties>
+struct vulkan_object_native<tag::result::khr::queue_family_ownership_transfer_properties>
 {
 	using type = VkQueueFamilyOwnershipTransferPropertiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_QUEUE_FAMILY_OWNERSHIP_TRANSFER_PROPERTIES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::maintenance9>
+struct vulkan_object_extensions<tag::feature::khr::maintenance9>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance9"};
 	constexpr static ::std::uint32_t core = 0;
@@ -164,7 +164,7 @@ struct vulkan_object_extensions<obj::feature::khr::maintenance9>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::khr::maintenance9>
+struct vulkan_object_extensions<tag::property::khr::maintenance9>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance9"};
 	constexpr static ::std::uint32_t core = 0;
@@ -172,7 +172,7 @@ struct vulkan_object_extensions<obj::property::khr::maintenance9>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::queue_family_ownership_transfer_properties>
+struct vulkan_object_extensions<tag::result::khr::queue_family_ownership_transfer_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance9"};
 	constexpr static ::std::uint32_t core = 0;
@@ -180,13 +180,13 @@ struct vulkan_object_extensions<obj::result::khr::queue_family_ownership_transfe
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::maintenance9> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::maintenance9> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::maintenance9> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::maintenance9> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::khr::maintenance9> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::khr::maintenance9> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::queue_family_properties2, obj::result::khr::queue_family_ownership_transfer_properties> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::queue_family_properties2, tag::result::khr::queue_family_ownership_transfer_properties> = true;
 }
 
 namespace vkfu::param
@@ -197,7 +197,7 @@ using ::vkfu::operator|;
 
 struct maintenance9
 {
-	using vulkan_tag_type = obj::feature::khr::maintenance9;
+	using vulkan_tag_type = tag::feature::khr::maintenance9;
 
 	bool enable = false;
 

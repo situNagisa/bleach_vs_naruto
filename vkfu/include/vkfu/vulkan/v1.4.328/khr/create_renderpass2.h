@@ -28,17 +28,17 @@
 
 #include "../version_1_2/create_renderpass2.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
-using attachment_description2 = ::vkfu::obj::attachment_description2;
-using attachment_reference2 = ::vkfu::obj::attachment_reference2;
-using render_pass2 = ::vkfu::obj::render_pass2;
-using subpass_begin = ::vkfu::obj::subpass_begin;
-using subpass_dependency2 = ::vkfu::obj::subpass_dependency2;
-using subpass_description2 = ::vkfu::obj::subpass_description2;
-using subpass_end = ::vkfu::obj::subpass_end;
+using attachment_description2 = ::vkfu::tag::attachment_description2;
+using attachment_reference2 = ::vkfu::tag::attachment_reference2;
+using render_pass2 = ::vkfu::tag::render_pass2;
+using subpass_begin = ::vkfu::tag::subpass_begin;
+using subpass_dependency2 = ::vkfu::tag::subpass_dependency2;
+using subpass_description2 = ::vkfu::tag::subpass_description2;
+using subpass_end = ::vkfu::tag::subpass_end;
 }
 }
 
@@ -51,7 +51,7 @@ using attachment_reference2 = ::vkfu::param::attachment_reference2;
 using render_pass2 = ::vkfu::param::render_pass2;
 using subpass_begin = ::vkfu::param::subpass_begin;
 using subpass_dependency2 = ::vkfu::param::subpass_dependency2;
-template<::vkfu::reference_expression_for<::vkfu::obj::attachment_reference2> depth_stencil_attachment_expression = ::vkfu::absent_expression>
+template<::vkfu::reference_expression_for<::vkfu::tag::attachment_reference2> depth_stencil_attachment_expression = ::vkfu::absent_expression>
 using subpass_description2 = ::vkfu::param::subpass_description2<depth_stencil_attachment_expression>;
 using subpass_end = ::vkfu::param::subpass_end;
 }

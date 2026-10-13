@@ -1,7 +1,7 @@
 """Stage 2: IR + naming table -> C++ headers, one per Vulkan module.
 
 Every identifier this stage writes comes from either vk.xml (native types,
-members, enum constants) or the naming table (obj/param/field names). It never
+members, enum constants) or the naming table (tag/param/field names). It never
 derives a name itself; a missing table entry is an error, not a fallback.
 
 A module is a <feature> or an <extension>: VK_VERSION_1_2, VK_KHR_swapchain.
@@ -18,7 +18,8 @@ import dataclasses
 from . import commands, ir, layout, producers, queries, structs
 from .cpp import NEWLINE, TAB, bucketed, leaf_of
 from .naming import Table
-from .plan import Plan, plan_struct, used_enums
+from .plan import Plan, bit_layout, plan_struct, used_enums, used_flags
+from .values import Values
 
 
 class GenerationError(Exception):
@@ -40,6 +41,7 @@ class Selection:
 	plain: list[str]  # sType-less structures: a param only
 	plans: dict[str, Plan]
 	enums: list[str]
+	flags: list[str]  # VkXxxFlags types: one shared bit-field struct each
 	aliases: dict[str, ir.Alias]  # alias name -> alias, for those with a table name
 	commands: list[object]  # ir.Command | ir.Wrapper | ir.Query | ir.ChainQuery
 
@@ -111,28 +113,15 @@ def _select(registry: ir.Registry, table: Table, scope: str) -> tuple[Selection,
 				problems.append(f"field collision in {name}: {used[field_name]} and {field.member.name} -> '{field_name}'")
 			else:
 				used[field_name] = field.member.name
-			if field.kind == "enum" and field_name == table.enum_name(field.enum_type):
-				# Legal, because generated code always writes ::vkfu::enums::x in
-				# full, but the member does hide the enum name in class scope.
-				warnings.append(f"{name}: field '{field_name}' hides the enum class it is typed with")
+			# A field named like its enum class (`format`, `index_type`) is not
+			# worth a warning: generated code always writes ::vkfu::enums::x in
+			# full, and the name reads as the field it is.
 			# object_name is None when the struct itself is unnamed, which is
 			# already reported; keep going rather than crashing on it.
 			if object_name is not None and field_name == leaf_of(object_name):
 				# Legal for an aggregate, but the member hides the injected class
 				# name inside the struct, so it is worth a look.
 				warnings.append(f"{name}: field '{field_name}' has the same name as its object")
-			if field.kind == "flags":
-				seen_bits: dict[str, str] = {}
-				for bit in field.layout:
-					bit_name = table.bit_name(field.flag_bits, bit.name)
-					if not bit_name:
-						missing.append(f"bit.{field.flag_bits}.{bit.name}")
-					elif bit_name in seen_bits:
-						problems.append(
-							f"bit collision in {field.flag_bits}: {seen_bits[bit_name]} and {bit.name} -> '{bit_name}'"
-						)
-					else:
-						seen_bits[bit_name] = bit.name
 
 	plain_selected = [name for name in registry.plain if table.struct_name(name)]
 	if scope != "table":
@@ -152,10 +141,6 @@ def _select(registry: ir.Registry, table: Table, scope: str) -> tuple[Selection,
 				problems.append(f"field collision in {name}: {used_names[field_name]} and {field.member.name} -> '{field_name}'")
 			else:
 				used_names[field_name] = field.member.name
-			if field.kind == "flags":
-				for bit in field.layout:
-					if not table.bit_name(field.flag_bits, bit.name):
-						missing.append(f"bit.{field.flag_bits}.{bit.name}")
 
 	enums = used_enums(selected, registry)
 	for enum_type in enums:
@@ -172,6 +157,28 @@ def _select(registry: ir.Registry, table: Table, scope: str) -> tuple[Selection,
 			else:
 				seen_values[name] = value.name
 
+	flags = used_flags(selected, registry)
+	claimed_flags: dict[str, str] = {}
+	for flags_type in flags:
+		flags_name = table.flags_name(flags_type)
+		if not flags_name:
+			missing.append(f"flags.{flags_type}")
+			continue
+		if flags_name in claimed_flags:
+			problems.append(f"flags collision: {claimed_flags[flags_name]} and {flags_type} -> '{flags_name}'")
+		else:
+			claimed_flags[flags_name] = flags_type
+		flag_bits = registry.bitmask_to_flagbits[flags_type]
+		seen_bits: dict[str, str] = {}
+		for bit in bit_layout(registry.flagbits[flag_bits]) or []:
+			bit_name = table.bit_name(flag_bits, bit.name)
+			if not bit_name:
+				missing.append(f"bit.{flag_bits}.{bit.name}")
+			elif bit_name in seen_bits:
+				problems.append(f"bit collision in {flag_bits}: {seen_bits[bit_name]} and {bit.name} -> '{bit_name}'")
+			else:
+				seen_bits[bit_name] = bit.name
+
 	for command in list(registry.queries) + list(registry.chain_queries):
 		if not table.command_name(command.name):
 			missing.append(f"command.{command.name}")
@@ -185,8 +192,8 @@ def _select(registry: ir.Registry, table: Table, scope: str) -> tuple[Selection,
 			missing.append(f"command.{command.name}.singular")
 
 	# Everything a param struct declares at class scope has to be distinct: the
-	# fields, the nested `<field>_type` of a flags field, the `<field>_expression`
-	# template parameter of a slot, and the fixed aliases.
+	# fields, the `<field>_expression` template parameter of a slot, and the
+	# fixed aliases.
 	for name in selected:
 		plan = plans[name]
 		class_scope: dict[str, str] = {}
@@ -198,8 +205,6 @@ def _select(registry: ir.Registry, table: Table, scope: str) -> tuple[Selection,
 			if not field_name:
 				continue
 			entries.append((field_name, "field"))
-			if field.kind == "flags":
-				entries.append((f"{field_name}_type", "nested type"))
 			if field.kind == "reference":
 				entries.append((f"{field_name}_expression", "template parameter"))
 		for entry, kind in entries:
@@ -248,6 +253,7 @@ def _select(registry: ir.Registry, table: Table, scope: str) -> tuple[Selection,
 		plain=plain_selected,
 		plans=plans,
 		enums=enums,
+		flags=flags,
 		aliases=by_alias,
 		commands=wrapped,
 	)
@@ -267,6 +273,7 @@ class Unit:
 	selected: list[str] = dataclasses.field(default_factory=list)
 	plain: list[str] = dataclasses.field(default_factory=list)
 	enums: list[str] = dataclasses.field(default_factory=list)
+	flags: list[str] = dataclasses.field(default_factory=list)
 	aliases: list[str] = dataclasses.field(default_factory=list)
 	edges: list[tuple[str, str]] = dataclasses.field(default_factory=list)
 	commands: list[object] = dataclasses.field(default_factory=list)
@@ -291,7 +298,14 @@ def _info_types(command: object, registry: ir.Registry) -> list[str]:
 	return names
 
 
-def _units(registry: ir.Registry, selection: Selection) -> list[Unit]:
+def _value_parameters(command: object) -> list[ir.Member]:
+	"""The by-value parameters a wrapper might spell as a vkfu flags or enum type."""
+	if isinstance(command, (ir.Command, ir.Query)):
+		return list(command.leading)
+	return [argument.member for argument in command.arguments if argument.kind == "passthrough"]
+
+
+def _units(registry: ir.Registry, selection: Selection, values: Values) -> list[Unit]:
 	"""Selection split by owning unit, in an order every include can follow.
 
 	A unit depends on another when something it declares names something the
@@ -330,20 +344,23 @@ def _units(registry: ir.Registry, selection: Selection) -> list[Unit]:
 
 	for name in selection.chained:
 		put(name, "chained")
-	for name in selection.selected:
-		unit = put(name, "selected")
-		for field in selection.plans[name].fields:
+	def needs_values(unit: Unit | None, fields: list) -> None:
+		for field in fields:
 			if field.kind == "enum":
 				needs(unit, field.enum_type)
+			elif field.kind == "flags":
+				needs(unit, field.flags_type)
 			elif field.kind == "reference":
 				needs(unit, field.target)
+
+	for name in selection.selected:
+		needs_values(put(name, "selected"), selection.plans[name].fields)
 	for name in selection.plain:
-		unit = put(name, "plain")
-		for field in plan_struct(registry.structs[name], registry).fields:
-			if field.kind == "enum":
-				needs(unit, field.enum_type)
+		needs_values(put(name, "plain"), plan_struct(registry.structs[name], registry).fields)
 	for name in selection.enums:
 		put(name, "enums")
+	for name in selection.flags:
+		put(name, "flags")
 	for name, alias in selection.aliases.items():
 		needs(put(name, "aliases"), alias.target)
 	for command in selection.commands:
@@ -352,6 +369,8 @@ def _units(registry: ir.Registry, selection: Selection) -> list[Unit]:
 			continue
 		unit.commands.append(command)
 		for name in _info_types(command, registry):
+			needs(unit, name)
+		for name in values.types(_value_parameters(command)):
 			needs(unit, name)
 
 	emitted = selection.emitted
@@ -403,7 +422,9 @@ def _ordered(units: dict[str, Unit], rank: dict[str, tuple[int, int]]) -> list[U
 # ---------------------------------------------------------------- rendering
 
 
-def _render_module(module: Unit, registry: ir.Registry, table: Table, selection: Selection) -> list[str]:
+def _render_module(
+	module: Unit, registry: ir.Registry, table: Table, selection: Selection, values: Values
+) -> list[str]:
 	"""Everything one module declares, each kind in the order the next needs it:
 	glue and tags, enums, traits and edges, aliases, params, then wrappers."""
 	lines: list[str] = []
@@ -420,9 +441,16 @@ def _render_module(module: Unit, registry: ir.Registry, table: Table, selection:
 			lines.append("")
 		lines += ["}", ""]
 
+	if module.flags:
+		lines += ["namespace vkfu::flags", "{"]
+		for flags_type in module.flags:
+			lines.extend(structs.render_flags(flags_type, registry, table))
+			lines.append("")
+		lines += ["}", ""]
+
 	if module.chained or module.edges:
 		if module.chained:
-			lines += ["namespace vkfu::obj", "{"]
+			lines += ["namespace vkfu::tag", "{"]
 			for namespace, names in bucketed(module.chained, struct_name):
 				if namespace:
 					lines += [f"namespace {namespace}", "{"]
@@ -438,14 +466,14 @@ def _render_module(module: Unit, registry: ir.Registry, table: Table, selection:
 		lines.append("")
 
 	if module.aliases:
-		lines += ["namespace vkfu::obj", "{"]
+		lines += ["namespace vkfu::tag", "{"]
 		for namespace, names in bucketed(module.aliases, table.alias_name):
 			if namespace:
 				lines += [f"namespace {namespace}", "{"]
 			for name in names:
 				alias = selection.aliases[name]
 				lines.extend(
-					structs.render_alias(alias, table.alias_name(name), struct_name(alias.target), [], table, "obj")
+					structs.render_alias(alias, table.alias_name(name), struct_name(alias.target), [], table, "tag")
 				)
 			if namespace:
 				lines.append("}")
@@ -460,7 +488,7 @@ def _render_module(module: Unit, registry: ir.Registry, table: Table, selection:
 
 	if module.commands:
 		lines += ["namespace vkfu", "{"]
-		lines.extend(_render_commands(module.commands, registry, table))
+		lines.extend(_render_commands(module.commands, registry, table, values))
 		lines += ["}", ""]
 
 	while lines and lines[-1] == "":
@@ -477,7 +505,7 @@ def _render_traits(module: Unit, registry: ir.Registry, table: Table) -> list[st
 	for name in module.chained:
 		struct = registry.structs[name]
 		lines.append("template<>")
-		lines.append(f"struct vulkan_object_trait<obj::{table.struct_name(name)}>")
+		lines.append(f"struct vulkan_object_trait<tag::{table.struct_name(name)}>")
 		lines.append("{")
 		lines.append(f"{TAB}constexpr static auto root = {'true' if name in roots else 'false'};")
 		lines.append(f"{TAB}constexpr static auto branch = {'true' if name in branches else 'false'};")
@@ -490,13 +518,13 @@ def _render_traits(module: Unit, registry: ir.Registry, table: Table) -> list[st
 		lines.append("template<>")
 		lines.append(f"struct expression_vulkan_tag<{name}>")
 		lines.append("{")
-		lines.append(f"{TAB}using type = obj::{table.struct_name(name)};")
+		lines.append(f"{TAB}using type = tag::{table.struct_name(name)};")
 		lines.append("};")
 		lines.append("")
 		# The other direction, which a query chain needs: it is handed tags and
 		# has to declare the native structures they stand for.
 		lines.append("template<>")
-		lines.append(f"struct vulkan_object_native<obj::{table.struct_name(name)}>")
+		lines.append(f"struct vulkan_object_native<tag::{table.struct_name(name)}>")
 		lines.append("{")
 		lines.append(f"{TAB}using type = {name};")
 		lines.append(f"{TAB}constexpr static auto structure_type = {struct.stype};")
@@ -516,7 +544,7 @@ def _render_traits(module: Unit, registry: ir.Registry, table: Table) -> list[st
 		guards = sorted(set(registry.structs[parent].guards) | set(registry.structs[child].guards))
 		lines.append("template<>")
 		lines.append(
-			f"inline constexpr auto is_vulkan_object_compatible_with_v<obj::{table.struct_name(parent)}, obj::{table.struct_name(child)}> = true;"
+			f"inline constexpr auto is_vulkan_object_compatible_with_v<tag::{table.struct_name(parent)}, tag::{table.struct_name(child)}> = true;"
 		)
 	return lines
 
@@ -574,20 +602,20 @@ def _render_params(
 	return lines
 
 
-def _render_commands(wrapped: list[object], registry: ir.Registry, table: Table) -> list[str]:
+def _render_commands(wrapped: list[object], registry: ir.Registry, table: Table, values: Values) -> list[str]:
 	lines: list[str] = []
 	for namespace, group in bucketed(wrapped, lambda command: table.command_name(command.name)):
 		if namespace:
 			lines += [f"namespace {namespace}", "{"]
 		for command in group:
 			if isinstance(command, ir.Command):
-				lines.extend(producers.render(command, table))
+				lines.extend(producers.render(command, table, values))
 			elif isinstance(command, ir.Query):
-				lines.extend(queries.render_query(command, table, registry))
+				lines.extend(queries.render_query(command, table, registry, values))
 			elif isinstance(command, ir.ChainQuery):
-				lines.extend(queries.render_chain_query(command, table, registry))
+				lines.extend(queries.render_chain_query(command, table, registry, values))
 			else:
-				lines.extend(commands.render(command, table))
+				lines.extend(commands.render(command, table, values))
 			lines.append("")
 		if namespace:
 			lines += ["}", ""]
@@ -641,6 +669,7 @@ def _summary(unit: Unit) -> str:
 		(len(unit.chained), "object"),
 		(len(unit.plain), "plain structure"),
 		(len(unit.enums), "enum"),
+		(len(unit.flags), "flags type"),
 		(len(unit.aliases), "alias"),
 		(len(unit.commands), "command"),
 	]
@@ -653,8 +682,9 @@ def _summary(unit: Unit) -> str:
 
 def _build(registry: ir.Registry, table: Table, scope: str) -> tuple[list[Unit], dict[str, list[str]], list[str]]:
 	selection, warnings = _select(registry, table, scope)
-	units = _units(registry, selection)
-	bodies = {unit.path: _render_module(unit, registry, table, selection) for unit in units}
+	values = Values(registry, table, selection.flags, selection.enums)
+	units = _units(registry, selection, values)
+	bodies = {unit.path: _render_module(unit, registry, table, selection, values) for unit in units}
 	return units, bodies, warnings
 
 

@@ -150,7 +150,7 @@ enum class sampler_ycbcr_range : ::std::underlying_type_t<VkSamplerYcbcrRange>
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct sampler_ycbcr_conversion{};
 namespace feature
@@ -172,7 +172,7 @@ struct sampler_ycbcr_conversion_image_format_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::bind_image_plane_memory>
+struct vulkan_object_trait<tag::option::bind_image_plane_memory>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -180,7 +180,7 @@ struct vulkan_object_trait<obj::option::bind_image_plane_memory>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::image_plane_memory_requirements>
+struct vulkan_object_trait<tag::option::image_plane_memory_requirements>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -188,7 +188,7 @@ struct vulkan_object_trait<obj::option::image_plane_memory_requirements>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::sampler_ycbcr_conversion>
+struct vulkan_object_trait<tag::feature::sampler_ycbcr_conversion>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -196,7 +196,7 @@ struct vulkan_object_trait<obj::feature::sampler_ycbcr_conversion>
 };
 
 template<>
-struct vulkan_object_trait<obj::sampler_ycbcr_conversion>
+struct vulkan_object_trait<tag::sampler_ycbcr_conversion>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -204,7 +204,7 @@ struct vulkan_object_trait<obj::sampler_ycbcr_conversion>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::ycbcr_conversion>
+struct vulkan_object_trait<tag::option::ycbcr_conversion>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -212,7 +212,7 @@ struct vulkan_object_trait<obj::option::ycbcr_conversion>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::sampler_ycbcr_conversion_image_format_properties>
+struct vulkan_object_trait<tag::result::sampler_ycbcr_conversion_image_format_properties>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -222,11 +222,11 @@ struct vulkan_object_trait<obj::result::sampler_ycbcr_conversion_image_format_pr
 template<>
 struct expression_vulkan_tag<VkBindImagePlaneMemoryInfo>
 {
-	using type = obj::option::bind_image_plane_memory;
+	using type = tag::option::bind_image_plane_memory;
 };
 
 template<>
-struct vulkan_object_native<obj::option::bind_image_plane_memory>
+struct vulkan_object_native<tag::option::bind_image_plane_memory>
 {
 	using type = VkBindImagePlaneMemoryInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_BIND_IMAGE_PLANE_MEMORY_INFO;
@@ -235,11 +235,11 @@ struct vulkan_object_native<obj::option::bind_image_plane_memory>
 template<>
 struct expression_vulkan_tag<VkImagePlaneMemoryRequirementsInfo>
 {
-	using type = obj::option::image_plane_memory_requirements;
+	using type = tag::option::image_plane_memory_requirements;
 };
 
 template<>
-struct vulkan_object_native<obj::option::image_plane_memory_requirements>
+struct vulkan_object_native<tag::option::image_plane_memory_requirements>
 {
 	using type = VkImagePlaneMemoryRequirementsInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_PLANE_MEMORY_REQUIREMENTS_INFO;
@@ -248,11 +248,11 @@ struct vulkan_object_native<obj::option::image_plane_memory_requirements>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceSamplerYcbcrConversionFeatures>
 {
-	using type = obj::feature::sampler_ycbcr_conversion;
+	using type = tag::feature::sampler_ycbcr_conversion;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::sampler_ycbcr_conversion>
+struct vulkan_object_native<tag::feature::sampler_ycbcr_conversion>
 {
 	using type = VkPhysicalDeviceSamplerYcbcrConversionFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_YCBCR_CONVERSION_FEATURES;
@@ -261,11 +261,11 @@ struct vulkan_object_native<obj::feature::sampler_ycbcr_conversion>
 template<>
 struct expression_vulkan_tag<VkSamplerYcbcrConversionCreateInfo>
 {
-	using type = obj::sampler_ycbcr_conversion;
+	using type = tag::sampler_ycbcr_conversion;
 };
 
 template<>
-struct vulkan_object_native<obj::sampler_ycbcr_conversion>
+struct vulkan_object_native<tag::sampler_ycbcr_conversion>
 {
 	using type = VkSamplerYcbcrConversionCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_CREATE_INFO;
@@ -274,11 +274,11 @@ struct vulkan_object_native<obj::sampler_ycbcr_conversion>
 template<>
 struct expression_vulkan_tag<VkSamplerYcbcrConversionInfo>
 {
-	using type = obj::option::ycbcr_conversion;
+	using type = tag::option::ycbcr_conversion;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ycbcr_conversion>
+struct vulkan_object_native<tag::option::ycbcr_conversion>
 {
 	using type = VkSamplerYcbcrConversionInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_INFO;
@@ -287,18 +287,18 @@ struct vulkan_object_native<obj::option::ycbcr_conversion>
 template<>
 struct expression_vulkan_tag<VkSamplerYcbcrConversionImageFormatProperties>
 {
-	using type = obj::result::sampler_ycbcr_conversion_image_format_properties;
+	using type = tag::result::sampler_ycbcr_conversion_image_format_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::sampler_ycbcr_conversion_image_format_properties>
+struct vulkan_object_native<tag::result::sampler_ycbcr_conversion_image_format_properties>
 {
 	using type = VkSamplerYcbcrConversionImageFormatProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_IMAGE_FORMAT_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::bind_image_plane_memory>
+struct vulkan_object_extensions<tag::option::bind_image_plane_memory>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_sampler_ycbcr_conversion"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -306,7 +306,7 @@ struct vulkan_object_extensions<obj::option::bind_image_plane_memory>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::image_plane_memory_requirements>
+struct vulkan_object_extensions<tag::option::image_plane_memory_requirements>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_sampler_ycbcr_conversion"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -314,7 +314,7 @@ struct vulkan_object_extensions<obj::option::image_plane_memory_requirements>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::sampler_ycbcr_conversion>
+struct vulkan_object_extensions<tag::feature::sampler_ycbcr_conversion>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_sampler_ycbcr_conversion"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -322,7 +322,7 @@ struct vulkan_object_extensions<obj::feature::sampler_ycbcr_conversion>
 };
 
 template<>
-struct vulkan_object_extensions<obj::sampler_ycbcr_conversion>
+struct vulkan_object_extensions<tag::sampler_ycbcr_conversion>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_sampler_ycbcr_conversion"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -330,7 +330,7 @@ struct vulkan_object_extensions<obj::sampler_ycbcr_conversion>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ycbcr_conversion>
+struct vulkan_object_extensions<tag::option::ycbcr_conversion>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_sampler_ycbcr_conversion"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -338,7 +338,7 @@ struct vulkan_object_extensions<obj::option::ycbcr_conversion>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::sampler_ycbcr_conversion_image_format_properties>
+struct vulkan_object_extensions<tag::result::sampler_ycbcr_conversion_image_format_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_sampler_ycbcr_conversion"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -346,19 +346,19 @@ struct vulkan_object_extensions<obj::result::sampler_ycbcr_conversion_image_form
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::bind_image_memory, obj::option::bind_image_plane_memory> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::bind_image_memory, tag::option::bind_image_plane_memory> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::sampler_ycbcr_conversion> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::sampler_ycbcr_conversion> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::image_format_properties2, obj::result::sampler_ycbcr_conversion_image_format_properties> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::image_format_properties2, tag::result::sampler_ycbcr_conversion_image_format_properties> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image_memory_requirements2, obj::option::image_plane_memory_requirements> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image_memory_requirements2, tag::option::image_plane_memory_requirements> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image_view, obj::option::ycbcr_conversion> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image_view, tag::option::ycbcr_conversion> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::sampler_ycbcr_conversion> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::sampler_ycbcr_conversion> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::sampler, obj::option::ycbcr_conversion> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::sampler, tag::option::ycbcr_conversion> = true;
 }
 
 namespace vkfu::param
@@ -367,7 +367,7 @@ using ::vkfu::operator|;
 
 struct sampler_ycbcr_conversion
 {
-	using vulkan_tag_type = obj::sampler_ycbcr_conversion;
+	using vulkan_tag_type = tag::sampler_ycbcr_conversion;
 
 	::vkfu::enums::format format{};
 	::vkfu::enums::sampler_ycbcr_model_conversion ycbcr_model{};
@@ -401,7 +401,7 @@ using ::vkfu::operator|;
 
 struct sampler_ycbcr_conversion
 {
-	using vulkan_tag_type = obj::feature::sampler_ycbcr_conversion;
+	using vulkan_tag_type = tag::feature::sampler_ycbcr_conversion;
 
 	bool enable = false;
 
@@ -423,7 +423,7 @@ using ::vkfu::operator|;
 
 struct bind_image_plane_memory
 {
-	using vulkan_tag_type = obj::option::bind_image_plane_memory;
+	using vulkan_tag_type = tag::option::bind_image_plane_memory;
 
 	::vkfu::enums::image_aspect plane_aspect{};
 
@@ -439,7 +439,7 @@ struct bind_image_plane_memory
 
 struct image_plane_memory_requirements
 {
-	using vulkan_tag_type = obj::option::image_plane_memory_requirements;
+	using vulkan_tag_type = tag::option::image_plane_memory_requirements;
 
 	::vkfu::enums::image_aspect plane_aspect{};
 
@@ -455,7 +455,7 @@ struct image_plane_memory_requirements
 
 struct ycbcr_conversion
 {
-	using vulkan_tag_type = obj::option::ycbcr_conversion;
+	using vulkan_tag_type = tag::option::ycbcr_conversion;
 
 	VkSamplerYcbcrConversion conversion{};
 
@@ -474,7 +474,7 @@ struct ycbcr_conversion
 
 namespace vkfu
 {
-template<::vkfu::expression_for<::vkfu::obj::sampler_ycbcr_conversion> Expression>
+template<::vkfu::expression_for<::vkfu::tag::sampler_ycbcr_conversion> Expression>
 [[nodiscard]] auto create_sampler_ycbcr_conversion(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkSamplerYcbcrConversion, ::VkResult>
 {
@@ -489,7 +489,7 @@ template<::vkfu::expression_for<::vkfu::obj::sampler_ycbcr_conversion> Expressio
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::sampler_ycbcr_conversion> Expression>
+template<::vkfu::expression_for<::vkfu::tag::sampler_ycbcr_conversion> Expression>
 [[nodiscard]] auto create_sampler_ycbcr_conversion(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkSamplerYcbcrConversion
 {
 	auto produced = create_sampler_ycbcr_conversion(device, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

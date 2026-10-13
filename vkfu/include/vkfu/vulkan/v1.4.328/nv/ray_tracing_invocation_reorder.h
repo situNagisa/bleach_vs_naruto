@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceRayTracingInvocationReorderPropert
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -74,7 +74,7 @@ struct ray_tracing_invocation_reorder{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::ray_tracing_invocation_reorder>
+struct vulkan_object_trait<tag::feature::nv::ray_tracing_invocation_reorder>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::feature::nv::ray_tracing_invocation_reorder>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::nv::ray_tracing_invocation_reorder>
+struct vulkan_object_trait<tag::property::nv::ray_tracing_invocation_reorder>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::property::nv::ray_tracing_invocation_reorder>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceRayTracingInvocationReorderFeaturesNV>
 {
-	using type = obj::feature::nv::ray_tracing_invocation_reorder;
+	using type = tag::feature::nv::ray_tracing_invocation_reorder;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::ray_tracing_invocation_reorder>
+struct vulkan_object_native<tag::feature::nv::ray_tracing_invocation_reorder>
 {
 	using type = VkPhysicalDeviceRayTracingInvocationReorderFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_INVOCATION_REORDER_FEATURES_NV;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::feature::nv::ray_tracing_invocation_reorder>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceRayTracingInvocationReorderPropertiesNV>
 {
-	using type = obj::property::nv::ray_tracing_invocation_reorder;
+	using type = tag::property::nv::ray_tracing_invocation_reorder;
 };
 
 template<>
-struct vulkan_object_native<obj::property::nv::ray_tracing_invocation_reorder>
+struct vulkan_object_native<tag::property::nv::ray_tracing_invocation_reorder>
 {
 	using type = VkPhysicalDeviceRayTracingInvocationReorderPropertiesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_INVOCATION_REORDER_PROPERTIES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::ray_tracing_invocation_reorder>
+struct vulkan_object_extensions<tag::feature::nv::ray_tracing_invocation_reorder>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_ray_tracing_invocation_reorder"};
 	constexpr static ::std::uint32_t core = 0;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::feature::nv::ray_tracing_invocation_reorder
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::nv::ray_tracing_invocation_reorder>
+struct vulkan_object_extensions<tag::property::nv::ray_tracing_invocation_reorder>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_ray_tracing_invocation_reorder"};
 	constexpr static ::std::uint32_t core = 0;
@@ -132,11 +132,11 @@ struct vulkan_object_extensions<obj::property::nv::ray_tracing_invocation_reorde
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::ray_tracing_invocation_reorder> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::ray_tracing_invocation_reorder> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::ray_tracing_invocation_reorder> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::ray_tracing_invocation_reorder> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::nv::ray_tracing_invocation_reorder> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::nv::ray_tracing_invocation_reorder> = true;
 }
 
 namespace vkfu::param
@@ -147,7 +147,7 @@ using ::vkfu::operator|;
 
 struct ray_tracing_invocation_reorder
 {
-	using vulkan_tag_type = obj::feature::nv::ray_tracing_invocation_reorder;
+	using vulkan_tag_type = tag::feature::nv::ray_tracing_invocation_reorder;
 
 	bool enable = false;
 

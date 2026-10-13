@@ -42,7 +42,7 @@ constexpr auto _vkfu_evaluate(VkWin32SurfaceCreateInfoKHR const& value) noexcept
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
@@ -53,7 +53,7 @@ struct win32_surface{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::khr::win32_surface>
+struct vulkan_object_trait<tag::khr::win32_surface>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -63,18 +63,18 @@ struct vulkan_object_trait<obj::khr::win32_surface>
 template<>
 struct expression_vulkan_tag<VkWin32SurfaceCreateInfoKHR>
 {
-	using type = obj::khr::win32_surface;
+	using type = tag::khr::win32_surface;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::win32_surface>
+struct vulkan_object_native<tag::khr::win32_surface>
 {
 	using type = VkWin32SurfaceCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::win32_surface>
+struct vulkan_object_extensions<tag::khr::win32_surface>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_win32_surface"};
 	constexpr static ::std::uint32_t core = 0;
@@ -91,7 +91,7 @@ using ::vkfu::operator|;
 
 struct win32_surface
 {
-	using vulkan_tag_type = obj::khr::win32_surface;
+	using vulkan_tag_type = tag::khr::win32_surface;
 
 	VkWin32SurfaceCreateFlagsKHR flags{};
 	HINSTANCE hinstance{};
@@ -116,7 +116,7 @@ namespace vkfu
 {
 namespace khr
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::win32_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::khr::win32_surface> Expression>
 [[nodiscard]] auto create_win32_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkSurfaceKHR, ::VkResult>
 {
@@ -131,7 +131,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::win32_surface> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::win32_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::khr::win32_surface> Expression>
 [[nodiscard]] auto create_win32_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkSurfaceKHR
 {
 	auto produced = create_win32_surface(instance, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

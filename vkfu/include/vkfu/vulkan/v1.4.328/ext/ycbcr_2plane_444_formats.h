@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceYcbcr2Plane444FormatsFeaturesEXT c
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct ycbcr2_plane444_formats{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::ycbcr2_plane444_formats>
+struct vulkan_object_trait<tag::feature::ext::ycbcr2_plane444_formats>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::ycbcr2_plane444_formats>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceYcbcr2Plane444FormatsFeaturesEXT>
 {
-	using type = obj::feature::ext::ycbcr2_plane444_formats;
+	using type = tag::feature::ext::ycbcr2_plane444_formats;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::ycbcr2_plane444_formats>
+struct vulkan_object_native<tag::feature::ext::ycbcr2_plane444_formats>
 {
 	using type = VkPhysicalDeviceYcbcr2Plane444FormatsFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_YCBCR_2_PLANE_444_FORMATS_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::ycbcr2_plane444_formats>
+struct vulkan_object_extensions<tag::feature::ext::ycbcr2_plane444_formats>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_ycbcr_2plane_444_formats"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::ycbcr2_plane444_formats>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::ycbcr2_plane444_formats> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::ycbcr2_plane444_formats> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::ycbcr2_plane444_formats> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::ycbcr2_plane444_formats> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct ycbcr2_plane444_formats
 {
-	using vulkan_tag_type = obj::feature::ext::ycbcr2_plane444_formats;
+	using vulkan_tag_type = tag::feature::ext::ycbcr2_plane444_formats;
 
 	bool enable = false;
 

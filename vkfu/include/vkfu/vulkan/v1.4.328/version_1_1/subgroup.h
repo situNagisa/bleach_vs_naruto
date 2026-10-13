@@ -41,7 +41,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceSubgroupProperties const& value) n
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property
 {
@@ -52,7 +52,7 @@ struct subgroup{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::property::subgroup>
+struct vulkan_object_trait<tag::property::subgroup>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -62,18 +62,18 @@ struct vulkan_object_trait<obj::property::subgroup>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceSubgroupProperties>
 {
-	using type = obj::property::subgroup;
+	using type = tag::property::subgroup;
 };
 
 template<>
-struct vulkan_object_native<obj::property::subgroup>
+struct vulkan_object_native<tag::property::subgroup>
 {
 	using type = VkPhysicalDeviceSubgroupProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::subgroup>
+struct vulkan_object_extensions<tag::property::subgroup>
 {
 	constexpr static ::std::array<char const*, 0> names{};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;

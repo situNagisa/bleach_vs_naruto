@@ -28,15 +28,15 @@
 
 #include "../version_1_2/sampler_filter_minmax.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::ext
 {
-using sampler_reduction_mode = ::vkfu::obj::option::sampler_reduction_mode;
+using sampler_reduction_mode = ::vkfu::tag::option::sampler_reduction_mode;
 }
 namespace property::ext
 {
-using sampler_filter_minmax = ::vkfu::obj::property::sampler_filter_minmax;
+using sampler_filter_minmax = ::vkfu::tag::property::sampler_filter_minmax;
 }
 }
 

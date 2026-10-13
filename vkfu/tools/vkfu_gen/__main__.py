@@ -17,7 +17,7 @@ import sys
 import tomllib
 
 from . import check, emit, ir, naming, producers
-from .plan import bit_layout, plan_struct, positional_bits, used_enums
+from .plan import bit_layout, plan_struct, positional_bits, used_enums, used_flags
 
 
 NEWLINE = chr(10)
@@ -327,12 +327,16 @@ def _rebuild(registry: ir.Registry, overrides_path: str) -> tuple[str, dict[str,
 				stats["members"] += 1
 		lines.append("")
 
-	used_bits = sorted({
-		field.flag_bits
-		for name in named_objects
-		for field in plan_struct(registry.structs[name], registry).fields
-		if field.kind == "flags"
-	})
+	flags_types = used_flags(registry.closure, registry)
+	flags_labels = naming.suggest_flags_names(flags_types, author_tags)
+	flags_overrides = overrides.get("flags") or {}
+	for flags_type in flags_types:
+		lines.append(f"[flags.{_quote(flags_type)}]")
+		lines.append(f'name = "{flags_overrides.get(flags_type, flags_labels[flags_type].value)}"')
+		lines.append("")
+		stats["flags"] = stats.get("flags", 0) + 1
+
+	used_bits = sorted({registry.bitmask_to_flagbits[flags_type] for flags_type in flags_types})
 	for flag_bits in used_bits:
 		layout = bit_layout(registry.flagbits[flag_bits]) or []
 		prefix = naming.bit_prefix(flag_bits, [bit.name for bit in layout], author_tags)
@@ -347,9 +351,10 @@ def _rebuild(registry: ir.Registry, overrides_path: str) -> tuple[str, dict[str,
 
 	enum_types = used_enums(registry.closure, registry)
 	enum_labels = naming.suggest_enum_names(enum_types, author_tags)
+	enum_overrides = overrides.get("enum") or {}
 	for enum_type in enum_types:
 		lines.append(f"[enum.{_quote(enum_type)}]")
-		lines.append(f'name = "{enum_labels[enum_type].value}"')
+		lines.append(f'name = "{enum_overrides.get(enum_type, enum_labels[enum_type].value)}"')
 		stats["enums"] += 1
 		values = registry.enums[enum_type].values
 		prefix = naming.bit_prefix(enum_type, [value.name for value in values], author_tags)
@@ -492,7 +497,7 @@ def main(argv: list[str] | None = None) -> int:
 			stream.write(text)
 		print(
 			f"{arguments.table}: rebuilt {stats['structs']} objects, {stats['members']} fields, "
-			f"{stats['bits']} flag bits, {stats['enums']} enums, {stats['values']} enumerators, "
+			f"{stats.get('flags', 0)} flags types, {stats['bits']} flag bits, {stats['enums']} enums, {stats['values']} enumerators, "
 			f"{stats['commands']} commands, {stats.get('aliases', 0)} aliases"
 			+ (f"; {stats['alias_collisions']} alias(es) skipped for colliding" if stats.get("alias_collisions") else "")
 			+ (f"; {stats['stale']} stale override(s)" if stats.get("stale") else "")

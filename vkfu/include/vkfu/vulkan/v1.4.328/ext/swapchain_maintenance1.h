@@ -28,22 +28,22 @@
 
 #include "../khr/swapchain_maintenance1.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr::ext
 {
-using swapchain_maintenance1 = ::vkfu::obj::feature::khr::swapchain_maintenance1;
+using swapchain_maintenance1 = ::vkfu::tag::feature::khr::swapchain_maintenance1;
 }
 namespace khr::ext
 {
-using release_swapchain_images = ::vkfu::obj::khr::release_swapchain_images;
+using release_swapchain_images = ::vkfu::tag::khr::release_swapchain_images;
 }
 namespace option::khr::ext
 {
-using swapchain_present_fence = ::vkfu::obj::option::khr::swapchain_present_fence;
-using swapchain_present_mode = ::vkfu::obj::option::khr::swapchain_present_mode;
-using swapchain_present_modes = ::vkfu::obj::option::khr::swapchain_present_modes;
-using swapchain_present_scaling = ::vkfu::obj::option::khr::swapchain_present_scaling;
+using swapchain_present_fence = ::vkfu::tag::option::khr::swapchain_present_fence;
+using swapchain_present_mode = ::vkfu::tag::option::khr::swapchain_present_mode;
+using swapchain_present_modes = ::vkfu::tag::option::khr::swapchain_present_modes;
+using swapchain_present_scaling = ::vkfu::tag::option::khr::swapchain_present_scaling;
 }
 }
 

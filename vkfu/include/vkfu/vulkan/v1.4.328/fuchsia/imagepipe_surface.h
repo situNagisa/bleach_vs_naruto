@@ -42,7 +42,7 @@ constexpr auto _vkfu_evaluate(VkImagePipeSurfaceCreateInfoFUCHSIA const& value) 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace fuchsia
 {
@@ -53,7 +53,7 @@ struct imagepipe_surface{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::fuchsia::imagepipe_surface>
+struct vulkan_object_trait<tag::fuchsia::imagepipe_surface>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -63,18 +63,18 @@ struct vulkan_object_trait<obj::fuchsia::imagepipe_surface>
 template<>
 struct expression_vulkan_tag<VkImagePipeSurfaceCreateInfoFUCHSIA>
 {
-	using type = obj::fuchsia::imagepipe_surface;
+	using type = tag::fuchsia::imagepipe_surface;
 };
 
 template<>
-struct vulkan_object_native<obj::fuchsia::imagepipe_surface>
+struct vulkan_object_native<tag::fuchsia::imagepipe_surface>
 {
 	using type = VkImagePipeSurfaceCreateInfoFUCHSIA;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGEPIPE_SURFACE_CREATE_INFO_FUCHSIA;
 };
 
 template<>
-struct vulkan_object_extensions<obj::fuchsia::imagepipe_surface>
+struct vulkan_object_extensions<tag::fuchsia::imagepipe_surface>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_FUCHSIA_imagepipe_surface"};
 	constexpr static ::std::uint32_t core = 0;
@@ -91,7 +91,7 @@ using ::vkfu::operator|;
 
 struct imagepipe_surface
 {
-	using vulkan_tag_type = obj::fuchsia::imagepipe_surface;
+	using vulkan_tag_type = tag::fuchsia::imagepipe_surface;
 
 	VkImagePipeSurfaceCreateFlagsFUCHSIA flags{};
 	zx_handle_t imagepipe_handle{};
@@ -114,7 +114,7 @@ namespace vkfu
 {
 namespace fuchsia
 {
-template<::vkfu::expression_for<::vkfu::obj::fuchsia::imagepipe_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::fuchsia::imagepipe_surface> Expression>
 [[nodiscard]] auto create_imagepipe_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkSurfaceKHR, ::VkResult>
 {
@@ -129,7 +129,7 @@ template<::vkfu::expression_for<::vkfu::obj::fuchsia::imagepipe_surface> Express
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::fuchsia::imagepipe_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::fuchsia::imagepipe_surface> Expression>
 [[nodiscard]] auto create_imagepipe_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkSurfaceKHR
 {
 	auto produced = create_imagepipe_surface(instance, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

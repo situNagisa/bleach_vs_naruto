@@ -3,7 +3,7 @@
 把 vk.xml 转成 `vkfu/include/vkfu/vulkan/v<version>.h` 以及它旁边的
 `v<version>/` 目录（见下文"输出：核心按功能、扩展按厂商"），内容是 vkfu 框架
 （`vulkan_object.h` / `storage.h` / `expression.h` / `branch_pipe.h`）所需的生成层：
-`vkfu::obj::*` 标签、`vulkan_object_trait` 特化、`is_vulkan_object_compatible_with_v`
+`vkfu::tag::*` 标签、`vulkan_object_trait` 特化、`is_vulkan_object_compatible_with_v`
 边、`vkfu::param::*` 参数结构体，以及原生 Vulkan 结构体的 `address`/`set_next` 胶水。
 
 ## 代码结构
@@ -125,14 +125,15 @@ v1.4.328 下是 **257 个 root / 834 个链式对象 / 69 个无 sType 的 param
 | `param::feature::` | `VkPhysicalDevice*Features*` | `timeline_semaphore` `mesh_shader_ext` `core`(= `VkPhysicalDeviceFeatures2`) |
 | `param::state::` | 管线状态（表达式槽的目标及其 pNext 后代中以 `Pipeline` 开头的） | `vertex_input` `viewport` `rasterization` `color_blend` `shader_stage` |
 | `param::option::` | 其余挂在 pNext 上的节点 | `device_private_data` `image_format_list` `ycbcr_conversion` |
-| `vkfu::enums::` | 被当作字段类型的纯枚举（含被当单值用的 FlagBits） | `format` `primitive_topology` `sample_count` |
+| `vkfu::enums::` | 被当作字段或命令参数类型的纯枚举（含被当单值用的 FlagBits） | `format` `primitive_topology` `sample_count` |
+| `vkfu::flags::` | 被当作字段或命令参数类型的 flags，每个类型一个位域结构体 | `access2` `pipeline_stage2` `buffer_usage` |
 
 **厂商标记是命名空间，不是后缀**。vk.xml `<tags>` 里声明的每个标记都自成一层，放在族之后：
 `param::khr::swapchain`、`param::feature::ext::mesh_shader` 与 `param::feature::nv::mesh_shader`、
 `param::state::nv::viewport_swizzle`。这样跨厂商根本不会撞名，消歧只剩一档：同一命名空间内
 仍然重名时保留动词（`nv::acceleration_structure` 对 `nv::acceleration_structure_create`）。
 
-`obj::` 与 `param::` 用同一套限定名，所以 `obj::feature::timeline_semaphore` 与
+`tag::` 与 `param::` 用同一套限定名，所以 `tag::feature::timeline_semaphore` 与
 `param::feature::timeline_semaphore` 一一对应。命名空间隔开之后
 `feature::pipeline_robustness`（能力开关）与 `option::pipeline_robustness`
 （单条管线的设置）可以同名共存，这本来就是同一概念的两个角色。
@@ -140,6 +141,16 @@ v1.4.328 下是 **257 个 root / 834 个链式对象 / 69 个无 sType 的 param
 **撞名只在需要时才加厂商标记**，一共 10 个对象：`acceleration_structure_khr` /
 `_nv`、`mesh_shader_ext` / `_nv`、`external_format_android` / `_qnx` 等。
 其中一边是核心版（无标记）时，核心版保留裸名，因为它没有标记可加。
+
+## `--scope`
+
+决定"哪些结构体要生成"，以及缺名字时怎么办：
+
+- `--scope table`（默认）：只生成命名表里有名字的对象，缺的跳过并报告还差多少。适合一边写代码一边按需填表。
+- `--scope closure`：从所有命令的入参结构体出发、沿 pNext / 指针槽 / 数组元素求出的整个闭包都必须有名字，
+  缺一个就失败。仓库里的头文件都是用它生成的。
+
+`check` 也吃这个参数：`closure` 下"缺名字"是错误，`table` 下不报。
 
 ## 字段名相对于对象
 
@@ -170,7 +181,7 @@ auto storage = vkfu::evaluate(param::graphics_pipeline{
 } | param::option::pipeline_rendering{...});
 ```
 
-- 槽是 `template<::vkfu::reference_expression_for<obj::state::vertex_input> ... = ::vkfu::absent_expression>`，
+- 槽是 `template<::vkfu::reference_expression_for<tag::state::vertex_input> ... = ::vkfu::absent_expression>`，
   所以**类型不匹配的子表达式接不上**，没填的槽 native 指针保持 null。
 - 调用点仍是聚合初始化：C++20 的聚合 CTAD 支持指定初始化器且允许跳过成员（g++ / clang 均已验证）。
 - 存储是 `reference_storage`，拷贝和移动都会重新把父级指向自己那份子存储。
@@ -226,7 +237,7 @@ python -m vkfu_gen check --xml vk.xml --table naming.toml --scope closure
 | `keyword` | C++ 关键字 |
 | `reserved` | 含 `__` 或 `_大写` 开头——保留给实现，程序是 ill-formed 的 |
 | `duplicate` | 两个对象/字段/位/枚举量/命令抢一个名字 |
-| `scope` | 字段撞上它自己生成的 `<字段>_type`、`<字段>_expression` 或固定别名 |
+| `scope` | 字段撞上它自己生成的 `<字段>_expression` 或固定别名 |
 | `namespace` | 同一个名字既是类又是命名空间（硬错误，只有两条都在了才显形） |
 | `shadow` | 命令名盖住 `vkfu` 里已有的 CPO |
 | `missing` / `orphan` | 在范围内却没有条目 / 有条目却不在范围内 |
@@ -282,10 +293,10 @@ span 形态一次调用就够（`count` 是 in-out），`VK_INCOMPLETE` **不是
 
 ```cpp
 auto props = vkfu::get_physical_device_properties2<
-    obj::property::driver, obj::property::id>(physical_device);
+    tag::property::driver, tag::property::id>(physical_device);
 
 props.head().properties.limits.maxImageDimension2D;
-props.get<obj::property::driver>().driverName;
+props.get<tag::property::driver>().driverName;
 ```
 
 约束用的是**写侧那套 structextends 边**：不扩展 `VkPhysicalDeviceProperties2` 的东西编译期
@@ -339,7 +350,7 @@ vkfu::required_device_extensions<VK_API_VERSION_1_0>(chain);    // {"VK_EXT_mesh
 | 数量写在结构体里 | 2 | `allocate_command_buffers(device, expression, span<VkCommandBuffer> out)` |
 
 厂商标记同样是命名空间：`vkfu::khr::create_swapchain`。约束是
-`expression_for<Expression, obj::x>`，所以塞错结构体的表达式接不上。
+`expression_for<Expression, tag::x>`，所以塞错结构体的表达式接不上。
 
 ## 用法
 
@@ -358,11 +369,13 @@ python -m vkfu_gen gen      --xml vk.xml --table naming.toml --scope closure
 `--scope closure` 要求闭包里每个对象都有名字，缺一个就失败。`--scope table`（默认）
 只生成命名过的，并报告还差多少，适合按用到才填表的增量节奏。
 
-`gen` 在这些情况下**硬失败**：缺名字、名字撞车、**类作用域撞名**（字段、flags 的嵌套
-`<字段>_type`、槽的 `<字段>_expression` 模板参数、`vulkan_tag_type` / `storage_type`
-别名之间任意两者相撞）、枚举项撞名、遇到未支持的成员形态（多维数组、位无法一位一格
-的 flag 枚举）。**只警告**：字段名与所属对象同名、字段名遮蔽它自己的枚举类型
-（合法，因为生成的代码始终写全限定名）、表里命名了不在作用域内的标识符。
+`gen` 在这些情况下**硬失败**：缺名字、名字撞车、**类作用域撞名**（字段、槽的 `<字段>_expression`
+模板参数、`vulkan_tag_type` / `storage_type` 别名之间任意两者相撞）、枚举项撞名、遇到未支持的成员形态
+（多维数组、位无法一位一格的 flag 枚举）、生成的文件之间依赖成环。**只警告**：字段名与所属对象同名、
+表里命名了不在作用域内的标识符。v1.4.328 下一条警告都没有。
+
+字段名和它的枚举类型同名（`format`、`index_type`）以前也会警告，一共 52 条（`check` 里 60 条），
+现在不再报：生成的代码总是写全限定名 `::vkfu::enums::format`，这种同名是合法的，而且读起来就是那个字段。
 
 ## 无 sType 的结构体也有 param
 
@@ -380,10 +393,13 @@ param::descriptor_set_layout_binding{
 
 ## flags 的处理
 
-flag 成员展开成一个**布局与原生 flags 字完全一致**的位域结构体，直接 `bit_cast`：
+每个 flags 类型生成**一个** `vkfu::flags::` 下的位域结构体，布局与原生 flags 字完全一致，直接 `bit_cast`。
+所有用到这个 flags 类型的地方——任意 param 的字段、任意命令的参数——都用同一个结构体：
 
 ```cpp
-struct flags_type
+namespace vkfu::flags
+{
+struct command_pool_create
 {
     VkCommandPoolCreateFlags transient : 1 = 0;
     VkCommandPoolCreateFlags reset_command_buffer : 1 = 0;
@@ -391,11 +407,31 @@ struct flags_type
     VkCommandPoolCreateFlags _reserved_3 : 29 = 0;
 };
 
-static_assert(sizeof(flags_type) == sizeof(VkCommandPoolCreateFlags));
-static_assert(::std::bit_cast<VkCommandPoolCreateFlags>(flags_type{.transient = 1}) == VK_COMMAND_POOL_CREATE_TRANSIENT_BIT);
+static_assert(sizeof(command_pool_create) == sizeof(VkCommandPoolCreateFlags));
+static_assert(::std::bit_cast<VkCommandPoolCreateFlags>(command_pool_create{.transient = 1}) == VK_COMMAND_POOL_CREATE_TRANSIENT_BIT);
+}
+
+// param::command_pool 里
+::vkfu::flags::command_pool_create flags{};
 // ...
 .flags = ::std::bit_cast<VkCommandPoolCreateFlags>(flags),
 ```
+
+所以 `param::image_memory_barrier2` 的 `src_stage_mask` / `dst_stage_mask` 都是 `flags::pipeline_stage2`，
+`src_access_mask` / `dst_access_mask` 都是 `flags::access2`，和 `buffer_memory_barrier2`、`memory_barrier2`、
+`semaphore_submit` 里的也是同一个类型，值可以直接互相赋。v1.4.328 下 188 个 flags 字段原来各生成一个
+嵌套结构体，现在是 102 个共享结构体。
+
+- **名字进命名表**：`[flags."VkAccessFlags2"] name = "access2"`。默认规则是去掉 `Vk` 和 `Flags`，
+  撞名时才加厂商后缀（`indirect_commands_layout_usage_ext` / `_nv`）。flags 和 enum 在不同命名空间，
+  所以 `flags::shader_stage`（掩码）和 `enums::shader_stage`（单个阶段）可以同名共存。
+- **放在引入该 flags 类型的那个文件里**，用到它的文件 include 那个文件。
+- **旧名字也一样**：`VkBuildAccelerationStructureFlagsNV` 是 `VkBuildAccelerationStructureFlagsKHR`
+  的别名，声明成旧名字的字段同样用 `flags::build_acceleration_structure`。枚举同理。
+- **命令参数也换**：按值传的 flags / enum 参数改成 `vkfu::flags::x` / `vkfu::enums::x`，调用 Vulkan 时再
+  `bit_cast` / `static_cast` 回去。所以 `cmd_pipeline_barrier` 吃 `flags::pipeline_stage`，`cmd_blit_image`
+  吃 `enums::image_layout` 和 `enums::filter`。只有命令参数用到的类型（如
+  `VkShaderInfoTypeAMD`）也会生成。
 
 几个要点：
 

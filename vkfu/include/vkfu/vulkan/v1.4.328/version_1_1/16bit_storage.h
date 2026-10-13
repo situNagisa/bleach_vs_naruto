@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDevice16BitStorageFeatures const& value)
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -54,7 +54,7 @@ struct storage_16bit{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::storage_16bit>
+struct vulkan_object_trait<tag::feature::storage_16bit>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::feature::storage_16bit>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevice16BitStorageFeatures>
 {
-	using type = obj::feature::storage_16bit;
+	using type = tag::feature::storage_16bit;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::storage_16bit>
+struct vulkan_object_native<tag::feature::storage_16bit>
 {
 	using type = VkPhysicalDevice16BitStorageFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::storage_16bit>
+struct vulkan_object_extensions<tag::feature::storage_16bit>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_16bit_storage"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -83,7 +83,7 @@ struct vulkan_object_extensions<obj::feature::storage_16bit>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::storage_16bit> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::storage_16bit> = true;
 }
 
 namespace vkfu::param
@@ -94,7 +94,7 @@ using ::vkfu::operator|;
 
 struct storage_16bit
 {
-	using vulkan_tag_type = obj::feature::storage_16bit;
+	using vulkan_tag_type = tag::feature::storage_16bit;
 
 	bool storage_buffer = false;
 	bool uniform_and_storage_buffer = false;

@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceDriverProperties const& value) noe
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property
 {
@@ -54,7 +54,7 @@ struct driver{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::property::driver>
+struct vulkan_object_trait<tag::property::driver>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::property::driver>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDriverProperties>
 {
-	using type = obj::property::driver;
+	using type = tag::property::driver;
 };
 
 template<>
-struct vulkan_object_native<obj::property::driver>
+struct vulkan_object_native<tag::property::driver>
 {
 	using type = VkPhysicalDeviceDriverProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::driver>
+struct vulkan_object_extensions<tag::property::driver>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_driver_properties"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -83,5 +83,5 @@ struct vulkan_object_extensions<obj::property::driver>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::driver> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::driver> = true;
 }

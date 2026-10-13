@@ -53,7 +53,7 @@ enum class time_domain : ::std::underlying_type_t<VkTimeDomainKHR>
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
@@ -64,7 +64,7 @@ struct calibrated_timestamp{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::khr::calibrated_timestamp>
+struct vulkan_object_trait<tag::khr::calibrated_timestamp>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -74,18 +74,18 @@ struct vulkan_object_trait<obj::khr::calibrated_timestamp>
 template<>
 struct expression_vulkan_tag<VkCalibratedTimestampInfoKHR>
 {
-	using type = obj::khr::calibrated_timestamp;
+	using type = tag::khr::calibrated_timestamp;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::calibrated_timestamp>
+struct vulkan_object_native<tag::khr::calibrated_timestamp>
 {
 	using type = VkCalibratedTimestampInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_CALIBRATED_TIMESTAMP_INFO_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::calibrated_timestamp>
+struct vulkan_object_extensions<tag::khr::calibrated_timestamp>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_calibrated_timestamps", "VK_KHR_calibrated_timestamps"};
 	constexpr static ::std::uint32_t core = 0;
@@ -102,7 +102,7 @@ using ::vkfu::operator|;
 
 struct calibrated_timestamp
 {
-	using vulkan_tag_type = obj::khr::calibrated_timestamp;
+	using vulkan_tag_type = tag::khr::calibrated_timestamp;
 
 	::vkfu::enums::time_domain time_domain{};
 

@@ -93,7 +93,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceMaintenance4Properties const& valu
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct device_buffer_memory_requirements{};
 struct device_image_memory_requirements{};
@@ -110,7 +110,7 @@ struct maintenance4{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::device_buffer_memory_requirements>
+struct vulkan_object_trait<tag::device_buffer_memory_requirements>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -118,7 +118,7 @@ struct vulkan_object_trait<obj::device_buffer_memory_requirements>
 };
 
 template<>
-struct vulkan_object_trait<obj::device_image_memory_requirements>
+struct vulkan_object_trait<tag::device_image_memory_requirements>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -126,7 +126,7 @@ struct vulkan_object_trait<obj::device_image_memory_requirements>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::maintenance4>
+struct vulkan_object_trait<tag::feature::maintenance4>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -134,7 +134,7 @@ struct vulkan_object_trait<obj::feature::maintenance4>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::maintenance4>
+struct vulkan_object_trait<tag::property::maintenance4>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -144,11 +144,11 @@ struct vulkan_object_trait<obj::property::maintenance4>
 template<>
 struct expression_vulkan_tag<VkDeviceBufferMemoryRequirements>
 {
-	using type = obj::device_buffer_memory_requirements;
+	using type = tag::device_buffer_memory_requirements;
 };
 
 template<>
-struct vulkan_object_native<obj::device_buffer_memory_requirements>
+struct vulkan_object_native<tag::device_buffer_memory_requirements>
 {
 	using type = VkDeviceBufferMemoryRequirements;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEVICE_BUFFER_MEMORY_REQUIREMENTS;
@@ -157,11 +157,11 @@ struct vulkan_object_native<obj::device_buffer_memory_requirements>
 template<>
 struct expression_vulkan_tag<VkDeviceImageMemoryRequirements>
 {
-	using type = obj::device_image_memory_requirements;
+	using type = tag::device_image_memory_requirements;
 };
 
 template<>
-struct vulkan_object_native<obj::device_image_memory_requirements>
+struct vulkan_object_native<tag::device_image_memory_requirements>
 {
 	using type = VkDeviceImageMemoryRequirements;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEVICE_IMAGE_MEMORY_REQUIREMENTS;
@@ -170,11 +170,11 @@ struct vulkan_object_native<obj::device_image_memory_requirements>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMaintenance4Features>
 {
-	using type = obj::feature::maintenance4;
+	using type = tag::feature::maintenance4;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::maintenance4>
+struct vulkan_object_native<tag::feature::maintenance4>
 {
 	using type = VkPhysicalDeviceMaintenance4Features;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_4_FEATURES;
@@ -183,18 +183,18 @@ struct vulkan_object_native<obj::feature::maintenance4>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMaintenance4Properties>
 {
-	using type = obj::property::maintenance4;
+	using type = tag::property::maintenance4;
 };
 
 template<>
-struct vulkan_object_native<obj::property::maintenance4>
+struct vulkan_object_native<tag::property::maintenance4>
 {
 	using type = VkPhysicalDeviceMaintenance4Properties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_4_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::device_buffer_memory_requirements>
+struct vulkan_object_extensions<tag::device_buffer_memory_requirements>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance4"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -202,7 +202,7 @@ struct vulkan_object_extensions<obj::device_buffer_memory_requirements>
 };
 
 template<>
-struct vulkan_object_extensions<obj::device_image_memory_requirements>
+struct vulkan_object_extensions<tag::device_image_memory_requirements>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance4"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -210,7 +210,7 @@ struct vulkan_object_extensions<obj::device_image_memory_requirements>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::maintenance4>
+struct vulkan_object_extensions<tag::feature::maintenance4>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance4"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -218,7 +218,7 @@ struct vulkan_object_extensions<obj::feature::maintenance4>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::maintenance4>
+struct vulkan_object_extensions<tag::property::maintenance4>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance4"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -226,21 +226,21 @@ struct vulkan_object_extensions<obj::property::maintenance4>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::maintenance4> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::maintenance4> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::maintenance4> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::maintenance4> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::maintenance4> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::maintenance4> = true;
 }
 
 namespace vkfu::param
 {
 using ::vkfu::operator|;
 
-template<::vkfu::reference_expression_for<obj::buffer> create_info_expression = ::vkfu::absent_expression>
+template<::vkfu::reference_expression_for<tag::buffer> create_info_expression = ::vkfu::absent_expression>
 struct device_buffer_memory_requirements
 {
-	using vulkan_tag_type = obj::device_buffer_memory_requirements;
+	using vulkan_tag_type = tag::device_buffer_memory_requirements;
 	using storage_type = ::vkfu::reference_storage<VkDeviceBufferMemoryRequirements
 		, ::vkfu::reference_slot<&VkDeviceBufferMemoryRequirements::pCreateInfo, ::vkfu::reference_storage_of_t<create_info_expression>>
 		>;
@@ -260,10 +260,10 @@ struct device_buffer_memory_requirements
 	}
 };
 
-template<::vkfu::reference_expression_for<obj::image> create_info_expression = ::vkfu::absent_expression>
+template<::vkfu::reference_expression_for<tag::image> create_info_expression = ::vkfu::absent_expression>
 struct device_image_memory_requirements
 {
-	using vulkan_tag_type = obj::device_image_memory_requirements;
+	using vulkan_tag_type = tag::device_image_memory_requirements;
 	using storage_type = ::vkfu::reference_storage<VkDeviceImageMemoryRequirements
 		, ::vkfu::reference_slot<&VkDeviceImageMemoryRequirements::pCreateInfo, ::vkfu::reference_storage_of_t<create_info_expression>>
 		>;
@@ -291,7 +291,7 @@ using ::vkfu::operator|;
 
 struct maintenance4
 {
-	using vulkan_tag_type = obj::feature::maintenance4;
+	using vulkan_tag_type = tag::feature::maintenance4;
 
 	bool enable = false;
 
@@ -310,7 +310,7 @@ struct maintenance4
 
 namespace vkfu
 {
-template<::vkfu::expression_for<::vkfu::obj::device_image_memory_requirements> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::device_image_memory_requirements> Expression1>
 [[nodiscard]] auto count_device_image_sparse_memory_requirements(VkDevice device, Expression1&& info) -> ::std::uint32_t
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
@@ -319,7 +319,7 @@ template<::vkfu::expression_for<::vkfu::obj::device_image_memory_requirements> E
 	return count;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::device_image_memory_requirements> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::device_image_memory_requirements> Expression1>
 [[nodiscard]] auto get_device_image_sparse_memory_requirements(VkDevice device, Expression1&& info, ::std::span<VkSparseImageMemoryRequirements2> out) -> ::std::span<VkSparseImageMemoryRequirements2>
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
@@ -333,7 +333,7 @@ template<::vkfu::expression_for<::vkfu::obj::device_image_memory_requirements> E
 	return out.first(count);
 }
 
-template<::vkfu::expression_for<::vkfu::obj::device_image_memory_requirements> Expression1, ::std::contiguous_iterator Out>
+template<::vkfu::expression_for<::vkfu::tag::device_image_memory_requirements> Expression1, ::std::contiguous_iterator Out>
 	requires ::std::same_as<::std::iter_value_t<Out>, VkSparseImageMemoryRequirements2>
 [[nodiscard]] auto get_device_image_sparse_memory_requirements(VkDevice device, Expression1&& info, Out out) -> Out
 {
@@ -342,20 +342,20 @@ template<::vkfu::expression_for<::vkfu::obj::device_image_memory_requirements> E
 	return out + static_cast<::std::iter_difference_t<Out>>(written.size());
 }
 
-template<::vkfu::query_extension_of<::vkfu::obj::result::memory_requirements2>... Extras, ::vkfu::expression_for<::vkfu::obj::device_buffer_memory_requirements> Expression1>
-[[nodiscard]] auto get_device_buffer_memory_requirements(VkDevice device, Expression1&& info) -> ::vkfu::query_chain<::vkfu::obj::result::memory_requirements2, Extras...>
+template<::vkfu::query_extension_of<::vkfu::tag::result::memory_requirements2>... Extras, ::vkfu::expression_for<::vkfu::tag::device_buffer_memory_requirements> Expression1>
+[[nodiscard]] auto get_device_buffer_memory_requirements(VkDevice device, Expression1&& info) -> ::vkfu::query_chain<::vkfu::tag::result::memory_requirements2, Extras...>
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
-	auto chain = ::vkfu::query_chain<::vkfu::obj::result::memory_requirements2, Extras...>{};
+	auto chain = ::vkfu::query_chain<::vkfu::tag::result::memory_requirements2, Extras...>{};
 	::vkGetDeviceBufferMemoryRequirements(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(chain.head()));
 	return chain;
 }
 
-template<::vkfu::query_extension_of<::vkfu::obj::result::memory_requirements2>... Extras, ::vkfu::expression_for<::vkfu::obj::device_image_memory_requirements> Expression1>
-[[nodiscard]] auto get_device_image_memory_requirements(VkDevice device, Expression1&& info) -> ::vkfu::query_chain<::vkfu::obj::result::memory_requirements2, Extras...>
+template<::vkfu::query_extension_of<::vkfu::tag::result::memory_requirements2>... Extras, ::vkfu::expression_for<::vkfu::tag::device_image_memory_requirements> Expression1>
+[[nodiscard]] auto get_device_image_memory_requirements(VkDevice device, Expression1&& info) -> ::vkfu::query_chain<::vkfu::tag::result::memory_requirements2, Extras...>
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
-	auto chain = ::vkfu::query_chain<::vkfu::obj::result::memory_requirements2, Extras...>{};
+	auto chain = ::vkfu::query_chain<::vkfu::tag::result::memory_requirements2, Extras...>{};
 	::vkGetDeviceImageMemoryRequirements(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(chain.head()));
 	return chain;
 }

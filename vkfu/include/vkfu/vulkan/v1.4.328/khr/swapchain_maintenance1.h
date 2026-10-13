@@ -29,6 +29,7 @@
 #include "../version_1_0/device.h"
 #include "../version_1_1/get_physical_device_properties2.h"
 #include "swapchain.h"
+#include "surface_maintenance1.h"
 
 constexpr auto _vkfu_address(VkPhysicalDeviceSwapchainMaintenance1FeaturesKHR& value) noexcept -> void const*
 {
@@ -120,7 +121,7 @@ constexpr auto _vkfu_evaluate(VkSwapchainPresentScalingCreateInfoKHR const& valu
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -142,7 +143,7 @@ struct swapchain_present_scaling{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::swapchain_maintenance1>
+struct vulkan_object_trait<tag::feature::khr::swapchain_maintenance1>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -150,7 +151,7 @@ struct vulkan_object_trait<obj::feature::khr::swapchain_maintenance1>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::release_swapchain_images>
+struct vulkan_object_trait<tag::khr::release_swapchain_images>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -158,7 +159,7 @@ struct vulkan_object_trait<obj::khr::release_swapchain_images>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::swapchain_present_fence>
+struct vulkan_object_trait<tag::option::khr::swapchain_present_fence>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -166,7 +167,7 @@ struct vulkan_object_trait<obj::option::khr::swapchain_present_fence>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::swapchain_present_mode>
+struct vulkan_object_trait<tag::option::khr::swapchain_present_mode>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -174,7 +175,7 @@ struct vulkan_object_trait<obj::option::khr::swapchain_present_mode>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::swapchain_present_modes>
+struct vulkan_object_trait<tag::option::khr::swapchain_present_modes>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -182,7 +183,7 @@ struct vulkan_object_trait<obj::option::khr::swapchain_present_modes>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::swapchain_present_scaling>
+struct vulkan_object_trait<tag::option::khr::swapchain_present_scaling>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -192,11 +193,11 @@ struct vulkan_object_trait<obj::option::khr::swapchain_present_scaling>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceSwapchainMaintenance1FeaturesKHR>
 {
-	using type = obj::feature::khr::swapchain_maintenance1;
+	using type = tag::feature::khr::swapchain_maintenance1;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::swapchain_maintenance1>
+struct vulkan_object_native<tag::feature::khr::swapchain_maintenance1>
 {
 	using type = VkPhysicalDeviceSwapchainMaintenance1FeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SWAPCHAIN_MAINTENANCE_1_FEATURES_KHR;
@@ -205,11 +206,11 @@ struct vulkan_object_native<obj::feature::khr::swapchain_maintenance1>
 template<>
 struct expression_vulkan_tag<VkReleaseSwapchainImagesInfoKHR>
 {
-	using type = obj::khr::release_swapchain_images;
+	using type = tag::khr::release_swapchain_images;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::release_swapchain_images>
+struct vulkan_object_native<tag::khr::release_swapchain_images>
 {
 	using type = VkReleaseSwapchainImagesInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RELEASE_SWAPCHAIN_IMAGES_INFO_KHR;
@@ -218,11 +219,11 @@ struct vulkan_object_native<obj::khr::release_swapchain_images>
 template<>
 struct expression_vulkan_tag<VkSwapchainPresentFenceInfoKHR>
 {
-	using type = obj::option::khr::swapchain_present_fence;
+	using type = tag::option::khr::swapchain_present_fence;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::swapchain_present_fence>
+struct vulkan_object_native<tag::option::khr::swapchain_present_fence>
 {
 	using type = VkSwapchainPresentFenceInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SWAPCHAIN_PRESENT_FENCE_INFO_KHR;
@@ -231,11 +232,11 @@ struct vulkan_object_native<obj::option::khr::swapchain_present_fence>
 template<>
 struct expression_vulkan_tag<VkSwapchainPresentModeInfoKHR>
 {
-	using type = obj::option::khr::swapchain_present_mode;
+	using type = tag::option::khr::swapchain_present_mode;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::swapchain_present_mode>
+struct vulkan_object_native<tag::option::khr::swapchain_present_mode>
 {
 	using type = VkSwapchainPresentModeInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SWAPCHAIN_PRESENT_MODE_INFO_KHR;
@@ -244,11 +245,11 @@ struct vulkan_object_native<obj::option::khr::swapchain_present_mode>
 template<>
 struct expression_vulkan_tag<VkSwapchainPresentModesCreateInfoKHR>
 {
-	using type = obj::option::khr::swapchain_present_modes;
+	using type = tag::option::khr::swapchain_present_modes;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::swapchain_present_modes>
+struct vulkan_object_native<tag::option::khr::swapchain_present_modes>
 {
 	using type = VkSwapchainPresentModesCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SWAPCHAIN_PRESENT_MODES_CREATE_INFO_KHR;
@@ -257,18 +258,18 @@ struct vulkan_object_native<obj::option::khr::swapchain_present_modes>
 template<>
 struct expression_vulkan_tag<VkSwapchainPresentScalingCreateInfoKHR>
 {
-	using type = obj::option::khr::swapchain_present_scaling;
+	using type = tag::option::khr::swapchain_present_scaling;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::swapchain_present_scaling>
+struct vulkan_object_native<tag::option::khr::swapchain_present_scaling>
 {
 	using type = VkSwapchainPresentScalingCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SWAPCHAIN_PRESENT_SCALING_CREATE_INFO_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::swapchain_maintenance1>
+struct vulkan_object_extensions<tag::feature::khr::swapchain_maintenance1>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_swapchain_maintenance1", "VK_KHR_swapchain_maintenance1"};
 	constexpr static ::std::uint32_t core = 0;
@@ -276,7 +277,7 @@ struct vulkan_object_extensions<obj::feature::khr::swapchain_maintenance1>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::release_swapchain_images>
+struct vulkan_object_extensions<tag::khr::release_swapchain_images>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_swapchain_maintenance1", "VK_KHR_swapchain_maintenance1"};
 	constexpr static ::std::uint32_t core = 0;
@@ -284,7 +285,7 @@ struct vulkan_object_extensions<obj::khr::release_swapchain_images>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::swapchain_present_fence>
+struct vulkan_object_extensions<tag::option::khr::swapchain_present_fence>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_swapchain_maintenance1", "VK_KHR_swapchain_maintenance1"};
 	constexpr static ::std::uint32_t core = 0;
@@ -292,7 +293,7 @@ struct vulkan_object_extensions<obj::option::khr::swapchain_present_fence>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::swapchain_present_mode>
+struct vulkan_object_extensions<tag::option::khr::swapchain_present_mode>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_swapchain_maintenance1", "VK_KHR_swapchain_maintenance1"};
 	constexpr static ::std::uint32_t core = 0;
@@ -300,7 +301,7 @@ struct vulkan_object_extensions<obj::option::khr::swapchain_present_mode>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::swapchain_present_modes>
+struct vulkan_object_extensions<tag::option::khr::swapchain_present_modes>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_swapchain_maintenance1", "VK_KHR_swapchain_maintenance1"};
 	constexpr static ::std::uint32_t core = 0;
@@ -308,7 +309,7 @@ struct vulkan_object_extensions<obj::option::khr::swapchain_present_modes>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::swapchain_present_scaling>
+struct vulkan_object_extensions<tag::option::khr::swapchain_present_scaling>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_swapchain_maintenance1", "VK_KHR_swapchain_maintenance1"};
 	constexpr static ::std::uint32_t core = 0;
@@ -316,17 +317,17 @@ struct vulkan_object_extensions<obj::option::khr::swapchain_present_scaling>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::swapchain_maintenance1> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::swapchain_maintenance1> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::swapchain_maintenance1> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::swapchain_maintenance1> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::present, obj::option::khr::swapchain_present_fence> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::present, tag::option::khr::swapchain_present_fence> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::present, obj::option::khr::swapchain_present_mode> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::present, tag::option::khr::swapchain_present_mode> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::swapchain, obj::option::khr::swapchain_present_modes> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::swapchain, tag::option::khr::swapchain_present_modes> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::swapchain, obj::option::khr::swapchain_present_scaling> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::swapchain, tag::option::khr::swapchain_present_scaling> = true;
 }
 
 namespace vkfu::param
@@ -337,7 +338,7 @@ using ::vkfu::operator|;
 
 struct swapchain_maintenance1
 {
-	using vulkan_tag_type = obj::feature::khr::swapchain_maintenance1;
+	using vulkan_tag_type = tag::feature::khr::swapchain_maintenance1;
 
 	bool enable = false;
 
@@ -359,7 +360,7 @@ using ::vkfu::operator|;
 
 struct release_swapchain_images
 {
-	using vulkan_tag_type = obj::khr::release_swapchain_images;
+	using vulkan_tag_type = tag::khr::release_swapchain_images;
 
 	VkSwapchainKHR swapchain{};
 	::std::span<::std::uint32_t const> image_indices{};
@@ -384,7 +385,7 @@ using ::vkfu::operator|;
 
 struct swapchain_present_fence
 {
-	using vulkan_tag_type = obj::option::khr::swapchain_present_fence;
+	using vulkan_tag_type = tag::option::khr::swapchain_present_fence;
 
 	::std::span<VkFence const> fences{};
 
@@ -401,7 +402,7 @@ struct swapchain_present_fence
 
 struct swapchain_present_mode
 {
-	using vulkan_tag_type = obj::option::khr::swapchain_present_mode;
+	using vulkan_tag_type = tag::option::khr::swapchain_present_mode;
 
 	::std::span<VkPresentModeKHR const> present_modes{};
 
@@ -418,7 +419,7 @@ struct swapchain_present_mode
 
 struct swapchain_present_modes
 {
-	using vulkan_tag_type = obj::option::khr::swapchain_present_modes;
+	using vulkan_tag_type = tag::option::khr::swapchain_present_modes;
 
 	::std::span<VkPresentModeKHR const> present_modes{};
 
@@ -435,35 +436,11 @@ struct swapchain_present_modes
 
 struct swapchain_present_scaling
 {
-	using vulkan_tag_type = obj::option::khr::swapchain_present_scaling;
+	using vulkan_tag_type = tag::option::khr::swapchain_present_scaling;
 
-	struct scaling_behavior_type
-	{
-		VkPresentScalingFlagsKHR one_to_one : 1 = 0;
-		VkPresentScalingFlagsKHR aspect_ratio_stretch : 1 = 0;
-		VkPresentScalingFlagsKHR stretch : 1 = 0;
-		VkPresentScalingFlagsKHR _reserved_3 : 29 = 0;
-	};
-
-	scaling_behavior_type scaling_behavior{};
-	struct present_gravity_x_type
-	{
-		VkPresentGravityFlagsKHR min : 1 = 0;
-		VkPresentGravityFlagsKHR max : 1 = 0;
-		VkPresentGravityFlagsKHR centered : 1 = 0;
-		VkPresentGravityFlagsKHR _reserved_3 : 29 = 0;
-	};
-
-	present_gravity_x_type present_gravity_x{};
-	struct present_gravity_y_type
-	{
-		VkPresentGravityFlagsKHR min : 1 = 0;
-		VkPresentGravityFlagsKHR max : 1 = 0;
-		VkPresentGravityFlagsKHR centered : 1 = 0;
-		VkPresentGravityFlagsKHR _reserved_3 : 29 = 0;
-	};
-
-	present_gravity_y_type present_gravity_y{};
+	::vkfu::flags::present_scaling scaling_behavior{};
+	::vkfu::flags::present_gravity present_gravity_x{};
+	::vkfu::flags::present_gravity present_gravity_y{};
 
 	constexpr auto evaluate() const noexcept -> VkSwapchainPresentScalingCreateInfoKHR
 	{
@@ -477,27 +454,6 @@ struct swapchain_present_scaling
 	}
 };
 
-static_assert(sizeof(swapchain_present_scaling::scaling_behavior_type) == sizeof(VkPresentScalingFlagsKHR));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkPresentScalingFlagsKHR>(swapchain_present_scaling::scaling_behavior_type{.one_to_one = 1}) == VK_PRESENT_SCALING_ONE_TO_ONE_BIT_KHR);
-static_assert(::std::bit_cast<VkPresentScalingFlagsKHR>(swapchain_present_scaling::scaling_behavior_type{.aspect_ratio_stretch = 1}) == VK_PRESENT_SCALING_ASPECT_RATIO_STRETCH_BIT_KHR);
-static_assert(::std::bit_cast<VkPresentScalingFlagsKHR>(swapchain_present_scaling::scaling_behavior_type{.stretch = 1}) == VK_PRESENT_SCALING_STRETCH_BIT_KHR);
-#endif
-
-static_assert(sizeof(swapchain_present_scaling::present_gravity_x_type) == sizeof(VkPresentGravityFlagsKHR));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkPresentGravityFlagsKHR>(swapchain_present_scaling::present_gravity_x_type{.min = 1}) == VK_PRESENT_GRAVITY_MIN_BIT_KHR);
-static_assert(::std::bit_cast<VkPresentGravityFlagsKHR>(swapchain_present_scaling::present_gravity_x_type{.max = 1}) == VK_PRESENT_GRAVITY_MAX_BIT_KHR);
-static_assert(::std::bit_cast<VkPresentGravityFlagsKHR>(swapchain_present_scaling::present_gravity_x_type{.centered = 1}) == VK_PRESENT_GRAVITY_CENTERED_BIT_KHR);
-#endif
-
-static_assert(sizeof(swapchain_present_scaling::present_gravity_y_type) == sizeof(VkPresentGravityFlagsKHR));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkPresentGravityFlagsKHR>(swapchain_present_scaling::present_gravity_y_type{.min = 1}) == VK_PRESENT_GRAVITY_MIN_BIT_KHR);
-static_assert(::std::bit_cast<VkPresentGravityFlagsKHR>(swapchain_present_scaling::present_gravity_y_type{.max = 1}) == VK_PRESENT_GRAVITY_MAX_BIT_KHR);
-static_assert(::std::bit_cast<VkPresentGravityFlagsKHR>(swapchain_present_scaling::present_gravity_y_type{.centered = 1}) == VK_PRESENT_GRAVITY_CENTERED_BIT_KHR);
-#endif
-
 }
 }
 
@@ -505,7 +461,7 @@ namespace vkfu
 {
 namespace khr
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::release_swapchain_images> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::release_swapchain_images> Expression1>
 [[nodiscard]] auto release_swapchain_images(VkDevice device, Expression1&& release_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -518,7 +474,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::release_swapchain_images> Expr
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::release_swapchain_images> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::release_swapchain_images> Expression1>
 void release_swapchain_images(VkDevice device, Expression1&& release_info)
 {
 	auto outcome = release_swapchain_images(device, ::std::forward<Expression1>(release_info), ::std::nothrow);

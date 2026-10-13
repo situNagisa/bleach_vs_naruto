@@ -29,6 +29,7 @@
 
 #include "../version_1_0/fence.h"
 #include "../version_1_1/external_fence_capabilities.h"
+#include "../version_1_1/external_fence.h"
 
 constexpr auto _vkfu_address(VkExportFenceWin32HandleInfoKHR& value) noexcept -> void const*
 {
@@ -75,7 +76,7 @@ constexpr auto _vkfu_evaluate(VkImportFenceWin32HandleInfoKHR const& value) noex
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
@@ -91,7 +92,7 @@ struct export_fence_win32_handle{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::khr::export_fence_win32_handle>
+struct vulkan_object_trait<tag::option::khr::export_fence_win32_handle>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -99,7 +100,7 @@ struct vulkan_object_trait<obj::option::khr::export_fence_win32_handle>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::fence_get_win32_handle>
+struct vulkan_object_trait<tag::khr::fence_get_win32_handle>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -107,7 +108,7 @@ struct vulkan_object_trait<obj::khr::fence_get_win32_handle>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::import_fence_win32_handle>
+struct vulkan_object_trait<tag::khr::import_fence_win32_handle>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -117,11 +118,11 @@ struct vulkan_object_trait<obj::khr::import_fence_win32_handle>
 template<>
 struct expression_vulkan_tag<VkExportFenceWin32HandleInfoKHR>
 {
-	using type = obj::option::khr::export_fence_win32_handle;
+	using type = tag::option::khr::export_fence_win32_handle;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::export_fence_win32_handle>
+struct vulkan_object_native<tag::option::khr::export_fence_win32_handle>
 {
 	using type = VkExportFenceWin32HandleInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXPORT_FENCE_WIN32_HANDLE_INFO_KHR;
@@ -130,11 +131,11 @@ struct vulkan_object_native<obj::option::khr::export_fence_win32_handle>
 template<>
 struct expression_vulkan_tag<VkFenceGetWin32HandleInfoKHR>
 {
-	using type = obj::khr::fence_get_win32_handle;
+	using type = tag::khr::fence_get_win32_handle;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::fence_get_win32_handle>
+struct vulkan_object_native<tag::khr::fence_get_win32_handle>
 {
 	using type = VkFenceGetWin32HandleInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_FENCE_GET_WIN32_HANDLE_INFO_KHR;
@@ -143,18 +144,18 @@ struct vulkan_object_native<obj::khr::fence_get_win32_handle>
 template<>
 struct expression_vulkan_tag<VkImportFenceWin32HandleInfoKHR>
 {
-	using type = obj::khr::import_fence_win32_handle;
+	using type = tag::khr::import_fence_win32_handle;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::import_fence_win32_handle>
+struct vulkan_object_native<tag::khr::import_fence_win32_handle>
 {
 	using type = VkImportFenceWin32HandleInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMPORT_FENCE_WIN32_HANDLE_INFO_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::export_fence_win32_handle>
+struct vulkan_object_extensions<tag::option::khr::export_fence_win32_handle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_fence_win32"};
 	constexpr static ::std::uint32_t core = 0;
@@ -162,7 +163,7 @@ struct vulkan_object_extensions<obj::option::khr::export_fence_win32_handle>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::fence_get_win32_handle>
+struct vulkan_object_extensions<tag::khr::fence_get_win32_handle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_fence_win32"};
 	constexpr static ::std::uint32_t core = 0;
@@ -170,7 +171,7 @@ struct vulkan_object_extensions<obj::khr::fence_get_win32_handle>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::import_fence_win32_handle>
+struct vulkan_object_extensions<tag::khr::import_fence_win32_handle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_fence_win32"};
 	constexpr static ::std::uint32_t core = 0;
@@ -178,7 +179,7 @@ struct vulkan_object_extensions<obj::khr::import_fence_win32_handle>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::fence, obj::option::khr::export_fence_win32_handle> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::fence, tag::option::khr::export_fence_win32_handle> = true;
 }
 
 namespace vkfu::param
@@ -189,7 +190,7 @@ using ::vkfu::operator|;
 
 struct fence_get_win32_handle
 {
-	using vulkan_tag_type = obj::khr::fence_get_win32_handle;
+	using vulkan_tag_type = tag::khr::fence_get_win32_handle;
 
 	VkFence fence{};
 	::vkfu::enums::external_fence_handle_type handle_type{};
@@ -207,16 +208,10 @@ struct fence_get_win32_handle
 
 struct import_fence_win32_handle
 {
-	using vulkan_tag_type = obj::khr::import_fence_win32_handle;
+	using vulkan_tag_type = tag::khr::import_fence_win32_handle;
 
 	VkFence fence{};
-	struct flags_type
-	{
-		VkFenceImportFlags temporary : 1 = 0;
-		VkFenceImportFlags _reserved_1 : 31 = 0;
-	};
-
-	flags_type flags{};
+	::vkfu::flags::fence_import flags{};
 	::vkfu::enums::external_fence_handle_type handle_type{};
 	HANDLE handle{};
 	LPCWSTR name{};
@@ -235,11 +230,6 @@ struct import_fence_win32_handle
 	}
 };
 
-static_assert(sizeof(import_fence_win32_handle::flags_type) == sizeof(VkFenceImportFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkFenceImportFlags>(import_fence_win32_handle::flags_type{.temporary = 1}) == VK_FENCE_IMPORT_TEMPORARY_BIT);
-#endif
-
 }
 
 namespace option::khr
@@ -248,7 +238,7 @@ using ::vkfu::operator|;
 
 struct export_fence_win32_handle
 {
-	using vulkan_tag_type = obj::option::khr::export_fence_win32_handle;
+	using vulkan_tag_type = tag::option::khr::export_fence_win32_handle;
 
 	SECURITY_ATTRIBUTES const* attributes = nullptr;
 	DWORD dw_access{};
@@ -273,7 +263,7 @@ namespace vkfu
 {
 namespace khr
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::fence_get_win32_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::fence_get_win32_handle> Expression1>
 [[nodiscard]] auto get_fence_win32_handle(VkDevice device, Expression1&& get_win32_handle_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<HANDLE, ::VkResult>
 {
@@ -287,7 +277,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::fence_get_win32_handle> Expres
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::fence_get_win32_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::fence_get_win32_handle> Expression1>
 [[nodiscard]] auto get_fence_win32_handle(VkDevice device, Expression1&& get_win32_handle_info) -> HANDLE
 {
 	auto outcome = get_fence_win32_handle(device, ::std::forward<Expression1>(get_win32_handle_info), ::std::nothrow);
@@ -298,7 +288,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::fence_get_win32_handle> Expres
 	return *outcome;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::import_fence_win32_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::import_fence_win32_handle> Expression1>
 [[nodiscard]] auto import_fence_win32_handle(VkDevice device, Expression1&& import_fence_win32_handle_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -311,7 +301,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::import_fence_win32_handle> Exp
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::import_fence_win32_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::import_fence_win32_handle> Expression1>
 void import_fence_win32_handle(VkDevice device, Expression1&& import_fence_win32_handle_info)
 {
 	auto outcome = import_fence_win32_handle(device, ::std::forward<Expression1>(import_fence_win32_handle_info), ::std::nothrow);

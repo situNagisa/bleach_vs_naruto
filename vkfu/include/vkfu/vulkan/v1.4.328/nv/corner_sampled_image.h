@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceCornerSampledImageFeaturesNV const
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -55,7 +55,7 @@ struct corner_sampled_image{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::corner_sampled_image>
+struct vulkan_object_trait<tag::feature::nv::corner_sampled_image>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::nv::corner_sampled_image>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceCornerSampledImageFeaturesNV>
 {
-	using type = obj::feature::nv::corner_sampled_image;
+	using type = tag::feature::nv::corner_sampled_image;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::corner_sampled_image>
+struct vulkan_object_native<tag::feature::nv::corner_sampled_image>
 {
 	using type = VkPhysicalDeviceCornerSampledImageFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CORNER_SAMPLED_IMAGE_FEATURES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::corner_sampled_image>
+struct vulkan_object_extensions<tag::feature::nv::corner_sampled_image>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_corner_sampled_image"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::nv::corner_sampled_image>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::corner_sampled_image> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::corner_sampled_image> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::corner_sampled_image> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::corner_sampled_image> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct corner_sampled_image
 {
-	using vulkan_tag_type = obj::feature::nv::corner_sampled_image;
+	using vulkan_tag_type = tag::feature::nv::corner_sampled_image;
 
 	bool enable = false;
 

@@ -73,7 +73,7 @@ constexpr auto _vkfu_evaluate(VkDebugMarkerObjectTagInfoEXT const& value) noexce
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace ext
 {
@@ -86,7 +86,7 @@ struct debug_marker_object_tag{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::ext::debug_marker>
+struct vulkan_object_trait<tag::ext::debug_marker>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -94,7 +94,7 @@ struct vulkan_object_trait<obj::ext::debug_marker>
 };
 
 template<>
-struct vulkan_object_trait<obj::ext::debug_marker_object_name>
+struct vulkan_object_trait<tag::ext::debug_marker_object_name>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -102,7 +102,7 @@ struct vulkan_object_trait<obj::ext::debug_marker_object_name>
 };
 
 template<>
-struct vulkan_object_trait<obj::ext::debug_marker_object_tag>
+struct vulkan_object_trait<tag::ext::debug_marker_object_tag>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -112,11 +112,11 @@ struct vulkan_object_trait<obj::ext::debug_marker_object_tag>
 template<>
 struct expression_vulkan_tag<VkDebugMarkerMarkerInfoEXT>
 {
-	using type = obj::ext::debug_marker;
+	using type = tag::ext::debug_marker;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::debug_marker>
+struct vulkan_object_native<tag::ext::debug_marker>
 {
 	using type = VkDebugMarkerMarkerInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
@@ -125,11 +125,11 @@ struct vulkan_object_native<obj::ext::debug_marker>
 template<>
 struct expression_vulkan_tag<VkDebugMarkerObjectNameInfoEXT>
 {
-	using type = obj::ext::debug_marker_object_name;
+	using type = tag::ext::debug_marker_object_name;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::debug_marker_object_name>
+struct vulkan_object_native<tag::ext::debug_marker_object_name>
 {
 	using type = VkDebugMarkerObjectNameInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT;
@@ -138,18 +138,18 @@ struct vulkan_object_native<obj::ext::debug_marker_object_name>
 template<>
 struct expression_vulkan_tag<VkDebugMarkerObjectTagInfoEXT>
 {
-	using type = obj::ext::debug_marker_object_tag;
+	using type = tag::ext::debug_marker_object_tag;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::debug_marker_object_tag>
+struct vulkan_object_native<tag::ext::debug_marker_object_tag>
 {
 	using type = VkDebugMarkerObjectTagInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_TAG_INFO_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::debug_marker>
+struct vulkan_object_extensions<tag::ext::debug_marker>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_debug_marker"};
 	constexpr static ::std::uint32_t core = 0;
@@ -157,7 +157,7 @@ struct vulkan_object_extensions<obj::ext::debug_marker>
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::debug_marker_object_name>
+struct vulkan_object_extensions<tag::ext::debug_marker_object_name>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_debug_marker"};
 	constexpr static ::std::uint32_t core = 0;
@@ -165,7 +165,7 @@ struct vulkan_object_extensions<obj::ext::debug_marker_object_name>
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::debug_marker_object_tag>
+struct vulkan_object_extensions<tag::ext::debug_marker_object_tag>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_debug_marker"};
 	constexpr static ::std::uint32_t core = 0;
@@ -182,7 +182,7 @@ using ::vkfu::operator|;
 
 struct debug_marker
 {
-	using vulkan_tag_type = obj::ext::debug_marker;
+	using vulkan_tag_type = tag::ext::debug_marker;
 
 	char const* marker_name = nullptr;
 	::std::array<float, 4> color{};
@@ -202,7 +202,7 @@ struct debug_marker
 
 struct debug_marker_object_name
 {
-	using vulkan_tag_type = obj::ext::debug_marker_object_name;
+	using vulkan_tag_type = tag::ext::debug_marker_object_name;
 
 	::vkfu::enums::debug_report_object_type object_type{};
 	::std::uint64_t object{};
@@ -222,7 +222,7 @@ struct debug_marker_object_name
 
 struct debug_marker_object_tag
 {
-	using vulkan_tag_type = obj::ext::debug_marker_object_tag;
+	using vulkan_tag_type = tag::ext::debug_marker_object_tag;
 
 	::vkfu::enums::debug_report_object_type object_type{};
 	::std::uint64_t object{};
@@ -251,21 +251,21 @@ namespace vkfu
 {
 namespace ext
 {
-template<::vkfu::expression_for<::vkfu::obj::ext::debug_marker> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::debug_marker> Expression1>
 void cmd_debug_marker_begin(VkCommandBuffer command_buffer, Expression1&& marker_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(marker_info));
 	::vkCmdDebugMarkerBeginEXT(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::debug_marker> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::debug_marker> Expression1>
 void cmd_debug_marker_insert(VkCommandBuffer command_buffer, Expression1&& marker_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(marker_info));
 	::vkCmdDebugMarkerInsertEXT(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::debug_marker_object_name> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::debug_marker_object_name> Expression1>
 [[nodiscard]] auto debug_marker_set_object_name(VkDevice device, Expression1&& name_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -278,7 +278,7 @@ template<::vkfu::expression_for<::vkfu::obj::ext::debug_marker_object_name> Expr
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::debug_marker_object_name> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::debug_marker_object_name> Expression1>
 void debug_marker_set_object_name(VkDevice device, Expression1&& name_info)
 {
 	auto outcome = debug_marker_set_object_name(device, ::std::forward<Expression1>(name_info), ::std::nothrow);
@@ -288,7 +288,7 @@ void debug_marker_set_object_name(VkDevice device, Expression1&& name_info)
 	}
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::debug_marker_object_tag> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::debug_marker_object_tag> Expression1>
 [[nodiscard]] auto debug_marker_set_object_tag(VkDevice device, Expression1&& tag_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -301,7 +301,7 @@ template<::vkfu::expression_for<::vkfu::obj::ext::debug_marker_object_tag> Expre
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::debug_marker_object_tag> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::debug_marker_object_tag> Expression1>
 void debug_marker_set_object_tag(VkDevice device, Expression1&& tag_info)
 {
 	auto outcome = debug_marker_set_object_tag(device, ::std::forward<Expression1>(tag_info), ::std::nothrow);

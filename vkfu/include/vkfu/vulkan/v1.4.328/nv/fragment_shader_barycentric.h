@@ -28,11 +28,11 @@
 
 #include "../khr/fragment_shader_barycentric.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr::nv
 {
-using fragment_shader_barycentric = ::vkfu::obj::feature::khr::fragment_shader_barycentric;
+using fragment_shader_barycentric = ::vkfu::tag::feature::khr::fragment_shader_barycentric;
 }
 }
 

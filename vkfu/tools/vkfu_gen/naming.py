@@ -126,7 +126,7 @@ def _decompose(text: str) -> list[str] | None:
 
 @dataclasses.dataclass
 class Table:
-	structs: dict[str, str]  # VkXxx -> obj/param name
+	structs: dict[str, str]  # VkXxx -> tag/param name
 	members: dict[str, dict[str, str]]  # VkXxx -> {memberName: field name}
 	bits: dict[str, dict[str, str]]  # VkXxxFlagBits -> {VK_..._BIT: field name}
 	commands: dict[str, str]  # vkCreateBuffer -> qualified function name
@@ -134,6 +134,7 @@ class Table:
 	counts: dict[str, str]  # vkEnumeratePhysicalDevices -> count_physical_devices
 	aliases: dict[str, str]  # VkPhysicalDeviceFeatures2KHR -> feature::khr::core
 	enums: dict[str, str]  # VkFormat -> enum class name
+	flags: dict[str, str]  # VkAccessFlags2 -> flags struct name
 	values: dict[str, dict[str, str]]  # VkFormat -> {VK_FORMAT_...: enumerator}
 
 	def struct_name(self, struct: str) -> str | None:
@@ -159,6 +160,9 @@ class Table:
 
 	def enum_name(self, enum_type: str) -> str | None:
 		return self.enums.get(enum_type)
+
+	def flags_name(self, flags_type: str) -> str | None:
+		return self.flags.get(flags_type)
 
 	def value_name(self, enum_type: str, value: str) -> str | None:
 		return self.values.get(enum_type, {}).get(value)
@@ -204,6 +208,12 @@ def load_table(path: str) -> Table:
 		if entry.get("count"):
 			counts[command] = entry["count"]
 
+	flags = {
+		flags_type: entry["name"]
+		for flags_type, entry in (document.get("flags") or {}).items()
+		if entry.get("name")
+	}
+
 	aliases: dict[str, str] = {}
 	for struct, entry in (document.get("alias") or {}).items():
 		if entry.get("name"):
@@ -218,6 +228,7 @@ def load_table(path: str) -> Table:
 		counts=counts,
 		aliases=aliases,
 		enums=enums,
+		flags=flags,
 		values=values,
 	)
 
@@ -501,6 +512,34 @@ def suggest_enum_names(enum_types: list[str], author_tags: frozenset[str]) -> di
 		if contested and not tag:
 			reviews.append("collision")
 		suggestions[enum_type] = Suggestion(value=value, reviews=reviews)
+	return suggestions
+
+
+def suggest_flags_names(flags_types: list[str], author_tags: frozenset[str]) -> dict[str, Suggestion]:
+	"""Name every flags type at once; the vendor tag only stays to break a tie.
+
+	VkAccessFlags2 -> access2: the `Flags` is what the namespace already says.
+	"""
+	stems = {}
+	for flags_type in flags_types:
+		core, tag = _split_author_tag(flags_type.removeprefix("Vk"), author_tags)
+		stems[flags_type] = (re.sub(r"Flags([0-9]*)$", r"\1", core), tag)
+
+	claims: dict[str, list[str]] = {}
+	for flags_type, (core, _) in stems.items():
+		claims.setdefault("_".join(_tokens(core)), []).append(flags_type)
+
+	suggestions: dict[str, Suggestion] = {}
+	for flags_type, (core, tag) in stems.items():
+		words = _tokens(core)
+		contested = len(claims["_".join(words)]) > 1
+		if contested and tag:
+			words = words + _tokens(tag)
+		value = _escape_keyword("_".join(words))
+		reviews = _reviews(core, value, author_tags)
+		if contested and not tag:
+			reviews.append("collision")
+		suggestions[flags_type] = Suggestion(value=value, reviews=reviews)
 	return suggestions
 
 

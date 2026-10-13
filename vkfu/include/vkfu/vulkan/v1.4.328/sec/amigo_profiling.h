@@ -60,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceAmigoProfilingFeaturesSEC const& v
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::sec
 {
@@ -75,7 +75,7 @@ struct amigo_profiling_submit{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::sec::amigo_profiling_submit>
+struct vulkan_object_trait<tag::option::sec::amigo_profiling_submit>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -83,7 +83,7 @@ struct vulkan_object_trait<obj::option::sec::amigo_profiling_submit>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::sec::amigo_profiling>
+struct vulkan_object_trait<tag::feature::sec::amigo_profiling>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -93,11 +93,11 @@ struct vulkan_object_trait<obj::feature::sec::amigo_profiling>
 template<>
 struct expression_vulkan_tag<VkAmigoProfilingSubmitInfoSEC>
 {
-	using type = obj::option::sec::amigo_profiling_submit;
+	using type = tag::option::sec::amigo_profiling_submit;
 };
 
 template<>
-struct vulkan_object_native<obj::option::sec::amigo_profiling_submit>
+struct vulkan_object_native<tag::option::sec::amigo_profiling_submit>
 {
 	using type = VkAmigoProfilingSubmitInfoSEC;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_AMIGO_PROFILING_SUBMIT_INFO_SEC;
@@ -106,18 +106,18 @@ struct vulkan_object_native<obj::option::sec::amigo_profiling_submit>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceAmigoProfilingFeaturesSEC>
 {
-	using type = obj::feature::sec::amigo_profiling;
+	using type = tag::feature::sec::amigo_profiling;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::sec::amigo_profiling>
+struct vulkan_object_native<tag::feature::sec::amigo_profiling>
 {
 	using type = VkPhysicalDeviceAmigoProfilingFeaturesSEC;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_AMIGO_PROFILING_FEATURES_SEC;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::sec::amigo_profiling_submit>
+struct vulkan_object_extensions<tag::option::sec::amigo_profiling_submit>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_SEC_amigo_profiling"};
 	constexpr static ::std::uint32_t core = 0;
@@ -125,7 +125,7 @@ struct vulkan_object_extensions<obj::option::sec::amigo_profiling_submit>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::sec::amigo_profiling>
+struct vulkan_object_extensions<tag::feature::sec::amigo_profiling>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_SEC_amigo_profiling"};
 	constexpr static ::std::uint32_t core = 0;
@@ -133,11 +133,11 @@ struct vulkan_object_extensions<obj::feature::sec::amigo_profiling>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::sec::amigo_profiling> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::sec::amigo_profiling> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::sec::amigo_profiling> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::sec::amigo_profiling> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::submit, obj::option::sec::amigo_profiling_submit> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::submit, tag::option::sec::amigo_profiling_submit> = true;
 }
 
 namespace vkfu::param
@@ -148,7 +148,7 @@ using ::vkfu::operator|;
 
 struct amigo_profiling
 {
-	using vulkan_tag_type = obj::feature::sec::amigo_profiling;
+	using vulkan_tag_type = tag::feature::sec::amigo_profiling;
 
 	bool enable = false;
 
@@ -170,7 +170,7 @@ using ::vkfu::operator|;
 
 struct amigo_profiling_submit
 {
-	using vulkan_tag_type = obj::option::sec::amigo_profiling_submit;
+	using vulkan_tag_type = tag::option::sec::amigo_profiling_submit;
 
 	::std::uint64_t first_draw_timestamp{};
 	::std::uint64_t swap_buffer_timestamp{};

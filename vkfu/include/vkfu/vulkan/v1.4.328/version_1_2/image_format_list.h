@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkImageFormatListCreateInfo const& value) noexcept
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option
 {
@@ -55,7 +55,7 @@ struct image_format_list{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::image_format_list>
+struct vulkan_object_trait<tag::option::image_format_list>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::option::image_format_list>
 template<>
 struct expression_vulkan_tag<VkImageFormatListCreateInfo>
 {
-	using type = obj::option::image_format_list;
+	using type = tag::option::image_format_list;
 };
 
 template<>
-struct vulkan_object_native<obj::option::image_format_list>
+struct vulkan_object_native<tag::option::image_format_list>
 {
 	using type = VkImageFormatListCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::image_format_list>
+struct vulkan_object_extensions<tag::option::image_format_list>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_image_format_list"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::option::image_format_list>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image, obj::option::image_format_list> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image, tag::option::image_format_list> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::physical_device_image_format2, obj::option::image_format_list> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::physical_device_image_format2, tag::option::image_format_list> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct image_format_list
 {
-	using vulkan_tag_type = obj::option::image_format_list;
+	using vulkan_tag_type = tag::option::image_format_list;
 
 	::std::span<VkFormat const> view_formats{};
 

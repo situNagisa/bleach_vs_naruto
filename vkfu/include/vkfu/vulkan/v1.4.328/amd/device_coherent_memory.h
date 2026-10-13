@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceCoherentMemoryFeaturesAMD const& v
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::amd
 {
@@ -55,7 +55,7 @@ struct coherent_memory{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::amd::coherent_memory>
+struct vulkan_object_trait<tag::feature::amd::coherent_memory>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::amd::coherent_memory>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceCoherentMemoryFeaturesAMD>
 {
-	using type = obj::feature::amd::coherent_memory;
+	using type = tag::feature::amd::coherent_memory;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::amd::coherent_memory>
+struct vulkan_object_native<tag::feature::amd::coherent_memory>
 {
 	using type = VkPhysicalDeviceCoherentMemoryFeaturesAMD;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COHERENT_MEMORY_FEATURES_AMD;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::amd::coherent_memory>
+struct vulkan_object_extensions<tag::feature::amd::coherent_memory>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_AMD_device_coherent_memory"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::amd::coherent_memory>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::amd::coherent_memory> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::amd::coherent_memory> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::amd::coherent_memory> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::amd::coherent_memory> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct coherent_memory
 {
-	using vulkan_tag_type = obj::feature::amd::coherent_memory;
+	using vulkan_tag_type = tag::feature::amd::coherent_memory;
 
 	bool device_coherent_memory = false;
 

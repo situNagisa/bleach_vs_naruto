@@ -74,7 +74,7 @@ constexpr auto _vkfu_evaluate(VkDeviceFaultInfoEXT const& value) noexcept -> VkD
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -90,7 +90,7 @@ struct device_fault{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::fault>
+struct vulkan_object_trait<tag::feature::ext::fault>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -98,7 +98,7 @@ struct vulkan_object_trait<obj::feature::ext::fault>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::device_fault_counts>
+struct vulkan_object_trait<tag::result::ext::device_fault_counts>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -106,7 +106,7 @@ struct vulkan_object_trait<obj::result::ext::device_fault_counts>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::device_fault>
+struct vulkan_object_trait<tag::result::ext::device_fault>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -116,11 +116,11 @@ struct vulkan_object_trait<obj::result::ext::device_fault>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceFaultFeaturesEXT>
 {
-	using type = obj::feature::ext::fault;
+	using type = tag::feature::ext::fault;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::fault>
+struct vulkan_object_native<tag::feature::ext::fault>
 {
 	using type = VkPhysicalDeviceFaultFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FAULT_FEATURES_EXT;
@@ -129,11 +129,11 @@ struct vulkan_object_native<obj::feature::ext::fault>
 template<>
 struct expression_vulkan_tag<VkDeviceFaultCountsEXT>
 {
-	using type = obj::result::ext::device_fault_counts;
+	using type = tag::result::ext::device_fault_counts;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::device_fault_counts>
+struct vulkan_object_native<tag::result::ext::device_fault_counts>
 {
 	using type = VkDeviceFaultCountsEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEVICE_FAULT_COUNTS_EXT;
@@ -142,18 +142,18 @@ struct vulkan_object_native<obj::result::ext::device_fault_counts>
 template<>
 struct expression_vulkan_tag<VkDeviceFaultInfoEXT>
 {
-	using type = obj::result::ext::device_fault;
+	using type = tag::result::ext::device_fault;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::device_fault>
+struct vulkan_object_native<tag::result::ext::device_fault>
 {
 	using type = VkDeviceFaultInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEVICE_FAULT_INFO_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::fault>
+struct vulkan_object_extensions<tag::feature::ext::fault>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_device_fault"};
 	constexpr static ::std::uint32_t core = 0;
@@ -161,7 +161,7 @@ struct vulkan_object_extensions<obj::feature::ext::fault>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::device_fault_counts>
+struct vulkan_object_extensions<tag::result::ext::device_fault_counts>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_device_fault"};
 	constexpr static ::std::uint32_t core = 0;
@@ -169,7 +169,7 @@ struct vulkan_object_extensions<obj::result::ext::device_fault_counts>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::device_fault>
+struct vulkan_object_extensions<tag::result::ext::device_fault>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_device_fault"};
 	constexpr static ::std::uint32_t core = 0;
@@ -177,9 +177,9 @@ struct vulkan_object_extensions<obj::result::ext::device_fault>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::fault> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::fault> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::fault> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::fault> = true;
 }
 
 namespace vkfu::param
@@ -190,7 +190,7 @@ using ::vkfu::operator|;
 
 struct fault
 {
-	using vulkan_tag_type = obj::feature::ext::fault;
+	using vulkan_tag_type = tag::feature::ext::fault;
 
 	bool device_fault = false;
 	bool device_fault_vendor_binary = false;

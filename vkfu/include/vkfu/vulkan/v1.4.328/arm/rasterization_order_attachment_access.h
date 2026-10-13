@@ -28,11 +28,11 @@
 
 #include "../ext/rasterization_order_attachment_access.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext::arm
 {
-using rasterization_order_attachment_access = ::vkfu::obj::feature::ext::rasterization_order_attachment_access;
+using rasterization_order_attachment_access = ::vkfu::tag::feature::ext::rasterization_order_attachment_access;
 }
 }
 

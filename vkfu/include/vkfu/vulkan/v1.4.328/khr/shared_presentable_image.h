@@ -41,7 +41,7 @@ constexpr auto _vkfu_evaluate(VkSharedPresentSurfaceCapabilitiesKHR const& value
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace result::khr
 {
@@ -52,7 +52,7 @@ struct shared_present_surface_capabilities{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::result::khr::shared_present_surface_capabilities>
+struct vulkan_object_trait<tag::result::khr::shared_present_surface_capabilities>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -62,18 +62,18 @@ struct vulkan_object_trait<obj::result::khr::shared_present_surface_capabilities
 template<>
 struct expression_vulkan_tag<VkSharedPresentSurfaceCapabilitiesKHR>
 {
-	using type = obj::result::khr::shared_present_surface_capabilities;
+	using type = tag::result::khr::shared_present_surface_capabilities;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::shared_present_surface_capabilities>
+struct vulkan_object_native<tag::result::khr::shared_present_surface_capabilities>
 {
 	using type = VkSharedPresentSurfaceCapabilitiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SHARED_PRESENT_SURFACE_CAPABILITIES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::shared_present_surface_capabilities>
+struct vulkan_object_extensions<tag::result::khr::shared_present_surface_capabilities>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_shared_presentable_image"};
 	constexpr static ::std::uint32_t core = 0;

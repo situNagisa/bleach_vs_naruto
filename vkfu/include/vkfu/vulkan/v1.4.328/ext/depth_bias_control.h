@@ -86,7 +86,7 @@ enum class depth_bias_representation : ::std::underlying_type_t<VkDepthBiasRepre
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace ext
 {
@@ -105,7 +105,7 @@ struct depth_bias_representation{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::ext::depth_bias>
+struct vulkan_object_trait<tag::ext::depth_bias>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -113,7 +113,7 @@ struct vulkan_object_trait<obj::ext::depth_bias>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::ext::depth_bias_representation>
+struct vulkan_object_trait<tag::option::ext::depth_bias_representation>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -121,7 +121,7 @@ struct vulkan_object_trait<obj::option::ext::depth_bias_representation>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::ext::depth_bias_control>
+struct vulkan_object_trait<tag::feature::ext::depth_bias_control>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -131,11 +131,11 @@ struct vulkan_object_trait<obj::feature::ext::depth_bias_control>
 template<>
 struct expression_vulkan_tag<VkDepthBiasInfoEXT>
 {
-	using type = obj::ext::depth_bias;
+	using type = tag::ext::depth_bias;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::depth_bias>
+struct vulkan_object_native<tag::ext::depth_bias>
 {
 	using type = VkDepthBiasInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEPTH_BIAS_INFO_EXT;
@@ -144,11 +144,11 @@ struct vulkan_object_native<obj::ext::depth_bias>
 template<>
 struct expression_vulkan_tag<VkDepthBiasRepresentationInfoEXT>
 {
-	using type = obj::option::ext::depth_bias_representation;
+	using type = tag::option::ext::depth_bias_representation;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::depth_bias_representation>
+struct vulkan_object_native<tag::option::ext::depth_bias_representation>
 {
 	using type = VkDepthBiasRepresentationInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEPTH_BIAS_REPRESENTATION_INFO_EXT;
@@ -157,18 +157,18 @@ struct vulkan_object_native<obj::option::ext::depth_bias_representation>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDepthBiasControlFeaturesEXT>
 {
-	using type = obj::feature::ext::depth_bias_control;
+	using type = tag::feature::ext::depth_bias_control;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::depth_bias_control>
+struct vulkan_object_native<tag::feature::ext::depth_bias_control>
 {
 	using type = VkPhysicalDeviceDepthBiasControlFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_BIAS_CONTROL_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::depth_bias>
+struct vulkan_object_extensions<tag::ext::depth_bias>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_depth_bias_control"};
 	constexpr static ::std::uint32_t core = 0;
@@ -176,7 +176,7 @@ struct vulkan_object_extensions<obj::ext::depth_bias>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::depth_bias_representation>
+struct vulkan_object_extensions<tag::option::ext::depth_bias_representation>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_depth_bias_control"};
 	constexpr static ::std::uint32_t core = 0;
@@ -184,7 +184,7 @@ struct vulkan_object_extensions<obj::option::ext::depth_bias_representation>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::depth_bias_control>
+struct vulkan_object_extensions<tag::feature::ext::depth_bias_control>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_depth_bias_control"};
 	constexpr static ::std::uint32_t core = 0;
@@ -192,13 +192,13 @@ struct vulkan_object_extensions<obj::feature::ext::depth_bias_control>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::ext::depth_bias, obj::option::ext::depth_bias_representation> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::ext::depth_bias, tag::option::ext::depth_bias_representation> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::depth_bias_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::depth_bias_control> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::depth_bias_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::depth_bias_control> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::rasterization, obj::option::ext::depth_bias_representation> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::rasterization, tag::option::ext::depth_bias_representation> = true;
 }
 
 namespace vkfu::param
@@ -209,7 +209,7 @@ using ::vkfu::operator|;
 
 struct depth_bias
 {
-	using vulkan_tag_type = obj::ext::depth_bias;
+	using vulkan_tag_type = tag::ext::depth_bias;
 
 	float constant_factor{};
 	float clamp{};
@@ -235,7 +235,7 @@ using ::vkfu::operator|;
 
 struct depth_bias_control
 {
-	using vulkan_tag_type = obj::feature::ext::depth_bias_control;
+	using vulkan_tag_type = tag::feature::ext::depth_bias_control;
 
 	bool enable = false;
 	bool least_representable_value_force_unorm_representation = false;
@@ -263,7 +263,7 @@ using ::vkfu::operator|;
 
 struct depth_bias_representation
 {
-	using vulkan_tag_type = obj::option::ext::depth_bias_representation;
+	using vulkan_tag_type = tag::option::ext::depth_bias_representation;
 
 	::vkfu::enums::depth_bias_representation representation{};
 	bool depth_bias_exact = false;
@@ -286,7 +286,7 @@ namespace vkfu
 {
 namespace ext
 {
-template<::vkfu::expression_for<::vkfu::obj::ext::depth_bias> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::depth_bias> Expression1>
 void cmd_set_depth_bias2(VkCommandBuffer command_buffer, Expression1&& depth_bias_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(depth_bias_info));

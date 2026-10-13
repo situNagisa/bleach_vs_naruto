@@ -28,21 +28,21 @@
 
 #include "../version_1_3/copy_commands2.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
-using blit_image2 = ::vkfu::obj::blit_image2;
-using buffer_copy2 = ::vkfu::obj::buffer_copy2;
-using buffer_image_copy2 = ::vkfu::obj::buffer_image_copy2;
-using copy_buffer2 = ::vkfu::obj::copy_buffer2;
-using copy_buffer_to_image2 = ::vkfu::obj::copy_buffer_to_image2;
-using copy_image2 = ::vkfu::obj::copy_image2;
-using copy_image_to_buffer2 = ::vkfu::obj::copy_image_to_buffer2;
-using image_blit2 = ::vkfu::obj::image_blit2;
-using image_copy2 = ::vkfu::obj::image_copy2;
-using image_resolve2 = ::vkfu::obj::image_resolve2;
-using resolve_image2 = ::vkfu::obj::resolve_image2;
+using blit_image2 = ::vkfu::tag::blit_image2;
+using buffer_copy2 = ::vkfu::tag::buffer_copy2;
+using buffer_image_copy2 = ::vkfu::tag::buffer_image_copy2;
+using copy_buffer2 = ::vkfu::tag::copy_buffer2;
+using copy_buffer_to_image2 = ::vkfu::tag::copy_buffer_to_image2;
+using copy_image2 = ::vkfu::tag::copy_image2;
+using copy_image_to_buffer2 = ::vkfu::tag::copy_image_to_buffer2;
+using image_blit2 = ::vkfu::tag::image_blit2;
+using image_copy2 = ::vkfu::tag::image_copy2;
+using image_resolve2 = ::vkfu::tag::image_resolve2;
+using resolve_image2 = ::vkfu::tag::resolve_image2;
 }
 }
 

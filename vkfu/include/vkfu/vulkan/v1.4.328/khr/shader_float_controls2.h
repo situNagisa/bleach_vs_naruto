@@ -28,11 +28,11 @@
 
 #include "../version_1_4/shader_float_controls2.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using shader_float_controls2 = ::vkfu::obj::feature::shader_float_controls2;
+using shader_float_controls2 = ::vkfu::tag::feature::shader_float_controls2;
 }
 }
 

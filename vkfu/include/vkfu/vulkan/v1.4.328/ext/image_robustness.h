@@ -28,11 +28,11 @@
 
 #include "../version_1_3/image_robustness.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
-using image_robustness = ::vkfu::obj::feature::image_robustness;
+using image_robustness = ::vkfu::tag::feature::image_robustness;
 }
 }
 

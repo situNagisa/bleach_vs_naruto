@@ -28,19 +28,19 @@
 
 #include "../ext/fragment_density_map_offset.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext::qcom
 {
-using fragment_density_map_offset = ::vkfu::obj::feature::ext::fragment_density_map_offset;
+using fragment_density_map_offset = ::vkfu::tag::feature::ext::fragment_density_map_offset;
 }
 namespace option::ext::qcom
 {
-using render_pass_fragment_density_map_offset_end = ::vkfu::obj::option::ext::render_pass_fragment_density_map_offset_end;
+using render_pass_fragment_density_map_offset_end = ::vkfu::tag::option::ext::render_pass_fragment_density_map_offset_end;
 }
 namespace property::ext::qcom
 {
-using fragment_density_map_offset = ::vkfu::obj::property::ext::fragment_density_map_offset;
+using fragment_density_map_offset = ::vkfu::tag::property::ext::fragment_density_map_offset;
 }
 }
 

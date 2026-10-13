@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceHostQueryResetFeatures const& valu
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -55,7 +55,7 @@ struct host_query_reset{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::host_query_reset>
+struct vulkan_object_trait<tag::feature::host_query_reset>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::host_query_reset>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceHostQueryResetFeatures>
 {
-	using type = obj::feature::host_query_reset;
+	using type = tag::feature::host_query_reset;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::host_query_reset>
+struct vulkan_object_native<tag::feature::host_query_reset>
 {
 	using type = VkPhysicalDeviceHostQueryResetFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_QUERY_RESET_FEATURES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::host_query_reset>
+struct vulkan_object_extensions<tag::feature::host_query_reset>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_host_query_reset"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::host_query_reset>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::host_query_reset> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::host_query_reset> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::host_query_reset> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::host_query_reset> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct host_query_reset
 {
-	using vulkan_tag_type = obj::feature::host_query_reset;
+	using vulkan_tag_type = tag::feature::host_query_reset;
 
 	bool enable = false;
 

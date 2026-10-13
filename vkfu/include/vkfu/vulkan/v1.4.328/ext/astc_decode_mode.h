@@ -61,7 +61,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceASTCDecodeFeaturesEXT const& value
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -76,7 +76,7 @@ struct image_view_astc_decode_mode{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::image_view_astc_decode_mode>
+struct vulkan_object_trait<tag::option::ext::image_view_astc_decode_mode>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -84,7 +84,7 @@ struct vulkan_object_trait<obj::option::ext::image_view_astc_decode_mode>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::ext::astc_decode>
+struct vulkan_object_trait<tag::feature::ext::astc_decode>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -94,11 +94,11 @@ struct vulkan_object_trait<obj::feature::ext::astc_decode>
 template<>
 struct expression_vulkan_tag<VkImageViewASTCDecodeModeEXT>
 {
-	using type = obj::option::ext::image_view_astc_decode_mode;
+	using type = tag::option::ext::image_view_astc_decode_mode;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::image_view_astc_decode_mode>
+struct vulkan_object_native<tag::option::ext::image_view_astc_decode_mode>
 {
 	using type = VkImageViewASTCDecodeModeEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_VIEW_ASTC_DECODE_MODE_EXT;
@@ -107,18 +107,18 @@ struct vulkan_object_native<obj::option::ext::image_view_astc_decode_mode>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceASTCDecodeFeaturesEXT>
 {
-	using type = obj::feature::ext::astc_decode;
+	using type = tag::feature::ext::astc_decode;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::astc_decode>
+struct vulkan_object_native<tag::feature::ext::astc_decode>
 {
 	using type = VkPhysicalDeviceASTCDecodeFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ASTC_DECODE_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::image_view_astc_decode_mode>
+struct vulkan_object_extensions<tag::option::ext::image_view_astc_decode_mode>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_astc_decode_mode"};
 	constexpr static ::std::uint32_t core = 0;
@@ -126,7 +126,7 @@ struct vulkan_object_extensions<obj::option::ext::image_view_astc_decode_mode>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::astc_decode>
+struct vulkan_object_extensions<tag::feature::ext::astc_decode>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_astc_decode_mode"};
 	constexpr static ::std::uint32_t core = 0;
@@ -134,11 +134,11 @@ struct vulkan_object_extensions<obj::feature::ext::astc_decode>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::astc_decode> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::astc_decode> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image_view, obj::option::ext::image_view_astc_decode_mode> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image_view, tag::option::ext::image_view_astc_decode_mode> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::astc_decode> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::astc_decode> = true;
 }
 
 namespace vkfu::param
@@ -149,7 +149,7 @@ using ::vkfu::operator|;
 
 struct astc_decode
 {
-	using vulkan_tag_type = obj::feature::ext::astc_decode;
+	using vulkan_tag_type = tag::feature::ext::astc_decode;
 
 	bool decode_mode_shared_exponent = false;
 
@@ -171,7 +171,7 @@ using ::vkfu::operator|;
 
 struct image_view_astc_decode_mode
 {
-	using vulkan_tag_type = obj::option::ext::image_view_astc_decode_mode;
+	using vulkan_tag_type = tag::option::ext::image_view_astc_decode_mode;
 
 	::vkfu::enums::format decode_mode{};
 

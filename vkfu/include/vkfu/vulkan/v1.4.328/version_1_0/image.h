@@ -84,7 +84,7 @@ enum class image_layout : ::std::underlying_type_t<VkImageLayout>
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct image{};
 }
@@ -92,7 +92,7 @@ struct image{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::image>
+struct vulkan_object_trait<tag::image>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -102,18 +102,18 @@ struct vulkan_object_trait<obj::image>
 template<>
 struct expression_vulkan_tag<VkImageCreateInfo>
 {
-	using type = obj::image;
+	using type = tag::image;
 };
 
 template<>
-struct vulkan_object_native<obj::image>
+struct vulkan_object_native<tag::image>
 {
 	using type = VkImageCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 };
 
 template<>
-struct vulkan_object_extensions<obj::image>
+struct vulkan_object_extensions<tag::image>
 {
 	constexpr static ::std::array<char const*, 0> names{};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_0;
@@ -128,35 +128,9 @@ using ::vkfu::operator|;
 
 struct image
 {
-	using vulkan_tag_type = obj::image;
+	using vulkan_tag_type = tag::image;
 
-	struct flags_type
-	{
-		VkImageCreateFlags sparse_binding : 1 = 0;
-		VkImageCreateFlags sparse_residency : 1 = 0;
-		VkImageCreateFlags sparse_aliased : 1 = 0;
-		VkImageCreateFlags mutable_format : 1 = 0;
-		VkImageCreateFlags cube_compatible : 1 = 0;
-		VkImageCreateFlags view_2d_array_compatible : 1 = 0;
-		VkImageCreateFlags split_instance_bind_regions : 1 = 0;
-		VkImageCreateFlags block_texel_view_compatible : 1 = 0;
-		VkImageCreateFlags extended_usage : 1 = 0;
-		VkImageCreateFlags disjoint : 1 = 0;
-		VkImageCreateFlags alias : 1 = 0;
-		VkImageCreateFlags protected_ : 1 = 0;
-		VkImageCreateFlags sample_locations_compatible_depth : 1 = 0;
-		VkImageCreateFlags corner_sampled : 1 = 0;
-		VkImageCreateFlags subsampled : 1 = 0;
-		VkImageCreateFlags fragment_density_map_offset : 1 = 0;
-		VkImageCreateFlags descriptor_buffer_capture_replay : 1 = 0;
-		VkImageCreateFlags view_2d_compatible : 1 = 0;
-		VkImageCreateFlags multisampled_render_to_single_sampled : 1 = 0;
-		VkImageCreateFlags _reserved_19 : 1 = 0;
-		VkImageCreateFlags video_profile_independent : 1 = 0;
-		VkImageCreateFlags _reserved_21 : 11 = 0;
-	};
-
-	flags_type flags{};
+	::vkfu::flags::image_create flags{};
 	::vkfu::enums::image_type type{};
 	::vkfu::enums::format format{};
 	VkExtent3D extent{};
@@ -164,39 +138,7 @@ struct image
 	::std::uint32_t array_layers{};
 	::vkfu::enums::sample_count samples{};
 	::vkfu::enums::image_tiling tiling{};
-	struct usage_type
-	{
-		VkImageUsageFlags transfer_src : 1 = 0;
-		VkImageUsageFlags transfer_dst : 1 = 0;
-		VkImageUsageFlags sampled : 1 = 0;
-		VkImageUsageFlags storage : 1 = 0;
-		VkImageUsageFlags color_attachment : 1 = 0;
-		VkImageUsageFlags depth_stencil_attachment : 1 = 0;
-		VkImageUsageFlags transient_attachment : 1 = 0;
-		VkImageUsageFlags input_attachment : 1 = 0;
-		VkImageUsageFlags fragment_shading_rate_attachment : 1 = 0;
-		VkImageUsageFlags fragment_density_map : 1 = 0;
-		VkImageUsageFlags video_decode_dst : 1 = 0;
-		VkImageUsageFlags video_decode_src : 1 = 0;
-		VkImageUsageFlags video_decode_dpb : 1 = 0;
-		VkImageUsageFlags video_encode_dst : 1 = 0;
-		VkImageUsageFlags video_encode_src : 1 = 0;
-		VkImageUsageFlags video_encode_dpb : 1 = 0;
-		VkImageUsageFlags _reserved_16 : 2 = 0;
-		VkImageUsageFlags invocation_mask : 1 = 0;
-		VkImageUsageFlags attachment_feedback_loop : 1 = 0;
-		VkImageUsageFlags sample_weight : 1 = 0;
-		VkImageUsageFlags sample_block_match : 1 = 0;
-		VkImageUsageFlags host_transfer : 1 = 0;
-		VkImageUsageFlags tensor_aliasing : 1 = 0;
-		VkImageUsageFlags _reserved_24 : 1 = 0;
-		VkImageUsageFlags video_encode_quantization_delta_map : 1 = 0;
-		VkImageUsageFlags video_encode_emphasis_map : 1 = 0;
-		VkImageUsageFlags tile_memory : 1 = 0;
-		VkImageUsageFlags _reserved_28 : 4 = 0;
-	};
-
-	usage_type usage{};
+	::vkfu::flags::image_usage usage{};
 	::vkfu::enums::sharing_mode sharing_mode{};
 	::std::span<::std::uint32_t const> queue_family_indices{};
 	::vkfu::enums::image_layout initial_layout{};
@@ -223,59 +165,6 @@ struct image
 	}
 };
 
-static_assert(sizeof(image::flags_type) == sizeof(VkImageCreateFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.sparse_binding = 1}) == VK_IMAGE_CREATE_SPARSE_BINDING_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.sparse_residency = 1}) == VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.sparse_aliased = 1}) == VK_IMAGE_CREATE_SPARSE_ALIASED_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.mutable_format = 1}) == VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.cube_compatible = 1}) == VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.view_2d_array_compatible = 1}) == VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.split_instance_bind_regions = 1}) == VK_IMAGE_CREATE_SPLIT_INSTANCE_BIND_REGIONS_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.block_texel_view_compatible = 1}) == VK_IMAGE_CREATE_BLOCK_TEXEL_VIEW_COMPATIBLE_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.extended_usage = 1}) == VK_IMAGE_CREATE_EXTENDED_USAGE_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.disjoint = 1}) == VK_IMAGE_CREATE_DISJOINT_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.alias = 1}) == VK_IMAGE_CREATE_ALIAS_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.protected_ = 1}) == VK_IMAGE_CREATE_PROTECTED_BIT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.sample_locations_compatible_depth = 1}) == VK_IMAGE_CREATE_SAMPLE_LOCATIONS_COMPATIBLE_DEPTH_BIT_EXT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.corner_sampled = 1}) == VK_IMAGE_CREATE_CORNER_SAMPLED_BIT_NV);
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.subsampled = 1}) == VK_IMAGE_CREATE_SUBSAMPLED_BIT_EXT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.fragment_density_map_offset = 1}) == VK_IMAGE_CREATE_FRAGMENT_DENSITY_MAP_OFFSET_BIT_EXT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.descriptor_buffer_capture_replay = 1}) == VK_IMAGE_CREATE_DESCRIPTOR_BUFFER_CAPTURE_REPLAY_BIT_EXT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.view_2d_compatible = 1}) == VK_IMAGE_CREATE_2D_VIEW_COMPATIBLE_BIT_EXT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.multisampled_render_to_single_sampled = 1}) == VK_IMAGE_CREATE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_BIT_EXT);
-static_assert(::std::bit_cast<VkImageCreateFlags>(image::flags_type{.video_profile_independent = 1}) == VK_IMAGE_CREATE_VIDEO_PROFILE_INDEPENDENT_BIT_KHR);
-#endif
-
-static_assert(sizeof(image::usage_type) == sizeof(VkImageUsageFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.transfer_src = 1}) == VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.transfer_dst = 1}) == VK_IMAGE_USAGE_TRANSFER_DST_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.sampled = 1}) == VK_IMAGE_USAGE_SAMPLED_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.storage = 1}) == VK_IMAGE_USAGE_STORAGE_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.color_attachment = 1}) == VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.depth_stencil_attachment = 1}) == VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.transient_attachment = 1}) == VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.input_attachment = 1}) == VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.fragment_shading_rate_attachment = 1}) == VK_IMAGE_USAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.fragment_density_map = 1}) == VK_IMAGE_USAGE_FRAGMENT_DENSITY_MAP_BIT_EXT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.video_decode_dst = 1}) == VK_IMAGE_USAGE_VIDEO_DECODE_DST_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.video_decode_src = 1}) == VK_IMAGE_USAGE_VIDEO_DECODE_SRC_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.video_decode_dpb = 1}) == VK_IMAGE_USAGE_VIDEO_DECODE_DPB_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.video_encode_dst = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_DST_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.video_encode_src = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_SRC_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.video_encode_dpb = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_DPB_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.invocation_mask = 1}) == VK_IMAGE_USAGE_INVOCATION_MASK_BIT_HUAWEI);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.attachment_feedback_loop = 1}) == VK_IMAGE_USAGE_ATTACHMENT_FEEDBACK_LOOP_BIT_EXT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.sample_weight = 1}) == VK_IMAGE_USAGE_SAMPLE_WEIGHT_BIT_QCOM);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.sample_block_match = 1}) == VK_IMAGE_USAGE_SAMPLE_BLOCK_MATCH_BIT_QCOM);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.host_transfer = 1}) == VK_IMAGE_USAGE_HOST_TRANSFER_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.tensor_aliasing = 1}) == VK_IMAGE_USAGE_TENSOR_ALIASING_BIT_ARM);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.video_encode_quantization_delta_map = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_QUANTIZATION_DELTA_MAP_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.video_encode_emphasis_map = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_EMPHASIS_MAP_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image::usage_type{.tile_memory = 1}) == VK_IMAGE_USAGE_TILE_MEMORY_BIT_QCOM);
-#endif
-
 struct subresource_layout
 {
 	VkDeviceSize offset{};
@@ -299,7 +188,7 @@ struct subresource_layout
 
 namespace vkfu
 {
-template<::vkfu::expression_for<::vkfu::obj::image> Expression>
+template<::vkfu::expression_for<::vkfu::tag::image> Expression>
 [[nodiscard]] auto create_image(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkImage, ::VkResult>
 {
@@ -314,7 +203,7 @@ template<::vkfu::expression_for<::vkfu::obj::image> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::image> Expression>
+template<::vkfu::expression_for<::vkfu::tag::image> Expression>
 [[nodiscard]] auto create_image(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkImage
 {
 	auto produced = create_image(device, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

@@ -19,6 +19,7 @@ class Field:
 	member: ir.Member
 	cpp_type: str  # declared type of the param field
 	count_member: str | None = None  # span: the native count member it drives
+	flags_type: str | None = None  # flags: the VkXxxFlags type, aliases resolved
 	flag_bits: str | None = None  # flags: the VkXxxFlagBits enum
 	layout: list[ir.Bit] | None = None  # flags: bits in ascending bitpos order
 	enum_type: str | None = None  # enum: the VkXxx plain enum it wraps
@@ -131,7 +132,9 @@ def plan_struct(struct: ir.Struct, registry: ir.Registry) -> Plan:
 			fields.append(Field(kind="bool", member=member, cpp_type="bool"))
 			continue
 
-		flag_bits = registry.bitmask_to_flagbits.get(member.type)
+		# The old spelling of a type is the same type, so it gets the same field.
+		declared = ir.resolve_type(registry, member.type)
+		flag_bits = registry.bitmask_to_flagbits.get(declared)
 		if flag_bits and registry.flagbits.get(flag_bits):
 			layout = bit_layout(registry.flagbits[flag_bits])
 			if layout:
@@ -139,7 +142,8 @@ def plan_struct(struct: ir.Struct, registry: ir.Registry) -> Plan:
 					Field(
 						kind="flags",
 						member=member,
-						cpp_type=member.type,
+						cpp_type=declared,
+						flags_type=declared,
 						flag_bits=flag_bits,
 						layout=layout,
 					)
@@ -150,8 +154,8 @@ def plan_struct(struct: ir.Struct, registry: ir.Registry) -> Plan:
 					f"{struct.name}.{member.name}: {flag_bits} bits do not fit one per position"
 				)
 
-		if member.type in registry.enums and registry.enums[member.type].values:
-			fields.append(Field(kind="enum", member=member, cpp_type=member.type, enum_type=member.type))
+		if declared in registry.enums and registry.enums[declared].values:
+			fields.append(Field(kind="enum", member=member, cpp_type=declared, enum_type=declared))
 			continue
 
 		fields.append(Field(kind="scalar", member=member, cpp_type=base_type(member.type)))
@@ -159,11 +163,48 @@ def plan_struct(struct: ir.Struct, registry: ir.Registry) -> Plan:
 	return Plan(struct=struct, fields=fields, consumed_counts=consumed, unsupported=unsupported)
 
 
-def used_enums(selected: list[str], registry: ir.Registry) -> list[str]:
-	"""Plain enums that some selected object exposes as a field."""
-	names: list[str] = []
+def _command_values(registry: ir.Registry) -> list[ir.Member]:
+	"""Every by-value parameter of a command vkfu wraps."""
+	members: list[ir.Member] = []
+	for command in registry.producers:
+		members += command.leading
+	for command in list(registry.wrappers) + list(registry.chain_queries):
+		members += [argument.member for argument in command.arguments if argument.kind == "passthrough"]
+	for query in registry.queries:
+		members += query.leading
+	return [member for member in members if not member.ptr_depth and not member.array_dims]
+
+
+def _value_kind(registry: ir.Registry, type_name: str) -> str | None:
+	"""flags | enum when vkfu gives this type its own spelling, the same rule a field follows."""
+	declared = ir.resolve_type(registry, type_name)
+	flag_bits = registry.bitmask_to_flagbits.get(declared)
+	if flag_bits and registry.flagbits.get(flag_bits) and bit_layout(registry.flagbits[flag_bits]):
+		return "flags"
+	if declared in registry.enums and registry.enums[declared].values:
+		return "enum"
+	return None
+
+
+def _used(kind: str, selected: list[str], registry: ir.Registry) -> list[str]:
+	names: set[str] = set()
 	for name in list(selected) + list(registry.plain):
 		for field in plan_struct(registry.structs[name], registry).fields:
-			if field.kind == "enum" and field.enum_type not in names:
-				names.append(field.enum_type)
+			if field.kind == kind:
+				names.add(field.flags_type if kind == "flags" else field.enum_type)
+	# A parameter is the same type as a field, so it gets the same struct or
+	# enum class -- and needs one even where no structure has such a field.
+	for member in _command_values(registry):
+		if _value_kind(registry, member.type) == kind:
+			names.add(ir.resolve_type(registry, member.type))
 	return sorted(names)
+
+
+def used_flags(selected: list[str], registry: ir.Registry) -> list[str]:
+	"""Flags types a field or a command parameter is declared with: one struct each."""
+	return _used("flags", selected, registry)
+
+
+def used_enums(selected: list[str], registry: ir.Registry) -> list[str]:
+	"""Plain enums a field or a command parameter is declared with: one enum class each."""
+	return _used("enum", selected, registry)

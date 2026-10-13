@@ -57,9 +57,9 @@ consteval auto all_distinct() noexcept -> bool
 /// guarantees across a copy or a move.
 ///
 ///     auto properties = vkfu::get_physical_device_properties2<
-///         obj::property::driver, obj::property::id>(physical_device);
+///         tag::property::driver, tag::property::id>(physical_device);
 ///     properties.head().properties.limits.maxImageDimension2D;
-///     properties.get<obj::property::driver>().driverName;
+///     properties.get<tag::property::driver>().driverName;
 template<vulkan_object Head, query_extension_of<Head>... Tags>
 	requires (query_detail::all_distinct<Head, Tags...>())
 struct query_chain

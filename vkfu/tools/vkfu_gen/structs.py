@@ -9,7 +9,7 @@ from __future__ import annotations
 from . import ir
 from .cpp import TAB, base_type, leaf_of
 from .naming import Table
-from .plan import Field, Plan
+from .plan import Field, Plan, bit_layout
 
 
 def _field_default(field: Field) -> str:
@@ -20,30 +20,9 @@ def _field_default(field: Field) -> str:
 	return "{}"
 
 
-def _render_flags_type(field: Field, registry: ir.Registry, table: Table, field_name: str) -> list[str]:
-	"""A bit-field struct whose layout matches the native flags word exactly.
-
-	Every bit position up to the enum's width is spelled out -- gaps included --
-	so the type has no indeterminate bits and `bit_cast` stays usable in a
-	constant expression.
-	"""
-	width = registry.flagbits[field.flag_bits].width
-	flags_type = field.member.type
-	lines = [f"{TAB}struct {field_name}_type", f"{TAB}{{"]
-
-	position = 0
-	for bit in field.layout:
-		if bit.bitpos > position:
-			lines.append(f"{TAB}{TAB}{flags_type} _reserved_{position} : {bit.bitpos - position} = 0;")
-		lines.append(f"{TAB}{TAB}{flags_type} {table.bit_name(field.flag_bits, bit.name)} : 1 = 0;")
-		position = bit.bitpos + 1
-	if position < width:
-		lines.append(f"{TAB}{TAB}{flags_type} _reserved_{position} : {width - position} = 0;")
-
-	lines.append(f"{TAB}}};")
-	lines.append("")
-	lines.append(f"{TAB}{field_name}_type {field_name}{{}};")
-	return lines
+def flags_reference(field: Field, table: Table) -> str:
+	"""How a field or a parameter names the shared struct for its flags type."""
+	return f"::vkfu::flags::{table.flags_name(field.flags_type)}"
 
 
 def _bit_constant(bit: ir.Bit) -> str:
@@ -51,25 +30,41 @@ def _bit_constant(bit: ir.Bit) -> str:
 	return ir.bit_literal(bit.bitpos) if bit.guards else bit.name
 
 
-def _render_flags_checks(field: Field, table: Table, owner: str, field_name: str) -> list[str]:
-	"""Prove the bit-field layout against the real enum constants.
+def render_flags(flags_type: str, registry: ir.Registry, table: Table) -> list[str]:
+	"""One bit-field struct per flags type, whose layout matches the native word.
+
+	Shared by every field and parameter of that type -- VkAccessFlags2 is one
+	struct whether it is a barrier's src or dst mask -- so values move between
+	them without a cast. Every bit position up to the enum's width is spelled
+	out, gaps included, so the type has no indeterminate bits and `bit_cast`
+	stays usable in a constant expression.
 
 	Bit-field allocation order is implementation-defined, so the mapping is
 	asserted rather than assumed. A platform-guarded constant is checked against
-	its value instead of its name, so the file needs no macro to compile; the
-	field itself is unconditional so the layout never shifts between platforms.
+	its value instead of its name, so the file needs no macro to compile.
 	"""
-	nested = f"{owner}::{field_name}_type"
-	lines = [
-		f"static_assert(sizeof({nested}) == sizeof({field.member.type}));",
-		# clang has no constexpr bit_cast over bit-fields yet, so the layout is
-		# proven on the compilers that do; the runtime tests cover clang.
-		"#if !defined(__clang__)",
-	]
-	for bit in field.layout:
-		name = table.bit_name(field.flag_bits, bit.name)
+	flag_bits = registry.bitmask_to_flagbits[flags_type]
+	width = registry.flagbits[flag_bits].width
+	layout = bit_layout(registry.flagbits[flag_bits])
+	name = table.flags_name(flags_type)
+	lines = [f"struct {name}", "{"]
+	position = 0
+	for bit in layout:
+		if bit.bitpos > position:
+			lines.append(f"{TAB}{flags_type} _reserved_{position} : {bit.bitpos - position} = 0;")
+		lines.append(f"{TAB}{flags_type} {table.bit_name(flag_bits, bit.name)} : 1 = 0;")
+		position = bit.bitpos + 1
+	if position < width:
+		lines.append(f"{TAB}{flags_type} _reserved_{position} : {width - position} = 0;")
+	lines.append("};")
+	lines.append("")
+	lines.append(f"static_assert(sizeof({name}) == sizeof({flags_type}));")
+	# clang has no constexpr bit_cast over bit-fields yet, so the layout is
+	# proven on the compilers that do; the runtime tests cover clang.
+	lines.append("#if !defined(__clang__)")
+	for bit in layout:
 		lines.append(
-			f"static_assert(::std::bit_cast<{field.member.type}>({nested}{{.{name} = 1}}) == {_bit_constant(bit)});"
+			f"static_assert(::std::bit_cast<{flags_type}>({name}{{.{table.bit_name(flag_bits, bit.name)} = 1}}) == {_bit_constant(bit)});"
 		)
 	lines.append("#endif")
 	return lines
@@ -93,7 +88,7 @@ def render_alias(
 	leaf = leaf_of(chosen)
 	if area == "param" and slots:
 		declarations = ", ".join(
-			f"::vkfu::reference_expression_for<::vkfu::obj::{table.struct_name(field.target)}> "
+			f"::vkfu::reference_expression_for<::vkfu::tag::{table.struct_name(field.target)}> "
 			f"{table.member_name(alias.target, field.member.name)}_expression = ::vkfu::absent_expression"
 			for field in slots
 		)
@@ -124,7 +119,7 @@ def render_param(
 		# One template parameter per pointer slot, so a slot can hold a whole
 		# sub-expression and the parent's storage owns what it points at.
 		declarations = ", ".join(
-			f"::vkfu::reference_expression_for<obj::{table.struct_name(field.target)}> "
+			f"::vkfu::reference_expression_for<tag::{table.struct_name(field.target)}> "
 			f"{parameters[field.member.name]} = ::vkfu::absent_expression"
 			for field in slots
 		)
@@ -132,7 +127,7 @@ def render_param(
 	lines.append(f"struct {leaf_of(object_name)}")
 	lines.append("{")
 	if struct.stype is not None:
-		lines.append(f"{TAB}using vulkan_tag_type = obj::{object_name};")
+		lines.append(f"{TAB}using vulkan_tag_type = tag::{object_name};")
 	if slots:
 		lines.append(f"{TAB}using storage_type = ::vkfu::reference_storage<{struct.name}")
 		for field in slots:
@@ -149,7 +144,7 @@ def render_param(
 	for field in plan.fields:
 		field_name = names[field.member.name]
 		if field.kind == "flags":
-			lines.extend(_render_flags_type(field, registry, table, field_name))
+			lines.append(f"{TAB}{flags_reference(field, table)} {field_name}{{}};")
 		elif field.kind == "enum":
 			lines.append(f"{TAB}::vkfu::enums::{table.enum_name(field.enum_type)} {field_name}{{}};")
 		elif field.kind == "reference":
@@ -208,9 +203,9 @@ def render_param(
 		elif field.kind == "span":
 			lines.append(f"{inner}.{member.name} = {field_name}.data(),")
 		elif field.kind == "flags":
-			lines.append(f"{inner}.{member.name} = ::std::bit_cast<{member.type}>({field_name}),")
+			lines.append(f"{inner}.{member.name} = ::std::bit_cast<{field.flags_type}>({field_name}),")
 		elif field.kind == "enum":
-			lines.append(f"{inner}.{member.name} = static_cast<{member.type}>({field_name}),")
+			lines.append(f"{inner}.{member.name} = static_cast<{field.enum_type}>({field_name}),")
 		elif field.kind == "reference":
 			lines.append(f"{inner}.{member.name} = nullptr,")
 		else:
@@ -232,12 +227,6 @@ def render_param(
 		lines.append(f"{TAB}{TAB}}};")
 		lines.append(f"{TAB}}}")
 		lines.append("};")
-		for field in plan.fields:
-			if field.kind == "flags":
-				lines.append("")
-				# Every template parameter has a default, so the layout of the
-				# nested bit-field type can be checked on the default instantiation.
-				lines.extend(_render_flags_checks(field, table, f"{leaf_of(object_name)}<>", names[field.member.name]))
 		return lines
 
 	lines.append(f"{TAB}{TAB}}};")
@@ -248,14 +237,6 @@ def render_param(
 		lines.append(f"{TAB}{TAB}return value;")
 	lines.append(f"{TAB}}}")
 	lines.append("};")
-
-	# A nested class's default member initialisers are not usable inside the
-	# enclosing class's body, so the layout checks sit just after it.
-	for field in plan.fields:
-		if field.kind == "flags":
-			lines.append("")
-			lines.extend(_render_flags_checks(field, table, leaf_of(object_name), names[field.member.name]))
-
 	return lines
 
 
@@ -328,7 +309,7 @@ def render_extensions(name: str, tag: str, provenance: ir.Provenance, guards: li
 	core = _CORE_VERSION.get(provenance.core or "", "0")
 	lines: list[str] = []
 	lines.append("template<>")
-	lines.append(f"struct vulkan_object_extensions<obj::{tag}>")
+	lines.append(f"struct vulkan_object_extensions<tag::{tag}>")
 	lines.append("{")
 	count = len(provenance.extensions)
 	if count:

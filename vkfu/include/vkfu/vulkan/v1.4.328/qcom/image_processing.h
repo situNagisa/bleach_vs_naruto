@@ -75,7 +75,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceImageProcessingPropertiesQCOM cons
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::qcom
 {
@@ -94,7 +94,7 @@ struct image_processing{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::qcom::image_view_sample_weight>
+struct vulkan_object_trait<tag::option::qcom::image_view_sample_weight>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -102,7 +102,7 @@ struct vulkan_object_trait<obj::option::qcom::image_view_sample_weight>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::qcom::image_processing>
+struct vulkan_object_trait<tag::feature::qcom::image_processing>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -110,7 +110,7 @@ struct vulkan_object_trait<obj::feature::qcom::image_processing>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::qcom::image_processing>
+struct vulkan_object_trait<tag::property::qcom::image_processing>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -120,11 +120,11 @@ struct vulkan_object_trait<obj::property::qcom::image_processing>
 template<>
 struct expression_vulkan_tag<VkImageViewSampleWeightCreateInfoQCOM>
 {
-	using type = obj::option::qcom::image_view_sample_weight;
+	using type = tag::option::qcom::image_view_sample_weight;
 };
 
 template<>
-struct vulkan_object_native<obj::option::qcom::image_view_sample_weight>
+struct vulkan_object_native<tag::option::qcom::image_view_sample_weight>
 {
 	using type = VkImageViewSampleWeightCreateInfoQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_VIEW_SAMPLE_WEIGHT_CREATE_INFO_QCOM;
@@ -133,11 +133,11 @@ struct vulkan_object_native<obj::option::qcom::image_view_sample_weight>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceImageProcessingFeaturesQCOM>
 {
-	using type = obj::feature::qcom::image_processing;
+	using type = tag::feature::qcom::image_processing;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::qcom::image_processing>
+struct vulkan_object_native<tag::feature::qcom::image_processing>
 {
 	using type = VkPhysicalDeviceImageProcessingFeaturesQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_PROCESSING_FEATURES_QCOM;
@@ -146,18 +146,18 @@ struct vulkan_object_native<obj::feature::qcom::image_processing>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceImageProcessingPropertiesQCOM>
 {
-	using type = obj::property::qcom::image_processing;
+	using type = tag::property::qcom::image_processing;
 };
 
 template<>
-struct vulkan_object_native<obj::property::qcom::image_processing>
+struct vulkan_object_native<tag::property::qcom::image_processing>
 {
 	using type = VkPhysicalDeviceImageProcessingPropertiesQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_PROCESSING_PROPERTIES_QCOM;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::qcom::image_view_sample_weight>
+struct vulkan_object_extensions<tag::option::qcom::image_view_sample_weight>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_image_processing"};
 	constexpr static ::std::uint32_t core = 0;
@@ -165,7 +165,7 @@ struct vulkan_object_extensions<obj::option::qcom::image_view_sample_weight>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::qcom::image_processing>
+struct vulkan_object_extensions<tag::feature::qcom::image_processing>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_image_processing"};
 	constexpr static ::std::uint32_t core = 0;
@@ -173,7 +173,7 @@ struct vulkan_object_extensions<obj::feature::qcom::image_processing>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::qcom::image_processing>
+struct vulkan_object_extensions<tag::property::qcom::image_processing>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_image_processing"};
 	constexpr static ::std::uint32_t core = 0;
@@ -181,13 +181,13 @@ struct vulkan_object_extensions<obj::property::qcom::image_processing>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::qcom::image_processing> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::qcom::image_processing> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image_view, obj::option::qcom::image_view_sample_weight> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image_view, tag::option::qcom::image_view_sample_weight> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::qcom::image_processing> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::qcom::image_processing> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::qcom::image_processing> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::qcom::image_processing> = true;
 }
 
 namespace vkfu::param
@@ -198,7 +198,7 @@ using ::vkfu::operator|;
 
 struct image_processing
 {
-	using vulkan_tag_type = obj::feature::qcom::image_processing;
+	using vulkan_tag_type = tag::feature::qcom::image_processing;
 
 	bool texture_sample_weighted = false;
 	bool texture_box_filter = false;
@@ -224,7 +224,7 @@ using ::vkfu::operator|;
 
 struct image_view_sample_weight
 {
-	using vulkan_tag_type = obj::option::qcom::image_view_sample_weight;
+	using vulkan_tag_type = tag::option::qcom::image_view_sample_weight;
 
 	VkOffset2D filter_center{};
 	VkExtent2D filter_size{};

@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceShaderAtomicFloatFeaturesEXT const
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct shader_atomic_float{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::shader_atomic_float>
+struct vulkan_object_trait<tag::feature::ext::shader_atomic_float>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::shader_atomic_float>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderAtomicFloatFeaturesEXT>
 {
-	using type = obj::feature::ext::shader_atomic_float;
+	using type = tag::feature::ext::shader_atomic_float;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::shader_atomic_float>
+struct vulkan_object_native<tag::feature::ext::shader_atomic_float>
 {
 	using type = VkPhysicalDeviceShaderAtomicFloatFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::shader_atomic_float>
+struct vulkan_object_extensions<tag::feature::ext::shader_atomic_float>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_shader_atomic_float"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::shader_atomic_float>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::shader_atomic_float> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::shader_atomic_float> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::shader_atomic_float> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::shader_atomic_float> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct shader_atomic_float
 {
-	using vulkan_tag_type = obj::feature::ext::shader_atomic_float;
+	using vulkan_tag_type = tag::feature::ext::shader_atomic_float;
 
 	bool shader_buffer_float32_atomics = false;
 	bool shader_buffer_float32_atomic_add = false;

@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceShaderCoreProperties2AMD const& va
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property::amd
 {
@@ -54,7 +54,7 @@ struct shader_core2{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::property::amd::shader_core2>
+struct vulkan_object_trait<tag::property::amd::shader_core2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::property::amd::shader_core2>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderCoreProperties2AMD>
 {
-	using type = obj::property::amd::shader_core2;
+	using type = tag::property::amd::shader_core2;
 };
 
 template<>
-struct vulkan_object_native<obj::property::amd::shader_core2>
+struct vulkan_object_native<tag::property::amd::shader_core2>
 {
 	using type = VkPhysicalDeviceShaderCoreProperties2AMD;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CORE_PROPERTIES_2_AMD;
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::amd::shader_core2>
+struct vulkan_object_extensions<tag::property::amd::shader_core2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_AMD_shader_core_properties2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -83,5 +83,5 @@ struct vulkan_object_extensions<obj::property::amd::shader_core2>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::amd::shader_core2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::amd::shader_core2> = true;
 }

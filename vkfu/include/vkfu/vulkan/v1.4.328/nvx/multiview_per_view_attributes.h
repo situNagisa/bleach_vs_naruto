@@ -61,7 +61,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceMultiviewPerViewAttributesProperti
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::nvx
 {
@@ -76,7 +76,7 @@ struct multiview_per_view_attributes{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::nvx::multiview_per_view_attributes>
+struct vulkan_object_trait<tag::option::nvx::multiview_per_view_attributes>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -84,7 +84,7 @@ struct vulkan_object_trait<obj::option::nvx::multiview_per_view_attributes>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::nvx::multiview_per_view_attributes>
+struct vulkan_object_trait<tag::property::nvx::multiview_per_view_attributes>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -94,11 +94,11 @@ struct vulkan_object_trait<obj::property::nvx::multiview_per_view_attributes>
 template<>
 struct expression_vulkan_tag<VkMultiviewPerViewAttributesInfoNVX>
 {
-	using type = obj::option::nvx::multiview_per_view_attributes;
+	using type = tag::option::nvx::multiview_per_view_attributes;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nvx::multiview_per_view_attributes>
+struct vulkan_object_native<tag::option::nvx::multiview_per_view_attributes>
 {
 	using type = VkMultiviewPerViewAttributesInfoNVX;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MULTIVIEW_PER_VIEW_ATTRIBUTES_INFO_NVX;
@@ -107,18 +107,18 @@ struct vulkan_object_native<obj::option::nvx::multiview_per_view_attributes>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX>
 {
-	using type = obj::property::nvx::multiview_per_view_attributes;
+	using type = tag::property::nvx::multiview_per_view_attributes;
 };
 
 template<>
-struct vulkan_object_native<obj::property::nvx::multiview_per_view_attributes>
+struct vulkan_object_native<tag::property::nvx::multiview_per_view_attributes>
 {
 	using type = VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_PER_VIEW_ATTRIBUTES_PROPERTIES_NVX;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nvx::multiview_per_view_attributes>
+struct vulkan_object_extensions<tag::option::nvx::multiview_per_view_attributes>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NVX_multiview_per_view_attributes"};
 	constexpr static ::std::uint32_t core = 0;
@@ -126,7 +126,7 @@ struct vulkan_object_extensions<obj::option::nvx::multiview_per_view_attributes>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::nvx::multiview_per_view_attributes>
+struct vulkan_object_extensions<tag::property::nvx::multiview_per_view_attributes>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NVX_multiview_per_view_attributes"};
 	constexpr static ::std::uint32_t core = 0;
@@ -134,13 +134,13 @@ struct vulkan_object_extensions<obj::property::nvx::multiview_per_view_attribute
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::command_buffer_inheritance, obj::option::nvx::multiview_per_view_attributes> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::command_buffer_inheritance, tag::option::nvx::multiview_per_view_attributes> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::graphics_pipeline, obj::option::nvx::multiview_per_view_attributes> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::graphics_pipeline, tag::option::nvx::multiview_per_view_attributes> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::nvx::multiview_per_view_attributes> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::nvx::multiview_per_view_attributes> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::rendering, obj::option::nvx::multiview_per_view_attributes> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::rendering, tag::option::nvx::multiview_per_view_attributes> = true;
 }
 
 namespace vkfu::param
@@ -151,7 +151,7 @@ using ::vkfu::operator|;
 
 struct multiview_per_view_attributes
 {
-	using vulkan_tag_type = obj::option::nvx::multiview_per_view_attributes;
+	using vulkan_tag_type = tag::option::nvx::multiview_per_view_attributes;
 
 	bool per_view_attributes = false;
 	bool per_view_attributes_position_x_only = false;

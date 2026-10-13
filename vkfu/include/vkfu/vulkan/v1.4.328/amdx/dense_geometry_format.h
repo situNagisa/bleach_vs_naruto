@@ -71,7 +71,7 @@ enum class compressed_triangle_format : ::std::underlying_type_t<VkCompressedTri
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::amdx
 {
@@ -86,7 +86,7 @@ struct acceleration_structure_dense_geometry_format_triangles_data{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::amdx::acceleration_structure_dense_geometry_format_triangles_data>
+struct vulkan_object_trait<tag::option::amdx::acceleration_structure_dense_geometry_format_triangles_data>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = true;
@@ -94,7 +94,7 @@ struct vulkan_object_trait<obj::option::amdx::acceleration_structure_dense_geome
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::amdx::dense_geometry_format>
+struct vulkan_object_trait<tag::feature::amdx::dense_geometry_format>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -104,11 +104,11 @@ struct vulkan_object_trait<obj::feature::amdx::dense_geometry_format>
 template<>
 struct expression_vulkan_tag<VkAccelerationStructureDenseGeometryFormatTrianglesDataAMDX>
 {
-	using type = obj::option::amdx::acceleration_structure_dense_geometry_format_triangles_data;
+	using type = tag::option::amdx::acceleration_structure_dense_geometry_format_triangles_data;
 };
 
 template<>
-struct vulkan_object_native<obj::option::amdx::acceleration_structure_dense_geometry_format_triangles_data>
+struct vulkan_object_native<tag::option::amdx::acceleration_structure_dense_geometry_format_triangles_data>
 {
 	using type = VkAccelerationStructureDenseGeometryFormatTrianglesDataAMDX;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DENSE_GEOMETRY_FORMAT_TRIANGLES_DATA_AMDX;
@@ -117,18 +117,18 @@ struct vulkan_object_native<obj::option::amdx::acceleration_structure_dense_geom
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDenseGeometryFormatFeaturesAMDX>
 {
-	using type = obj::feature::amdx::dense_geometry_format;
+	using type = tag::feature::amdx::dense_geometry_format;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::amdx::dense_geometry_format>
+struct vulkan_object_native<tag::feature::amdx::dense_geometry_format>
 {
 	using type = VkPhysicalDeviceDenseGeometryFormatFeaturesAMDX;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DENSE_GEOMETRY_FORMAT_FEATURES_AMDX;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::amdx::acceleration_structure_dense_geometry_format_triangles_data>
+struct vulkan_object_extensions<tag::option::amdx::acceleration_structure_dense_geometry_format_triangles_data>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_AMDX_dense_geometry_format"};
 	constexpr static ::std::uint32_t core = 0;
@@ -136,7 +136,7 @@ struct vulkan_object_extensions<obj::option::amdx::acceleration_structure_dense_
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::amdx::dense_geometry_format>
+struct vulkan_object_extensions<tag::feature::amdx::dense_geometry_format>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_AMDX_dense_geometry_format"};
 	constexpr static ::std::uint32_t core = 0;
@@ -144,13 +144,13 @@ struct vulkan_object_extensions<obj::feature::amdx::dense_geometry_format>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::option::amdx::acceleration_structure_dense_geometry_format_triangles_data, obj::option::ext::acceleration_structure_triangles_opacity_micromap> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::option::amdx::acceleration_structure_dense_geometry_format_triangles_data, tag::option::ext::acceleration_structure_triangles_opacity_micromap> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::acceleration_structure_geometry, obj::option::amdx::acceleration_structure_dense_geometry_format_triangles_data> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::acceleration_structure_geometry, tag::option::amdx::acceleration_structure_dense_geometry_format_triangles_data> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::amdx::dense_geometry_format> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::amdx::dense_geometry_format> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::amdx::dense_geometry_format> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::amdx::dense_geometry_format> = true;
 }
 
 namespace vkfu::param
@@ -161,7 +161,7 @@ using ::vkfu::operator|;
 
 struct dense_geometry_format
 {
-	using vulkan_tag_type = obj::feature::amdx::dense_geometry_format;
+	using vulkan_tag_type = tag::feature::amdx::dense_geometry_format;
 
 	bool enable = false;
 
@@ -183,7 +183,7 @@ using ::vkfu::operator|;
 
 struct acceleration_structure_dense_geometry_format_triangles_data
 {
-	using vulkan_tag_type = obj::option::amdx::acceleration_structure_dense_geometry_format_triangles_data;
+	using vulkan_tag_type = tag::option::amdx::acceleration_structure_dense_geometry_format_triangles_data;
 
 	VkDeviceOrHostAddressConstKHR compressed_data{};
 	VkDeviceSize data_size{};

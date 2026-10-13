@@ -92,7 +92,7 @@ constexpr auto _vkfu_evaluate(VkVideoDecodeVP9CapabilitiesKHR const& value) noex
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -112,7 +112,7 @@ struct video_decode_vp9_capabilities{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::video_decode_vp9>
+struct vulkan_object_trait<tag::feature::khr::video_decode_vp9>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -120,7 +120,7 @@ struct vulkan_object_trait<obj::feature::khr::video_decode_vp9>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::video_decode_vp9_picture>
+struct vulkan_object_trait<tag::option::khr::video_decode_vp9_picture>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -128,7 +128,7 @@ struct vulkan_object_trait<obj::option::khr::video_decode_vp9_picture>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::video_decode_vp9_profile>
+struct vulkan_object_trait<tag::option::khr::video_decode_vp9_profile>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -136,7 +136,7 @@ struct vulkan_object_trait<obj::option::khr::video_decode_vp9_profile>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::video_decode_vp9_capabilities>
+struct vulkan_object_trait<tag::result::khr::video_decode_vp9_capabilities>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -146,11 +146,11 @@ struct vulkan_object_trait<obj::result::khr::video_decode_vp9_capabilities>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceVideoDecodeVP9FeaturesKHR>
 {
-	using type = obj::feature::khr::video_decode_vp9;
+	using type = tag::feature::khr::video_decode_vp9;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::video_decode_vp9>
+struct vulkan_object_native<tag::feature::khr::video_decode_vp9>
 {
 	using type = VkPhysicalDeviceVideoDecodeVP9FeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VIDEO_DECODE_VP9_FEATURES_KHR;
@@ -159,11 +159,11 @@ struct vulkan_object_native<obj::feature::khr::video_decode_vp9>
 template<>
 struct expression_vulkan_tag<VkVideoDecodeVP9PictureInfoKHR>
 {
-	using type = obj::option::khr::video_decode_vp9_picture;
+	using type = tag::option::khr::video_decode_vp9_picture;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::video_decode_vp9_picture>
+struct vulkan_object_native<tag::option::khr::video_decode_vp9_picture>
 {
 	using type = VkVideoDecodeVP9PictureInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_DECODE_VP9_PICTURE_INFO_KHR;
@@ -172,11 +172,11 @@ struct vulkan_object_native<obj::option::khr::video_decode_vp9_picture>
 template<>
 struct expression_vulkan_tag<VkVideoDecodeVP9ProfileInfoKHR>
 {
-	using type = obj::option::khr::video_decode_vp9_profile;
+	using type = tag::option::khr::video_decode_vp9_profile;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::video_decode_vp9_profile>
+struct vulkan_object_native<tag::option::khr::video_decode_vp9_profile>
 {
 	using type = VkVideoDecodeVP9ProfileInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_DECODE_VP9_PROFILE_INFO_KHR;
@@ -185,18 +185,18 @@ struct vulkan_object_native<obj::option::khr::video_decode_vp9_profile>
 template<>
 struct expression_vulkan_tag<VkVideoDecodeVP9CapabilitiesKHR>
 {
-	using type = obj::result::khr::video_decode_vp9_capabilities;
+	using type = tag::result::khr::video_decode_vp9_capabilities;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::video_decode_vp9_capabilities>
+struct vulkan_object_native<tag::result::khr::video_decode_vp9_capabilities>
 {
 	using type = VkVideoDecodeVP9CapabilitiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_DECODE_VP9_CAPABILITIES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::video_decode_vp9>
+struct vulkan_object_extensions<tag::feature::khr::video_decode_vp9>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_decode_vp9"};
 	constexpr static ::std::uint32_t core = 0;
@@ -204,7 +204,7 @@ struct vulkan_object_extensions<obj::feature::khr::video_decode_vp9>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::video_decode_vp9_picture>
+struct vulkan_object_extensions<tag::option::khr::video_decode_vp9_picture>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_decode_vp9"};
 	constexpr static ::std::uint32_t core = 0;
@@ -212,7 +212,7 @@ struct vulkan_object_extensions<obj::option::khr::video_decode_vp9_picture>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::video_decode_vp9_profile>
+struct vulkan_object_extensions<tag::option::khr::video_decode_vp9_profile>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_decode_vp9"};
 	constexpr static ::std::uint32_t core = 0;
@@ -220,7 +220,7 @@ struct vulkan_object_extensions<obj::option::khr::video_decode_vp9_profile>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::video_decode_vp9_capabilities>
+struct vulkan_object_extensions<tag::result::khr::video_decode_vp9_capabilities>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_decode_vp9"};
 	constexpr static ::std::uint32_t core = 0;
@@ -228,17 +228,17 @@ struct vulkan_object_extensions<obj::result::khr::video_decode_vp9_capabilities>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::video_decode_vp9> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::video_decode_vp9> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::video_decode_vp9> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::video_decode_vp9> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::query_pool, obj::option::khr::video_decode_vp9_profile> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::query_pool, tag::option::khr::video_decode_vp9_profile> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::video_capabilities, obj::result::khr::video_decode_vp9_capabilities> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::video_capabilities, tag::result::khr::video_decode_vp9_capabilities> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_decode, obj::option::khr::video_decode_vp9_picture> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_decode, tag::option::khr::video_decode_vp9_picture> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_profile, obj::option::khr::video_decode_vp9_profile> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_profile, tag::option::khr::video_decode_vp9_profile> = true;
 }
 
 namespace vkfu::param
@@ -249,7 +249,7 @@ using ::vkfu::operator|;
 
 struct video_decode_vp9
 {
-	using vulkan_tag_type = obj::feature::khr::video_decode_vp9;
+	using vulkan_tag_type = tag::feature::khr::video_decode_vp9;
 
 	bool enable = false;
 
@@ -271,7 +271,7 @@ using ::vkfu::operator|;
 
 struct video_decode_vp9_picture
 {
-	using vulkan_tag_type = obj::option::khr::video_decode_vp9_picture;
+	using vulkan_tag_type = tag::option::khr::video_decode_vp9_picture;
 
 	StdVideoDecodeVP9PictureInfo const* std_picture_info = nullptr;
 	::std::array<::std::int32_t, VK_MAX_VIDEO_VP9_REFERENCES_PER_FRAME_KHR> reference_name_slot_indices{};
@@ -297,7 +297,7 @@ struct video_decode_vp9_picture
 
 struct video_decode_vp9_profile
 {
-	using vulkan_tag_type = obj::option::khr::video_decode_vp9_profile;
+	using vulkan_tag_type = tag::option::khr::video_decode_vp9_profile;
 
 	StdVideoVP9Profile std_profile{};
 

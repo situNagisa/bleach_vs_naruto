@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceMaintenance3Properties const& valu
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property
 {
@@ -74,7 +74,7 @@ struct descriptor_set_layout_support{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::result::descriptor_set_layout_support>
+struct vulkan_object_trait<tag::result::descriptor_set_layout_support>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::result::descriptor_set_layout_support>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::maintenance3>
+struct vulkan_object_trait<tag::property::maintenance3>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::property::maintenance3>
 template<>
 struct expression_vulkan_tag<VkDescriptorSetLayoutSupport>
 {
-	using type = obj::result::descriptor_set_layout_support;
+	using type = tag::result::descriptor_set_layout_support;
 };
 
 template<>
-struct vulkan_object_native<obj::result::descriptor_set_layout_support>
+struct vulkan_object_native<tag::result::descriptor_set_layout_support>
 {
 	using type = VkDescriptorSetLayoutSupport;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_SUPPORT;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::result::descriptor_set_layout_support>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMaintenance3Properties>
 {
-	using type = obj::property::maintenance3;
+	using type = tag::property::maintenance3;
 };
 
 template<>
-struct vulkan_object_native<obj::property::maintenance3>
+struct vulkan_object_native<tag::property::maintenance3>
 {
 	using type = VkPhysicalDeviceMaintenance3Properties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_3_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::descriptor_set_layout_support>
+struct vulkan_object_extensions<tag::result::descriptor_set_layout_support>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance3"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::result::descriptor_set_layout_support>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::maintenance3>
+struct vulkan_object_extensions<tag::property::maintenance3>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance3"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -132,16 +132,16 @@ struct vulkan_object_extensions<obj::property::maintenance3>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::maintenance3> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::maintenance3> = true;
 }
 
 namespace vkfu
 {
-template<::vkfu::query_extension_of<::vkfu::obj::result::descriptor_set_layout_support>... Extras, ::vkfu::expression_for<::vkfu::obj::descriptor_set_layout> Expression1>
-[[nodiscard]] auto get_descriptor_set_layout_support(VkDevice device, Expression1&& create_info) -> ::vkfu::query_chain<::vkfu::obj::result::descriptor_set_layout_support, Extras...>
+template<::vkfu::query_extension_of<::vkfu::tag::result::descriptor_set_layout_support>... Extras, ::vkfu::expression_for<::vkfu::tag::descriptor_set_layout> Expression1>
+[[nodiscard]] auto get_descriptor_set_layout_support(VkDevice device, Expression1&& create_info) -> ::vkfu::query_chain<::vkfu::tag::result::descriptor_set_layout_support, Extras...>
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(create_info));
-	auto chain = ::vkfu::query_chain<::vkfu::obj::result::descriptor_set_layout_support, Extras...>{};
+	auto chain = ::vkfu::query_chain<::vkfu::tag::result::descriptor_set_layout_support, Extras...>{};
 	::vkGetDescriptorSetLayoutSupport(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(chain.head()));
 	return chain;
 }

@@ -28,11 +28,11 @@
 
 #include "../version_1_2/8bit_storage.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using storage_8bit = ::vkfu::obj::feature::storage_8bit;
+using storage_8bit = ::vkfu::tag::feature::storage_8bit;
 }
 }
 

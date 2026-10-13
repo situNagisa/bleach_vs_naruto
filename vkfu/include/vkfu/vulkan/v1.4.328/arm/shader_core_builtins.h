@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceShaderCoreBuiltinsPropertiesARM co
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::arm
 {
@@ -74,7 +74,7 @@ struct shader_core_builtins{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::arm::shader_core_builtins>
+struct vulkan_object_trait<tag::feature::arm::shader_core_builtins>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::feature::arm::shader_core_builtins>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::arm::shader_core_builtins>
+struct vulkan_object_trait<tag::property::arm::shader_core_builtins>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::property::arm::shader_core_builtins>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderCoreBuiltinsFeaturesARM>
 {
-	using type = obj::feature::arm::shader_core_builtins;
+	using type = tag::feature::arm::shader_core_builtins;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::arm::shader_core_builtins>
+struct vulkan_object_native<tag::feature::arm::shader_core_builtins>
 {
 	using type = VkPhysicalDeviceShaderCoreBuiltinsFeaturesARM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CORE_BUILTINS_FEATURES_ARM;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::feature::arm::shader_core_builtins>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderCoreBuiltinsPropertiesARM>
 {
-	using type = obj::property::arm::shader_core_builtins;
+	using type = tag::property::arm::shader_core_builtins;
 };
 
 template<>
-struct vulkan_object_native<obj::property::arm::shader_core_builtins>
+struct vulkan_object_native<tag::property::arm::shader_core_builtins>
 {
 	using type = VkPhysicalDeviceShaderCoreBuiltinsPropertiesARM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CORE_BUILTINS_PROPERTIES_ARM;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::arm::shader_core_builtins>
+struct vulkan_object_extensions<tag::feature::arm::shader_core_builtins>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ARM_shader_core_builtins"};
 	constexpr static ::std::uint32_t core = 0;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::feature::arm::shader_core_builtins>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::arm::shader_core_builtins>
+struct vulkan_object_extensions<tag::property::arm::shader_core_builtins>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ARM_shader_core_builtins"};
 	constexpr static ::std::uint32_t core = 0;
@@ -132,11 +132,11 @@ struct vulkan_object_extensions<obj::property::arm::shader_core_builtins>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::arm::shader_core_builtins> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::arm::shader_core_builtins> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::arm::shader_core_builtins> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::arm::shader_core_builtins> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::arm::shader_core_builtins> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::arm::shader_core_builtins> = true;
 }
 
 namespace vkfu::param
@@ -147,7 +147,7 @@ using ::vkfu::operator|;
 
 struct shader_core_builtins
 {
-	using vulkan_tag_type = obj::feature::arm::shader_core_builtins;
+	using vulkan_tag_type = tag::feature::arm::shader_core_builtins;
 
 	bool enable = false;
 

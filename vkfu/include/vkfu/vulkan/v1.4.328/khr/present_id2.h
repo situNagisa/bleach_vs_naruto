@@ -76,7 +76,7 @@ constexpr auto _vkfu_evaluate(VkSurfaceCapabilitiesPresentId2KHR const& value) n
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -95,7 +95,7 @@ struct surface_capabilities_present_id2{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::present_id2>
+struct vulkan_object_trait<tag::feature::khr::present_id2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -103,7 +103,7 @@ struct vulkan_object_trait<obj::feature::khr::present_id2>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::present_id2>
+struct vulkan_object_trait<tag::option::khr::present_id2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -111,7 +111,7 @@ struct vulkan_object_trait<obj::option::khr::present_id2>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::surface_capabilities_present_id2>
+struct vulkan_object_trait<tag::result::khr::surface_capabilities_present_id2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -121,11 +121,11 @@ struct vulkan_object_trait<obj::result::khr::surface_capabilities_present_id2>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePresentId2FeaturesKHR>
 {
-	using type = obj::feature::khr::present_id2;
+	using type = tag::feature::khr::present_id2;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::present_id2>
+struct vulkan_object_native<tag::feature::khr::present_id2>
 {
 	using type = VkPhysicalDevicePresentId2FeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRESENT_ID_2_FEATURES_KHR;
@@ -134,11 +134,11 @@ struct vulkan_object_native<obj::feature::khr::present_id2>
 template<>
 struct expression_vulkan_tag<VkPresentId2KHR>
 {
-	using type = obj::option::khr::present_id2;
+	using type = tag::option::khr::present_id2;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::present_id2>
+struct vulkan_object_native<tag::option::khr::present_id2>
 {
 	using type = VkPresentId2KHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PRESENT_ID_2_KHR;
@@ -147,18 +147,18 @@ struct vulkan_object_native<obj::option::khr::present_id2>
 template<>
 struct expression_vulkan_tag<VkSurfaceCapabilitiesPresentId2KHR>
 {
-	using type = obj::result::khr::surface_capabilities_present_id2;
+	using type = tag::result::khr::surface_capabilities_present_id2;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::surface_capabilities_present_id2>
+struct vulkan_object_native<tag::result::khr::surface_capabilities_present_id2>
 {
 	using type = VkSurfaceCapabilitiesPresentId2KHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SURFACE_CAPABILITIES_PRESENT_ID_2_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::present_id2>
+struct vulkan_object_extensions<tag::feature::khr::present_id2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_present_id2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -166,7 +166,7 @@ struct vulkan_object_extensions<obj::feature::khr::present_id2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::present_id2>
+struct vulkan_object_extensions<tag::option::khr::present_id2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_present_id2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -174,7 +174,7 @@ struct vulkan_object_extensions<obj::option::khr::present_id2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::surface_capabilities_present_id2>
+struct vulkan_object_extensions<tag::result::khr::surface_capabilities_present_id2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_present_id2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -182,13 +182,13 @@ struct vulkan_object_extensions<obj::result::khr::surface_capabilities_present_i
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::present_id2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::present_id2> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::present_id2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::present_id2> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::present, obj::option::khr::present_id2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::present, tag::option::khr::present_id2> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::surface_capabilities2, obj::result::khr::surface_capabilities_present_id2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::surface_capabilities2, tag::result::khr::surface_capabilities_present_id2> = true;
 }
 
 namespace vkfu::param
@@ -199,7 +199,7 @@ using ::vkfu::operator|;
 
 struct present_id2
 {
-	using vulkan_tag_type = obj::feature::khr::present_id2;
+	using vulkan_tag_type = tag::feature::khr::present_id2;
 
 	bool enable = false;
 
@@ -221,7 +221,7 @@ using ::vkfu::operator|;
 
 struct present_id2
 {
-	using vulkan_tag_type = obj::option::khr::present_id2;
+	using vulkan_tag_type = tag::option::khr::present_id2;
 
 	::std::uint32_t swapchain_count{};
 	::std::uint64_t const* present_ids = nullptr;

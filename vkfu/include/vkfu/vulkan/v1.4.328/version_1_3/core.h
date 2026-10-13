@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceVulkan13Properties const& value) n
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -74,7 +74,7 @@ struct vulkan13{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::vulkan13>
+struct vulkan_object_trait<tag::feature::vulkan13>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::feature::vulkan13>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::vulkan13>
+struct vulkan_object_trait<tag::property::vulkan13>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::property::vulkan13>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceVulkan13Features>
 {
-	using type = obj::feature::vulkan13;
+	using type = tag::feature::vulkan13;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::vulkan13>
+struct vulkan_object_native<tag::feature::vulkan13>
 {
 	using type = VkPhysicalDeviceVulkan13Features;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::feature::vulkan13>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceVulkan13Properties>
 {
-	using type = obj::property::vulkan13;
+	using type = tag::property::vulkan13;
 };
 
 template<>
-struct vulkan_object_native<obj::property::vulkan13>
+struct vulkan_object_native<tag::property::vulkan13>
 {
 	using type = VkPhysicalDeviceVulkan13Properties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::vulkan13>
+struct vulkan_object_extensions<tag::feature::vulkan13>
 {
 	constexpr static ::std::array<char const*, 0> names{};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::feature::vulkan13>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::vulkan13>
+struct vulkan_object_extensions<tag::property::vulkan13>
 {
 	constexpr static ::std::array<char const*, 0> names{};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -132,11 +132,11 @@ struct vulkan_object_extensions<obj::property::vulkan13>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::vulkan13> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::vulkan13> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::vulkan13> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::vulkan13> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::vulkan13> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::vulkan13> = true;
 }
 
 namespace vkfu::param
@@ -147,7 +147,7 @@ using ::vkfu::operator|;
 
 struct vulkan13
 {
-	using vulkan_tag_type = obj::feature::vulkan13;
+	using vulkan_tag_type = tag::feature::vulkan13;
 
 	bool robust_image_access = false;
 	bool inline_uniform_block = false;

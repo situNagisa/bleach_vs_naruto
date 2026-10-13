@@ -90,7 +90,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceProtectedMemoryProperties const& v
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct device_queue2{};
 namespace feature
@@ -110,7 +110,7 @@ struct protected_memory{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::device_queue2>
+struct vulkan_object_trait<tag::device_queue2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -118,7 +118,7 @@ struct vulkan_object_trait<obj::device_queue2>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::protected_memory>
+struct vulkan_object_trait<tag::feature::protected_memory>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -126,7 +126,7 @@ struct vulkan_object_trait<obj::feature::protected_memory>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::protected_submit>
+struct vulkan_object_trait<tag::option::protected_submit>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -134,7 +134,7 @@ struct vulkan_object_trait<obj::option::protected_submit>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::protected_memory>
+struct vulkan_object_trait<tag::property::protected_memory>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -144,11 +144,11 @@ struct vulkan_object_trait<obj::property::protected_memory>
 template<>
 struct expression_vulkan_tag<VkDeviceQueueInfo2>
 {
-	using type = obj::device_queue2;
+	using type = tag::device_queue2;
 };
 
 template<>
-struct vulkan_object_native<obj::device_queue2>
+struct vulkan_object_native<tag::device_queue2>
 {
 	using type = VkDeviceQueueInfo2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEVICE_QUEUE_INFO_2;
@@ -157,11 +157,11 @@ struct vulkan_object_native<obj::device_queue2>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceProtectedMemoryFeatures>
 {
-	using type = obj::feature::protected_memory;
+	using type = tag::feature::protected_memory;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::protected_memory>
+struct vulkan_object_native<tag::feature::protected_memory>
 {
 	using type = VkPhysicalDeviceProtectedMemoryFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROTECTED_MEMORY_FEATURES;
@@ -170,11 +170,11 @@ struct vulkan_object_native<obj::feature::protected_memory>
 template<>
 struct expression_vulkan_tag<VkProtectedSubmitInfo>
 {
-	using type = obj::option::protected_submit;
+	using type = tag::option::protected_submit;
 };
 
 template<>
-struct vulkan_object_native<obj::option::protected_submit>
+struct vulkan_object_native<tag::option::protected_submit>
 {
 	using type = VkProtectedSubmitInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PROTECTED_SUBMIT_INFO;
@@ -183,18 +183,18 @@ struct vulkan_object_native<obj::option::protected_submit>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceProtectedMemoryProperties>
 {
-	using type = obj::property::protected_memory;
+	using type = tag::property::protected_memory;
 };
 
 template<>
-struct vulkan_object_native<obj::property::protected_memory>
+struct vulkan_object_native<tag::property::protected_memory>
 {
 	using type = VkPhysicalDeviceProtectedMemoryProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROTECTED_MEMORY_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::device_queue2>
+struct vulkan_object_extensions<tag::device_queue2>
 {
 	constexpr static ::std::array<char const*, 0> names{};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -202,7 +202,7 @@ struct vulkan_object_extensions<obj::device_queue2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::protected_memory>
+struct vulkan_object_extensions<tag::feature::protected_memory>
 {
 	constexpr static ::std::array<char const*, 0> names{};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -210,7 +210,7 @@ struct vulkan_object_extensions<obj::feature::protected_memory>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::protected_submit>
+struct vulkan_object_extensions<tag::option::protected_submit>
 {
 	constexpr static ::std::array<char const*, 0> names{};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -218,7 +218,7 @@ struct vulkan_object_extensions<obj::option::protected_submit>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::protected_memory>
+struct vulkan_object_extensions<tag::property::protected_memory>
 {
 	constexpr static ::std::array<char const*, 0> names{};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -226,13 +226,13 @@ struct vulkan_object_extensions<obj::property::protected_memory>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::protected_memory> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::protected_memory> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::protected_memory> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::protected_memory> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::protected_memory> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::protected_memory> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::submit, obj::option::protected_submit> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::submit, tag::option::protected_submit> = true;
 }
 
 namespace vkfu::param
@@ -241,15 +241,9 @@ using ::vkfu::operator|;
 
 struct device_queue2
 {
-	using vulkan_tag_type = obj::device_queue2;
+	using vulkan_tag_type = tag::device_queue2;
 
-	struct flags_type
-	{
-		VkDeviceQueueCreateFlags protected_ : 1 = 0;
-		VkDeviceQueueCreateFlags _reserved_1 : 31 = 0;
-	};
-
-	flags_type flags{};
+	::vkfu::flags::device_queue_create flags{};
 	::std::uint32_t queue_family_index{};
 	::std::uint32_t queue_index{};
 
@@ -265,18 +259,13 @@ struct device_queue2
 	}
 };
 
-static_assert(sizeof(device_queue2::flags_type) == sizeof(VkDeviceQueueCreateFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkDeviceQueueCreateFlags>(device_queue2::flags_type{.protected_ = 1}) == VK_DEVICE_QUEUE_CREATE_PROTECTED_BIT);
-#endif
-
 namespace feature
 {
 using ::vkfu::operator|;
 
 struct protected_memory
 {
-	using vulkan_tag_type = obj::feature::protected_memory;
+	using vulkan_tag_type = tag::feature::protected_memory;
 
 	bool enable = false;
 
@@ -298,7 +287,7 @@ using ::vkfu::operator|;
 
 struct protected_submit
 {
-	using vulkan_tag_type = obj::option::protected_submit;
+	using vulkan_tag_type = tag::option::protected_submit;
 
 	bool enable = false;
 
@@ -317,7 +306,7 @@ struct protected_submit
 
 namespace vkfu
 {
-template<::vkfu::expression_for<::vkfu::obj::device_queue2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::device_queue2> Expression1>
 [[nodiscard]] auto get_device_queue2(VkDevice device, Expression1&& queue_info) -> VkQueue
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(queue_info));

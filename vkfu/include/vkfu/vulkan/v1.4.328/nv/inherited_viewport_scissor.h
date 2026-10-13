@@ -60,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceInheritedViewportScissorFeaturesNV
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -75,7 +75,7 @@ struct command_buffer_inheritance_viewport_scissor{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::nv::command_buffer_inheritance_viewport_scissor>
+struct vulkan_object_trait<tag::option::nv::command_buffer_inheritance_viewport_scissor>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -83,7 +83,7 @@ struct vulkan_object_trait<obj::option::nv::command_buffer_inheritance_viewport_
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::nv::inherited_viewport_scissor>
+struct vulkan_object_trait<tag::feature::nv::inherited_viewport_scissor>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -93,11 +93,11 @@ struct vulkan_object_trait<obj::feature::nv::inherited_viewport_scissor>
 template<>
 struct expression_vulkan_tag<VkCommandBufferInheritanceViewportScissorInfoNV>
 {
-	using type = obj::option::nv::command_buffer_inheritance_viewport_scissor;
+	using type = tag::option::nv::command_buffer_inheritance_viewport_scissor;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::command_buffer_inheritance_viewport_scissor>
+struct vulkan_object_native<tag::option::nv::command_buffer_inheritance_viewport_scissor>
 {
 	using type = VkCommandBufferInheritanceViewportScissorInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_VIEWPORT_SCISSOR_INFO_NV;
@@ -106,18 +106,18 @@ struct vulkan_object_native<obj::option::nv::command_buffer_inheritance_viewport
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceInheritedViewportScissorFeaturesNV>
 {
-	using type = obj::feature::nv::inherited_viewport_scissor;
+	using type = tag::feature::nv::inherited_viewport_scissor;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::inherited_viewport_scissor>
+struct vulkan_object_native<tag::feature::nv::inherited_viewport_scissor>
 {
 	using type = VkPhysicalDeviceInheritedViewportScissorFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INHERITED_VIEWPORT_SCISSOR_FEATURES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::command_buffer_inheritance_viewport_scissor>
+struct vulkan_object_extensions<tag::option::nv::command_buffer_inheritance_viewport_scissor>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_inherited_viewport_scissor"};
 	constexpr static ::std::uint32_t core = 0;
@@ -125,7 +125,7 @@ struct vulkan_object_extensions<obj::option::nv::command_buffer_inheritance_view
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::inherited_viewport_scissor>
+struct vulkan_object_extensions<tag::feature::nv::inherited_viewport_scissor>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_inherited_viewport_scissor"};
 	constexpr static ::std::uint32_t core = 0;
@@ -133,11 +133,11 @@ struct vulkan_object_extensions<obj::feature::nv::inherited_viewport_scissor>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::command_buffer_inheritance, obj::option::nv::command_buffer_inheritance_viewport_scissor> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::command_buffer_inheritance, tag::option::nv::command_buffer_inheritance_viewport_scissor> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::inherited_viewport_scissor> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::inherited_viewport_scissor> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::inherited_viewport_scissor> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::inherited_viewport_scissor> = true;
 }
 
 namespace vkfu::param
@@ -148,7 +148,7 @@ using ::vkfu::operator|;
 
 struct inherited_viewport_scissor
 {
-	using vulkan_tag_type = obj::feature::nv::inherited_viewport_scissor;
+	using vulkan_tag_type = tag::feature::nv::inherited_viewport_scissor;
 
 	bool inherited_viewport_scissor_2d = false;
 
@@ -170,7 +170,7 @@ using ::vkfu::operator|;
 
 struct command_buffer_inheritance_viewport_scissor
 {
-	using vulkan_tag_type = obj::option::nv::command_buffer_inheritance_viewport_scissor;
+	using vulkan_tag_type = tag::option::nv::command_buffer_inheritance_viewport_scissor;
 
 	bool viewport_scissor_2d = false;
 	::std::uint32_t viewport_depth_count{};

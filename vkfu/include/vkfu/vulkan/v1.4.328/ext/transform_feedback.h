@@ -75,7 +75,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceTransformFeedbackPropertiesEXT con
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -94,7 +94,7 @@ struct rasterization_stream{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::transform_feedback>
+struct vulkan_object_trait<tag::feature::ext::transform_feedback>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -102,7 +102,7 @@ struct vulkan_object_trait<obj::feature::ext::transform_feedback>
 };
 
 template<>
-struct vulkan_object_trait<obj::state::ext::rasterization_stream>
+struct vulkan_object_trait<tag::state::ext::rasterization_stream>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -110,7 +110,7 @@ struct vulkan_object_trait<obj::state::ext::rasterization_stream>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::ext::transform_feedback>
+struct vulkan_object_trait<tag::property::ext::transform_feedback>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -120,11 +120,11 @@ struct vulkan_object_trait<obj::property::ext::transform_feedback>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceTransformFeedbackFeaturesEXT>
 {
-	using type = obj::feature::ext::transform_feedback;
+	using type = tag::feature::ext::transform_feedback;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::transform_feedback>
+struct vulkan_object_native<tag::feature::ext::transform_feedback>
 {
 	using type = VkPhysicalDeviceTransformFeedbackFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TRANSFORM_FEEDBACK_FEATURES_EXT;
@@ -133,11 +133,11 @@ struct vulkan_object_native<obj::feature::ext::transform_feedback>
 template<>
 struct expression_vulkan_tag<VkPipelineRasterizationStateStreamCreateInfoEXT>
 {
-	using type = obj::state::ext::rasterization_stream;
+	using type = tag::state::ext::rasterization_stream;
 };
 
 template<>
-struct vulkan_object_native<obj::state::ext::rasterization_stream>
+struct vulkan_object_native<tag::state::ext::rasterization_stream>
 {
 	using type = VkPipelineRasterizationStateStreamCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_STREAM_CREATE_INFO_EXT;
@@ -146,18 +146,18 @@ struct vulkan_object_native<obj::state::ext::rasterization_stream>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceTransformFeedbackPropertiesEXT>
 {
-	using type = obj::property::ext::transform_feedback;
+	using type = tag::property::ext::transform_feedback;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::transform_feedback>
+struct vulkan_object_native<tag::property::ext::transform_feedback>
 {
 	using type = VkPhysicalDeviceTransformFeedbackPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TRANSFORM_FEEDBACK_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::transform_feedback>
+struct vulkan_object_extensions<tag::feature::ext::transform_feedback>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_transform_feedback"};
 	constexpr static ::std::uint32_t core = 0;
@@ -165,7 +165,7 @@ struct vulkan_object_extensions<obj::feature::ext::transform_feedback>
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::ext::rasterization_stream>
+struct vulkan_object_extensions<tag::state::ext::rasterization_stream>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_transform_feedback"};
 	constexpr static ::std::uint32_t core = 0;
@@ -173,7 +173,7 @@ struct vulkan_object_extensions<obj::state::ext::rasterization_stream>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::transform_feedback>
+struct vulkan_object_extensions<tag::property::ext::transform_feedback>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_transform_feedback"};
 	constexpr static ::std::uint32_t core = 0;
@@ -181,13 +181,13 @@ struct vulkan_object_extensions<obj::property::ext::transform_feedback>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::transform_feedback> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::transform_feedback> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::transform_feedback> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::transform_feedback> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::transform_feedback> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::transform_feedback> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::rasterization, obj::state::ext::rasterization_stream> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::rasterization, tag::state::ext::rasterization_stream> = true;
 }
 
 namespace vkfu::param
@@ -198,7 +198,7 @@ using ::vkfu::operator|;
 
 struct transform_feedback
 {
-	using vulkan_tag_type = obj::feature::ext::transform_feedback;
+	using vulkan_tag_type = tag::feature::ext::transform_feedback;
 
 	bool enable = false;
 	bool geometry_streams = false;
@@ -222,7 +222,7 @@ using ::vkfu::operator|;
 
 struct rasterization_stream
 {
-	using vulkan_tag_type = obj::state::ext::rasterization_stream;
+	using vulkan_tag_type = tag::state::ext::rasterization_stream;
 
 	VkPipelineRasterizationStateStreamCreateFlagsEXT flags{};
 	::std::uint32_t stream{};

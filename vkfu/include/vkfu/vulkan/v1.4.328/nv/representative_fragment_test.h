@@ -60,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkPipelineRepresentativeFragmentTestStateCreateInf
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -75,7 +75,7 @@ struct pipeline_representative_fragment_test_state{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::representative_fragment_test>
+struct vulkan_object_trait<tag::feature::nv::representative_fragment_test>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -83,7 +83,7 @@ struct vulkan_object_trait<obj::feature::nv::representative_fragment_test>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::nv::pipeline_representative_fragment_test_state>
+struct vulkan_object_trait<tag::option::nv::pipeline_representative_fragment_test_state>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -93,11 +93,11 @@ struct vulkan_object_trait<obj::option::nv::pipeline_representative_fragment_tes
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceRepresentativeFragmentTestFeaturesNV>
 {
-	using type = obj::feature::nv::representative_fragment_test;
+	using type = tag::feature::nv::representative_fragment_test;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::representative_fragment_test>
+struct vulkan_object_native<tag::feature::nv::representative_fragment_test>
 {
 	using type = VkPhysicalDeviceRepresentativeFragmentTestFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_REPRESENTATIVE_FRAGMENT_TEST_FEATURES_NV;
@@ -106,18 +106,18 @@ struct vulkan_object_native<obj::feature::nv::representative_fragment_test>
 template<>
 struct expression_vulkan_tag<VkPipelineRepresentativeFragmentTestStateCreateInfoNV>
 {
-	using type = obj::option::nv::pipeline_representative_fragment_test_state;
+	using type = tag::option::nv::pipeline_representative_fragment_test_state;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::pipeline_representative_fragment_test_state>
+struct vulkan_object_native<tag::option::nv::pipeline_representative_fragment_test_state>
 {
 	using type = VkPipelineRepresentativeFragmentTestStateCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_REPRESENTATIVE_FRAGMENT_TEST_STATE_CREATE_INFO_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::representative_fragment_test>
+struct vulkan_object_extensions<tag::feature::nv::representative_fragment_test>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_representative_fragment_test"};
 	constexpr static ::std::uint32_t core = 0;
@@ -125,7 +125,7 @@ struct vulkan_object_extensions<obj::feature::nv::representative_fragment_test>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::pipeline_representative_fragment_test_state>
+struct vulkan_object_extensions<tag::option::nv::pipeline_representative_fragment_test_state>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_representative_fragment_test"};
 	constexpr static ::std::uint32_t core = 0;
@@ -133,11 +133,11 @@ struct vulkan_object_extensions<obj::option::nv::pipeline_representative_fragmen
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::representative_fragment_test> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::representative_fragment_test> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::graphics_pipeline, obj::option::nv::pipeline_representative_fragment_test_state> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::graphics_pipeline, tag::option::nv::pipeline_representative_fragment_test_state> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::representative_fragment_test> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::representative_fragment_test> = true;
 }
 
 namespace vkfu::param
@@ -148,7 +148,7 @@ using ::vkfu::operator|;
 
 struct representative_fragment_test
 {
-	using vulkan_tag_type = obj::feature::nv::representative_fragment_test;
+	using vulkan_tag_type = tag::feature::nv::representative_fragment_test;
 
 	bool enable = false;
 
@@ -170,7 +170,7 @@ using ::vkfu::operator|;
 
 struct pipeline_representative_fragment_test_state
 {
-	using vulkan_tag_type = obj::option::nv::pipeline_representative_fragment_test_state;
+	using vulkan_tag_type = tag::option::nv::pipeline_representative_fragment_test_state;
 
 	bool representative_fragment_test_enable = false;
 

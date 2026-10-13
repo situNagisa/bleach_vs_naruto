@@ -59,7 +59,7 @@ struct texture_type
 				return ::vkkl::device_memory(device, ::vkfu::allocate_memory(device, ::vkfu::param::memory{ .allocation_size = req.size, .type_index = *index }));
 			}())
 		, view(device, VK_NULL_HANDLE)
-		, staging(device, physical_device, source.pixels, ::vkfu::param::buffer::usage_type{ .transfer_src = 1 })
+		, staging(device, physical_device, source.pixels, ::vkfu::flags::buffer_usage{ .transfer_src = 1 })
 		, sampler(device, ::vkfu::create_sampler(device, ::vkfu::param::sampler{
 				.mag_filter = ::vkfu::enums::filter::linear,
 				.min_filter = ::vkfu::enums::filter::linear,

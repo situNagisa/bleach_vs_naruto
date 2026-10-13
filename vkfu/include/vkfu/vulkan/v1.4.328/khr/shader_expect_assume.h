@@ -28,11 +28,11 @@
 
 #include "../version_1_4/shader_expect_assume.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using shader_expect_assume = ::vkfu::obj::feature::shader_expect_assume;
+using shader_expect_assume = ::vkfu::tag::feature::shader_expect_assume;
 }
 }
 

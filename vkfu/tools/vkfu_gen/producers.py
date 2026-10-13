@@ -13,6 +13,7 @@ from __future__ import annotations
 from . import ir
 from .cpp import TAB
 from .naming import Table
+from .values import Values
 
 
 
@@ -26,15 +27,19 @@ def shape_of(command: ir.Command) -> str:
 
 
 
-def _leading(command: ir.Command) -> tuple[str, str]:
-	"""(parameter list, argument list) for the handles the caller already has."""
-	declaration = "".join(f"{member.type} {member.name}, " for member in command.leading)
-	arguments = "".join(f"{member.name}, " for member in command.leading)
-	return declaration, arguments
+def _leading(command: ir.Command, values: Values) -> tuple[str, str, str]:
+	"""(parameters, arguments to the native call, arguments to another overload)
+	for the handles the caller already has."""
+	declaration = "".join(
+		f"{values.spelled(member) or member.type} {member.name}, " for member in command.leading
+	)
+	native = "".join(f"{values.native(member, member.name)}, " for member in command.leading)
+	forwarded = "".join(f"{member.name}, " for member in command.leading)
+	return declaration, native, forwarded
 
 
-def _single(command: ir.Command, function: str, tag: str) -> list[str]:
-	declare, pass_on = _leading(command)
+def _single(command: ir.Command, values: Values, function: str, tag: str) -> list[str]:
+	declare, call_on, pass_on = _leading(command, values)
 	handle = command.out.type
 	allocator = ", ::VkAllocationCallbacks const* allocation_callbacks" if command.allocator else ""
 	allocator_argument = ", allocation_callbacks" if command.allocator else ""
@@ -46,7 +51,7 @@ def _single(command: ir.Command, function: str, tag: str) -> list[str]:
 		f"{TAB}decltype(auto) storage = ::vkfu::evaluate(::std::forward<Expression>(info));",
 		f"{TAB}auto produced = {handle}{{}};",
 		f"{TAB}auto const result = ::{command.name}(",
-		f"{TAB}{TAB}{pass_on}::std::addressof(::vkfu::unpack(storage)){allocator_argument}, ::std::addressof(produced));",
+		f"{TAB}{TAB}{call_on}::std::addressof(::vkfu::unpack(storage)){allocator_argument}, ::std::addressof(produced));",
 		f"{TAB}if (result != ::VK_SUCCESS)",
 		f"{TAB}{{",
 		f"{TAB}{TAB}return ::std::unexpected{{result}};",
@@ -71,9 +76,9 @@ def _single(command: ir.Command, function: str, tag: str) -> list[str]:
 	]
 
 
-def _counted(command: ir.Command, function: str, tag: str) -> list[str]:
+def _counted(command: ir.Command, values: Values, function: str, tag: str) -> list[str]:
 	"""The out array's length lives inside the structure, so the caller sizes it."""
-	declare, pass_on = _leading(command)
+	declare, call_on, pass_on = _leading(command, values)
 	handle = command.out.type
 	return [
 		f"// The count comes from the structure ({command.out.length}), so `produced`",
@@ -83,7 +88,7 @@ def _counted(command: ir.Command, function: str, tag: str) -> list[str]:
 		f"{TAB}-> ::std::expected<void, ::VkResult>",
 		"{",
 		f"{TAB}decltype(auto) storage = ::vkfu::evaluate(::std::forward<Expression>(info));",
-		f"{TAB}auto const result = ::{command.name}({pass_on}::std::addressof(::vkfu::unpack(storage)), produced.data());",
+		f"{TAB}auto const result = ::{command.name}({call_on}::std::addressof(::vkfu::unpack(storage)), produced.data());",
 		f"{TAB}if (result != ::VK_SUCCESS)",
 		f"{TAB}{{",
 		f"{TAB}{TAB}return ::std::unexpected{{result}};",
@@ -103,9 +108,9 @@ def _counted(command: ir.Command, function: str, tag: str) -> list[str]:
 	]
 
 
-def _array(command: ir.Command, function: str, singular: str, tag: str) -> list[str]:
+def _array(command: ir.Command, values: Values, function: str, singular: str, tag: str) -> list[str]:
 	"""One command call for as many structures as the caller passes."""
-	declare, pass_on = _leading(command)
+	declare, call_on, pass_on = _leading(command, values)
 	handle = command.out.type
 	native = command.info.type
 	constraint = (
@@ -126,7 +131,7 @@ def _array(command: ir.Command, function: str, singular: str, tag: str) -> list[
 		f"{TAB}}}(::std::index_sequence_for<Expressions...>{{}});",
 		f"{TAB}auto produced = ::std::array<{handle}, sizeof...(Expressions)>{{}};",
 		f"{TAB}auto const result = ::{command.name}(",
-		f"{TAB}{TAB}{pass_on}static_cast<::std::uint32_t>(natives.size()), natives.data(),",
+		f"{TAB}{TAB}{call_on}static_cast<::std::uint32_t>(natives.size()), natives.data(),",
 		f"{TAB}{TAB}allocation_callbacks, produced.data());",
 		f"{TAB}if (result != ::VK_SUCCESS)",
 		f"{TAB}{{",
@@ -170,15 +175,15 @@ def _array(command: ir.Command, function: str, singular: str, tag: str) -> list[
 	return lines
 
 
-def render(command: ir.Command, table: Table) -> list[str]:
-	tag = f"::vkfu::obj::{table.struct_name(command.info.type)}"
+def render(command: ir.Command, table: Table, values: Values) -> list[str]:
+	tag = f"::vkfu::tag::{table.struct_name(command.info.type)}"
 	function = table.command_name(command.name).rpartition("::")[2]
 	lines: list[str] = []
 	shape = shape_of(command)
 	if shape == "single":
-		lines.extend(_single(command, function, tag))
+		lines.extend(_single(command, values, function, tag))
 	elif shape == "counted":
-		lines.extend(_counted(command, function, tag))
+		lines.extend(_counted(command, values, function, tag))
 	else:
-		lines.extend(_array(command, function, table.command_singular(command.name).rpartition("::")[2], tag))
+		lines.extend(_array(command, values, function, table.command_singular(command.name).rpartition("::")[2], tag))
 	return lines

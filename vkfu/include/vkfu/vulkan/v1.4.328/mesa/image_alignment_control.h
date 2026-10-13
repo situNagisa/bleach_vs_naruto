@@ -75,7 +75,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceImageAlignmentControlPropertiesMES
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::mesa
 {
@@ -94,7 +94,7 @@ struct image_alignment_control{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::mesa::image_alignment_control>
+struct vulkan_object_trait<tag::option::mesa::image_alignment_control>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -102,7 +102,7 @@ struct vulkan_object_trait<obj::option::mesa::image_alignment_control>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::mesa::image_alignment_control>
+struct vulkan_object_trait<tag::feature::mesa::image_alignment_control>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -110,7 +110,7 @@ struct vulkan_object_trait<obj::feature::mesa::image_alignment_control>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::mesa::image_alignment_control>
+struct vulkan_object_trait<tag::property::mesa::image_alignment_control>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -120,11 +120,11 @@ struct vulkan_object_trait<obj::property::mesa::image_alignment_control>
 template<>
 struct expression_vulkan_tag<VkImageAlignmentControlCreateInfoMESA>
 {
-	using type = obj::option::mesa::image_alignment_control;
+	using type = tag::option::mesa::image_alignment_control;
 };
 
 template<>
-struct vulkan_object_native<obj::option::mesa::image_alignment_control>
+struct vulkan_object_native<tag::option::mesa::image_alignment_control>
 {
 	using type = VkImageAlignmentControlCreateInfoMESA;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_ALIGNMENT_CONTROL_CREATE_INFO_MESA;
@@ -133,11 +133,11 @@ struct vulkan_object_native<obj::option::mesa::image_alignment_control>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceImageAlignmentControlFeaturesMESA>
 {
-	using type = obj::feature::mesa::image_alignment_control;
+	using type = tag::feature::mesa::image_alignment_control;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::mesa::image_alignment_control>
+struct vulkan_object_native<tag::feature::mesa::image_alignment_control>
 {
 	using type = VkPhysicalDeviceImageAlignmentControlFeaturesMESA;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_ALIGNMENT_CONTROL_FEATURES_MESA;
@@ -146,18 +146,18 @@ struct vulkan_object_native<obj::feature::mesa::image_alignment_control>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceImageAlignmentControlPropertiesMESA>
 {
-	using type = obj::property::mesa::image_alignment_control;
+	using type = tag::property::mesa::image_alignment_control;
 };
 
 template<>
-struct vulkan_object_native<obj::property::mesa::image_alignment_control>
+struct vulkan_object_native<tag::property::mesa::image_alignment_control>
 {
 	using type = VkPhysicalDeviceImageAlignmentControlPropertiesMESA;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_ALIGNMENT_CONTROL_PROPERTIES_MESA;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::mesa::image_alignment_control>
+struct vulkan_object_extensions<tag::option::mesa::image_alignment_control>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_MESA_image_alignment_control"};
 	constexpr static ::std::uint32_t core = 0;
@@ -165,7 +165,7 @@ struct vulkan_object_extensions<obj::option::mesa::image_alignment_control>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::mesa::image_alignment_control>
+struct vulkan_object_extensions<tag::feature::mesa::image_alignment_control>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_MESA_image_alignment_control"};
 	constexpr static ::std::uint32_t core = 0;
@@ -173,7 +173,7 @@ struct vulkan_object_extensions<obj::feature::mesa::image_alignment_control>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::mesa::image_alignment_control>
+struct vulkan_object_extensions<tag::property::mesa::image_alignment_control>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_MESA_image_alignment_control"};
 	constexpr static ::std::uint32_t core = 0;
@@ -181,13 +181,13 @@ struct vulkan_object_extensions<obj::property::mesa::image_alignment_control>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::mesa::image_alignment_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::mesa::image_alignment_control> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image, obj::option::mesa::image_alignment_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image, tag::option::mesa::image_alignment_control> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::mesa::image_alignment_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::mesa::image_alignment_control> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::mesa::image_alignment_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::mesa::image_alignment_control> = true;
 }
 
 namespace vkfu::param
@@ -198,7 +198,7 @@ using ::vkfu::operator|;
 
 struct image_alignment_control
 {
-	using vulkan_tag_type = obj::feature::mesa::image_alignment_control;
+	using vulkan_tag_type = tag::feature::mesa::image_alignment_control;
 
 	bool enable = false;
 
@@ -220,7 +220,7 @@ using ::vkfu::operator|;
 
 struct image_alignment_control
 {
-	using vulkan_tag_type = obj::option::mesa::image_alignment_control;
+	using vulkan_tag_type = tag::option::mesa::image_alignment_control;
 
 	::std::uint32_t maximum_requested_alignment{};
 

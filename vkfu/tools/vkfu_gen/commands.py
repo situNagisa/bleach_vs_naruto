@@ -17,6 +17,7 @@ from __future__ import annotations
 from . import ir, naming
 from .cpp import TAB, base_type, span_element_type
 from .naming import Table
+from .values import Values
 
 
 # Commands returning one of these hand the value straight back; anything else
@@ -51,7 +52,7 @@ def _span_element(member: ir.Member) -> str:
 
 
 
-def _signature(command: ir.Wrapper, table: Table) -> tuple[list[str], list[str], str | None]:
+def _signature(command: ir.Wrapper, table: Table, values: Values) -> tuple[list[str], list[str], str | None]:
 	"""(template parameters, function parameters, the out argument's C++ type)."""
 	templates: list[str] = []
 	parameters: list[str] = []
@@ -63,7 +64,7 @@ def _signature(command: ir.Wrapper, table: Table) -> tuple[list[str], list[str],
 		name = _identifier(member)
 		if argument.kind == "info":
 			index += 1
-			tag = f"::vkfu::obj::{table.struct_name(member.type)}"
+			tag = f"::vkfu::tag::{table.struct_name(member.type)}"
 			parameter = f"Expression{index}"
 			templates.append(f"::vkfu::expression_for<{tag}> {parameter}")
 			parameters.append(f"{parameter}&& {name}")
@@ -78,12 +79,12 @@ def _signature(command: ir.Wrapper, table: Table) -> tuple[list[str], list[str],
 		elif argument.kind == "out_span":
 			parameters.append(f"::std::span<{_type(member.type)}> {name}")
 		else:
-			parameters.append(f"{_declared(member)} {name}")
+			parameters.append(f"{values.spelled(member) or _declared(member)} {name}")
 
 	return templates, parameters, produced
 
 
-def _call_arguments(command: ir.Wrapper) -> list[str]:
+def _call_arguments(command: ir.Wrapper, values: Values) -> list[str]:
 	"""One expression per native parameter, in the command's own order."""
 	kinds = {argument.member.name: argument.kind for argument in command.arguments}
 	by_name = {member.name: member for member in command.params}
@@ -109,7 +110,7 @@ def _call_arguments(command: ir.Wrapper) -> list[str]:
 		elif kind == "out_span":
 			arguments.append(f"{_identifier(member)}.data()")
 		else:
-			arguments.append(_identifier(member))
+			arguments.append(values.native(member, _identifier(member)))
 	_ = spans
 	return arguments
 
@@ -128,10 +129,10 @@ def _evaluations(command: ir.Wrapper) -> list[str]:
 	return lines
 
 
-def render(command: ir.Wrapper, table: Table) -> list[str]:
+def render(command: ir.Wrapper, table: Table, values: Values) -> list[str]:
 	function = table.command_name(command.name).rpartition("::")[2]
-	templates, parameters, produced = _signature(command, table)
-	call = ", ".join(_call_arguments(command))
+	templates, parameters, produced = _signature(command, table, values)
+	call = ", ".join(_call_arguments(command, values))
 	template_line = f"template<{', '.join(templates)}>" if templates else None
 
 	# A wrapper with no expression parameter is not a template, so it needs to be

@@ -28,30 +28,30 @@
 
 #include "../version_1_4/maintenance5.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using maintenance5 = ::vkfu::obj::feature::maintenance5;
+using maintenance5 = ::vkfu::tag::feature::maintenance5;
 }
 namespace khr
 {
-using device_image_subresource = ::vkfu::obj::device_image_subresource;
-using image_subresource2 = ::vkfu::obj::image_subresource2;
-using rendering_area = ::vkfu::obj::rendering_area;
+using device_image_subresource = ::vkfu::tag::device_image_subresource;
+using image_subresource2 = ::vkfu::tag::image_subresource2;
+using rendering_area = ::vkfu::tag::rendering_area;
 }
 namespace option::khr
 {
-using buffer_usage_flags2 = ::vkfu::obj::option::buffer_usage_flags2;
-using pipeline_create_flags2 = ::vkfu::obj::option::pipeline_create_flags2;
+using buffer_usage_flags2 = ::vkfu::tag::option::buffer_usage_flags2;
+using pipeline_create_flags2 = ::vkfu::tag::option::pipeline_create_flags2;
 }
 namespace property::khr
 {
-using maintenance5 = ::vkfu::obj::property::maintenance5;
+using maintenance5 = ::vkfu::tag::property::maintenance5;
 }
 namespace result::khr
 {
-using subresource_layout2 = ::vkfu::obj::result::subresource_layout2;
+using subresource_layout2 = ::vkfu::tag::result::subresource_layout2;
 }
 }
 
@@ -64,7 +64,7 @@ using maintenance5 = ::vkfu::param::feature::maintenance5;
 
 namespace khr
 {
-template<::vkfu::reference_expression_for<::vkfu::obj::image> create_info_expression = ::vkfu::absent_expression, ::vkfu::reference_expression_for<::vkfu::obj::image_subresource2> subresource_expression = ::vkfu::absent_expression>
+template<::vkfu::reference_expression_for<::vkfu::tag::image> create_info_expression = ::vkfu::absent_expression, ::vkfu::reference_expression_for<::vkfu::tag::image_subresource2> subresource_expression = ::vkfu::absent_expression>
 using device_image_subresource = ::vkfu::param::device_image_subresource<create_info_expression, subresource_expression>;
 using image_subresource2 = ::vkfu::param::image_subresource2;
 using rendering_area = ::vkfu::param::rendering_area;

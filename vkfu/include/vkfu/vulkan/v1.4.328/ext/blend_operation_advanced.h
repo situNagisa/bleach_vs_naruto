@@ -86,7 +86,7 @@ enum class blend_overlap : ::std::underlying_type_t<VkBlendOverlapEXT>
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -105,7 +105,7 @@ struct color_blend_advanced{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::blend_operation_advanced>
+struct vulkan_object_trait<tag::feature::ext::blend_operation_advanced>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -113,7 +113,7 @@ struct vulkan_object_trait<obj::feature::ext::blend_operation_advanced>
 };
 
 template<>
-struct vulkan_object_trait<obj::state::ext::color_blend_advanced>
+struct vulkan_object_trait<tag::state::ext::color_blend_advanced>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -121,7 +121,7 @@ struct vulkan_object_trait<obj::state::ext::color_blend_advanced>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::ext::blend_operation_advanced>
+struct vulkan_object_trait<tag::property::ext::blend_operation_advanced>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -131,11 +131,11 @@ struct vulkan_object_trait<obj::property::ext::blend_operation_advanced>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT>
 {
-	using type = obj::feature::ext::blend_operation_advanced;
+	using type = tag::feature::ext::blend_operation_advanced;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::blend_operation_advanced>
+struct vulkan_object_native<tag::feature::ext::blend_operation_advanced>
 {
 	using type = VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BLEND_OPERATION_ADVANCED_FEATURES_EXT;
@@ -144,11 +144,11 @@ struct vulkan_object_native<obj::feature::ext::blend_operation_advanced>
 template<>
 struct expression_vulkan_tag<VkPipelineColorBlendAdvancedStateCreateInfoEXT>
 {
-	using type = obj::state::ext::color_blend_advanced;
+	using type = tag::state::ext::color_blend_advanced;
 };
 
 template<>
-struct vulkan_object_native<obj::state::ext::color_blend_advanced>
+struct vulkan_object_native<tag::state::ext::color_blend_advanced>
 {
 	using type = VkPipelineColorBlendAdvancedStateCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_ADVANCED_STATE_CREATE_INFO_EXT;
@@ -157,18 +157,18 @@ struct vulkan_object_native<obj::state::ext::color_blend_advanced>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT>
 {
-	using type = obj::property::ext::blend_operation_advanced;
+	using type = tag::property::ext::blend_operation_advanced;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::blend_operation_advanced>
+struct vulkan_object_native<tag::property::ext::blend_operation_advanced>
 {
 	using type = VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BLEND_OPERATION_ADVANCED_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::blend_operation_advanced>
+struct vulkan_object_extensions<tag::feature::ext::blend_operation_advanced>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_blend_operation_advanced"};
 	constexpr static ::std::uint32_t core = 0;
@@ -176,7 +176,7 @@ struct vulkan_object_extensions<obj::feature::ext::blend_operation_advanced>
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::ext::color_blend_advanced>
+struct vulkan_object_extensions<tag::state::ext::color_blend_advanced>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_blend_operation_advanced"};
 	constexpr static ::std::uint32_t core = 0;
@@ -184,7 +184,7 @@ struct vulkan_object_extensions<obj::state::ext::color_blend_advanced>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::blend_operation_advanced>
+struct vulkan_object_extensions<tag::property::ext::blend_operation_advanced>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_blend_operation_advanced"};
 	constexpr static ::std::uint32_t core = 0;
@@ -192,13 +192,13 @@ struct vulkan_object_extensions<obj::property::ext::blend_operation_advanced>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::blend_operation_advanced> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::blend_operation_advanced> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::blend_operation_advanced> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::blend_operation_advanced> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::blend_operation_advanced> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::blend_operation_advanced> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::color_blend, obj::state::ext::color_blend_advanced> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::color_blend, tag::state::ext::color_blend_advanced> = true;
 }
 
 namespace vkfu::param
@@ -209,7 +209,7 @@ using ::vkfu::operator|;
 
 struct blend_operation_advanced
 {
-	using vulkan_tag_type = obj::feature::ext::blend_operation_advanced;
+	using vulkan_tag_type = tag::feature::ext::blend_operation_advanced;
 
 	bool advanced_blend_coherent_operations = false;
 
@@ -231,7 +231,7 @@ using ::vkfu::operator|;
 
 struct color_blend_advanced
 {
-	using vulkan_tag_type = obj::state::ext::color_blend_advanced;
+	using vulkan_tag_type = tag::state::ext::color_blend_advanced;
 
 	bool src_premultiplied = false;
 	bool dst_premultiplied = false;

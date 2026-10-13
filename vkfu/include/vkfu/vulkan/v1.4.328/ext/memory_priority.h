@@ -60,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceMemoryPriorityFeaturesEXT const& v
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -75,7 +75,7 @@ struct memory_priority{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::memory_priority>
+struct vulkan_object_trait<tag::option::ext::memory_priority>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -83,7 +83,7 @@ struct vulkan_object_trait<obj::option::ext::memory_priority>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::ext::memory_priority>
+struct vulkan_object_trait<tag::feature::ext::memory_priority>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -93,11 +93,11 @@ struct vulkan_object_trait<obj::feature::ext::memory_priority>
 template<>
 struct expression_vulkan_tag<VkMemoryPriorityAllocateInfoEXT>
 {
-	using type = obj::option::ext::memory_priority;
+	using type = tag::option::ext::memory_priority;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::memory_priority>
+struct vulkan_object_native<tag::option::ext::memory_priority>
 {
 	using type = VkMemoryPriorityAllocateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MEMORY_PRIORITY_ALLOCATE_INFO_EXT;
@@ -106,18 +106,18 @@ struct vulkan_object_native<obj::option::ext::memory_priority>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMemoryPriorityFeaturesEXT>
 {
-	using type = obj::feature::ext::memory_priority;
+	using type = tag::feature::ext::memory_priority;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::memory_priority>
+struct vulkan_object_native<tag::feature::ext::memory_priority>
 {
 	using type = VkPhysicalDeviceMemoryPriorityFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PRIORITY_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::memory_priority>
+struct vulkan_object_extensions<tag::option::ext::memory_priority>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_memory_priority"};
 	constexpr static ::std::uint32_t core = 0;
@@ -125,7 +125,7 @@ struct vulkan_object_extensions<obj::option::ext::memory_priority>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::memory_priority>
+struct vulkan_object_extensions<tag::feature::ext::memory_priority>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_memory_priority"};
 	constexpr static ::std::uint32_t core = 0;
@@ -133,11 +133,11 @@ struct vulkan_object_extensions<obj::feature::ext::memory_priority>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::memory_priority> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::memory_priority> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::memory, obj::option::ext::memory_priority> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::memory, tag::option::ext::memory_priority> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::memory_priority> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::memory_priority> = true;
 }
 
 namespace vkfu::param
@@ -148,7 +148,7 @@ using ::vkfu::operator|;
 
 struct memory_priority
 {
-	using vulkan_tag_type = obj::feature::ext::memory_priority;
+	using vulkan_tag_type = tag::feature::ext::memory_priority;
 
 	bool enable = false;
 
@@ -170,7 +170,7 @@ using ::vkfu::operator|;
 
 struct memory_priority
 {
-	using vulkan_tag_type = obj::option::ext::memory_priority;
+	using vulkan_tag_type = tag::option::ext::memory_priority;
 
 	float priority{};
 

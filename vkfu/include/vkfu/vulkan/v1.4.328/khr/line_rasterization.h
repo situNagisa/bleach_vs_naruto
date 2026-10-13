@@ -28,19 +28,19 @@
 
 #include "../version_1_4/line_rasterization.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using line_rasterization = ::vkfu::obj::feature::line_rasterization;
+using line_rasterization = ::vkfu::tag::feature::line_rasterization;
 }
 namespace property::khr
 {
-using line_rasterization = ::vkfu::obj::property::line_rasterization;
+using line_rasterization = ::vkfu::tag::property::line_rasterization;
 }
 namespace state::khr
 {
-using rasterization_line = ::vkfu::obj::state::rasterization_line;
+using rasterization_line = ::vkfu::tag::state::rasterization_line;
 }
 }
 

@@ -60,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceRayTracingMotionBlurFeaturesNV con
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -75,7 +75,7 @@ struct acceleration_structure_motion{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::nv::acceleration_structure_motion>
+struct vulkan_object_trait<tag::option::nv::acceleration_structure_motion>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -83,7 +83,7 @@ struct vulkan_object_trait<obj::option::nv::acceleration_structure_motion>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::nv::ray_tracing_motion_blur>
+struct vulkan_object_trait<tag::feature::nv::ray_tracing_motion_blur>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -93,11 +93,11 @@ struct vulkan_object_trait<obj::feature::nv::ray_tracing_motion_blur>
 template<>
 struct expression_vulkan_tag<VkAccelerationStructureMotionInfoNV>
 {
-	using type = obj::option::nv::acceleration_structure_motion;
+	using type = tag::option::nv::acceleration_structure_motion;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::acceleration_structure_motion>
+struct vulkan_object_native<tag::option::nv::acceleration_structure_motion>
 {
 	using type = VkAccelerationStructureMotionInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_MOTION_INFO_NV;
@@ -106,18 +106,18 @@ struct vulkan_object_native<obj::option::nv::acceleration_structure_motion>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceRayTracingMotionBlurFeaturesNV>
 {
-	using type = obj::feature::nv::ray_tracing_motion_blur;
+	using type = tag::feature::nv::ray_tracing_motion_blur;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::ray_tracing_motion_blur>
+struct vulkan_object_native<tag::feature::nv::ray_tracing_motion_blur>
 {
 	using type = VkPhysicalDeviceRayTracingMotionBlurFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_MOTION_BLUR_FEATURES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::acceleration_structure_motion>
+struct vulkan_object_extensions<tag::option::nv::acceleration_structure_motion>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_ray_tracing_motion_blur"};
 	constexpr static ::std::uint32_t core = 0;
@@ -125,7 +125,7 @@ struct vulkan_object_extensions<obj::option::nv::acceleration_structure_motion>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::ray_tracing_motion_blur>
+struct vulkan_object_extensions<tag::feature::nv::ray_tracing_motion_blur>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_ray_tracing_motion_blur"};
 	constexpr static ::std::uint32_t core = 0;
@@ -133,11 +133,11 @@ struct vulkan_object_extensions<obj::feature::nv::ray_tracing_motion_blur>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::acceleration_structure, obj::option::nv::acceleration_structure_motion> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::acceleration_structure, tag::option::nv::acceleration_structure_motion> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::ray_tracing_motion_blur> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::ray_tracing_motion_blur> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::ray_tracing_motion_blur> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::ray_tracing_motion_blur> = true;
 }
 
 namespace vkfu::param
@@ -148,7 +148,7 @@ using ::vkfu::operator|;
 
 struct ray_tracing_motion_blur
 {
-	using vulkan_tag_type = obj::feature::nv::ray_tracing_motion_blur;
+	using vulkan_tag_type = tag::feature::nv::ray_tracing_motion_blur;
 
 	bool enable = false;
 	bool pipeline_trace_rays_indirect = false;
@@ -172,7 +172,7 @@ using ::vkfu::operator|;
 
 struct acceleration_structure_motion
 {
-	using vulkan_tag_type = obj::option::nv::acceleration_structure_motion;
+	using vulkan_tag_type = tag::option::nv::acceleration_structure_motion;
 
 	::std::uint32_t max_instances{};
 	VkAccelerationStructureMotionInfoFlagsNV flags{};

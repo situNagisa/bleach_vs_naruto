@@ -183,6 +183,15 @@ class Origins:
 	guards: dict[str, str]  # module -> the macro it needs, for platform and beta extensions
 
 
+def resolve_type(registry: "Registry", name: str) -> str:
+	"""Follow flags and enum aliases to the type vk.xml actually defines."""
+	seen: set[str] = set()
+	while name in registry.type_aliases and name not in seen:
+		seen.add(name)
+		name = registry.type_aliases[name]
+	return name
+
+
 @dataclasses.dataclass
 class Registry:
 	header_version: str
@@ -190,6 +199,9 @@ class Registry:
 	author_tags: list[str]  # vk.xml <tags>, e.g. KHR / EXT / HUAWEI
 	structs: dict[str, Struct]
 	bitmask_to_flagbits: dict[str, str]  # VkXxxFlags -> VkXxxFlagBits
+	# An old spelling of a flags or enum type -> the type it names. A member
+	# declared with the old spelling is the same type and gets the same field.
+	type_aliases: dict[str, str]
 	flagbits: dict[str, FlagBits]
 	enums: dict[str, EnumType]  # plain (non-bitmask) enums
 	roots: list[str]
@@ -1082,9 +1094,12 @@ def load(path: str, api: str = "vulkan", profile: Profile = EVERYTHING) -> Regis
 
 	structs: dict[str, Struct] = {}
 	bitmask_to_flagbits: dict[str, str] = {}
+	type_aliases: dict[str, str] = {}
 
 	for type_element in root.iter("type"):
 		category = type_element.get("category")
+		if category in ("bitmask", "enum") and type_element.get("alias") and type_element.get("name"):
+			type_aliases[type_element.get("name")] = type_element.get("alias")
 		if category == "bitmask":
 			if type_element.get("alias") or not _api_allows(type_element, api):
 				continue
@@ -1229,6 +1244,7 @@ def load(path: str, api: str = "vulkan", profile: Profile = EVERYTHING) -> Regis
 		author_tags=sorted(tag.get("name") for tag in root.iter("tag") if tag.get("name")),
 		structs=structs,
 		bitmask_to_flagbits=bitmask_to_flagbits,
+		type_aliases=type_aliases,
 		flagbits=flagbits,
 		enums=enums,
 		roots=sorted(roots),

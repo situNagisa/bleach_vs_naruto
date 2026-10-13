@@ -70,7 +70,7 @@ enum class depth_clamp_mode : ::std::underlying_type_t<VkDepthClampModeEXT>
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -85,7 +85,7 @@ struct viewport_depth_clamp_control{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::depth_clamp_control>
+struct vulkan_object_trait<tag::feature::ext::depth_clamp_control>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -93,7 +93,7 @@ struct vulkan_object_trait<obj::feature::ext::depth_clamp_control>
 };
 
 template<>
-struct vulkan_object_trait<obj::state::ext::viewport_depth_clamp_control>
+struct vulkan_object_trait<tag::state::ext::viewport_depth_clamp_control>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -103,11 +103,11 @@ struct vulkan_object_trait<obj::state::ext::viewport_depth_clamp_control>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDepthClampControlFeaturesEXT>
 {
-	using type = obj::feature::ext::depth_clamp_control;
+	using type = tag::feature::ext::depth_clamp_control;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::depth_clamp_control>
+struct vulkan_object_native<tag::feature::ext::depth_clamp_control>
 {
 	using type = VkPhysicalDeviceDepthClampControlFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_CLAMP_CONTROL_FEATURES_EXT;
@@ -116,18 +116,18 @@ struct vulkan_object_native<obj::feature::ext::depth_clamp_control>
 template<>
 struct expression_vulkan_tag<VkPipelineViewportDepthClampControlCreateInfoEXT>
 {
-	using type = obj::state::ext::viewport_depth_clamp_control;
+	using type = tag::state::ext::viewport_depth_clamp_control;
 };
 
 template<>
-struct vulkan_object_native<obj::state::ext::viewport_depth_clamp_control>
+struct vulkan_object_native<tag::state::ext::viewport_depth_clamp_control>
 {
 	using type = VkPipelineViewportDepthClampControlCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_DEPTH_CLAMP_CONTROL_CREATE_INFO_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::depth_clamp_control>
+struct vulkan_object_extensions<tag::feature::ext::depth_clamp_control>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_depth_clamp_control"};
 	constexpr static ::std::uint32_t core = 0;
@@ -135,7 +135,7 @@ struct vulkan_object_extensions<obj::feature::ext::depth_clamp_control>
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::ext::viewport_depth_clamp_control>
+struct vulkan_object_extensions<tag::state::ext::viewport_depth_clamp_control>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_depth_clamp_control"};
 	constexpr static ::std::uint32_t core = 0;
@@ -143,11 +143,11 @@ struct vulkan_object_extensions<obj::state::ext::viewport_depth_clamp_control>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::depth_clamp_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::depth_clamp_control> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::depth_clamp_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::depth_clamp_control> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::viewport, obj::state::ext::viewport_depth_clamp_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::viewport, tag::state::ext::viewport_depth_clamp_control> = true;
 }
 
 namespace vkfu::param
@@ -158,7 +158,7 @@ using ::vkfu::operator|;
 
 struct depth_clamp_control
 {
-	using vulkan_tag_type = obj::feature::ext::depth_clamp_control;
+	using vulkan_tag_type = tag::feature::ext::depth_clamp_control;
 
 	bool enable = false;
 
@@ -180,7 +180,7 @@ using ::vkfu::operator|;
 
 struct viewport_depth_clamp_control
 {
-	using vulkan_tag_type = obj::state::ext::viewport_depth_clamp_control;
+	using vulkan_tag_type = tag::state::ext::viewport_depth_clamp_control;
 
 	::vkfu::enums::depth_clamp_mode depth_clamp_mode{};
 	VkDepthClampRangeEXT const* depth_clamp_range = nullptr;

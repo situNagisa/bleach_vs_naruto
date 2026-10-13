@@ -29,31 +29,31 @@
 #include "../version_1_4/maintenance5.h"
 #include "../version_1_4/host_image_copy.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace ext
 {
-using copy_image_to_image = ::vkfu::obj::copy_image_to_image;
-using copy_image_to_memory = ::vkfu::obj::copy_image_to_memory;
-using copy_memory_to_image = ::vkfu::obj::copy_memory_to_image;
-using host_image_layout_transition = ::vkfu::obj::host_image_layout_transition;
-using image_subresource2 = ::vkfu::obj::image_subresource2;
-using image_to_memory_copy = ::vkfu::obj::image_to_memory_copy;
-using memory_to_image_copy = ::vkfu::obj::memory_to_image_copy;
+using copy_image_to_image = ::vkfu::tag::copy_image_to_image;
+using copy_image_to_memory = ::vkfu::tag::copy_image_to_memory;
+using copy_memory_to_image = ::vkfu::tag::copy_memory_to_image;
+using host_image_layout_transition = ::vkfu::tag::host_image_layout_transition;
+using image_subresource2 = ::vkfu::tag::image_subresource2;
+using image_to_memory_copy = ::vkfu::tag::image_to_memory_copy;
+using memory_to_image_copy = ::vkfu::tag::memory_to_image_copy;
 }
 namespace feature::ext
 {
-using host_image_copy = ::vkfu::obj::feature::host_image_copy;
+using host_image_copy = ::vkfu::tag::feature::host_image_copy;
 }
 namespace property::ext
 {
-using host_image_copy = ::vkfu::obj::property::host_image_copy;
+using host_image_copy = ::vkfu::tag::property::host_image_copy;
 }
 namespace result::ext
 {
-using host_image_copy_device_performance_query = ::vkfu::obj::result::host_image_copy_device_performance_query;
-using subresource_host_memcpy_size = ::vkfu::obj::result::subresource_host_memcpy_size;
-using subresource_layout2 = ::vkfu::obj::result::subresource_layout2;
+using host_image_copy_device_performance_query = ::vkfu::tag::result::host_image_copy_device_performance_query;
+using subresource_host_memcpy_size = ::vkfu::tag::result::subresource_host_memcpy_size;
+using subresource_layout2 = ::vkfu::tag::result::subresource_layout2;
 }
 }
 

@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDevice8BitStorageFeatures const& value) 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -55,7 +55,7 @@ struct storage_8bit{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::storage_8bit>
+struct vulkan_object_trait<tag::feature::storage_8bit>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::storage_8bit>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevice8BitStorageFeatures>
 {
-	using type = obj::feature::storage_8bit;
+	using type = tag::feature::storage_8bit;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::storage_8bit>
+struct vulkan_object_native<tag::feature::storage_8bit>
 {
 	using type = VkPhysicalDevice8BitStorageFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::storage_8bit>
+struct vulkan_object_extensions<tag::feature::storage_8bit>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_8bit_storage"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::storage_8bit>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::storage_8bit> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::storage_8bit> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::storage_8bit> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::storage_8bit> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct storage_8bit
 {
-	using vulkan_tag_type = obj::feature::storage_8bit;
+	using vulkan_tag_type = tag::feature::storage_8bit;
 
 	bool storage_buffer = false;
 	bool uniform_and_storage_buffer = false;

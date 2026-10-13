@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceImage2DViewOf3DFeaturesEXT const& 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct image_2d_view_of_3d{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::image_2d_view_of_3d>
+struct vulkan_object_trait<tag::feature::ext::image_2d_view_of_3d>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::image_2d_view_of_3d>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceImage2DViewOf3DFeaturesEXT>
 {
-	using type = obj::feature::ext::image_2d_view_of_3d;
+	using type = tag::feature::ext::image_2d_view_of_3d;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::image_2d_view_of_3d>
+struct vulkan_object_native<tag::feature::ext::image_2d_view_of_3d>
 {
 	using type = VkPhysicalDeviceImage2DViewOf3DFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_2D_VIEW_OF_3D_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::image_2d_view_of_3d>
+struct vulkan_object_extensions<tag::feature::ext::image_2d_view_of_3d>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_image_2d_view_of_3d"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::image_2d_view_of_3d>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::image_2d_view_of_3d> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::image_2d_view_of_3d> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::image_2d_view_of_3d> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::image_2d_view_of_3d> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct image_2d_view_of_3d
 {
-	using vulkan_tag_type = obj::feature::ext::image_2d_view_of_3d;
+	using vulkan_tag_type = tag::feature::ext::image_2d_view_of_3d;
 
 	bool enable = false;
 	bool sampler_2d_view_of_3d = false;

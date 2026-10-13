@@ -29,6 +29,7 @@
 #include "../version_1_0/device.h"
 #include "../version_1_0/descriptor_set.h"
 #include "../version_1_1/get_physical_device_properties2.h"
+#include "../khr/acceleration_structure.h"
 
 constexpr auto _vkfu_address(VkBuildPartitionedAccelerationStructureInfoNV& value) noexcept -> void const*
 {
@@ -120,7 +121,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDevicePartitionedAccelerationStructurePr
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -145,7 +146,7 @@ struct partitioned_acceleration_structure{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::nv::build_partitioned_acceleration_structure>
+struct vulkan_object_trait<tag::nv::build_partitioned_acceleration_structure>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -153,7 +154,7 @@ struct vulkan_object_trait<obj::nv::build_partitioned_acceleration_structure>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::nv::partitioned_acceleration_structure_flags>
+struct vulkan_object_trait<tag::option::nv::partitioned_acceleration_structure_flags>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -161,7 +162,7 @@ struct vulkan_object_trait<obj::option::nv::partitioned_acceleration_structure_f
 };
 
 template<>
-struct vulkan_object_trait<obj::nv::partitioned_acceleration_structure_instances_input>
+struct vulkan_object_trait<tag::nv::partitioned_acceleration_structure_instances_input>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -169,7 +170,7 @@ struct vulkan_object_trait<obj::nv::partitioned_acceleration_structure_instances
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::nv::partitioned_acceleration_structure>
+struct vulkan_object_trait<tag::feature::nv::partitioned_acceleration_structure>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -177,7 +178,7 @@ struct vulkan_object_trait<obj::feature::nv::partitioned_acceleration_structure>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::nv::write_descriptor_set_partitioned_acceleration_structure>
+struct vulkan_object_trait<tag::option::nv::write_descriptor_set_partitioned_acceleration_structure>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -185,7 +186,7 @@ struct vulkan_object_trait<obj::option::nv::write_descriptor_set_partitioned_acc
 };
 
 template<>
-struct vulkan_object_trait<obj::property::nv::partitioned_acceleration_structure>
+struct vulkan_object_trait<tag::property::nv::partitioned_acceleration_structure>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -195,11 +196,11 @@ struct vulkan_object_trait<obj::property::nv::partitioned_acceleration_structure
 template<>
 struct expression_vulkan_tag<VkBuildPartitionedAccelerationStructureInfoNV>
 {
-	using type = obj::nv::build_partitioned_acceleration_structure;
+	using type = tag::nv::build_partitioned_acceleration_structure;
 };
 
 template<>
-struct vulkan_object_native<obj::nv::build_partitioned_acceleration_structure>
+struct vulkan_object_native<tag::nv::build_partitioned_acceleration_structure>
 {
 	using type = VkBuildPartitionedAccelerationStructureInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_BUILD_PARTITIONED_ACCELERATION_STRUCTURE_INFO_NV;
@@ -208,11 +209,11 @@ struct vulkan_object_native<obj::nv::build_partitioned_acceleration_structure>
 template<>
 struct expression_vulkan_tag<VkPartitionedAccelerationStructureFlagsNV>
 {
-	using type = obj::option::nv::partitioned_acceleration_structure_flags;
+	using type = tag::option::nv::partitioned_acceleration_structure_flags;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::partitioned_acceleration_structure_flags>
+struct vulkan_object_native<tag::option::nv::partitioned_acceleration_structure_flags>
 {
 	using type = VkPartitionedAccelerationStructureFlagsNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PARTITIONED_ACCELERATION_STRUCTURE_FLAGS_NV;
@@ -221,11 +222,11 @@ struct vulkan_object_native<obj::option::nv::partitioned_acceleration_structure_
 template<>
 struct expression_vulkan_tag<VkPartitionedAccelerationStructureInstancesInputNV>
 {
-	using type = obj::nv::partitioned_acceleration_structure_instances_input;
+	using type = tag::nv::partitioned_acceleration_structure_instances_input;
 };
 
 template<>
-struct vulkan_object_native<obj::nv::partitioned_acceleration_structure_instances_input>
+struct vulkan_object_native<tag::nv::partitioned_acceleration_structure_instances_input>
 {
 	using type = VkPartitionedAccelerationStructureInstancesInputNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PARTITIONED_ACCELERATION_STRUCTURE_INSTANCES_INPUT_NV;
@@ -234,11 +235,11 @@ struct vulkan_object_native<obj::nv::partitioned_acceleration_structure_instance
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePartitionedAccelerationStructureFeaturesNV>
 {
-	using type = obj::feature::nv::partitioned_acceleration_structure;
+	using type = tag::feature::nv::partitioned_acceleration_structure;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::partitioned_acceleration_structure>
+struct vulkan_object_native<tag::feature::nv::partitioned_acceleration_structure>
 {
 	using type = VkPhysicalDevicePartitionedAccelerationStructureFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PARTITIONED_ACCELERATION_STRUCTURE_FEATURES_NV;
@@ -247,11 +248,11 @@ struct vulkan_object_native<obj::feature::nv::partitioned_acceleration_structure
 template<>
 struct expression_vulkan_tag<VkWriteDescriptorSetPartitionedAccelerationStructureNV>
 {
-	using type = obj::option::nv::write_descriptor_set_partitioned_acceleration_structure;
+	using type = tag::option::nv::write_descriptor_set_partitioned_acceleration_structure;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::write_descriptor_set_partitioned_acceleration_structure>
+struct vulkan_object_native<tag::option::nv::write_descriptor_set_partitioned_acceleration_structure>
 {
 	using type = VkWriteDescriptorSetPartitionedAccelerationStructureNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_PARTITIONED_ACCELERATION_STRUCTURE_NV;
@@ -260,18 +261,18 @@ struct vulkan_object_native<obj::option::nv::write_descriptor_set_partitioned_ac
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePartitionedAccelerationStructurePropertiesNV>
 {
-	using type = obj::property::nv::partitioned_acceleration_structure;
+	using type = tag::property::nv::partitioned_acceleration_structure;
 };
 
 template<>
-struct vulkan_object_native<obj::property::nv::partitioned_acceleration_structure>
+struct vulkan_object_native<tag::property::nv::partitioned_acceleration_structure>
 {
 	using type = VkPhysicalDevicePartitionedAccelerationStructurePropertiesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PARTITIONED_ACCELERATION_STRUCTURE_PROPERTIES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::nv::build_partitioned_acceleration_structure>
+struct vulkan_object_extensions<tag::nv::build_partitioned_acceleration_structure>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_partitioned_acceleration_structure"};
 	constexpr static ::std::uint32_t core = 0;
@@ -279,7 +280,7 @@ struct vulkan_object_extensions<obj::nv::build_partitioned_acceleration_structur
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::partitioned_acceleration_structure_flags>
+struct vulkan_object_extensions<tag::option::nv::partitioned_acceleration_structure_flags>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_partitioned_acceleration_structure"};
 	constexpr static ::std::uint32_t core = 0;
@@ -287,7 +288,7 @@ struct vulkan_object_extensions<obj::option::nv::partitioned_acceleration_struct
 };
 
 template<>
-struct vulkan_object_extensions<obj::nv::partitioned_acceleration_structure_instances_input>
+struct vulkan_object_extensions<tag::nv::partitioned_acceleration_structure_instances_input>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_partitioned_acceleration_structure"};
 	constexpr static ::std::uint32_t core = 0;
@@ -295,7 +296,7 @@ struct vulkan_object_extensions<obj::nv::partitioned_acceleration_structure_inst
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::partitioned_acceleration_structure>
+struct vulkan_object_extensions<tag::feature::nv::partitioned_acceleration_structure>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_partitioned_acceleration_structure"};
 	constexpr static ::std::uint32_t core = 0;
@@ -303,7 +304,7 @@ struct vulkan_object_extensions<obj::feature::nv::partitioned_acceleration_struc
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::write_descriptor_set_partitioned_acceleration_structure>
+struct vulkan_object_extensions<tag::option::nv::write_descriptor_set_partitioned_acceleration_structure>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_partitioned_acceleration_structure"};
 	constexpr static ::std::uint32_t core = 0;
@@ -311,7 +312,7 @@ struct vulkan_object_extensions<obj::option::nv::write_descriptor_set_partitione
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::nv::partitioned_acceleration_structure>
+struct vulkan_object_extensions<tag::property::nv::partitioned_acceleration_structure>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_partitioned_acceleration_structure"};
 	constexpr static ::std::uint32_t core = 0;
@@ -319,15 +320,15 @@ struct vulkan_object_extensions<obj::property::nv::partitioned_acceleration_stru
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::partitioned_acceleration_structure> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::partitioned_acceleration_structure> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::nv::partitioned_acceleration_structure_instances_input, obj::option::nv::partitioned_acceleration_structure_flags> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::nv::partitioned_acceleration_structure_instances_input, tag::option::nv::partitioned_acceleration_structure_flags> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::partitioned_acceleration_structure> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::partitioned_acceleration_structure> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::nv::partitioned_acceleration_structure> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::nv::partitioned_acceleration_structure> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::write_descriptor_set, obj::option::nv::write_descriptor_set_partitioned_acceleration_structure> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::write_descriptor_set, tag::option::nv::write_descriptor_set_partitioned_acceleration_structure> = true;
 }
 
 namespace vkfu::param
@@ -338,7 +339,7 @@ using ::vkfu::operator|;
 
 struct partitioned_acceleration_structure
 {
-	using vulkan_tag_type = obj::feature::nv::partitioned_acceleration_structure;
+	using vulkan_tag_type = tag::feature::nv::partitioned_acceleration_structure;
 
 	bool enable = false;
 
@@ -360,7 +361,7 @@ using ::vkfu::operator|;
 
 struct build_partitioned_acceleration_structure
 {
-	using vulkan_tag_type = obj::nv::build_partitioned_acceleration_structure;
+	using vulkan_tag_type = tag::nv::build_partitioned_acceleration_structure;
 
 	VkPartitionedAccelerationStructureInstancesInputNV input{};
 	VkDeviceAddress src_acceleration_structure_data{};
@@ -386,27 +387,9 @@ struct build_partitioned_acceleration_structure
 
 struct partitioned_acceleration_structure_instances_input
 {
-	using vulkan_tag_type = obj::nv::partitioned_acceleration_structure_instances_input;
+	using vulkan_tag_type = tag::nv::partitioned_acceleration_structure_instances_input;
 
-	struct flags_type
-	{
-		VkBuildAccelerationStructureFlagsKHR allow_update : 1 = 0;
-		VkBuildAccelerationStructureFlagsKHR allow_compaction : 1 = 0;
-		VkBuildAccelerationStructureFlagsKHR prefer_fast_trace : 1 = 0;
-		VkBuildAccelerationStructureFlagsKHR prefer_fast_build : 1 = 0;
-		VkBuildAccelerationStructureFlagsKHR low_memory : 1 = 0;
-		VkBuildAccelerationStructureFlagsKHR motion : 1 = 0;
-		VkBuildAccelerationStructureFlagsKHR allow_opacity_micromap_update : 1 = 0;
-		VkBuildAccelerationStructureFlagsKHR allow_disable_opacity_micromaps : 1 = 0;
-		VkBuildAccelerationStructureFlagsKHR allow_opacity_micromap_data_update : 1 = 0;
-		VkBuildAccelerationStructureFlagsKHR allow_displacement_micromap_update : 1 = 0;
-		VkBuildAccelerationStructureFlagsKHR _reserved_10 : 1 = 0;
-		VkBuildAccelerationStructureFlagsKHR allow_data_access : 1 = 0;
-		VkBuildAccelerationStructureFlagsKHR allow_cluster_opacity_micromaps : 1 = 0;
-		VkBuildAccelerationStructureFlagsKHR _reserved_13 : 19 = 0;
-	};
-
-	flags_type flags{};
+	::vkfu::flags::build_acceleration_structure flags{};
 	::std::uint32_t instance_count{};
 	::std::uint32_t max_instance_per_partition_count{};
 	::std::uint32_t partition_count{};
@@ -426,22 +409,6 @@ struct partitioned_acceleration_structure_instances_input
 	}
 };
 
-static_assert(sizeof(partitioned_acceleration_structure_instances_input::flags_type) == sizeof(VkBuildAccelerationStructureFlagsKHR));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkBuildAccelerationStructureFlagsKHR>(partitioned_acceleration_structure_instances_input::flags_type{.allow_update = 1}) == VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_UPDATE_BIT_KHR);
-static_assert(::std::bit_cast<VkBuildAccelerationStructureFlagsKHR>(partitioned_acceleration_structure_instances_input::flags_type{.allow_compaction = 1}) == VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_COMPACTION_BIT_KHR);
-static_assert(::std::bit_cast<VkBuildAccelerationStructureFlagsKHR>(partitioned_acceleration_structure_instances_input::flags_type{.prefer_fast_trace = 1}) == VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR);
-static_assert(::std::bit_cast<VkBuildAccelerationStructureFlagsKHR>(partitioned_acceleration_structure_instances_input::flags_type{.prefer_fast_build = 1}) == VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_KHR);
-static_assert(::std::bit_cast<VkBuildAccelerationStructureFlagsKHR>(partitioned_acceleration_structure_instances_input::flags_type{.low_memory = 1}) == VK_BUILD_ACCELERATION_STRUCTURE_LOW_MEMORY_BIT_KHR);
-static_assert(::std::bit_cast<VkBuildAccelerationStructureFlagsKHR>(partitioned_acceleration_structure_instances_input::flags_type{.motion = 1}) == VK_BUILD_ACCELERATION_STRUCTURE_MOTION_BIT_NV);
-static_assert(::std::bit_cast<VkBuildAccelerationStructureFlagsKHR>(partitioned_acceleration_structure_instances_input::flags_type{.allow_opacity_micromap_update = 1}) == VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_OPACITY_MICROMAP_UPDATE_BIT_EXT);
-static_assert(::std::bit_cast<VkBuildAccelerationStructureFlagsKHR>(partitioned_acceleration_structure_instances_input::flags_type{.allow_disable_opacity_micromaps = 1}) == VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_DISABLE_OPACITY_MICROMAPS_BIT_EXT);
-static_assert(::std::bit_cast<VkBuildAccelerationStructureFlagsKHR>(partitioned_acceleration_structure_instances_input::flags_type{.allow_opacity_micromap_data_update = 1}) == VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_OPACITY_MICROMAP_DATA_UPDATE_BIT_EXT);
-static_assert(::std::bit_cast<VkBuildAccelerationStructureFlagsKHR>(partitioned_acceleration_structure_instances_input::flags_type{.allow_displacement_micromap_update = 1}) == 0x200);
-static_assert(::std::bit_cast<VkBuildAccelerationStructureFlagsKHR>(partitioned_acceleration_structure_instances_input::flags_type{.allow_data_access = 1}) == VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_DATA_ACCESS_BIT_KHR);
-static_assert(::std::bit_cast<VkBuildAccelerationStructureFlagsKHR>(partitioned_acceleration_structure_instances_input::flags_type{.allow_cluster_opacity_micromaps = 1}) == VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_CLUSTER_OPACITY_MICROMAPS_BIT_NV);
-#endif
-
 }
 
 namespace option::nv
@@ -450,7 +417,7 @@ using ::vkfu::operator|;
 
 struct partitioned_acceleration_structure_flags
 {
-	using vulkan_tag_type = obj::option::nv::partitioned_acceleration_structure_flags;
+	using vulkan_tag_type = tag::option::nv::partitioned_acceleration_structure_flags;
 
 	bool enable_partition_translation = false;
 
@@ -466,7 +433,7 @@ struct partitioned_acceleration_structure_flags
 
 struct write_descriptor_set_partitioned_acceleration_structure
 {
-	using vulkan_tag_type = obj::option::nv::write_descriptor_set_partitioned_acceleration_structure;
+	using vulkan_tag_type = tag::option::nv::write_descriptor_set_partitioned_acceleration_structure;
 
 	::std::span<VkDeviceAddress const> acceleration_structures{};
 
@@ -488,14 +455,14 @@ namespace vkfu
 {
 namespace nv
 {
-template<::vkfu::expression_for<::vkfu::obj::nv::build_partitioned_acceleration_structure> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::nv::build_partitioned_acceleration_structure> Expression1>
 void cmd_build_partitioned_acceleration_structures(VkCommandBuffer command_buffer, Expression1&& build_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(build_info));
 	::vkCmdBuildPartitionedAccelerationStructuresNV(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nv::partitioned_acceleration_structure_instances_input> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::nv::partitioned_acceleration_structure_instances_input> Expression1>
 [[nodiscard]] auto get_partitioned_acceleration_structures_build_sizes(VkDevice device, Expression1&& info) -> VkAccelerationStructureBuildSizesInfoKHR
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));

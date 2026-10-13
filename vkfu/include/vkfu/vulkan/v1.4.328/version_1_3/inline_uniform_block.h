@@ -90,7 +90,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceInlineUniformBlockProperties const
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -110,7 +110,7 @@ struct inline_uniform_block{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::descriptor_pool_inline_uniform_block>
+struct vulkan_object_trait<tag::option::descriptor_pool_inline_uniform_block>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -118,7 +118,7 @@ struct vulkan_object_trait<obj::option::descriptor_pool_inline_uniform_block>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::inline_uniform_block>
+struct vulkan_object_trait<tag::feature::inline_uniform_block>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -126,7 +126,7 @@ struct vulkan_object_trait<obj::feature::inline_uniform_block>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::write_descriptor_set_inline_uniform_block>
+struct vulkan_object_trait<tag::option::write_descriptor_set_inline_uniform_block>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -134,7 +134,7 @@ struct vulkan_object_trait<obj::option::write_descriptor_set_inline_uniform_bloc
 };
 
 template<>
-struct vulkan_object_trait<obj::property::inline_uniform_block>
+struct vulkan_object_trait<tag::property::inline_uniform_block>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -144,11 +144,11 @@ struct vulkan_object_trait<obj::property::inline_uniform_block>
 template<>
 struct expression_vulkan_tag<VkDescriptorPoolInlineUniformBlockCreateInfo>
 {
-	using type = obj::option::descriptor_pool_inline_uniform_block;
+	using type = tag::option::descriptor_pool_inline_uniform_block;
 };
 
 template<>
-struct vulkan_object_native<obj::option::descriptor_pool_inline_uniform_block>
+struct vulkan_object_native<tag::option::descriptor_pool_inline_uniform_block>
 {
 	using type = VkDescriptorPoolInlineUniformBlockCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_INLINE_UNIFORM_BLOCK_CREATE_INFO;
@@ -157,11 +157,11 @@ struct vulkan_object_native<obj::option::descriptor_pool_inline_uniform_block>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceInlineUniformBlockFeatures>
 {
-	using type = obj::feature::inline_uniform_block;
+	using type = tag::feature::inline_uniform_block;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::inline_uniform_block>
+struct vulkan_object_native<tag::feature::inline_uniform_block>
 {
 	using type = VkPhysicalDeviceInlineUniformBlockFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INLINE_UNIFORM_BLOCK_FEATURES;
@@ -170,11 +170,11 @@ struct vulkan_object_native<obj::feature::inline_uniform_block>
 template<>
 struct expression_vulkan_tag<VkWriteDescriptorSetInlineUniformBlock>
 {
-	using type = obj::option::write_descriptor_set_inline_uniform_block;
+	using type = tag::option::write_descriptor_set_inline_uniform_block;
 };
 
 template<>
-struct vulkan_object_native<obj::option::write_descriptor_set_inline_uniform_block>
+struct vulkan_object_native<tag::option::write_descriptor_set_inline_uniform_block>
 {
 	using type = VkWriteDescriptorSetInlineUniformBlock;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_INLINE_UNIFORM_BLOCK;
@@ -183,18 +183,18 @@ struct vulkan_object_native<obj::option::write_descriptor_set_inline_uniform_blo
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceInlineUniformBlockProperties>
 {
-	using type = obj::property::inline_uniform_block;
+	using type = tag::property::inline_uniform_block;
 };
 
 template<>
-struct vulkan_object_native<obj::property::inline_uniform_block>
+struct vulkan_object_native<tag::property::inline_uniform_block>
 {
 	using type = VkPhysicalDeviceInlineUniformBlockProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INLINE_UNIFORM_BLOCK_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::descriptor_pool_inline_uniform_block>
+struct vulkan_object_extensions<tag::option::descriptor_pool_inline_uniform_block>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_inline_uniform_block"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -202,7 +202,7 @@ struct vulkan_object_extensions<obj::option::descriptor_pool_inline_uniform_bloc
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::inline_uniform_block>
+struct vulkan_object_extensions<tag::feature::inline_uniform_block>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_inline_uniform_block"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -210,7 +210,7 @@ struct vulkan_object_extensions<obj::feature::inline_uniform_block>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::write_descriptor_set_inline_uniform_block>
+struct vulkan_object_extensions<tag::option::write_descriptor_set_inline_uniform_block>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_inline_uniform_block"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -218,7 +218,7 @@ struct vulkan_object_extensions<obj::option::write_descriptor_set_inline_uniform
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::inline_uniform_block>
+struct vulkan_object_extensions<tag::property::inline_uniform_block>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_inline_uniform_block"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -226,15 +226,15 @@ struct vulkan_object_extensions<obj::property::inline_uniform_block>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::descriptor_pool, obj::option::descriptor_pool_inline_uniform_block> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::descriptor_pool, tag::option::descriptor_pool_inline_uniform_block> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::inline_uniform_block> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::inline_uniform_block> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::inline_uniform_block> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::inline_uniform_block> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::inline_uniform_block> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::inline_uniform_block> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::write_descriptor_set, obj::option::write_descriptor_set_inline_uniform_block> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::write_descriptor_set, tag::option::write_descriptor_set_inline_uniform_block> = true;
 }
 
 namespace vkfu::param
@@ -245,7 +245,7 @@ using ::vkfu::operator|;
 
 struct inline_uniform_block
 {
-	using vulkan_tag_type = obj::feature::inline_uniform_block;
+	using vulkan_tag_type = tag::feature::inline_uniform_block;
 
 	bool enable = false;
 	bool descriptor_binding_inline_uniform_block_update_after_bind = false;
@@ -269,7 +269,7 @@ using ::vkfu::operator|;
 
 struct descriptor_pool_inline_uniform_block
 {
-	using vulkan_tag_type = obj::option::descriptor_pool_inline_uniform_block;
+	using vulkan_tag_type = tag::option::descriptor_pool_inline_uniform_block;
 
 	::std::uint32_t max_inline_uniform_block_bindings{};
 
@@ -285,7 +285,7 @@ struct descriptor_pool_inline_uniform_block
 
 struct write_descriptor_set_inline_uniform_block
 {
-	using vulkan_tag_type = obj::option::write_descriptor_set_inline_uniform_block;
+	using vulkan_tag_type = tag::option::write_descriptor_set_inline_uniform_block;
 
 	::std::uint32_t data_size{};
 	void const* data = nullptr;

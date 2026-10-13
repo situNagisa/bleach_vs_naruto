@@ -28,16 +28,16 @@
 
 #include "../version_1_4/dynamic_rendering_local_read.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using dynamic_rendering_local_read = ::vkfu::obj::feature::dynamic_rendering_local_read;
+using dynamic_rendering_local_read = ::vkfu::tag::feature::dynamic_rendering_local_read;
 }
 namespace khr
 {
-using rendering_attachment_location = ::vkfu::obj::rendering_attachment_location;
-using rendering_input_attachment_index = ::vkfu::obj::rendering_input_attachment_index;
+using rendering_attachment_location = ::vkfu::tag::rendering_attachment_location;
+using rendering_input_attachment_index = ::vkfu::tag::rendering_input_attachment_index;
 }
 }
 

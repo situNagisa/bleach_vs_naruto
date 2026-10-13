@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceCubicClampFeaturesQCOM const& valu
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::qcom
 {
@@ -55,7 +55,7 @@ struct cubic_clamp{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::qcom::cubic_clamp>
+struct vulkan_object_trait<tag::feature::qcom::cubic_clamp>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::qcom::cubic_clamp>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceCubicClampFeaturesQCOM>
 {
-	using type = obj::feature::qcom::cubic_clamp;
+	using type = tag::feature::qcom::cubic_clamp;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::qcom::cubic_clamp>
+struct vulkan_object_native<tag::feature::qcom::cubic_clamp>
 {
 	using type = VkPhysicalDeviceCubicClampFeaturesQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CUBIC_CLAMP_FEATURES_QCOM;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::qcom::cubic_clamp>
+struct vulkan_object_extensions<tag::feature::qcom::cubic_clamp>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_filter_cubic_clamp"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::qcom::cubic_clamp>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::qcom::cubic_clamp> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::qcom::cubic_clamp> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::qcom::cubic_clamp> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::qcom::cubic_clamp> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct cubic_clamp
 {
-	using vulkan_tag_type = obj::feature::qcom::cubic_clamp;
+	using vulkan_tag_type = tag::feature::qcom::cubic_clamp;
 
 	bool cubic_range_clamp = false;
 

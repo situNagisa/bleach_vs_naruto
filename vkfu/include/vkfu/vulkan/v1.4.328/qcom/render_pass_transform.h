@@ -60,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkRenderPassTransformBeginInfoQCOM const& value) n
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::qcom
 {
@@ -72,7 +72,7 @@ struct render_pass_transform_begin{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::qcom::command_buffer_inheritance_render_pass_transform>
+struct vulkan_object_trait<tag::option::qcom::command_buffer_inheritance_render_pass_transform>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -80,7 +80,7 @@ struct vulkan_object_trait<obj::option::qcom::command_buffer_inheritance_render_
 };
 
 template<>
-struct vulkan_object_trait<obj::option::qcom::render_pass_transform_begin>
+struct vulkan_object_trait<tag::option::qcom::render_pass_transform_begin>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -90,11 +90,11 @@ struct vulkan_object_trait<obj::option::qcom::render_pass_transform_begin>
 template<>
 struct expression_vulkan_tag<VkCommandBufferInheritanceRenderPassTransformInfoQCOM>
 {
-	using type = obj::option::qcom::command_buffer_inheritance_render_pass_transform;
+	using type = tag::option::qcom::command_buffer_inheritance_render_pass_transform;
 };
 
 template<>
-struct vulkan_object_native<obj::option::qcom::command_buffer_inheritance_render_pass_transform>
+struct vulkan_object_native<tag::option::qcom::command_buffer_inheritance_render_pass_transform>
 {
 	using type = VkCommandBufferInheritanceRenderPassTransformInfoQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_RENDER_PASS_TRANSFORM_INFO_QCOM;
@@ -103,18 +103,18 @@ struct vulkan_object_native<obj::option::qcom::command_buffer_inheritance_render
 template<>
 struct expression_vulkan_tag<VkRenderPassTransformBeginInfoQCOM>
 {
-	using type = obj::option::qcom::render_pass_transform_begin;
+	using type = tag::option::qcom::render_pass_transform_begin;
 };
 
 template<>
-struct vulkan_object_native<obj::option::qcom::render_pass_transform_begin>
+struct vulkan_object_native<tag::option::qcom::render_pass_transform_begin>
 {
 	using type = VkRenderPassTransformBeginInfoQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RENDER_PASS_TRANSFORM_BEGIN_INFO_QCOM;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::qcom::command_buffer_inheritance_render_pass_transform>
+struct vulkan_object_extensions<tag::option::qcom::command_buffer_inheritance_render_pass_transform>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_render_pass_transform"};
 	constexpr static ::std::uint32_t core = 0;
@@ -122,7 +122,7 @@ struct vulkan_object_extensions<obj::option::qcom::command_buffer_inheritance_re
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::qcom::render_pass_transform_begin>
+struct vulkan_object_extensions<tag::option::qcom::render_pass_transform_begin>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_render_pass_transform"};
 	constexpr static ::std::uint32_t core = 0;
@@ -130,9 +130,9 @@ struct vulkan_object_extensions<obj::option::qcom::render_pass_transform_begin>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::command_buffer_inheritance, obj::option::qcom::command_buffer_inheritance_render_pass_transform> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::command_buffer_inheritance, tag::option::qcom::command_buffer_inheritance_render_pass_transform> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::render_pass_begin, obj::option::qcom::render_pass_transform_begin> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::render_pass_begin, tag::option::qcom::render_pass_transform_begin> = true;
 }
 
 namespace vkfu::param
@@ -143,7 +143,7 @@ using ::vkfu::operator|;
 
 struct command_buffer_inheritance_render_pass_transform
 {
-	using vulkan_tag_type = obj::option::qcom::command_buffer_inheritance_render_pass_transform;
+	using vulkan_tag_type = tag::option::qcom::command_buffer_inheritance_render_pass_transform;
 
 	::vkfu::enums::surface_transform transform{};
 	VkRect2D render_area{};
@@ -161,7 +161,7 @@ struct command_buffer_inheritance_render_pass_transform
 
 struct render_pass_transform_begin
 {
-	using vulkan_tag_type = obj::option::qcom::render_pass_transform_begin;
+	using vulkan_tag_type = tag::option::qcom::render_pass_transform_begin;
 
 	::vkfu::enums::surface_transform transform{};
 

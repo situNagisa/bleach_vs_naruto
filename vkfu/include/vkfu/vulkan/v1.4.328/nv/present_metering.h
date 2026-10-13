@@ -61,7 +61,7 @@ constexpr auto _vkfu_evaluate(VkSetPresentConfigNV const& value) noexcept -> VkS
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -76,7 +76,7 @@ struct set_present_config{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::present_metering>
+struct vulkan_object_trait<tag::feature::nv::present_metering>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -84,7 +84,7 @@ struct vulkan_object_trait<obj::feature::nv::present_metering>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::nv::set_present_config>
+struct vulkan_object_trait<tag::option::nv::set_present_config>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -94,11 +94,11 @@ struct vulkan_object_trait<obj::option::nv::set_present_config>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePresentMeteringFeaturesNV>
 {
-	using type = obj::feature::nv::present_metering;
+	using type = tag::feature::nv::present_metering;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::present_metering>
+struct vulkan_object_native<tag::feature::nv::present_metering>
 {
 	using type = VkPhysicalDevicePresentMeteringFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRESENT_METERING_FEATURES_NV;
@@ -107,18 +107,18 @@ struct vulkan_object_native<obj::feature::nv::present_metering>
 template<>
 struct expression_vulkan_tag<VkSetPresentConfigNV>
 {
-	using type = obj::option::nv::set_present_config;
+	using type = tag::option::nv::set_present_config;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::set_present_config>
+struct vulkan_object_native<tag::option::nv::set_present_config>
 {
 	using type = VkSetPresentConfigNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SET_PRESENT_CONFIG_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::present_metering>
+struct vulkan_object_extensions<tag::feature::nv::present_metering>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_present_metering"};
 	constexpr static ::std::uint32_t core = 0;
@@ -126,7 +126,7 @@ struct vulkan_object_extensions<obj::feature::nv::present_metering>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::set_present_config>
+struct vulkan_object_extensions<tag::option::nv::set_present_config>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_present_metering"};
 	constexpr static ::std::uint32_t core = 0;
@@ -134,11 +134,11 @@ struct vulkan_object_extensions<obj::option::nv::set_present_config>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::present_metering> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::present_metering> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::present_metering> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::present_metering> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::present, obj::option::nv::set_present_config> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::present, tag::option::nv::set_present_config> = true;
 }
 
 namespace vkfu::param
@@ -149,7 +149,7 @@ using ::vkfu::operator|;
 
 struct present_metering
 {
-	using vulkan_tag_type = obj::feature::nv::present_metering;
+	using vulkan_tag_type = tag::feature::nv::present_metering;
 
 	bool enable = false;
 
@@ -171,7 +171,7 @@ using ::vkfu::operator|;
 
 struct set_present_config
 {
-	using vulkan_tag_type = obj::option::nv::set_present_config;
+	using vulkan_tag_type = tag::option::nv::set_present_config;
 
 	::std::uint32_t num_frames_per_batch{};
 	::std::uint32_t present_config_feedback{};

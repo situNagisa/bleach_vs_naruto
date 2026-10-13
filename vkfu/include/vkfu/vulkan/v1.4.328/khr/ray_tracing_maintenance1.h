@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceRayTracingMaintenance1FeaturesKHR 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -55,7 +55,7 @@ struct ray_tracing_maintenance1{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::ray_tracing_maintenance1>
+struct vulkan_object_trait<tag::feature::khr::ray_tracing_maintenance1>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::khr::ray_tracing_maintenance1>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceRayTracingMaintenance1FeaturesKHR>
 {
-	using type = obj::feature::khr::ray_tracing_maintenance1;
+	using type = tag::feature::khr::ray_tracing_maintenance1;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::ray_tracing_maintenance1>
+struct vulkan_object_native<tag::feature::khr::ray_tracing_maintenance1>
 {
 	using type = VkPhysicalDeviceRayTracingMaintenance1FeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_MAINTENANCE_1_FEATURES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::ray_tracing_maintenance1>
+struct vulkan_object_extensions<tag::feature::khr::ray_tracing_maintenance1>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_ray_tracing_maintenance1"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::khr::ray_tracing_maintenance1>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::ray_tracing_maintenance1> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::ray_tracing_maintenance1> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::ray_tracing_maintenance1> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::ray_tracing_maintenance1> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct ray_tracing_maintenance1
 {
-	using vulkan_tag_type = obj::feature::khr::ray_tracing_maintenance1;
+	using vulkan_tag_type = tag::feature::khr::ray_tracing_maintenance1;
 
 	bool enable = false;
 	bool ray_tracing_pipeline_trace_rays_indirect2 = false;

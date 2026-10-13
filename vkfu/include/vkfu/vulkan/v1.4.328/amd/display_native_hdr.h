@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkDisplayNativeHdrSurfaceCapabilitiesAMD const& va
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::amd
 {
@@ -74,7 +74,7 @@ struct display_native_hdr_surface_capabilities{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::amd::swapchain_display_native_hdr>
+struct vulkan_object_trait<tag::option::amd::swapchain_display_native_hdr>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::option::amd::swapchain_display_native_hdr>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::amd::display_native_hdr_surface_capabilities>
+struct vulkan_object_trait<tag::result::amd::display_native_hdr_surface_capabilities>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::result::amd::display_native_hdr_surface_capabili
 template<>
 struct expression_vulkan_tag<VkSwapchainDisplayNativeHdrCreateInfoAMD>
 {
-	using type = obj::option::amd::swapchain_display_native_hdr;
+	using type = tag::option::amd::swapchain_display_native_hdr;
 };
 
 template<>
-struct vulkan_object_native<obj::option::amd::swapchain_display_native_hdr>
+struct vulkan_object_native<tag::option::amd::swapchain_display_native_hdr>
 {
 	using type = VkSwapchainDisplayNativeHdrCreateInfoAMD;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SWAPCHAIN_DISPLAY_NATIVE_HDR_CREATE_INFO_AMD;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::option::amd::swapchain_display_native_hdr>
 template<>
 struct expression_vulkan_tag<VkDisplayNativeHdrSurfaceCapabilitiesAMD>
 {
-	using type = obj::result::amd::display_native_hdr_surface_capabilities;
+	using type = tag::result::amd::display_native_hdr_surface_capabilities;
 };
 
 template<>
-struct vulkan_object_native<obj::result::amd::display_native_hdr_surface_capabilities>
+struct vulkan_object_native<tag::result::amd::display_native_hdr_surface_capabilities>
 {
 	using type = VkDisplayNativeHdrSurfaceCapabilitiesAMD;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DISPLAY_NATIVE_HDR_SURFACE_CAPABILITIES_AMD;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::amd::swapchain_display_native_hdr>
+struct vulkan_object_extensions<tag::option::amd::swapchain_display_native_hdr>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_AMD_display_native_hdr"};
 	constexpr static ::std::uint32_t core = 0;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::option::amd::swapchain_display_native_hdr>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::amd::display_native_hdr_surface_capabilities>
+struct vulkan_object_extensions<tag::result::amd::display_native_hdr_surface_capabilities>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_AMD_display_native_hdr"};
 	constexpr static ::std::uint32_t core = 0;
@@ -132,9 +132,9 @@ struct vulkan_object_extensions<obj::result::amd::display_native_hdr_surface_cap
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::surface_capabilities2, obj::result::amd::display_native_hdr_surface_capabilities> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::surface_capabilities2, tag::result::amd::display_native_hdr_surface_capabilities> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::swapchain, obj::option::amd::swapchain_display_native_hdr> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::swapchain, tag::option::amd::swapchain_display_native_hdr> = true;
 }
 
 namespace vkfu::param
@@ -145,7 +145,7 @@ using ::vkfu::operator|;
 
 struct swapchain_display_native_hdr
 {
-	using vulkan_tag_type = obj::option::amd::swapchain_display_native_hdr;
+	using vulkan_tag_type = tag::option::amd::swapchain_display_native_hdr;
 
 	bool local_dimming_enable = false;
 

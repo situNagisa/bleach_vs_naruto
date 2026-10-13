@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceUniformBufferStandardLayoutFeature
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -55,7 +55,7 @@ struct uniform_buffer_standard_layout{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::uniform_buffer_standard_layout>
+struct vulkan_object_trait<tag::feature::uniform_buffer_standard_layout>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::uniform_buffer_standard_layout>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceUniformBufferStandardLayoutFeatures>
 {
-	using type = obj::feature::uniform_buffer_standard_layout;
+	using type = tag::feature::uniform_buffer_standard_layout;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::uniform_buffer_standard_layout>
+struct vulkan_object_native<tag::feature::uniform_buffer_standard_layout>
 {
 	using type = VkPhysicalDeviceUniformBufferStandardLayoutFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFORM_BUFFER_STANDARD_LAYOUT_FEATURES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::uniform_buffer_standard_layout>
+struct vulkan_object_extensions<tag::feature::uniform_buffer_standard_layout>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_uniform_buffer_standard_layout"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::uniform_buffer_standard_layout>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::uniform_buffer_standard_layout> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::uniform_buffer_standard_layout> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::uniform_buffer_standard_layout> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::uniform_buffer_standard_layout> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct uniform_buffer_standard_layout
 {
-	using vulkan_tag_type = obj::feature::uniform_buffer_standard_layout;
+	using vulkan_tag_type = tag::feature::uniform_buffer_standard_layout;
 
 	bool enable = false;
 

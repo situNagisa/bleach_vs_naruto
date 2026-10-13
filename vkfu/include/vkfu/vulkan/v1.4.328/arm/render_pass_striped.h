@@ -107,7 +107,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceRenderPassStripedPropertiesARM con
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace arm
 {
@@ -131,7 +131,7 @@ struct render_pass_striped{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::arm::render_pass_striped>
+struct vulkan_object_trait<tag::feature::arm::render_pass_striped>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -139,7 +139,7 @@ struct vulkan_object_trait<obj::feature::arm::render_pass_striped>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::arm::render_pass_stripe_begin>
+struct vulkan_object_trait<tag::option::arm::render_pass_stripe_begin>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -147,7 +147,7 @@ struct vulkan_object_trait<obj::option::arm::render_pass_stripe_begin>
 };
 
 template<>
-struct vulkan_object_trait<obj::arm::render_pass_stripe>
+struct vulkan_object_trait<tag::arm::render_pass_stripe>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -155,7 +155,7 @@ struct vulkan_object_trait<obj::arm::render_pass_stripe>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::arm::render_pass_stripe_submit>
+struct vulkan_object_trait<tag::option::arm::render_pass_stripe_submit>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -163,7 +163,7 @@ struct vulkan_object_trait<obj::option::arm::render_pass_stripe_submit>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::arm::render_pass_striped>
+struct vulkan_object_trait<tag::property::arm::render_pass_striped>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -173,11 +173,11 @@ struct vulkan_object_trait<obj::property::arm::render_pass_striped>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceRenderPassStripedFeaturesARM>
 {
-	using type = obj::feature::arm::render_pass_striped;
+	using type = tag::feature::arm::render_pass_striped;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::arm::render_pass_striped>
+struct vulkan_object_native<tag::feature::arm::render_pass_striped>
 {
 	using type = VkPhysicalDeviceRenderPassStripedFeaturesARM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RENDER_PASS_STRIPED_FEATURES_ARM;
@@ -186,11 +186,11 @@ struct vulkan_object_native<obj::feature::arm::render_pass_striped>
 template<>
 struct expression_vulkan_tag<VkRenderPassStripeBeginInfoARM>
 {
-	using type = obj::option::arm::render_pass_stripe_begin;
+	using type = tag::option::arm::render_pass_stripe_begin;
 };
 
 template<>
-struct vulkan_object_native<obj::option::arm::render_pass_stripe_begin>
+struct vulkan_object_native<tag::option::arm::render_pass_stripe_begin>
 {
 	using type = VkRenderPassStripeBeginInfoARM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RENDER_PASS_STRIPE_BEGIN_INFO_ARM;
@@ -199,11 +199,11 @@ struct vulkan_object_native<obj::option::arm::render_pass_stripe_begin>
 template<>
 struct expression_vulkan_tag<VkRenderPassStripeInfoARM>
 {
-	using type = obj::arm::render_pass_stripe;
+	using type = tag::arm::render_pass_stripe;
 };
 
 template<>
-struct vulkan_object_native<obj::arm::render_pass_stripe>
+struct vulkan_object_native<tag::arm::render_pass_stripe>
 {
 	using type = VkRenderPassStripeInfoARM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RENDER_PASS_STRIPE_INFO_ARM;
@@ -212,11 +212,11 @@ struct vulkan_object_native<obj::arm::render_pass_stripe>
 template<>
 struct expression_vulkan_tag<VkRenderPassStripeSubmitInfoARM>
 {
-	using type = obj::option::arm::render_pass_stripe_submit;
+	using type = tag::option::arm::render_pass_stripe_submit;
 };
 
 template<>
-struct vulkan_object_native<obj::option::arm::render_pass_stripe_submit>
+struct vulkan_object_native<tag::option::arm::render_pass_stripe_submit>
 {
 	using type = VkRenderPassStripeSubmitInfoARM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RENDER_PASS_STRIPE_SUBMIT_INFO_ARM;
@@ -225,18 +225,18 @@ struct vulkan_object_native<obj::option::arm::render_pass_stripe_submit>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceRenderPassStripedPropertiesARM>
 {
-	using type = obj::property::arm::render_pass_striped;
+	using type = tag::property::arm::render_pass_striped;
 };
 
 template<>
-struct vulkan_object_native<obj::property::arm::render_pass_striped>
+struct vulkan_object_native<tag::property::arm::render_pass_striped>
 {
 	using type = VkPhysicalDeviceRenderPassStripedPropertiesARM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RENDER_PASS_STRIPED_PROPERTIES_ARM;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::arm::render_pass_striped>
+struct vulkan_object_extensions<tag::feature::arm::render_pass_striped>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ARM_render_pass_striped"};
 	constexpr static ::std::uint32_t core = 0;
@@ -244,7 +244,7 @@ struct vulkan_object_extensions<obj::feature::arm::render_pass_striped>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::arm::render_pass_stripe_begin>
+struct vulkan_object_extensions<tag::option::arm::render_pass_stripe_begin>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ARM_render_pass_striped"};
 	constexpr static ::std::uint32_t core = 0;
@@ -252,7 +252,7 @@ struct vulkan_object_extensions<obj::option::arm::render_pass_stripe_begin>
 };
 
 template<>
-struct vulkan_object_extensions<obj::arm::render_pass_stripe>
+struct vulkan_object_extensions<tag::arm::render_pass_stripe>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ARM_render_pass_striped"};
 	constexpr static ::std::uint32_t core = 0;
@@ -260,7 +260,7 @@ struct vulkan_object_extensions<obj::arm::render_pass_stripe>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::arm::render_pass_stripe_submit>
+struct vulkan_object_extensions<tag::option::arm::render_pass_stripe_submit>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ARM_render_pass_striped"};
 	constexpr static ::std::uint32_t core = 0;
@@ -268,7 +268,7 @@ struct vulkan_object_extensions<obj::option::arm::render_pass_stripe_submit>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::arm::render_pass_striped>
+struct vulkan_object_extensions<tag::property::arm::render_pass_striped>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ARM_render_pass_striped"};
 	constexpr static ::std::uint32_t core = 0;
@@ -276,17 +276,17 @@ struct vulkan_object_extensions<obj::property::arm::render_pass_striped>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::command_buffer_submit, obj::option::arm::render_pass_stripe_submit> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::command_buffer_submit, tag::option::arm::render_pass_stripe_submit> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::arm::render_pass_striped> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::arm::render_pass_striped> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::arm::render_pass_striped> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::arm::render_pass_striped> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::arm::render_pass_striped> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::arm::render_pass_striped> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::render_pass_begin, obj::option::arm::render_pass_stripe_begin> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::render_pass_begin, tag::option::arm::render_pass_stripe_begin> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::rendering, obj::option::arm::render_pass_stripe_begin> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::rendering, tag::option::arm::render_pass_stripe_begin> = true;
 }
 
 namespace vkfu::param
@@ -297,7 +297,7 @@ using ::vkfu::operator|;
 
 struct render_pass_stripe
 {
-	using vulkan_tag_type = obj::arm::render_pass_stripe;
+	using vulkan_tag_type = tag::arm::render_pass_stripe;
 
 	VkRect2D stripe_area{};
 
@@ -319,7 +319,7 @@ using ::vkfu::operator|;
 
 struct render_pass_striped
 {
-	using vulkan_tag_type = obj::feature::arm::render_pass_striped;
+	using vulkan_tag_type = tag::feature::arm::render_pass_striped;
 
 	bool enable = false;
 
@@ -341,7 +341,7 @@ using ::vkfu::operator|;
 
 struct render_pass_stripe_begin
 {
-	using vulkan_tag_type = obj::option::arm::render_pass_stripe_begin;
+	using vulkan_tag_type = tag::option::arm::render_pass_stripe_begin;
 
 	::std::span<VkRenderPassStripeInfoARM const> stripe_infos{};
 
@@ -358,7 +358,7 @@ struct render_pass_stripe_begin
 
 struct render_pass_stripe_submit
 {
-	using vulkan_tag_type = obj::option::arm::render_pass_stripe_submit;
+	using vulkan_tag_type = tag::option::arm::render_pass_stripe_submit;
 
 	::std::span<VkSemaphoreSubmitInfo const> stripe_semaphore_infos{};
 

@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkPipelineCoverageToColorStateCreateInfoNV const& 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace state::nv
 {
@@ -54,7 +54,7 @@ struct coverage_to_color{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::state::nv::coverage_to_color>
+struct vulkan_object_trait<tag::state::nv::coverage_to_color>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::state::nv::coverage_to_color>
 template<>
 struct expression_vulkan_tag<VkPipelineCoverageToColorStateCreateInfoNV>
 {
-	using type = obj::state::nv::coverage_to_color;
+	using type = tag::state::nv::coverage_to_color;
 };
 
 template<>
-struct vulkan_object_native<obj::state::nv::coverage_to_color>
+struct vulkan_object_native<tag::state::nv::coverage_to_color>
 {
 	using type = VkPipelineCoverageToColorStateCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_COVERAGE_TO_COLOR_STATE_CREATE_INFO_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::nv::coverage_to_color>
+struct vulkan_object_extensions<tag::state::nv::coverage_to_color>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_fragment_coverage_to_color"};
 	constexpr static ::std::uint32_t core = 0;
@@ -83,7 +83,7 @@ struct vulkan_object_extensions<obj::state::nv::coverage_to_color>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::multisample, obj::state::nv::coverage_to_color> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::multisample, tag::state::nv::coverage_to_color> = true;
 }
 
 namespace vkfu::param
@@ -94,7 +94,7 @@ using ::vkfu::operator|;
 
 struct coverage_to_color
 {
-	using vulkan_tag_type = obj::state::nv::coverage_to_color;
+	using vulkan_tag_type = tag::state::nv::coverage_to_color;
 
 	VkPipelineCoverageToColorStateCreateFlagsNV flags{};
 	bool enable = false;

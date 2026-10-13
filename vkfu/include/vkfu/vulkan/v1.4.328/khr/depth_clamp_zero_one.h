@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceDepthClampZeroOneFeaturesKHR const
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -55,7 +55,7 @@ struct depth_clamp_zero_one{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::depth_clamp_zero_one>
+struct vulkan_object_trait<tag::feature::khr::depth_clamp_zero_one>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::khr::depth_clamp_zero_one>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDepthClampZeroOneFeaturesKHR>
 {
-	using type = obj::feature::khr::depth_clamp_zero_one;
+	using type = tag::feature::khr::depth_clamp_zero_one;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::depth_clamp_zero_one>
+struct vulkan_object_native<tag::feature::khr::depth_clamp_zero_one>
 {
 	using type = VkPhysicalDeviceDepthClampZeroOneFeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_CLAMP_ZERO_ONE_FEATURES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::depth_clamp_zero_one>
+struct vulkan_object_extensions<tag::feature::khr::depth_clamp_zero_one>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_depth_clamp_zero_one", "VK_KHR_depth_clamp_zero_one"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::khr::depth_clamp_zero_one>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::depth_clamp_zero_one> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::depth_clamp_zero_one> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::depth_clamp_zero_one> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::depth_clamp_zero_one> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct depth_clamp_zero_one
 {
-	using vulkan_tag_type = obj::feature::khr::depth_clamp_zero_one;
+	using vulkan_tag_type = tag::feature::khr::depth_clamp_zero_one;
 
 	bool enable = false;
 

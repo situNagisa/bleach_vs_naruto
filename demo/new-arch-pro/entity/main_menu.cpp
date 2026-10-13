@@ -106,7 +106,7 @@ struct main_menu::implementation : immovable
 		::vkkl::buffer _handle{};
 
 		_buffer(::consumer_arch_vulkan::global_vulkan_env_renderer global,
-			::std::span<::std::byte const> data, ::vkfu::param::buffer::usage_type usage) : _device(global.device())
+			::std::span<::std::byte const> data, ::vkfu::flags::buffer_usage usage) : _device(global.device())
 		{
 			namespace param = ::vkfu::param;
 
@@ -438,7 +438,7 @@ struct main_menu::implementation : immovable
 
 		assert(extent.width != 0 && extent.height != 0);
 		auto const vertices = _draw(extent, snapshot);
-		recording._vertices = ::std::make_unique<_buffer>(global, ::std::as_bytes(::std::span{vertices}), param::buffer::usage_type{.vertex_buffer = 1});
+		recording._vertices = ::std::make_unique<_buffer>(global, ::std::as_bytes(::std::span{vertices}), ::vkfu::flags::buffer_usage{.vertex_buffer = 1});
 		recording._command = _allocate_command(global.device(), recording._pool.handle, command_buffer_level::secondary);
 		auto const command = recording._command.handle;
 		::vkfu::begin_command_buffer(command, param::command_buffer_begin{
@@ -451,7 +451,7 @@ struct main_menu::implementation : immovable
 		::vkfu::cmd_set_viewport(command, 0, ::std::span{&viewport, 1u});
 		::vkfu::cmd_set_scissor(command, 0, ::std::span{&scissor, 1u});
 		::vkCmdBindPipeline(command, VK_PIPELINE_BIND_POINT_GRAPHICS, _graphics->_pipeline.handle);
-		::vkfu::cmd_bind_descriptor_sets(command, VK_PIPELINE_BIND_POINT_GRAPHICS, _graphics->_layout.handle,
+		::vkfu::cmd_bind_descriptor_sets(command, ::vkfu::enums::pipeline_bind_point::graphics, _graphics->_layout.handle,
 			0, ::std::span{&_graphics->_descriptor.handle, 1u}, {});
 		auto const offset = ::VkDeviceSize{};
 		::vkfu::cmd_bind_vertex_buffers(command, 0, ::std::span{&recording._vertices->_handle.handle, 1u}, ::std::span{&offset, 1u});

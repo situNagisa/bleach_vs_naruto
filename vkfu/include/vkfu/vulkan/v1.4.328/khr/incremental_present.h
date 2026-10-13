@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkPresentRegionsKHR const& value) noexcept -> VkPr
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::khr
 {
@@ -54,7 +54,7 @@ struct present_regions{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::khr::present_regions>
+struct vulkan_object_trait<tag::option::khr::present_regions>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::option::khr::present_regions>
 template<>
 struct expression_vulkan_tag<VkPresentRegionsKHR>
 {
-	using type = obj::option::khr::present_regions;
+	using type = tag::option::khr::present_regions;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::present_regions>
+struct vulkan_object_native<tag::option::khr::present_regions>
 {
 	using type = VkPresentRegionsKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PRESENT_REGIONS_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::present_regions>
+struct vulkan_object_extensions<tag::option::khr::present_regions>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_incremental_present"};
 	constexpr static ::std::uint32_t core = 0;
@@ -83,7 +83,7 @@ struct vulkan_object_extensions<obj::option::khr::present_regions>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::present, obj::option::khr::present_regions> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::present, tag::option::khr::present_regions> = true;
 }
 
 namespace vkfu::param
@@ -94,7 +94,7 @@ using ::vkfu::operator|;
 
 struct present_regions
 {
-	using vulkan_tag_type = obj::option::khr::present_regions;
+	using vulkan_tag_type = tag::option::khr::present_regions;
 
 	::std::uint32_t swapchain_count{};
 	VkPresentRegionKHR const* regions = nullptr;

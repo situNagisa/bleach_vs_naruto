@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkTextureLODGatherFormatPropertiesAMD const& value
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace result::amd
 {
@@ -54,7 +54,7 @@ struct texture_lod_gather_format_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::result::amd::texture_lod_gather_format_properties>
+struct vulkan_object_trait<tag::result::amd::texture_lod_gather_format_properties>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::result::amd::texture_lod_gather_format_propertie
 template<>
 struct expression_vulkan_tag<VkTextureLODGatherFormatPropertiesAMD>
 {
-	using type = obj::result::amd::texture_lod_gather_format_properties;
+	using type = tag::result::amd::texture_lod_gather_format_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::amd::texture_lod_gather_format_properties>
+struct vulkan_object_native<tag::result::amd::texture_lod_gather_format_properties>
 {
 	using type = VkTextureLODGatherFormatPropertiesAMD;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_TEXTURE_LOD_GATHER_FORMAT_PROPERTIES_AMD;
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::amd::texture_lod_gather_format_properties>
+struct vulkan_object_extensions<tag::result::amd::texture_lod_gather_format_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_AMD_texture_gather_bias_lod"};
 	constexpr static ::std::uint32_t core = 0;
@@ -83,5 +83,5 @@ struct vulkan_object_extensions<obj::result::amd::texture_lod_gather_format_prop
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::image_format_properties2, obj::result::amd::texture_lod_gather_format_properties> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::image_format_properties2, tag::result::amd::texture_lod_gather_format_properties> = true;
 }

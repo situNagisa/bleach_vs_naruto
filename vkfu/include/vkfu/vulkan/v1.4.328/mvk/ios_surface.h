@@ -42,7 +42,7 @@ constexpr auto _vkfu_evaluate(VkIOSSurfaceCreateInfoMVK const& value) noexcept -
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace mvk
 {
@@ -53,7 +53,7 @@ struct ios_surface{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::mvk::ios_surface>
+struct vulkan_object_trait<tag::mvk::ios_surface>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -63,18 +63,18 @@ struct vulkan_object_trait<obj::mvk::ios_surface>
 template<>
 struct expression_vulkan_tag<VkIOSSurfaceCreateInfoMVK>
 {
-	using type = obj::mvk::ios_surface;
+	using type = tag::mvk::ios_surface;
 };
 
 template<>
-struct vulkan_object_native<obj::mvk::ios_surface>
+struct vulkan_object_native<tag::mvk::ios_surface>
 {
 	using type = VkIOSSurfaceCreateInfoMVK;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IOS_SURFACE_CREATE_INFO_MVK;
 };
 
 template<>
-struct vulkan_object_extensions<obj::mvk::ios_surface>
+struct vulkan_object_extensions<tag::mvk::ios_surface>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_MVK_ios_surface"};
 	constexpr static ::std::uint32_t core = 0;
@@ -91,7 +91,7 @@ using ::vkfu::operator|;
 
 struct ios_surface
 {
-	using vulkan_tag_type = obj::mvk::ios_surface;
+	using vulkan_tag_type = tag::mvk::ios_surface;
 
 	VkIOSSurfaceCreateFlagsMVK flags{};
 	void const* view = nullptr;
@@ -114,7 +114,7 @@ namespace vkfu
 {
 namespace mvk
 {
-template<::vkfu::expression_for<::vkfu::obj::mvk::ios_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::mvk::ios_surface> Expression>
 [[nodiscard]] auto create_ios_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkSurfaceKHR, ::VkResult>
 {
@@ -129,7 +129,7 @@ template<::vkfu::expression_for<::vkfu::obj::mvk::ios_surface> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::mvk::ios_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::mvk::ios_surface> Expression>
 [[nodiscard]] auto create_ios_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkSurfaceKHR
 {
 	auto produced = create_ios_surface(instance, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

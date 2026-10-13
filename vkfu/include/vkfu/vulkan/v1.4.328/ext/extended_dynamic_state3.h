@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceExtendedDynamicState3PropertiesEXT
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -74,7 +74,7 @@ struct extended_dynamic_state3{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::extended_dynamic_state3>
+struct vulkan_object_trait<tag::feature::ext::extended_dynamic_state3>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::feature::ext::extended_dynamic_state3>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::ext::extended_dynamic_state3>
+struct vulkan_object_trait<tag::property::ext::extended_dynamic_state3>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::property::ext::extended_dynamic_state3>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceExtendedDynamicState3FeaturesEXT>
 {
-	using type = obj::feature::ext::extended_dynamic_state3;
+	using type = tag::feature::ext::extended_dynamic_state3;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::extended_dynamic_state3>
+struct vulkan_object_native<tag::feature::ext::extended_dynamic_state3>
 {
 	using type = VkPhysicalDeviceExtendedDynamicState3FeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_3_FEATURES_EXT;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::feature::ext::extended_dynamic_state3>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceExtendedDynamicState3PropertiesEXT>
 {
-	using type = obj::property::ext::extended_dynamic_state3;
+	using type = tag::property::ext::extended_dynamic_state3;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::extended_dynamic_state3>
+struct vulkan_object_native<tag::property::ext::extended_dynamic_state3>
 {
 	using type = VkPhysicalDeviceExtendedDynamicState3PropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_3_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::extended_dynamic_state3>
+struct vulkan_object_extensions<tag::feature::ext::extended_dynamic_state3>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_extended_dynamic_state3"};
 	constexpr static ::std::uint32_t core = 0;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::feature::ext::extended_dynamic_state3>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::extended_dynamic_state3>
+struct vulkan_object_extensions<tag::property::ext::extended_dynamic_state3>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_extended_dynamic_state3"};
 	constexpr static ::std::uint32_t core = 0;
@@ -132,11 +132,11 @@ struct vulkan_object_extensions<obj::property::ext::extended_dynamic_state3>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::extended_dynamic_state3> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::extended_dynamic_state3> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::extended_dynamic_state3> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::extended_dynamic_state3> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::extended_dynamic_state3> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::extended_dynamic_state3> = true;
 }
 
 namespace vkfu::param
@@ -147,7 +147,7 @@ using ::vkfu::operator|;
 
 struct extended_dynamic_state3
 {
-	using vulkan_tag_type = obj::feature::ext::extended_dynamic_state3;
+	using vulkan_tag_type = tag::feature::ext::extended_dynamic_state3;
 
 	bool tessellation_domain_origin = false;
 	bool depth_clamp_enable = false;

@@ -42,7 +42,7 @@ constexpr auto _vkfu_evaluate(VkXlibSurfaceCreateInfoKHR const& value) noexcept 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
@@ -53,7 +53,7 @@ struct xlib_surface{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::khr::xlib_surface>
+struct vulkan_object_trait<tag::khr::xlib_surface>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -63,18 +63,18 @@ struct vulkan_object_trait<obj::khr::xlib_surface>
 template<>
 struct expression_vulkan_tag<VkXlibSurfaceCreateInfoKHR>
 {
-	using type = obj::khr::xlib_surface;
+	using type = tag::khr::xlib_surface;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::xlib_surface>
+struct vulkan_object_native<tag::khr::xlib_surface>
 {
 	using type = VkXlibSurfaceCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::xlib_surface>
+struct vulkan_object_extensions<tag::khr::xlib_surface>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_xlib_surface"};
 	constexpr static ::std::uint32_t core = 0;
@@ -91,7 +91,7 @@ using ::vkfu::operator|;
 
 struct xlib_surface
 {
-	using vulkan_tag_type = obj::khr::xlib_surface;
+	using vulkan_tag_type = tag::khr::xlib_surface;
 
 	VkXlibSurfaceCreateFlagsKHR flags{};
 	Display* dpy = nullptr;
@@ -116,7 +116,7 @@ namespace vkfu
 {
 namespace khr
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::xlib_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::khr::xlib_surface> Expression>
 [[nodiscard]] auto create_xlib_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkSurfaceKHR, ::VkResult>
 {
@@ -131,7 +131,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::xlib_surface> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::xlib_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::khr::xlib_surface> Expression>
 [[nodiscard]] auto create_xlib_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkSurfaceKHR
 {
 	auto produced = create_xlib_surface(instance, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

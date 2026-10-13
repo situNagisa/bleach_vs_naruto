@@ -90,7 +90,7 @@ constexpr auto _vkfu_evaluate(VkMemoryWin32HandlePropertiesKHR const& value) noe
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
@@ -110,7 +110,7 @@ struct memory_win32_handle_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::khr::export_memory_win32_handle>
+struct vulkan_object_trait<tag::option::khr::export_memory_win32_handle>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -118,7 +118,7 @@ struct vulkan_object_trait<obj::option::khr::export_memory_win32_handle>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::import_memory_win32_handle>
+struct vulkan_object_trait<tag::option::khr::import_memory_win32_handle>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -126,7 +126,7 @@ struct vulkan_object_trait<obj::option::khr::import_memory_win32_handle>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::memory_get_win32_handle>
+struct vulkan_object_trait<tag::khr::memory_get_win32_handle>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -134,7 +134,7 @@ struct vulkan_object_trait<obj::khr::memory_get_win32_handle>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::memory_win32_handle_properties>
+struct vulkan_object_trait<tag::result::khr::memory_win32_handle_properties>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -144,11 +144,11 @@ struct vulkan_object_trait<obj::result::khr::memory_win32_handle_properties>
 template<>
 struct expression_vulkan_tag<VkExportMemoryWin32HandleInfoKHR>
 {
-	using type = obj::option::khr::export_memory_win32_handle;
+	using type = tag::option::khr::export_memory_win32_handle;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::export_memory_win32_handle>
+struct vulkan_object_native<tag::option::khr::export_memory_win32_handle>
 {
 	using type = VkExportMemoryWin32HandleInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXPORT_MEMORY_WIN32_HANDLE_INFO_KHR;
@@ -157,11 +157,11 @@ struct vulkan_object_native<obj::option::khr::export_memory_win32_handle>
 template<>
 struct expression_vulkan_tag<VkImportMemoryWin32HandleInfoKHR>
 {
-	using type = obj::option::khr::import_memory_win32_handle;
+	using type = tag::option::khr::import_memory_win32_handle;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::import_memory_win32_handle>
+struct vulkan_object_native<tag::option::khr::import_memory_win32_handle>
 {
 	using type = VkImportMemoryWin32HandleInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR;
@@ -170,11 +170,11 @@ struct vulkan_object_native<obj::option::khr::import_memory_win32_handle>
 template<>
 struct expression_vulkan_tag<VkMemoryGetWin32HandleInfoKHR>
 {
-	using type = obj::khr::memory_get_win32_handle;
+	using type = tag::khr::memory_get_win32_handle;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::memory_get_win32_handle>
+struct vulkan_object_native<tag::khr::memory_get_win32_handle>
 {
 	using type = VkMemoryGetWin32HandleInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR;
@@ -183,18 +183,18 @@ struct vulkan_object_native<obj::khr::memory_get_win32_handle>
 template<>
 struct expression_vulkan_tag<VkMemoryWin32HandlePropertiesKHR>
 {
-	using type = obj::result::khr::memory_win32_handle_properties;
+	using type = tag::result::khr::memory_win32_handle_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::memory_win32_handle_properties>
+struct vulkan_object_native<tag::result::khr::memory_win32_handle_properties>
 {
 	using type = VkMemoryWin32HandlePropertiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MEMORY_WIN32_HANDLE_PROPERTIES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::export_memory_win32_handle>
+struct vulkan_object_extensions<tag::option::khr::export_memory_win32_handle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_memory_win32"};
 	constexpr static ::std::uint32_t core = 0;
@@ -202,7 +202,7 @@ struct vulkan_object_extensions<obj::option::khr::export_memory_win32_handle>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::import_memory_win32_handle>
+struct vulkan_object_extensions<tag::option::khr::import_memory_win32_handle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_memory_win32"};
 	constexpr static ::std::uint32_t core = 0;
@@ -210,7 +210,7 @@ struct vulkan_object_extensions<obj::option::khr::import_memory_win32_handle>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::memory_get_win32_handle>
+struct vulkan_object_extensions<tag::khr::memory_get_win32_handle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_memory_win32"};
 	constexpr static ::std::uint32_t core = 0;
@@ -218,7 +218,7 @@ struct vulkan_object_extensions<obj::khr::memory_get_win32_handle>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::memory_win32_handle_properties>
+struct vulkan_object_extensions<tag::result::khr::memory_win32_handle_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_memory_win32"};
 	constexpr static ::std::uint32_t core = 0;
@@ -226,9 +226,9 @@ struct vulkan_object_extensions<obj::result::khr::memory_win32_handle_properties
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::memory, obj::option::khr::export_memory_win32_handle> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::memory, tag::option::khr::export_memory_win32_handle> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::memory, obj::option::khr::import_memory_win32_handle> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::memory, tag::option::khr::import_memory_win32_handle> = true;
 }
 
 namespace vkfu::param
@@ -239,7 +239,7 @@ using ::vkfu::operator|;
 
 struct memory_get_win32_handle
 {
-	using vulkan_tag_type = obj::khr::memory_get_win32_handle;
+	using vulkan_tag_type = tag::khr::memory_get_win32_handle;
 
 	VkDeviceMemory memory{};
 	::vkfu::enums::external_memory_handle_type handle_type{};
@@ -263,7 +263,7 @@ using ::vkfu::operator|;
 
 struct export_memory_win32_handle
 {
-	using vulkan_tag_type = obj::option::khr::export_memory_win32_handle;
+	using vulkan_tag_type = tag::option::khr::export_memory_win32_handle;
 
 	SECURITY_ATTRIBUTES const* attributes = nullptr;
 	DWORD dw_access{};
@@ -283,7 +283,7 @@ struct export_memory_win32_handle
 
 struct import_memory_win32_handle
 {
-	using vulkan_tag_type = obj::option::khr::import_memory_win32_handle;
+	using vulkan_tag_type = tag::option::khr::import_memory_win32_handle;
 
 	::vkfu::enums::external_memory_handle_type handle_type{};
 	HANDLE handle{};
@@ -308,7 +308,7 @@ namespace vkfu
 {
 namespace khr
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::memory_get_win32_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::memory_get_win32_handle> Expression1>
 [[nodiscard]] auto get_memory_win32_handle(VkDevice device, Expression1&& get_win32_handle_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<HANDLE, ::VkResult>
 {
@@ -322,7 +322,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::memory_get_win32_handle> Expre
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::memory_get_win32_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::memory_get_win32_handle> Expression1>
 [[nodiscard]] auto get_memory_win32_handle(VkDevice device, Expression1&& get_win32_handle_info) -> HANDLE
 {
 	auto outcome = get_memory_win32_handle(device, ::std::forward<Expression1>(get_win32_handle_info), ::std::nothrow);

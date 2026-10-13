@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceFloatControlsProperties const& val
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property
 {
@@ -54,7 +54,7 @@ struct float_controls{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::property::float_controls>
+struct vulkan_object_trait<tag::property::float_controls>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::property::float_controls>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceFloatControlsProperties>
 {
-	using type = obj::property::float_controls;
+	using type = tag::property::float_controls;
 };
 
 template<>
-struct vulkan_object_native<obj::property::float_controls>
+struct vulkan_object_native<tag::property::float_controls>
 {
 	using type = VkPhysicalDeviceFloatControlsProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FLOAT_CONTROLS_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::float_controls>
+struct vulkan_object_extensions<tag::property::float_controls>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_shader_float_controls"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -83,5 +83,5 @@ struct vulkan_object_extensions<obj::property::float_controls>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::float_controls> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::float_controls> = true;
 }

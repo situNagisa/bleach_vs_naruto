@@ -93,7 +93,7 @@ enum class ray_tracing_lss_primitive_end_caps_mode : ::std::underlying_type_t<Vk
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -109,7 +109,7 @@ struct acceleration_structure_geometry_spheres_data{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::nv::acceleration_structure_geometry_linear_swept_spheres_data>
+struct vulkan_object_trait<tag::option::nv::acceleration_structure_geometry_linear_swept_spheres_data>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -117,7 +117,7 @@ struct vulkan_object_trait<obj::option::nv::acceleration_structure_geometry_line
 };
 
 template<>
-struct vulkan_object_trait<obj::option::nv::acceleration_structure_geometry_spheres_data>
+struct vulkan_object_trait<tag::option::nv::acceleration_structure_geometry_spheres_data>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -125,7 +125,7 @@ struct vulkan_object_trait<obj::option::nv::acceleration_structure_geometry_sphe
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::nv::ray_tracing_linear_swept_spheres>
+struct vulkan_object_trait<tag::feature::nv::ray_tracing_linear_swept_spheres>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -135,11 +135,11 @@ struct vulkan_object_trait<obj::feature::nv::ray_tracing_linear_swept_spheres>
 template<>
 struct expression_vulkan_tag<VkAccelerationStructureGeometryLinearSweptSpheresDataNV>
 {
-	using type = obj::option::nv::acceleration_structure_geometry_linear_swept_spheres_data;
+	using type = tag::option::nv::acceleration_structure_geometry_linear_swept_spheres_data;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::acceleration_structure_geometry_linear_swept_spheres_data>
+struct vulkan_object_native<tag::option::nv::acceleration_structure_geometry_linear_swept_spheres_data>
 {
 	using type = VkAccelerationStructureGeometryLinearSweptSpheresDataNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_LINEAR_SWEPT_SPHERES_DATA_NV;
@@ -148,11 +148,11 @@ struct vulkan_object_native<obj::option::nv::acceleration_structure_geometry_lin
 template<>
 struct expression_vulkan_tag<VkAccelerationStructureGeometrySpheresDataNV>
 {
-	using type = obj::option::nv::acceleration_structure_geometry_spheres_data;
+	using type = tag::option::nv::acceleration_structure_geometry_spheres_data;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::acceleration_structure_geometry_spheres_data>
+struct vulkan_object_native<tag::option::nv::acceleration_structure_geometry_spheres_data>
 {
 	using type = VkAccelerationStructureGeometrySpheresDataNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_SPHERES_DATA_NV;
@@ -161,18 +161,18 @@ struct vulkan_object_native<obj::option::nv::acceleration_structure_geometry_sph
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceRayTracingLinearSweptSpheresFeaturesNV>
 {
-	using type = obj::feature::nv::ray_tracing_linear_swept_spheres;
+	using type = tag::feature::nv::ray_tracing_linear_swept_spheres;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::ray_tracing_linear_swept_spheres>
+struct vulkan_object_native<tag::feature::nv::ray_tracing_linear_swept_spheres>
 {
 	using type = VkPhysicalDeviceRayTracingLinearSweptSpheresFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_LINEAR_SWEPT_SPHERES_FEATURES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::acceleration_structure_geometry_linear_swept_spheres_data>
+struct vulkan_object_extensions<tag::option::nv::acceleration_structure_geometry_linear_swept_spheres_data>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_ray_tracing_linear_swept_spheres"};
 	constexpr static ::std::uint32_t core = 0;
@@ -180,7 +180,7 @@ struct vulkan_object_extensions<obj::option::nv::acceleration_structure_geometry
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::acceleration_structure_geometry_spheres_data>
+struct vulkan_object_extensions<tag::option::nv::acceleration_structure_geometry_spheres_data>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_ray_tracing_linear_swept_spheres"};
 	constexpr static ::std::uint32_t core = 0;
@@ -188,7 +188,7 @@ struct vulkan_object_extensions<obj::option::nv::acceleration_structure_geometry
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::ray_tracing_linear_swept_spheres>
+struct vulkan_object_extensions<tag::feature::nv::ray_tracing_linear_swept_spheres>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_ray_tracing_linear_swept_spheres"};
 	constexpr static ::std::uint32_t core = 0;
@@ -196,13 +196,13 @@ struct vulkan_object_extensions<obj::feature::nv::ray_tracing_linear_swept_spher
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::acceleration_structure_geometry, obj::option::nv::acceleration_structure_geometry_linear_swept_spheres_data> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::acceleration_structure_geometry, tag::option::nv::acceleration_structure_geometry_linear_swept_spheres_data> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::acceleration_structure_geometry, obj::option::nv::acceleration_structure_geometry_spheres_data> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::acceleration_structure_geometry, tag::option::nv::acceleration_structure_geometry_spheres_data> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::ray_tracing_linear_swept_spheres> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::ray_tracing_linear_swept_spheres> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::ray_tracing_linear_swept_spheres> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::ray_tracing_linear_swept_spheres> = true;
 }
 
 namespace vkfu::param
@@ -213,7 +213,7 @@ using ::vkfu::operator|;
 
 struct ray_tracing_linear_swept_spheres
 {
-	using vulkan_tag_type = obj::feature::nv::ray_tracing_linear_swept_spheres;
+	using vulkan_tag_type = tag::feature::nv::ray_tracing_linear_swept_spheres;
 
 	bool spheres = false;
 	bool linear_swept_spheres = false;
@@ -237,7 +237,7 @@ using ::vkfu::operator|;
 
 struct acceleration_structure_geometry_linear_swept_spheres_data
 {
-	using vulkan_tag_type = obj::option::nv::acceleration_structure_geometry_linear_swept_spheres_data;
+	using vulkan_tag_type = tag::option::nv::acceleration_structure_geometry_linear_swept_spheres_data;
 
 	::vkfu::enums::format vertex_format{};
 	VkDeviceOrHostAddressConstKHR vertex_data{};
@@ -273,7 +273,7 @@ struct acceleration_structure_geometry_linear_swept_spheres_data
 
 struct acceleration_structure_geometry_spheres_data
 {
-	using vulkan_tag_type = obj::option::nv::acceleration_structure_geometry_spheres_data;
+	using vulkan_tag_type = tag::option::nv::acceleration_structure_geometry_spheres_data;
 
 	::vkfu::enums::format vertex_format{};
 	VkDeviceOrHostAddressConstKHR vertex_data{};

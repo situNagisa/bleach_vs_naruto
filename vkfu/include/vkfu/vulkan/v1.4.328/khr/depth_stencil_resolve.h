@@ -28,15 +28,15 @@
 
 #include "../version_1_2/depth_stencil_resolve.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::khr
 {
-using subpass_description_depth_stencil_resolve = ::vkfu::obj::option::subpass_description_depth_stencil_resolve;
+using subpass_description_depth_stencil_resolve = ::vkfu::tag::option::subpass_description_depth_stencil_resolve;
 }
 namespace property::khr
 {
-using depth_stencil_resolve = ::vkfu::obj::property::depth_stencil_resolve;
+using depth_stencil_resolve = ::vkfu::tag::property::depth_stencil_resolve;
 }
 }
 
@@ -44,7 +44,7 @@ namespace vkfu::param
 {
 namespace option::khr
 {
-template<::vkfu::reference_expression_for<::vkfu::obj::attachment_reference2> depth_stencil_resolve_attachment_expression = ::vkfu::absent_expression>
+template<::vkfu::reference_expression_for<::vkfu::tag::attachment_reference2> depth_stencil_resolve_attachment_expression = ::vkfu::absent_expression>
 using subpass_description_depth_stencil_resolve = ::vkfu::param::option::subpass_description_depth_stencil_resolve<depth_stencil_resolve_attachment_expression>;
 }
 }

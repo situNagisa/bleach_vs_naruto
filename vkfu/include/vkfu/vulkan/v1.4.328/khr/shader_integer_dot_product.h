@@ -28,15 +28,15 @@
 
 #include "../version_1_3/shader_integer_dot_product.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using shader_integer_dot_product = ::vkfu::obj::feature::shader_integer_dot_product;
+using shader_integer_dot_product = ::vkfu::tag::feature::shader_integer_dot_product;
 }
 namespace property::khr
 {
-using shader_integer_dot_product = ::vkfu::obj::property::shader_integer_dot_product;
+using shader_integer_dot_product = ::vkfu::tag::property::shader_integer_dot_product;
 }
 }
 

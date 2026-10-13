@@ -118,7 +118,7 @@ enum class shading_rate_palette_entry : ::std::underlying_type_t<VkShadingRatePa
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -138,7 +138,7 @@ struct viewport_shading_rate_image{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::shading_rate_image>
+struct vulkan_object_trait<tag::feature::nv::shading_rate_image>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -146,7 +146,7 @@ struct vulkan_object_trait<obj::feature::nv::shading_rate_image>
 };
 
 template<>
-struct vulkan_object_trait<obj::state::nv::viewport_coarse_sample_order>
+struct vulkan_object_trait<tag::state::nv::viewport_coarse_sample_order>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -154,7 +154,7 @@ struct vulkan_object_trait<obj::state::nv::viewport_coarse_sample_order>
 };
 
 template<>
-struct vulkan_object_trait<obj::state::nv::viewport_shading_rate_image>
+struct vulkan_object_trait<tag::state::nv::viewport_shading_rate_image>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -162,7 +162,7 @@ struct vulkan_object_trait<obj::state::nv::viewport_shading_rate_image>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::nv::shading_rate_image>
+struct vulkan_object_trait<tag::property::nv::shading_rate_image>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -172,11 +172,11 @@ struct vulkan_object_trait<obj::property::nv::shading_rate_image>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShadingRateImageFeaturesNV>
 {
-	using type = obj::feature::nv::shading_rate_image;
+	using type = tag::feature::nv::shading_rate_image;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::shading_rate_image>
+struct vulkan_object_native<tag::feature::nv::shading_rate_image>
 {
 	using type = VkPhysicalDeviceShadingRateImageFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADING_RATE_IMAGE_FEATURES_NV;
@@ -185,11 +185,11 @@ struct vulkan_object_native<obj::feature::nv::shading_rate_image>
 template<>
 struct expression_vulkan_tag<VkPipelineViewportCoarseSampleOrderStateCreateInfoNV>
 {
-	using type = obj::state::nv::viewport_coarse_sample_order;
+	using type = tag::state::nv::viewport_coarse_sample_order;
 };
 
 template<>
-struct vulkan_object_native<obj::state::nv::viewport_coarse_sample_order>
+struct vulkan_object_native<tag::state::nv::viewport_coarse_sample_order>
 {
 	using type = VkPipelineViewportCoarseSampleOrderStateCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_COARSE_SAMPLE_ORDER_STATE_CREATE_INFO_NV;
@@ -198,11 +198,11 @@ struct vulkan_object_native<obj::state::nv::viewport_coarse_sample_order>
 template<>
 struct expression_vulkan_tag<VkPipelineViewportShadingRateImageStateCreateInfoNV>
 {
-	using type = obj::state::nv::viewport_shading_rate_image;
+	using type = tag::state::nv::viewport_shading_rate_image;
 };
 
 template<>
-struct vulkan_object_native<obj::state::nv::viewport_shading_rate_image>
+struct vulkan_object_native<tag::state::nv::viewport_shading_rate_image>
 {
 	using type = VkPipelineViewportShadingRateImageStateCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_SHADING_RATE_IMAGE_STATE_CREATE_INFO_NV;
@@ -211,18 +211,18 @@ struct vulkan_object_native<obj::state::nv::viewport_shading_rate_image>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShadingRateImagePropertiesNV>
 {
-	using type = obj::property::nv::shading_rate_image;
+	using type = tag::property::nv::shading_rate_image;
 };
 
 template<>
-struct vulkan_object_native<obj::property::nv::shading_rate_image>
+struct vulkan_object_native<tag::property::nv::shading_rate_image>
 {
 	using type = VkPhysicalDeviceShadingRateImagePropertiesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADING_RATE_IMAGE_PROPERTIES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::shading_rate_image>
+struct vulkan_object_extensions<tag::feature::nv::shading_rate_image>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_shading_rate_image"};
 	constexpr static ::std::uint32_t core = 0;
@@ -230,7 +230,7 @@ struct vulkan_object_extensions<obj::feature::nv::shading_rate_image>
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::nv::viewport_coarse_sample_order>
+struct vulkan_object_extensions<tag::state::nv::viewport_coarse_sample_order>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_shading_rate_image"};
 	constexpr static ::std::uint32_t core = 0;
@@ -238,7 +238,7 @@ struct vulkan_object_extensions<obj::state::nv::viewport_coarse_sample_order>
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::nv::viewport_shading_rate_image>
+struct vulkan_object_extensions<tag::state::nv::viewport_shading_rate_image>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_shading_rate_image"};
 	constexpr static ::std::uint32_t core = 0;
@@ -246,7 +246,7 @@ struct vulkan_object_extensions<obj::state::nv::viewport_shading_rate_image>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::nv::shading_rate_image>
+struct vulkan_object_extensions<tag::property::nv::shading_rate_image>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_shading_rate_image"};
 	constexpr static ::std::uint32_t core = 0;
@@ -254,15 +254,15 @@ struct vulkan_object_extensions<obj::property::nv::shading_rate_image>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::shading_rate_image> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::shading_rate_image> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::shading_rate_image> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::shading_rate_image> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::nv::shading_rate_image> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::nv::shading_rate_image> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::viewport, obj::state::nv::viewport_coarse_sample_order> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::viewport, tag::state::nv::viewport_coarse_sample_order> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::viewport, obj::state::nv::viewport_shading_rate_image> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::viewport, tag::state::nv::viewport_shading_rate_image> = true;
 }
 
 namespace vkfu::param
@@ -273,7 +273,7 @@ using ::vkfu::operator|;
 
 struct shading_rate_image
 {
-	using vulkan_tag_type = obj::feature::nv::shading_rate_image;
+	using vulkan_tag_type = tag::feature::nv::shading_rate_image;
 
 	bool enable = false;
 	bool shading_rate_coarse_sample_order = false;
@@ -297,7 +297,7 @@ using ::vkfu::operator|;
 
 struct viewport_coarse_sample_order
 {
-	using vulkan_tag_type = obj::state::nv::viewport_coarse_sample_order;
+	using vulkan_tag_type = tag::state::nv::viewport_coarse_sample_order;
 
 	::vkfu::enums::coarse_sample_order_type sample_order_type{};
 	::std::span<VkCoarseSampleOrderCustomNV const> custom_sample_orders{};
@@ -316,7 +316,7 @@ struct viewport_coarse_sample_order
 
 struct viewport_shading_rate_image
 {
-	using vulkan_tag_type = obj::state::nv::viewport_shading_rate_image;
+	using vulkan_tag_type = tag::state::nv::viewport_shading_rate_image;
 
 	bool shading_rate_image_enable = false;
 	::std::span<VkShadingRatePaletteNV const> shading_rate_palettes{};
@@ -390,9 +390,9 @@ namespace vkfu
 {
 namespace nv
 {
-inline void cmd_set_coarse_sample_order(VkCommandBuffer command_buffer, VkCoarseSampleOrderTypeNV sample_order_type, ::std::span<VkCoarseSampleOrderCustomNV const> custom_sample_orders)
+inline void cmd_set_coarse_sample_order(VkCommandBuffer command_buffer, ::vkfu::enums::coarse_sample_order_type sample_order_type, ::std::span<VkCoarseSampleOrderCustomNV const> custom_sample_orders)
 {
-	::vkCmdSetCoarseSampleOrderNV(command_buffer, sample_order_type, static_cast<::std::uint32_t>(custom_sample_orders.size()), custom_sample_orders.data());
+	::vkCmdSetCoarseSampleOrderNV(command_buffer, static_cast<VkCoarseSampleOrderTypeNV>(sample_order_type), static_cast<::std::uint32_t>(custom_sample_orders.size()), custom_sample_orders.data());
 }
 
 inline void cmd_set_viewport_shading_rate_palette(VkCommandBuffer command_buffer, ::std::uint32_t first_viewport, ::std::span<VkShadingRatePaletteNV const> shading_rate_palettes)

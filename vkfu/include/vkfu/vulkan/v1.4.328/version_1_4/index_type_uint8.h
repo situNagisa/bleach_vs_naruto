@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceIndexTypeUint8Features const& valu
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -55,7 +55,7 @@ struct index_type_uint8{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::index_type_uint8>
+struct vulkan_object_trait<tag::feature::index_type_uint8>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::index_type_uint8>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceIndexTypeUint8Features>
 {
-	using type = obj::feature::index_type_uint8;
+	using type = tag::feature::index_type_uint8;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::index_type_uint8>
+struct vulkan_object_native<tag::feature::index_type_uint8>
 {
 	using type = VkPhysicalDeviceIndexTypeUint8Features;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INDEX_TYPE_UINT8_FEATURES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::index_type_uint8>
+struct vulkan_object_extensions<tag::feature::index_type_uint8>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_index_type_uint8", "VK_KHR_index_type_uint8"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::index_type_uint8>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::index_type_uint8> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::index_type_uint8> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::index_type_uint8> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::index_type_uint8> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct index_type_uint8
 {
-	using vulkan_tag_type = obj::feature::index_type_uint8;
+	using vulkan_tag_type = tag::feature::index_type_uint8;
 
 	bool enable = false;
 

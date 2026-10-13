@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDevicePrimitiveTopologyListRestartFeatur
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct primitive_topology_list_restart{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::primitive_topology_list_restart>
+struct vulkan_object_trait<tag::feature::ext::primitive_topology_list_restart>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::primitive_topology_list_restart>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT>
 {
-	using type = obj::feature::ext::primitive_topology_list_restart;
+	using type = tag::feature::ext::primitive_topology_list_restart;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::primitive_topology_list_restart>
+struct vulkan_object_native<tag::feature::ext::primitive_topology_list_restart>
 {
 	using type = VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRIMITIVE_TOPOLOGY_LIST_RESTART_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::primitive_topology_list_restart>
+struct vulkan_object_extensions<tag::feature::ext::primitive_topology_list_restart>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_primitive_topology_list_restart"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::primitive_topology_list_resta
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::primitive_topology_list_restart> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::primitive_topology_list_restart> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::primitive_topology_list_restart> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::primitive_topology_list_restart> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct primitive_topology_list_restart
 {
-	using vulkan_tag_type = obj::feature::ext::primitive_topology_list_restart;
+	using vulkan_tag_type = tag::feature::ext::primitive_topology_list_restart;
 
 	bool enable = false;
 	bool primitive_topology_patch_list_restart = false;

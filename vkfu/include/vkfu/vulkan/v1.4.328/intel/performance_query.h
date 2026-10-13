@@ -138,7 +138,7 @@ enum class query_pool_sampling_mode : ::std::underlying_type_t<VkQueryPoolSampli
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace intel
 {
@@ -157,7 +157,7 @@ struct query_pool_performance{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::intel::initialize_performance_api>
+struct vulkan_object_trait<tag::intel::initialize_performance_api>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -165,7 +165,7 @@ struct vulkan_object_trait<obj::intel::initialize_performance_api>
 };
 
 template<>
-struct vulkan_object_trait<obj::intel::performance_configuration_acquire>
+struct vulkan_object_trait<tag::intel::performance_configuration_acquire>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -173,7 +173,7 @@ struct vulkan_object_trait<obj::intel::performance_configuration_acquire>
 };
 
 template<>
-struct vulkan_object_trait<obj::intel::performance_marker>
+struct vulkan_object_trait<tag::intel::performance_marker>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -181,7 +181,7 @@ struct vulkan_object_trait<obj::intel::performance_marker>
 };
 
 template<>
-struct vulkan_object_trait<obj::intel::performance_override>
+struct vulkan_object_trait<tag::intel::performance_override>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -189,7 +189,7 @@ struct vulkan_object_trait<obj::intel::performance_override>
 };
 
 template<>
-struct vulkan_object_trait<obj::intel::performance_stream_marker>
+struct vulkan_object_trait<tag::intel::performance_stream_marker>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -197,7 +197,7 @@ struct vulkan_object_trait<obj::intel::performance_stream_marker>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::intel::query_pool_performance>
+struct vulkan_object_trait<tag::option::intel::query_pool_performance>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -207,11 +207,11 @@ struct vulkan_object_trait<obj::option::intel::query_pool_performance>
 template<>
 struct expression_vulkan_tag<VkInitializePerformanceApiInfoINTEL>
 {
-	using type = obj::intel::initialize_performance_api;
+	using type = tag::intel::initialize_performance_api;
 };
 
 template<>
-struct vulkan_object_native<obj::intel::initialize_performance_api>
+struct vulkan_object_native<tag::intel::initialize_performance_api>
 {
 	using type = VkInitializePerformanceApiInfoINTEL;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_INITIALIZE_PERFORMANCE_API_INFO_INTEL;
@@ -220,11 +220,11 @@ struct vulkan_object_native<obj::intel::initialize_performance_api>
 template<>
 struct expression_vulkan_tag<VkPerformanceConfigurationAcquireInfoINTEL>
 {
-	using type = obj::intel::performance_configuration_acquire;
+	using type = tag::intel::performance_configuration_acquire;
 };
 
 template<>
-struct vulkan_object_native<obj::intel::performance_configuration_acquire>
+struct vulkan_object_native<tag::intel::performance_configuration_acquire>
 {
 	using type = VkPerformanceConfigurationAcquireInfoINTEL;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PERFORMANCE_CONFIGURATION_ACQUIRE_INFO_INTEL;
@@ -233,11 +233,11 @@ struct vulkan_object_native<obj::intel::performance_configuration_acquire>
 template<>
 struct expression_vulkan_tag<VkPerformanceMarkerInfoINTEL>
 {
-	using type = obj::intel::performance_marker;
+	using type = tag::intel::performance_marker;
 };
 
 template<>
-struct vulkan_object_native<obj::intel::performance_marker>
+struct vulkan_object_native<tag::intel::performance_marker>
 {
 	using type = VkPerformanceMarkerInfoINTEL;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PERFORMANCE_MARKER_INFO_INTEL;
@@ -246,11 +246,11 @@ struct vulkan_object_native<obj::intel::performance_marker>
 template<>
 struct expression_vulkan_tag<VkPerformanceOverrideInfoINTEL>
 {
-	using type = obj::intel::performance_override;
+	using type = tag::intel::performance_override;
 };
 
 template<>
-struct vulkan_object_native<obj::intel::performance_override>
+struct vulkan_object_native<tag::intel::performance_override>
 {
 	using type = VkPerformanceOverrideInfoINTEL;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PERFORMANCE_OVERRIDE_INFO_INTEL;
@@ -259,11 +259,11 @@ struct vulkan_object_native<obj::intel::performance_override>
 template<>
 struct expression_vulkan_tag<VkPerformanceStreamMarkerInfoINTEL>
 {
-	using type = obj::intel::performance_stream_marker;
+	using type = tag::intel::performance_stream_marker;
 };
 
 template<>
-struct vulkan_object_native<obj::intel::performance_stream_marker>
+struct vulkan_object_native<tag::intel::performance_stream_marker>
 {
 	using type = VkPerformanceStreamMarkerInfoINTEL;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PERFORMANCE_STREAM_MARKER_INFO_INTEL;
@@ -272,18 +272,18 @@ struct vulkan_object_native<obj::intel::performance_stream_marker>
 template<>
 struct expression_vulkan_tag<VkQueryPoolPerformanceQueryCreateInfoINTEL>
 {
-	using type = obj::option::intel::query_pool_performance;
+	using type = tag::option::intel::query_pool_performance;
 };
 
 template<>
-struct vulkan_object_native<obj::option::intel::query_pool_performance>
+struct vulkan_object_native<tag::option::intel::query_pool_performance>
 {
 	using type = VkQueryPoolPerformanceQueryCreateInfoINTEL;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_QUERY_POOL_PERFORMANCE_QUERY_CREATE_INFO_INTEL;
 };
 
 template<>
-struct vulkan_object_extensions<obj::intel::initialize_performance_api>
+struct vulkan_object_extensions<tag::intel::initialize_performance_api>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_INTEL_performance_query"};
 	constexpr static ::std::uint32_t core = 0;
@@ -291,7 +291,7 @@ struct vulkan_object_extensions<obj::intel::initialize_performance_api>
 };
 
 template<>
-struct vulkan_object_extensions<obj::intel::performance_configuration_acquire>
+struct vulkan_object_extensions<tag::intel::performance_configuration_acquire>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_INTEL_performance_query"};
 	constexpr static ::std::uint32_t core = 0;
@@ -299,7 +299,7 @@ struct vulkan_object_extensions<obj::intel::performance_configuration_acquire>
 };
 
 template<>
-struct vulkan_object_extensions<obj::intel::performance_marker>
+struct vulkan_object_extensions<tag::intel::performance_marker>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_INTEL_performance_query"};
 	constexpr static ::std::uint32_t core = 0;
@@ -307,7 +307,7 @@ struct vulkan_object_extensions<obj::intel::performance_marker>
 };
 
 template<>
-struct vulkan_object_extensions<obj::intel::performance_override>
+struct vulkan_object_extensions<tag::intel::performance_override>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_INTEL_performance_query"};
 	constexpr static ::std::uint32_t core = 0;
@@ -315,7 +315,7 @@ struct vulkan_object_extensions<obj::intel::performance_override>
 };
 
 template<>
-struct vulkan_object_extensions<obj::intel::performance_stream_marker>
+struct vulkan_object_extensions<tag::intel::performance_stream_marker>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_INTEL_performance_query"};
 	constexpr static ::std::uint32_t core = 0;
@@ -323,7 +323,7 @@ struct vulkan_object_extensions<obj::intel::performance_stream_marker>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::intel::query_pool_performance>
+struct vulkan_object_extensions<tag::option::intel::query_pool_performance>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_INTEL_performance_query"};
 	constexpr static ::std::uint32_t core = 0;
@@ -331,14 +331,14 @@ struct vulkan_object_extensions<obj::option::intel::query_pool_performance>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::query_pool, obj::option::intel::query_pool_performance> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::query_pool, tag::option::intel::query_pool_performance> = true;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::intel::intel
 {
-using query_pool_performance = ::vkfu::obj::option::intel::query_pool_performance;
+using query_pool_performance = ::vkfu::tag::option::intel::query_pool_performance;
 }
 }
 
@@ -350,7 +350,7 @@ using ::vkfu::operator|;
 
 struct initialize_performance_api
 {
-	using vulkan_tag_type = obj::intel::initialize_performance_api;
+	using vulkan_tag_type = tag::intel::initialize_performance_api;
 
 	void* user_data = nullptr;
 
@@ -366,7 +366,7 @@ struct initialize_performance_api
 
 struct performance_configuration_acquire
 {
-	using vulkan_tag_type = obj::intel::performance_configuration_acquire;
+	using vulkan_tag_type = tag::intel::performance_configuration_acquire;
 
 	::vkfu::enums::performance_configuration_type type{};
 
@@ -382,7 +382,7 @@ struct performance_configuration_acquire
 
 struct performance_marker
 {
-	using vulkan_tag_type = obj::intel::performance_marker;
+	using vulkan_tag_type = tag::intel::performance_marker;
 
 	::std::uint64_t marker{};
 
@@ -398,7 +398,7 @@ struct performance_marker
 
 struct performance_override
 {
-	using vulkan_tag_type = obj::intel::performance_override;
+	using vulkan_tag_type = tag::intel::performance_override;
 
 	::vkfu::enums::performance_override_type type{};
 	bool enable = false;
@@ -418,7 +418,7 @@ struct performance_override
 
 struct performance_stream_marker
 {
-	using vulkan_tag_type = obj::intel::performance_stream_marker;
+	using vulkan_tag_type = tag::intel::performance_stream_marker;
 
 	::std::uint32_t marker{};
 
@@ -440,7 +440,7 @@ using ::vkfu::operator|;
 
 struct query_pool_performance
 {
-	using vulkan_tag_type = obj::option::intel::query_pool_performance;
+	using vulkan_tag_type = tag::option::intel::query_pool_performance;
 
 	::vkfu::enums::query_pool_sampling_mode performance_counters_sampling{};
 
@@ -466,7 +466,7 @@ namespace vkfu
 {
 namespace intel
 {
-template<::vkfu::expression_for<::vkfu::obj::intel::performance_configuration_acquire> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::intel::performance_configuration_acquire> Expression1>
 [[nodiscard]] auto acquire_performance_configuration(VkDevice device, Expression1&& acquire_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkPerformanceConfigurationINTEL, ::VkResult>
 {
@@ -480,7 +480,7 @@ template<::vkfu::expression_for<::vkfu::obj::intel::performance_configuration_ac
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::intel::performance_configuration_acquire> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::intel::performance_configuration_acquire> Expression1>
 [[nodiscard]] auto acquire_performance_configuration(VkDevice device, Expression1&& acquire_info) -> VkPerformanceConfigurationINTEL
 {
 	auto outcome = acquire_performance_configuration(device, ::std::forward<Expression1>(acquire_info), ::std::nothrow);
@@ -491,7 +491,7 @@ template<::vkfu::expression_for<::vkfu::obj::intel::performance_configuration_ac
 	return *outcome;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::intel::performance_marker> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::intel::performance_marker> Expression1>
 [[nodiscard]] auto cmd_set_performance_marker(VkCommandBuffer command_buffer, Expression1&& marker_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -504,7 +504,7 @@ template<::vkfu::expression_for<::vkfu::obj::intel::performance_marker> Expressi
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::intel::performance_marker> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::intel::performance_marker> Expression1>
 void cmd_set_performance_marker(VkCommandBuffer command_buffer, Expression1&& marker_info)
 {
 	auto outcome = cmd_set_performance_marker(command_buffer, ::std::forward<Expression1>(marker_info), ::std::nothrow);
@@ -514,7 +514,7 @@ void cmd_set_performance_marker(VkCommandBuffer command_buffer, Expression1&& ma
 	}
 }
 
-template<::vkfu::expression_for<::vkfu::obj::intel::performance_override> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::intel::performance_override> Expression1>
 [[nodiscard]] auto cmd_set_performance_override(VkCommandBuffer command_buffer, Expression1&& override_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -527,7 +527,7 @@ template<::vkfu::expression_for<::vkfu::obj::intel::performance_override> Expres
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::intel::performance_override> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::intel::performance_override> Expression1>
 void cmd_set_performance_override(VkCommandBuffer command_buffer, Expression1&& override_info)
 {
 	auto outcome = cmd_set_performance_override(command_buffer, ::std::forward<Expression1>(override_info), ::std::nothrow);
@@ -537,7 +537,7 @@ void cmd_set_performance_override(VkCommandBuffer command_buffer, Expression1&& 
 	}
 }
 
-template<::vkfu::expression_for<::vkfu::obj::intel::performance_stream_marker> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::intel::performance_stream_marker> Expression1>
 [[nodiscard]] auto cmd_set_performance_stream_marker(VkCommandBuffer command_buffer, Expression1&& marker_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -550,7 +550,7 @@ template<::vkfu::expression_for<::vkfu::obj::intel::performance_stream_marker> E
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::intel::performance_stream_marker> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::intel::performance_stream_marker> Expression1>
 void cmd_set_performance_stream_marker(VkCommandBuffer command_buffer, Expression1&& marker_info)
 {
 	auto outcome = cmd_set_performance_stream_marker(command_buffer, ::std::forward<Expression1>(marker_info), ::std::nothrow);
@@ -560,7 +560,7 @@ void cmd_set_performance_stream_marker(VkCommandBuffer command_buffer, Expressio
 	}
 }
 
-template<::vkfu::expression_for<::vkfu::obj::intel::initialize_performance_api> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::intel::initialize_performance_api> Expression1>
 [[nodiscard]] auto initialize_performance_api(VkDevice device, Expression1&& initialize_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -573,7 +573,7 @@ template<::vkfu::expression_for<::vkfu::obj::intel::initialize_performance_api> 
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::intel::initialize_performance_api> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::intel::initialize_performance_api> Expression1>
 void initialize_performance_api(VkDevice device, Expression1&& initialize_info)
 {
 	auto outcome = initialize_performance_api(device, ::std::forward<Expression1>(initialize_info), ::std::nothrow);

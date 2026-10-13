@@ -13,7 +13,7 @@ struct buffer_type
 	::vkkl::buffer handle{};
 	::vkkl::device_memory memory{};
 
-	buffer_type(::VkDevice device, ::VkPhysicalDevice physical_device, ::std::span<::std::byte const> data, ::vkfu::param::buffer::usage_type usage)
+	buffer_type(::VkDevice device, ::VkPhysicalDevice physical_device, ::std::span<::std::byte const> data, ::vkfu::flags::buffer_usage usage)
 		: handle(device, ::vkfu::create_buffer(device, ::vkfu::param::buffer{ .size = data.size(), .usage = usage }))
 		, memory([&]
 			{

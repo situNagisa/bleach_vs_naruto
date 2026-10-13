@@ -28,19 +28,19 @@
 
 #include "../version_1_3/private_data.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace ext
 {
-using private_data_slot = ::vkfu::obj::private_data_slot;
+using private_data_slot = ::vkfu::tag::private_data_slot;
 }
 namespace feature::ext
 {
-using private_data = ::vkfu::obj::feature::private_data;
+using private_data = ::vkfu::tag::feature::private_data;
 }
 namespace option::ext
 {
-using device_private_data = ::vkfu::obj::option::device_private_data;
+using device_private_data = ::vkfu::tag::option::device_private_data;
 }
 }
 

@@ -91,7 +91,7 @@ constexpr auto _vkfu_evaluate(VkShaderModuleIdentifierEXT const& value) noexcept
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -114,7 +114,7 @@ struct shader_stage_module_identifier{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::shader_module_identifier>
+struct vulkan_object_trait<tag::feature::ext::shader_module_identifier>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -122,7 +122,7 @@ struct vulkan_object_trait<obj::feature::ext::shader_module_identifier>
 };
 
 template<>
-struct vulkan_object_trait<obj::state::ext::shader_stage_module_identifier>
+struct vulkan_object_trait<tag::state::ext::shader_stage_module_identifier>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -130,7 +130,7 @@ struct vulkan_object_trait<obj::state::ext::shader_stage_module_identifier>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::ext::shader_module_identifier>
+struct vulkan_object_trait<tag::property::ext::shader_module_identifier>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -138,7 +138,7 @@ struct vulkan_object_trait<obj::property::ext::shader_module_identifier>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::shader_module_identifier>
+struct vulkan_object_trait<tag::result::ext::shader_module_identifier>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -148,11 +148,11 @@ struct vulkan_object_trait<obj::result::ext::shader_module_identifier>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderModuleIdentifierFeaturesEXT>
 {
-	using type = obj::feature::ext::shader_module_identifier;
+	using type = tag::feature::ext::shader_module_identifier;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::shader_module_identifier>
+struct vulkan_object_native<tag::feature::ext::shader_module_identifier>
 {
 	using type = VkPhysicalDeviceShaderModuleIdentifierFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_MODULE_IDENTIFIER_FEATURES_EXT;
@@ -161,11 +161,11 @@ struct vulkan_object_native<obj::feature::ext::shader_module_identifier>
 template<>
 struct expression_vulkan_tag<VkPipelineShaderStageModuleIdentifierCreateInfoEXT>
 {
-	using type = obj::state::ext::shader_stage_module_identifier;
+	using type = tag::state::ext::shader_stage_module_identifier;
 };
 
 template<>
-struct vulkan_object_native<obj::state::ext::shader_stage_module_identifier>
+struct vulkan_object_native<tag::state::ext::shader_stage_module_identifier>
 {
 	using type = VkPipelineShaderStageModuleIdentifierCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_MODULE_IDENTIFIER_CREATE_INFO_EXT;
@@ -174,11 +174,11 @@ struct vulkan_object_native<obj::state::ext::shader_stage_module_identifier>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderModuleIdentifierPropertiesEXT>
 {
-	using type = obj::property::ext::shader_module_identifier;
+	using type = tag::property::ext::shader_module_identifier;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::shader_module_identifier>
+struct vulkan_object_native<tag::property::ext::shader_module_identifier>
 {
 	using type = VkPhysicalDeviceShaderModuleIdentifierPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_MODULE_IDENTIFIER_PROPERTIES_EXT;
@@ -187,18 +187,18 @@ struct vulkan_object_native<obj::property::ext::shader_module_identifier>
 template<>
 struct expression_vulkan_tag<VkShaderModuleIdentifierEXT>
 {
-	using type = obj::result::ext::shader_module_identifier;
+	using type = tag::result::ext::shader_module_identifier;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::shader_module_identifier>
+struct vulkan_object_native<tag::result::ext::shader_module_identifier>
 {
 	using type = VkShaderModuleIdentifierEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SHADER_MODULE_IDENTIFIER_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::shader_module_identifier>
+struct vulkan_object_extensions<tag::feature::ext::shader_module_identifier>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_shader_module_identifier"};
 	constexpr static ::std::uint32_t core = 0;
@@ -206,7 +206,7 @@ struct vulkan_object_extensions<obj::feature::ext::shader_module_identifier>
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::ext::shader_stage_module_identifier>
+struct vulkan_object_extensions<tag::state::ext::shader_stage_module_identifier>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_shader_module_identifier"};
 	constexpr static ::std::uint32_t core = 0;
@@ -214,7 +214,7 @@ struct vulkan_object_extensions<obj::state::ext::shader_stage_module_identifier>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::shader_module_identifier>
+struct vulkan_object_extensions<tag::property::ext::shader_module_identifier>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_shader_module_identifier"};
 	constexpr static ::std::uint32_t core = 0;
@@ -222,7 +222,7 @@ struct vulkan_object_extensions<obj::property::ext::shader_module_identifier>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::shader_module_identifier>
+struct vulkan_object_extensions<tag::result::ext::shader_module_identifier>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_shader_module_identifier"};
 	constexpr static ::std::uint32_t core = 0;
@@ -230,13 +230,13 @@ struct vulkan_object_extensions<obj::result::ext::shader_module_identifier>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::shader_module_identifier> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::shader_module_identifier> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::shader_module_identifier> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::shader_module_identifier> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::shader_module_identifier> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::shader_module_identifier> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::shader_stage, obj::state::ext::shader_stage_module_identifier> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::shader_stage, tag::state::ext::shader_stage_module_identifier> = true;
 }
 
 namespace vkfu::param
@@ -247,7 +247,7 @@ using ::vkfu::operator|;
 
 struct shader_module_identifier
 {
-	using vulkan_tag_type = obj::feature::ext::shader_module_identifier;
+	using vulkan_tag_type = tag::feature::ext::shader_module_identifier;
 
 	bool enable = false;
 
@@ -269,7 +269,7 @@ using ::vkfu::operator|;
 
 struct shader_stage_module_identifier
 {
-	using vulkan_tag_type = obj::state::ext::shader_stage_module_identifier;
+	using vulkan_tag_type = tag::state::ext::shader_stage_module_identifier;
 
 	::std::span<::std::uint8_t const> identifier{};
 
@@ -291,7 +291,7 @@ namespace vkfu
 {
 namespace ext
 {
-template<::vkfu::expression_for<::vkfu::obj::shader_module> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::shader_module> Expression1>
 [[nodiscard]] auto get_shader_module_create_info_identifier(VkDevice device, Expression1&& create_info) -> VkShaderModuleIdentifierEXT
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(create_info));

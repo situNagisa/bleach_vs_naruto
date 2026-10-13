@@ -140,7 +140,7 @@ constexpr auto _vkfu_evaluate(VkAndroidHardwareBufferUsageANDROID const& value) 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace android
 {
@@ -163,7 +163,7 @@ struct android_hardware_buffer_usage{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::android::external_format>
+struct vulkan_object_trait<tag::option::android::external_format>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -171,7 +171,7 @@ struct vulkan_object_trait<obj::option::android::external_format>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::android::import_android_hardware_buffer>
+struct vulkan_object_trait<tag::option::android::import_android_hardware_buffer>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -179,7 +179,7 @@ struct vulkan_object_trait<obj::option::android::import_android_hardware_buffer>
 };
 
 template<>
-struct vulkan_object_trait<obj::android::memory_get_android_hardware_buffer>
+struct vulkan_object_trait<tag::android::memory_get_android_hardware_buffer>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -187,7 +187,7 @@ struct vulkan_object_trait<obj::android::memory_get_android_hardware_buffer>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::android::android_hardware_buffer_format_properties2>
+struct vulkan_object_trait<tag::result::android::android_hardware_buffer_format_properties2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -195,7 +195,7 @@ struct vulkan_object_trait<obj::result::android::android_hardware_buffer_format_
 };
 
 template<>
-struct vulkan_object_trait<obj::result::android::android_hardware_buffer_format_properties>
+struct vulkan_object_trait<tag::result::android::android_hardware_buffer_format_properties>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -203,7 +203,7 @@ struct vulkan_object_trait<obj::result::android::android_hardware_buffer_format_
 };
 
 template<>
-struct vulkan_object_trait<obj::result::android::android_hardware_buffer_properties>
+struct vulkan_object_trait<tag::result::android::android_hardware_buffer_properties>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -211,7 +211,7 @@ struct vulkan_object_trait<obj::result::android::android_hardware_buffer_propert
 };
 
 template<>
-struct vulkan_object_trait<obj::result::android::android_hardware_buffer_usage>
+struct vulkan_object_trait<tag::result::android::android_hardware_buffer_usage>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -221,11 +221,11 @@ struct vulkan_object_trait<obj::result::android::android_hardware_buffer_usage>
 template<>
 struct expression_vulkan_tag<VkExternalFormatANDROID>
 {
-	using type = obj::option::android::external_format;
+	using type = tag::option::android::external_format;
 };
 
 template<>
-struct vulkan_object_native<obj::option::android::external_format>
+struct vulkan_object_native<tag::option::android::external_format>
 {
 	using type = VkExternalFormatANDROID;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXTERNAL_FORMAT_ANDROID;
@@ -234,11 +234,11 @@ struct vulkan_object_native<obj::option::android::external_format>
 template<>
 struct expression_vulkan_tag<VkImportAndroidHardwareBufferInfoANDROID>
 {
-	using type = obj::option::android::import_android_hardware_buffer;
+	using type = tag::option::android::import_android_hardware_buffer;
 };
 
 template<>
-struct vulkan_object_native<obj::option::android::import_android_hardware_buffer>
+struct vulkan_object_native<tag::option::android::import_android_hardware_buffer>
 {
 	using type = VkImportAndroidHardwareBufferInfoANDROID;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMPORT_ANDROID_HARDWARE_BUFFER_INFO_ANDROID;
@@ -247,11 +247,11 @@ struct vulkan_object_native<obj::option::android::import_android_hardware_buffer
 template<>
 struct expression_vulkan_tag<VkMemoryGetAndroidHardwareBufferInfoANDROID>
 {
-	using type = obj::android::memory_get_android_hardware_buffer;
+	using type = tag::android::memory_get_android_hardware_buffer;
 };
 
 template<>
-struct vulkan_object_native<obj::android::memory_get_android_hardware_buffer>
+struct vulkan_object_native<tag::android::memory_get_android_hardware_buffer>
 {
 	using type = VkMemoryGetAndroidHardwareBufferInfoANDROID;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MEMORY_GET_ANDROID_HARDWARE_BUFFER_INFO_ANDROID;
@@ -260,11 +260,11 @@ struct vulkan_object_native<obj::android::memory_get_android_hardware_buffer>
 template<>
 struct expression_vulkan_tag<VkAndroidHardwareBufferFormatProperties2ANDROID>
 {
-	using type = obj::result::android::android_hardware_buffer_format_properties2;
+	using type = tag::result::android::android_hardware_buffer_format_properties2;
 };
 
 template<>
-struct vulkan_object_native<obj::result::android::android_hardware_buffer_format_properties2>
+struct vulkan_object_native<tag::result::android::android_hardware_buffer_format_properties2>
 {
 	using type = VkAndroidHardwareBufferFormatProperties2ANDROID;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_FORMAT_PROPERTIES_2_ANDROID;
@@ -273,11 +273,11 @@ struct vulkan_object_native<obj::result::android::android_hardware_buffer_format
 template<>
 struct expression_vulkan_tag<VkAndroidHardwareBufferFormatPropertiesANDROID>
 {
-	using type = obj::result::android::android_hardware_buffer_format_properties;
+	using type = tag::result::android::android_hardware_buffer_format_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::android::android_hardware_buffer_format_properties>
+struct vulkan_object_native<tag::result::android::android_hardware_buffer_format_properties>
 {
 	using type = VkAndroidHardwareBufferFormatPropertiesANDROID;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_FORMAT_PROPERTIES_ANDROID;
@@ -286,11 +286,11 @@ struct vulkan_object_native<obj::result::android::android_hardware_buffer_format
 template<>
 struct expression_vulkan_tag<VkAndroidHardwareBufferPropertiesANDROID>
 {
-	using type = obj::result::android::android_hardware_buffer_properties;
+	using type = tag::result::android::android_hardware_buffer_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::android::android_hardware_buffer_properties>
+struct vulkan_object_native<tag::result::android::android_hardware_buffer_properties>
 {
 	using type = VkAndroidHardwareBufferPropertiesANDROID;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_PROPERTIES_ANDROID;
@@ -299,18 +299,18 @@ struct vulkan_object_native<obj::result::android::android_hardware_buffer_proper
 template<>
 struct expression_vulkan_tag<VkAndroidHardwareBufferUsageANDROID>
 {
-	using type = obj::result::android::android_hardware_buffer_usage;
+	using type = tag::result::android::android_hardware_buffer_usage;
 };
 
 template<>
-struct vulkan_object_native<obj::result::android::android_hardware_buffer_usage>
+struct vulkan_object_native<tag::result::android::android_hardware_buffer_usage>
 {
 	using type = VkAndroidHardwareBufferUsageANDROID;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_USAGE_ANDROID;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::android::external_format>
+struct vulkan_object_extensions<tag::option::android::external_format>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ANDROID_external_memory_android_hardware_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -318,7 +318,7 @@ struct vulkan_object_extensions<obj::option::android::external_format>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::android::import_android_hardware_buffer>
+struct vulkan_object_extensions<tag::option::android::import_android_hardware_buffer>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ANDROID_external_memory_android_hardware_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -326,7 +326,7 @@ struct vulkan_object_extensions<obj::option::android::import_android_hardware_bu
 };
 
 template<>
-struct vulkan_object_extensions<obj::android::memory_get_android_hardware_buffer>
+struct vulkan_object_extensions<tag::android::memory_get_android_hardware_buffer>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ANDROID_external_memory_android_hardware_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -334,7 +334,7 @@ struct vulkan_object_extensions<obj::android::memory_get_android_hardware_buffer
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::android::android_hardware_buffer_format_properties2>
+struct vulkan_object_extensions<tag::result::android::android_hardware_buffer_format_properties2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ANDROID_external_memory_android_hardware_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -342,7 +342,7 @@ struct vulkan_object_extensions<obj::result::android::android_hardware_buffer_fo
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::android::android_hardware_buffer_format_properties>
+struct vulkan_object_extensions<tag::result::android::android_hardware_buffer_format_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ANDROID_external_memory_android_hardware_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -350,7 +350,7 @@ struct vulkan_object_extensions<obj::result::android::android_hardware_buffer_fo
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::android::android_hardware_buffer_properties>
+struct vulkan_object_extensions<tag::result::android::android_hardware_buffer_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ANDROID_external_memory_android_hardware_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -358,7 +358,7 @@ struct vulkan_object_extensions<obj::result::android::android_hardware_buffer_pr
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::android::android_hardware_buffer_usage>
+struct vulkan_object_extensions<tag::result::android::android_hardware_buffer_usage>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ANDROID_external_memory_android_hardware_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -366,23 +366,23 @@ struct vulkan_object_extensions<obj::result::android::android_hardware_buffer_us
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::android::android_hardware_buffer_properties, obj::result::android::android_hardware_buffer_format_properties2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::android::android_hardware_buffer_properties, tag::result::android::android_hardware_buffer_format_properties2> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::android::android_hardware_buffer_properties, obj::result::android::android_hardware_buffer_format_properties> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::android::android_hardware_buffer_properties, tag::result::android::android_hardware_buffer_format_properties> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::attachment_description2, obj::option::android::external_format> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::attachment_description2, tag::option::android::external_format> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::command_buffer_inheritance, obj::option::android::external_format> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::command_buffer_inheritance, tag::option::android::external_format> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::graphics_pipeline, obj::option::android::external_format> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::graphics_pipeline, tag::option::android::external_format> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image, obj::option::android::external_format> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image, tag::option::android::external_format> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::image_format_properties2, obj::result::android::android_hardware_buffer_usage> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::image_format_properties2, tag::result::android::android_hardware_buffer_usage> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::memory, obj::option::android::import_android_hardware_buffer> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::memory, tag::option::android::import_android_hardware_buffer> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::sampler_ycbcr_conversion, obj::option::android::external_format> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::sampler_ycbcr_conversion, tag::option::android::external_format> = true;
 }
 
 namespace vkfu::param
@@ -393,7 +393,7 @@ using ::vkfu::operator|;
 
 struct memory_get_android_hardware_buffer
 {
-	using vulkan_tag_type = obj::android::memory_get_android_hardware_buffer;
+	using vulkan_tag_type = tag::android::memory_get_android_hardware_buffer;
 
 	VkDeviceMemory memory{};
 
@@ -415,7 +415,7 @@ using ::vkfu::operator|;
 
 struct external_format
 {
-	using vulkan_tag_type = obj::option::android::external_format;
+	using vulkan_tag_type = tag::option::android::external_format;
 
 	::std::uint64_t format{};
 
@@ -431,7 +431,7 @@ struct external_format
 
 struct import_android_hardware_buffer
 {
-	using vulkan_tag_type = obj::option::android::import_android_hardware_buffer;
+	using vulkan_tag_type = tag::option::android::import_android_hardware_buffer;
 
 	AHardwareBuffer* buffer = nullptr;
 
@@ -452,7 +452,7 @@ namespace vkfu
 {
 namespace android
 {
-template<::vkfu::expression_for<::vkfu::obj::android::memory_get_android_hardware_buffer> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::android::memory_get_android_hardware_buffer> Expression1>
 [[nodiscard]] auto get_memory_android_hardware_buffer(VkDevice device, Expression1&& info, ::std::nothrow_t) noexcept
 	-> ::std::expected<AHardwareBuffer*, ::VkResult>
 {
@@ -466,7 +466,7 @@ template<::vkfu::expression_for<::vkfu::obj::android::memory_get_android_hardwar
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::android::memory_get_android_hardware_buffer> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::android::memory_get_android_hardware_buffer> Expression1>
 [[nodiscard]] auto get_memory_android_hardware_buffer(VkDevice device, Expression1&& info) -> AHardwareBuffer*
 {
 	auto outcome = get_memory_android_hardware_buffer(device, ::std::forward<Expression1>(info), ::std::nothrow);
@@ -477,11 +477,11 @@ template<::vkfu::expression_for<::vkfu::obj::android::memory_get_android_hardwar
 	return *outcome;
 }
 
-template<::vkfu::query_extension_of<::vkfu::obj::result::android::android_hardware_buffer_properties>... Extras>
+template<::vkfu::query_extension_of<::vkfu::tag::result::android::android_hardware_buffer_properties>... Extras>
 [[nodiscard]] auto get_android_hardware_buffer_properties(VkDevice device, AHardwareBuffer const* buffer, ::std::nothrow_t)
-	-> ::std::expected<::vkfu::query_chain<::vkfu::obj::result::android::android_hardware_buffer_properties, Extras...>, ::VkResult>
+	-> ::std::expected<::vkfu::query_chain<::vkfu::tag::result::android::android_hardware_buffer_properties, Extras...>, ::VkResult>
 {
-	auto chain = ::vkfu::query_chain<::vkfu::obj::result::android::android_hardware_buffer_properties, Extras...>{};
+	auto chain = ::vkfu::query_chain<::vkfu::tag::result::android::android_hardware_buffer_properties, Extras...>{};
 	if (auto const outcome = ::vkGetAndroidHardwareBufferPropertiesANDROID(device, buffer, ::std::addressof(chain.head())); outcome != ::VK_SUCCESS)
 	{
 		return ::std::unexpected{outcome};
@@ -489,8 +489,8 @@ template<::vkfu::query_extension_of<::vkfu::obj::result::android::android_hardwa
 	return chain;
 }
 
-template<::vkfu::query_extension_of<::vkfu::obj::result::android::android_hardware_buffer_properties>... Extras>
-[[nodiscard]] auto get_android_hardware_buffer_properties(VkDevice device, AHardwareBuffer const* buffer) -> ::vkfu::query_chain<::vkfu::obj::result::android::android_hardware_buffer_properties, Extras...>
+template<::vkfu::query_extension_of<::vkfu::tag::result::android::android_hardware_buffer_properties>... Extras>
+[[nodiscard]] auto get_android_hardware_buffer_properties(VkDevice device, AHardwareBuffer const* buffer) -> ::vkfu::query_chain<::vkfu::tag::result::android::android_hardware_buffer_properties, Extras...>
 {
 	auto outcome = get_android_hardware_buffer_properties<Extras...>(device, buffer, ::std::nothrow);
 	if (!outcome)

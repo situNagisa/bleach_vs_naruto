@@ -28,11 +28,11 @@
 
 #include "../version_1_1/external_fence.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::khr
 {
-using export_fence = ::vkfu::obj::option::export_fence;
+using export_fence = ::vkfu::tag::option::export_fence;
 }
 }
 

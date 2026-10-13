@@ -28,11 +28,11 @@
 
 #include "../version_1_3/shader_demote_to_helper_invocation.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
-using shader_demote_to_helper_invocation = ::vkfu::obj::feature::shader_demote_to_helper_invocation;
+using shader_demote_to_helper_invocation = ::vkfu::tag::feature::shader_demote_to_helper_invocation;
 }
 }
 

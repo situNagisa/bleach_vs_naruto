@@ -47,7 +47,7 @@ void vkGetWidgetProperties(VkDevice, VkWidgetProperties*);
 #include "golden/vulkan/v1.1.42.h"
 
 namespace param = ::vkfu::param;
-namespace obj = ::vkfu::obj;
+namespace tag = ::vkfu::tag;
 
 int main()
 {
@@ -71,8 +71,8 @@ int main()
 	if (next == nullptr || next->sType != VK_STRUCTURE_TYPE_WIDGET_COLOUR_INFO_EXT) return 5;
 
 	// The query chain, and the extension list derived from the chain.
-	auto chain = ::vkfu::query_chain<obj::result::widget_properties, obj::result::ext::widget_driver_properties>{};
-	if (chain.head().pNext != static_cast<void const*>(&chain.get<obj::result::ext::widget_driver_properties>())) return 6;
+	auto chain = ::vkfu::query_chain<tag::result::widget_properties, tag::result::ext::widget_driver_properties>{};
+	if (chain.head().pNext != static_cast<void const*>(&chain.get<tag::result::ext::widget_driver_properties>())) return 6;
 	static_assert(::vkfu::required_extensions_v<decltype(param::widget{} | param::option::widget_limits{}), VK_API_VERSION_1_0>.size() == 1);
 	static_assert(::vkfu::required_extensions_v<decltype(param::widget{} | param::option::widget_limits{}), VK_API_VERSION_1_1>.empty());
 	return 0;

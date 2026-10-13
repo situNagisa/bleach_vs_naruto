@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceShaderCorePropertiesARM const& val
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property::arm
 {
@@ -54,7 +54,7 @@ struct shader_core{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::property::arm::shader_core>
+struct vulkan_object_trait<tag::property::arm::shader_core>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::property::arm::shader_core>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderCorePropertiesARM>
 {
-	using type = obj::property::arm::shader_core;
+	using type = tag::property::arm::shader_core;
 };
 
 template<>
-struct vulkan_object_native<obj::property::arm::shader_core>
+struct vulkan_object_native<tag::property::arm::shader_core>
 {
 	using type = VkPhysicalDeviceShaderCorePropertiesARM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CORE_PROPERTIES_ARM;
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::arm::shader_core>
+struct vulkan_object_extensions<tag::property::arm::shader_core>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ARM_shader_core_properties"};
 	constexpr static ::std::uint32_t core = 0;
@@ -83,5 +83,5 @@ struct vulkan_object_extensions<obj::property::arm::shader_core>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::arm::shader_core> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::arm::shader_core> = true;
 }

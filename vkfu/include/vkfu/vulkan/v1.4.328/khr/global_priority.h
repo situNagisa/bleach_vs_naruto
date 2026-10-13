@@ -28,19 +28,19 @@
 
 #include "../version_1_4/global_priority.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using global_priority_query = ::vkfu::obj::feature::global_priority_query;
+using global_priority_query = ::vkfu::tag::feature::global_priority_query;
 }
 namespace option::khr
 {
-using device_queue_global_priority = ::vkfu::obj::option::device_queue_global_priority;
+using device_queue_global_priority = ::vkfu::tag::option::device_queue_global_priority;
 }
 namespace result::khr
 {
-using queue_family_global_priority_properties = ::vkfu::obj::result::queue_family_global_priority_properties;
+using queue_family_global_priority_properties = ::vkfu::tag::result::queue_family_global_priority_properties;
 }
 }
 

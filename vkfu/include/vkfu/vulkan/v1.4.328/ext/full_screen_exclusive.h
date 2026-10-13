@@ -87,7 +87,7 @@ enum class full_screen_exclusive : ::std::underlying_type_t<VkFullScreenExclusiv
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::ext
 {
@@ -103,7 +103,7 @@ struct surface_capabilities_full_screen_exclusive{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::surface_full_screen_exclusive>
+struct vulkan_object_trait<tag::option::ext::surface_full_screen_exclusive>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -111,7 +111,7 @@ struct vulkan_object_trait<obj::option::ext::surface_full_screen_exclusive>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::ext::surface_full_screen_exclusive_win32>
+struct vulkan_object_trait<tag::option::ext::surface_full_screen_exclusive_win32>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -119,7 +119,7 @@ struct vulkan_object_trait<obj::option::ext::surface_full_screen_exclusive_win32
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::surface_capabilities_full_screen_exclusive>
+struct vulkan_object_trait<tag::result::ext::surface_capabilities_full_screen_exclusive>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -129,11 +129,11 @@ struct vulkan_object_trait<obj::result::ext::surface_capabilities_full_screen_ex
 template<>
 struct expression_vulkan_tag<VkSurfaceFullScreenExclusiveInfoEXT>
 {
-	using type = obj::option::ext::surface_full_screen_exclusive;
+	using type = tag::option::ext::surface_full_screen_exclusive;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::surface_full_screen_exclusive>
+struct vulkan_object_native<tag::option::ext::surface_full_screen_exclusive>
 {
 	using type = VkSurfaceFullScreenExclusiveInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_INFO_EXT;
@@ -142,11 +142,11 @@ struct vulkan_object_native<obj::option::ext::surface_full_screen_exclusive>
 template<>
 struct expression_vulkan_tag<VkSurfaceFullScreenExclusiveWin32InfoEXT>
 {
-	using type = obj::option::ext::surface_full_screen_exclusive_win32;
+	using type = tag::option::ext::surface_full_screen_exclusive_win32;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::surface_full_screen_exclusive_win32>
+struct vulkan_object_native<tag::option::ext::surface_full_screen_exclusive_win32>
 {
 	using type = VkSurfaceFullScreenExclusiveWin32InfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_WIN32_INFO_EXT;
@@ -155,18 +155,18 @@ struct vulkan_object_native<obj::option::ext::surface_full_screen_exclusive_win3
 template<>
 struct expression_vulkan_tag<VkSurfaceCapabilitiesFullScreenExclusiveEXT>
 {
-	using type = obj::result::ext::surface_capabilities_full_screen_exclusive;
+	using type = tag::result::ext::surface_capabilities_full_screen_exclusive;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::surface_capabilities_full_screen_exclusive>
+struct vulkan_object_native<tag::result::ext::surface_capabilities_full_screen_exclusive>
 {
 	using type = VkSurfaceCapabilitiesFullScreenExclusiveEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SURFACE_CAPABILITIES_FULL_SCREEN_EXCLUSIVE_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::surface_full_screen_exclusive>
+struct vulkan_object_extensions<tag::option::ext::surface_full_screen_exclusive>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_full_screen_exclusive"};
 	constexpr static ::std::uint32_t core = 0;
@@ -174,7 +174,7 @@ struct vulkan_object_extensions<obj::option::ext::surface_full_screen_exclusive>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::surface_full_screen_exclusive_win32>
+struct vulkan_object_extensions<tag::option::ext::surface_full_screen_exclusive_win32>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_full_screen_exclusive"};
 	constexpr static ::std::uint32_t core = 0;
@@ -182,7 +182,7 @@ struct vulkan_object_extensions<obj::option::ext::surface_full_screen_exclusive_
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::surface_capabilities_full_screen_exclusive>
+struct vulkan_object_extensions<tag::result::ext::surface_capabilities_full_screen_exclusive>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_full_screen_exclusive"};
 	constexpr static ::std::uint32_t core = 0;
@@ -190,15 +190,15 @@ struct vulkan_object_extensions<obj::result::ext::surface_capabilities_full_scre
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::physical_device_surface2, obj::option::ext::surface_full_screen_exclusive> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::physical_device_surface2, tag::option::ext::surface_full_screen_exclusive> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::physical_device_surface2, obj::option::ext::surface_full_screen_exclusive_win32> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::physical_device_surface2, tag::option::ext::surface_full_screen_exclusive_win32> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::surface_capabilities2, obj::result::ext::surface_capabilities_full_screen_exclusive> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::surface_capabilities2, tag::result::ext::surface_capabilities_full_screen_exclusive> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::swapchain, obj::option::ext::surface_full_screen_exclusive> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::swapchain, tag::option::ext::surface_full_screen_exclusive> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::swapchain, obj::option::ext::surface_full_screen_exclusive_win32> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::swapchain, tag::option::ext::surface_full_screen_exclusive_win32> = true;
 }
 
 namespace vkfu::param
@@ -209,7 +209,7 @@ using ::vkfu::operator|;
 
 struct surface_full_screen_exclusive
 {
-	using vulkan_tag_type = obj::option::ext::surface_full_screen_exclusive;
+	using vulkan_tag_type = tag::option::ext::surface_full_screen_exclusive;
 
 	::vkfu::enums::full_screen_exclusive full_screen_exclusive{};
 
@@ -225,7 +225,7 @@ struct surface_full_screen_exclusive
 
 struct surface_full_screen_exclusive_win32
 {
-	using vulkan_tag_type = obj::option::ext::surface_full_screen_exclusive_win32;
+	using vulkan_tag_type = tag::option::ext::surface_full_screen_exclusive_win32;
 
 	HMONITOR hmonitor{};
 
@@ -246,7 +246,7 @@ namespace vkfu
 {
 namespace ext
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::physical_device_surface2> Expression1>
 [[nodiscard]] auto count_physical_device_surface_present_modes2(VkPhysicalDevice physical_device, Expression1&& surface_info, ::std::nothrow_t)
 	-> ::std::expected<::std::uint32_t, ::VkResult>
 {
@@ -259,7 +259,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expr
 	return count;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::physical_device_surface2> Expression1>
 [[nodiscard]] auto count_physical_device_surface_present_modes2(VkPhysicalDevice physical_device, Expression1&& surface_info) -> ::std::uint32_t
 {
 	auto const outcome = count_physical_device_surface_present_modes2(physical_device, ::std::forward<Expression1>(surface_info), ::std::nothrow);
@@ -270,7 +270,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expr
 	return *outcome;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::physical_device_surface2> Expression1>
 [[nodiscard]] auto get_physical_device_surface_present_modes2(VkPhysicalDevice physical_device, Expression1&& surface_info, ::std::span<VkPresentModeKHR> out, ::std::nothrow_t)
 	-> ::std::expected<::std::span<VkPresentModeKHR>, ::VkResult>
 {
@@ -284,7 +284,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expr
 	return out.first(count);
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::physical_device_surface2> Expression1>
 [[nodiscard]] auto get_physical_device_surface_present_modes2(VkPhysicalDevice physical_device, Expression1&& surface_info, ::std::span<VkPresentModeKHR> out) -> ::std::span<VkPresentModeKHR>
 {
 	auto const outcome = get_physical_device_surface_present_modes2(physical_device, ::std::forward<Expression1>(surface_info), out, ::std::nothrow);
@@ -295,7 +295,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expr
 	return *outcome;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expression1, ::std::contiguous_iterator Out>
+template<::vkfu::expression_for<::vkfu::tag::khr::physical_device_surface2> Expression1, ::std::contiguous_iterator Out>
 	requires ::std::same_as<::std::iter_value_t<Out>, VkPresentModeKHR>
 [[nodiscard]] auto get_physical_device_surface_present_modes2(VkPhysicalDevice physical_device, Expression1&& surface_info, Out out) -> Out
 {

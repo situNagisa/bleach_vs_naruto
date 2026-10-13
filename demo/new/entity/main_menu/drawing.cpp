@@ -66,8 +66,8 @@ auto background::draw(
 	g.texture(p0, p1, p2, p3, { 0.0f, 0.0f }, { 1.0f, 1.0f });
 
 	::vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline.handle);
-	buffer_type result(device, physical_device, ::std::as_bytes(::std::span{ g.vertices }), ::vkfu::param::buffer::usage_type{ .vertex_buffer = 1 });
-	::vkfu::cmd_bind_descriptor_sets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.layout.handle, 0, ::std::array{ pipeline.descriptors[0].handle }, {});
+	buffer_type result(device, physical_device, ::std::as_bytes(::std::span{ g.vertices }), ::vkfu::flags::buffer_usage{ .vertex_buffer = 1 });
+	::vkfu::cmd_bind_descriptor_sets(command_buffer, ::vkfu::enums::pipeline_bind_point::graphics, pipeline.layout.handle, 0, ::std::array{ pipeline.descriptors[0].handle }, {});
 	::vkfu::cmd_bind_vertex_buffers(command_buffer, 0, ::std::array{ result.handle.handle }, ::std::array{ ::VkDeviceSize{} });
 	::vkCmdDraw(command_buffer, static_cast<::std::uint32_t>(g.vertices.size()), 1, 0, 0);
 	return result;
@@ -104,7 +104,7 @@ auto vector_graph_type::draw_rectangle(
 	g.rectangle(p0, p1, p2, p3, color);
 
 	::vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline.handle);
-	buffer_type result(device, physical_device, ::std::as_bytes(::std::span{ g.vertices }), ::vkfu::param::buffer::usage_type{ .vertex_buffer = 1 });
+	buffer_type result(device, physical_device, ::std::as_bytes(::std::span{ g.vertices }), ::vkfu::flags::buffer_usage{ .vertex_buffer = 1 });
 	::vkfu::cmd_bind_vertex_buffers(command_buffer, 0, ::std::array{ result.handle.handle }, ::std::array{ ::VkDeviceSize{} });
 	::vkCmdDraw(command_buffer, static_cast<::std::uint32_t>(g.vertices.size()), 1, 0, 0);
 	return result;
@@ -240,8 +240,8 @@ auto text_type::label(
 	}
 
 	::vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline.handle);
-	buffer_type result(device, physical_device, ::std::as_bytes(::std::span{ g.vertices }), ::vkfu::param::buffer::usage_type{ .vertex_buffer = 1 });
-	::vkfu::cmd_bind_descriptor_sets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.layout.handle, 0, ::std::array{ pipeline.descriptors[0].handle }, {});
+	buffer_type result(device, physical_device, ::std::as_bytes(::std::span{ g.vertices }), ::vkfu::flags::buffer_usage{ .vertex_buffer = 1 });
+	::vkfu::cmd_bind_descriptor_sets(command_buffer, ::vkfu::enums::pipeline_bind_point::graphics, pipeline.layout.handle, 0, ::std::array{ pipeline.descriptors[0].handle }, {});
 	::vkfu::cmd_bind_vertex_buffers(command_buffer, 0, ::std::array{ result.handle.handle }, ::std::array{ ::VkDeviceSize{} });
 	::vkCmdDraw(command_buffer, static_cast<::std::uint32_t>(g.vertices.size()), 1, 0, 0);
 	return result;

@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceMemoryDecompressionPropertiesNV co
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -74,7 +74,7 @@ struct memory_decompression{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::memory_decompression>
+struct vulkan_object_trait<tag::feature::nv::memory_decompression>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::feature::nv::memory_decompression>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::nv::memory_decompression>
+struct vulkan_object_trait<tag::property::nv::memory_decompression>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::property::nv::memory_decompression>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMemoryDecompressionFeaturesNV>
 {
-	using type = obj::feature::nv::memory_decompression;
+	using type = tag::feature::nv::memory_decompression;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::memory_decompression>
+struct vulkan_object_native<tag::feature::nv::memory_decompression>
 {
 	using type = VkPhysicalDeviceMemoryDecompressionFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_DECOMPRESSION_FEATURES_NV;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::feature::nv::memory_decompression>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMemoryDecompressionPropertiesNV>
 {
-	using type = obj::property::nv::memory_decompression;
+	using type = tag::property::nv::memory_decompression;
 };
 
 template<>
-struct vulkan_object_native<obj::property::nv::memory_decompression>
+struct vulkan_object_native<tag::property::nv::memory_decompression>
 {
 	using type = VkPhysicalDeviceMemoryDecompressionPropertiesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_DECOMPRESSION_PROPERTIES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::memory_decompression>
+struct vulkan_object_extensions<tag::feature::nv::memory_decompression>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_memory_decompression"};
 	constexpr static ::std::uint32_t core = 0;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::feature::nv::memory_decompression>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::nv::memory_decompression>
+struct vulkan_object_extensions<tag::property::nv::memory_decompression>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_memory_decompression"};
 	constexpr static ::std::uint32_t core = 0;
@@ -132,11 +132,11 @@ struct vulkan_object_extensions<obj::property::nv::memory_decompression>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::memory_decompression> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::memory_decompression> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::memory_decompression> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::memory_decompression> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::nv::memory_decompression> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::nv::memory_decompression> = true;
 }
 
 namespace vkfu::param
@@ -147,7 +147,7 @@ using ::vkfu::operator|;
 
 struct memory_decompression
 {
-	using vulkan_tag_type = obj::feature::nv::memory_decompression;
+	using vulkan_tag_type = tag::feature::nv::memory_decompression;
 
 	bool enable = false;
 

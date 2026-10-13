@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDevicePerStageDescriptorSetFeaturesNV co
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -55,7 +55,7 @@ struct per_stage_descriptor_set{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::per_stage_descriptor_set>
+struct vulkan_object_trait<tag::feature::nv::per_stage_descriptor_set>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::nv::per_stage_descriptor_set>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePerStageDescriptorSetFeaturesNV>
 {
-	using type = obj::feature::nv::per_stage_descriptor_set;
+	using type = tag::feature::nv::per_stage_descriptor_set;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::per_stage_descriptor_set>
+struct vulkan_object_native<tag::feature::nv::per_stage_descriptor_set>
 {
 	using type = VkPhysicalDevicePerStageDescriptorSetFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PER_STAGE_DESCRIPTOR_SET_FEATURES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::per_stage_descriptor_set>
+struct vulkan_object_extensions<tag::feature::nv::per_stage_descriptor_set>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_per_stage_descriptor_set"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::nv::per_stage_descriptor_set>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::per_stage_descriptor_set> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::per_stage_descriptor_set> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::per_stage_descriptor_set> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::per_stage_descriptor_set> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct per_stage_descriptor_set
 {
-	using vulkan_tag_type = obj::feature::nv::per_stage_descriptor_set;
+	using vulkan_tag_type = tag::feature::nv::per_stage_descriptor_set;
 
 	bool enable = false;
 	bool dynamic_pipeline_layout = false;

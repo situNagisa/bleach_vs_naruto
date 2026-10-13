@@ -75,7 +75,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceSubpassShadingPropertiesHUAWEI con
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::huawei
 {
@@ -94,7 +94,7 @@ struct subpass_shading{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::huawei::subpass_shading>
+struct vulkan_object_trait<tag::feature::huawei::subpass_shading>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -102,7 +102,7 @@ struct vulkan_object_trait<obj::feature::huawei::subpass_shading>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::huawei::subpass_shading_pipeline>
+struct vulkan_object_trait<tag::option::huawei::subpass_shading_pipeline>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -110,7 +110,7 @@ struct vulkan_object_trait<obj::option::huawei::subpass_shading_pipeline>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::huawei::subpass_shading>
+struct vulkan_object_trait<tag::property::huawei::subpass_shading>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -120,11 +120,11 @@ struct vulkan_object_trait<obj::property::huawei::subpass_shading>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceSubpassShadingFeaturesHUAWEI>
 {
-	using type = obj::feature::huawei::subpass_shading;
+	using type = tag::feature::huawei::subpass_shading;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::huawei::subpass_shading>
+struct vulkan_object_native<tag::feature::huawei::subpass_shading>
 {
 	using type = VkPhysicalDeviceSubpassShadingFeaturesHUAWEI;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBPASS_SHADING_FEATURES_HUAWEI;
@@ -133,11 +133,11 @@ struct vulkan_object_native<obj::feature::huawei::subpass_shading>
 template<>
 struct expression_vulkan_tag<VkSubpassShadingPipelineCreateInfoHUAWEI>
 {
-	using type = obj::option::huawei::subpass_shading_pipeline;
+	using type = tag::option::huawei::subpass_shading_pipeline;
 };
 
 template<>
-struct vulkan_object_native<obj::option::huawei::subpass_shading_pipeline>
+struct vulkan_object_native<tag::option::huawei::subpass_shading_pipeline>
 {
 	using type = VkSubpassShadingPipelineCreateInfoHUAWEI;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SUBPASS_SHADING_PIPELINE_CREATE_INFO_HUAWEI;
@@ -146,18 +146,18 @@ struct vulkan_object_native<obj::option::huawei::subpass_shading_pipeline>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceSubpassShadingPropertiesHUAWEI>
 {
-	using type = obj::property::huawei::subpass_shading;
+	using type = tag::property::huawei::subpass_shading;
 };
 
 template<>
-struct vulkan_object_native<obj::property::huawei::subpass_shading>
+struct vulkan_object_native<tag::property::huawei::subpass_shading>
 {
 	using type = VkPhysicalDeviceSubpassShadingPropertiesHUAWEI;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBPASS_SHADING_PROPERTIES_HUAWEI;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::huawei::subpass_shading>
+struct vulkan_object_extensions<tag::feature::huawei::subpass_shading>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_HUAWEI_subpass_shading"};
 	constexpr static ::std::uint32_t core = 0;
@@ -165,7 +165,7 @@ struct vulkan_object_extensions<obj::feature::huawei::subpass_shading>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::huawei::subpass_shading_pipeline>
+struct vulkan_object_extensions<tag::option::huawei::subpass_shading_pipeline>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_HUAWEI_subpass_shading"};
 	constexpr static ::std::uint32_t core = 0;
@@ -173,7 +173,7 @@ struct vulkan_object_extensions<obj::option::huawei::subpass_shading_pipeline>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::huawei::subpass_shading>
+struct vulkan_object_extensions<tag::property::huawei::subpass_shading>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_HUAWEI_subpass_shading"};
 	constexpr static ::std::uint32_t core = 0;
@@ -181,13 +181,13 @@ struct vulkan_object_extensions<obj::property::huawei::subpass_shading>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::compute_pipeline, obj::option::huawei::subpass_shading_pipeline> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::compute_pipeline, tag::option::huawei::subpass_shading_pipeline> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::huawei::subpass_shading> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::huawei::subpass_shading> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::huawei::subpass_shading> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::huawei::subpass_shading> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::huawei::subpass_shading> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::huawei::subpass_shading> = true;
 }
 
 namespace vkfu::param
@@ -198,7 +198,7 @@ using ::vkfu::operator|;
 
 struct subpass_shading
 {
-	using vulkan_tag_type = obj::feature::huawei::subpass_shading;
+	using vulkan_tag_type = tag::feature::huawei::subpass_shading;
 
 	bool enable = false;
 
@@ -220,7 +220,7 @@ using ::vkfu::operator|;
 
 struct subpass_shading_pipeline
 {
-	using vulkan_tag_type = obj::option::huawei::subpass_shading_pipeline;
+	using vulkan_tag_type = tag::option::huawei::subpass_shading_pipeline;
 
 	VkRenderPass render_pass{};
 	::std::uint32_t subpass{};

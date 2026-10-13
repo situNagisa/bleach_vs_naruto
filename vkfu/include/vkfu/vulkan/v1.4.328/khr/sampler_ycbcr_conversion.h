@@ -28,25 +28,25 @@
 
 #include "../version_1_1/sampler_ycbcr_conversion.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using sampler_ycbcr_conversion = ::vkfu::obj::feature::sampler_ycbcr_conversion;
+using sampler_ycbcr_conversion = ::vkfu::tag::feature::sampler_ycbcr_conversion;
 }
 namespace khr
 {
-using sampler_ycbcr_conversion = ::vkfu::obj::sampler_ycbcr_conversion;
+using sampler_ycbcr_conversion = ::vkfu::tag::sampler_ycbcr_conversion;
 }
 namespace option::khr
 {
-using bind_image_plane_memory = ::vkfu::obj::option::bind_image_plane_memory;
-using image_plane_memory_requirements = ::vkfu::obj::option::image_plane_memory_requirements;
-using ycbcr_conversion = ::vkfu::obj::option::ycbcr_conversion;
+using bind_image_plane_memory = ::vkfu::tag::option::bind_image_plane_memory;
+using image_plane_memory_requirements = ::vkfu::tag::option::image_plane_memory_requirements;
+using ycbcr_conversion = ::vkfu::tag::option::ycbcr_conversion;
 }
 namespace result::khr
 {
-using sampler_ycbcr_conversion_image_format_properties = ::vkfu::obj::result::sampler_ycbcr_conversion_image_format_properties;
+using sampler_ycbcr_conversion_image_format_properties = ::vkfu::tag::result::sampler_ycbcr_conversion_image_format_properties;
 }
 }
 

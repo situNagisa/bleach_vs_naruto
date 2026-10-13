@@ -41,7 +41,7 @@ constexpr auto _vkfu_evaluate(VkHdrMetadataEXT const& value) noexcept -> VkHdrMe
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace ext
 {
@@ -52,7 +52,7 @@ struct hdr_metadata{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::ext::hdr_metadata>
+struct vulkan_object_trait<tag::ext::hdr_metadata>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -62,18 +62,18 @@ struct vulkan_object_trait<obj::ext::hdr_metadata>
 template<>
 struct expression_vulkan_tag<VkHdrMetadataEXT>
 {
-	using type = obj::ext::hdr_metadata;
+	using type = tag::ext::hdr_metadata;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::hdr_metadata>
+struct vulkan_object_native<tag::ext::hdr_metadata>
 {
 	using type = VkHdrMetadataEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_HDR_METADATA_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::hdr_metadata>
+struct vulkan_object_extensions<tag::ext::hdr_metadata>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_hdr_metadata"};
 	constexpr static ::std::uint32_t core = 0;
@@ -90,7 +90,7 @@ using ::vkfu::operator|;
 
 struct hdr_metadata
 {
-	using vulkan_tag_type = obj::ext::hdr_metadata;
+	using vulkan_tag_type = tag::ext::hdr_metadata;
 
 	VkXYColorEXT display_primary_red{};
 	VkXYColorEXT display_primary_green{};

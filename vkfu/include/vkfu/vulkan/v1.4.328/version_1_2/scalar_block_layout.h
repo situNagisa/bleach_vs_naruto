@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceScalarBlockLayoutFeatures const& v
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -55,7 +55,7 @@ struct scalar_block_layout{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::scalar_block_layout>
+struct vulkan_object_trait<tag::feature::scalar_block_layout>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::scalar_block_layout>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceScalarBlockLayoutFeatures>
 {
-	using type = obj::feature::scalar_block_layout;
+	using type = tag::feature::scalar_block_layout;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::scalar_block_layout>
+struct vulkan_object_native<tag::feature::scalar_block_layout>
 {
 	using type = VkPhysicalDeviceScalarBlockLayoutFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCALAR_BLOCK_LAYOUT_FEATURES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::scalar_block_layout>
+struct vulkan_object_extensions<tag::feature::scalar_block_layout>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_scalar_block_layout"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::scalar_block_layout>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::scalar_block_layout> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::scalar_block_layout> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::scalar_block_layout> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::scalar_block_layout> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct scalar_block_layout
 {
-	using vulkan_tag_type = obj::feature::scalar_block_layout;
+	using vulkan_tag_type = tag::feature::scalar_block_layout;
 
 	bool enable = false;
 

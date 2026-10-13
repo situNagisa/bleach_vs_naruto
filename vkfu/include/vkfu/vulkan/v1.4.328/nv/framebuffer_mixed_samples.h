@@ -56,7 +56,7 @@ enum class coverage_modulation_mode : ::std::underlying_type_t<VkCoverageModulat
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace state::nv
 {
@@ -67,7 +67,7 @@ struct coverage_modulation{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::state::nv::coverage_modulation>
+struct vulkan_object_trait<tag::state::nv::coverage_modulation>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -77,18 +77,18 @@ struct vulkan_object_trait<obj::state::nv::coverage_modulation>
 template<>
 struct expression_vulkan_tag<VkPipelineCoverageModulationStateCreateInfoNV>
 {
-	using type = obj::state::nv::coverage_modulation;
+	using type = tag::state::nv::coverage_modulation;
 };
 
 template<>
-struct vulkan_object_native<obj::state::nv::coverage_modulation>
+struct vulkan_object_native<tag::state::nv::coverage_modulation>
 {
 	using type = VkPipelineCoverageModulationStateCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_COVERAGE_MODULATION_STATE_CREATE_INFO_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::nv::coverage_modulation>
+struct vulkan_object_extensions<tag::state::nv::coverage_modulation>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_framebuffer_mixed_samples"};
 	constexpr static ::std::uint32_t core = 0;
@@ -96,14 +96,14 @@ struct vulkan_object_extensions<obj::state::nv::coverage_modulation>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::multisample, obj::state::nv::coverage_modulation> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::multisample, tag::state::nv::coverage_modulation> = true;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::amd::nv
 {
-using attachment_sample_count = ::vkfu::obj::option::amd::attachment_sample_count;
+using attachment_sample_count = ::vkfu::tag::option::amd::attachment_sample_count;
 }
 }
 
@@ -115,7 +115,7 @@ using ::vkfu::operator|;
 
 struct coverage_modulation
 {
-	using vulkan_tag_type = obj::state::nv::coverage_modulation;
+	using vulkan_tag_type = tag::state::nv::coverage_modulation;
 
 	VkPipelineCoverageModulationStateCreateFlagsNV flags{};
 	::vkfu::enums::coverage_modulation_mode mode{};

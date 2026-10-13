@@ -69,7 +69,7 @@ enum class discard_rectangle_mode : ::std::underlying_type_t<VkDiscardRectangleM
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::ext
 {
@@ -84,7 +84,7 @@ struct discard_rectangle{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::pipeline_discard_rectangle_state>
+struct vulkan_object_trait<tag::option::ext::pipeline_discard_rectangle_state>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,7 +92,7 @@ struct vulkan_object_trait<obj::option::ext::pipeline_discard_rectangle_state>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::ext::discard_rectangle>
+struct vulkan_object_trait<tag::property::ext::discard_rectangle>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -102,11 +102,11 @@ struct vulkan_object_trait<obj::property::ext::discard_rectangle>
 template<>
 struct expression_vulkan_tag<VkPipelineDiscardRectangleStateCreateInfoEXT>
 {
-	using type = obj::option::ext::pipeline_discard_rectangle_state;
+	using type = tag::option::ext::pipeline_discard_rectangle_state;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::pipeline_discard_rectangle_state>
+struct vulkan_object_native<tag::option::ext::pipeline_discard_rectangle_state>
 {
 	using type = VkPipelineDiscardRectangleStateCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_DISCARD_RECTANGLE_STATE_CREATE_INFO_EXT;
@@ -115,18 +115,18 @@ struct vulkan_object_native<obj::option::ext::pipeline_discard_rectangle_state>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDiscardRectanglePropertiesEXT>
 {
-	using type = obj::property::ext::discard_rectangle;
+	using type = tag::property::ext::discard_rectangle;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::discard_rectangle>
+struct vulkan_object_native<tag::property::ext::discard_rectangle>
 {
 	using type = VkPhysicalDeviceDiscardRectanglePropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DISCARD_RECTANGLE_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::pipeline_discard_rectangle_state>
+struct vulkan_object_extensions<tag::option::ext::pipeline_discard_rectangle_state>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_discard_rectangles"};
 	constexpr static ::std::uint32_t core = 0;
@@ -134,7 +134,7 @@ struct vulkan_object_extensions<obj::option::ext::pipeline_discard_rectangle_sta
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::discard_rectangle>
+struct vulkan_object_extensions<tag::property::ext::discard_rectangle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_discard_rectangles"};
 	constexpr static ::std::uint32_t core = 0;
@@ -142,9 +142,9 @@ struct vulkan_object_extensions<obj::property::ext::discard_rectangle>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::graphics_pipeline, obj::option::ext::pipeline_discard_rectangle_state> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::graphics_pipeline, tag::option::ext::pipeline_discard_rectangle_state> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::discard_rectangle> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::discard_rectangle> = true;
 }
 
 namespace vkfu::param
@@ -155,7 +155,7 @@ using ::vkfu::operator|;
 
 struct pipeline_discard_rectangle_state
 {
-	using vulkan_tag_type = obj::option::ext::pipeline_discard_rectangle_state;
+	using vulkan_tag_type = tag::option::ext::pipeline_discard_rectangle_state;
 
 	VkPipelineDiscardRectangleStateCreateFlagsEXT flags{};
 	::vkfu::enums::discard_rectangle_mode discard_rectangle_mode{};

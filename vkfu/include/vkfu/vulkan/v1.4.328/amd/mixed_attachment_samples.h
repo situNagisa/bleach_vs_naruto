@@ -45,7 +45,7 @@ constexpr auto _vkfu_evaluate(VkAttachmentSampleCountInfoAMD const& value) noexc
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::amd
 {
@@ -56,7 +56,7 @@ struct attachment_sample_count{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::amd::attachment_sample_count>
+struct vulkan_object_trait<tag::option::amd::attachment_sample_count>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -66,18 +66,18 @@ struct vulkan_object_trait<obj::option::amd::attachment_sample_count>
 template<>
 struct expression_vulkan_tag<VkAttachmentSampleCountInfoAMD>
 {
-	using type = obj::option::amd::attachment_sample_count;
+	using type = tag::option::amd::attachment_sample_count;
 };
 
 template<>
-struct vulkan_object_native<obj::option::amd::attachment_sample_count>
+struct vulkan_object_native<tag::option::amd::attachment_sample_count>
 {
 	using type = VkAttachmentSampleCountInfoAMD;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ATTACHMENT_SAMPLE_COUNT_INFO_AMD;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::amd::attachment_sample_count>
+struct vulkan_object_extensions<tag::option::amd::attachment_sample_count>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_AMD_mixed_attachment_samples", "VK_NV_framebuffer_mixed_samples"};
 	constexpr static ::std::uint32_t core = 0;
@@ -85,9 +85,9 @@ struct vulkan_object_extensions<obj::option::amd::attachment_sample_count>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::command_buffer_inheritance, obj::option::amd::attachment_sample_count> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::command_buffer_inheritance, tag::option::amd::attachment_sample_count> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::graphics_pipeline, obj::option::amd::attachment_sample_count> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::graphics_pipeline, tag::option::amd::attachment_sample_count> = true;
 }
 
 namespace vkfu::param
@@ -98,7 +98,7 @@ using ::vkfu::operator|;
 
 struct attachment_sample_count
 {
-	using vulkan_tag_type = obj::option::amd::attachment_sample_count;
+	using vulkan_tag_type = tag::option::amd::attachment_sample_count;
 
 	::std::span<VkSampleCountFlagBits const> color_attachment_samples{};
 	::vkfu::enums::sample_count depth_stencil_attachment_samples{};

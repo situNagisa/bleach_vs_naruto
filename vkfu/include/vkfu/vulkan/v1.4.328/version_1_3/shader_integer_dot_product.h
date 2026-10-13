@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceShaderIntegerDotProductProperties 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -74,7 +74,7 @@ struct shader_integer_dot_product{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::shader_integer_dot_product>
+struct vulkan_object_trait<tag::feature::shader_integer_dot_product>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::feature::shader_integer_dot_product>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::shader_integer_dot_product>
+struct vulkan_object_trait<tag::property::shader_integer_dot_product>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::property::shader_integer_dot_product>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderIntegerDotProductFeatures>
 {
-	using type = obj::feature::shader_integer_dot_product;
+	using type = tag::feature::shader_integer_dot_product;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::shader_integer_dot_product>
+struct vulkan_object_native<tag::feature::shader_integer_dot_product>
 {
 	using type = VkPhysicalDeviceShaderIntegerDotProductFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INTEGER_DOT_PRODUCT_FEATURES;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::feature::shader_integer_dot_product>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderIntegerDotProductProperties>
 {
-	using type = obj::property::shader_integer_dot_product;
+	using type = tag::property::shader_integer_dot_product;
 };
 
 template<>
-struct vulkan_object_native<obj::property::shader_integer_dot_product>
+struct vulkan_object_native<tag::property::shader_integer_dot_product>
 {
 	using type = VkPhysicalDeviceShaderIntegerDotProductProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INTEGER_DOT_PRODUCT_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::shader_integer_dot_product>
+struct vulkan_object_extensions<tag::feature::shader_integer_dot_product>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_shader_integer_dot_product"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::feature::shader_integer_dot_product>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::shader_integer_dot_product>
+struct vulkan_object_extensions<tag::property::shader_integer_dot_product>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_shader_integer_dot_product"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -132,11 +132,11 @@ struct vulkan_object_extensions<obj::property::shader_integer_dot_product>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::shader_integer_dot_product> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::shader_integer_dot_product> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::shader_integer_dot_product> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::shader_integer_dot_product> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::shader_integer_dot_product> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::shader_integer_dot_product> = true;
 }
 
 namespace vkfu::param
@@ -147,7 +147,7 @@ using ::vkfu::operator|;
 
 struct shader_integer_dot_product
 {
-	using vulkan_tag_type = obj::feature::shader_integer_dot_product;
+	using vulkan_tag_type = tag::feature::shader_integer_dot_product;
 
 	bool enable = false;
 

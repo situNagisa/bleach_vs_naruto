@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceImageCompressionControlSwapchainFe
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct image_compression_control_swapchain{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::image_compression_control_swapchain>
+struct vulkan_object_trait<tag::feature::ext::image_compression_control_swapchain>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::image_compression_control_swapchai
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceImageCompressionControlSwapchainFeaturesEXT>
 {
-	using type = obj::feature::ext::image_compression_control_swapchain;
+	using type = tag::feature::ext::image_compression_control_swapchain;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::image_compression_control_swapchain>
+struct vulkan_object_native<tag::feature::ext::image_compression_control_swapchain>
 {
 	using type = VkPhysicalDeviceImageCompressionControlSwapchainFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_COMPRESSION_CONTROL_SWAPCHAIN_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::image_compression_control_swapchain>
+struct vulkan_object_extensions<tag::feature::ext::image_compression_control_swapchain>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_image_compression_control_swapchain"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::image_compression_control_swa
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::image_compression_control_swapchain> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::image_compression_control_swapchain> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::image_compression_control_swapchain> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::image_compression_control_swapchain> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct image_compression_control_swapchain
 {
-	using vulkan_tag_type = obj::feature::ext::image_compression_control_swapchain;
+	using vulkan_tag_type = tag::feature::ext::image_compression_control_swapchain;
 
 	bool enable = false;
 

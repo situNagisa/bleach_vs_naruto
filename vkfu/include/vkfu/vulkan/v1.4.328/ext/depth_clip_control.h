@@ -60,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkPipelineViewportDepthClipControlCreateInfoEXT co
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -75,7 +75,7 @@ struct viewport_depth_clip_control{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::depth_clip_control>
+struct vulkan_object_trait<tag::feature::ext::depth_clip_control>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -83,7 +83,7 @@ struct vulkan_object_trait<obj::feature::ext::depth_clip_control>
 };
 
 template<>
-struct vulkan_object_trait<obj::state::ext::viewport_depth_clip_control>
+struct vulkan_object_trait<tag::state::ext::viewport_depth_clip_control>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -93,11 +93,11 @@ struct vulkan_object_trait<obj::state::ext::viewport_depth_clip_control>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDepthClipControlFeaturesEXT>
 {
-	using type = obj::feature::ext::depth_clip_control;
+	using type = tag::feature::ext::depth_clip_control;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::depth_clip_control>
+struct vulkan_object_native<tag::feature::ext::depth_clip_control>
 {
 	using type = VkPhysicalDeviceDepthClipControlFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_CLIP_CONTROL_FEATURES_EXT;
@@ -106,18 +106,18 @@ struct vulkan_object_native<obj::feature::ext::depth_clip_control>
 template<>
 struct expression_vulkan_tag<VkPipelineViewportDepthClipControlCreateInfoEXT>
 {
-	using type = obj::state::ext::viewport_depth_clip_control;
+	using type = tag::state::ext::viewport_depth_clip_control;
 };
 
 template<>
-struct vulkan_object_native<obj::state::ext::viewport_depth_clip_control>
+struct vulkan_object_native<tag::state::ext::viewport_depth_clip_control>
 {
 	using type = VkPipelineViewportDepthClipControlCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_DEPTH_CLIP_CONTROL_CREATE_INFO_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::depth_clip_control>
+struct vulkan_object_extensions<tag::feature::ext::depth_clip_control>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_depth_clip_control"};
 	constexpr static ::std::uint32_t core = 0;
@@ -125,7 +125,7 @@ struct vulkan_object_extensions<obj::feature::ext::depth_clip_control>
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::ext::viewport_depth_clip_control>
+struct vulkan_object_extensions<tag::state::ext::viewport_depth_clip_control>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_depth_clip_control"};
 	constexpr static ::std::uint32_t core = 0;
@@ -133,11 +133,11 @@ struct vulkan_object_extensions<obj::state::ext::viewport_depth_clip_control>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::depth_clip_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::depth_clip_control> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::depth_clip_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::depth_clip_control> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::viewport, obj::state::ext::viewport_depth_clip_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::viewport, tag::state::ext::viewport_depth_clip_control> = true;
 }
 
 namespace vkfu::param
@@ -148,7 +148,7 @@ using ::vkfu::operator|;
 
 struct depth_clip_control
 {
-	using vulkan_tag_type = obj::feature::ext::depth_clip_control;
+	using vulkan_tag_type = tag::feature::ext::depth_clip_control;
 
 	bool enable = false;
 
@@ -170,7 +170,7 @@ using ::vkfu::operator|;
 
 struct viewport_depth_clip_control
 {
-	using vulkan_tag_type = obj::state::ext::viewport_depth_clip_control;
+	using vulkan_tag_type = tag::state::ext::viewport_depth_clip_control;
 
 	bool negative_one_to_one = false;
 

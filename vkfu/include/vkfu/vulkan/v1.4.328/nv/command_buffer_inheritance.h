@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceCommandBufferInheritanceFeaturesNV
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -55,7 +55,7 @@ struct command_buffer_inheritance{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::command_buffer_inheritance>
+struct vulkan_object_trait<tag::feature::nv::command_buffer_inheritance>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::nv::command_buffer_inheritance>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceCommandBufferInheritanceFeaturesNV>
 {
-	using type = obj::feature::nv::command_buffer_inheritance;
+	using type = tag::feature::nv::command_buffer_inheritance;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::command_buffer_inheritance>
+struct vulkan_object_native<tag::feature::nv::command_buffer_inheritance>
 {
 	using type = VkPhysicalDeviceCommandBufferInheritanceFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COMMAND_BUFFER_INHERITANCE_FEATURES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::command_buffer_inheritance>
+struct vulkan_object_extensions<tag::feature::nv::command_buffer_inheritance>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_command_buffer_inheritance"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::nv::command_buffer_inheritance>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::command_buffer_inheritance> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::command_buffer_inheritance> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::command_buffer_inheritance> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::command_buffer_inheritance> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct command_buffer_inheritance
 {
-	using vulkan_tag_type = obj::feature::nv::command_buffer_inheritance;
+	using vulkan_tag_type = tag::feature::nv::command_buffer_inheritance;
 
 	bool enable = false;
 

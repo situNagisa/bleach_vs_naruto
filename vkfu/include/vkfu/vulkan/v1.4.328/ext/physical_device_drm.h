@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceDrmPropertiesEXT const& value) noe
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property::ext
 {
@@ -54,7 +54,7 @@ struct drm{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::property::ext::drm>
+struct vulkan_object_trait<tag::property::ext::drm>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::property::ext::drm>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDrmPropertiesEXT>
 {
-	using type = obj::property::ext::drm;
+	using type = tag::property::ext::drm;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::drm>
+struct vulkan_object_native<tag::property::ext::drm>
 {
 	using type = VkPhysicalDeviceDrmPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRM_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::drm>
+struct vulkan_object_extensions<tag::property::ext::drm>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_physical_device_drm"};
 	constexpr static ::std::uint32_t core = 0;
@@ -83,5 +83,5 @@ struct vulkan_object_extensions<obj::property::ext::drm>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::drm> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::drm> = true;
 }

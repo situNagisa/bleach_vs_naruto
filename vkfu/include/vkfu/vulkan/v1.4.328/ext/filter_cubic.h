@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkFilterCubicImageViewImageFormatPropertiesEXT con
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::ext
 {
@@ -74,7 +74,7 @@ struct filter_cubic_image_view_image_format_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::image_view_type>
+struct vulkan_object_trait<tag::option::ext::image_view_type>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::option::ext::image_view_type>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::filter_cubic_image_view_image_format_properties>
+struct vulkan_object_trait<tag::result::ext::filter_cubic_image_view_image_format_properties>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::result::ext::filter_cubic_image_view_image_forma
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceImageViewImageFormatInfoEXT>
 {
-	using type = obj::option::ext::image_view_type;
+	using type = tag::option::ext::image_view_type;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::image_view_type>
+struct vulkan_object_native<tag::option::ext::image_view_type>
 {
 	using type = VkPhysicalDeviceImageViewImageFormatInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_VIEW_IMAGE_FORMAT_INFO_EXT;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::option::ext::image_view_type>
 template<>
 struct expression_vulkan_tag<VkFilterCubicImageViewImageFormatPropertiesEXT>
 {
-	using type = obj::result::ext::filter_cubic_image_view_image_format_properties;
+	using type = tag::result::ext::filter_cubic_image_view_image_format_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::filter_cubic_image_view_image_format_properties>
+struct vulkan_object_native<tag::result::ext::filter_cubic_image_view_image_format_properties>
 {
 	using type = VkFilterCubicImageViewImageFormatPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_FILTER_CUBIC_IMAGE_VIEW_IMAGE_FORMAT_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::image_view_type>
+struct vulkan_object_extensions<tag::option::ext::image_view_type>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_filter_cubic"};
 	constexpr static ::std::uint32_t core = 0;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::option::ext::image_view_type>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::filter_cubic_image_view_image_format_properties>
+struct vulkan_object_extensions<tag::result::ext::filter_cubic_image_view_image_format_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_filter_cubic"};
 	constexpr static ::std::uint32_t core = 0;
@@ -132,9 +132,9 @@ struct vulkan_object_extensions<obj::result::ext::filter_cubic_image_view_image_
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::image_format_properties2, obj::result::ext::filter_cubic_image_view_image_format_properties> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::image_format_properties2, tag::result::ext::filter_cubic_image_view_image_format_properties> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::physical_device_image_format2, obj::option::ext::image_view_type> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::physical_device_image_format2, tag::option::ext::image_view_type> = true;
 }
 
 namespace vkfu::param
@@ -145,7 +145,7 @@ using ::vkfu::operator|;
 
 struct image_view_type
 {
-	using vulkan_tag_type = obj::option::ext::image_view_type;
+	using vulkan_tag_type = tag::option::ext::image_view_type;
 
 	::vkfu::enums::image_view_type type{};
 

@@ -28,15 +28,15 @@
 
 #include "../version_1_4/global_priority.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
-using global_priority_query = ::vkfu::obj::feature::global_priority_query;
+using global_priority_query = ::vkfu::tag::feature::global_priority_query;
 }
 namespace result::ext
 {
-using queue_family_global_priority_properties = ::vkfu::obj::result::queue_family_global_priority_properties;
+using queue_family_global_priority_properties = ::vkfu::tag::result::queue_family_global_priority_properties;
 }
 }
 

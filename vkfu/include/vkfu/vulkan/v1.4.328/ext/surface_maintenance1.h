@@ -28,16 +28,16 @@
 
 #include "../khr/surface_maintenance1.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::khr::ext
 {
-using surface_present_mode = ::vkfu::obj::option::khr::surface_present_mode;
+using surface_present_mode = ::vkfu::tag::option::khr::surface_present_mode;
 }
 namespace result::khr::ext
 {
-using surface_present_mode_compatibility = ::vkfu::obj::result::khr::surface_present_mode_compatibility;
-using surface_present_scaling_capabilities = ::vkfu::obj::result::khr::surface_present_scaling_capabilities;
+using surface_present_mode_compatibility = ::vkfu::tag::result::khr::surface_present_mode_compatibility;
+using surface_present_scaling_capabilities = ::vkfu::tag::result::khr::surface_present_scaling_capabilities;
 }
 }
 

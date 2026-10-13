@@ -28,11 +28,11 @@
 
 #include "../version_1_2/shader_subgroup_extended_types.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using shader_subgroup_extended_types = ::vkfu::obj::feature::shader_subgroup_extended_types;
+using shader_subgroup_extended_types = ::vkfu::tag::feature::shader_subgroup_extended_types;
 }
 }
 

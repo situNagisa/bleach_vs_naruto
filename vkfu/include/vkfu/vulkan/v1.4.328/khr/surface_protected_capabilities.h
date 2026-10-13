@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkSurfaceProtectedCapabilitiesKHR const& value) no
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace result::khr
 {
@@ -54,7 +54,7 @@ struct surface_protected_capabilities{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::result::khr::surface_protected_capabilities>
+struct vulkan_object_trait<tag::result::khr::surface_protected_capabilities>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::result::khr::surface_protected_capabilities>
 template<>
 struct expression_vulkan_tag<VkSurfaceProtectedCapabilitiesKHR>
 {
-	using type = obj::result::khr::surface_protected_capabilities;
+	using type = tag::result::khr::surface_protected_capabilities;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::surface_protected_capabilities>
+struct vulkan_object_native<tag::result::khr::surface_protected_capabilities>
 {
 	using type = VkSurfaceProtectedCapabilitiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SURFACE_PROTECTED_CAPABILITIES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::surface_protected_capabilities>
+struct vulkan_object_extensions<tag::result::khr::surface_protected_capabilities>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_surface_protected_capabilities"};
 	constexpr static ::std::uint32_t core = 0;
@@ -83,5 +83,5 @@ struct vulkan_object_extensions<obj::result::khr::surface_protected_capabilities
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::surface_capabilities2, obj::result::khr::surface_protected_capabilities> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::surface_capabilities2, tag::result::khr::surface_protected_capabilities> = true;
 }

@@ -28,11 +28,11 @@
 
 #include "../version_1_2/shader_atomic_int64.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using shader_atomic_int64 = ::vkfu::obj::feature::shader_atomic_int64;
+using shader_atomic_int64 = ::vkfu::tag::feature::shader_atomic_int64;
 }
 }
 

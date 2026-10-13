@@ -95,7 +95,7 @@ enum class pipeline_robustness_image_behavior : ::std::underlying_type_t<VkPipel
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -114,7 +114,7 @@ struct robustness{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::pipeline_robustness>
+struct vulkan_object_trait<tag::feature::pipeline_robustness>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -122,7 +122,7 @@ struct vulkan_object_trait<obj::feature::pipeline_robustness>
 };
 
 template<>
-struct vulkan_object_trait<obj::state::robustness>
+struct vulkan_object_trait<tag::state::robustness>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -130,7 +130,7 @@ struct vulkan_object_trait<obj::state::robustness>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::pipeline_robustness>
+struct vulkan_object_trait<tag::property::pipeline_robustness>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -140,11 +140,11 @@ struct vulkan_object_trait<obj::property::pipeline_robustness>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePipelineRobustnessFeatures>
 {
-	using type = obj::feature::pipeline_robustness;
+	using type = tag::feature::pipeline_robustness;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::pipeline_robustness>
+struct vulkan_object_native<tag::feature::pipeline_robustness>
 {
 	using type = VkPhysicalDevicePipelineRobustnessFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_ROBUSTNESS_FEATURES;
@@ -153,11 +153,11 @@ struct vulkan_object_native<obj::feature::pipeline_robustness>
 template<>
 struct expression_vulkan_tag<VkPipelineRobustnessCreateInfo>
 {
-	using type = obj::state::robustness;
+	using type = tag::state::robustness;
 };
 
 template<>
-struct vulkan_object_native<obj::state::robustness>
+struct vulkan_object_native<tag::state::robustness>
 {
 	using type = VkPipelineRobustnessCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_ROBUSTNESS_CREATE_INFO;
@@ -166,18 +166,18 @@ struct vulkan_object_native<obj::state::robustness>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePipelineRobustnessProperties>
 {
-	using type = obj::property::pipeline_robustness;
+	using type = tag::property::pipeline_robustness;
 };
 
 template<>
-struct vulkan_object_native<obj::property::pipeline_robustness>
+struct vulkan_object_native<tag::property::pipeline_robustness>
 {
 	using type = VkPhysicalDevicePipelineRobustnessProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_ROBUSTNESS_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::pipeline_robustness>
+struct vulkan_object_extensions<tag::feature::pipeline_robustness>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_pipeline_robustness"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -185,7 +185,7 @@ struct vulkan_object_extensions<obj::feature::pipeline_robustness>
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::robustness>
+struct vulkan_object_extensions<tag::state::robustness>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_pipeline_robustness"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -193,7 +193,7 @@ struct vulkan_object_extensions<obj::state::robustness>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::pipeline_robustness>
+struct vulkan_object_extensions<tag::property::pipeline_robustness>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_pipeline_robustness"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -201,17 +201,17 @@ struct vulkan_object_extensions<obj::property::pipeline_robustness>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::compute_pipeline, obj::state::robustness> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::compute_pipeline, tag::state::robustness> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::pipeline_robustness> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::pipeline_robustness> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::graphics_pipeline, obj::state::robustness> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::graphics_pipeline, tag::state::robustness> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::pipeline_robustness> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::pipeline_robustness> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::pipeline_robustness> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::pipeline_robustness> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::shader_stage, obj::state::robustness> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::shader_stage, tag::state::robustness> = true;
 }
 
 namespace vkfu::param
@@ -222,7 +222,7 @@ using ::vkfu::operator|;
 
 struct pipeline_robustness
 {
-	using vulkan_tag_type = obj::feature::pipeline_robustness;
+	using vulkan_tag_type = tag::feature::pipeline_robustness;
 
 	bool enable = false;
 
@@ -244,7 +244,7 @@ using ::vkfu::operator|;
 
 struct robustness
 {
-	using vulkan_tag_type = obj::state::robustness;
+	using vulkan_tag_type = tag::state::robustness;
 
 	::vkfu::enums::pipeline_robustness_buffer_behavior storage_buffers{};
 	::vkfu::enums::pipeline_robustness_buffer_behavior uniform_buffers{};

@@ -28,11 +28,11 @@
 
 #include "../version_1_2/host_query_reset.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
-using host_query_reset = ::vkfu::obj::feature::host_query_reset;
+using host_query_reset = ::vkfu::tag::feature::host_query_reset;
 }
 }
 

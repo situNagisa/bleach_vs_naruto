@@ -26,6 +26,7 @@
 #include <vkfu/storage.h>
 #include <vkfu/vulkan_object.h>
 
+#include "../version_1_0/device_initialization.h"
 #include "../version_1_0/image.h"
 #include "../version_1_1/get_physical_device_properties2.h"
 
@@ -44,7 +45,7 @@ constexpr auto _vkfu_evaluate(VkImageStencilUsageCreateInfo const& value) noexce
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option
 {
@@ -55,7 +56,7 @@ struct image_stencil_usage{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::image_stencil_usage>
+struct vulkan_object_trait<tag::option::image_stencil_usage>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +66,18 @@ struct vulkan_object_trait<obj::option::image_stencil_usage>
 template<>
 struct expression_vulkan_tag<VkImageStencilUsageCreateInfo>
 {
-	using type = obj::option::image_stencil_usage;
+	using type = tag::option::image_stencil_usage;
 };
 
 template<>
-struct vulkan_object_native<obj::option::image_stencil_usage>
+struct vulkan_object_native<tag::option::image_stencil_usage>
 {
 	using type = VkImageStencilUsageCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_STENCIL_USAGE_CREATE_INFO;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::image_stencil_usage>
+struct vulkan_object_extensions<tag::option::image_stencil_usage>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_separate_stencil_usage"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -84,9 +85,9 @@ struct vulkan_object_extensions<obj::option::image_stencil_usage>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image, obj::option::image_stencil_usage> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image, tag::option::image_stencil_usage> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::physical_device_image_format2, obj::option::image_stencil_usage> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::physical_device_image_format2, tag::option::image_stencil_usage> = true;
 }
 
 namespace vkfu::param
@@ -97,41 +98,9 @@ using ::vkfu::operator|;
 
 struct image_stencil_usage
 {
-	using vulkan_tag_type = obj::option::image_stencil_usage;
+	using vulkan_tag_type = tag::option::image_stencil_usage;
 
-	struct stencil_usage_type
-	{
-		VkImageUsageFlags transfer_src : 1 = 0;
-		VkImageUsageFlags transfer_dst : 1 = 0;
-		VkImageUsageFlags sampled : 1 = 0;
-		VkImageUsageFlags storage : 1 = 0;
-		VkImageUsageFlags color_attachment : 1 = 0;
-		VkImageUsageFlags depth_stencil_attachment : 1 = 0;
-		VkImageUsageFlags transient_attachment : 1 = 0;
-		VkImageUsageFlags input_attachment : 1 = 0;
-		VkImageUsageFlags fragment_shading_rate_attachment : 1 = 0;
-		VkImageUsageFlags fragment_density_map : 1 = 0;
-		VkImageUsageFlags video_decode_dst : 1 = 0;
-		VkImageUsageFlags video_decode_src : 1 = 0;
-		VkImageUsageFlags video_decode_dpb : 1 = 0;
-		VkImageUsageFlags video_encode_dst : 1 = 0;
-		VkImageUsageFlags video_encode_src : 1 = 0;
-		VkImageUsageFlags video_encode_dpb : 1 = 0;
-		VkImageUsageFlags _reserved_16 : 2 = 0;
-		VkImageUsageFlags invocation_mask : 1 = 0;
-		VkImageUsageFlags attachment_feedback_loop : 1 = 0;
-		VkImageUsageFlags sample_weight : 1 = 0;
-		VkImageUsageFlags sample_block_match : 1 = 0;
-		VkImageUsageFlags host_transfer : 1 = 0;
-		VkImageUsageFlags tensor_aliasing : 1 = 0;
-		VkImageUsageFlags _reserved_24 : 1 = 0;
-		VkImageUsageFlags video_encode_quantization_delta_map : 1 = 0;
-		VkImageUsageFlags video_encode_emphasis_map : 1 = 0;
-		VkImageUsageFlags tile_memory : 1 = 0;
-		VkImageUsageFlags _reserved_28 : 4 = 0;
-	};
-
-	stencil_usage_type stencil_usage{};
+	::vkfu::flags::image_usage stencil_usage{};
 
 	constexpr auto evaluate() const noexcept -> VkImageStencilUsageCreateInfo
 	{
@@ -142,35 +111,6 @@ struct image_stencil_usage
 		};
 	}
 };
-
-static_assert(sizeof(image_stencil_usage::stencil_usage_type) == sizeof(VkImageUsageFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.transfer_src = 1}) == VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.transfer_dst = 1}) == VK_IMAGE_USAGE_TRANSFER_DST_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.sampled = 1}) == VK_IMAGE_USAGE_SAMPLED_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.storage = 1}) == VK_IMAGE_USAGE_STORAGE_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.color_attachment = 1}) == VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.depth_stencil_attachment = 1}) == VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.transient_attachment = 1}) == VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.input_attachment = 1}) == VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.fragment_shading_rate_attachment = 1}) == VK_IMAGE_USAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.fragment_density_map = 1}) == VK_IMAGE_USAGE_FRAGMENT_DENSITY_MAP_BIT_EXT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.video_decode_dst = 1}) == VK_IMAGE_USAGE_VIDEO_DECODE_DST_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.video_decode_src = 1}) == VK_IMAGE_USAGE_VIDEO_DECODE_SRC_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.video_decode_dpb = 1}) == VK_IMAGE_USAGE_VIDEO_DECODE_DPB_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.video_encode_dst = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_DST_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.video_encode_src = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_SRC_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.video_encode_dpb = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_DPB_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.invocation_mask = 1}) == VK_IMAGE_USAGE_INVOCATION_MASK_BIT_HUAWEI);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.attachment_feedback_loop = 1}) == VK_IMAGE_USAGE_ATTACHMENT_FEEDBACK_LOOP_BIT_EXT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.sample_weight = 1}) == VK_IMAGE_USAGE_SAMPLE_WEIGHT_BIT_QCOM);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.sample_block_match = 1}) == VK_IMAGE_USAGE_SAMPLE_BLOCK_MATCH_BIT_QCOM);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.host_transfer = 1}) == VK_IMAGE_USAGE_HOST_TRANSFER_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.tensor_aliasing = 1}) == VK_IMAGE_USAGE_TENSOR_ALIASING_BIT_ARM);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.video_encode_quantization_delta_map = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_QUANTIZATION_DELTA_MAP_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.video_encode_emphasis_map = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_EMPHASIS_MAP_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_stencil_usage::stencil_usage_type{.tile_memory = 1}) == VK_IMAGE_USAGE_TILE_MEMORY_BIT_QCOM);
-#endif
 
 }
 }

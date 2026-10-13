@@ -26,6 +26,8 @@
 #include <vkfu/storage.h>
 #include <vkfu/vulkan_object.h>
 
+#include "pipeline.h"
+
 constexpr auto _vkfu_address(VkPipelineLayoutCreateInfo& value) noexcept -> void const*
 {
 	return ::std::addressof(value);
@@ -41,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkPipelineLayoutCreateInfo const& value) noexcept 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct pipeline_layout{};
 }
@@ -49,7 +51,7 @@ struct pipeline_layout{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::pipeline_layout>
+struct vulkan_object_trait<tag::pipeline_layout>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -59,18 +61,18 @@ struct vulkan_object_trait<obj::pipeline_layout>
 template<>
 struct expression_vulkan_tag<VkPipelineLayoutCreateInfo>
 {
-	using type = obj::pipeline_layout;
+	using type = tag::pipeline_layout;
 };
 
 template<>
-struct vulkan_object_native<obj::pipeline_layout>
+struct vulkan_object_native<tag::pipeline_layout>
 {
 	using type = VkPipelineLayoutCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 };
 
 template<>
-struct vulkan_object_extensions<obj::pipeline_layout>
+struct vulkan_object_extensions<tag::pipeline_layout>
 {
 	constexpr static ::std::array<char const*, 0> names{};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_0;
@@ -85,16 +87,9 @@ using ::vkfu::operator|;
 
 struct pipeline_layout
 {
-	using vulkan_tag_type = obj::pipeline_layout;
+	using vulkan_tag_type = tag::pipeline_layout;
 
-	struct flags_type
-	{
-		VkPipelineLayoutCreateFlags _reserved_0 : 1 = 0;
-		VkPipelineLayoutCreateFlags independent_sets : 1 = 0;
-		VkPipelineLayoutCreateFlags _reserved_2 : 30 = 0;
-	};
-
-	flags_type flags{};
+	::vkfu::flags::pipeline_layout_create flags{};
 	::std::span<VkDescriptorSetLayout const> set_layouts{};
 	::std::span<VkPushConstantRange const> push_constant_ranges{};
 
@@ -112,36 +107,9 @@ struct pipeline_layout
 	}
 };
 
-static_assert(sizeof(pipeline_layout::flags_type) == sizeof(VkPipelineLayoutCreateFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkPipelineLayoutCreateFlags>(pipeline_layout::flags_type{.independent_sets = 1}) == VK_PIPELINE_LAYOUT_CREATE_INDEPENDENT_SETS_BIT_EXT);
-#endif
-
 struct push_constant_range
 {
-	struct stage_flags_type
-	{
-		VkShaderStageFlags vertex : 1 = 0;
-		VkShaderStageFlags tessellation_control : 1 = 0;
-		VkShaderStageFlags tessellation_evaluation : 1 = 0;
-		VkShaderStageFlags geometry : 1 = 0;
-		VkShaderStageFlags fragment : 1 = 0;
-		VkShaderStageFlags compute : 1 = 0;
-		VkShaderStageFlags task : 1 = 0;
-		VkShaderStageFlags mesh : 1 = 0;
-		VkShaderStageFlags raygen : 1 = 0;
-		VkShaderStageFlags any_hit : 1 = 0;
-		VkShaderStageFlags closest_hit : 1 = 0;
-		VkShaderStageFlags miss : 1 = 0;
-		VkShaderStageFlags intersection : 1 = 0;
-		VkShaderStageFlags callable : 1 = 0;
-		VkShaderStageFlags subpass_shading : 1 = 0;
-		VkShaderStageFlags _reserved_15 : 4 = 0;
-		VkShaderStageFlags cluster_culling : 1 = 0;
-		VkShaderStageFlags _reserved_20 : 12 = 0;
-	};
-
-	stage_flags_type stage_flags{};
+	::vkfu::flags::shader_stage stage_flags{};
 	::std::uint32_t offset{};
 	::std::uint32_t size{};
 
@@ -154,31 +122,11 @@ struct push_constant_range
 		};
 	}
 };
-
-static_assert(sizeof(push_constant_range::stage_flags_type) == sizeof(VkShaderStageFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.vertex = 1}) == VK_SHADER_STAGE_VERTEX_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.tessellation_control = 1}) == VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.tessellation_evaluation = 1}) == VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.geometry = 1}) == VK_SHADER_STAGE_GEOMETRY_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.fragment = 1}) == VK_SHADER_STAGE_FRAGMENT_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.compute = 1}) == VK_SHADER_STAGE_COMPUTE_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.task = 1}) == VK_SHADER_STAGE_TASK_BIT_EXT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.mesh = 1}) == VK_SHADER_STAGE_MESH_BIT_EXT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.raygen = 1}) == VK_SHADER_STAGE_RAYGEN_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.any_hit = 1}) == VK_SHADER_STAGE_ANY_HIT_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.closest_hit = 1}) == VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.miss = 1}) == VK_SHADER_STAGE_MISS_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.intersection = 1}) == VK_SHADER_STAGE_INTERSECTION_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.callable = 1}) == VK_SHADER_STAGE_CALLABLE_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.subpass_shading = 1}) == VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constant_range::stage_flags_type{.cluster_culling = 1}) == VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI);
-#endif
 }
 
 namespace vkfu
 {
-template<::vkfu::expression_for<::vkfu::obj::pipeline_layout> Expression>
+template<::vkfu::expression_for<::vkfu::tag::pipeline_layout> Expression>
 [[nodiscard]] auto create_pipeline_layout(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkPipelineLayout, ::VkResult>
 {
@@ -193,7 +141,7 @@ template<::vkfu::expression_for<::vkfu::obj::pipeline_layout> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::pipeline_layout> Expression>
+template<::vkfu::expression_for<::vkfu::tag::pipeline_layout> Expression>
 [[nodiscard]] auto create_pipeline_layout(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkPipelineLayout
 {
 	auto produced = create_pipeline_layout(device, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

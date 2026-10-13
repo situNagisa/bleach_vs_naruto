@@ -28,12 +28,12 @@
 
 #include "../version_1_4/map_memory2.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
-using memory_map = ::vkfu::obj::memory_map;
-using memory_unmap = ::vkfu::obj::memory_unmap;
+using memory_map = ::vkfu::tag::memory_map;
+using memory_unmap = ::vkfu::tag::memory_unmap;
 }
 }
 

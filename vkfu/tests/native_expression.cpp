@@ -12,7 +12,7 @@ namespace param = vkfu::param;
 static_assert(vkfu::expression<VkPhysicalDeviceTimelineSemaphoreFeatures>);
 static_assert(::std::same_as<
 	vkfu::expression_vulkan_tag_t<VkPhysicalDeviceTimelineSemaphoreFeatures>,
-	vkfu::obj::feature::timeline_semaphore>);
+	vkfu::tag::feature::timeline_semaphore>);
 static_assert(vkfu::branch_expression<VkPhysicalDeviceFeatures2>);
 static_assert(::std::same_as<decltype(vkfu::evaluate(VkDeviceCreateInfo{})), VkDeviceCreateInfo>);
 

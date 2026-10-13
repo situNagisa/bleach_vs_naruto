@@ -75,7 +75,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceMapMemoryPlacedPropertiesEXT const
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -94,7 +94,7 @@ struct map_memory_placed{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::memory_map_placed>
+struct vulkan_object_trait<tag::option::ext::memory_map_placed>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -102,7 +102,7 @@ struct vulkan_object_trait<obj::option::ext::memory_map_placed>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::ext::map_memory_placed>
+struct vulkan_object_trait<tag::feature::ext::map_memory_placed>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -110,7 +110,7 @@ struct vulkan_object_trait<obj::feature::ext::map_memory_placed>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::ext::map_memory_placed>
+struct vulkan_object_trait<tag::property::ext::map_memory_placed>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -120,11 +120,11 @@ struct vulkan_object_trait<obj::property::ext::map_memory_placed>
 template<>
 struct expression_vulkan_tag<VkMemoryMapPlacedInfoEXT>
 {
-	using type = obj::option::ext::memory_map_placed;
+	using type = tag::option::ext::memory_map_placed;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::memory_map_placed>
+struct vulkan_object_native<tag::option::ext::memory_map_placed>
 {
 	using type = VkMemoryMapPlacedInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MEMORY_MAP_PLACED_INFO_EXT;
@@ -133,11 +133,11 @@ struct vulkan_object_native<obj::option::ext::memory_map_placed>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMapMemoryPlacedFeaturesEXT>
 {
-	using type = obj::feature::ext::map_memory_placed;
+	using type = tag::feature::ext::map_memory_placed;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::map_memory_placed>
+struct vulkan_object_native<tag::feature::ext::map_memory_placed>
 {
 	using type = VkPhysicalDeviceMapMemoryPlacedFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAP_MEMORY_PLACED_FEATURES_EXT;
@@ -146,18 +146,18 @@ struct vulkan_object_native<obj::feature::ext::map_memory_placed>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMapMemoryPlacedPropertiesEXT>
 {
-	using type = obj::property::ext::map_memory_placed;
+	using type = tag::property::ext::map_memory_placed;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::map_memory_placed>
+struct vulkan_object_native<tag::property::ext::map_memory_placed>
 {
 	using type = VkPhysicalDeviceMapMemoryPlacedPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAP_MEMORY_PLACED_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::memory_map_placed>
+struct vulkan_object_extensions<tag::option::ext::memory_map_placed>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_map_memory_placed"};
 	constexpr static ::std::uint32_t core = 0;
@@ -165,7 +165,7 @@ struct vulkan_object_extensions<obj::option::ext::memory_map_placed>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::map_memory_placed>
+struct vulkan_object_extensions<tag::feature::ext::map_memory_placed>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_map_memory_placed"};
 	constexpr static ::std::uint32_t core = 0;
@@ -173,7 +173,7 @@ struct vulkan_object_extensions<obj::feature::ext::map_memory_placed>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::map_memory_placed>
+struct vulkan_object_extensions<tag::property::ext::map_memory_placed>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_map_memory_placed"};
 	constexpr static ::std::uint32_t core = 0;
@@ -181,13 +181,13 @@ struct vulkan_object_extensions<obj::property::ext::map_memory_placed>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::map_memory_placed> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::map_memory_placed> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::memory_map, obj::option::ext::memory_map_placed> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::memory_map, tag::option::ext::memory_map_placed> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::map_memory_placed> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::map_memory_placed> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::map_memory_placed> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::map_memory_placed> = true;
 }
 
 namespace vkfu::param
@@ -198,7 +198,7 @@ using ::vkfu::operator|;
 
 struct map_memory_placed
 {
-	using vulkan_tag_type = obj::feature::ext::map_memory_placed;
+	using vulkan_tag_type = tag::feature::ext::map_memory_placed;
 
 	bool memory_map_placed = false;
 	bool memory_map_range_placed = false;
@@ -224,7 +224,7 @@ using ::vkfu::operator|;
 
 struct memory_map_placed
 {
-	using vulkan_tag_type = obj::option::ext::memory_map_placed;
+	using vulkan_tag_type = tag::option::ext::memory_map_placed;
 
 	void* placed_address = nullptr;
 

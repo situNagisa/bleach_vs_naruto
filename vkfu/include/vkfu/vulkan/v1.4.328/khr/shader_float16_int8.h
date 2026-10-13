@@ -28,11 +28,11 @@
 
 #include "../version_1_2/shader_float16_int8.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using shader_float16_int8 = ::vkfu::obj::feature::shader_float16_int8;
+using shader_float16_int8 = ::vkfu::tag::feature::shader_float16_int8;
 }
 }
 

@@ -120,7 +120,7 @@ constexpr auto _vkfu_evaluate(VkImageDrmFormatModifierPropertiesEXT const& value
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::ext
 {
@@ -139,7 +139,7 @@ struct image_drm_format_modifier_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::image_drm_format_modifier_explicit>
+struct vulkan_object_trait<tag::option::ext::image_drm_format_modifier_explicit>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -147,7 +147,7 @@ struct vulkan_object_trait<obj::option::ext::image_drm_format_modifier_explicit>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::ext::image_drm_format_modifier_list>
+struct vulkan_object_trait<tag::option::ext::image_drm_format_modifier_list>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -155,7 +155,7 @@ struct vulkan_object_trait<obj::option::ext::image_drm_format_modifier_list>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::ext::physical_device_image_drm_format_modifier>
+struct vulkan_object_trait<tag::option::ext::physical_device_image_drm_format_modifier>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -163,7 +163,7 @@ struct vulkan_object_trait<obj::option::ext::physical_device_image_drm_format_mo
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::drm_format_modifier_properties_list2>
+struct vulkan_object_trait<tag::result::ext::drm_format_modifier_properties_list2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -171,7 +171,7 @@ struct vulkan_object_trait<obj::result::ext::drm_format_modifier_properties_list
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::drm_format_modifier_properties_list>
+struct vulkan_object_trait<tag::result::ext::drm_format_modifier_properties_list>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -179,7 +179,7 @@ struct vulkan_object_trait<obj::result::ext::drm_format_modifier_properties_list
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::image_drm_format_modifier_properties>
+struct vulkan_object_trait<tag::result::ext::image_drm_format_modifier_properties>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -189,11 +189,11 @@ struct vulkan_object_trait<obj::result::ext::image_drm_format_modifier_propertie
 template<>
 struct expression_vulkan_tag<VkImageDrmFormatModifierExplicitCreateInfoEXT>
 {
-	using type = obj::option::ext::image_drm_format_modifier_explicit;
+	using type = tag::option::ext::image_drm_format_modifier_explicit;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::image_drm_format_modifier_explicit>
+struct vulkan_object_native<tag::option::ext::image_drm_format_modifier_explicit>
 {
 	using type = VkImageDrmFormatModifierExplicitCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_EXPLICIT_CREATE_INFO_EXT;
@@ -202,11 +202,11 @@ struct vulkan_object_native<obj::option::ext::image_drm_format_modifier_explicit
 template<>
 struct expression_vulkan_tag<VkImageDrmFormatModifierListCreateInfoEXT>
 {
-	using type = obj::option::ext::image_drm_format_modifier_list;
+	using type = tag::option::ext::image_drm_format_modifier_list;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::image_drm_format_modifier_list>
+struct vulkan_object_native<tag::option::ext::image_drm_format_modifier_list>
 {
 	using type = VkImageDrmFormatModifierListCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_LIST_CREATE_INFO_EXT;
@@ -215,11 +215,11 @@ struct vulkan_object_native<obj::option::ext::image_drm_format_modifier_list>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceImageDrmFormatModifierInfoEXT>
 {
-	using type = obj::option::ext::physical_device_image_drm_format_modifier;
+	using type = tag::option::ext::physical_device_image_drm_format_modifier;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::physical_device_image_drm_format_modifier>
+struct vulkan_object_native<tag::option::ext::physical_device_image_drm_format_modifier>
 {
 	using type = VkPhysicalDeviceImageDrmFormatModifierInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_DRM_FORMAT_MODIFIER_INFO_EXT;
@@ -228,11 +228,11 @@ struct vulkan_object_native<obj::option::ext::physical_device_image_drm_format_m
 template<>
 struct expression_vulkan_tag<VkDrmFormatModifierPropertiesList2EXT>
 {
-	using type = obj::result::ext::drm_format_modifier_properties_list2;
+	using type = tag::result::ext::drm_format_modifier_properties_list2;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::drm_format_modifier_properties_list2>
+struct vulkan_object_native<tag::result::ext::drm_format_modifier_properties_list2>
 {
 	using type = VkDrmFormatModifierPropertiesList2EXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DRM_FORMAT_MODIFIER_PROPERTIES_LIST_2_EXT;
@@ -241,11 +241,11 @@ struct vulkan_object_native<obj::result::ext::drm_format_modifier_properties_lis
 template<>
 struct expression_vulkan_tag<VkDrmFormatModifierPropertiesListEXT>
 {
-	using type = obj::result::ext::drm_format_modifier_properties_list;
+	using type = tag::result::ext::drm_format_modifier_properties_list;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::drm_format_modifier_properties_list>
+struct vulkan_object_native<tag::result::ext::drm_format_modifier_properties_list>
 {
 	using type = VkDrmFormatModifierPropertiesListEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DRM_FORMAT_MODIFIER_PROPERTIES_LIST_EXT;
@@ -254,18 +254,18 @@ struct vulkan_object_native<obj::result::ext::drm_format_modifier_properties_lis
 template<>
 struct expression_vulkan_tag<VkImageDrmFormatModifierPropertiesEXT>
 {
-	using type = obj::result::ext::image_drm_format_modifier_properties;
+	using type = tag::result::ext::image_drm_format_modifier_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::image_drm_format_modifier_properties>
+struct vulkan_object_native<tag::result::ext::image_drm_format_modifier_properties>
 {
 	using type = VkImageDrmFormatModifierPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::image_drm_format_modifier_explicit>
+struct vulkan_object_extensions<tag::option::ext::image_drm_format_modifier_explicit>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_image_drm_format_modifier"};
 	constexpr static ::std::uint32_t core = 0;
@@ -273,7 +273,7 @@ struct vulkan_object_extensions<obj::option::ext::image_drm_format_modifier_expl
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::image_drm_format_modifier_list>
+struct vulkan_object_extensions<tag::option::ext::image_drm_format_modifier_list>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_image_drm_format_modifier"};
 	constexpr static ::std::uint32_t core = 0;
@@ -281,7 +281,7 @@ struct vulkan_object_extensions<obj::option::ext::image_drm_format_modifier_list
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::physical_device_image_drm_format_modifier>
+struct vulkan_object_extensions<tag::option::ext::physical_device_image_drm_format_modifier>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_image_drm_format_modifier"};
 	constexpr static ::std::uint32_t core = 0;
@@ -289,7 +289,7 @@ struct vulkan_object_extensions<obj::option::ext::physical_device_image_drm_form
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::drm_format_modifier_properties_list2>
+struct vulkan_object_extensions<tag::result::ext::drm_format_modifier_properties_list2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_image_drm_format_modifier"};
 	constexpr static ::std::uint32_t core = 0;
@@ -297,7 +297,7 @@ struct vulkan_object_extensions<obj::result::ext::drm_format_modifier_properties
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::drm_format_modifier_properties_list>
+struct vulkan_object_extensions<tag::result::ext::drm_format_modifier_properties_list>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_image_drm_format_modifier"};
 	constexpr static ::std::uint32_t core = 0;
@@ -305,7 +305,7 @@ struct vulkan_object_extensions<obj::result::ext::drm_format_modifier_properties
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::image_drm_format_modifier_properties>
+struct vulkan_object_extensions<tag::result::ext::image_drm_format_modifier_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_image_drm_format_modifier"};
 	constexpr static ::std::uint32_t core = 0;
@@ -313,15 +313,15 @@ struct vulkan_object_extensions<obj::result::ext::image_drm_format_modifier_prop
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::format_properties2, obj::result::ext::drm_format_modifier_properties_list2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::format_properties2, tag::result::ext::drm_format_modifier_properties_list2> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::format_properties2, obj::result::ext::drm_format_modifier_properties_list> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::format_properties2, tag::result::ext::drm_format_modifier_properties_list> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image, obj::option::ext::image_drm_format_modifier_explicit> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image, tag::option::ext::image_drm_format_modifier_explicit> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image, obj::option::ext::image_drm_format_modifier_list> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image, tag::option::ext::image_drm_format_modifier_list> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::physical_device_image_format2, obj::option::ext::physical_device_image_drm_format_modifier> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::physical_device_image_format2, tag::option::ext::physical_device_image_drm_format_modifier> = true;
 }
 
 namespace vkfu::param
@@ -332,7 +332,7 @@ using ::vkfu::operator|;
 
 struct image_drm_format_modifier_explicit
 {
-	using vulkan_tag_type = obj::option::ext::image_drm_format_modifier_explicit;
+	using vulkan_tag_type = tag::option::ext::image_drm_format_modifier_explicit;
 
 	::std::uint64_t drm_format_modifier{};
 	::std::span<VkSubresourceLayout const> plane_layouts{};
@@ -351,7 +351,7 @@ struct image_drm_format_modifier_explicit
 
 struct image_drm_format_modifier_list
 {
-	using vulkan_tag_type = obj::option::ext::image_drm_format_modifier_list;
+	using vulkan_tag_type = tag::option::ext::image_drm_format_modifier_list;
 
 	::std::span<::std::uint64_t const> drm_format_modifiers{};
 
@@ -368,7 +368,7 @@ struct image_drm_format_modifier_list
 
 struct physical_device_image_drm_format_modifier
 {
-	using vulkan_tag_type = obj::option::ext::physical_device_image_drm_format_modifier;
+	using vulkan_tag_type = tag::option::ext::physical_device_image_drm_format_modifier;
 
 	::std::uint64_t drm_format_modifier{};
 	::vkfu::enums::sharing_mode sharing_mode{};

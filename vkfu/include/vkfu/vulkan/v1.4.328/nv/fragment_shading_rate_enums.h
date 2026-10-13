@@ -101,7 +101,7 @@ enum class fragment_shading_rate_type : ::std::underlying_type_t<VkFragmentShadi
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -120,7 +120,7 @@ struct fragment_shading_rate_enums{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::fragment_shading_rate_enums>
+struct vulkan_object_trait<tag::feature::nv::fragment_shading_rate_enums>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -128,7 +128,7 @@ struct vulkan_object_trait<obj::feature::nv::fragment_shading_rate_enums>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::nv::pipeline_fragment_shading_rate_enum_state>
+struct vulkan_object_trait<tag::option::nv::pipeline_fragment_shading_rate_enum_state>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -136,7 +136,7 @@ struct vulkan_object_trait<obj::option::nv::pipeline_fragment_shading_rate_enum_
 };
 
 template<>
-struct vulkan_object_trait<obj::property::nv::fragment_shading_rate_enums>
+struct vulkan_object_trait<tag::property::nv::fragment_shading_rate_enums>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -146,11 +146,11 @@ struct vulkan_object_trait<obj::property::nv::fragment_shading_rate_enums>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceFragmentShadingRateEnumsFeaturesNV>
 {
-	using type = obj::feature::nv::fragment_shading_rate_enums;
+	using type = tag::feature::nv::fragment_shading_rate_enums;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::fragment_shading_rate_enums>
+struct vulkan_object_native<tag::feature::nv::fragment_shading_rate_enums>
 {
 	using type = VkPhysicalDeviceFragmentShadingRateEnumsFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_ENUMS_FEATURES_NV;
@@ -159,11 +159,11 @@ struct vulkan_object_native<obj::feature::nv::fragment_shading_rate_enums>
 template<>
 struct expression_vulkan_tag<VkPipelineFragmentShadingRateEnumStateCreateInfoNV>
 {
-	using type = obj::option::nv::pipeline_fragment_shading_rate_enum_state;
+	using type = tag::option::nv::pipeline_fragment_shading_rate_enum_state;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::pipeline_fragment_shading_rate_enum_state>
+struct vulkan_object_native<tag::option::nv::pipeline_fragment_shading_rate_enum_state>
 {
 	using type = VkPipelineFragmentShadingRateEnumStateCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_FRAGMENT_SHADING_RATE_ENUM_STATE_CREATE_INFO_NV;
@@ -172,18 +172,18 @@ struct vulkan_object_native<obj::option::nv::pipeline_fragment_shading_rate_enum
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceFragmentShadingRateEnumsPropertiesNV>
 {
-	using type = obj::property::nv::fragment_shading_rate_enums;
+	using type = tag::property::nv::fragment_shading_rate_enums;
 };
 
 template<>
-struct vulkan_object_native<obj::property::nv::fragment_shading_rate_enums>
+struct vulkan_object_native<tag::property::nv::fragment_shading_rate_enums>
 {
 	using type = VkPhysicalDeviceFragmentShadingRateEnumsPropertiesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_ENUMS_PROPERTIES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::fragment_shading_rate_enums>
+struct vulkan_object_extensions<tag::feature::nv::fragment_shading_rate_enums>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_fragment_shading_rate_enums"};
 	constexpr static ::std::uint32_t core = 0;
@@ -191,7 +191,7 @@ struct vulkan_object_extensions<obj::feature::nv::fragment_shading_rate_enums>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::pipeline_fragment_shading_rate_enum_state>
+struct vulkan_object_extensions<tag::option::nv::pipeline_fragment_shading_rate_enum_state>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_fragment_shading_rate_enums"};
 	constexpr static ::std::uint32_t core = 0;
@@ -199,7 +199,7 @@ struct vulkan_object_extensions<obj::option::nv::pipeline_fragment_shading_rate_
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::nv::fragment_shading_rate_enums>
+struct vulkan_object_extensions<tag::property::nv::fragment_shading_rate_enums>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_fragment_shading_rate_enums"};
 	constexpr static ::std::uint32_t core = 0;
@@ -207,13 +207,13 @@ struct vulkan_object_extensions<obj::property::nv::fragment_shading_rate_enums>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::fragment_shading_rate_enums> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::fragment_shading_rate_enums> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::graphics_pipeline, obj::option::nv::pipeline_fragment_shading_rate_enum_state> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::graphics_pipeline, tag::option::nv::pipeline_fragment_shading_rate_enum_state> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::fragment_shading_rate_enums> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::fragment_shading_rate_enums> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::nv::fragment_shading_rate_enums> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::nv::fragment_shading_rate_enums> = true;
 }
 
 namespace vkfu::param
@@ -224,7 +224,7 @@ using ::vkfu::operator|;
 
 struct fragment_shading_rate_enums
 {
-	using vulkan_tag_type = obj::feature::nv::fragment_shading_rate_enums;
+	using vulkan_tag_type = tag::feature::nv::fragment_shading_rate_enums;
 
 	bool enable = false;
 	bool supersample_fragment_shading_rates = false;
@@ -250,7 +250,7 @@ using ::vkfu::operator|;
 
 struct pipeline_fragment_shading_rate_enum_state
 {
-	using vulkan_tag_type = obj::option::nv::pipeline_fragment_shading_rate_enum_state;
+	using vulkan_tag_type = tag::option::nv::pipeline_fragment_shading_rate_enum_state;
 
 	::vkfu::enums::fragment_shading_rate_type shading_rate_type{};
 	::vkfu::enums::fragment_shading_rate shading_rate{};

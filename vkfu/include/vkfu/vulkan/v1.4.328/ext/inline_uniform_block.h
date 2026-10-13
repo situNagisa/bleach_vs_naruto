@@ -28,20 +28,20 @@
 
 #include "../version_1_3/inline_uniform_block.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
-using inline_uniform_block = ::vkfu::obj::feature::inline_uniform_block;
+using inline_uniform_block = ::vkfu::tag::feature::inline_uniform_block;
 }
 namespace option::ext
 {
-using descriptor_pool_inline_uniform_block = ::vkfu::obj::option::descriptor_pool_inline_uniform_block;
-using write_descriptor_set_inline_uniform_block = ::vkfu::obj::option::write_descriptor_set_inline_uniform_block;
+using descriptor_pool_inline_uniform_block = ::vkfu::tag::option::descriptor_pool_inline_uniform_block;
+using write_descriptor_set_inline_uniform_block = ::vkfu::tag::option::write_descriptor_set_inline_uniform_block;
 }
 namespace property::ext
 {
-using inline_uniform_block = ::vkfu::obj::property::inline_uniform_block;
+using inline_uniform_block = ::vkfu::tag::property::inline_uniform_block;
 }
 }
 

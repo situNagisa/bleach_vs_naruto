@@ -75,7 +75,7 @@ constexpr auto _vkfu_evaluate(VkSurfaceCapabilitiesPresentWait2KHR const& value)
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -94,7 +94,7 @@ struct surface_capabilities_present_wait2{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::present_wait2>
+struct vulkan_object_trait<tag::feature::khr::present_wait2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -102,7 +102,7 @@ struct vulkan_object_trait<obj::feature::khr::present_wait2>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::present_wait2>
+struct vulkan_object_trait<tag::khr::present_wait2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -110,7 +110,7 @@ struct vulkan_object_trait<obj::khr::present_wait2>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::surface_capabilities_present_wait2>
+struct vulkan_object_trait<tag::result::khr::surface_capabilities_present_wait2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -120,11 +120,11 @@ struct vulkan_object_trait<obj::result::khr::surface_capabilities_present_wait2>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePresentWait2FeaturesKHR>
 {
-	using type = obj::feature::khr::present_wait2;
+	using type = tag::feature::khr::present_wait2;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::present_wait2>
+struct vulkan_object_native<tag::feature::khr::present_wait2>
 {
 	using type = VkPhysicalDevicePresentWait2FeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRESENT_WAIT_2_FEATURES_KHR;
@@ -133,11 +133,11 @@ struct vulkan_object_native<obj::feature::khr::present_wait2>
 template<>
 struct expression_vulkan_tag<VkPresentWait2InfoKHR>
 {
-	using type = obj::khr::present_wait2;
+	using type = tag::khr::present_wait2;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::present_wait2>
+struct vulkan_object_native<tag::khr::present_wait2>
 {
 	using type = VkPresentWait2InfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PRESENT_WAIT_2_INFO_KHR;
@@ -146,18 +146,18 @@ struct vulkan_object_native<obj::khr::present_wait2>
 template<>
 struct expression_vulkan_tag<VkSurfaceCapabilitiesPresentWait2KHR>
 {
-	using type = obj::result::khr::surface_capabilities_present_wait2;
+	using type = tag::result::khr::surface_capabilities_present_wait2;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::surface_capabilities_present_wait2>
+struct vulkan_object_native<tag::result::khr::surface_capabilities_present_wait2>
 {
 	using type = VkSurfaceCapabilitiesPresentWait2KHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SURFACE_CAPABILITIES_PRESENT_WAIT_2_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::present_wait2>
+struct vulkan_object_extensions<tag::feature::khr::present_wait2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_present_wait2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -165,7 +165,7 @@ struct vulkan_object_extensions<obj::feature::khr::present_wait2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::present_wait2>
+struct vulkan_object_extensions<tag::khr::present_wait2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_present_wait2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -173,7 +173,7 @@ struct vulkan_object_extensions<obj::khr::present_wait2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::surface_capabilities_present_wait2>
+struct vulkan_object_extensions<tag::result::khr::surface_capabilities_present_wait2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_present_wait2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -181,11 +181,11 @@ struct vulkan_object_extensions<obj::result::khr::surface_capabilities_present_w
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::present_wait2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::present_wait2> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::present_wait2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::present_wait2> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::surface_capabilities2, obj::result::khr::surface_capabilities_present_wait2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::surface_capabilities2, tag::result::khr::surface_capabilities_present_wait2> = true;
 }
 
 namespace vkfu::param
@@ -196,7 +196,7 @@ using ::vkfu::operator|;
 
 struct present_wait2
 {
-	using vulkan_tag_type = obj::feature::khr::present_wait2;
+	using vulkan_tag_type = tag::feature::khr::present_wait2;
 
 	bool enable = false;
 
@@ -218,7 +218,7 @@ using ::vkfu::operator|;
 
 struct present_wait2
 {
-	using vulkan_tag_type = obj::khr::present_wait2;
+	using vulkan_tag_type = tag::khr::present_wait2;
 
 	::std::uint64_t present_id{};
 	::std::uint64_t timeout{};
@@ -241,7 +241,7 @@ namespace vkfu
 {
 namespace khr
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::present_wait2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::present_wait2> Expression1>
 [[nodiscard]] auto wait_for_present2(VkDevice device, VkSwapchainKHR swapchain, Expression1&& present_wait2_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -254,7 +254,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::present_wait2> Expression1>
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::present_wait2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::present_wait2> Expression1>
 void wait_for_present2(VkDevice device, VkSwapchainKHR swapchain, Expression1&& present_wait2_info)
 {
 	auto outcome = wait_for_present2(device, swapchain, ::std::forward<Expression1>(present_wait2_info), ::std::nothrow);

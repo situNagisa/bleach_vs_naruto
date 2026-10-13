@@ -28,10 +28,10 @@
 
 #include "../version_1_3/format_feature_flags2.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace result::khr
 {
-using format_properties3 = ::vkfu::obj::result::format_properties3;
+using format_properties3 = ::vkfu::tag::result::format_properties3;
 }
 }

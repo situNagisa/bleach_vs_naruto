@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDevice4444FormatsFeaturesEXT const& valu
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct format_4444{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::format_4444>
+struct vulkan_object_trait<tag::feature::ext::format_4444>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::format_4444>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevice4444FormatsFeaturesEXT>
 {
-	using type = obj::feature::ext::format_4444;
+	using type = tag::feature::ext::format_4444;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::format_4444>
+struct vulkan_object_native<tag::feature::ext::format_4444>
 {
 	using type = VkPhysicalDevice4444FormatsFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_4444_FORMATS_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::format_4444>
+struct vulkan_object_extensions<tag::feature::ext::format_4444>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_4444_formats"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::format_4444>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::format_4444> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::format_4444> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::format_4444> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::format_4444> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct format_4444
 {
-	using vulkan_tag_type = obj::feature::ext::format_4444;
+	using vulkan_tag_type = tag::feature::ext::format_4444;
 
 	bool format_a4r4g4b4 = false;
 	bool format_a4b4g4r4 = false;

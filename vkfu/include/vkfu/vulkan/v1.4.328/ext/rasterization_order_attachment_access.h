@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceRasterizationOrderAttachmentAccess
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct rasterization_order_attachment_access{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::rasterization_order_attachment_access>
+struct vulkan_object_trait<tag::feature::ext::rasterization_order_attachment_access>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::rasterization_order_attachment_acc
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceRasterizationOrderAttachmentAccessFeaturesEXT>
 {
-	using type = obj::feature::ext::rasterization_order_attachment_access;
+	using type = tag::feature::ext::rasterization_order_attachment_access;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::rasterization_order_attachment_access>
+struct vulkan_object_native<tag::feature::ext::rasterization_order_attachment_access>
 {
 	using type = VkPhysicalDeviceRasterizationOrderAttachmentAccessFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RASTERIZATION_ORDER_ATTACHMENT_ACCESS_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::rasterization_order_attachment_access>
+struct vulkan_object_extensions<tag::feature::ext::rasterization_order_attachment_access>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_ARM_rasterization_order_attachment_access", "VK_EXT_rasterization_order_attachment_access"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::rasterization_order_attachmen
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::rasterization_order_attachment_access> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::rasterization_order_attachment_access> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::rasterization_order_attachment_access> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::rasterization_order_attachment_access> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct rasterization_order_attachment_access
 {
-	using vulkan_tag_type = obj::feature::ext::rasterization_order_attachment_access;
+	using vulkan_tag_type = tag::feature::ext::rasterization_order_attachment_access;
 
 	bool rasterization_order_color_attachment_access = false;
 	bool rasterization_order_depth_attachment_access = false;

@@ -194,7 +194,7 @@ constexpr auto _vkfu_evaluate(VkResolveImageInfo2 const& value) noexcept -> VkRe
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct blit_image2{};
 struct buffer_copy2{};
@@ -212,7 +212,7 @@ struct resolve_image2{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::blit_image2>
+struct vulkan_object_trait<tag::blit_image2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -220,7 +220,7 @@ struct vulkan_object_trait<obj::blit_image2>
 };
 
 template<>
-struct vulkan_object_trait<obj::buffer_copy2>
+struct vulkan_object_trait<tag::buffer_copy2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -228,47 +228,7 @@ struct vulkan_object_trait<obj::buffer_copy2>
 };
 
 template<>
-struct vulkan_object_trait<obj::buffer_image_copy2>
-{
-	constexpr static auto root = false;
-	constexpr static auto branch = true;
-	constexpr static auto allow_duplicate = false;
-};
-
-template<>
-struct vulkan_object_trait<obj::copy_buffer2>
-{
-	constexpr static auto root = true;
-	constexpr static auto branch = false;
-	constexpr static auto allow_duplicate = false;
-};
-
-template<>
-struct vulkan_object_trait<obj::copy_buffer_to_image2>
-{
-	constexpr static auto root = true;
-	constexpr static auto branch = false;
-	constexpr static auto allow_duplicate = false;
-};
-
-template<>
-struct vulkan_object_trait<obj::copy_image2>
-{
-	constexpr static auto root = true;
-	constexpr static auto branch = false;
-	constexpr static auto allow_duplicate = false;
-};
-
-template<>
-struct vulkan_object_trait<obj::copy_image_to_buffer2>
-{
-	constexpr static auto root = true;
-	constexpr static auto branch = false;
-	constexpr static auto allow_duplicate = false;
-};
-
-template<>
-struct vulkan_object_trait<obj::image_blit2>
+struct vulkan_object_trait<tag::buffer_image_copy2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = true;
@@ -276,7 +236,47 @@ struct vulkan_object_trait<obj::image_blit2>
 };
 
 template<>
-struct vulkan_object_trait<obj::image_copy2>
+struct vulkan_object_trait<tag::copy_buffer2>
+{
+	constexpr static auto root = true;
+	constexpr static auto branch = false;
+	constexpr static auto allow_duplicate = false;
+};
+
+template<>
+struct vulkan_object_trait<tag::copy_buffer_to_image2>
+{
+	constexpr static auto root = true;
+	constexpr static auto branch = false;
+	constexpr static auto allow_duplicate = false;
+};
+
+template<>
+struct vulkan_object_trait<tag::copy_image2>
+{
+	constexpr static auto root = true;
+	constexpr static auto branch = false;
+	constexpr static auto allow_duplicate = false;
+};
+
+template<>
+struct vulkan_object_trait<tag::copy_image_to_buffer2>
+{
+	constexpr static auto root = true;
+	constexpr static auto branch = false;
+	constexpr static auto allow_duplicate = false;
+};
+
+template<>
+struct vulkan_object_trait<tag::image_blit2>
+{
+	constexpr static auto root = false;
+	constexpr static auto branch = true;
+	constexpr static auto allow_duplicate = false;
+};
+
+template<>
+struct vulkan_object_trait<tag::image_copy2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -284,7 +284,7 @@ struct vulkan_object_trait<obj::image_copy2>
 };
 
 template<>
-struct vulkan_object_trait<obj::image_resolve2>
+struct vulkan_object_trait<tag::image_resolve2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -292,7 +292,7 @@ struct vulkan_object_trait<obj::image_resolve2>
 };
 
 template<>
-struct vulkan_object_trait<obj::resolve_image2>
+struct vulkan_object_trait<tag::resolve_image2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -302,11 +302,11 @@ struct vulkan_object_trait<obj::resolve_image2>
 template<>
 struct expression_vulkan_tag<VkBlitImageInfo2>
 {
-	using type = obj::blit_image2;
+	using type = tag::blit_image2;
 };
 
 template<>
-struct vulkan_object_native<obj::blit_image2>
+struct vulkan_object_native<tag::blit_image2>
 {
 	using type = VkBlitImageInfo2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2;
@@ -315,11 +315,11 @@ struct vulkan_object_native<obj::blit_image2>
 template<>
 struct expression_vulkan_tag<VkBufferCopy2>
 {
-	using type = obj::buffer_copy2;
+	using type = tag::buffer_copy2;
 };
 
 template<>
-struct vulkan_object_native<obj::buffer_copy2>
+struct vulkan_object_native<tag::buffer_copy2>
 {
 	using type = VkBufferCopy2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_BUFFER_COPY_2;
@@ -328,11 +328,11 @@ struct vulkan_object_native<obj::buffer_copy2>
 template<>
 struct expression_vulkan_tag<VkBufferImageCopy2>
 {
-	using type = obj::buffer_image_copy2;
+	using type = tag::buffer_image_copy2;
 };
 
 template<>
-struct vulkan_object_native<obj::buffer_image_copy2>
+struct vulkan_object_native<tag::buffer_image_copy2>
 {
 	using type = VkBufferImageCopy2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_BUFFER_IMAGE_COPY_2;
@@ -341,11 +341,11 @@ struct vulkan_object_native<obj::buffer_image_copy2>
 template<>
 struct expression_vulkan_tag<VkCopyBufferInfo2>
 {
-	using type = obj::copy_buffer2;
+	using type = tag::copy_buffer2;
 };
 
 template<>
-struct vulkan_object_native<obj::copy_buffer2>
+struct vulkan_object_native<tag::copy_buffer2>
 {
 	using type = VkCopyBufferInfo2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_COPY_BUFFER_INFO_2;
@@ -354,11 +354,11 @@ struct vulkan_object_native<obj::copy_buffer2>
 template<>
 struct expression_vulkan_tag<VkCopyBufferToImageInfo2>
 {
-	using type = obj::copy_buffer_to_image2;
+	using type = tag::copy_buffer_to_image2;
 };
 
 template<>
-struct vulkan_object_native<obj::copy_buffer_to_image2>
+struct vulkan_object_native<tag::copy_buffer_to_image2>
 {
 	using type = VkCopyBufferToImageInfo2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_COPY_BUFFER_TO_IMAGE_INFO_2;
@@ -367,11 +367,11 @@ struct vulkan_object_native<obj::copy_buffer_to_image2>
 template<>
 struct expression_vulkan_tag<VkCopyImageInfo2>
 {
-	using type = obj::copy_image2;
+	using type = tag::copy_image2;
 };
 
 template<>
-struct vulkan_object_native<obj::copy_image2>
+struct vulkan_object_native<tag::copy_image2>
 {
 	using type = VkCopyImageInfo2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_COPY_IMAGE_INFO_2;
@@ -380,11 +380,11 @@ struct vulkan_object_native<obj::copy_image2>
 template<>
 struct expression_vulkan_tag<VkCopyImageToBufferInfo2>
 {
-	using type = obj::copy_image_to_buffer2;
+	using type = tag::copy_image_to_buffer2;
 };
 
 template<>
-struct vulkan_object_native<obj::copy_image_to_buffer2>
+struct vulkan_object_native<tag::copy_image_to_buffer2>
 {
 	using type = VkCopyImageToBufferInfo2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_COPY_IMAGE_TO_BUFFER_INFO_2;
@@ -393,11 +393,11 @@ struct vulkan_object_native<obj::copy_image_to_buffer2>
 template<>
 struct expression_vulkan_tag<VkImageBlit2>
 {
-	using type = obj::image_blit2;
+	using type = tag::image_blit2;
 };
 
 template<>
-struct vulkan_object_native<obj::image_blit2>
+struct vulkan_object_native<tag::image_blit2>
 {
 	using type = VkImageBlit2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_BLIT_2;
@@ -406,11 +406,11 @@ struct vulkan_object_native<obj::image_blit2>
 template<>
 struct expression_vulkan_tag<VkImageCopy2>
 {
-	using type = obj::image_copy2;
+	using type = tag::image_copy2;
 };
 
 template<>
-struct vulkan_object_native<obj::image_copy2>
+struct vulkan_object_native<tag::image_copy2>
 {
 	using type = VkImageCopy2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_COPY_2;
@@ -419,11 +419,11 @@ struct vulkan_object_native<obj::image_copy2>
 template<>
 struct expression_vulkan_tag<VkImageResolve2>
 {
-	using type = obj::image_resolve2;
+	using type = tag::image_resolve2;
 };
 
 template<>
-struct vulkan_object_native<obj::image_resolve2>
+struct vulkan_object_native<tag::image_resolve2>
 {
 	using type = VkImageResolve2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_RESOLVE_2;
@@ -432,18 +432,18 @@ struct vulkan_object_native<obj::image_resolve2>
 template<>
 struct expression_vulkan_tag<VkResolveImageInfo2>
 {
-	using type = obj::resolve_image2;
+	using type = tag::resolve_image2;
 };
 
 template<>
-struct vulkan_object_native<obj::resolve_image2>
+struct vulkan_object_native<tag::resolve_image2>
 {
 	using type = VkResolveImageInfo2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RESOLVE_IMAGE_INFO_2;
 };
 
 template<>
-struct vulkan_object_extensions<obj::blit_image2>
+struct vulkan_object_extensions<tag::blit_image2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_copy_commands2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -451,7 +451,7 @@ struct vulkan_object_extensions<obj::blit_image2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::buffer_copy2>
+struct vulkan_object_extensions<tag::buffer_copy2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_copy_commands2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -459,7 +459,7 @@ struct vulkan_object_extensions<obj::buffer_copy2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::buffer_image_copy2>
+struct vulkan_object_extensions<tag::buffer_image_copy2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_copy_commands2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -467,7 +467,7 @@ struct vulkan_object_extensions<obj::buffer_image_copy2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::copy_buffer2>
+struct vulkan_object_extensions<tag::copy_buffer2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_copy_commands2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -475,7 +475,7 @@ struct vulkan_object_extensions<obj::copy_buffer2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::copy_buffer_to_image2>
+struct vulkan_object_extensions<tag::copy_buffer_to_image2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_copy_commands2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -483,7 +483,7 @@ struct vulkan_object_extensions<obj::copy_buffer_to_image2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::copy_image2>
+struct vulkan_object_extensions<tag::copy_image2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_copy_commands2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -491,7 +491,7 @@ struct vulkan_object_extensions<obj::copy_image2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::copy_image_to_buffer2>
+struct vulkan_object_extensions<tag::copy_image_to_buffer2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_copy_commands2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -499,7 +499,7 @@ struct vulkan_object_extensions<obj::copy_image_to_buffer2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::image_blit2>
+struct vulkan_object_extensions<tag::image_blit2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_copy_commands2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -507,7 +507,7 @@ struct vulkan_object_extensions<obj::image_blit2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::image_copy2>
+struct vulkan_object_extensions<tag::image_copy2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_copy_commands2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -515,7 +515,7 @@ struct vulkan_object_extensions<obj::image_copy2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::image_resolve2>
+struct vulkan_object_extensions<tag::image_resolve2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_copy_commands2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -523,7 +523,7 @@ struct vulkan_object_extensions<obj::image_resolve2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::resolve_image2>
+struct vulkan_object_extensions<tag::resolve_image2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_copy_commands2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -538,7 +538,7 @@ using ::vkfu::operator|;
 
 struct blit_image2
 {
-	using vulkan_tag_type = obj::blit_image2;
+	using vulkan_tag_type = tag::blit_image2;
 
 	VkImage src_image{};
 	::vkfu::enums::image_layout src_image_layout{};
@@ -565,7 +565,7 @@ struct blit_image2
 
 struct buffer_copy2
 {
-	using vulkan_tag_type = obj::buffer_copy2;
+	using vulkan_tag_type = tag::buffer_copy2;
 
 	VkDeviceSize src_offset{};
 	VkDeviceSize dst_offset{};
@@ -585,7 +585,7 @@ struct buffer_copy2
 
 struct buffer_image_copy2
 {
-	using vulkan_tag_type = obj::buffer_image_copy2;
+	using vulkan_tag_type = tag::buffer_image_copy2;
 
 	VkDeviceSize buffer_offset{};
 	::std::uint32_t buffer_row_length{};
@@ -611,7 +611,7 @@ struct buffer_image_copy2
 
 struct copy_buffer2
 {
-	using vulkan_tag_type = obj::copy_buffer2;
+	using vulkan_tag_type = tag::copy_buffer2;
 
 	VkBuffer src_buffer{};
 	VkBuffer dst_buffer{};
@@ -632,7 +632,7 @@ struct copy_buffer2
 
 struct copy_buffer_to_image2
 {
-	using vulkan_tag_type = obj::copy_buffer_to_image2;
+	using vulkan_tag_type = tag::copy_buffer_to_image2;
 
 	VkBuffer src_buffer{};
 	VkImage dst_image{};
@@ -655,7 +655,7 @@ struct copy_buffer_to_image2
 
 struct copy_image2
 {
-	using vulkan_tag_type = obj::copy_image2;
+	using vulkan_tag_type = tag::copy_image2;
 
 	VkImage src_image{};
 	::vkfu::enums::image_layout src_image_layout{};
@@ -680,7 +680,7 @@ struct copy_image2
 
 struct copy_image_to_buffer2
 {
-	using vulkan_tag_type = obj::copy_image_to_buffer2;
+	using vulkan_tag_type = tag::copy_image_to_buffer2;
 
 	VkImage src_image{};
 	::vkfu::enums::image_layout src_image_layout{};
@@ -703,7 +703,7 @@ struct copy_image_to_buffer2
 
 struct image_blit2
 {
-	using vulkan_tag_type = obj::image_blit2;
+	using vulkan_tag_type = tag::image_blit2;
 
 	VkImageSubresourceLayers src_subresource{};
 	::std::array<VkOffset3D, 2> src_offsets{};
@@ -728,7 +728,7 @@ struct image_blit2
 
 struct image_copy2
 {
-	using vulkan_tag_type = obj::image_copy2;
+	using vulkan_tag_type = tag::image_copy2;
 
 	VkImageSubresourceLayers src_subresource{};
 	VkOffset3D src_offset{};
@@ -752,7 +752,7 @@ struct image_copy2
 
 struct image_resolve2
 {
-	using vulkan_tag_type = obj::image_resolve2;
+	using vulkan_tag_type = tag::image_resolve2;
 
 	VkImageSubresourceLayers src_subresource{};
 	VkOffset3D src_offset{};
@@ -776,7 +776,7 @@ struct image_resolve2
 
 struct resolve_image2
 {
-	using vulkan_tag_type = obj::resolve_image2;
+	using vulkan_tag_type = tag::resolve_image2;
 
 	VkImage src_image{};
 	::vkfu::enums::image_layout src_image_layout{};
@@ -802,42 +802,42 @@ struct resolve_image2
 
 namespace vkfu
 {
-template<::vkfu::expression_for<::vkfu::obj::blit_image2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::blit_image2> Expression1>
 void cmd_blit_image2(VkCommandBuffer command_buffer, Expression1&& blit_image_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(blit_image_info));
 	::vkCmdBlitImage2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::copy_buffer2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::copy_buffer2> Expression1>
 void cmd_copy_buffer2(VkCommandBuffer command_buffer, Expression1&& copy_buffer_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(copy_buffer_info));
 	::vkCmdCopyBuffer2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::copy_buffer_to_image2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::copy_buffer_to_image2> Expression1>
 void cmd_copy_buffer_to_image2(VkCommandBuffer command_buffer, Expression1&& copy_buffer_to_image_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(copy_buffer_to_image_info));
 	::vkCmdCopyBufferToImage2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::copy_image2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::copy_image2> Expression1>
 void cmd_copy_image2(VkCommandBuffer command_buffer, Expression1&& copy_image_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(copy_image_info));
 	::vkCmdCopyImage2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::copy_image_to_buffer2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::copy_image_to_buffer2> Expression1>
 void cmd_copy_image_to_buffer2(VkCommandBuffer command_buffer, Expression1&& copy_image_to_buffer_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(copy_image_to_buffer_info));
 	::vkCmdCopyImageToBuffer2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::resolve_image2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::resolve_image2> Expression1>
 void cmd_resolve_image2(VkCommandBuffer command_buffer, Expression1&& resolve_image_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(resolve_image_info));

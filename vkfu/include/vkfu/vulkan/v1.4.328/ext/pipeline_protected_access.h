@@ -28,11 +28,11 @@
 
 #include "../version_1_4/pipeline_protected_access.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
-using pipeline_protected_access = ::vkfu::obj::feature::pipeline_protected_access;
+using pipeline_protected_access = ::vkfu::tag::feature::pipeline_protected_access;
 }
 }
 

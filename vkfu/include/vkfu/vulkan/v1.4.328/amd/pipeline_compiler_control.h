@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkPipelineCompilerControlCreateInfoAMD const& valu
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::amd
 {
@@ -54,7 +54,7 @@ struct pipeline_compiler_control{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::amd::pipeline_compiler_control>
+struct vulkan_object_trait<tag::option::amd::pipeline_compiler_control>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::option::amd::pipeline_compiler_control>
 template<>
 struct expression_vulkan_tag<VkPipelineCompilerControlCreateInfoAMD>
 {
-	using type = obj::option::amd::pipeline_compiler_control;
+	using type = tag::option::amd::pipeline_compiler_control;
 };
 
 template<>
-struct vulkan_object_native<obj::option::amd::pipeline_compiler_control>
+struct vulkan_object_native<tag::option::amd::pipeline_compiler_control>
 {
 	using type = VkPipelineCompilerControlCreateInfoAMD;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_COMPILER_CONTROL_CREATE_INFO_AMD;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::amd::pipeline_compiler_control>
+struct vulkan_object_extensions<tag::option::amd::pipeline_compiler_control>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_AMD_pipeline_compiler_control"};
 	constexpr static ::std::uint32_t core = 0;
@@ -83,9 +83,9 @@ struct vulkan_object_extensions<obj::option::amd::pipeline_compiler_control>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::compute_pipeline, obj::option::amd::pipeline_compiler_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::compute_pipeline, tag::option::amd::pipeline_compiler_control> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::graphics_pipeline, obj::option::amd::pipeline_compiler_control> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::graphics_pipeline, tag::option::amd::pipeline_compiler_control> = true;
 }
 
 namespace vkfu::param
@@ -96,7 +96,7 @@ using ::vkfu::operator|;
 
 struct pipeline_compiler_control
 {
-	using vulkan_tag_type = obj::option::amd::pipeline_compiler_control;
+	using vulkan_tag_type = tag::option::amd::pipeline_compiler_control;
 
 	VkPipelineCompilerControlFlagsAMD compiler_control_flags{};
 

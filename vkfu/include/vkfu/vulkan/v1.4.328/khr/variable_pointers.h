@@ -28,11 +28,11 @@
 
 #include "../version_1_1/variable_pointers.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using variable_pointers = ::vkfu::obj::feature::variable_pointers;
+using variable_pointers = ::vkfu::tag::feature::variable_pointers;
 }
 }
 

@@ -75,7 +75,7 @@ constexpr auto _vkfu_evaluate(VkMemoryZirconHandlePropertiesFUCHSIA const& value
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace fuchsia
 {
@@ -94,7 +94,7 @@ struct memory_zircon_handle_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::fuchsia::import_memory_zircon_handle>
+struct vulkan_object_trait<tag::option::fuchsia::import_memory_zircon_handle>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -102,7 +102,7 @@ struct vulkan_object_trait<obj::option::fuchsia::import_memory_zircon_handle>
 };
 
 template<>
-struct vulkan_object_trait<obj::fuchsia::memory_get_zircon_handle>
+struct vulkan_object_trait<tag::fuchsia::memory_get_zircon_handle>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -110,7 +110,7 @@ struct vulkan_object_trait<obj::fuchsia::memory_get_zircon_handle>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::fuchsia::memory_zircon_handle_properties>
+struct vulkan_object_trait<tag::result::fuchsia::memory_zircon_handle_properties>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -120,11 +120,11 @@ struct vulkan_object_trait<obj::result::fuchsia::memory_zircon_handle_properties
 template<>
 struct expression_vulkan_tag<VkImportMemoryZirconHandleInfoFUCHSIA>
 {
-	using type = obj::option::fuchsia::import_memory_zircon_handle;
+	using type = tag::option::fuchsia::import_memory_zircon_handle;
 };
 
 template<>
-struct vulkan_object_native<obj::option::fuchsia::import_memory_zircon_handle>
+struct vulkan_object_native<tag::option::fuchsia::import_memory_zircon_handle>
 {
 	using type = VkImportMemoryZirconHandleInfoFUCHSIA;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMPORT_MEMORY_ZIRCON_HANDLE_INFO_FUCHSIA;
@@ -133,11 +133,11 @@ struct vulkan_object_native<obj::option::fuchsia::import_memory_zircon_handle>
 template<>
 struct expression_vulkan_tag<VkMemoryGetZirconHandleInfoFUCHSIA>
 {
-	using type = obj::fuchsia::memory_get_zircon_handle;
+	using type = tag::fuchsia::memory_get_zircon_handle;
 };
 
 template<>
-struct vulkan_object_native<obj::fuchsia::memory_get_zircon_handle>
+struct vulkan_object_native<tag::fuchsia::memory_get_zircon_handle>
 {
 	using type = VkMemoryGetZirconHandleInfoFUCHSIA;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MEMORY_GET_ZIRCON_HANDLE_INFO_FUCHSIA;
@@ -146,18 +146,18 @@ struct vulkan_object_native<obj::fuchsia::memory_get_zircon_handle>
 template<>
 struct expression_vulkan_tag<VkMemoryZirconHandlePropertiesFUCHSIA>
 {
-	using type = obj::result::fuchsia::memory_zircon_handle_properties;
+	using type = tag::result::fuchsia::memory_zircon_handle_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::fuchsia::memory_zircon_handle_properties>
+struct vulkan_object_native<tag::result::fuchsia::memory_zircon_handle_properties>
 {
 	using type = VkMemoryZirconHandlePropertiesFUCHSIA;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MEMORY_ZIRCON_HANDLE_PROPERTIES_FUCHSIA;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::fuchsia::import_memory_zircon_handle>
+struct vulkan_object_extensions<tag::option::fuchsia::import_memory_zircon_handle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_FUCHSIA_external_memory"};
 	constexpr static ::std::uint32_t core = 0;
@@ -165,7 +165,7 @@ struct vulkan_object_extensions<obj::option::fuchsia::import_memory_zircon_handl
 };
 
 template<>
-struct vulkan_object_extensions<obj::fuchsia::memory_get_zircon_handle>
+struct vulkan_object_extensions<tag::fuchsia::memory_get_zircon_handle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_FUCHSIA_external_memory"};
 	constexpr static ::std::uint32_t core = 0;
@@ -173,7 +173,7 @@ struct vulkan_object_extensions<obj::fuchsia::memory_get_zircon_handle>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::fuchsia::memory_zircon_handle_properties>
+struct vulkan_object_extensions<tag::result::fuchsia::memory_zircon_handle_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_FUCHSIA_external_memory"};
 	constexpr static ::std::uint32_t core = 0;
@@ -181,7 +181,7 @@ struct vulkan_object_extensions<obj::result::fuchsia::memory_zircon_handle_prope
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::memory, obj::option::fuchsia::import_memory_zircon_handle> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::memory, tag::option::fuchsia::import_memory_zircon_handle> = true;
 }
 
 namespace vkfu::param
@@ -192,7 +192,7 @@ using ::vkfu::operator|;
 
 struct memory_get_zircon_handle
 {
-	using vulkan_tag_type = obj::fuchsia::memory_get_zircon_handle;
+	using vulkan_tag_type = tag::fuchsia::memory_get_zircon_handle;
 
 	VkDeviceMemory memory{};
 	::vkfu::enums::external_memory_handle_type handle_type{};
@@ -216,7 +216,7 @@ using ::vkfu::operator|;
 
 struct import_memory_zircon_handle
 {
-	using vulkan_tag_type = obj::option::fuchsia::import_memory_zircon_handle;
+	using vulkan_tag_type = tag::option::fuchsia::import_memory_zircon_handle;
 
 	::vkfu::enums::external_memory_handle_type handle_type{};
 	zx_handle_t handle{};
@@ -239,7 +239,7 @@ namespace vkfu
 {
 namespace fuchsia
 {
-template<::vkfu::expression_for<::vkfu::obj::fuchsia::memory_get_zircon_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::fuchsia::memory_get_zircon_handle> Expression1>
 [[nodiscard]] auto get_memory_zircon_handle(VkDevice device, Expression1&& get_zircon_handle_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<zx_handle_t, ::VkResult>
 {
@@ -253,7 +253,7 @@ template<::vkfu::expression_for<::vkfu::obj::fuchsia::memory_get_zircon_handle> 
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::fuchsia::memory_get_zircon_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::fuchsia::memory_get_zircon_handle> Expression1>
 [[nodiscard]] auto get_memory_zircon_handle(VkDevice device, Expression1&& get_zircon_handle_info) -> zx_handle_t
 {
 	auto outcome = get_memory_zircon_handle(device, ::std::forward<Expression1>(get_zircon_handle_info), ::std::nothrow);

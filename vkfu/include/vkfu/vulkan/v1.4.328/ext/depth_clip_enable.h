@@ -60,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkPipelineRasterizationDepthClipStateCreateInfoEXT
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -75,7 +75,7 @@ struct rasterization_depth_clip{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::depth_clip_enable>
+struct vulkan_object_trait<tag::feature::ext::depth_clip_enable>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -83,7 +83,7 @@ struct vulkan_object_trait<obj::feature::ext::depth_clip_enable>
 };
 
 template<>
-struct vulkan_object_trait<obj::state::ext::rasterization_depth_clip>
+struct vulkan_object_trait<tag::state::ext::rasterization_depth_clip>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -93,11 +93,11 @@ struct vulkan_object_trait<obj::state::ext::rasterization_depth_clip>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDepthClipEnableFeaturesEXT>
 {
-	using type = obj::feature::ext::depth_clip_enable;
+	using type = tag::feature::ext::depth_clip_enable;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::depth_clip_enable>
+struct vulkan_object_native<tag::feature::ext::depth_clip_enable>
 {
 	using type = VkPhysicalDeviceDepthClipEnableFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_CLIP_ENABLE_FEATURES_EXT;
@@ -106,18 +106,18 @@ struct vulkan_object_native<obj::feature::ext::depth_clip_enable>
 template<>
 struct expression_vulkan_tag<VkPipelineRasterizationDepthClipStateCreateInfoEXT>
 {
-	using type = obj::state::ext::rasterization_depth_clip;
+	using type = tag::state::ext::rasterization_depth_clip;
 };
 
 template<>
-struct vulkan_object_native<obj::state::ext::rasterization_depth_clip>
+struct vulkan_object_native<tag::state::ext::rasterization_depth_clip>
 {
 	using type = VkPipelineRasterizationDepthClipStateCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_DEPTH_CLIP_STATE_CREATE_INFO_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::depth_clip_enable>
+struct vulkan_object_extensions<tag::feature::ext::depth_clip_enable>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_depth_clip_enable"};
 	constexpr static ::std::uint32_t core = 0;
@@ -125,7 +125,7 @@ struct vulkan_object_extensions<obj::feature::ext::depth_clip_enable>
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::ext::rasterization_depth_clip>
+struct vulkan_object_extensions<tag::state::ext::rasterization_depth_clip>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_depth_clip_enable"};
 	constexpr static ::std::uint32_t core = 0;
@@ -133,11 +133,11 @@ struct vulkan_object_extensions<obj::state::ext::rasterization_depth_clip>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::depth_clip_enable> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::depth_clip_enable> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::depth_clip_enable> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::depth_clip_enable> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::rasterization, obj::state::ext::rasterization_depth_clip> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::rasterization, tag::state::ext::rasterization_depth_clip> = true;
 }
 
 namespace vkfu::param
@@ -148,7 +148,7 @@ using ::vkfu::operator|;
 
 struct depth_clip_enable
 {
-	using vulkan_tag_type = obj::feature::ext::depth_clip_enable;
+	using vulkan_tag_type = tag::feature::ext::depth_clip_enable;
 
 	bool enable = false;
 
@@ -170,7 +170,7 @@ using ::vkfu::operator|;
 
 struct rasterization_depth_clip
 {
-	using vulkan_tag_type = obj::state::ext::rasterization_depth_clip;
+	using vulkan_tag_type = tag::state::ext::rasterization_depth_clip;
 
 	VkPipelineRasterizationDepthClipStateCreateFlagsEXT flags{};
 	bool depth_clip_enable = false;

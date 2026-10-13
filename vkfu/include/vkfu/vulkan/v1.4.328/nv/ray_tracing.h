@@ -26,6 +26,8 @@
 #include <vkfu/storage.h>
 #include <vkfu/vulkan_object.h>
 
+#include "../version_1_0/query.h"
+#include "../version_1_0/pipeline.h"
 #include "../version_1_0/descriptor_set.h"
 #include "../version_1_1/get_physical_device_properties2.h"
 #include "../version_1_3/pipeline_creation_feedback.h"
@@ -179,7 +181,7 @@ enum class acceleration_structure_memory_requirements_type : ::std::underlying_t
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace nv
 {
@@ -204,7 +206,7 @@ struct ray_tracing{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::nv::acceleration_structure_create>
+struct vulkan_object_trait<tag::nv::acceleration_structure_create>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -212,7 +214,7 @@ struct vulkan_object_trait<obj::nv::acceleration_structure_create>
 };
 
 template<>
-struct vulkan_object_trait<obj::nv::acceleration_structure>
+struct vulkan_object_trait<tag::nv::acceleration_structure>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -220,7 +222,7 @@ struct vulkan_object_trait<obj::nv::acceleration_structure>
 };
 
 template<>
-struct vulkan_object_trait<obj::nv::acceleration_structure_memory_requirements>
+struct vulkan_object_trait<tag::nv::acceleration_structure_memory_requirements>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -228,7 +230,7 @@ struct vulkan_object_trait<obj::nv::acceleration_structure_memory_requirements>
 };
 
 template<>
-struct vulkan_object_trait<obj::nv::bind_acceleration_structure_memory>
+struct vulkan_object_trait<tag::nv::bind_acceleration_structure_memory>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -236,7 +238,7 @@ struct vulkan_object_trait<obj::nv::bind_acceleration_structure_memory>
 };
 
 template<>
-struct vulkan_object_trait<obj::nv::geometry>
+struct vulkan_object_trait<tag::nv::geometry>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -244,7 +246,7 @@ struct vulkan_object_trait<obj::nv::geometry>
 };
 
 template<>
-struct vulkan_object_trait<obj::nv::ray_tracing_pipeline>
+struct vulkan_object_trait<tag::nv::ray_tracing_pipeline>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -252,7 +254,7 @@ struct vulkan_object_trait<obj::nv::ray_tracing_pipeline>
 };
 
 template<>
-struct vulkan_object_trait<obj::nv::ray_tracing_shader_group>
+struct vulkan_object_trait<tag::nv::ray_tracing_shader_group>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -260,7 +262,7 @@ struct vulkan_object_trait<obj::nv::ray_tracing_shader_group>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::nv::write_descriptor_set_acceleration_structure>
+struct vulkan_object_trait<tag::option::nv::write_descriptor_set_acceleration_structure>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -268,7 +270,7 @@ struct vulkan_object_trait<obj::option::nv::write_descriptor_set_acceleration_st
 };
 
 template<>
-struct vulkan_object_trait<obj::property::nv::ray_tracing>
+struct vulkan_object_trait<tag::property::nv::ray_tracing>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -278,11 +280,11 @@ struct vulkan_object_trait<obj::property::nv::ray_tracing>
 template<>
 struct expression_vulkan_tag<VkAccelerationStructureCreateInfoNV>
 {
-	using type = obj::nv::acceleration_structure_create;
+	using type = tag::nv::acceleration_structure_create;
 };
 
 template<>
-struct vulkan_object_native<obj::nv::acceleration_structure_create>
+struct vulkan_object_native<tag::nv::acceleration_structure_create>
 {
 	using type = VkAccelerationStructureCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_NV;
@@ -291,11 +293,11 @@ struct vulkan_object_native<obj::nv::acceleration_structure_create>
 template<>
 struct expression_vulkan_tag<VkAccelerationStructureInfoNV>
 {
-	using type = obj::nv::acceleration_structure;
+	using type = tag::nv::acceleration_structure;
 };
 
 template<>
-struct vulkan_object_native<obj::nv::acceleration_structure>
+struct vulkan_object_native<tag::nv::acceleration_structure>
 {
 	using type = VkAccelerationStructureInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV;
@@ -304,11 +306,11 @@ struct vulkan_object_native<obj::nv::acceleration_structure>
 template<>
 struct expression_vulkan_tag<VkAccelerationStructureMemoryRequirementsInfoNV>
 {
-	using type = obj::nv::acceleration_structure_memory_requirements;
+	using type = tag::nv::acceleration_structure_memory_requirements;
 };
 
 template<>
-struct vulkan_object_native<obj::nv::acceleration_structure_memory_requirements>
+struct vulkan_object_native<tag::nv::acceleration_structure_memory_requirements>
 {
 	using type = VkAccelerationStructureMemoryRequirementsInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_MEMORY_REQUIREMENTS_INFO_NV;
@@ -317,11 +319,11 @@ struct vulkan_object_native<obj::nv::acceleration_structure_memory_requirements>
 template<>
 struct expression_vulkan_tag<VkBindAccelerationStructureMemoryInfoNV>
 {
-	using type = obj::nv::bind_acceleration_structure_memory;
+	using type = tag::nv::bind_acceleration_structure_memory;
 };
 
 template<>
-struct vulkan_object_native<obj::nv::bind_acceleration_structure_memory>
+struct vulkan_object_native<tag::nv::bind_acceleration_structure_memory>
 {
 	using type = VkBindAccelerationStructureMemoryInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_BIND_ACCELERATION_STRUCTURE_MEMORY_INFO_NV;
@@ -330,11 +332,11 @@ struct vulkan_object_native<obj::nv::bind_acceleration_structure_memory>
 template<>
 struct expression_vulkan_tag<VkGeometryNV>
 {
-	using type = obj::nv::geometry;
+	using type = tag::nv::geometry;
 };
 
 template<>
-struct vulkan_object_native<obj::nv::geometry>
+struct vulkan_object_native<tag::nv::geometry>
 {
 	using type = VkGeometryNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_GEOMETRY_NV;
@@ -343,11 +345,11 @@ struct vulkan_object_native<obj::nv::geometry>
 template<>
 struct expression_vulkan_tag<VkRayTracingPipelineCreateInfoNV>
 {
-	using type = obj::nv::ray_tracing_pipeline;
+	using type = tag::nv::ray_tracing_pipeline;
 };
 
 template<>
-struct vulkan_object_native<obj::nv::ray_tracing_pipeline>
+struct vulkan_object_native<tag::nv::ray_tracing_pipeline>
 {
 	using type = VkRayTracingPipelineCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_NV;
@@ -356,11 +358,11 @@ struct vulkan_object_native<obj::nv::ray_tracing_pipeline>
 template<>
 struct expression_vulkan_tag<VkRayTracingShaderGroupCreateInfoNV>
 {
-	using type = obj::nv::ray_tracing_shader_group;
+	using type = tag::nv::ray_tracing_shader_group;
 };
 
 template<>
-struct vulkan_object_native<obj::nv::ray_tracing_shader_group>
+struct vulkan_object_native<tag::nv::ray_tracing_shader_group>
 {
 	using type = VkRayTracingShaderGroupCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_NV;
@@ -369,11 +371,11 @@ struct vulkan_object_native<obj::nv::ray_tracing_shader_group>
 template<>
 struct expression_vulkan_tag<VkWriteDescriptorSetAccelerationStructureNV>
 {
-	using type = obj::option::nv::write_descriptor_set_acceleration_structure;
+	using type = tag::option::nv::write_descriptor_set_acceleration_structure;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::write_descriptor_set_acceleration_structure>
+struct vulkan_object_native<tag::option::nv::write_descriptor_set_acceleration_structure>
 {
 	using type = VkWriteDescriptorSetAccelerationStructureNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_NV;
@@ -382,18 +384,18 @@ struct vulkan_object_native<obj::option::nv::write_descriptor_set_acceleration_s
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceRayTracingPropertiesNV>
 {
-	using type = obj::property::nv::ray_tracing;
+	using type = tag::property::nv::ray_tracing;
 };
 
 template<>
-struct vulkan_object_native<obj::property::nv::ray_tracing>
+struct vulkan_object_native<tag::property::nv::ray_tracing>
 {
 	using type = VkPhysicalDeviceRayTracingPropertiesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PROPERTIES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::nv::acceleration_structure_create>
+struct vulkan_object_extensions<tag::nv::acceleration_structure_create>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_ray_tracing"};
 	constexpr static ::std::uint32_t core = 0;
@@ -401,7 +403,7 @@ struct vulkan_object_extensions<obj::nv::acceleration_structure_create>
 };
 
 template<>
-struct vulkan_object_extensions<obj::nv::acceleration_structure>
+struct vulkan_object_extensions<tag::nv::acceleration_structure>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_ray_tracing"};
 	constexpr static ::std::uint32_t core = 0;
@@ -409,7 +411,7 @@ struct vulkan_object_extensions<obj::nv::acceleration_structure>
 };
 
 template<>
-struct vulkan_object_extensions<obj::nv::acceleration_structure_memory_requirements>
+struct vulkan_object_extensions<tag::nv::acceleration_structure_memory_requirements>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_ray_tracing"};
 	constexpr static ::std::uint32_t core = 0;
@@ -417,7 +419,7 @@ struct vulkan_object_extensions<obj::nv::acceleration_structure_memory_requireme
 };
 
 template<>
-struct vulkan_object_extensions<obj::nv::bind_acceleration_structure_memory>
+struct vulkan_object_extensions<tag::nv::bind_acceleration_structure_memory>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_ray_tracing"};
 	constexpr static ::std::uint32_t core = 0;
@@ -425,7 +427,7 @@ struct vulkan_object_extensions<obj::nv::bind_acceleration_structure_memory>
 };
 
 template<>
-struct vulkan_object_extensions<obj::nv::geometry>
+struct vulkan_object_extensions<tag::nv::geometry>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_ray_tracing"};
 	constexpr static ::std::uint32_t core = 0;
@@ -433,7 +435,7 @@ struct vulkan_object_extensions<obj::nv::geometry>
 };
 
 template<>
-struct vulkan_object_extensions<obj::nv::ray_tracing_pipeline>
+struct vulkan_object_extensions<tag::nv::ray_tracing_pipeline>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_ray_tracing"};
 	constexpr static ::std::uint32_t core = 0;
@@ -441,7 +443,7 @@ struct vulkan_object_extensions<obj::nv::ray_tracing_pipeline>
 };
 
 template<>
-struct vulkan_object_extensions<obj::nv::ray_tracing_shader_group>
+struct vulkan_object_extensions<tag::nv::ray_tracing_shader_group>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_ray_tracing"};
 	constexpr static ::std::uint32_t core = 0;
@@ -449,7 +451,7 @@ struct vulkan_object_extensions<obj::nv::ray_tracing_shader_group>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::write_descriptor_set_acceleration_structure>
+struct vulkan_object_extensions<tag::option::nv::write_descriptor_set_acceleration_structure>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_ray_tracing"};
 	constexpr static ::std::uint32_t core = 0;
@@ -457,7 +459,7 @@ struct vulkan_object_extensions<obj::option::nv::write_descriptor_set_accelerati
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::nv::ray_tracing>
+struct vulkan_object_extensions<tag::property::nv::ray_tracing>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_ray_tracing"};
 	constexpr static ::std::uint32_t core = 0;
@@ -465,13 +467,13 @@ struct vulkan_object_extensions<obj::property::nv::ray_tracing>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::nv::ray_tracing> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::nv::ray_tracing> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::nv::ray_tracing_pipeline, obj::option::pipeline_create_flags2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::nv::ray_tracing_pipeline, tag::option::pipeline_create_flags2> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::nv::ray_tracing_pipeline, obj::option::pipeline_creation_feedback> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::nv::ray_tracing_pipeline, tag::option::pipeline_creation_feedback> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::write_descriptor_set, obj::option::nv::write_descriptor_set_acceleration_structure> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::write_descriptor_set, tag::option::nv::write_descriptor_set_acceleration_structure> = true;
 }
 
 namespace vkfu::param
@@ -482,7 +484,7 @@ using ::vkfu::operator|;
 
 struct acceleration_structure_create
 {
-	using vulkan_tag_type = obj::nv::acceleration_structure_create;
+	using vulkan_tag_type = tag::nv::acceleration_structure_create;
 
 	VkDeviceSize compacted_size{};
 	VkAccelerationStructureInfoNV info{};
@@ -500,10 +502,10 @@ struct acceleration_structure_create
 
 struct acceleration_structure
 {
-	using vulkan_tag_type = obj::nv::acceleration_structure;
+	using vulkan_tag_type = tag::nv::acceleration_structure;
 
-	VkAccelerationStructureTypeNV type{};
-	VkBuildAccelerationStructureFlagsNV flags{};
+	::vkfu::enums::acceleration_structure_type type{};
+	::vkfu::flags::build_acceleration_structure flags{};
 	::std::uint32_t instance_count{};
 	::std::span<VkGeometryNV const> geometries{};
 
@@ -512,8 +514,8 @@ struct acceleration_structure
 		return VkAccelerationStructureInfoNV{
 			.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV,
 			.pNext = nullptr,
-			.type = type,
-			.flags = flags,
+			.type = static_cast<VkAccelerationStructureTypeKHR>(type),
+			.flags = ::std::bit_cast<VkBuildAccelerationStructureFlagsKHR>(flags),
 			.instanceCount = instance_count,
 			.geometryCount = static_cast<::std::uint32_t>(geometries.size()),
 			.pGeometries = geometries.data(),
@@ -523,7 +525,7 @@ struct acceleration_structure
 
 struct acceleration_structure_memory_requirements
 {
-	using vulkan_tag_type = obj::nv::acceleration_structure_memory_requirements;
+	using vulkan_tag_type = tag::nv::acceleration_structure_memory_requirements;
 
 	::vkfu::enums::acceleration_structure_memory_requirements_type type{};
 	VkAccelerationStructureNV acceleration_structure{};
@@ -541,7 +543,7 @@ struct acceleration_structure_memory_requirements
 
 struct bind_acceleration_structure_memory
 {
-	using vulkan_tag_type = obj::nv::bind_acceleration_structure_memory;
+	using vulkan_tag_type = tag::nv::bind_acceleration_structure_memory;
 
 	VkAccelerationStructureNV acceleration_structure{};
 	VkDeviceMemory memory{};
@@ -564,18 +566,11 @@ struct bind_acceleration_structure_memory
 
 struct geometry
 {
-	using vulkan_tag_type = obj::nv::geometry;
+	using vulkan_tag_type = tag::nv::geometry;
 
 	::vkfu::enums::geometry_type type{};
 	VkGeometryDataNV data{};
-	struct flags_type
-	{
-		VkGeometryFlagsKHR opaque : 1 = 0;
-		VkGeometryFlagsKHR no_duplicate_any_hit_invocation : 1 = 0;
-		VkGeometryFlagsKHR _reserved_2 : 30 = 0;
-	};
-
-	flags_type flags{};
+	::vkfu::flags::geometry flags{};
 
 	constexpr auto evaluate() const noexcept -> VkGeometryNV
 	{
@@ -589,53 +584,11 @@ struct geometry
 	}
 };
 
-static_assert(sizeof(geometry::flags_type) == sizeof(VkGeometryFlagsKHR));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkGeometryFlagsKHR>(geometry::flags_type{.opaque = 1}) == VK_GEOMETRY_OPAQUE_BIT_KHR);
-static_assert(::std::bit_cast<VkGeometryFlagsKHR>(geometry::flags_type{.no_duplicate_any_hit_invocation = 1}) == VK_GEOMETRY_NO_DUPLICATE_ANY_HIT_INVOCATION_BIT_KHR);
-#endif
-
 struct ray_tracing_pipeline
 {
-	using vulkan_tag_type = obj::nv::ray_tracing_pipeline;
+	using vulkan_tag_type = tag::nv::ray_tracing_pipeline;
 
-	struct flags_type
-	{
-		VkPipelineCreateFlags disable_optimization : 1 = 0;
-		VkPipelineCreateFlags allow_derivatives : 1 = 0;
-		VkPipelineCreateFlags derivative : 1 = 0;
-		VkPipelineCreateFlags view_index_from_device_index : 1 = 0;
-		VkPipelineCreateFlags dispatch_base : 1 = 0;
-		VkPipelineCreateFlags defer_compile : 1 = 0;
-		VkPipelineCreateFlags capture_statistics : 1 = 0;
-		VkPipelineCreateFlags capture_internal_representations : 1 = 0;
-		VkPipelineCreateFlags fail_on_pipeline_compile_required : 1 = 0;
-		VkPipelineCreateFlags early_return_on_failure : 1 = 0;
-		VkPipelineCreateFlags link_time_optimization : 1 = 0;
-		VkPipelineCreateFlags library : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_skip_triangles : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_skip_aabbs : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_no_null_any_hit_shaders : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_no_null_closest_hit_shaders : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_no_null_miss_shaders : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_no_null_intersection_shaders : 1 = 0;
-		VkPipelineCreateFlags indirect_bindable : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_shader_group_handle_capture_replay : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_allow_motion : 1 = 0;
-		VkPipelineCreateFlags rendering_fragment_shading_rate_attachment : 1 = 0;
-		VkPipelineCreateFlags rendering_fragment_density_map_attachment : 1 = 0;
-		VkPipelineCreateFlags retain_link_time_optimization_info : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_opacity_micromap : 1 = 0;
-		VkPipelineCreateFlags color_attachment_feedback_loop : 1 = 0;
-		VkPipelineCreateFlags depth_stencil_attachment_feedback_loop : 1 = 0;
-		VkPipelineCreateFlags no_protected_access : 1 = 0;
-		VkPipelineCreateFlags ray_tracing_displacement_micromap : 1 = 0;
-		VkPipelineCreateFlags descriptor_buffer : 1 = 0;
-		VkPipelineCreateFlags protected_access_only : 1 = 0;
-		VkPipelineCreateFlags _reserved_31 : 1 = 0;
-	};
-
-	flags_type flags{};
+	::vkfu::flags::pipeline_create flags{};
 	::std::span<VkPipelineShaderStageCreateInfo const> stages{};
 	::std::span<VkRayTracingShaderGroupCreateInfoNV const> groups{};
 	::std::uint32_t max_recursion_depth{};
@@ -661,44 +614,9 @@ struct ray_tracing_pipeline
 	}
 };
 
-static_assert(sizeof(ray_tracing_pipeline::flags_type) == sizeof(VkPipelineCreateFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.disable_optimization = 1}) == VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.allow_derivatives = 1}) == VK_PIPELINE_CREATE_ALLOW_DERIVATIVES_BIT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.derivative = 1}) == VK_PIPELINE_CREATE_DERIVATIVE_BIT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.view_index_from_device_index = 1}) == VK_PIPELINE_CREATE_VIEW_INDEX_FROM_DEVICE_INDEX_BIT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.dispatch_base = 1}) == VK_PIPELINE_CREATE_DISPATCH_BASE_BIT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.defer_compile = 1}) == VK_PIPELINE_CREATE_DEFER_COMPILE_BIT_NV);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.capture_statistics = 1}) == VK_PIPELINE_CREATE_CAPTURE_STATISTICS_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.capture_internal_representations = 1}) == VK_PIPELINE_CREATE_CAPTURE_INTERNAL_REPRESENTATIONS_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.fail_on_pipeline_compile_required = 1}) == VK_PIPELINE_CREATE_FAIL_ON_PIPELINE_COMPILE_REQUIRED_BIT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.early_return_on_failure = 1}) == VK_PIPELINE_CREATE_EARLY_RETURN_ON_FAILURE_BIT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.link_time_optimization = 1}) == VK_PIPELINE_CREATE_LINK_TIME_OPTIMIZATION_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.library = 1}) == VK_PIPELINE_CREATE_LIBRARY_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.ray_tracing_skip_triangles = 1}) == VK_PIPELINE_CREATE_RAY_TRACING_SKIP_TRIANGLES_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.ray_tracing_skip_aabbs = 1}) == VK_PIPELINE_CREATE_RAY_TRACING_SKIP_AABBS_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.ray_tracing_no_null_any_hit_shaders = 1}) == VK_PIPELINE_CREATE_RAY_TRACING_NO_NULL_ANY_HIT_SHADERS_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.ray_tracing_no_null_closest_hit_shaders = 1}) == VK_PIPELINE_CREATE_RAY_TRACING_NO_NULL_CLOSEST_HIT_SHADERS_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.ray_tracing_no_null_miss_shaders = 1}) == VK_PIPELINE_CREATE_RAY_TRACING_NO_NULL_MISS_SHADERS_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.ray_tracing_no_null_intersection_shaders = 1}) == VK_PIPELINE_CREATE_RAY_TRACING_NO_NULL_INTERSECTION_SHADERS_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.indirect_bindable = 1}) == VK_PIPELINE_CREATE_INDIRECT_BINDABLE_BIT_NV);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.ray_tracing_shader_group_handle_capture_replay = 1}) == VK_PIPELINE_CREATE_RAY_TRACING_SHADER_GROUP_HANDLE_CAPTURE_REPLAY_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.ray_tracing_allow_motion = 1}) == VK_PIPELINE_CREATE_RAY_TRACING_ALLOW_MOTION_BIT_NV);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.rendering_fragment_shading_rate_attachment = 1}) == VK_PIPELINE_CREATE_RENDERING_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.rendering_fragment_density_map_attachment = 1}) == VK_PIPELINE_CREATE_RENDERING_FRAGMENT_DENSITY_MAP_ATTACHMENT_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.retain_link_time_optimization_info = 1}) == VK_PIPELINE_CREATE_RETAIN_LINK_TIME_OPTIMIZATION_INFO_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.ray_tracing_opacity_micromap = 1}) == VK_PIPELINE_CREATE_RAY_TRACING_OPACITY_MICROMAP_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.color_attachment_feedback_loop = 1}) == VK_PIPELINE_CREATE_COLOR_ATTACHMENT_FEEDBACK_LOOP_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.depth_stencil_attachment_feedback_loop = 1}) == VK_PIPELINE_CREATE_DEPTH_STENCIL_ATTACHMENT_FEEDBACK_LOOP_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.no_protected_access = 1}) == VK_PIPELINE_CREATE_NO_PROTECTED_ACCESS_BIT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.ray_tracing_displacement_micromap = 1}) == 0x10000000);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.descriptor_buffer = 1}) == VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineCreateFlags>(ray_tracing_pipeline::flags_type{.protected_access_only = 1}) == VK_PIPELINE_CREATE_PROTECTED_ACCESS_ONLY_BIT);
-#endif
-
 struct ray_tracing_shader_group
 {
-	using vulkan_tag_type = obj::nv::ray_tracing_shader_group;
+	using vulkan_tag_type = tag::nv::ray_tracing_shader_group;
 
 	::vkfu::enums::ray_tracing_shader_group_type type{};
 	::std::uint32_t general_shader{};
@@ -728,7 +646,7 @@ using ::vkfu::operator|;
 
 struct write_descriptor_set_acceleration_structure
 {
-	using vulkan_tag_type = obj::option::nv::write_descriptor_set_acceleration_structure;
+	using vulkan_tag_type = tag::option::nv::write_descriptor_set_acceleration_structure;
 
 	::std::span<VkAccelerationStructureNV const> acceleration_structures{};
 
@@ -768,7 +686,7 @@ namespace vkfu
 {
 namespace nv
 {
-template<::vkfu::expression_for<::vkfu::obj::nv::acceleration_structure_create> Expression>
+template<::vkfu::expression_for<::vkfu::tag::nv::acceleration_structure_create> Expression>
 [[nodiscard]] auto create_acceleration_structure(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkAccelerationStructureNV, ::VkResult>
 {
@@ -783,7 +701,7 @@ template<::vkfu::expression_for<::vkfu::obj::nv::acceleration_structure_create> 
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nv::acceleration_structure_create> Expression>
+template<::vkfu::expression_for<::vkfu::tag::nv::acceleration_structure_create> Expression>
 [[nodiscard]] auto create_acceleration_structure(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkAccelerationStructureNV
 {
 	auto produced = create_acceleration_structure(device, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);
@@ -795,7 +713,7 @@ template<::vkfu::expression_for<::vkfu::obj::nv::acceleration_structure_create> 
 }
 
 template<class... Expressions>
-	requires (sizeof...(Expressions) != 0 && (::vkfu::expression_for<Expressions, ::vkfu::obj::nv::ray_tracing_pipeline> && ...))
+	requires (sizeof...(Expressions) != 0 && (::vkfu::expression_for<Expressions, ::vkfu::tag::nv::ray_tracing_pipeline> && ...))
 [[nodiscard]] auto create_ray_tracing_pipelines(VkDevice device, VkPipelineCache pipelineCache, ::VkAllocationCallbacks const* allocation_callbacks,
 	::std::nothrow_t, Expressions&&... infos) noexcept
 	-> ::std::expected<::std::array<VkPipeline, sizeof...(Expressions)>, ::VkResult>
@@ -817,7 +735,7 @@ template<class... Expressions>
 }
 
 template<class... Expressions>
-	requires (sizeof...(Expressions) != 0 && (::vkfu::expression_for<Expressions, ::vkfu::obj::nv::ray_tracing_pipeline> && ...))
+	requires (sizeof...(Expressions) != 0 && (::vkfu::expression_for<Expressions, ::vkfu::tag::nv::ray_tracing_pipeline> && ...))
 [[nodiscard]] auto create_ray_tracing_pipelines(VkDevice device, VkPipelineCache pipelineCache, ::VkAllocationCallbacks const* allocation_callbacks,
 	Expressions&&... infos) -> ::std::array<VkPipeline, sizeof...(Expressions)>
 {
@@ -830,14 +748,14 @@ template<class... Expressions>
 }
 
 // One structure is the common case, and reads better than a one-element array.
-template<::vkfu::expression_for<::vkfu::obj::nv::ray_tracing_pipeline> Expression>
+template<::vkfu::expression_for<::vkfu::tag::nv::ray_tracing_pipeline> Expression>
 [[nodiscard]] auto create_ray_tracing_pipeline(VkDevice device, VkPipelineCache pipelineCache, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr)
 	-> VkPipeline
 {
 	return create_ray_tracing_pipelines(device, pipelineCache, allocation_callbacks, ::std::forward<Expression>(info))[0];
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nv::ray_tracing_pipeline> Expression>
+template<::vkfu::expression_for<::vkfu::tag::nv::ray_tracing_pipeline> Expression>
 [[nodiscard]] auto create_ray_tracing_pipeline(VkDevice device, VkPipelineCache pipelineCache, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkPipeline, ::VkResult>
 {
@@ -869,19 +787,19 @@ inline void bind_acceleration_structure_memory(VkDevice device, ::std::span<VkBi
 	}
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nv::acceleration_structure> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::nv::acceleration_structure> Expression1>
 void cmd_build_acceleration_structure(VkCommandBuffer command_buffer, Expression1&& info, VkBuffer instance_data, VkDeviceSize instance_offset, VkBool32 update, VkAccelerationStructureNV dst, VkAccelerationStructureNV src, VkBuffer scratch, VkDeviceSize scratch_offset)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
 	::vkCmdBuildAccelerationStructureNV(command_buffer, ::std::addressof(::vkfu::unpack(storage1)), instance_data, instance_offset, update, dst, src, scratch, scratch_offset);
 }
 
-inline void cmd_write_acceleration_structures_properties(VkCommandBuffer command_buffer, ::std::span<VkAccelerationStructureNV const> acceleration_structures, VkQueryType query_type, VkQueryPool query_pool, ::std::uint32_t first_query)
+inline void cmd_write_acceleration_structures_properties(VkCommandBuffer command_buffer, ::std::span<VkAccelerationStructureNV const> acceleration_structures, ::vkfu::enums::query_type query_type, VkQueryPool query_pool, ::std::uint32_t first_query)
 {
-	::vkCmdWriteAccelerationStructuresPropertiesNV(command_buffer, static_cast<::std::uint32_t>(acceleration_structures.size()), acceleration_structures.data(), query_type, query_pool, first_query);
+	::vkCmdWriteAccelerationStructuresPropertiesNV(command_buffer, static_cast<::std::uint32_t>(acceleration_structures.size()), acceleration_structures.data(), static_cast<VkQueryType>(query_type), query_pool, first_query);
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nv::acceleration_structure_memory_requirements> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::nv::acceleration_structure_memory_requirements> Expression1>
 [[nodiscard]] auto get_acceleration_structure_memory_requirements(VkDevice device, Expression1&& info) -> VkMemoryRequirements2KHR
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));

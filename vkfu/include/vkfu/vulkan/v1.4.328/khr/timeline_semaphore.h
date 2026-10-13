@@ -28,25 +28,25 @@
 
 #include "../version_1_2/timeline_semaphore.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using timeline_semaphore = ::vkfu::obj::feature::timeline_semaphore;
+using timeline_semaphore = ::vkfu::tag::feature::timeline_semaphore;
 }
 namespace khr
 {
-using semaphore_signal = ::vkfu::obj::semaphore_signal;
-using semaphore_wait = ::vkfu::obj::semaphore_wait;
+using semaphore_signal = ::vkfu::tag::semaphore_signal;
+using semaphore_wait = ::vkfu::tag::semaphore_wait;
 }
 namespace option::khr
 {
-using semaphore_type = ::vkfu::obj::option::semaphore_type;
-using timeline_semaphore_submit = ::vkfu::obj::option::timeline_semaphore_submit;
+using semaphore_type = ::vkfu::tag::option::semaphore_type;
+using timeline_semaphore_submit = ::vkfu::tag::option::timeline_semaphore_submit;
 }
 namespace property::khr
 {
-using timeline_semaphore = ::vkfu::obj::property::timeline_semaphore;
+using timeline_semaphore = ::vkfu::tag::property::timeline_semaphore;
 }
 }
 

@@ -6,6 +6,7 @@
 
 #include "nv/dedicated_allocation.h"
 #include "nv/corner_sampled_image.h"
+#include "nv/external_memory_capabilities.h"
 #include "nv/external_memory.h"
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
 #include "nv/external_memory_win32.h"

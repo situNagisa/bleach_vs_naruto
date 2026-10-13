@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceShaderEarlyAndLateFragmentTestsFea
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::amd
 {
@@ -55,7 +55,7 @@ struct shader_early_and_late_fragment_tests{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::amd::shader_early_and_late_fragment_tests>
+struct vulkan_object_trait<tag::feature::amd::shader_early_and_late_fragment_tests>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::amd::shader_early_and_late_fragment_tes
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderEarlyAndLateFragmentTestsFeaturesAMD>
 {
-	using type = obj::feature::amd::shader_early_and_late_fragment_tests;
+	using type = tag::feature::amd::shader_early_and_late_fragment_tests;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::amd::shader_early_and_late_fragment_tests>
+struct vulkan_object_native<tag::feature::amd::shader_early_and_late_fragment_tests>
 {
 	using type = VkPhysicalDeviceShaderEarlyAndLateFragmentTestsFeaturesAMD;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_EARLY_AND_LATE_FRAGMENT_TESTS_FEATURES_AMD;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::amd::shader_early_and_late_fragment_tests>
+struct vulkan_object_extensions<tag::feature::amd::shader_early_and_late_fragment_tests>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_AMD_shader_early_and_late_fragment_tests"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::amd::shader_early_and_late_fragmen
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::amd::shader_early_and_late_fragment_tests> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::amd::shader_early_and_late_fragment_tests> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::amd::shader_early_and_late_fragment_tests> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::amd::shader_early_and_late_fragment_tests> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct shader_early_and_late_fragment_tests
 {
-	using vulkan_tag_type = obj::feature::amd::shader_early_and_late_fragment_tests;
+	using vulkan_tag_type = tag::feature::amd::shader_early_and_late_fragment_tests;
 
 	bool enable = false;
 

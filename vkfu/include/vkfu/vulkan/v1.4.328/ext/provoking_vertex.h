@@ -85,7 +85,7 @@ enum class provoking_vertex_mode : ::std::underlying_type_t<VkProvokingVertexMod
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -104,7 +104,7 @@ struct rasterization_provoking_vertex{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::provoking_vertex>
+struct vulkan_object_trait<tag::feature::ext::provoking_vertex>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -112,7 +112,7 @@ struct vulkan_object_trait<obj::feature::ext::provoking_vertex>
 };
 
 template<>
-struct vulkan_object_trait<obj::state::ext::rasterization_provoking_vertex>
+struct vulkan_object_trait<tag::state::ext::rasterization_provoking_vertex>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -120,7 +120,7 @@ struct vulkan_object_trait<obj::state::ext::rasterization_provoking_vertex>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::ext::provoking_vertex>
+struct vulkan_object_trait<tag::property::ext::provoking_vertex>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -130,11 +130,11 @@ struct vulkan_object_trait<obj::property::ext::provoking_vertex>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceProvokingVertexFeaturesEXT>
 {
-	using type = obj::feature::ext::provoking_vertex;
+	using type = tag::feature::ext::provoking_vertex;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::provoking_vertex>
+struct vulkan_object_native<tag::feature::ext::provoking_vertex>
 {
 	using type = VkPhysicalDeviceProvokingVertexFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROVOKING_VERTEX_FEATURES_EXT;
@@ -143,11 +143,11 @@ struct vulkan_object_native<obj::feature::ext::provoking_vertex>
 template<>
 struct expression_vulkan_tag<VkPipelineRasterizationProvokingVertexStateCreateInfoEXT>
 {
-	using type = obj::state::ext::rasterization_provoking_vertex;
+	using type = tag::state::ext::rasterization_provoking_vertex;
 };
 
 template<>
-struct vulkan_object_native<obj::state::ext::rasterization_provoking_vertex>
+struct vulkan_object_native<tag::state::ext::rasterization_provoking_vertex>
 {
 	using type = VkPipelineRasterizationProvokingVertexStateCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_PROVOKING_VERTEX_STATE_CREATE_INFO_EXT;
@@ -156,18 +156,18 @@ struct vulkan_object_native<obj::state::ext::rasterization_provoking_vertex>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceProvokingVertexPropertiesEXT>
 {
-	using type = obj::property::ext::provoking_vertex;
+	using type = tag::property::ext::provoking_vertex;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::provoking_vertex>
+struct vulkan_object_native<tag::property::ext::provoking_vertex>
 {
 	using type = VkPhysicalDeviceProvokingVertexPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROVOKING_VERTEX_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::provoking_vertex>
+struct vulkan_object_extensions<tag::feature::ext::provoking_vertex>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_provoking_vertex"};
 	constexpr static ::std::uint32_t core = 0;
@@ -175,7 +175,7 @@ struct vulkan_object_extensions<obj::feature::ext::provoking_vertex>
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::ext::rasterization_provoking_vertex>
+struct vulkan_object_extensions<tag::state::ext::rasterization_provoking_vertex>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_provoking_vertex"};
 	constexpr static ::std::uint32_t core = 0;
@@ -183,7 +183,7 @@ struct vulkan_object_extensions<obj::state::ext::rasterization_provoking_vertex>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::provoking_vertex>
+struct vulkan_object_extensions<tag::property::ext::provoking_vertex>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_provoking_vertex"};
 	constexpr static ::std::uint32_t core = 0;
@@ -191,13 +191,13 @@ struct vulkan_object_extensions<obj::property::ext::provoking_vertex>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::provoking_vertex> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::provoking_vertex> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::provoking_vertex> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::provoking_vertex> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::provoking_vertex> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::provoking_vertex> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::rasterization, obj::state::ext::rasterization_provoking_vertex> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::rasterization, tag::state::ext::rasterization_provoking_vertex> = true;
 }
 
 namespace vkfu::param
@@ -208,7 +208,7 @@ using ::vkfu::operator|;
 
 struct provoking_vertex
 {
-	using vulkan_tag_type = obj::feature::ext::provoking_vertex;
+	using vulkan_tag_type = tag::feature::ext::provoking_vertex;
 
 	bool last = false;
 	bool transform_feedback_preserves_provoking_vertex = false;
@@ -232,7 +232,7 @@ using ::vkfu::operator|;
 
 struct rasterization_provoking_vertex
 {
-	using vulkan_tag_type = obj::state::ext::rasterization_provoking_vertex;
+	using vulkan_tag_type = tag::state::ext::rasterization_provoking_vertex;
 
 	::vkfu::enums::provoking_vertex_mode provoking_vertex_mode{};
 

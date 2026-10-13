@@ -28,10 +28,10 @@
 
 #include "../version_1_4/push_descriptor.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property::khr
 {
-using push_descriptor = ::vkfu::obj::property::push_descriptor;
+using push_descriptor = ::vkfu::tag::property::push_descriptor;
 }
 }

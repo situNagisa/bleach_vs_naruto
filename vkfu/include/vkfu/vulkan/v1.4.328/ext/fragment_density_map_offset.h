@@ -90,7 +90,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceFragmentDensityMapOffsetProperties
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace ext
 {
@@ -113,7 +113,7 @@ struct fragment_density_map_offset{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::fragment_density_map_offset>
+struct vulkan_object_trait<tag::feature::ext::fragment_density_map_offset>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -121,7 +121,7 @@ struct vulkan_object_trait<obj::feature::ext::fragment_density_map_offset>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::ext::render_pass_fragment_density_map_offset_end>
+struct vulkan_object_trait<tag::option::ext::render_pass_fragment_density_map_offset_end>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -129,7 +129,7 @@ struct vulkan_object_trait<obj::option::ext::render_pass_fragment_density_map_of
 };
 
 template<>
-struct vulkan_object_trait<obj::ext::rendering_end>
+struct vulkan_object_trait<tag::ext::rendering_end>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -137,7 +137,7 @@ struct vulkan_object_trait<obj::ext::rendering_end>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::ext::fragment_density_map_offset>
+struct vulkan_object_trait<tag::property::ext::fragment_density_map_offset>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -147,11 +147,11 @@ struct vulkan_object_trait<obj::property::ext::fragment_density_map_offset>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceFragmentDensityMapOffsetFeaturesEXT>
 {
-	using type = obj::feature::ext::fragment_density_map_offset;
+	using type = tag::feature::ext::fragment_density_map_offset;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::fragment_density_map_offset>
+struct vulkan_object_native<tag::feature::ext::fragment_density_map_offset>
 {
 	using type = VkPhysicalDeviceFragmentDensityMapOffsetFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_OFFSET_FEATURES_EXT;
@@ -160,11 +160,11 @@ struct vulkan_object_native<obj::feature::ext::fragment_density_map_offset>
 template<>
 struct expression_vulkan_tag<VkRenderPassFragmentDensityMapOffsetEndInfoEXT>
 {
-	using type = obj::option::ext::render_pass_fragment_density_map_offset_end;
+	using type = tag::option::ext::render_pass_fragment_density_map_offset_end;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::render_pass_fragment_density_map_offset_end>
+struct vulkan_object_native<tag::option::ext::render_pass_fragment_density_map_offset_end>
 {
 	using type = VkRenderPassFragmentDensityMapOffsetEndInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RENDER_PASS_FRAGMENT_DENSITY_MAP_OFFSET_END_INFO_EXT;
@@ -173,11 +173,11 @@ struct vulkan_object_native<obj::option::ext::render_pass_fragment_density_map_o
 template<>
 struct expression_vulkan_tag<VkRenderingEndInfoEXT>
 {
-	using type = obj::ext::rendering_end;
+	using type = tag::ext::rendering_end;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::rendering_end>
+struct vulkan_object_native<tag::ext::rendering_end>
 {
 	using type = VkRenderingEndInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RENDERING_END_INFO_EXT;
@@ -186,18 +186,18 @@ struct vulkan_object_native<obj::ext::rendering_end>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceFragmentDensityMapOffsetPropertiesEXT>
 {
-	using type = obj::property::ext::fragment_density_map_offset;
+	using type = tag::property::ext::fragment_density_map_offset;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::fragment_density_map_offset>
+struct vulkan_object_native<tag::property::ext::fragment_density_map_offset>
 {
 	using type = VkPhysicalDeviceFragmentDensityMapOffsetPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_OFFSET_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::fragment_density_map_offset>
+struct vulkan_object_extensions<tag::feature::ext::fragment_density_map_offset>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_fragment_density_map_offset", "VK_QCOM_fragment_density_map_offset"};
 	constexpr static ::std::uint32_t core = 0;
@@ -205,7 +205,7 @@ struct vulkan_object_extensions<obj::feature::ext::fragment_density_map_offset>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::render_pass_fragment_density_map_offset_end>
+struct vulkan_object_extensions<tag::option::ext::render_pass_fragment_density_map_offset_end>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_fragment_density_map_offset", "VK_QCOM_fragment_density_map_offset"};
 	constexpr static ::std::uint32_t core = 0;
@@ -213,7 +213,7 @@ struct vulkan_object_extensions<obj::option::ext::render_pass_fragment_density_m
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::rendering_end>
+struct vulkan_object_extensions<tag::ext::rendering_end>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_fragment_density_map_offset"};
 	constexpr static ::std::uint32_t core = 0;
@@ -221,7 +221,7 @@ struct vulkan_object_extensions<obj::ext::rendering_end>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::fragment_density_map_offset>
+struct vulkan_object_extensions<tag::property::ext::fragment_density_map_offset>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_fragment_density_map_offset", "VK_QCOM_fragment_density_map_offset"};
 	constexpr static ::std::uint32_t core = 0;
@@ -229,15 +229,15 @@ struct vulkan_object_extensions<obj::property::ext::fragment_density_map_offset>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::fragment_density_map_offset> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::fragment_density_map_offset> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::fragment_density_map_offset> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::fragment_density_map_offset> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::fragment_density_map_offset> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::fragment_density_map_offset> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::ext::rendering_end, obj::option::ext::render_pass_fragment_density_map_offset_end> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::ext::rendering_end, tag::option::ext::render_pass_fragment_density_map_offset_end> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::subpass_end, obj::option::ext::render_pass_fragment_density_map_offset_end> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::subpass_end, tag::option::ext::render_pass_fragment_density_map_offset_end> = true;
 }
 
 namespace vkfu::param
@@ -248,7 +248,7 @@ using ::vkfu::operator|;
 
 struct rendering_end
 {
-	using vulkan_tag_type = obj::ext::rendering_end;
+	using vulkan_tag_type = tag::ext::rendering_end;
 
 
 	constexpr auto evaluate() const noexcept -> VkRenderingEndInfoEXT
@@ -268,7 +268,7 @@ using ::vkfu::operator|;
 
 struct fragment_density_map_offset
 {
-	using vulkan_tag_type = obj::feature::ext::fragment_density_map_offset;
+	using vulkan_tag_type = tag::feature::ext::fragment_density_map_offset;
 
 	bool enable = false;
 
@@ -290,7 +290,7 @@ using ::vkfu::operator|;
 
 struct render_pass_fragment_density_map_offset_end
 {
-	using vulkan_tag_type = obj::option::ext::render_pass_fragment_density_map_offset_end;
+	using vulkan_tag_type = tag::option::ext::render_pass_fragment_density_map_offset_end;
 
 	::std::span<VkOffset2D const> fragment_density_offsets{};
 
@@ -312,7 +312,7 @@ namespace vkfu
 {
 namespace ext
 {
-template<::vkfu::expression_for<::vkfu::obj::ext::rendering_end> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::rendering_end> Expression1>
 void cmd_end_rendering2(VkCommandBuffer command_buffer, Expression1&& rendering_end_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(rendering_end_info));

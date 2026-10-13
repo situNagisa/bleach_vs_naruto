@@ -28,15 +28,15 @@
 
 #include "../version_1_1/device_group_creation.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::khr
 {
-using device_group = ::vkfu::obj::option::device_group;
+using device_group = ::vkfu::tag::option::device_group;
 }
 namespace property::khr
 {
-using group = ::vkfu::obj::property::group;
+using group = ::vkfu::tag::property::group;
 }
 }
 

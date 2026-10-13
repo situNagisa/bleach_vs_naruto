@@ -28,20 +28,20 @@
 
 #include "../version_1_3/maintenance4.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using maintenance4 = ::vkfu::obj::feature::maintenance4;
+using maintenance4 = ::vkfu::tag::feature::maintenance4;
 }
 namespace khr
 {
-using device_buffer_memory_requirements = ::vkfu::obj::device_buffer_memory_requirements;
-using device_image_memory_requirements = ::vkfu::obj::device_image_memory_requirements;
+using device_buffer_memory_requirements = ::vkfu::tag::device_buffer_memory_requirements;
+using device_image_memory_requirements = ::vkfu::tag::device_image_memory_requirements;
 }
 namespace property::khr
 {
-using maintenance4 = ::vkfu::obj::property::maintenance4;
+using maintenance4 = ::vkfu::tag::property::maintenance4;
 }
 }
 
@@ -54,9 +54,9 @@ using maintenance4 = ::vkfu::param::feature::maintenance4;
 
 namespace khr
 {
-template<::vkfu::reference_expression_for<::vkfu::obj::buffer> create_info_expression = ::vkfu::absent_expression>
+template<::vkfu::reference_expression_for<::vkfu::tag::buffer> create_info_expression = ::vkfu::absent_expression>
 using device_buffer_memory_requirements = ::vkfu::param::device_buffer_memory_requirements<create_info_expression>;
-template<::vkfu::reference_expression_for<::vkfu::obj::image> create_info_expression = ::vkfu::absent_expression>
+template<::vkfu::reference_expression_for<::vkfu::tag::image> create_info_expression = ::vkfu::absent_expression>
 using device_image_memory_requirements = ::vkfu::param::device_image_memory_requirements<create_info_expression>;
 }
 }

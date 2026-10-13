@@ -28,11 +28,11 @@
 
 #include "../version_1_4/index_type_uint8.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using index_type_uint8 = ::vkfu::obj::feature::index_type_uint8;
+using index_type_uint8 = ::vkfu::tag::feature::index_type_uint8;
 }
 }
 

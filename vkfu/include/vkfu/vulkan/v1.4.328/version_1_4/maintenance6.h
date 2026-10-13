@@ -27,6 +27,7 @@
 #include <vkfu/vulkan_object.h>
 
 #include "../version_1_0/device.h"
+#include "../version_1_0/pipeline.h"
 #include "../version_1_0/pipeline_layout.h"
 #include "../version_1_1/bind_memory2.h"
 #include "../version_1_1/get_physical_device_properties2.h"
@@ -136,7 +137,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceMaintenance6Properties const& valu
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct bind_descriptor_sets{};
 struct push_constants{};
@@ -159,7 +160,7 @@ struct maintenance6{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::bind_descriptor_sets>
+struct vulkan_object_trait<tag::bind_descriptor_sets>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -167,7 +168,7 @@ struct vulkan_object_trait<obj::bind_descriptor_sets>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::bind_memory_status>
+struct vulkan_object_trait<tag::option::bind_memory_status>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -175,7 +176,7 @@ struct vulkan_object_trait<obj::option::bind_memory_status>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::maintenance6>
+struct vulkan_object_trait<tag::feature::maintenance6>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -183,7 +184,7 @@ struct vulkan_object_trait<obj::feature::maintenance6>
 };
 
 template<>
-struct vulkan_object_trait<obj::push_constants>
+struct vulkan_object_trait<tag::push_constants>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -191,7 +192,7 @@ struct vulkan_object_trait<obj::push_constants>
 };
 
 template<>
-struct vulkan_object_trait<obj::push_descriptor_set>
+struct vulkan_object_trait<tag::push_descriptor_set>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -199,7 +200,7 @@ struct vulkan_object_trait<obj::push_descriptor_set>
 };
 
 template<>
-struct vulkan_object_trait<obj::push_descriptor_set_with_template>
+struct vulkan_object_trait<tag::push_descriptor_set_with_template>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -207,7 +208,7 @@ struct vulkan_object_trait<obj::push_descriptor_set_with_template>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::maintenance6>
+struct vulkan_object_trait<tag::property::maintenance6>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -217,11 +218,11 @@ struct vulkan_object_trait<obj::property::maintenance6>
 template<>
 struct expression_vulkan_tag<VkBindDescriptorSetsInfo>
 {
-	using type = obj::bind_descriptor_sets;
+	using type = tag::bind_descriptor_sets;
 };
 
 template<>
-struct vulkan_object_native<obj::bind_descriptor_sets>
+struct vulkan_object_native<tag::bind_descriptor_sets>
 {
 	using type = VkBindDescriptorSetsInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_BIND_DESCRIPTOR_SETS_INFO;
@@ -230,11 +231,11 @@ struct vulkan_object_native<obj::bind_descriptor_sets>
 template<>
 struct expression_vulkan_tag<VkBindMemoryStatus>
 {
-	using type = obj::option::bind_memory_status;
+	using type = tag::option::bind_memory_status;
 };
 
 template<>
-struct vulkan_object_native<obj::option::bind_memory_status>
+struct vulkan_object_native<tag::option::bind_memory_status>
 {
 	using type = VkBindMemoryStatus;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_BIND_MEMORY_STATUS;
@@ -243,11 +244,11 @@ struct vulkan_object_native<obj::option::bind_memory_status>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMaintenance6Features>
 {
-	using type = obj::feature::maintenance6;
+	using type = tag::feature::maintenance6;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::maintenance6>
+struct vulkan_object_native<tag::feature::maintenance6>
 {
 	using type = VkPhysicalDeviceMaintenance6Features;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_6_FEATURES;
@@ -256,11 +257,11 @@ struct vulkan_object_native<obj::feature::maintenance6>
 template<>
 struct expression_vulkan_tag<VkPushConstantsInfo>
 {
-	using type = obj::push_constants;
+	using type = tag::push_constants;
 };
 
 template<>
-struct vulkan_object_native<obj::push_constants>
+struct vulkan_object_native<tag::push_constants>
 {
 	using type = VkPushConstantsInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PUSH_CONSTANTS_INFO;
@@ -269,11 +270,11 @@ struct vulkan_object_native<obj::push_constants>
 template<>
 struct expression_vulkan_tag<VkPushDescriptorSetInfo>
 {
-	using type = obj::push_descriptor_set;
+	using type = tag::push_descriptor_set;
 };
 
 template<>
-struct vulkan_object_native<obj::push_descriptor_set>
+struct vulkan_object_native<tag::push_descriptor_set>
 {
 	using type = VkPushDescriptorSetInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PUSH_DESCRIPTOR_SET_INFO;
@@ -282,11 +283,11 @@ struct vulkan_object_native<obj::push_descriptor_set>
 template<>
 struct expression_vulkan_tag<VkPushDescriptorSetWithTemplateInfo>
 {
-	using type = obj::push_descriptor_set_with_template;
+	using type = tag::push_descriptor_set_with_template;
 };
 
 template<>
-struct vulkan_object_native<obj::push_descriptor_set_with_template>
+struct vulkan_object_native<tag::push_descriptor_set_with_template>
 {
 	using type = VkPushDescriptorSetWithTemplateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PUSH_DESCRIPTOR_SET_WITH_TEMPLATE_INFO;
@@ -295,18 +296,18 @@ struct vulkan_object_native<obj::push_descriptor_set_with_template>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMaintenance6Properties>
 {
-	using type = obj::property::maintenance6;
+	using type = tag::property::maintenance6;
 };
 
 template<>
-struct vulkan_object_native<obj::property::maintenance6>
+struct vulkan_object_native<tag::property::maintenance6>
 {
 	using type = VkPhysicalDeviceMaintenance6Properties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_6_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::bind_descriptor_sets>
+struct vulkan_object_extensions<tag::bind_descriptor_sets>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance6"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -314,7 +315,7 @@ struct vulkan_object_extensions<obj::bind_descriptor_sets>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::bind_memory_status>
+struct vulkan_object_extensions<tag::option::bind_memory_status>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance6"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -322,7 +323,7 @@ struct vulkan_object_extensions<obj::option::bind_memory_status>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::maintenance6>
+struct vulkan_object_extensions<tag::feature::maintenance6>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance6"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -330,7 +331,7 @@ struct vulkan_object_extensions<obj::feature::maintenance6>
 };
 
 template<>
-struct vulkan_object_extensions<obj::push_constants>
+struct vulkan_object_extensions<tag::push_constants>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance6"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -338,7 +339,7 @@ struct vulkan_object_extensions<obj::push_constants>
 };
 
 template<>
-struct vulkan_object_extensions<obj::push_descriptor_set>
+struct vulkan_object_extensions<tag::push_descriptor_set>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance6"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -346,7 +347,7 @@ struct vulkan_object_extensions<obj::push_descriptor_set>
 };
 
 template<>
-struct vulkan_object_extensions<obj::push_descriptor_set_with_template>
+struct vulkan_object_extensions<tag::push_descriptor_set_with_template>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance6"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -354,7 +355,7 @@ struct vulkan_object_extensions<obj::push_descriptor_set_with_template>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::maintenance6>
+struct vulkan_object_extensions<tag::property::maintenance6>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance6"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -362,23 +363,23 @@ struct vulkan_object_extensions<obj::property::maintenance6>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::bind_buffer_memory, obj::option::bind_memory_status> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::bind_buffer_memory, tag::option::bind_memory_status> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::bind_descriptor_sets, obj::pipeline_layout> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::bind_descriptor_sets, tag::pipeline_layout> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::bind_image_memory, obj::option::bind_memory_status> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::bind_image_memory, tag::option::bind_memory_status> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::maintenance6> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::maintenance6> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::maintenance6> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::maintenance6> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::maintenance6> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::maintenance6> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::push_constants, obj::pipeline_layout> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::push_constants, tag::pipeline_layout> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::push_descriptor_set, obj::pipeline_layout> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::push_descriptor_set, tag::pipeline_layout> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::push_descriptor_set_with_template, obj::pipeline_layout> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::push_descriptor_set_with_template, tag::pipeline_layout> = true;
 }
 
 namespace vkfu::param
@@ -387,31 +388,9 @@ using ::vkfu::operator|;
 
 struct bind_descriptor_sets
 {
-	using vulkan_tag_type = obj::bind_descriptor_sets;
+	using vulkan_tag_type = tag::bind_descriptor_sets;
 
-	struct stage_flags_type
-	{
-		VkShaderStageFlags vertex : 1 = 0;
-		VkShaderStageFlags tessellation_control : 1 = 0;
-		VkShaderStageFlags tessellation_evaluation : 1 = 0;
-		VkShaderStageFlags geometry : 1 = 0;
-		VkShaderStageFlags fragment : 1 = 0;
-		VkShaderStageFlags compute : 1 = 0;
-		VkShaderStageFlags task : 1 = 0;
-		VkShaderStageFlags mesh : 1 = 0;
-		VkShaderStageFlags raygen : 1 = 0;
-		VkShaderStageFlags any_hit : 1 = 0;
-		VkShaderStageFlags closest_hit : 1 = 0;
-		VkShaderStageFlags miss : 1 = 0;
-		VkShaderStageFlags intersection : 1 = 0;
-		VkShaderStageFlags callable : 1 = 0;
-		VkShaderStageFlags subpass_shading : 1 = 0;
-		VkShaderStageFlags _reserved_15 : 4 = 0;
-		VkShaderStageFlags cluster_culling : 1 = 0;
-		VkShaderStageFlags _reserved_20 : 12 = 0;
-	};
-
-	stage_flags_type stage_flags{};
+	::vkfu::flags::shader_stage stage_flags{};
 	VkPipelineLayout layout{};
 	::std::uint32_t first_set{};
 	::std::span<VkDescriptorSet const> descriptor_sets{};
@@ -433,54 +412,12 @@ struct bind_descriptor_sets
 	}
 };
 
-static_assert(sizeof(bind_descriptor_sets::stage_flags_type) == sizeof(VkShaderStageFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_sets::stage_flags_type{.vertex = 1}) == VK_SHADER_STAGE_VERTEX_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_sets::stage_flags_type{.tessellation_control = 1}) == VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_sets::stage_flags_type{.tessellation_evaluation = 1}) == VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_sets::stage_flags_type{.geometry = 1}) == VK_SHADER_STAGE_GEOMETRY_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_sets::stage_flags_type{.fragment = 1}) == VK_SHADER_STAGE_FRAGMENT_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_sets::stage_flags_type{.compute = 1}) == VK_SHADER_STAGE_COMPUTE_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_sets::stage_flags_type{.task = 1}) == VK_SHADER_STAGE_TASK_BIT_EXT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_sets::stage_flags_type{.mesh = 1}) == VK_SHADER_STAGE_MESH_BIT_EXT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_sets::stage_flags_type{.raygen = 1}) == VK_SHADER_STAGE_RAYGEN_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_sets::stage_flags_type{.any_hit = 1}) == VK_SHADER_STAGE_ANY_HIT_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_sets::stage_flags_type{.closest_hit = 1}) == VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_sets::stage_flags_type{.miss = 1}) == VK_SHADER_STAGE_MISS_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_sets::stage_flags_type{.intersection = 1}) == VK_SHADER_STAGE_INTERSECTION_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_sets::stage_flags_type{.callable = 1}) == VK_SHADER_STAGE_CALLABLE_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_sets::stage_flags_type{.subpass_shading = 1}) == VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI);
-static_assert(::std::bit_cast<VkShaderStageFlags>(bind_descriptor_sets::stage_flags_type{.cluster_culling = 1}) == VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI);
-#endif
-
 struct push_constants
 {
-	using vulkan_tag_type = obj::push_constants;
+	using vulkan_tag_type = tag::push_constants;
 
 	VkPipelineLayout layout{};
-	struct stage_flags_type
-	{
-		VkShaderStageFlags vertex : 1 = 0;
-		VkShaderStageFlags tessellation_control : 1 = 0;
-		VkShaderStageFlags tessellation_evaluation : 1 = 0;
-		VkShaderStageFlags geometry : 1 = 0;
-		VkShaderStageFlags fragment : 1 = 0;
-		VkShaderStageFlags compute : 1 = 0;
-		VkShaderStageFlags task : 1 = 0;
-		VkShaderStageFlags mesh : 1 = 0;
-		VkShaderStageFlags raygen : 1 = 0;
-		VkShaderStageFlags any_hit : 1 = 0;
-		VkShaderStageFlags closest_hit : 1 = 0;
-		VkShaderStageFlags miss : 1 = 0;
-		VkShaderStageFlags intersection : 1 = 0;
-		VkShaderStageFlags callable : 1 = 0;
-		VkShaderStageFlags subpass_shading : 1 = 0;
-		VkShaderStageFlags _reserved_15 : 4 = 0;
-		VkShaderStageFlags cluster_culling : 1 = 0;
-		VkShaderStageFlags _reserved_20 : 12 = 0;
-	};
-
-	stage_flags_type stage_flags{};
+	::vkfu::flags::shader_stage stage_flags{};
 	::std::uint32_t offset{};
 	::std::uint32_t size{};
 	void const* values = nullptr;
@@ -499,53 +436,11 @@ struct push_constants
 	}
 };
 
-static_assert(sizeof(push_constants::stage_flags_type) == sizeof(VkShaderStageFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constants::stage_flags_type{.vertex = 1}) == VK_SHADER_STAGE_VERTEX_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constants::stage_flags_type{.tessellation_control = 1}) == VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constants::stage_flags_type{.tessellation_evaluation = 1}) == VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constants::stage_flags_type{.geometry = 1}) == VK_SHADER_STAGE_GEOMETRY_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constants::stage_flags_type{.fragment = 1}) == VK_SHADER_STAGE_FRAGMENT_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constants::stage_flags_type{.compute = 1}) == VK_SHADER_STAGE_COMPUTE_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constants::stage_flags_type{.task = 1}) == VK_SHADER_STAGE_TASK_BIT_EXT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constants::stage_flags_type{.mesh = 1}) == VK_SHADER_STAGE_MESH_BIT_EXT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constants::stage_flags_type{.raygen = 1}) == VK_SHADER_STAGE_RAYGEN_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constants::stage_flags_type{.any_hit = 1}) == VK_SHADER_STAGE_ANY_HIT_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constants::stage_flags_type{.closest_hit = 1}) == VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constants::stage_flags_type{.miss = 1}) == VK_SHADER_STAGE_MISS_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constants::stage_flags_type{.intersection = 1}) == VK_SHADER_STAGE_INTERSECTION_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constants::stage_flags_type{.callable = 1}) == VK_SHADER_STAGE_CALLABLE_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constants::stage_flags_type{.subpass_shading = 1}) == VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_constants::stage_flags_type{.cluster_culling = 1}) == VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI);
-#endif
-
 struct push_descriptor_set
 {
-	using vulkan_tag_type = obj::push_descriptor_set;
+	using vulkan_tag_type = tag::push_descriptor_set;
 
-	struct stage_flags_type
-	{
-		VkShaderStageFlags vertex : 1 = 0;
-		VkShaderStageFlags tessellation_control : 1 = 0;
-		VkShaderStageFlags tessellation_evaluation : 1 = 0;
-		VkShaderStageFlags geometry : 1 = 0;
-		VkShaderStageFlags fragment : 1 = 0;
-		VkShaderStageFlags compute : 1 = 0;
-		VkShaderStageFlags task : 1 = 0;
-		VkShaderStageFlags mesh : 1 = 0;
-		VkShaderStageFlags raygen : 1 = 0;
-		VkShaderStageFlags any_hit : 1 = 0;
-		VkShaderStageFlags closest_hit : 1 = 0;
-		VkShaderStageFlags miss : 1 = 0;
-		VkShaderStageFlags intersection : 1 = 0;
-		VkShaderStageFlags callable : 1 = 0;
-		VkShaderStageFlags subpass_shading : 1 = 0;
-		VkShaderStageFlags _reserved_15 : 4 = 0;
-		VkShaderStageFlags cluster_culling : 1 = 0;
-		VkShaderStageFlags _reserved_20 : 12 = 0;
-	};
-
-	stage_flags_type stage_flags{};
+	::vkfu::flags::shader_stage stage_flags{};
 	VkPipelineLayout layout{};
 	::std::uint32_t set{};
 	::std::span<VkWriteDescriptorSet const> descriptor_writes{};
@@ -564,29 +459,9 @@ struct push_descriptor_set
 	}
 };
 
-static_assert(sizeof(push_descriptor_set::stage_flags_type) == sizeof(VkShaderStageFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_descriptor_set::stage_flags_type{.vertex = 1}) == VK_SHADER_STAGE_VERTEX_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_descriptor_set::stage_flags_type{.tessellation_control = 1}) == VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_descriptor_set::stage_flags_type{.tessellation_evaluation = 1}) == VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_descriptor_set::stage_flags_type{.geometry = 1}) == VK_SHADER_STAGE_GEOMETRY_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_descriptor_set::stage_flags_type{.fragment = 1}) == VK_SHADER_STAGE_FRAGMENT_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_descriptor_set::stage_flags_type{.compute = 1}) == VK_SHADER_STAGE_COMPUTE_BIT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_descriptor_set::stage_flags_type{.task = 1}) == VK_SHADER_STAGE_TASK_BIT_EXT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_descriptor_set::stage_flags_type{.mesh = 1}) == VK_SHADER_STAGE_MESH_BIT_EXT);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_descriptor_set::stage_flags_type{.raygen = 1}) == VK_SHADER_STAGE_RAYGEN_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_descriptor_set::stage_flags_type{.any_hit = 1}) == VK_SHADER_STAGE_ANY_HIT_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_descriptor_set::stage_flags_type{.closest_hit = 1}) == VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_descriptor_set::stage_flags_type{.miss = 1}) == VK_SHADER_STAGE_MISS_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_descriptor_set::stage_flags_type{.intersection = 1}) == VK_SHADER_STAGE_INTERSECTION_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_descriptor_set::stage_flags_type{.callable = 1}) == VK_SHADER_STAGE_CALLABLE_BIT_KHR);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_descriptor_set::stage_flags_type{.subpass_shading = 1}) == VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI);
-static_assert(::std::bit_cast<VkShaderStageFlags>(push_descriptor_set::stage_flags_type{.cluster_culling = 1}) == VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI);
-#endif
-
 struct push_descriptor_set_with_template
 {
-	using vulkan_tag_type = obj::push_descriptor_set_with_template;
+	using vulkan_tag_type = tag::push_descriptor_set_with_template;
 
 	VkDescriptorUpdateTemplate descriptor_update_template{};
 	VkPipelineLayout layout{};
@@ -612,7 +487,7 @@ using ::vkfu::operator|;
 
 struct maintenance6
 {
-	using vulkan_tag_type = obj::feature::maintenance6;
+	using vulkan_tag_type = tag::feature::maintenance6;
 
 	bool enable = false;
 
@@ -634,7 +509,7 @@ using ::vkfu::operator|;
 
 struct bind_memory_status
 {
-	using vulkan_tag_type = obj::option::bind_memory_status;
+	using vulkan_tag_type = tag::option::bind_memory_status;
 
 	VkResult* result = nullptr;
 
@@ -653,28 +528,28 @@ struct bind_memory_status
 
 namespace vkfu
 {
-template<::vkfu::expression_for<::vkfu::obj::bind_descriptor_sets> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::bind_descriptor_sets> Expression1>
 void cmd_bind_descriptor_sets2(VkCommandBuffer command_buffer, Expression1&& bind_descriptor_sets_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(bind_descriptor_sets_info));
 	::vkCmdBindDescriptorSets2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::push_constants> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::push_constants> Expression1>
 void cmd_push_constants2(VkCommandBuffer command_buffer, Expression1&& push_constants_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(push_constants_info));
 	::vkCmdPushConstants2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::push_descriptor_set> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::push_descriptor_set> Expression1>
 void cmd_push_descriptor_set2(VkCommandBuffer command_buffer, Expression1&& push_descriptor_set_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(push_descriptor_set_info));
 	::vkCmdPushDescriptorSet2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::push_descriptor_set_with_template> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::push_descriptor_set_with_template> Expression1>
 void cmd_push_descriptor_set_with_template2(VkCommandBuffer command_buffer, Expression1&& push_descriptor_set_with_template_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(push_descriptor_set_with_template_info));

@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceRelaxedLineRasterizationFeaturesIM
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::img
 {
@@ -55,7 +55,7 @@ struct relaxed_line_rasterization{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::img::relaxed_line_rasterization>
+struct vulkan_object_trait<tag::feature::img::relaxed_line_rasterization>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::img::relaxed_line_rasterization>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceRelaxedLineRasterizationFeaturesIMG>
 {
-	using type = obj::feature::img::relaxed_line_rasterization;
+	using type = tag::feature::img::relaxed_line_rasterization;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::img::relaxed_line_rasterization>
+struct vulkan_object_native<tag::feature::img::relaxed_line_rasterization>
 {
 	using type = VkPhysicalDeviceRelaxedLineRasterizationFeaturesIMG;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RELAXED_LINE_RASTERIZATION_FEATURES_IMG;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::img::relaxed_line_rasterization>
+struct vulkan_object_extensions<tag::feature::img::relaxed_line_rasterization>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_IMG_relaxed_line_rasterization"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::img::relaxed_line_rasterization>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::img::relaxed_line_rasterization> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::img::relaxed_line_rasterization> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::img::relaxed_line_rasterization> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::img::relaxed_line_rasterization> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct relaxed_line_rasterization
 {
-	using vulkan_tag_type = obj::feature::img::relaxed_line_rasterization;
+	using vulkan_tag_type = tag::feature::img::relaxed_line_rasterization;
 
 	bool enable = false;
 

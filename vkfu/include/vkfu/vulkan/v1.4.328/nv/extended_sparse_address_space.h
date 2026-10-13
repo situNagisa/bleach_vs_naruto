@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceExtendedSparseAddressSpaceProperti
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -74,7 +74,7 @@ struct extended_sparse_address_space{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::extended_sparse_address_space>
+struct vulkan_object_trait<tag::feature::nv::extended_sparse_address_space>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::feature::nv::extended_sparse_address_space>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::nv::extended_sparse_address_space>
+struct vulkan_object_trait<tag::property::nv::extended_sparse_address_space>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::property::nv::extended_sparse_address_space>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceExtendedSparseAddressSpaceFeaturesNV>
 {
-	using type = obj::feature::nv::extended_sparse_address_space;
+	using type = tag::feature::nv::extended_sparse_address_space;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::extended_sparse_address_space>
+struct vulkan_object_native<tag::feature::nv::extended_sparse_address_space>
 {
 	using type = VkPhysicalDeviceExtendedSparseAddressSpaceFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_SPARSE_ADDRESS_SPACE_FEATURES_NV;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::feature::nv::extended_sparse_address_space>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceExtendedSparseAddressSpacePropertiesNV>
 {
-	using type = obj::property::nv::extended_sparse_address_space;
+	using type = tag::property::nv::extended_sparse_address_space;
 };
 
 template<>
-struct vulkan_object_native<obj::property::nv::extended_sparse_address_space>
+struct vulkan_object_native<tag::property::nv::extended_sparse_address_space>
 {
 	using type = VkPhysicalDeviceExtendedSparseAddressSpacePropertiesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_SPARSE_ADDRESS_SPACE_PROPERTIES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::extended_sparse_address_space>
+struct vulkan_object_extensions<tag::feature::nv::extended_sparse_address_space>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_extended_sparse_address_space"};
 	constexpr static ::std::uint32_t core = 0;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::feature::nv::extended_sparse_address_space>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::nv::extended_sparse_address_space>
+struct vulkan_object_extensions<tag::property::nv::extended_sparse_address_space>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_extended_sparse_address_space"};
 	constexpr static ::std::uint32_t core = 0;
@@ -132,11 +132,11 @@ struct vulkan_object_extensions<obj::property::nv::extended_sparse_address_space
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::extended_sparse_address_space> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::extended_sparse_address_space> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::extended_sparse_address_space> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::extended_sparse_address_space> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::nv::extended_sparse_address_space> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::nv::extended_sparse_address_space> = true;
 }
 
 namespace vkfu::param
@@ -147,7 +147,7 @@ using ::vkfu::operator|;
 
 struct extended_sparse_address_space
 {
-	using vulkan_tag_type = obj::feature::nv::extended_sparse_address_space;
+	using vulkan_tag_type = tag::feature::nv::extended_sparse_address_space;
 
 	bool enable = false;
 

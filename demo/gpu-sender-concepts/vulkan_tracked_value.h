@@ -60,7 +60,7 @@ public:
 	{
 		_waits.push_back(::vkfu::evaluate(::vkfu::param::semaphore_submit{
 			.semaphore = semaphore,
-			.stage_mask = ::std::bit_cast<::vkfu::param::semaphore_submit::stage_mask_type>(stage),
+			.stage_mask = ::std::bit_cast<::vkfu::flags::pipeline_stage2>(stage),
 		}));
 	}
 
@@ -247,10 +247,10 @@ struct transite_sender
 			if constexpr (image_state<From> && image_state<To>)
 			{
 				auto const barrier = ::vkfu::evaluate(param::image_memory_barrier2{
-					.src_stage_mask = ::std::bit_cast<param::image_memory_barrier2::src_stage_mask_type>(_from.stage()),
-					.src_access_mask = ::std::bit_cast<param::image_memory_barrier2::src_access_mask_type>(_from.access()),
-					.dst_stage_mask = ::std::bit_cast<param::image_memory_barrier2::dst_stage_mask_type>(_to.stage()),
-					.dst_access_mask = ::std::bit_cast<param::image_memory_barrier2::dst_access_mask_type>(_to.access()),
+					.src_stage_mask = ::std::bit_cast<::vkfu::flags::pipeline_stage2>(_from.stage()),
+					.src_access_mask = ::std::bit_cast<::vkfu::flags::access2>(_from.access()),
+					.dst_stage_mask = ::std::bit_cast<::vkfu::flags::pipeline_stage2>(_to.stage()),
+					.dst_access_mask = ::std::bit_cast<::vkfu::flags::access2>(_to.access()),
 					.old_layout = static_cast<::vkfu::enums::image_layout>(_from.layout()),
 					.new_layout = static_cast<::vkfu::enums::image_layout>(_to.layout()),
 					.src_queue_family_index = VK_QUEUE_FAMILY_IGNORED,
@@ -268,10 +268,10 @@ struct transite_sender
 			else if constexpr (buffer_state<From> && buffer_state<To>)
 			{
 				auto const barrier = ::vkfu::evaluate(param::buffer_memory_barrier2{
-					.src_stage_mask = ::std::bit_cast<param::buffer_memory_barrier2::src_stage_mask_type>(_from.stage()),
-					.src_access_mask = ::std::bit_cast<param::buffer_memory_barrier2::src_access_mask_type>(_from.access()),
-					.dst_stage_mask = ::std::bit_cast<param::buffer_memory_barrier2::dst_stage_mask_type>(_to.stage()),
-					.dst_access_mask = ::std::bit_cast<param::buffer_memory_barrier2::dst_access_mask_type>(_to.access()),
+					.src_stage_mask = ::std::bit_cast<::vkfu::flags::pipeline_stage2>(_from.stage()),
+					.src_access_mask = ::std::bit_cast<::vkfu::flags::access2>(_from.access()),
+					.dst_stage_mask = ::std::bit_cast<::vkfu::flags::pipeline_stage2>(_to.stage()),
+					.dst_access_mask = ::std::bit_cast<::vkfu::flags::access2>(_to.access()),
 					.src_queue_family_index = VK_QUEUE_FAMILY_IGNORED,
 					.dst_queue_family_index = VK_QUEUE_FAMILY_IGNORED,
 					.buffer = _handle,

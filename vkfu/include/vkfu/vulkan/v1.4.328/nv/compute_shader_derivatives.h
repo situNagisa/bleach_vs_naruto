@@ -28,11 +28,11 @@
 
 #include "../khr/compute_shader_derivatives.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr::nv
 {
-using compute_shader_derivatives = ::vkfu::obj::feature::khr::compute_shader_derivatives;
+using compute_shader_derivatives = ::vkfu::tag::feature::khr::compute_shader_derivatives;
 }
 }
 

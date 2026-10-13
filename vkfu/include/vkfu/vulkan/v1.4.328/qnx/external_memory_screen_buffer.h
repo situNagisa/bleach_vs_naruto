@@ -108,7 +108,7 @@ constexpr auto _vkfu_evaluate(VkScreenBufferPropertiesQNX const& value) noexcept
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::qnx
 {
@@ -129,7 +129,7 @@ struct screen_buffer_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::qnx::external_format>
+struct vulkan_object_trait<tag::option::qnx::external_format>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -137,7 +137,7 @@ struct vulkan_object_trait<obj::option::qnx::external_format>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::qnx::import_screen_buffer>
+struct vulkan_object_trait<tag::option::qnx::import_screen_buffer>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -145,7 +145,7 @@ struct vulkan_object_trait<obj::option::qnx::import_screen_buffer>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::qnx::external_memory_screen_buffer>
+struct vulkan_object_trait<tag::feature::qnx::external_memory_screen_buffer>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -153,7 +153,7 @@ struct vulkan_object_trait<obj::feature::qnx::external_memory_screen_buffer>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::qnx::screen_buffer_format_properties>
+struct vulkan_object_trait<tag::result::qnx::screen_buffer_format_properties>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -161,7 +161,7 @@ struct vulkan_object_trait<obj::result::qnx::screen_buffer_format_properties>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::qnx::screen_buffer_properties>
+struct vulkan_object_trait<tag::result::qnx::screen_buffer_properties>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -171,11 +171,11 @@ struct vulkan_object_trait<obj::result::qnx::screen_buffer_properties>
 template<>
 struct expression_vulkan_tag<VkExternalFormatQNX>
 {
-	using type = obj::option::qnx::external_format;
+	using type = tag::option::qnx::external_format;
 };
 
 template<>
-struct vulkan_object_native<obj::option::qnx::external_format>
+struct vulkan_object_native<tag::option::qnx::external_format>
 {
 	using type = VkExternalFormatQNX;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXTERNAL_FORMAT_QNX;
@@ -184,11 +184,11 @@ struct vulkan_object_native<obj::option::qnx::external_format>
 template<>
 struct expression_vulkan_tag<VkImportScreenBufferInfoQNX>
 {
-	using type = obj::option::qnx::import_screen_buffer;
+	using type = tag::option::qnx::import_screen_buffer;
 };
 
 template<>
-struct vulkan_object_native<obj::option::qnx::import_screen_buffer>
+struct vulkan_object_native<tag::option::qnx::import_screen_buffer>
 {
 	using type = VkImportScreenBufferInfoQNX;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMPORT_SCREEN_BUFFER_INFO_QNX;
@@ -197,11 +197,11 @@ struct vulkan_object_native<obj::option::qnx::import_screen_buffer>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceExternalMemoryScreenBufferFeaturesQNX>
 {
-	using type = obj::feature::qnx::external_memory_screen_buffer;
+	using type = tag::feature::qnx::external_memory_screen_buffer;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::qnx::external_memory_screen_buffer>
+struct vulkan_object_native<tag::feature::qnx::external_memory_screen_buffer>
 {
 	using type = VkPhysicalDeviceExternalMemoryScreenBufferFeaturesQNX;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_MEMORY_SCREEN_BUFFER_FEATURES_QNX;
@@ -210,11 +210,11 @@ struct vulkan_object_native<obj::feature::qnx::external_memory_screen_buffer>
 template<>
 struct expression_vulkan_tag<VkScreenBufferFormatPropertiesQNX>
 {
-	using type = obj::result::qnx::screen_buffer_format_properties;
+	using type = tag::result::qnx::screen_buffer_format_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::qnx::screen_buffer_format_properties>
+struct vulkan_object_native<tag::result::qnx::screen_buffer_format_properties>
 {
 	using type = VkScreenBufferFormatPropertiesQNX;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SCREEN_BUFFER_FORMAT_PROPERTIES_QNX;
@@ -223,18 +223,18 @@ struct vulkan_object_native<obj::result::qnx::screen_buffer_format_properties>
 template<>
 struct expression_vulkan_tag<VkScreenBufferPropertiesQNX>
 {
-	using type = obj::result::qnx::screen_buffer_properties;
+	using type = tag::result::qnx::screen_buffer_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::qnx::screen_buffer_properties>
+struct vulkan_object_native<tag::result::qnx::screen_buffer_properties>
 {
 	using type = VkScreenBufferPropertiesQNX;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SCREEN_BUFFER_PROPERTIES_QNX;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::qnx::external_format>
+struct vulkan_object_extensions<tag::option::qnx::external_format>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QNX_external_memory_screen_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -242,7 +242,7 @@ struct vulkan_object_extensions<obj::option::qnx::external_format>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::qnx::import_screen_buffer>
+struct vulkan_object_extensions<tag::option::qnx::import_screen_buffer>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QNX_external_memory_screen_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -250,7 +250,7 @@ struct vulkan_object_extensions<obj::option::qnx::import_screen_buffer>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::qnx::external_memory_screen_buffer>
+struct vulkan_object_extensions<tag::feature::qnx::external_memory_screen_buffer>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QNX_external_memory_screen_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -258,7 +258,7 @@ struct vulkan_object_extensions<obj::feature::qnx::external_memory_screen_buffer
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::qnx::screen_buffer_format_properties>
+struct vulkan_object_extensions<tag::result::qnx::screen_buffer_format_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QNX_external_memory_screen_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -266,7 +266,7 @@ struct vulkan_object_extensions<obj::result::qnx::screen_buffer_format_propertie
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::qnx::screen_buffer_properties>
+struct vulkan_object_extensions<tag::result::qnx::screen_buffer_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QNX_external_memory_screen_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -274,17 +274,17 @@ struct vulkan_object_extensions<obj::result::qnx::screen_buffer_properties>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::qnx::external_memory_screen_buffer> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::qnx::external_memory_screen_buffer> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image, obj::option::qnx::external_format> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image, tag::option::qnx::external_format> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::memory, obj::option::qnx::import_screen_buffer> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::memory, tag::option::qnx::import_screen_buffer> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::qnx::external_memory_screen_buffer> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::qnx::external_memory_screen_buffer> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::sampler_ycbcr_conversion, obj::option::qnx::external_format> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::sampler_ycbcr_conversion, tag::option::qnx::external_format> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::qnx::screen_buffer_properties, obj::result::qnx::screen_buffer_format_properties> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::qnx::screen_buffer_properties, tag::result::qnx::screen_buffer_format_properties> = true;
 }
 
 namespace vkfu::param
@@ -295,7 +295,7 @@ using ::vkfu::operator|;
 
 struct external_memory_screen_buffer
 {
-	using vulkan_tag_type = obj::feature::qnx::external_memory_screen_buffer;
+	using vulkan_tag_type = tag::feature::qnx::external_memory_screen_buffer;
 
 	bool screen_buffer_import = false;
 
@@ -317,7 +317,7 @@ using ::vkfu::operator|;
 
 struct external_format
 {
-	using vulkan_tag_type = obj::option::qnx::external_format;
+	using vulkan_tag_type = tag::option::qnx::external_format;
 
 	::std::uint64_t format{};
 
@@ -333,7 +333,7 @@ struct external_format
 
 struct import_screen_buffer
 {
-	using vulkan_tag_type = obj::option::qnx::import_screen_buffer;
+	using vulkan_tag_type = tag::option::qnx::import_screen_buffer;
 
 	_screen_buffer* buffer = nullptr;
 
@@ -354,11 +354,11 @@ namespace vkfu
 {
 namespace qnx
 {
-template<::vkfu::query_extension_of<::vkfu::obj::result::qnx::screen_buffer_properties>... Extras>
+template<::vkfu::query_extension_of<::vkfu::tag::result::qnx::screen_buffer_properties>... Extras>
 [[nodiscard]] auto get_screen_buffer_properties(VkDevice device, _screen_buffer const* buffer, ::std::nothrow_t)
-	-> ::std::expected<::vkfu::query_chain<::vkfu::obj::result::qnx::screen_buffer_properties, Extras...>, ::VkResult>
+	-> ::std::expected<::vkfu::query_chain<::vkfu::tag::result::qnx::screen_buffer_properties, Extras...>, ::VkResult>
 {
-	auto chain = ::vkfu::query_chain<::vkfu::obj::result::qnx::screen_buffer_properties, Extras...>{};
+	auto chain = ::vkfu::query_chain<::vkfu::tag::result::qnx::screen_buffer_properties, Extras...>{};
 	if (auto const outcome = ::vkGetScreenBufferPropertiesQNX(device, buffer, ::std::addressof(chain.head())); outcome != ::VK_SUCCESS)
 	{
 		return ::std::unexpected{outcome};
@@ -366,8 +366,8 @@ template<::vkfu::query_extension_of<::vkfu::obj::result::qnx::screen_buffer_prop
 	return chain;
 }
 
-template<::vkfu::query_extension_of<::vkfu::obj::result::qnx::screen_buffer_properties>... Extras>
-[[nodiscard]] auto get_screen_buffer_properties(VkDevice device, _screen_buffer const* buffer) -> ::vkfu::query_chain<::vkfu::obj::result::qnx::screen_buffer_properties, Extras...>
+template<::vkfu::query_extension_of<::vkfu::tag::result::qnx::screen_buffer_properties>... Extras>
+[[nodiscard]] auto get_screen_buffer_properties(VkDevice device, _screen_buffer const* buffer) -> ::vkfu::query_chain<::vkfu::tag::result::qnx::screen_buffer_properties, Extras...>
 {
 	auto outcome = get_screen_buffer_properties<Extras...>(device, buffer, ::std::nothrow);
 	if (!outcome)

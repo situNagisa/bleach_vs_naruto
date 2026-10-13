@@ -56,7 +56,7 @@ constexpr auto _vkfu_evaluate(VkBindImageMemoryInfo const& value) noexcept -> Vk
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct bind_buffer_memory{};
 struct bind_image_memory{};
@@ -65,7 +65,7 @@ struct bind_image_memory{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::bind_buffer_memory>
+struct vulkan_object_trait<tag::bind_buffer_memory>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -73,7 +73,7 @@ struct vulkan_object_trait<obj::bind_buffer_memory>
 };
 
 template<>
-struct vulkan_object_trait<obj::bind_image_memory>
+struct vulkan_object_trait<tag::bind_image_memory>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -83,11 +83,11 @@ struct vulkan_object_trait<obj::bind_image_memory>
 template<>
 struct expression_vulkan_tag<VkBindBufferMemoryInfo>
 {
-	using type = obj::bind_buffer_memory;
+	using type = tag::bind_buffer_memory;
 };
 
 template<>
-struct vulkan_object_native<obj::bind_buffer_memory>
+struct vulkan_object_native<tag::bind_buffer_memory>
 {
 	using type = VkBindBufferMemoryInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_BIND_BUFFER_MEMORY_INFO;
@@ -96,18 +96,18 @@ struct vulkan_object_native<obj::bind_buffer_memory>
 template<>
 struct expression_vulkan_tag<VkBindImageMemoryInfo>
 {
-	using type = obj::bind_image_memory;
+	using type = tag::bind_image_memory;
 };
 
 template<>
-struct vulkan_object_native<obj::bind_image_memory>
+struct vulkan_object_native<tag::bind_image_memory>
 {
 	using type = VkBindImageMemoryInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_BIND_IMAGE_MEMORY_INFO;
 };
 
 template<>
-struct vulkan_object_extensions<obj::bind_buffer_memory>
+struct vulkan_object_extensions<tag::bind_buffer_memory>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_bind_memory2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -115,7 +115,7 @@ struct vulkan_object_extensions<obj::bind_buffer_memory>
 };
 
 template<>
-struct vulkan_object_extensions<obj::bind_image_memory>
+struct vulkan_object_extensions<tag::bind_image_memory>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_bind_memory2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -130,7 +130,7 @@ using ::vkfu::operator|;
 
 struct bind_buffer_memory
 {
-	using vulkan_tag_type = obj::bind_buffer_memory;
+	using vulkan_tag_type = tag::bind_buffer_memory;
 
 	VkBuffer buffer{};
 	VkDeviceMemory memory{};
@@ -150,7 +150,7 @@ struct bind_buffer_memory
 
 struct bind_image_memory
 {
-	using vulkan_tag_type = obj::bind_image_memory;
+	using vulkan_tag_type = tag::bind_image_memory;
 
 	VkImage image{};
 	VkDeviceMemory memory{};

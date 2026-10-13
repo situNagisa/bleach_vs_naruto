@@ -28,19 +28,19 @@
 
 #include "../version_1_3/subgroup_size_control.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
-using subgroup_size_control = ::vkfu::obj::feature::subgroup_size_control;
+using subgroup_size_control = ::vkfu::tag::feature::subgroup_size_control;
 }
 namespace property::ext
 {
-using subgroup_size_control = ::vkfu::obj::property::subgroup_size_control;
+using subgroup_size_control = ::vkfu::tag::property::subgroup_size_control;
 }
 namespace state::ext
 {
-using shader_stage_required_subgroup_size = ::vkfu::obj::state::shader_stage_required_subgroup_size;
+using shader_stage_required_subgroup_size = ::vkfu::tag::state::shader_stage_required_subgroup_size;
 }
 }
 

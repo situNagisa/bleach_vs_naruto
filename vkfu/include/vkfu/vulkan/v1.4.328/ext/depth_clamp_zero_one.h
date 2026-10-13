@@ -28,11 +28,11 @@
 
 #include "../khr/depth_clamp_zero_one.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr::ext
 {
-using depth_clamp_zero_one = ::vkfu::obj::feature::khr::depth_clamp_zero_one;
+using depth_clamp_zero_one = ::vkfu::tag::feature::khr::depth_clamp_zero_one;
 }
 }
 

@@ -28,14 +28,14 @@
 
 #include "../version_1_1/maintenance3.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property::khr
 {
-using maintenance3 = ::vkfu::obj::property::maintenance3;
+using maintenance3 = ::vkfu::tag::property::maintenance3;
 }
 namespace result::khr
 {
-using descriptor_set_layout_support = ::vkfu::obj::result::descriptor_set_layout_support;
+using descriptor_set_layout_support = ::vkfu::tag::result::descriptor_set_layout_support;
 }
 }

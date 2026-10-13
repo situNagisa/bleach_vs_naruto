@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceLegacyVertexAttributesPropertiesEX
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -74,7 +74,7 @@ struct legacy_vertex_attributes{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::legacy_vertex_attributes>
+struct vulkan_object_trait<tag::feature::ext::legacy_vertex_attributes>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::feature::ext::legacy_vertex_attributes>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::ext::legacy_vertex_attributes>
+struct vulkan_object_trait<tag::property::ext::legacy_vertex_attributes>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::property::ext::legacy_vertex_attributes>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceLegacyVertexAttributesFeaturesEXT>
 {
-	using type = obj::feature::ext::legacy_vertex_attributes;
+	using type = tag::feature::ext::legacy_vertex_attributes;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::legacy_vertex_attributes>
+struct vulkan_object_native<tag::feature::ext::legacy_vertex_attributes>
 {
 	using type = VkPhysicalDeviceLegacyVertexAttributesFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LEGACY_VERTEX_ATTRIBUTES_FEATURES_EXT;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::feature::ext::legacy_vertex_attributes>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceLegacyVertexAttributesPropertiesEXT>
 {
-	using type = obj::property::ext::legacy_vertex_attributes;
+	using type = tag::property::ext::legacy_vertex_attributes;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::legacy_vertex_attributes>
+struct vulkan_object_native<tag::property::ext::legacy_vertex_attributes>
 {
 	using type = VkPhysicalDeviceLegacyVertexAttributesPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LEGACY_VERTEX_ATTRIBUTES_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::legacy_vertex_attributes>
+struct vulkan_object_extensions<tag::feature::ext::legacy_vertex_attributes>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_legacy_vertex_attributes"};
 	constexpr static ::std::uint32_t core = 0;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::feature::ext::legacy_vertex_attributes>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::legacy_vertex_attributes>
+struct vulkan_object_extensions<tag::property::ext::legacy_vertex_attributes>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_legacy_vertex_attributes"};
 	constexpr static ::std::uint32_t core = 0;
@@ -132,11 +132,11 @@ struct vulkan_object_extensions<obj::property::ext::legacy_vertex_attributes>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::legacy_vertex_attributes> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::legacy_vertex_attributes> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::legacy_vertex_attributes> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::legacy_vertex_attributes> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::legacy_vertex_attributes> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::legacy_vertex_attributes> = true;
 }
 
 namespace vkfu::param
@@ -147,7 +147,7 @@ using ::vkfu::operator|;
 
 struct legacy_vertex_attributes
 {
-	using vulkan_tag_type = obj::feature::ext::legacy_vertex_attributes;
+	using vulkan_tag_type = tag::feature::ext::legacy_vertex_attributes;
 
 	bool enable = false;
 

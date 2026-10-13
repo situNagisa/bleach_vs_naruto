@@ -59,7 +59,7 @@ enum class layer_setting_type : ::std::underlying_type_t<VkLayerSettingTypeEXT>
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::ext
 {
@@ -70,7 +70,7 @@ struct layer_settings{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::layer_settings>
+struct vulkan_object_trait<tag::option::ext::layer_settings>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -80,18 +80,18 @@ struct vulkan_object_trait<obj::option::ext::layer_settings>
 template<>
 struct expression_vulkan_tag<VkLayerSettingsCreateInfoEXT>
 {
-	using type = obj::option::ext::layer_settings;
+	using type = tag::option::ext::layer_settings;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::layer_settings>
+struct vulkan_object_native<tag::option::ext::layer_settings>
 {
 	using type = VkLayerSettingsCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_LAYER_SETTINGS_CREATE_INFO_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::layer_settings>
+struct vulkan_object_extensions<tag::option::ext::layer_settings>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_layer_settings"};
 	constexpr static ::std::uint32_t core = 0;
@@ -99,7 +99,7 @@ struct vulkan_object_extensions<obj::option::ext::layer_settings>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::instance, obj::option::ext::layer_settings> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::instance, tag::option::ext::layer_settings> = true;
 }
 
 namespace vkfu::param
@@ -110,7 +110,7 @@ using ::vkfu::operator|;
 
 struct layer_settings
 {
-	using vulkan_tag_type = obj::option::ext::layer_settings;
+	using vulkan_tag_type = tag::option::ext::layer_settings;
 
 	::std::span<VkLayerSettingEXT const> settings{};
 

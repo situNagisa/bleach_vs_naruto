@@ -27,6 +27,7 @@
 #include <vkfu/vulkan_object.h>
 
 #include "../version_1_1/external_fence_capabilities.h"
+#include "../version_1_1/external_fence.h"
 
 constexpr auto _vkfu_address(VkFenceGetFdInfoKHR& value) noexcept -> void const*
 {
@@ -58,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkImportFenceFdInfoKHR const& value) noexcept -> V
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
@@ -70,7 +71,7 @@ struct import_fence_fd{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::khr::fence_get_fd>
+struct vulkan_object_trait<tag::khr::fence_get_fd>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -78,7 +79,7 @@ struct vulkan_object_trait<obj::khr::fence_get_fd>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::import_fence_fd>
+struct vulkan_object_trait<tag::khr::import_fence_fd>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -88,11 +89,11 @@ struct vulkan_object_trait<obj::khr::import_fence_fd>
 template<>
 struct expression_vulkan_tag<VkFenceGetFdInfoKHR>
 {
-	using type = obj::khr::fence_get_fd;
+	using type = tag::khr::fence_get_fd;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::fence_get_fd>
+struct vulkan_object_native<tag::khr::fence_get_fd>
 {
 	using type = VkFenceGetFdInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_FENCE_GET_FD_INFO_KHR;
@@ -101,18 +102,18 @@ struct vulkan_object_native<obj::khr::fence_get_fd>
 template<>
 struct expression_vulkan_tag<VkImportFenceFdInfoKHR>
 {
-	using type = obj::khr::import_fence_fd;
+	using type = tag::khr::import_fence_fd;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::import_fence_fd>
+struct vulkan_object_native<tag::khr::import_fence_fd>
 {
 	using type = VkImportFenceFdInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMPORT_FENCE_FD_INFO_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::fence_get_fd>
+struct vulkan_object_extensions<tag::khr::fence_get_fd>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_fence_fd"};
 	constexpr static ::std::uint32_t core = 0;
@@ -120,7 +121,7 @@ struct vulkan_object_extensions<obj::khr::fence_get_fd>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::import_fence_fd>
+struct vulkan_object_extensions<tag::khr::import_fence_fd>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_fence_fd"};
 	constexpr static ::std::uint32_t core = 0;
@@ -137,7 +138,7 @@ using ::vkfu::operator|;
 
 struct fence_get_fd
 {
-	using vulkan_tag_type = obj::khr::fence_get_fd;
+	using vulkan_tag_type = tag::khr::fence_get_fd;
 
 	VkFence fence{};
 	::vkfu::enums::external_fence_handle_type handle_type{};
@@ -155,16 +156,10 @@ struct fence_get_fd
 
 struct import_fence_fd
 {
-	using vulkan_tag_type = obj::khr::import_fence_fd;
+	using vulkan_tag_type = tag::khr::import_fence_fd;
 
 	VkFence fence{};
-	struct flags_type
-	{
-		VkFenceImportFlags temporary : 1 = 0;
-		VkFenceImportFlags _reserved_1 : 31 = 0;
-	};
-
-	flags_type flags{};
+	::vkfu::flags::fence_import flags{};
 	::vkfu::enums::external_fence_handle_type handle_type{};
 	int fd{};
 
@@ -181,11 +176,6 @@ struct import_fence_fd
 	}
 };
 
-static_assert(sizeof(import_fence_fd::flags_type) == sizeof(VkFenceImportFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkFenceImportFlags>(import_fence_fd::flags_type{.temporary = 1}) == VK_FENCE_IMPORT_TEMPORARY_BIT);
-#endif
-
 }
 }
 
@@ -193,7 +183,7 @@ namespace vkfu
 {
 namespace khr
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::fence_get_fd> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::fence_get_fd> Expression1>
 [[nodiscard]] auto get_fence_fd(VkDevice device, Expression1&& get_fd_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<int, ::VkResult>
 {
@@ -207,7 +197,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::fence_get_fd> Expression1>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::fence_get_fd> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::fence_get_fd> Expression1>
 [[nodiscard]] auto get_fence_fd(VkDevice device, Expression1&& get_fd_info) -> int
 {
 	auto outcome = get_fence_fd(device, ::std::forward<Expression1>(get_fd_info), ::std::nothrow);
@@ -218,7 +208,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::fence_get_fd> Expression1>
 	return *outcome;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::import_fence_fd> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::import_fence_fd> Expression1>
 [[nodiscard]] auto import_fence_fd(VkDevice device, Expression1&& import_fence_fd_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -231,7 +221,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::import_fence_fd> Expression1>
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::import_fence_fd> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::import_fence_fd> Expression1>
 void import_fence_fd(VkDevice device, Expression1&& import_fence_fd_info)
 {
 	auto outcome = import_fence_fd(device, ::std::forward<Expression1>(import_fence_fd_info), ::std::nothrow);

@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceVertexAttributeDivisorPropertiesEX
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property::ext
 {
@@ -55,7 +55,7 @@ struct vertex_attribute_divisor{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::property::ext::vertex_attribute_divisor>
+struct vulkan_object_trait<tag::property::ext::vertex_attribute_divisor>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::property::ext::vertex_attribute_divisor>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT>
 {
-	using type = obj::property::ext::vertex_attribute_divisor;
+	using type = tag::property::ext::vertex_attribute_divisor;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::vertex_attribute_divisor>
+struct vulkan_object_native<tag::property::ext::vertex_attribute_divisor>
 {
 	using type = VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VERTEX_ATTRIBUTE_DIVISOR_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::vertex_attribute_divisor>
+struct vulkan_object_extensions<tag::property::ext::vertex_attribute_divisor>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_vertex_attribute_divisor"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,18 +84,18 @@ struct vulkan_object_extensions<obj::property::ext::vertex_attribute_divisor>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::vertex_attribute_divisor> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::vertex_attribute_divisor> = true;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
-using vertex_attribute_divisor = ::vkfu::obj::feature::vertex_attribute_divisor;
+using vertex_attribute_divisor = ::vkfu::tag::feature::vertex_attribute_divisor;
 }
 namespace state::ext
 {
-using vertex_input_divisor = ::vkfu::obj::state::vertex_input_divisor;
+using vertex_input_divisor = ::vkfu::tag::state::vertex_input_divisor;
 }
 }
 

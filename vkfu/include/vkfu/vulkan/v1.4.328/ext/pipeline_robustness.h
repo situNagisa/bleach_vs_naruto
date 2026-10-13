@@ -28,19 +28,19 @@
 
 #include "../version_1_4/pipeline_robustness.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
-using pipeline_robustness = ::vkfu::obj::feature::pipeline_robustness;
+using pipeline_robustness = ::vkfu::tag::feature::pipeline_robustness;
 }
 namespace property::ext
 {
-using pipeline_robustness = ::vkfu::obj::property::pipeline_robustness;
+using pipeline_robustness = ::vkfu::tag::property::pipeline_robustness;
 }
 namespace state::ext
 {
-using robustness = ::vkfu::obj::state::robustness;
+using robustness = ::vkfu::tag::state::robustness;
 }
 }
 

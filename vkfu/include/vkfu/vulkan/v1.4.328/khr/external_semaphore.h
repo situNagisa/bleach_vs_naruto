@@ -28,11 +28,11 @@
 
 #include "../version_1_1/external_semaphore.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::khr
 {
-using export_semaphore = ::vkfu::obj::option::export_semaphore;
+using export_semaphore = ::vkfu::tag::option::export_semaphore;
 }
 }
 

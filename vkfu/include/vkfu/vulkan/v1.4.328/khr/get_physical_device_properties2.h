@@ -28,28 +28,28 @@
 
 #include "../version_1_1/get_physical_device_properties2.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using core = ::vkfu::obj::feature::core;
+using core = ::vkfu::tag::feature::core;
 }
 namespace khr
 {
-using physical_device_image_format2 = ::vkfu::obj::physical_device_image_format2;
-using physical_device_sparse_image_format2 = ::vkfu::obj::physical_device_sparse_image_format2;
+using physical_device_image_format2 = ::vkfu::tag::physical_device_image_format2;
+using physical_device_sparse_image_format2 = ::vkfu::tag::physical_device_sparse_image_format2;
 }
 namespace property::khr
 {
-using memory2 = ::vkfu::obj::property::memory2;
-using core = ::vkfu::obj::property::core;
+using memory2 = ::vkfu::tag::property::memory2;
+using core = ::vkfu::tag::property::core;
 }
 namespace result::khr
 {
-using format_properties2 = ::vkfu::obj::result::format_properties2;
-using image_format_properties2 = ::vkfu::obj::result::image_format_properties2;
-using queue_family_properties2 = ::vkfu::obj::result::queue_family_properties2;
-using sparse_image_format_properties2 = ::vkfu::obj::result::sparse_image_format_properties2;
+using format_properties2 = ::vkfu::tag::result::format_properties2;
+using image_format_properties2 = ::vkfu::tag::result::image_format_properties2;
+using queue_family_properties2 = ::vkfu::tag::result::queue_family_properties2;
+using sparse_image_format_properties2 = ::vkfu::tag::result::sparse_image_format_properties2;
 }
 }
 

@@ -119,7 +119,7 @@ constexpr auto _vkfu_evaluate(VkPipelineExecutableStatisticKHR const& value) noe
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -141,7 +141,7 @@ struct pipeline_executable_statistic{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::pipeline_executable_properties>
+struct vulkan_object_trait<tag::feature::khr::pipeline_executable_properties>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -149,7 +149,7 @@ struct vulkan_object_trait<obj::feature::khr::pipeline_executable_properties>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::pipeline_executable>
+struct vulkan_object_trait<tag::khr::pipeline_executable>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -157,7 +157,7 @@ struct vulkan_object_trait<obj::khr::pipeline_executable>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::pipeline>
+struct vulkan_object_trait<tag::khr::pipeline>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -165,7 +165,7 @@ struct vulkan_object_trait<obj::khr::pipeline>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::pipeline_executable_internal_representation>
+struct vulkan_object_trait<tag::result::khr::pipeline_executable_internal_representation>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -173,7 +173,7 @@ struct vulkan_object_trait<obj::result::khr::pipeline_executable_internal_repres
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::pipeline_executable_properties>
+struct vulkan_object_trait<tag::result::khr::pipeline_executable_properties>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -181,7 +181,7 @@ struct vulkan_object_trait<obj::result::khr::pipeline_executable_properties>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::pipeline_executable_statistic>
+struct vulkan_object_trait<tag::result::khr::pipeline_executable_statistic>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -191,11 +191,11 @@ struct vulkan_object_trait<obj::result::khr::pipeline_executable_statistic>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR>
 {
-	using type = obj::feature::khr::pipeline_executable_properties;
+	using type = tag::feature::khr::pipeline_executable_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::pipeline_executable_properties>
+struct vulkan_object_native<tag::feature::khr::pipeline_executable_properties>
 {
 	using type = VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_EXECUTABLE_PROPERTIES_FEATURES_KHR;
@@ -204,11 +204,11 @@ struct vulkan_object_native<obj::feature::khr::pipeline_executable_properties>
 template<>
 struct expression_vulkan_tag<VkPipelineExecutableInfoKHR>
 {
-	using type = obj::khr::pipeline_executable;
+	using type = tag::khr::pipeline_executable;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::pipeline_executable>
+struct vulkan_object_native<tag::khr::pipeline_executable>
 {
 	using type = VkPipelineExecutableInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_EXECUTABLE_INFO_KHR;
@@ -217,11 +217,11 @@ struct vulkan_object_native<obj::khr::pipeline_executable>
 template<>
 struct expression_vulkan_tag<VkPipelineInfoKHR>
 {
-	using type = obj::khr::pipeline;
+	using type = tag::khr::pipeline;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::pipeline>
+struct vulkan_object_native<tag::khr::pipeline>
 {
 	using type = VkPipelineInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_INFO_KHR;
@@ -230,11 +230,11 @@ struct vulkan_object_native<obj::khr::pipeline>
 template<>
 struct expression_vulkan_tag<VkPipelineExecutableInternalRepresentationKHR>
 {
-	using type = obj::result::khr::pipeline_executable_internal_representation;
+	using type = tag::result::khr::pipeline_executable_internal_representation;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::pipeline_executable_internal_representation>
+struct vulkan_object_native<tag::result::khr::pipeline_executable_internal_representation>
 {
 	using type = VkPipelineExecutableInternalRepresentationKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_EXECUTABLE_INTERNAL_REPRESENTATION_KHR;
@@ -243,11 +243,11 @@ struct vulkan_object_native<obj::result::khr::pipeline_executable_internal_repre
 template<>
 struct expression_vulkan_tag<VkPipelineExecutablePropertiesKHR>
 {
-	using type = obj::result::khr::pipeline_executable_properties;
+	using type = tag::result::khr::pipeline_executable_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::pipeline_executable_properties>
+struct vulkan_object_native<tag::result::khr::pipeline_executable_properties>
 {
 	using type = VkPipelineExecutablePropertiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_EXECUTABLE_PROPERTIES_KHR;
@@ -256,18 +256,18 @@ struct vulkan_object_native<obj::result::khr::pipeline_executable_properties>
 template<>
 struct expression_vulkan_tag<VkPipelineExecutableStatisticKHR>
 {
-	using type = obj::result::khr::pipeline_executable_statistic;
+	using type = tag::result::khr::pipeline_executable_statistic;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::pipeline_executable_statistic>
+struct vulkan_object_native<tag::result::khr::pipeline_executable_statistic>
 {
 	using type = VkPipelineExecutableStatisticKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_EXECUTABLE_STATISTIC_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::pipeline_executable_properties>
+struct vulkan_object_extensions<tag::feature::khr::pipeline_executable_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_pipeline_executable_properties"};
 	constexpr static ::std::uint32_t core = 0;
@@ -275,7 +275,7 @@ struct vulkan_object_extensions<obj::feature::khr::pipeline_executable_propertie
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::pipeline_executable>
+struct vulkan_object_extensions<tag::khr::pipeline_executable>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_pipeline_executable_properties"};
 	constexpr static ::std::uint32_t core = 0;
@@ -283,7 +283,7 @@ struct vulkan_object_extensions<obj::khr::pipeline_executable>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::pipeline>
+struct vulkan_object_extensions<tag::khr::pipeline>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_pipeline_properties", "VK_KHR_pipeline_executable_properties"};
 	constexpr static ::std::uint32_t core = 0;
@@ -291,7 +291,7 @@ struct vulkan_object_extensions<obj::khr::pipeline>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::pipeline_executable_internal_representation>
+struct vulkan_object_extensions<tag::result::khr::pipeline_executable_internal_representation>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_pipeline_executable_properties"};
 	constexpr static ::std::uint32_t core = 0;
@@ -299,7 +299,7 @@ struct vulkan_object_extensions<obj::result::khr::pipeline_executable_internal_r
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::pipeline_executable_properties>
+struct vulkan_object_extensions<tag::result::khr::pipeline_executable_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_pipeline_executable_properties"};
 	constexpr static ::std::uint32_t core = 0;
@@ -307,7 +307,7 @@ struct vulkan_object_extensions<obj::result::khr::pipeline_executable_properties
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::pipeline_executable_statistic>
+struct vulkan_object_extensions<tag::result::khr::pipeline_executable_statistic>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_pipeline_executable_properties"};
 	constexpr static ::std::uint32_t core = 0;
@@ -315,9 +315,9 @@ struct vulkan_object_extensions<obj::result::khr::pipeline_executable_statistic>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::pipeline_executable_properties> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::pipeline_executable_properties> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::pipeline_executable_properties> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::pipeline_executable_properties> = true;
 }
 
 namespace vkfu::param
@@ -328,7 +328,7 @@ using ::vkfu::operator|;
 
 struct pipeline_executable_properties
 {
-	using vulkan_tag_type = obj::feature::khr::pipeline_executable_properties;
+	using vulkan_tag_type = tag::feature::khr::pipeline_executable_properties;
 
 	bool pipeline_executable_info = false;
 
@@ -350,7 +350,7 @@ using ::vkfu::operator|;
 
 struct pipeline_executable
 {
-	using vulkan_tag_type = obj::khr::pipeline_executable;
+	using vulkan_tag_type = tag::khr::pipeline_executable;
 
 	VkPipeline pipeline{};
 	::std::uint32_t executable_index{};
@@ -368,7 +368,7 @@ struct pipeline_executable
 
 struct pipeline
 {
-	using vulkan_tag_type = obj::khr::pipeline;
+	using vulkan_tag_type = tag::khr::pipeline;
 
 	VkPipeline handle{};
 
@@ -389,7 +389,7 @@ namespace vkfu
 {
 namespace khr
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_executable> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::pipeline_executable> Expression1>
 [[nodiscard]] auto count_pipeline_executable_internal_representations(VkDevice device, Expression1&& executable_info, ::std::nothrow_t)
 	-> ::std::expected<::std::uint32_t, ::VkResult>
 {
@@ -402,7 +402,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_executable> Expressio
 	return count;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_executable> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::pipeline_executable> Expression1>
 [[nodiscard]] auto count_pipeline_executable_internal_representations(VkDevice device, Expression1&& executable_info) -> ::std::uint32_t
 {
 	auto const outcome = count_pipeline_executable_internal_representations(device, ::std::forward<Expression1>(executable_info), ::std::nothrow);
@@ -413,7 +413,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_executable> Expressio
 	return *outcome;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_executable> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::pipeline_executable> Expression1>
 [[nodiscard]] auto get_pipeline_executable_internal_representations(VkDevice device, Expression1&& executable_info, ::std::span<VkPipelineExecutableInternalRepresentationKHR> out, ::std::nothrow_t)
 	-> ::std::expected<::std::span<VkPipelineExecutableInternalRepresentationKHR>, ::VkResult>
 {
@@ -432,7 +432,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_executable> Expressio
 	return out.first(count);
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_executable> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::pipeline_executable> Expression1>
 [[nodiscard]] auto get_pipeline_executable_internal_representations(VkDevice device, Expression1&& executable_info, ::std::span<VkPipelineExecutableInternalRepresentationKHR> out) -> ::std::span<VkPipelineExecutableInternalRepresentationKHR>
 {
 	auto const outcome = get_pipeline_executable_internal_representations(device, ::std::forward<Expression1>(executable_info), out, ::std::nothrow);
@@ -443,7 +443,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_executable> Expressio
 	return *outcome;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_executable> Expression1, ::std::contiguous_iterator Out>
+template<::vkfu::expression_for<::vkfu::tag::khr::pipeline_executable> Expression1, ::std::contiguous_iterator Out>
 	requires ::std::same_as<::std::iter_value_t<Out>, VkPipelineExecutableInternalRepresentationKHR>
 [[nodiscard]] auto get_pipeline_executable_internal_representations(VkDevice device, Expression1&& executable_info, Out out) -> Out
 {
@@ -452,7 +452,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_executable> Expressio
 	return out + static_cast<::std::iter_difference_t<Out>>(written.size());
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::pipeline> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::pipeline> Expression1>
 [[nodiscard]] auto count_pipeline_executable_properties(VkDevice device, Expression1&& pipeline_info, ::std::nothrow_t)
 	-> ::std::expected<::std::uint32_t, ::VkResult>
 {
@@ -465,7 +465,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::pipeline> Expression1>
 	return count;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::pipeline> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::pipeline> Expression1>
 [[nodiscard]] auto count_pipeline_executable_properties(VkDevice device, Expression1&& pipeline_info) -> ::std::uint32_t
 {
 	auto const outcome = count_pipeline_executable_properties(device, ::std::forward<Expression1>(pipeline_info), ::std::nothrow);
@@ -476,7 +476,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::pipeline> Expression1>
 	return *outcome;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::pipeline> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::pipeline> Expression1>
 [[nodiscard]] auto get_pipeline_executable_properties(VkDevice device, Expression1&& pipeline_info, ::std::span<VkPipelineExecutablePropertiesKHR> out, ::std::nothrow_t)
 	-> ::std::expected<::std::span<VkPipelineExecutablePropertiesKHR>, ::VkResult>
 {
@@ -495,7 +495,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::pipeline> Expression1>
 	return out.first(count);
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::pipeline> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::pipeline> Expression1>
 [[nodiscard]] auto get_pipeline_executable_properties(VkDevice device, Expression1&& pipeline_info, ::std::span<VkPipelineExecutablePropertiesKHR> out) -> ::std::span<VkPipelineExecutablePropertiesKHR>
 {
 	auto const outcome = get_pipeline_executable_properties(device, ::std::forward<Expression1>(pipeline_info), out, ::std::nothrow);
@@ -506,7 +506,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::pipeline> Expression1>
 	return *outcome;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::pipeline> Expression1, ::std::contiguous_iterator Out>
+template<::vkfu::expression_for<::vkfu::tag::khr::pipeline> Expression1, ::std::contiguous_iterator Out>
 	requires ::std::same_as<::std::iter_value_t<Out>, VkPipelineExecutablePropertiesKHR>
 [[nodiscard]] auto get_pipeline_executable_properties(VkDevice device, Expression1&& pipeline_info, Out out) -> Out
 {
@@ -515,7 +515,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::pipeline> Expression1, ::std::
 	return out + static_cast<::std::iter_difference_t<Out>>(written.size());
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_executable> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::pipeline_executable> Expression1>
 [[nodiscard]] auto count_pipeline_executable_statistics(VkDevice device, Expression1&& executable_info, ::std::nothrow_t)
 	-> ::std::expected<::std::uint32_t, ::VkResult>
 {
@@ -528,7 +528,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_executable> Expressio
 	return count;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_executable> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::pipeline_executable> Expression1>
 [[nodiscard]] auto count_pipeline_executable_statistics(VkDevice device, Expression1&& executable_info) -> ::std::uint32_t
 {
 	auto const outcome = count_pipeline_executable_statistics(device, ::std::forward<Expression1>(executable_info), ::std::nothrow);
@@ -539,7 +539,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_executable> Expressio
 	return *outcome;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_executable> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::pipeline_executable> Expression1>
 [[nodiscard]] auto get_pipeline_executable_statistics(VkDevice device, Expression1&& executable_info, ::std::span<VkPipelineExecutableStatisticKHR> out, ::std::nothrow_t)
 	-> ::std::expected<::std::span<VkPipelineExecutableStatisticKHR>, ::VkResult>
 {
@@ -558,7 +558,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_executable> Expressio
 	return out.first(count);
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_executable> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::pipeline_executable> Expression1>
 [[nodiscard]] auto get_pipeline_executable_statistics(VkDevice device, Expression1&& executable_info, ::std::span<VkPipelineExecutableStatisticKHR> out) -> ::std::span<VkPipelineExecutableStatisticKHR>
 {
 	auto const outcome = get_pipeline_executable_statistics(device, ::std::forward<Expression1>(executable_info), out, ::std::nothrow);
@@ -569,7 +569,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_executable> Expressio
 	return *outcome;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::pipeline_executable> Expression1, ::std::contiguous_iterator Out>
+template<::vkfu::expression_for<::vkfu::tag::khr::pipeline_executable> Expression1, ::std::contiguous_iterator Out>
 	requires ::std::same_as<::std::iter_value_t<Out>, VkPipelineExecutableStatisticKHR>
 [[nodiscard]] auto get_pipeline_executable_statistics(VkDevice device, Expression1&& executable_info, Out out) -> Out
 {

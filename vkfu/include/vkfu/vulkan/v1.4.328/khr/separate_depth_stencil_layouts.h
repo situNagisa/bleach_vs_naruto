@@ -28,16 +28,16 @@
 
 #include "../version_1_2/separate_depth_stencil_layouts.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using separate_depth_stencil_layouts = ::vkfu::obj::feature::separate_depth_stencil_layouts;
+using separate_depth_stencil_layouts = ::vkfu::tag::feature::separate_depth_stencil_layouts;
 }
 namespace option::khr
 {
-using attachment_description_stencil_layout = ::vkfu::obj::option::attachment_description_stencil_layout;
-using attachment_reference_stencil_layout = ::vkfu::obj::option::attachment_reference_stencil_layout;
+using attachment_description_stencil_layout = ::vkfu::tag::option::attachment_description_stencil_layout;
+using attachment_reference_stencil_layout = ::vkfu::tag::option::attachment_reference_stencil_layout;
 }
 }
 

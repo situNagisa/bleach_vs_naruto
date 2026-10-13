@@ -74,7 +74,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceClusterCullingShaderPropertiesHUAW
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::huawei
 {
@@ -90,7 +90,7 @@ struct cluster_culling_shader{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::huawei::cluster_culling_shader>
+struct vulkan_object_trait<tag::feature::huawei::cluster_culling_shader>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = true;
@@ -98,7 +98,7 @@ struct vulkan_object_trait<obj::feature::huawei::cluster_culling_shader>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::huawei::cluster_culling_shader_vrs>
+struct vulkan_object_trait<tag::feature::huawei::cluster_culling_shader_vrs>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -106,7 +106,7 @@ struct vulkan_object_trait<obj::feature::huawei::cluster_culling_shader_vrs>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::huawei::cluster_culling_shader>
+struct vulkan_object_trait<tag::property::huawei::cluster_culling_shader>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -116,11 +116,11 @@ struct vulkan_object_trait<obj::property::huawei::cluster_culling_shader>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceClusterCullingShaderFeaturesHUAWEI>
 {
-	using type = obj::feature::huawei::cluster_culling_shader;
+	using type = tag::feature::huawei::cluster_culling_shader;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::huawei::cluster_culling_shader>
+struct vulkan_object_native<tag::feature::huawei::cluster_culling_shader>
 {
 	using type = VkPhysicalDeviceClusterCullingShaderFeaturesHUAWEI;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CLUSTER_CULLING_SHADER_FEATURES_HUAWEI;
@@ -129,11 +129,11 @@ struct vulkan_object_native<obj::feature::huawei::cluster_culling_shader>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceClusterCullingShaderVrsFeaturesHUAWEI>
 {
-	using type = obj::feature::huawei::cluster_culling_shader_vrs;
+	using type = tag::feature::huawei::cluster_culling_shader_vrs;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::huawei::cluster_culling_shader_vrs>
+struct vulkan_object_native<tag::feature::huawei::cluster_culling_shader_vrs>
 {
 	using type = VkPhysicalDeviceClusterCullingShaderVrsFeaturesHUAWEI;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CLUSTER_CULLING_SHADER_VRS_FEATURES_HUAWEI;
@@ -142,18 +142,18 @@ struct vulkan_object_native<obj::feature::huawei::cluster_culling_shader_vrs>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceClusterCullingShaderPropertiesHUAWEI>
 {
-	using type = obj::property::huawei::cluster_culling_shader;
+	using type = tag::property::huawei::cluster_culling_shader;
 };
 
 template<>
-struct vulkan_object_native<obj::property::huawei::cluster_culling_shader>
+struct vulkan_object_native<tag::property::huawei::cluster_culling_shader>
 {
 	using type = VkPhysicalDeviceClusterCullingShaderPropertiesHUAWEI;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CLUSTER_CULLING_SHADER_PROPERTIES_HUAWEI;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::huawei::cluster_culling_shader>
+struct vulkan_object_extensions<tag::feature::huawei::cluster_culling_shader>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_HUAWEI_cluster_culling_shader"};
 	constexpr static ::std::uint32_t core = 0;
@@ -161,7 +161,7 @@ struct vulkan_object_extensions<obj::feature::huawei::cluster_culling_shader>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::huawei::cluster_culling_shader_vrs>
+struct vulkan_object_extensions<tag::feature::huawei::cluster_culling_shader_vrs>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_HUAWEI_cluster_culling_shader"};
 	constexpr static ::std::uint32_t core = 0;
@@ -169,7 +169,7 @@ struct vulkan_object_extensions<obj::feature::huawei::cluster_culling_shader_vrs
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::huawei::cluster_culling_shader>
+struct vulkan_object_extensions<tag::property::huawei::cluster_culling_shader>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_HUAWEI_cluster_culling_shader"};
 	constexpr static ::std::uint32_t core = 0;
@@ -177,13 +177,13 @@ struct vulkan_object_extensions<obj::property::huawei::cluster_culling_shader>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::huawei::cluster_culling_shader> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::huawei::cluster_culling_shader> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::huawei::cluster_culling_shader, obj::feature::huawei::cluster_culling_shader_vrs> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::huawei::cluster_culling_shader, tag::feature::huawei::cluster_culling_shader_vrs> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::huawei::cluster_culling_shader> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::huawei::cluster_culling_shader> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::huawei::cluster_culling_shader> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::huawei::cluster_culling_shader> = true;
 }
 
 namespace vkfu::param
@@ -194,7 +194,7 @@ using ::vkfu::operator|;
 
 struct cluster_culling_shader
 {
-	using vulkan_tag_type = obj::feature::huawei::cluster_culling_shader;
+	using vulkan_tag_type = tag::feature::huawei::cluster_culling_shader;
 
 	bool enable = false;
 	bool multiview_cluster_culling_shader = false;
@@ -212,7 +212,7 @@ struct cluster_culling_shader
 
 struct cluster_culling_shader_vrs
 {
-	using vulkan_tag_type = obj::feature::huawei::cluster_culling_shader_vrs;
+	using vulkan_tag_type = tag::feature::huawei::cluster_culling_shader_vrs;
 
 	bool cluster_shading_rate = false;
 

@@ -103,7 +103,7 @@ constexpr auto _vkfu_evaluate(VkSparseImageMemoryRequirements2 const& value) noe
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct buffer_memory_requirements2{};
 struct image_memory_requirements2{};
@@ -118,7 +118,7 @@ struct sparse_image_memory_requirements2{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::buffer_memory_requirements2>
+struct vulkan_object_trait<tag::buffer_memory_requirements2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -126,7 +126,7 @@ struct vulkan_object_trait<obj::buffer_memory_requirements2>
 };
 
 template<>
-struct vulkan_object_trait<obj::image_memory_requirements2>
+struct vulkan_object_trait<tag::image_memory_requirements2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -134,7 +134,7 @@ struct vulkan_object_trait<obj::image_memory_requirements2>
 };
 
 template<>
-struct vulkan_object_trait<obj::image_sparse_memory_requirements2>
+struct vulkan_object_trait<tag::image_sparse_memory_requirements2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -142,7 +142,7 @@ struct vulkan_object_trait<obj::image_sparse_memory_requirements2>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::memory_requirements2>
+struct vulkan_object_trait<tag::result::memory_requirements2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -150,7 +150,7 @@ struct vulkan_object_trait<obj::result::memory_requirements2>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::sparse_image_memory_requirements2>
+struct vulkan_object_trait<tag::result::sparse_image_memory_requirements2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -160,11 +160,11 @@ struct vulkan_object_trait<obj::result::sparse_image_memory_requirements2>
 template<>
 struct expression_vulkan_tag<VkBufferMemoryRequirementsInfo2>
 {
-	using type = obj::buffer_memory_requirements2;
+	using type = tag::buffer_memory_requirements2;
 };
 
 template<>
-struct vulkan_object_native<obj::buffer_memory_requirements2>
+struct vulkan_object_native<tag::buffer_memory_requirements2>
 {
 	using type = VkBufferMemoryRequirementsInfo2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_BUFFER_MEMORY_REQUIREMENTS_INFO_2;
@@ -173,11 +173,11 @@ struct vulkan_object_native<obj::buffer_memory_requirements2>
 template<>
 struct expression_vulkan_tag<VkImageMemoryRequirementsInfo2>
 {
-	using type = obj::image_memory_requirements2;
+	using type = tag::image_memory_requirements2;
 };
 
 template<>
-struct vulkan_object_native<obj::image_memory_requirements2>
+struct vulkan_object_native<tag::image_memory_requirements2>
 {
 	using type = VkImageMemoryRequirementsInfo2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_MEMORY_REQUIREMENTS_INFO_2;
@@ -186,11 +186,11 @@ struct vulkan_object_native<obj::image_memory_requirements2>
 template<>
 struct expression_vulkan_tag<VkImageSparseMemoryRequirementsInfo2>
 {
-	using type = obj::image_sparse_memory_requirements2;
+	using type = tag::image_sparse_memory_requirements2;
 };
 
 template<>
-struct vulkan_object_native<obj::image_sparse_memory_requirements2>
+struct vulkan_object_native<tag::image_sparse_memory_requirements2>
 {
 	using type = VkImageSparseMemoryRequirementsInfo2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_SPARSE_MEMORY_REQUIREMENTS_INFO_2;
@@ -199,11 +199,11 @@ struct vulkan_object_native<obj::image_sparse_memory_requirements2>
 template<>
 struct expression_vulkan_tag<VkMemoryRequirements2>
 {
-	using type = obj::result::memory_requirements2;
+	using type = tag::result::memory_requirements2;
 };
 
 template<>
-struct vulkan_object_native<obj::result::memory_requirements2>
+struct vulkan_object_native<tag::result::memory_requirements2>
 {
 	using type = VkMemoryRequirements2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2;
@@ -212,18 +212,18 @@ struct vulkan_object_native<obj::result::memory_requirements2>
 template<>
 struct expression_vulkan_tag<VkSparseImageMemoryRequirements2>
 {
-	using type = obj::result::sparse_image_memory_requirements2;
+	using type = tag::result::sparse_image_memory_requirements2;
 };
 
 template<>
-struct vulkan_object_native<obj::result::sparse_image_memory_requirements2>
+struct vulkan_object_native<tag::result::sparse_image_memory_requirements2>
 {
 	using type = VkSparseImageMemoryRequirements2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SPARSE_IMAGE_MEMORY_REQUIREMENTS_2;
 };
 
 template<>
-struct vulkan_object_extensions<obj::buffer_memory_requirements2>
+struct vulkan_object_extensions<tag::buffer_memory_requirements2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_memory_requirements2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -231,7 +231,7 @@ struct vulkan_object_extensions<obj::buffer_memory_requirements2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::image_memory_requirements2>
+struct vulkan_object_extensions<tag::image_memory_requirements2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_memory_requirements2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -239,7 +239,7 @@ struct vulkan_object_extensions<obj::image_memory_requirements2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::image_sparse_memory_requirements2>
+struct vulkan_object_extensions<tag::image_sparse_memory_requirements2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_memory_requirements2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -247,7 +247,7 @@ struct vulkan_object_extensions<obj::image_sparse_memory_requirements2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::memory_requirements2>
+struct vulkan_object_extensions<tag::result::memory_requirements2>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_KHR_get_memory_requirements2", "VK_NV_ray_tracing"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -255,7 +255,7 @@ struct vulkan_object_extensions<obj::result::memory_requirements2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::sparse_image_memory_requirements2>
+struct vulkan_object_extensions<tag::result::sparse_image_memory_requirements2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_memory_requirements2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -263,7 +263,7 @@ struct vulkan_object_extensions<obj::result::sparse_image_memory_requirements2>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::memory_requirements2, obj::result::memory_dedicated_requirements> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::memory_requirements2, tag::result::memory_dedicated_requirements> = true;
 }
 
 namespace vkfu::param
@@ -272,7 +272,7 @@ using ::vkfu::operator|;
 
 struct buffer_memory_requirements2
 {
-	using vulkan_tag_type = obj::buffer_memory_requirements2;
+	using vulkan_tag_type = tag::buffer_memory_requirements2;
 
 	VkBuffer buffer{};
 
@@ -288,7 +288,7 @@ struct buffer_memory_requirements2
 
 struct image_memory_requirements2
 {
-	using vulkan_tag_type = obj::image_memory_requirements2;
+	using vulkan_tag_type = tag::image_memory_requirements2;
 
 	VkImage image{};
 
@@ -304,7 +304,7 @@ struct image_memory_requirements2
 
 struct image_sparse_memory_requirements2
 {
-	using vulkan_tag_type = obj::image_sparse_memory_requirements2;
+	using vulkan_tag_type = tag::image_sparse_memory_requirements2;
 
 	VkImage image{};
 
@@ -321,7 +321,7 @@ struct image_sparse_memory_requirements2
 
 namespace vkfu
 {
-template<::vkfu::expression_for<::vkfu::obj::image_sparse_memory_requirements2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::image_sparse_memory_requirements2> Expression1>
 [[nodiscard]] auto count_image_sparse_memory_requirements2(VkDevice device, Expression1&& info) -> ::std::uint32_t
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
@@ -330,7 +330,7 @@ template<::vkfu::expression_for<::vkfu::obj::image_sparse_memory_requirements2> 
 	return count;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::image_sparse_memory_requirements2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::image_sparse_memory_requirements2> Expression1>
 [[nodiscard]] auto get_image_sparse_memory_requirements2(VkDevice device, Expression1&& info, ::std::span<VkSparseImageMemoryRequirements2> out) -> ::std::span<VkSparseImageMemoryRequirements2>
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
@@ -344,7 +344,7 @@ template<::vkfu::expression_for<::vkfu::obj::image_sparse_memory_requirements2> 
 	return out.first(count);
 }
 
-template<::vkfu::expression_for<::vkfu::obj::image_sparse_memory_requirements2> Expression1, ::std::contiguous_iterator Out>
+template<::vkfu::expression_for<::vkfu::tag::image_sparse_memory_requirements2> Expression1, ::std::contiguous_iterator Out>
 	requires ::std::same_as<::std::iter_value_t<Out>, VkSparseImageMemoryRequirements2>
 [[nodiscard]] auto get_image_sparse_memory_requirements2(VkDevice device, Expression1&& info, Out out) -> Out
 {
@@ -353,20 +353,20 @@ template<::vkfu::expression_for<::vkfu::obj::image_sparse_memory_requirements2> 
 	return out + static_cast<::std::iter_difference_t<Out>>(written.size());
 }
 
-template<::vkfu::query_extension_of<::vkfu::obj::result::memory_requirements2>... Extras, ::vkfu::expression_for<::vkfu::obj::buffer_memory_requirements2> Expression1>
-[[nodiscard]] auto get_buffer_memory_requirements2(VkDevice device, Expression1&& info) -> ::vkfu::query_chain<::vkfu::obj::result::memory_requirements2, Extras...>
+template<::vkfu::query_extension_of<::vkfu::tag::result::memory_requirements2>... Extras, ::vkfu::expression_for<::vkfu::tag::buffer_memory_requirements2> Expression1>
+[[nodiscard]] auto get_buffer_memory_requirements2(VkDevice device, Expression1&& info) -> ::vkfu::query_chain<::vkfu::tag::result::memory_requirements2, Extras...>
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
-	auto chain = ::vkfu::query_chain<::vkfu::obj::result::memory_requirements2, Extras...>{};
+	auto chain = ::vkfu::query_chain<::vkfu::tag::result::memory_requirements2, Extras...>{};
 	::vkGetBufferMemoryRequirements2(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(chain.head()));
 	return chain;
 }
 
-template<::vkfu::query_extension_of<::vkfu::obj::result::memory_requirements2>... Extras, ::vkfu::expression_for<::vkfu::obj::image_memory_requirements2> Expression1>
-[[nodiscard]] auto get_image_memory_requirements2(VkDevice device, Expression1&& info) -> ::vkfu::query_chain<::vkfu::obj::result::memory_requirements2, Extras...>
+template<::vkfu::query_extension_of<::vkfu::tag::result::memory_requirements2>... Extras, ::vkfu::expression_for<::vkfu::tag::image_memory_requirements2> Expression1>
+[[nodiscard]] auto get_image_memory_requirements2(VkDevice device, Expression1&& info) -> ::vkfu::query_chain<::vkfu::tag::result::memory_requirements2, Extras...>
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
-	auto chain = ::vkfu::query_chain<::vkfu::obj::result::memory_requirements2, Extras...>{};
+	auto chain = ::vkfu::query_chain<::vkfu::tag::result::memory_requirements2, Extras...>{};
 	::vkGetImageMemoryRequirements2(device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(chain.head()));
 	return chain;
 }

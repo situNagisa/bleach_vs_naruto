@@ -28,11 +28,11 @@
 
 #include "../version_1_2/uniform_buffer_standard_layout.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using uniform_buffer_standard_layout = ::vkfu::obj::feature::uniform_buffer_standard_layout;
+using uniform_buffer_standard_layout = ::vkfu::tag::feature::uniform_buffer_standard_layout;
 }
 }
 

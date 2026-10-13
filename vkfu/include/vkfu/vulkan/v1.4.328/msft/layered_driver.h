@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceLayeredDriverPropertiesMSFT const&
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property::msft
 {
@@ -54,7 +54,7 @@ struct layered_driver{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::property::msft::layered_driver>
+struct vulkan_object_trait<tag::property::msft::layered_driver>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::property::msft::layered_driver>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceLayeredDriverPropertiesMSFT>
 {
-	using type = obj::property::msft::layered_driver;
+	using type = tag::property::msft::layered_driver;
 };
 
 template<>
-struct vulkan_object_native<obj::property::msft::layered_driver>
+struct vulkan_object_native<tag::property::msft::layered_driver>
 {
 	using type = VkPhysicalDeviceLayeredDriverPropertiesMSFT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LAYERED_DRIVER_PROPERTIES_MSFT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::msft::layered_driver>
+struct vulkan_object_extensions<tag::property::msft::layered_driver>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_MSFT_layered_driver"};
 	constexpr static ::std::uint32_t core = 0;
@@ -83,5 +83,5 @@ struct vulkan_object_extensions<obj::property::msft::layered_driver>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::msft::layered_driver> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::msft::layered_driver> = true;
 }

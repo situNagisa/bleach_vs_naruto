@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDevicePresentModeFifoLatestReadyFeatures
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -55,7 +55,7 @@ struct present_mode_fifo_latest_ready{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::present_mode_fifo_latest_ready>
+struct vulkan_object_trait<tag::feature::khr::present_mode_fifo_latest_ready>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::khr::present_mode_fifo_latest_ready>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePresentModeFifoLatestReadyFeaturesKHR>
 {
-	using type = obj::feature::khr::present_mode_fifo_latest_ready;
+	using type = tag::feature::khr::present_mode_fifo_latest_ready;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::present_mode_fifo_latest_ready>
+struct vulkan_object_native<tag::feature::khr::present_mode_fifo_latest_ready>
 {
 	using type = VkPhysicalDevicePresentModeFifoLatestReadyFeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRESENT_MODE_FIFO_LATEST_READY_FEATURES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::present_mode_fifo_latest_ready>
+struct vulkan_object_extensions<tag::feature::khr::present_mode_fifo_latest_ready>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_present_mode_fifo_latest_ready", "VK_KHR_present_mode_fifo_latest_ready"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::khr::present_mode_fifo_latest_read
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::present_mode_fifo_latest_ready> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::present_mode_fifo_latest_ready> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::present_mode_fifo_latest_ready> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::present_mode_fifo_latest_ready> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct present_mode_fifo_latest_ready
 {
-	using vulkan_tag_type = obj::feature::khr::present_mode_fifo_latest_ready;
+	using vulkan_tag_type = tag::feature::khr::present_mode_fifo_latest_ready;
 
 	bool enable = false;
 

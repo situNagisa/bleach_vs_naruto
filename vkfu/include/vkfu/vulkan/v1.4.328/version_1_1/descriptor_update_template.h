@@ -54,7 +54,7 @@ enum class descriptor_update_template_type : ::std::underlying_type_t<VkDescript
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct descriptor_update_template{};
 }
@@ -62,7 +62,7 @@ struct descriptor_update_template{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::descriptor_update_template>
+struct vulkan_object_trait<tag::descriptor_update_template>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -72,18 +72,18 @@ struct vulkan_object_trait<obj::descriptor_update_template>
 template<>
 struct expression_vulkan_tag<VkDescriptorUpdateTemplateCreateInfo>
 {
-	using type = obj::descriptor_update_template;
+	using type = tag::descriptor_update_template;
 };
 
 template<>
-struct vulkan_object_native<obj::descriptor_update_template>
+struct vulkan_object_native<tag::descriptor_update_template>
 {
 	using type = VkDescriptorUpdateTemplateCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DESCRIPTOR_UPDATE_TEMPLATE_CREATE_INFO;
 };
 
 template<>
-struct vulkan_object_extensions<obj::descriptor_update_template>
+struct vulkan_object_extensions<tag::descriptor_update_template>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_descriptor_update_template"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -98,7 +98,7 @@ using ::vkfu::operator|;
 
 struct descriptor_update_template
 {
-	using vulkan_tag_type = obj::descriptor_update_template;
+	using vulkan_tag_type = tag::descriptor_update_template;
 
 	VkDescriptorUpdateTemplateCreateFlags flags{};
 	::std::span<VkDescriptorUpdateTemplateEntry const> descriptor_update_entries{};
@@ -150,7 +150,7 @@ struct descriptor_update_template_entry
 
 namespace vkfu
 {
-template<::vkfu::expression_for<::vkfu::obj::descriptor_update_template> Expression>
+template<::vkfu::expression_for<::vkfu::tag::descriptor_update_template> Expression>
 [[nodiscard]] auto create_descriptor_update_template(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkDescriptorUpdateTemplate, ::VkResult>
 {
@@ -165,7 +165,7 @@ template<::vkfu::expression_for<::vkfu::obj::descriptor_update_template> Express
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::descriptor_update_template> Expression>
+template<::vkfu::expression_for<::vkfu::tag::descriptor_update_template> Expression>
 [[nodiscard]] auto create_descriptor_update_template(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkDescriptorUpdateTemplate
 {
 	auto produced = create_descriptor_update_template(device, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

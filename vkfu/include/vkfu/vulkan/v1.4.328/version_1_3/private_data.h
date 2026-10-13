@@ -74,7 +74,7 @@ constexpr auto _vkfu_evaluate(VkPrivateDataSlotCreateInfo const& value) noexcept
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct private_data_slot{};
 namespace feature
@@ -90,7 +90,7 @@ struct device_private_data{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::device_private_data>
+struct vulkan_object_trait<tag::option::device_private_data>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -98,7 +98,7 @@ struct vulkan_object_trait<obj::option::device_private_data>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::private_data>
+struct vulkan_object_trait<tag::feature::private_data>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -106,7 +106,7 @@ struct vulkan_object_trait<obj::feature::private_data>
 };
 
 template<>
-struct vulkan_object_trait<obj::private_data_slot>
+struct vulkan_object_trait<tag::private_data_slot>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -116,11 +116,11 @@ struct vulkan_object_trait<obj::private_data_slot>
 template<>
 struct expression_vulkan_tag<VkDevicePrivateDataCreateInfo>
 {
-	using type = obj::option::device_private_data;
+	using type = tag::option::device_private_data;
 };
 
 template<>
-struct vulkan_object_native<obj::option::device_private_data>
+struct vulkan_object_native<tag::option::device_private_data>
 {
 	using type = VkDevicePrivateDataCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEVICE_PRIVATE_DATA_CREATE_INFO;
@@ -129,11 +129,11 @@ struct vulkan_object_native<obj::option::device_private_data>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePrivateDataFeatures>
 {
-	using type = obj::feature::private_data;
+	using type = tag::feature::private_data;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::private_data>
+struct vulkan_object_native<tag::feature::private_data>
 {
 	using type = VkPhysicalDevicePrivateDataFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRIVATE_DATA_FEATURES;
@@ -142,18 +142,18 @@ struct vulkan_object_native<obj::feature::private_data>
 template<>
 struct expression_vulkan_tag<VkPrivateDataSlotCreateInfo>
 {
-	using type = obj::private_data_slot;
+	using type = tag::private_data_slot;
 };
 
 template<>
-struct vulkan_object_native<obj::private_data_slot>
+struct vulkan_object_native<tag::private_data_slot>
 {
 	using type = VkPrivateDataSlotCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PRIVATE_DATA_SLOT_CREATE_INFO;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::device_private_data>
+struct vulkan_object_extensions<tag::option::device_private_data>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_private_data"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -161,7 +161,7 @@ struct vulkan_object_extensions<obj::option::device_private_data>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::private_data>
+struct vulkan_object_extensions<tag::feature::private_data>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_private_data"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -169,7 +169,7 @@ struct vulkan_object_extensions<obj::feature::private_data>
 };
 
 template<>
-struct vulkan_object_extensions<obj::private_data_slot>
+struct vulkan_object_extensions<tag::private_data_slot>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_private_data"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -177,11 +177,11 @@ struct vulkan_object_extensions<obj::private_data_slot>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::option::device_private_data> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::option::device_private_data> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::private_data> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::private_data> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::private_data> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::private_data> = true;
 }
 
 namespace vkfu::param
@@ -190,7 +190,7 @@ using ::vkfu::operator|;
 
 struct private_data_slot
 {
-	using vulkan_tag_type = obj::private_data_slot;
+	using vulkan_tag_type = tag::private_data_slot;
 
 	VkPrivateDataSlotCreateFlags flags{};
 
@@ -210,7 +210,7 @@ using ::vkfu::operator|;
 
 struct private_data
 {
-	using vulkan_tag_type = obj::feature::private_data;
+	using vulkan_tag_type = tag::feature::private_data;
 
 	bool enable = false;
 
@@ -232,7 +232,7 @@ using ::vkfu::operator|;
 
 struct device_private_data
 {
-	using vulkan_tag_type = obj::option::device_private_data;
+	using vulkan_tag_type = tag::option::device_private_data;
 
 	::std::uint32_t private_data_slot_request_count{};
 
@@ -251,7 +251,7 @@ struct device_private_data
 
 namespace vkfu
 {
-template<::vkfu::expression_for<::vkfu::obj::private_data_slot> Expression>
+template<::vkfu::expression_for<::vkfu::tag::private_data_slot> Expression>
 [[nodiscard]] auto create_private_data_slot(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkPrivateDataSlot, ::VkResult>
 {
@@ -266,7 +266,7 @@ template<::vkfu::expression_for<::vkfu::obj::private_data_slot> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::private_data_slot> Expression>
+template<::vkfu::expression_for<::vkfu::tag::private_data_slot> Expression>
 [[nodiscard]] auto create_private_data_slot(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkPrivateDataSlot
 {
 	auto produced = create_private_data_slot(device, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

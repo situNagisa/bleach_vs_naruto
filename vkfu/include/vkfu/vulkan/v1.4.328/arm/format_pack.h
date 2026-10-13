@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceFormatPackFeaturesARM const& value
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::arm
 {
@@ -55,7 +55,7 @@ struct format_pack{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::arm::format_pack>
+struct vulkan_object_trait<tag::feature::arm::format_pack>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::arm::format_pack>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceFormatPackFeaturesARM>
 {
-	using type = obj::feature::arm::format_pack;
+	using type = tag::feature::arm::format_pack;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::arm::format_pack>
+struct vulkan_object_native<tag::feature::arm::format_pack>
 {
 	using type = VkPhysicalDeviceFormatPackFeaturesARM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FORMAT_PACK_FEATURES_ARM;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::arm::format_pack>
+struct vulkan_object_extensions<tag::feature::arm::format_pack>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ARM_format_pack"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::arm::format_pack>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::arm::format_pack> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::arm::format_pack> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::arm::format_pack> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::arm::format_pack> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct format_pack
 {
-	using vulkan_tag_type = obj::feature::arm::format_pack;
+	using vulkan_tag_type = tag::feature::arm::format_pack;
 
 	bool enable = false;
 

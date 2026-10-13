@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceRayQueryFeaturesKHR const& value) 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -55,7 +55,7 @@ struct ray_query{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::ray_query>
+struct vulkan_object_trait<tag::feature::khr::ray_query>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::khr::ray_query>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceRayQueryFeaturesKHR>
 {
-	using type = obj::feature::khr::ray_query;
+	using type = tag::feature::khr::ray_query;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::ray_query>
+struct vulkan_object_native<tag::feature::khr::ray_query>
 {
 	using type = VkPhysicalDeviceRayQueryFeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::ray_query>
+struct vulkan_object_extensions<tag::feature::khr::ray_query>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_ray_query"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::khr::ray_query>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::ray_query> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::ray_query> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::ray_query> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::ray_query> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct ray_query
 {
-	using vulkan_tag_type = obj::feature::khr::ray_query;
+	using vulkan_tag_type = tag::feature::khr::ray_query;
 
 	bool enable = false;
 

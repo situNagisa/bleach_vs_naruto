@@ -62,6 +62,9 @@ name = "khr::widget_win32"
 [struct."VkWidgetWin32InfoKHR".members]
 handle = "handle"
 
+[flags."VkWidgetFlags"]
+name = "widget"
+
 [bits."VkWidgetFlagBits"]
 VK_WIDGET_ALPHA_BIT = "alpha"
 VK_WIDGET_GAMMA_BIT = "gamma"

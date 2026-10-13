@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceRawAccessChainsFeaturesNV const& v
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -55,7 +55,7 @@ struct raw_access_chains{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::raw_access_chains>
+struct vulkan_object_trait<tag::feature::nv::raw_access_chains>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::nv::raw_access_chains>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceRawAccessChainsFeaturesNV>
 {
-	using type = obj::feature::nv::raw_access_chains;
+	using type = tag::feature::nv::raw_access_chains;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::raw_access_chains>
+struct vulkan_object_native<tag::feature::nv::raw_access_chains>
 {
 	using type = VkPhysicalDeviceRawAccessChainsFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAW_ACCESS_CHAINS_FEATURES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::raw_access_chains>
+struct vulkan_object_extensions<tag::feature::nv::raw_access_chains>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_raw_access_chains"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::nv::raw_access_chains>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::raw_access_chains> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::raw_access_chains> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::raw_access_chains> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::raw_access_chains> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct raw_access_chains
 {
-	using vulkan_tag_type = obj::feature::nv::raw_access_chains;
+	using vulkan_tag_type = tag::feature::nv::raw_access_chains;
 
 	bool shader_raw_access_chains = false;
 

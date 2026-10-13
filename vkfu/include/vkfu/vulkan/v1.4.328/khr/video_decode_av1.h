@@ -105,7 +105,7 @@ constexpr auto _vkfu_evaluate(VkVideoDecodeAV1CapabilitiesKHR const& value) noex
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::khr
 {
@@ -123,7 +123,7 @@ struct video_decode_av1_capabilities{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::khr::video_decode_av1_dpb_slot>
+struct vulkan_object_trait<tag::option::khr::video_decode_av1_dpb_slot>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -131,7 +131,7 @@ struct vulkan_object_trait<obj::option::khr::video_decode_av1_dpb_slot>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::video_decode_av1_picture>
+struct vulkan_object_trait<tag::option::khr::video_decode_av1_picture>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -139,7 +139,7 @@ struct vulkan_object_trait<obj::option::khr::video_decode_av1_picture>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::video_decode_av1_profile>
+struct vulkan_object_trait<tag::option::khr::video_decode_av1_profile>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -147,7 +147,7 @@ struct vulkan_object_trait<obj::option::khr::video_decode_av1_profile>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::video_decode_av1_session_parameters>
+struct vulkan_object_trait<tag::option::khr::video_decode_av1_session_parameters>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -155,7 +155,7 @@ struct vulkan_object_trait<obj::option::khr::video_decode_av1_session_parameters
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::video_decode_av1_capabilities>
+struct vulkan_object_trait<tag::result::khr::video_decode_av1_capabilities>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -165,11 +165,11 @@ struct vulkan_object_trait<obj::result::khr::video_decode_av1_capabilities>
 template<>
 struct expression_vulkan_tag<VkVideoDecodeAV1DpbSlotInfoKHR>
 {
-	using type = obj::option::khr::video_decode_av1_dpb_slot;
+	using type = tag::option::khr::video_decode_av1_dpb_slot;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::video_decode_av1_dpb_slot>
+struct vulkan_object_native<tag::option::khr::video_decode_av1_dpb_slot>
 {
 	using type = VkVideoDecodeAV1DpbSlotInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_DECODE_AV1_DPB_SLOT_INFO_KHR;
@@ -178,11 +178,11 @@ struct vulkan_object_native<obj::option::khr::video_decode_av1_dpb_slot>
 template<>
 struct expression_vulkan_tag<VkVideoDecodeAV1PictureInfoKHR>
 {
-	using type = obj::option::khr::video_decode_av1_picture;
+	using type = tag::option::khr::video_decode_av1_picture;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::video_decode_av1_picture>
+struct vulkan_object_native<tag::option::khr::video_decode_av1_picture>
 {
 	using type = VkVideoDecodeAV1PictureInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_DECODE_AV1_PICTURE_INFO_KHR;
@@ -191,11 +191,11 @@ struct vulkan_object_native<obj::option::khr::video_decode_av1_picture>
 template<>
 struct expression_vulkan_tag<VkVideoDecodeAV1ProfileInfoKHR>
 {
-	using type = obj::option::khr::video_decode_av1_profile;
+	using type = tag::option::khr::video_decode_av1_profile;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::video_decode_av1_profile>
+struct vulkan_object_native<tag::option::khr::video_decode_av1_profile>
 {
 	using type = VkVideoDecodeAV1ProfileInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_DECODE_AV1_PROFILE_INFO_KHR;
@@ -204,11 +204,11 @@ struct vulkan_object_native<obj::option::khr::video_decode_av1_profile>
 template<>
 struct expression_vulkan_tag<VkVideoDecodeAV1SessionParametersCreateInfoKHR>
 {
-	using type = obj::option::khr::video_decode_av1_session_parameters;
+	using type = tag::option::khr::video_decode_av1_session_parameters;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::video_decode_av1_session_parameters>
+struct vulkan_object_native<tag::option::khr::video_decode_av1_session_parameters>
 {
 	using type = VkVideoDecodeAV1SessionParametersCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_DECODE_AV1_SESSION_PARAMETERS_CREATE_INFO_KHR;
@@ -217,18 +217,18 @@ struct vulkan_object_native<obj::option::khr::video_decode_av1_session_parameter
 template<>
 struct expression_vulkan_tag<VkVideoDecodeAV1CapabilitiesKHR>
 {
-	using type = obj::result::khr::video_decode_av1_capabilities;
+	using type = tag::result::khr::video_decode_av1_capabilities;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::video_decode_av1_capabilities>
+struct vulkan_object_native<tag::result::khr::video_decode_av1_capabilities>
 {
 	using type = VkVideoDecodeAV1CapabilitiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_DECODE_AV1_CAPABILITIES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::video_decode_av1_dpb_slot>
+struct vulkan_object_extensions<tag::option::khr::video_decode_av1_dpb_slot>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_decode_av1"};
 	constexpr static ::std::uint32_t core = 0;
@@ -236,7 +236,7 @@ struct vulkan_object_extensions<obj::option::khr::video_decode_av1_dpb_slot>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::video_decode_av1_picture>
+struct vulkan_object_extensions<tag::option::khr::video_decode_av1_picture>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_decode_av1"};
 	constexpr static ::std::uint32_t core = 0;
@@ -244,7 +244,7 @@ struct vulkan_object_extensions<obj::option::khr::video_decode_av1_picture>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::video_decode_av1_profile>
+struct vulkan_object_extensions<tag::option::khr::video_decode_av1_profile>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_decode_av1"};
 	constexpr static ::std::uint32_t core = 0;
@@ -252,7 +252,7 @@ struct vulkan_object_extensions<obj::option::khr::video_decode_av1_profile>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::video_decode_av1_session_parameters>
+struct vulkan_object_extensions<tag::option::khr::video_decode_av1_session_parameters>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_decode_av1"};
 	constexpr static ::std::uint32_t core = 0;
@@ -260,7 +260,7 @@ struct vulkan_object_extensions<obj::option::khr::video_decode_av1_session_param
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::video_decode_av1_capabilities>
+struct vulkan_object_extensions<tag::result::khr::video_decode_av1_capabilities>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_decode_av1"};
 	constexpr static ::std::uint32_t core = 0;
@@ -268,17 +268,17 @@ struct vulkan_object_extensions<obj::result::khr::video_decode_av1_capabilities>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::query_pool, obj::option::khr::video_decode_av1_profile> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::query_pool, tag::option::khr::video_decode_av1_profile> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::video_capabilities, obj::result::khr::video_decode_av1_capabilities> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::video_capabilities, tag::result::khr::video_decode_av1_capabilities> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_decode, obj::option::khr::video_decode_av1_picture> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_decode, tag::option::khr::video_decode_av1_picture> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_profile, obj::option::khr::video_decode_av1_profile> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_profile, tag::option::khr::video_decode_av1_profile> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_reference_slot, obj::option::khr::video_decode_av1_dpb_slot> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_reference_slot, tag::option::khr::video_decode_av1_dpb_slot> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_session_parameters, obj::option::khr::video_decode_av1_session_parameters> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_session_parameters, tag::option::khr::video_decode_av1_session_parameters> = true;
 }
 
 namespace vkfu::param
@@ -289,7 +289,7 @@ using ::vkfu::operator|;
 
 struct video_decode_av1_dpb_slot
 {
-	using vulkan_tag_type = obj::option::khr::video_decode_av1_dpb_slot;
+	using vulkan_tag_type = tag::option::khr::video_decode_av1_dpb_slot;
 
 	StdVideoDecodeAV1ReferenceInfo const* std_reference_info = nullptr;
 
@@ -305,7 +305,7 @@ struct video_decode_av1_dpb_slot
 
 struct video_decode_av1_picture
 {
-	using vulkan_tag_type = obj::option::khr::video_decode_av1_picture;
+	using vulkan_tag_type = tag::option::khr::video_decode_av1_picture;
 
 	StdVideoDecodeAV1PictureInfo const* std_picture_info = nullptr;
 	::std::array<::std::int32_t, VK_MAX_VIDEO_AV1_REFERENCES_PER_FRAME_KHR> reference_name_slot_indices{};
@@ -333,7 +333,7 @@ struct video_decode_av1_picture
 
 struct video_decode_av1_profile
 {
-	using vulkan_tag_type = obj::option::khr::video_decode_av1_profile;
+	using vulkan_tag_type = tag::option::khr::video_decode_av1_profile;
 
 	StdVideoAV1Profile std_profile{};
 	bool film_grain_support = false;
@@ -351,7 +351,7 @@ struct video_decode_av1_profile
 
 struct video_decode_av1_session_parameters
 {
-	using vulkan_tag_type = obj::option::khr::video_decode_av1_session_parameters;
+	using vulkan_tag_type = tag::option::khr::video_decode_av1_session_parameters;
 
 	StdVideoAV1SequenceHeader const* std_sequence_header = nullptr;
 

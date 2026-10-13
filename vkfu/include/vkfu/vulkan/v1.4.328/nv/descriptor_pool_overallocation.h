@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceDescriptorPoolOverallocationFeatur
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -55,7 +55,7 @@ struct descriptor_pool_overallocation{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::descriptor_pool_overallocation>
+struct vulkan_object_trait<tag::feature::nv::descriptor_pool_overallocation>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::nv::descriptor_pool_overallocation>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDescriptorPoolOverallocationFeaturesNV>
 {
-	using type = obj::feature::nv::descriptor_pool_overallocation;
+	using type = tag::feature::nv::descriptor_pool_overallocation;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::descriptor_pool_overallocation>
+struct vulkan_object_native<tag::feature::nv::descriptor_pool_overallocation>
 {
 	using type = VkPhysicalDeviceDescriptorPoolOverallocationFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_POOL_OVERALLOCATION_FEATURES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::descriptor_pool_overallocation>
+struct vulkan_object_extensions<tag::feature::nv::descriptor_pool_overallocation>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_descriptor_pool_overallocation"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::nv::descriptor_pool_overallocation
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::descriptor_pool_overallocation> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::descriptor_pool_overallocation> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::descriptor_pool_overallocation> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::descriptor_pool_overallocation> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct descriptor_pool_overallocation
 {
-	using vulkan_tag_type = obj::feature::nv::descriptor_pool_overallocation;
+	using vulkan_tag_type = tag::feature::nv::descriptor_pool_overallocation;
 
 	bool enable = false;
 

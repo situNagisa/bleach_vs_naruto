@@ -27,6 +27,7 @@
 #include <vkfu/vulkan_object.h>
 
 #include "../version_1_0/device.h"
+#include "../version_1_0/image.h"
 #include "../version_1_1/get_physical_device_properties2.h"
 #include "../khr/copy_memory_indirect.h"
 
@@ -45,7 +46,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceCopyMemoryIndirectFeaturesNV const
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -56,7 +57,7 @@ struct copy_memory_indirect{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::copy_memory_indirect>
+struct vulkan_object_trait<tag::feature::nv::copy_memory_indirect>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -66,18 +67,18 @@ struct vulkan_object_trait<obj::feature::nv::copy_memory_indirect>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceCopyMemoryIndirectFeaturesNV>
 {
-	using type = obj::feature::nv::copy_memory_indirect;
+	using type = tag::feature::nv::copy_memory_indirect;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::copy_memory_indirect>
+struct vulkan_object_native<tag::feature::nv::copy_memory_indirect>
 {
 	using type = VkPhysicalDeviceCopyMemoryIndirectFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COPY_MEMORY_INDIRECT_FEATURES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::copy_memory_indirect>
+struct vulkan_object_extensions<tag::feature::nv::copy_memory_indirect>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_copy_memory_indirect"};
 	constexpr static ::std::uint32_t core = 0;
@@ -85,16 +86,16 @@ struct vulkan_object_extensions<obj::feature::nv::copy_memory_indirect>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::copy_memory_indirect> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::copy_memory_indirect> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::copy_memory_indirect> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::copy_memory_indirect> = true;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property::khr::nv
 {
-using copy_memory_indirect = ::vkfu::obj::property::khr::copy_memory_indirect;
+using copy_memory_indirect = ::vkfu::tag::property::khr::copy_memory_indirect;
 }
 }
 
@@ -106,7 +107,7 @@ using ::vkfu::operator|;
 
 struct copy_memory_indirect
 {
-	using vulkan_tag_type = obj::feature::nv::copy_memory_indirect;
+	using vulkan_tag_type = tag::feature::nv::copy_memory_indirect;
 
 	bool indirect_copy = false;
 
@@ -127,9 +128,9 @@ namespace vkfu
 {
 namespace nv
 {
-inline void cmd_copy_memory_to_image_indirect(VkCommandBuffer command_buffer, VkDeviceAddress copy_buffer_address, ::std::uint32_t stride, VkImage dst_image, VkImageLayout dst_image_layout, ::std::span<VkImageSubresourceLayers const> image_subresources)
+inline void cmd_copy_memory_to_image_indirect(VkCommandBuffer command_buffer, VkDeviceAddress copy_buffer_address, ::std::uint32_t stride, VkImage dst_image, ::vkfu::enums::image_layout dst_image_layout, ::std::span<VkImageSubresourceLayers const> image_subresources)
 {
-	::vkCmdCopyMemoryToImageIndirectNV(command_buffer, copy_buffer_address, static_cast<::std::uint32_t>(image_subresources.size()), stride, dst_image, dst_image_layout, image_subresources.data());
+	::vkCmdCopyMemoryToImageIndirectNV(command_buffer, copy_buffer_address, static_cast<::std::uint32_t>(image_subresources.size()), stride, dst_image, static_cast<VkImageLayout>(dst_image_layout), image_subresources.data());
 }
 
 }

@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceShaderExpectAssumeFeatures const& 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -55,7 +55,7 @@ struct shader_expect_assume{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::shader_expect_assume>
+struct vulkan_object_trait<tag::feature::shader_expect_assume>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::shader_expect_assume>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderExpectAssumeFeatures>
 {
-	using type = obj::feature::shader_expect_assume;
+	using type = tag::feature::shader_expect_assume;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::shader_expect_assume>
+struct vulkan_object_native<tag::feature::shader_expect_assume>
 {
 	using type = VkPhysicalDeviceShaderExpectAssumeFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_EXPECT_ASSUME_FEATURES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::shader_expect_assume>
+struct vulkan_object_extensions<tag::feature::shader_expect_assume>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_shader_expect_assume"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::shader_expect_assume>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::shader_expect_assume> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::shader_expect_assume> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::shader_expect_assume> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::shader_expect_assume> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct shader_expect_assume
 {
-	using vulkan_tag_type = obj::feature::shader_expect_assume;
+	using vulkan_tag_type = tag::feature::shader_expect_assume;
 
 	bool enable = false;
 

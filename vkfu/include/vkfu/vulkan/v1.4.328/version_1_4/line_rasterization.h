@@ -87,7 +87,7 @@ enum class line_rasterization_mode : ::std::underlying_type_t<VkLineRasterizatio
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -106,7 +106,7 @@ struct rasterization_line{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::line_rasterization>
+struct vulkan_object_trait<tag::feature::line_rasterization>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -114,7 +114,7 @@ struct vulkan_object_trait<obj::feature::line_rasterization>
 };
 
 template<>
-struct vulkan_object_trait<obj::state::rasterization_line>
+struct vulkan_object_trait<tag::state::rasterization_line>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -122,7 +122,7 @@ struct vulkan_object_trait<obj::state::rasterization_line>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::line_rasterization>
+struct vulkan_object_trait<tag::property::line_rasterization>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -132,11 +132,11 @@ struct vulkan_object_trait<obj::property::line_rasterization>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceLineRasterizationFeatures>
 {
-	using type = obj::feature::line_rasterization;
+	using type = tag::feature::line_rasterization;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::line_rasterization>
+struct vulkan_object_native<tag::feature::line_rasterization>
 {
 	using type = VkPhysicalDeviceLineRasterizationFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LINE_RASTERIZATION_FEATURES;
@@ -145,11 +145,11 @@ struct vulkan_object_native<obj::feature::line_rasterization>
 template<>
 struct expression_vulkan_tag<VkPipelineRasterizationLineStateCreateInfo>
 {
-	using type = obj::state::rasterization_line;
+	using type = tag::state::rasterization_line;
 };
 
 template<>
-struct vulkan_object_native<obj::state::rasterization_line>
+struct vulkan_object_native<tag::state::rasterization_line>
 {
 	using type = VkPipelineRasterizationLineStateCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_LINE_STATE_CREATE_INFO;
@@ -158,18 +158,18 @@ struct vulkan_object_native<obj::state::rasterization_line>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceLineRasterizationProperties>
 {
-	using type = obj::property::line_rasterization;
+	using type = tag::property::line_rasterization;
 };
 
 template<>
-struct vulkan_object_native<obj::property::line_rasterization>
+struct vulkan_object_native<tag::property::line_rasterization>
 {
 	using type = VkPhysicalDeviceLineRasterizationProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LINE_RASTERIZATION_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::line_rasterization>
+struct vulkan_object_extensions<tag::feature::line_rasterization>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_line_rasterization", "VK_KHR_line_rasterization"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -177,7 +177,7 @@ struct vulkan_object_extensions<obj::feature::line_rasterization>
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::rasterization_line>
+struct vulkan_object_extensions<tag::state::rasterization_line>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_line_rasterization", "VK_KHR_line_rasterization"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -185,7 +185,7 @@ struct vulkan_object_extensions<obj::state::rasterization_line>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::line_rasterization>
+struct vulkan_object_extensions<tag::property::line_rasterization>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_line_rasterization", "VK_KHR_line_rasterization"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -193,13 +193,13 @@ struct vulkan_object_extensions<obj::property::line_rasterization>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::line_rasterization> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::line_rasterization> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::line_rasterization> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::line_rasterization> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::line_rasterization> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::line_rasterization> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::rasterization, obj::state::rasterization_line> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::rasterization, tag::state::rasterization_line> = true;
 }
 
 namespace vkfu::param
@@ -210,7 +210,7 @@ using ::vkfu::operator|;
 
 struct line_rasterization
 {
-	using vulkan_tag_type = obj::feature::line_rasterization;
+	using vulkan_tag_type = tag::feature::line_rasterization;
 
 	bool rectangular_lines = false;
 	bool bresenham_lines = false;
@@ -242,7 +242,7 @@ using ::vkfu::operator|;
 
 struct rasterization_line
 {
-	using vulkan_tag_type = obj::state::rasterization_line;
+	using vulkan_tag_type = tag::state::rasterization_line;
 
 	::vkfu::enums::line_rasterization_mode line_rasterization_mode{};
 	bool stippled_line_enable = false;

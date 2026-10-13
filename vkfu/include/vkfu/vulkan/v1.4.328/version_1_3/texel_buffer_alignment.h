@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceTexelBufferAlignmentProperties con
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property
 {
@@ -54,7 +54,7 @@ struct texel_buffer_alignment{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::property::texel_buffer_alignment>
+struct vulkan_object_trait<tag::property::texel_buffer_alignment>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::property::texel_buffer_alignment>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceTexelBufferAlignmentProperties>
 {
-	using type = obj::property::texel_buffer_alignment;
+	using type = tag::property::texel_buffer_alignment;
 };
 
 template<>
-struct vulkan_object_native<obj::property::texel_buffer_alignment>
+struct vulkan_object_native<tag::property::texel_buffer_alignment>
 {
 	using type = VkPhysicalDeviceTexelBufferAlignmentProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TEXEL_BUFFER_ALIGNMENT_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::texel_buffer_alignment>
+struct vulkan_object_extensions<tag::property::texel_buffer_alignment>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_texel_buffer_alignment"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -83,5 +83,5 @@ struct vulkan_object_extensions<obj::property::texel_buffer_alignment>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::texel_buffer_alignment> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::texel_buffer_alignment> = true;
 }

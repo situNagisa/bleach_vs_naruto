@@ -58,7 +58,7 @@ constexpr auto _vkfu_evaluate(VkWidgetDriverPropertiesEXT const& value) noexcept
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::ext
 {
@@ -73,7 +73,7 @@ struct widget_driver_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::widget_colour>
+struct vulkan_object_trait<tag::option::ext::widget_colour>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -81,7 +81,7 @@ struct vulkan_object_trait<obj::option::ext::widget_colour>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::widget_driver_properties>
+struct vulkan_object_trait<tag::result::ext::widget_driver_properties>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -91,11 +91,11 @@ struct vulkan_object_trait<obj::result::ext::widget_driver_properties>
 template<>
 struct expression_vulkan_tag<VkWidgetColourInfoEXT>
 {
-	using type = obj::option::ext::widget_colour;
+	using type = tag::option::ext::widget_colour;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::widget_colour>
+struct vulkan_object_native<tag::option::ext::widget_colour>
 {
 	using type = VkWidgetColourInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIDGET_COLOUR_INFO_EXT;
@@ -104,18 +104,18 @@ struct vulkan_object_native<obj::option::ext::widget_colour>
 template<>
 struct expression_vulkan_tag<VkWidgetDriverPropertiesEXT>
 {
-	using type = obj::result::ext::widget_driver_properties;
+	using type = tag::result::ext::widget_driver_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::widget_driver_properties>
+struct vulkan_object_native<tag::result::ext::widget_driver_properties>
 {
 	using type = VkWidgetDriverPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIDGET_DRIVER_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::widget_colour>
+struct vulkan_object_extensions<tag::option::ext::widget_colour>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_widget_colour"};
 	constexpr static ::std::uint32_t core = 0;
@@ -123,7 +123,7 @@ struct vulkan_object_extensions<obj::option::ext::widget_colour>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::widget_driver_properties>
+struct vulkan_object_extensions<tag::result::ext::widget_driver_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_widget_colour"};
 	constexpr static ::std::uint32_t core = 0;
@@ -131,9 +131,9 @@ struct vulkan_object_extensions<obj::result::ext::widget_driver_properties>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::widget, obj::option::ext::widget_colour> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::widget, tag::option::ext::widget_colour> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::widget_properties, obj::result::ext::widget_driver_properties> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::widget_properties, tag::result::ext::widget_driver_properties> = true;
 }
 
 namespace vkfu::param
@@ -144,7 +144,7 @@ using ::vkfu::operator|;
 
 struct widget_colour
 {
-	using vulkan_tag_type = obj::option::ext::widget_colour;
+	using vulkan_tag_type = tag::option::ext::widget_colour;
 
 	::vkfu::enums::widget_mode fallback_mode{};
 

@@ -32,6 +32,7 @@
 #include "../version_1_0/image_view.h"
 #include "../version_1_0/sampler.h"
 #include "../version_1_0/descriptor_set.h"
+#include "../version_1_0/render_pass.h"
 #include "../version_1_1/get_physical_device_properties2.h"
 #include "../version_1_4/maintenance5.h"
 #include "../khr/acceleration_structure.h"
@@ -217,7 +218,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceDescriptorBufferPropertiesEXT cons
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace ext
 {
@@ -248,7 +249,7 @@ struct descriptor_buffer{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::ext::acceleration_structure_capture_descriptor_data>
+struct vulkan_object_trait<tag::ext::acceleration_structure_capture_descriptor_data>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -256,7 +257,7 @@ struct vulkan_object_trait<obj::ext::acceleration_structure_capture_descriptor_d
 };
 
 template<>
-struct vulkan_object_trait<obj::ext::buffer_capture_descriptor_data>
+struct vulkan_object_trait<tag::ext::buffer_capture_descriptor_data>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -264,23 +265,7 @@ struct vulkan_object_trait<obj::ext::buffer_capture_descriptor_data>
 };
 
 template<>
-struct vulkan_object_trait<obj::ext::descriptor_buffer_binding>
-{
-	constexpr static auto root = true;
-	constexpr static auto branch = true;
-	constexpr static auto allow_duplicate = false;
-};
-
-template<>
-struct vulkan_object_trait<obj::option::ext::push_descriptor_buffer_handle>
-{
-	constexpr static auto root = false;
-	constexpr static auto branch = false;
-	constexpr static auto allow_duplicate = false;
-};
-
-template<>
-struct vulkan_object_trait<obj::ext::descriptor_get>
+struct vulkan_object_trait<tag::ext::descriptor_buffer_binding>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -288,23 +273,7 @@ struct vulkan_object_trait<obj::ext::descriptor_get>
 };
 
 template<>
-struct vulkan_object_trait<obj::ext::image_capture_descriptor_data>
-{
-	constexpr static auto root = true;
-	constexpr static auto branch = false;
-	constexpr static auto allow_duplicate = false;
-};
-
-template<>
-struct vulkan_object_trait<obj::ext::image_view_capture_descriptor_data>
-{
-	constexpr static auto root = true;
-	constexpr static auto branch = false;
-	constexpr static auto allow_duplicate = false;
-};
-
-template<>
-struct vulkan_object_trait<obj::option::ext::opaque_capture_descriptor_data>
+struct vulkan_object_trait<tag::option::ext::push_descriptor_buffer_handle>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -312,15 +281,15 @@ struct vulkan_object_trait<obj::option::ext::opaque_capture_descriptor_data>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::ext::descriptor_buffer>
+struct vulkan_object_trait<tag::ext::descriptor_get>
 {
-	constexpr static auto root = false;
-	constexpr static auto branch = false;
+	constexpr static auto root = true;
+	constexpr static auto branch = true;
 	constexpr static auto allow_duplicate = false;
 };
 
 template<>
-struct vulkan_object_trait<obj::ext::sampler_capture_descriptor_data>
+struct vulkan_object_trait<tag::ext::image_capture_descriptor_data>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -328,7 +297,15 @@ struct vulkan_object_trait<obj::ext::sampler_capture_descriptor_data>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::ext::descriptor_buffer_density_map>
+struct vulkan_object_trait<tag::ext::image_view_capture_descriptor_data>
+{
+	constexpr static auto root = true;
+	constexpr static auto branch = false;
+	constexpr static auto allow_duplicate = false;
+};
+
+template<>
+struct vulkan_object_trait<tag::option::ext::opaque_capture_descriptor_data>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -336,7 +313,31 @@ struct vulkan_object_trait<obj::property::ext::descriptor_buffer_density_map>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::ext::descriptor_buffer>
+struct vulkan_object_trait<tag::feature::ext::descriptor_buffer>
+{
+	constexpr static auto root = false;
+	constexpr static auto branch = false;
+	constexpr static auto allow_duplicate = false;
+};
+
+template<>
+struct vulkan_object_trait<tag::ext::sampler_capture_descriptor_data>
+{
+	constexpr static auto root = true;
+	constexpr static auto branch = false;
+	constexpr static auto allow_duplicate = false;
+};
+
+template<>
+struct vulkan_object_trait<tag::property::ext::descriptor_buffer_density_map>
+{
+	constexpr static auto root = false;
+	constexpr static auto branch = false;
+	constexpr static auto allow_duplicate = false;
+};
+
+template<>
+struct vulkan_object_trait<tag::property::ext::descriptor_buffer>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -346,11 +347,11 @@ struct vulkan_object_trait<obj::property::ext::descriptor_buffer>
 template<>
 struct expression_vulkan_tag<VkAccelerationStructureCaptureDescriptorDataInfoEXT>
 {
-	using type = obj::ext::acceleration_structure_capture_descriptor_data;
+	using type = tag::ext::acceleration_structure_capture_descriptor_data;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::acceleration_structure_capture_descriptor_data>
+struct vulkan_object_native<tag::ext::acceleration_structure_capture_descriptor_data>
 {
 	using type = VkAccelerationStructureCaptureDescriptorDataInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CAPTURE_DESCRIPTOR_DATA_INFO_EXT;
@@ -359,11 +360,11 @@ struct vulkan_object_native<obj::ext::acceleration_structure_capture_descriptor_
 template<>
 struct expression_vulkan_tag<VkBufferCaptureDescriptorDataInfoEXT>
 {
-	using type = obj::ext::buffer_capture_descriptor_data;
+	using type = tag::ext::buffer_capture_descriptor_data;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::buffer_capture_descriptor_data>
+struct vulkan_object_native<tag::ext::buffer_capture_descriptor_data>
 {
 	using type = VkBufferCaptureDescriptorDataInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_BUFFER_CAPTURE_DESCRIPTOR_DATA_INFO_EXT;
@@ -372,11 +373,11 @@ struct vulkan_object_native<obj::ext::buffer_capture_descriptor_data>
 template<>
 struct expression_vulkan_tag<VkDescriptorBufferBindingInfoEXT>
 {
-	using type = obj::ext::descriptor_buffer_binding;
+	using type = tag::ext::descriptor_buffer_binding;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::descriptor_buffer_binding>
+struct vulkan_object_native<tag::ext::descriptor_buffer_binding>
 {
 	using type = VkDescriptorBufferBindingInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT;
@@ -385,11 +386,11 @@ struct vulkan_object_native<obj::ext::descriptor_buffer_binding>
 template<>
 struct expression_vulkan_tag<VkDescriptorBufferBindingPushDescriptorBufferHandleEXT>
 {
-	using type = obj::option::ext::push_descriptor_buffer_handle;
+	using type = tag::option::ext::push_descriptor_buffer_handle;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::push_descriptor_buffer_handle>
+struct vulkan_object_native<tag::option::ext::push_descriptor_buffer_handle>
 {
 	using type = VkDescriptorBufferBindingPushDescriptorBufferHandleEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_PUSH_DESCRIPTOR_BUFFER_HANDLE_EXT;
@@ -398,11 +399,11 @@ struct vulkan_object_native<obj::option::ext::push_descriptor_buffer_handle>
 template<>
 struct expression_vulkan_tag<VkDescriptorGetInfoEXT>
 {
-	using type = obj::ext::descriptor_get;
+	using type = tag::ext::descriptor_get;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::descriptor_get>
+struct vulkan_object_native<tag::ext::descriptor_get>
 {
 	using type = VkDescriptorGetInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT;
@@ -411,11 +412,11 @@ struct vulkan_object_native<obj::ext::descriptor_get>
 template<>
 struct expression_vulkan_tag<VkImageCaptureDescriptorDataInfoEXT>
 {
-	using type = obj::ext::image_capture_descriptor_data;
+	using type = tag::ext::image_capture_descriptor_data;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::image_capture_descriptor_data>
+struct vulkan_object_native<tag::ext::image_capture_descriptor_data>
 {
 	using type = VkImageCaptureDescriptorDataInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_CAPTURE_DESCRIPTOR_DATA_INFO_EXT;
@@ -424,11 +425,11 @@ struct vulkan_object_native<obj::ext::image_capture_descriptor_data>
 template<>
 struct expression_vulkan_tag<VkImageViewCaptureDescriptorDataInfoEXT>
 {
-	using type = obj::ext::image_view_capture_descriptor_data;
+	using type = tag::ext::image_view_capture_descriptor_data;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::image_view_capture_descriptor_data>
+struct vulkan_object_native<tag::ext::image_view_capture_descriptor_data>
 {
 	using type = VkImageViewCaptureDescriptorDataInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_VIEW_CAPTURE_DESCRIPTOR_DATA_INFO_EXT;
@@ -437,11 +438,11 @@ struct vulkan_object_native<obj::ext::image_view_capture_descriptor_data>
 template<>
 struct expression_vulkan_tag<VkOpaqueCaptureDescriptorDataCreateInfoEXT>
 {
-	using type = obj::option::ext::opaque_capture_descriptor_data;
+	using type = tag::option::ext::opaque_capture_descriptor_data;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::opaque_capture_descriptor_data>
+struct vulkan_object_native<tag::option::ext::opaque_capture_descriptor_data>
 {
 	using type = VkOpaqueCaptureDescriptorDataCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_OPAQUE_CAPTURE_DESCRIPTOR_DATA_CREATE_INFO_EXT;
@@ -450,11 +451,11 @@ struct vulkan_object_native<obj::option::ext::opaque_capture_descriptor_data>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDescriptorBufferFeaturesEXT>
 {
-	using type = obj::feature::ext::descriptor_buffer;
+	using type = tag::feature::ext::descriptor_buffer;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::descriptor_buffer>
+struct vulkan_object_native<tag::feature::ext::descriptor_buffer>
 {
 	using type = VkPhysicalDeviceDescriptorBufferFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_FEATURES_EXT;
@@ -463,11 +464,11 @@ struct vulkan_object_native<obj::feature::ext::descriptor_buffer>
 template<>
 struct expression_vulkan_tag<VkSamplerCaptureDescriptorDataInfoEXT>
 {
-	using type = obj::ext::sampler_capture_descriptor_data;
+	using type = tag::ext::sampler_capture_descriptor_data;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::sampler_capture_descriptor_data>
+struct vulkan_object_native<tag::ext::sampler_capture_descriptor_data>
 {
 	using type = VkSamplerCaptureDescriptorDataInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SAMPLER_CAPTURE_DESCRIPTOR_DATA_INFO_EXT;
@@ -476,11 +477,11 @@ struct vulkan_object_native<obj::ext::sampler_capture_descriptor_data>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDescriptorBufferDensityMapPropertiesEXT>
 {
-	using type = obj::property::ext::descriptor_buffer_density_map;
+	using type = tag::property::ext::descriptor_buffer_density_map;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::descriptor_buffer_density_map>
+struct vulkan_object_native<tag::property::ext::descriptor_buffer_density_map>
 {
 	using type = VkPhysicalDeviceDescriptorBufferDensityMapPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_DENSITY_MAP_PROPERTIES_EXT;
@@ -489,18 +490,18 @@ struct vulkan_object_native<obj::property::ext::descriptor_buffer_density_map>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDescriptorBufferPropertiesEXT>
 {
-	using type = obj::property::ext::descriptor_buffer;
+	using type = tag::property::ext::descriptor_buffer;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::descriptor_buffer>
+struct vulkan_object_native<tag::property::ext::descriptor_buffer>
 {
 	using type = VkPhysicalDeviceDescriptorBufferPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::acceleration_structure_capture_descriptor_data>
+struct vulkan_object_extensions<tag::ext::acceleration_structure_capture_descriptor_data>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_descriptor_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -508,7 +509,7 @@ struct vulkan_object_extensions<obj::ext::acceleration_structure_capture_descrip
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::buffer_capture_descriptor_data>
+struct vulkan_object_extensions<tag::ext::buffer_capture_descriptor_data>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_descriptor_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -516,7 +517,7 @@ struct vulkan_object_extensions<obj::ext::buffer_capture_descriptor_data>
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::descriptor_buffer_binding>
+struct vulkan_object_extensions<tag::ext::descriptor_buffer_binding>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_descriptor_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -524,7 +525,7 @@ struct vulkan_object_extensions<obj::ext::descriptor_buffer_binding>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::push_descriptor_buffer_handle>
+struct vulkan_object_extensions<tag::option::ext::push_descriptor_buffer_handle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_descriptor_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -532,7 +533,7 @@ struct vulkan_object_extensions<obj::option::ext::push_descriptor_buffer_handle>
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::descriptor_get>
+struct vulkan_object_extensions<tag::ext::descriptor_get>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_descriptor_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -540,7 +541,7 @@ struct vulkan_object_extensions<obj::ext::descriptor_get>
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::image_capture_descriptor_data>
+struct vulkan_object_extensions<tag::ext::image_capture_descriptor_data>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_descriptor_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -548,7 +549,7 @@ struct vulkan_object_extensions<obj::ext::image_capture_descriptor_data>
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::image_view_capture_descriptor_data>
+struct vulkan_object_extensions<tag::ext::image_view_capture_descriptor_data>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_descriptor_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -556,7 +557,7 @@ struct vulkan_object_extensions<obj::ext::image_view_capture_descriptor_data>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::opaque_capture_descriptor_data>
+struct vulkan_object_extensions<tag::option::ext::opaque_capture_descriptor_data>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_descriptor_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -564,7 +565,7 @@ struct vulkan_object_extensions<obj::option::ext::opaque_capture_descriptor_data
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::descriptor_buffer>
+struct vulkan_object_extensions<tag::feature::ext::descriptor_buffer>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_descriptor_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -572,7 +573,7 @@ struct vulkan_object_extensions<obj::feature::ext::descriptor_buffer>
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::sampler_capture_descriptor_data>
+struct vulkan_object_extensions<tag::ext::sampler_capture_descriptor_data>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_descriptor_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -580,7 +581,7 @@ struct vulkan_object_extensions<obj::ext::sampler_capture_descriptor_data>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::descriptor_buffer_density_map>
+struct vulkan_object_extensions<tag::property::ext::descriptor_buffer_density_map>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_descriptor_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -588,7 +589,7 @@ struct vulkan_object_extensions<obj::property::ext::descriptor_buffer_density_ma
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::descriptor_buffer>
+struct vulkan_object_extensions<tag::property::ext::descriptor_buffer>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_descriptor_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -596,29 +597,29 @@ struct vulkan_object_extensions<obj::property::ext::descriptor_buffer>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::acceleration_structure, obj::option::ext::opaque_capture_descriptor_data> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::acceleration_structure, tag::option::ext::opaque_capture_descriptor_data> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::nv::acceleration_structure_create, obj::option::ext::opaque_capture_descriptor_data> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::nv::acceleration_structure_create, tag::option::ext::opaque_capture_descriptor_data> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::buffer, obj::option::ext::opaque_capture_descriptor_data> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::buffer, tag::option::ext::opaque_capture_descriptor_data> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::ext::descriptor_buffer_binding, obj::option::buffer_usage_flags2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::ext::descriptor_buffer_binding, tag::option::buffer_usage_flags2> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::ext::descriptor_buffer_binding, obj::option::ext::push_descriptor_buffer_handle> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::ext::descriptor_buffer_binding, tag::option::ext::push_descriptor_buffer_handle> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::descriptor_buffer> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::descriptor_buffer> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image, obj::option::ext::opaque_capture_descriptor_data> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image, tag::option::ext::opaque_capture_descriptor_data> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image_view, obj::option::ext::opaque_capture_descriptor_data> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image_view, tag::option::ext::opaque_capture_descriptor_data> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::descriptor_buffer> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::descriptor_buffer> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::descriptor_buffer_density_map> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::descriptor_buffer_density_map> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::descriptor_buffer> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::descriptor_buffer> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::sampler, obj::option::ext::opaque_capture_descriptor_data> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::sampler, tag::option::ext::opaque_capture_descriptor_data> = true;
 }
 
 namespace vkfu::param
@@ -629,7 +630,7 @@ using ::vkfu::operator|;
 
 struct acceleration_structure_capture_descriptor_data
 {
-	using vulkan_tag_type = obj::ext::acceleration_structure_capture_descriptor_data;
+	using vulkan_tag_type = tag::ext::acceleration_structure_capture_descriptor_data;
 
 	VkAccelerationStructureKHR acceleration_structure{};
 	VkAccelerationStructureNV acceleration_structure_nv{};
@@ -647,7 +648,7 @@ struct acceleration_structure_capture_descriptor_data
 
 struct buffer_capture_descriptor_data
 {
-	using vulkan_tag_type = obj::ext::buffer_capture_descriptor_data;
+	using vulkan_tag_type = tag::ext::buffer_capture_descriptor_data;
 
 	VkBuffer buffer{};
 
@@ -663,43 +664,10 @@ struct buffer_capture_descriptor_data
 
 struct descriptor_buffer_binding
 {
-	using vulkan_tag_type = obj::ext::descriptor_buffer_binding;
+	using vulkan_tag_type = tag::ext::descriptor_buffer_binding;
 
 	VkDeviceAddress address{};
-	struct usage_type
-	{
-		VkBufferUsageFlags transfer_src : 1 = 0;
-		VkBufferUsageFlags transfer_dst : 1 = 0;
-		VkBufferUsageFlags uniform_texel_buffer : 1 = 0;
-		VkBufferUsageFlags storage_texel_buffer : 1 = 0;
-		VkBufferUsageFlags uniform_buffer : 1 = 0;
-		VkBufferUsageFlags storage_buffer : 1 = 0;
-		VkBufferUsageFlags index_buffer : 1 = 0;
-		VkBufferUsageFlags vertex_buffer : 1 = 0;
-		VkBufferUsageFlags indirect_buffer : 1 = 0;
-		VkBufferUsageFlags conditional_rendering : 1 = 0;
-		VkBufferUsageFlags shader_binding_table : 1 = 0;
-		VkBufferUsageFlags transform_feedback_buffer : 1 = 0;
-		VkBufferUsageFlags transform_feedback_counter_buffer : 1 = 0;
-		VkBufferUsageFlags video_decode_src : 1 = 0;
-		VkBufferUsageFlags video_decode_dst : 1 = 0;
-		VkBufferUsageFlags video_encode_dst : 1 = 0;
-		VkBufferUsageFlags video_encode_src : 1 = 0;
-		VkBufferUsageFlags shader_device_address : 1 = 0;
-		VkBufferUsageFlags _reserved_18 : 1 = 0;
-		VkBufferUsageFlags acceleration_structure_build_input_read_only : 1 = 0;
-		VkBufferUsageFlags acceleration_structure_storage : 1 = 0;
-		VkBufferUsageFlags sampler_descriptor_buffer : 1 = 0;
-		VkBufferUsageFlags resource_descriptor_buffer : 1 = 0;
-		VkBufferUsageFlags micromap_build_input_read_only : 1 = 0;
-		VkBufferUsageFlags micromap_storage : 1 = 0;
-		VkBufferUsageFlags execution_graph_scratch : 1 = 0;
-		VkBufferUsageFlags push_descriptors_descriptor_buffer : 1 = 0;
-		VkBufferUsageFlags tile_memory : 1 = 0;
-		VkBufferUsageFlags _reserved_28 : 4 = 0;
-	};
-
-	usage_type usage{};
+	::vkfu::flags::buffer_usage usage{};
 
 	constexpr auto evaluate() const noexcept -> VkDescriptorBufferBindingInfoEXT
 	{
@@ -712,40 +680,9 @@ struct descriptor_buffer_binding
 	}
 };
 
-static_assert(sizeof(descriptor_buffer_binding::usage_type) == sizeof(VkBufferUsageFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.transfer_src = 1}) == VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.transfer_dst = 1}) == VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.uniform_texel_buffer = 1}) == VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.storage_texel_buffer = 1}) == VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.uniform_buffer = 1}) == VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.storage_buffer = 1}) == VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.index_buffer = 1}) == VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.vertex_buffer = 1}) == VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.indirect_buffer = 1}) == VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.conditional_rendering = 1}) == VK_BUFFER_USAGE_CONDITIONAL_RENDERING_BIT_EXT);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.shader_binding_table = 1}) == VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.transform_feedback_buffer = 1}) == VK_BUFFER_USAGE_TRANSFORM_FEEDBACK_BUFFER_BIT_EXT);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.transform_feedback_counter_buffer = 1}) == VK_BUFFER_USAGE_TRANSFORM_FEEDBACK_COUNTER_BUFFER_BIT_EXT);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.video_decode_src = 1}) == VK_BUFFER_USAGE_VIDEO_DECODE_SRC_BIT_KHR);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.video_decode_dst = 1}) == VK_BUFFER_USAGE_VIDEO_DECODE_DST_BIT_KHR);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.video_encode_dst = 1}) == VK_BUFFER_USAGE_VIDEO_ENCODE_DST_BIT_KHR);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.video_encode_src = 1}) == VK_BUFFER_USAGE_VIDEO_ENCODE_SRC_BIT_KHR);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.shader_device_address = 1}) == VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.acceleration_structure_build_input_read_only = 1}) == VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.acceleration_structure_storage = 1}) == VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.sampler_descriptor_buffer = 1}) == VK_BUFFER_USAGE_SAMPLER_DESCRIPTOR_BUFFER_BIT_EXT);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.resource_descriptor_buffer = 1}) == VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.micromap_build_input_read_only = 1}) == VK_BUFFER_USAGE_MICROMAP_BUILD_INPUT_READ_ONLY_BIT_EXT);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.micromap_storage = 1}) == VK_BUFFER_USAGE_MICROMAP_STORAGE_BIT_EXT);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.execution_graph_scratch = 1}) == 0x2000000);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.push_descriptors_descriptor_buffer = 1}) == VK_BUFFER_USAGE_PUSH_DESCRIPTORS_DESCRIPTOR_BUFFER_BIT_EXT);
-static_assert(::std::bit_cast<VkBufferUsageFlags>(descriptor_buffer_binding::usage_type{.tile_memory = 1}) == VK_BUFFER_USAGE_TILE_MEMORY_BIT_QCOM);
-#endif
-
 struct descriptor_get
 {
-	using vulkan_tag_type = obj::ext::descriptor_get;
+	using vulkan_tag_type = tag::ext::descriptor_get;
 
 	::vkfu::enums::descriptor_type type{};
 	VkDescriptorDataEXT data{};
@@ -763,7 +700,7 @@ struct descriptor_get
 
 struct image_capture_descriptor_data
 {
-	using vulkan_tag_type = obj::ext::image_capture_descriptor_data;
+	using vulkan_tag_type = tag::ext::image_capture_descriptor_data;
 
 	VkImage image{};
 
@@ -779,7 +716,7 @@ struct image_capture_descriptor_data
 
 struct image_view_capture_descriptor_data
 {
-	using vulkan_tag_type = obj::ext::image_view_capture_descriptor_data;
+	using vulkan_tag_type = tag::ext::image_view_capture_descriptor_data;
 
 	VkImageView image_view{};
 
@@ -795,7 +732,7 @@ struct image_view_capture_descriptor_data
 
 struct sampler_capture_descriptor_data
 {
-	using vulkan_tag_type = obj::ext::sampler_capture_descriptor_data;
+	using vulkan_tag_type = tag::ext::sampler_capture_descriptor_data;
 
 	VkSampler sampler{};
 
@@ -817,7 +754,7 @@ using ::vkfu::operator|;
 
 struct descriptor_buffer
 {
-	using vulkan_tag_type = obj::feature::ext::descriptor_buffer;
+	using vulkan_tag_type = tag::feature::ext::descriptor_buffer;
 
 	bool enable = false;
 	bool capture_replay = false;
@@ -845,7 +782,7 @@ using ::vkfu::operator|;
 
 struct push_descriptor_buffer_handle
 {
-	using vulkan_tag_type = obj::option::ext::push_descriptor_buffer_handle;
+	using vulkan_tag_type = tag::option::ext::push_descriptor_buffer_handle;
 
 	VkBuffer buffer{};
 
@@ -861,7 +798,7 @@ struct push_descriptor_buffer_handle
 
 struct opaque_capture_descriptor_data
 {
-	using vulkan_tag_type = obj::option::ext::opaque_capture_descriptor_data;
+	using vulkan_tag_type = tag::option::ext::opaque_capture_descriptor_data;
 
 	void const* data = nullptr;
 
@@ -887,12 +824,12 @@ inline void cmd_bind_descriptor_buffers(VkCommandBuffer command_buffer, ::std::s
 	::vkCmdBindDescriptorBuffersEXT(command_buffer, static_cast<::std::uint32_t>(binding_infos.size()), binding_infos.data());
 }
 
-inline void cmd_set_descriptor_buffer_offsets(VkCommandBuffer command_buffer, VkPipelineBindPoint pipeline_bind_point, VkPipelineLayout layout, ::std::uint32_t first_set, ::std::span<::std::uint32_t const> buffer_indices, ::std::span<VkDeviceSize const> offsets)
+inline void cmd_set_descriptor_buffer_offsets(VkCommandBuffer command_buffer, ::vkfu::enums::pipeline_bind_point pipeline_bind_point, VkPipelineLayout layout, ::std::uint32_t first_set, ::std::span<::std::uint32_t const> buffer_indices, ::std::span<VkDeviceSize const> offsets)
 {
-	::vkCmdSetDescriptorBufferOffsetsEXT(command_buffer, pipeline_bind_point, layout, first_set, static_cast<::std::uint32_t>(offsets.size()), buffer_indices.data(), offsets.data());
+	::vkCmdSetDescriptorBufferOffsetsEXT(command_buffer, static_cast<VkPipelineBindPoint>(pipeline_bind_point), layout, first_set, static_cast<::std::uint32_t>(offsets.size()), buffer_indices.data(), offsets.data());
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::acceleration_structure_capture_descriptor_data> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::acceleration_structure_capture_descriptor_data> Expression1>
 [[nodiscard]] auto get_acceleration_structure_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -905,7 +842,7 @@ template<::vkfu::expression_for<::vkfu::obj::ext::acceleration_structure_capture
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::acceleration_structure_capture_descriptor_data> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::acceleration_structure_capture_descriptor_data> Expression1>
 void get_acceleration_structure_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data)
 {
 	auto outcome = get_acceleration_structure_opaque_capture_descriptor_data(device, ::std::forward<Expression1>(info), data, ::std::nothrow);
@@ -915,7 +852,7 @@ void get_acceleration_structure_opaque_capture_descriptor_data(VkDevice device, 
 	}
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::buffer_capture_descriptor_data> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::buffer_capture_descriptor_data> Expression1>
 [[nodiscard]] auto get_buffer_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -928,7 +865,7 @@ template<::vkfu::expression_for<::vkfu::obj::ext::buffer_capture_descriptor_data
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::buffer_capture_descriptor_data> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::buffer_capture_descriptor_data> Expression1>
 void get_buffer_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data)
 {
 	auto outcome = get_buffer_opaque_capture_descriptor_data(device, ::std::forward<Expression1>(info), data, ::std::nothrow);
@@ -938,14 +875,14 @@ void get_buffer_opaque_capture_descriptor_data(VkDevice device, Expression1&& in
 	}
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::descriptor_get> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::descriptor_get> Expression1>
 void get_descriptor(VkDevice device, Expression1&& descriptor_info, ::std::size_t data_size, void* descriptor)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(descriptor_info));
 	::vkGetDescriptorEXT(device, ::std::addressof(::vkfu::unpack(storage1)), data_size, descriptor);
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::image_capture_descriptor_data> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::image_capture_descriptor_data> Expression1>
 [[nodiscard]] auto get_image_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -958,7 +895,7 @@ template<::vkfu::expression_for<::vkfu::obj::ext::image_capture_descriptor_data>
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::image_capture_descriptor_data> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::image_capture_descriptor_data> Expression1>
 void get_image_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data)
 {
 	auto outcome = get_image_opaque_capture_descriptor_data(device, ::std::forward<Expression1>(info), data, ::std::nothrow);
@@ -968,7 +905,7 @@ void get_image_opaque_capture_descriptor_data(VkDevice device, Expression1&& inf
 	}
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::image_view_capture_descriptor_data> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::image_view_capture_descriptor_data> Expression1>
 [[nodiscard]] auto get_image_view_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -981,7 +918,7 @@ template<::vkfu::expression_for<::vkfu::obj::ext::image_view_capture_descriptor_
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::image_view_capture_descriptor_data> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::image_view_capture_descriptor_data> Expression1>
 void get_image_view_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data)
 {
 	auto outcome = get_image_view_opaque_capture_descriptor_data(device, ::std::forward<Expression1>(info), data, ::std::nothrow);
@@ -991,7 +928,7 @@ void get_image_view_opaque_capture_descriptor_data(VkDevice device, Expression1&
 	}
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::sampler_capture_descriptor_data> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::sampler_capture_descriptor_data> Expression1>
 [[nodiscard]] auto get_sampler_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -1004,7 +941,7 @@ template<::vkfu::expression_for<::vkfu::obj::ext::sampler_capture_descriptor_dat
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::sampler_capture_descriptor_data> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::sampler_capture_descriptor_data> Expression1>
 void get_sampler_opaque_capture_descriptor_data(VkDevice device, Expression1&& info, void* data)
 {
 	auto outcome = get_sampler_opaque_capture_descriptor_data(device, ::std::forward<Expression1>(info), data, ::std::nothrow);

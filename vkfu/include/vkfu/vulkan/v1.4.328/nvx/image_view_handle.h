@@ -58,7 +58,7 @@ constexpr auto _vkfu_evaluate(VkImageViewAddressPropertiesNVX const& value) noex
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace nvx
 {
@@ -73,7 +73,7 @@ struct image_view_address_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::nvx::image_view_handle>
+struct vulkan_object_trait<tag::nvx::image_view_handle>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -81,7 +81,7 @@ struct vulkan_object_trait<obj::nvx::image_view_handle>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::nvx::image_view_address_properties>
+struct vulkan_object_trait<tag::result::nvx::image_view_address_properties>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -91,11 +91,11 @@ struct vulkan_object_trait<obj::result::nvx::image_view_address_properties>
 template<>
 struct expression_vulkan_tag<VkImageViewHandleInfoNVX>
 {
-	using type = obj::nvx::image_view_handle;
+	using type = tag::nvx::image_view_handle;
 };
 
 template<>
-struct vulkan_object_native<obj::nvx::image_view_handle>
+struct vulkan_object_native<tag::nvx::image_view_handle>
 {
 	using type = VkImageViewHandleInfoNVX;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_VIEW_HANDLE_INFO_NVX;
@@ -104,18 +104,18 @@ struct vulkan_object_native<obj::nvx::image_view_handle>
 template<>
 struct expression_vulkan_tag<VkImageViewAddressPropertiesNVX>
 {
-	using type = obj::result::nvx::image_view_address_properties;
+	using type = tag::result::nvx::image_view_address_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::nvx::image_view_address_properties>
+struct vulkan_object_native<tag::result::nvx::image_view_address_properties>
 {
 	using type = VkImageViewAddressPropertiesNVX;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_VIEW_ADDRESS_PROPERTIES_NVX;
 };
 
 template<>
-struct vulkan_object_extensions<obj::nvx::image_view_handle>
+struct vulkan_object_extensions<tag::nvx::image_view_handle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NVX_image_view_handle"};
 	constexpr static ::std::uint32_t core = 0;
@@ -123,7 +123,7 @@ struct vulkan_object_extensions<obj::nvx::image_view_handle>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::nvx::image_view_address_properties>
+struct vulkan_object_extensions<tag::result::nvx::image_view_address_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NVX_image_view_handle"};
 	constexpr static ::std::uint32_t core = 0;
@@ -140,7 +140,7 @@ using ::vkfu::operator|;
 
 struct image_view_handle
 {
-	using vulkan_tag_type = obj::nvx::image_view_handle;
+	using vulkan_tag_type = tag::nvx::image_view_handle;
 
 	VkImageView image_view{};
 	::vkfu::enums::descriptor_type descriptor_type{};
@@ -165,14 +165,14 @@ namespace vkfu
 {
 namespace nvx
 {
-template<::vkfu::expression_for<::vkfu::obj::nvx::image_view_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::nvx::image_view_handle> Expression1>
 [[nodiscard]] auto get_image_view_handle64(VkDevice device, Expression1&& info) -> ::std::uint64_t
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
 	return ::vkGetImageViewHandle64NVX(device, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nvx::image_view_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::nvx::image_view_handle> Expression1>
 [[nodiscard]] auto get_image_view_handle(VkDevice device, Expression1&& info) -> ::std::uint32_t
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));

@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDevicePrimitivesGeneratedQueryFeaturesEX
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct primitives_generated_query{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::primitives_generated_query>
+struct vulkan_object_trait<tag::feature::ext::primitives_generated_query>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::primitives_generated_query>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePrimitivesGeneratedQueryFeaturesEXT>
 {
-	using type = obj::feature::ext::primitives_generated_query;
+	using type = tag::feature::ext::primitives_generated_query;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::primitives_generated_query>
+struct vulkan_object_native<tag::feature::ext::primitives_generated_query>
 {
 	using type = VkPhysicalDevicePrimitivesGeneratedQueryFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRIMITIVES_GENERATED_QUERY_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::primitives_generated_query>
+struct vulkan_object_extensions<tag::feature::ext::primitives_generated_query>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_primitives_generated_query"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::primitives_generated_query>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::primitives_generated_query> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::primitives_generated_query> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::primitives_generated_query> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::primitives_generated_query> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct primitives_generated_query
 {
-	using vulkan_tag_type = obj::feature::ext::primitives_generated_query;
+	using vulkan_tag_type = tag::feature::ext::primitives_generated_query;
 
 	bool enable = false;
 	bool with_rasterizer_discard = false;

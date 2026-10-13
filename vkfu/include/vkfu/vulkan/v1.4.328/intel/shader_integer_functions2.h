@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceShaderIntegerFunctions2FeaturesINT
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::intel
 {
@@ -55,7 +55,7 @@ struct shader_integer_functions2{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::intel::shader_integer_functions2>
+struct vulkan_object_trait<tag::feature::intel::shader_integer_functions2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::intel::shader_integer_functions2>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderIntegerFunctions2FeaturesINTEL>
 {
-	using type = obj::feature::intel::shader_integer_functions2;
+	using type = tag::feature::intel::shader_integer_functions2;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::intel::shader_integer_functions2>
+struct vulkan_object_native<tag::feature::intel::shader_integer_functions2>
 {
 	using type = VkPhysicalDeviceShaderIntegerFunctions2FeaturesINTEL;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INTEGER_FUNCTIONS_2_FEATURES_INTEL;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::intel::shader_integer_functions2>
+struct vulkan_object_extensions<tag::feature::intel::shader_integer_functions2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_INTEL_shader_integer_functions2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::intel::shader_integer_functions2>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::intel::shader_integer_functions2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::intel::shader_integer_functions2> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::intel::shader_integer_functions2> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::intel::shader_integer_functions2> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct shader_integer_functions2
 {
-	using vulkan_tag_type = obj::feature::intel::shader_integer_functions2;
+	using vulkan_tag_type = tag::feature::intel::shader_integer_functions2;
 
 	bool enable = false;
 

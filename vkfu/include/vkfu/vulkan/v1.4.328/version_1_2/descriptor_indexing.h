@@ -106,7 +106,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceDescriptorIndexingProperties const
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -130,7 +130,7 @@ struct descriptor_set_variable_descriptor_count_layout_support{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::descriptor_set_layout_binding_flags>
+struct vulkan_object_trait<tag::option::descriptor_set_layout_binding_flags>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -138,7 +138,7 @@ struct vulkan_object_trait<obj::option::descriptor_set_layout_binding_flags>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::descriptor_set_variable_descriptor_count>
+struct vulkan_object_trait<tag::option::descriptor_set_variable_descriptor_count>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -146,7 +146,7 @@ struct vulkan_object_trait<obj::option::descriptor_set_variable_descriptor_count
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::descriptor_indexing>
+struct vulkan_object_trait<tag::feature::descriptor_indexing>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -154,7 +154,7 @@ struct vulkan_object_trait<obj::feature::descriptor_indexing>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::descriptor_set_variable_descriptor_count_layout_support>
+struct vulkan_object_trait<tag::result::descriptor_set_variable_descriptor_count_layout_support>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -162,7 +162,7 @@ struct vulkan_object_trait<obj::result::descriptor_set_variable_descriptor_count
 };
 
 template<>
-struct vulkan_object_trait<obj::property::descriptor_indexing>
+struct vulkan_object_trait<tag::property::descriptor_indexing>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -172,11 +172,11 @@ struct vulkan_object_trait<obj::property::descriptor_indexing>
 template<>
 struct expression_vulkan_tag<VkDescriptorSetLayoutBindingFlagsCreateInfo>
 {
-	using type = obj::option::descriptor_set_layout_binding_flags;
+	using type = tag::option::descriptor_set_layout_binding_flags;
 };
 
 template<>
-struct vulkan_object_native<obj::option::descriptor_set_layout_binding_flags>
+struct vulkan_object_native<tag::option::descriptor_set_layout_binding_flags>
 {
 	using type = VkDescriptorSetLayoutBindingFlagsCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
@@ -185,11 +185,11 @@ struct vulkan_object_native<obj::option::descriptor_set_layout_binding_flags>
 template<>
 struct expression_vulkan_tag<VkDescriptorSetVariableDescriptorCountAllocateInfo>
 {
-	using type = obj::option::descriptor_set_variable_descriptor_count;
+	using type = tag::option::descriptor_set_variable_descriptor_count;
 };
 
 template<>
-struct vulkan_object_native<obj::option::descriptor_set_variable_descriptor_count>
+struct vulkan_object_native<tag::option::descriptor_set_variable_descriptor_count>
 {
 	using type = VkDescriptorSetVariableDescriptorCountAllocateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO;
@@ -198,11 +198,11 @@ struct vulkan_object_native<obj::option::descriptor_set_variable_descriptor_coun
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDescriptorIndexingFeatures>
 {
-	using type = obj::feature::descriptor_indexing;
+	using type = tag::feature::descriptor_indexing;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::descriptor_indexing>
+struct vulkan_object_native<tag::feature::descriptor_indexing>
 {
 	using type = VkPhysicalDeviceDescriptorIndexingFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
@@ -211,11 +211,11 @@ struct vulkan_object_native<obj::feature::descriptor_indexing>
 template<>
 struct expression_vulkan_tag<VkDescriptorSetVariableDescriptorCountLayoutSupport>
 {
-	using type = obj::result::descriptor_set_variable_descriptor_count_layout_support;
+	using type = tag::result::descriptor_set_variable_descriptor_count_layout_support;
 };
 
 template<>
-struct vulkan_object_native<obj::result::descriptor_set_variable_descriptor_count_layout_support>
+struct vulkan_object_native<tag::result::descriptor_set_variable_descriptor_count_layout_support>
 {
 	using type = VkDescriptorSetVariableDescriptorCountLayoutSupport;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_LAYOUT_SUPPORT;
@@ -224,18 +224,18 @@ struct vulkan_object_native<obj::result::descriptor_set_variable_descriptor_coun
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDescriptorIndexingProperties>
 {
-	using type = obj::property::descriptor_indexing;
+	using type = tag::property::descriptor_indexing;
 };
 
 template<>
-struct vulkan_object_native<obj::property::descriptor_indexing>
+struct vulkan_object_native<tag::property::descriptor_indexing>
 {
 	using type = VkPhysicalDeviceDescriptorIndexingProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::descriptor_set_layout_binding_flags>
+struct vulkan_object_extensions<tag::option::descriptor_set_layout_binding_flags>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_descriptor_indexing"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -243,7 +243,7 @@ struct vulkan_object_extensions<obj::option::descriptor_set_layout_binding_flags
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::descriptor_set_variable_descriptor_count>
+struct vulkan_object_extensions<tag::option::descriptor_set_variable_descriptor_count>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_descriptor_indexing"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -251,7 +251,7 @@ struct vulkan_object_extensions<obj::option::descriptor_set_variable_descriptor_
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::descriptor_indexing>
+struct vulkan_object_extensions<tag::feature::descriptor_indexing>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_descriptor_indexing"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -259,7 +259,7 @@ struct vulkan_object_extensions<obj::feature::descriptor_indexing>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::descriptor_set_variable_descriptor_count_layout_support>
+struct vulkan_object_extensions<tag::result::descriptor_set_variable_descriptor_count_layout_support>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_descriptor_indexing"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -267,7 +267,7 @@ struct vulkan_object_extensions<obj::result::descriptor_set_variable_descriptor_
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::descriptor_indexing>
+struct vulkan_object_extensions<tag::property::descriptor_indexing>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_descriptor_indexing"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -275,17 +275,17 @@ struct vulkan_object_extensions<obj::property::descriptor_indexing>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::descriptor_set, obj::option::descriptor_set_variable_descriptor_count> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::descriptor_set, tag::option::descriptor_set_variable_descriptor_count> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::descriptor_set_layout, obj::option::descriptor_set_layout_binding_flags> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::descriptor_set_layout, tag::option::descriptor_set_layout_binding_flags> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::descriptor_set_layout_support, obj::result::descriptor_set_variable_descriptor_count_layout_support> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::descriptor_set_layout_support, tag::result::descriptor_set_variable_descriptor_count_layout_support> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::descriptor_indexing> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::descriptor_indexing> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::descriptor_indexing> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::descriptor_indexing> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::descriptor_indexing> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::descriptor_indexing> = true;
 }
 
 namespace vkfu::param
@@ -296,7 +296,7 @@ using ::vkfu::operator|;
 
 struct descriptor_indexing
 {
-	using vulkan_tag_type = obj::feature::descriptor_indexing;
+	using vulkan_tag_type = tag::feature::descriptor_indexing;
 
 	bool shader_input_attachment_array_dynamic_indexing = false;
 	bool shader_uniform_texel_buffer_array_dynamic_indexing = false;
@@ -356,7 +356,7 @@ using ::vkfu::operator|;
 
 struct descriptor_set_layout_binding_flags
 {
-	using vulkan_tag_type = obj::option::descriptor_set_layout_binding_flags;
+	using vulkan_tag_type = tag::option::descriptor_set_layout_binding_flags;
 
 	::std::span<VkDescriptorBindingFlags const> binding_flags{};
 
@@ -373,7 +373,7 @@ struct descriptor_set_layout_binding_flags
 
 struct descriptor_set_variable_descriptor_count
 {
-	using vulkan_tag_type = obj::option::descriptor_set_variable_descriptor_count;
+	using vulkan_tag_type = tag::option::descriptor_set_variable_descriptor_count;
 
 	::std::span<::std::uint32_t const> descriptor_counts{};
 

@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDevicePresentWaitFeaturesKHR const& valu
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -55,7 +55,7 @@ struct present_wait{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::present_wait>
+struct vulkan_object_trait<tag::feature::khr::present_wait>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::khr::present_wait>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePresentWaitFeaturesKHR>
 {
-	using type = obj::feature::khr::present_wait;
+	using type = tag::feature::khr::present_wait;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::present_wait>
+struct vulkan_object_native<tag::feature::khr::present_wait>
 {
 	using type = VkPhysicalDevicePresentWaitFeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRESENT_WAIT_FEATURES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::present_wait>
+struct vulkan_object_extensions<tag::feature::khr::present_wait>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_present_wait"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::khr::present_wait>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::present_wait> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::present_wait> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::present_wait> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::present_wait> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct present_wait
 {
-	using vulkan_tag_type = obj::feature::khr::present_wait;
+	using vulkan_tag_type = tag::feature::khr::present_wait;
 
 	bool enable = false;
 

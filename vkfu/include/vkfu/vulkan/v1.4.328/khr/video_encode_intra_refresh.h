@@ -119,7 +119,7 @@ enum class video_encode_intra_refresh_mode : ::std::underlying_type_t<VkVideoEnc
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -140,7 +140,7 @@ struct video_encode_intra_refresh_capabilities{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::video_encode_intra_refresh>
+struct vulkan_object_trait<tag::feature::khr::video_encode_intra_refresh>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -148,7 +148,7 @@ struct vulkan_object_trait<obj::feature::khr::video_encode_intra_refresh>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::video_encode_intra_refresh>
+struct vulkan_object_trait<tag::option::khr::video_encode_intra_refresh>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -156,7 +156,7 @@ struct vulkan_object_trait<obj::option::khr::video_encode_intra_refresh>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::video_encode_session_intra_refresh>
+struct vulkan_object_trait<tag::option::khr::video_encode_session_intra_refresh>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -164,7 +164,7 @@ struct vulkan_object_trait<obj::option::khr::video_encode_session_intra_refresh>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::video_reference_intra_refresh>
+struct vulkan_object_trait<tag::option::khr::video_reference_intra_refresh>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -172,7 +172,7 @@ struct vulkan_object_trait<obj::option::khr::video_reference_intra_refresh>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::video_encode_intra_refresh_capabilities>
+struct vulkan_object_trait<tag::result::khr::video_encode_intra_refresh_capabilities>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -182,11 +182,11 @@ struct vulkan_object_trait<obj::result::khr::video_encode_intra_refresh_capabili
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceVideoEncodeIntraRefreshFeaturesKHR>
 {
-	using type = obj::feature::khr::video_encode_intra_refresh;
+	using type = tag::feature::khr::video_encode_intra_refresh;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::video_encode_intra_refresh>
+struct vulkan_object_native<tag::feature::khr::video_encode_intra_refresh>
 {
 	using type = VkPhysicalDeviceVideoEncodeIntraRefreshFeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VIDEO_ENCODE_INTRA_REFRESH_FEATURES_KHR;
@@ -195,11 +195,11 @@ struct vulkan_object_native<obj::feature::khr::video_encode_intra_refresh>
 template<>
 struct expression_vulkan_tag<VkVideoEncodeIntraRefreshInfoKHR>
 {
-	using type = obj::option::khr::video_encode_intra_refresh;
+	using type = tag::option::khr::video_encode_intra_refresh;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::video_encode_intra_refresh>
+struct vulkan_object_native<tag::option::khr::video_encode_intra_refresh>
 {
 	using type = VkVideoEncodeIntraRefreshInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_ENCODE_INTRA_REFRESH_INFO_KHR;
@@ -208,11 +208,11 @@ struct vulkan_object_native<obj::option::khr::video_encode_intra_refresh>
 template<>
 struct expression_vulkan_tag<VkVideoEncodeSessionIntraRefreshCreateInfoKHR>
 {
-	using type = obj::option::khr::video_encode_session_intra_refresh;
+	using type = tag::option::khr::video_encode_session_intra_refresh;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::video_encode_session_intra_refresh>
+struct vulkan_object_native<tag::option::khr::video_encode_session_intra_refresh>
 {
 	using type = VkVideoEncodeSessionIntraRefreshCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_ENCODE_SESSION_INTRA_REFRESH_CREATE_INFO_KHR;
@@ -221,11 +221,11 @@ struct vulkan_object_native<obj::option::khr::video_encode_session_intra_refresh
 template<>
 struct expression_vulkan_tag<VkVideoReferenceIntraRefreshInfoKHR>
 {
-	using type = obj::option::khr::video_reference_intra_refresh;
+	using type = tag::option::khr::video_reference_intra_refresh;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::video_reference_intra_refresh>
+struct vulkan_object_native<tag::option::khr::video_reference_intra_refresh>
 {
 	using type = VkVideoReferenceIntraRefreshInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_REFERENCE_INTRA_REFRESH_INFO_KHR;
@@ -234,18 +234,18 @@ struct vulkan_object_native<obj::option::khr::video_reference_intra_refresh>
 template<>
 struct expression_vulkan_tag<VkVideoEncodeIntraRefreshCapabilitiesKHR>
 {
-	using type = obj::result::khr::video_encode_intra_refresh_capabilities;
+	using type = tag::result::khr::video_encode_intra_refresh_capabilities;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::video_encode_intra_refresh_capabilities>
+struct vulkan_object_native<tag::result::khr::video_encode_intra_refresh_capabilities>
 {
 	using type = VkVideoEncodeIntraRefreshCapabilitiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_ENCODE_INTRA_REFRESH_CAPABILITIES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::video_encode_intra_refresh>
+struct vulkan_object_extensions<tag::feature::khr::video_encode_intra_refresh>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_encode_intra_refresh"};
 	constexpr static ::std::uint32_t core = 0;
@@ -253,7 +253,7 @@ struct vulkan_object_extensions<obj::feature::khr::video_encode_intra_refresh>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::video_encode_intra_refresh>
+struct vulkan_object_extensions<tag::option::khr::video_encode_intra_refresh>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_encode_intra_refresh"};
 	constexpr static ::std::uint32_t core = 0;
@@ -261,7 +261,7 @@ struct vulkan_object_extensions<obj::option::khr::video_encode_intra_refresh>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::video_encode_session_intra_refresh>
+struct vulkan_object_extensions<tag::option::khr::video_encode_session_intra_refresh>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_encode_intra_refresh"};
 	constexpr static ::std::uint32_t core = 0;
@@ -269,7 +269,7 @@ struct vulkan_object_extensions<obj::option::khr::video_encode_session_intra_ref
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::video_reference_intra_refresh>
+struct vulkan_object_extensions<tag::option::khr::video_reference_intra_refresh>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_encode_intra_refresh"};
 	constexpr static ::std::uint32_t core = 0;
@@ -277,7 +277,7 @@ struct vulkan_object_extensions<obj::option::khr::video_reference_intra_refresh>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::video_encode_intra_refresh_capabilities>
+struct vulkan_object_extensions<tag::result::khr::video_encode_intra_refresh_capabilities>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_encode_intra_refresh"};
 	constexpr static ::std::uint32_t core = 0;
@@ -285,17 +285,17 @@ struct vulkan_object_extensions<obj::result::khr::video_encode_intra_refresh_cap
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::video_encode_intra_refresh> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::video_encode_intra_refresh> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::video_encode_intra_refresh> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::video_encode_intra_refresh> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::video_capabilities, obj::result::khr::video_encode_intra_refresh_capabilities> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::video_capabilities, tag::result::khr::video_encode_intra_refresh_capabilities> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_encode, obj::option::khr::video_encode_intra_refresh> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_encode, tag::option::khr::video_encode_intra_refresh> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_reference_slot, obj::option::khr::video_reference_intra_refresh> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_reference_slot, tag::option::khr::video_reference_intra_refresh> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_session, obj::option::khr::video_encode_session_intra_refresh> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_session, tag::option::khr::video_encode_session_intra_refresh> = true;
 }
 
 namespace vkfu::param
@@ -306,7 +306,7 @@ using ::vkfu::operator|;
 
 struct video_encode_intra_refresh
 {
-	using vulkan_tag_type = obj::feature::khr::video_encode_intra_refresh;
+	using vulkan_tag_type = tag::feature::khr::video_encode_intra_refresh;
 
 	bool enable = false;
 
@@ -328,7 +328,7 @@ using ::vkfu::operator|;
 
 struct video_encode_intra_refresh
 {
-	using vulkan_tag_type = obj::option::khr::video_encode_intra_refresh;
+	using vulkan_tag_type = tag::option::khr::video_encode_intra_refresh;
 
 	::std::uint32_t intra_refresh_cycle_duration{};
 	::std::uint32_t intra_refresh_index{};
@@ -346,7 +346,7 @@ struct video_encode_intra_refresh
 
 struct video_encode_session_intra_refresh
 {
-	using vulkan_tag_type = obj::option::khr::video_encode_session_intra_refresh;
+	using vulkan_tag_type = tag::option::khr::video_encode_session_intra_refresh;
 
 	::vkfu::enums::video_encode_intra_refresh_mode intra_refresh_mode{};
 
@@ -362,7 +362,7 @@ struct video_encode_session_intra_refresh
 
 struct video_reference_intra_refresh
 {
-	using vulkan_tag_type = obj::option::khr::video_reference_intra_refresh;
+	using vulkan_tag_type = tag::option::khr::video_reference_intra_refresh;
 
 	::std::uint32_t dirty_intra_refresh_regions{};
 

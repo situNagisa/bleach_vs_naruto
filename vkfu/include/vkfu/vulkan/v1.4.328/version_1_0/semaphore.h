@@ -41,7 +41,7 @@ constexpr auto _vkfu_evaluate(VkSemaphoreCreateInfo const& value) noexcept -> Vk
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct semaphore{};
 }
@@ -49,7 +49,7 @@ struct semaphore{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::semaphore>
+struct vulkan_object_trait<tag::semaphore>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -59,18 +59,18 @@ struct vulkan_object_trait<obj::semaphore>
 template<>
 struct expression_vulkan_tag<VkSemaphoreCreateInfo>
 {
-	using type = obj::semaphore;
+	using type = tag::semaphore;
 };
 
 template<>
-struct vulkan_object_native<obj::semaphore>
+struct vulkan_object_native<tag::semaphore>
 {
 	using type = VkSemaphoreCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 };
 
 template<>
-struct vulkan_object_extensions<obj::semaphore>
+struct vulkan_object_extensions<tag::semaphore>
 {
 	constexpr static ::std::array<char const*, 0> names{};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_0;
@@ -85,7 +85,7 @@ using ::vkfu::operator|;
 
 struct semaphore
 {
-	using vulkan_tag_type = obj::semaphore;
+	using vulkan_tag_type = tag::semaphore;
 
 	VkSemaphoreCreateFlags flags{};
 
@@ -102,7 +102,7 @@ struct semaphore
 
 namespace vkfu
 {
-template<::vkfu::expression_for<::vkfu::obj::semaphore> Expression>
+template<::vkfu::expression_for<::vkfu::tag::semaphore> Expression>
 [[nodiscard]] auto create_semaphore(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkSemaphore, ::VkResult>
 {
@@ -117,7 +117,7 @@ template<::vkfu::expression_for<::vkfu::obj::semaphore> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::semaphore> Expression>
+template<::vkfu::expression_for<::vkfu::tag::semaphore> Expression>
 [[nodiscard]] auto create_semaphore(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkSemaphore
 {
 	auto produced = create_semaphore(device, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

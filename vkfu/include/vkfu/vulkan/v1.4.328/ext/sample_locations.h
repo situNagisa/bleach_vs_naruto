@@ -27,8 +27,8 @@
 #include <vkfu/vulkan_object.h>
 
 #include "../version_1_0/device_initialization.h"
-#include "../version_1_0/types.h"
 #include "../version_1_0/pipeline.h"
+#include "../version_1_0/types.h"
 #include "../version_1_0/command_buffer_building.h"
 #include "../version_1_1/get_physical_device_properties2.h"
 #include "../version_1_3/synchronization2.h"
@@ -108,7 +108,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceSampleLocationsPropertiesEXT const
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace ext
 {
@@ -135,7 +135,7 @@ struct sample_locations{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::state::ext::sample_locations>
+struct vulkan_object_trait<tag::state::ext::sample_locations>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -143,7 +143,7 @@ struct vulkan_object_trait<obj::state::ext::sample_locations>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::ext::render_pass_sample_locations_begin>
+struct vulkan_object_trait<tag::option::ext::render_pass_sample_locations_begin>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -151,7 +151,7 @@ struct vulkan_object_trait<obj::option::ext::render_pass_sample_locations_begin>
 };
 
 template<>
-struct vulkan_object_trait<obj::ext::sample_locations>
+struct vulkan_object_trait<tag::ext::sample_locations>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -159,7 +159,7 @@ struct vulkan_object_trait<obj::ext::sample_locations>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::multisample_properties>
+struct vulkan_object_trait<tag::result::ext::multisample_properties>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -167,7 +167,7 @@ struct vulkan_object_trait<obj::result::ext::multisample_properties>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::ext::sample_locations>
+struct vulkan_object_trait<tag::property::ext::sample_locations>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -177,11 +177,11 @@ struct vulkan_object_trait<obj::property::ext::sample_locations>
 template<>
 struct expression_vulkan_tag<VkPipelineSampleLocationsStateCreateInfoEXT>
 {
-	using type = obj::state::ext::sample_locations;
+	using type = tag::state::ext::sample_locations;
 };
 
 template<>
-struct vulkan_object_native<obj::state::ext::sample_locations>
+struct vulkan_object_native<tag::state::ext::sample_locations>
 {
 	using type = VkPipelineSampleLocationsStateCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_SAMPLE_LOCATIONS_STATE_CREATE_INFO_EXT;
@@ -190,11 +190,11 @@ struct vulkan_object_native<obj::state::ext::sample_locations>
 template<>
 struct expression_vulkan_tag<VkRenderPassSampleLocationsBeginInfoEXT>
 {
-	using type = obj::option::ext::render_pass_sample_locations_begin;
+	using type = tag::option::ext::render_pass_sample_locations_begin;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::render_pass_sample_locations_begin>
+struct vulkan_object_native<tag::option::ext::render_pass_sample_locations_begin>
 {
 	using type = VkRenderPassSampleLocationsBeginInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RENDER_PASS_SAMPLE_LOCATIONS_BEGIN_INFO_EXT;
@@ -203,11 +203,11 @@ struct vulkan_object_native<obj::option::ext::render_pass_sample_locations_begin
 template<>
 struct expression_vulkan_tag<VkSampleLocationsInfoEXT>
 {
-	using type = obj::ext::sample_locations;
+	using type = tag::ext::sample_locations;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::sample_locations>
+struct vulkan_object_native<tag::ext::sample_locations>
 {
 	using type = VkSampleLocationsInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SAMPLE_LOCATIONS_INFO_EXT;
@@ -216,11 +216,11 @@ struct vulkan_object_native<obj::ext::sample_locations>
 template<>
 struct expression_vulkan_tag<VkMultisamplePropertiesEXT>
 {
-	using type = obj::result::ext::multisample_properties;
+	using type = tag::result::ext::multisample_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::multisample_properties>
+struct vulkan_object_native<tag::result::ext::multisample_properties>
 {
 	using type = VkMultisamplePropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MULTISAMPLE_PROPERTIES_EXT;
@@ -229,18 +229,18 @@ struct vulkan_object_native<obj::result::ext::multisample_properties>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceSampleLocationsPropertiesEXT>
 {
-	using type = obj::property::ext::sample_locations;
+	using type = tag::property::ext::sample_locations;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::sample_locations>
+struct vulkan_object_native<tag::property::ext::sample_locations>
 {
 	using type = VkPhysicalDeviceSampleLocationsPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLE_LOCATIONS_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::ext::sample_locations>
+struct vulkan_object_extensions<tag::state::ext::sample_locations>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_sample_locations"};
 	constexpr static ::std::uint32_t core = 0;
@@ -248,7 +248,7 @@ struct vulkan_object_extensions<obj::state::ext::sample_locations>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::render_pass_sample_locations_begin>
+struct vulkan_object_extensions<tag::option::ext::render_pass_sample_locations_begin>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_sample_locations"};
 	constexpr static ::std::uint32_t core = 0;
@@ -256,7 +256,7 @@ struct vulkan_object_extensions<obj::option::ext::render_pass_sample_locations_b
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::sample_locations>
+struct vulkan_object_extensions<tag::ext::sample_locations>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_sample_locations"};
 	constexpr static ::std::uint32_t core = 0;
@@ -264,7 +264,7 @@ struct vulkan_object_extensions<obj::ext::sample_locations>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::multisample_properties>
+struct vulkan_object_extensions<tag::result::ext::multisample_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_sample_locations"};
 	constexpr static ::std::uint32_t core = 0;
@@ -272,7 +272,7 @@ struct vulkan_object_extensions<obj::result::ext::multisample_properties>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::sample_locations>
+struct vulkan_object_extensions<tag::property::ext::sample_locations>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_sample_locations"};
 	constexpr static ::std::uint32_t core = 0;
@@ -280,15 +280,15 @@ struct vulkan_object_extensions<obj::property::ext::sample_locations>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image_memory_barrier, obj::ext::sample_locations> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image_memory_barrier, tag::ext::sample_locations> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image_memory_barrier2, obj::ext::sample_locations> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image_memory_barrier2, tag::ext::sample_locations> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::sample_locations> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::sample_locations> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::multisample, obj::state::ext::sample_locations> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::multisample, tag::state::ext::sample_locations> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::render_pass_begin, obj::option::ext::render_pass_sample_locations_begin> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::render_pass_begin, tag::option::ext::render_pass_sample_locations_begin> = true;
 }
 
 namespace vkfu::param
@@ -299,7 +299,7 @@ using ::vkfu::operator|;
 
 struct sample_locations
 {
-	using vulkan_tag_type = obj::ext::sample_locations;
+	using vulkan_tag_type = tag::ext::sample_locations;
 
 	::vkfu::enums::sample_count per_pixel{};
 	VkExtent2D sample_location_grid_size{};
@@ -326,7 +326,7 @@ using ::vkfu::operator|;
 
 struct render_pass_sample_locations_begin
 {
-	using vulkan_tag_type = obj::option::ext::render_pass_sample_locations_begin;
+	using vulkan_tag_type = tag::option::ext::render_pass_sample_locations_begin;
 
 	::std::span<VkAttachmentSampleLocationsEXT const> attachment_initial_sample_locations{};
 	::std::span<VkSubpassSampleLocationsEXT const> post_subpass_sample_locations{};
@@ -352,7 +352,7 @@ using ::vkfu::operator|;
 
 struct sample_locations
 {
-	using vulkan_tag_type = obj::state::ext::sample_locations;
+	using vulkan_tag_type = tag::state::ext::sample_locations;
 
 	bool enable = false;
 	VkSampleLocationsInfoEXT info{};
@@ -421,7 +421,7 @@ namespace vkfu
 {
 namespace ext
 {
-template<::vkfu::expression_for<::vkfu::obj::ext::sample_locations> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::sample_locations> Expression1>
 void cmd_set_sample_locations(VkCommandBuffer command_buffer, Expression1&& sample_locations_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(sample_locations_info));

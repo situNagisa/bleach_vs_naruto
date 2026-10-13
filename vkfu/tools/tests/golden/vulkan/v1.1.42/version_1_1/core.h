@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkWidgetLimits const& value) noexcept -> VkWidgetL
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option
 {
@@ -54,7 +54,7 @@ struct widget_limits{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::widget_limits>
+struct vulkan_object_trait<tag::option::widget_limits>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::option::widget_limits>
 template<>
 struct expression_vulkan_tag<VkWidgetLimits>
 {
-	using type = obj::option::widget_limits;
+	using type = tag::option::widget_limits;
 };
 
 template<>
-struct vulkan_object_native<obj::option::widget_limits>
+struct vulkan_object_native<tag::option::widget_limits>
 {
 	using type = VkWidgetLimits;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIDGET_LIMITS;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::widget_limits>
+struct vulkan_object_extensions<tag::option::widget_limits>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_widget_limits"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -83,7 +83,7 @@ struct vulkan_object_extensions<obj::option::widget_limits>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::widget, obj::option::widget_limits> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::widget, tag::option::widget_limits> = true;
 }
 
 namespace vkfu::param
@@ -94,7 +94,7 @@ using ::vkfu::operator|;
 
 struct widget_limits
 {
-	using vulkan_tag_type = obj::option::widget_limits;
+	using vulkan_tag_type = tag::option::widget_limits;
 
 	::std::uint32_t max_parts{};
 

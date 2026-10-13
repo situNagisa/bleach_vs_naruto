@@ -60,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkPipelineColorWriteCreateInfoEXT const& value) no
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -75,7 +75,7 @@ struct color_write{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::color_write_enable>
+struct vulkan_object_trait<tag::feature::ext::color_write_enable>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -83,7 +83,7 @@ struct vulkan_object_trait<obj::feature::ext::color_write_enable>
 };
 
 template<>
-struct vulkan_object_trait<obj::state::ext::color_write>
+struct vulkan_object_trait<tag::state::ext::color_write>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -93,11 +93,11 @@ struct vulkan_object_trait<obj::state::ext::color_write>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceColorWriteEnableFeaturesEXT>
 {
-	using type = obj::feature::ext::color_write_enable;
+	using type = tag::feature::ext::color_write_enable;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::color_write_enable>
+struct vulkan_object_native<tag::feature::ext::color_write_enable>
 {
 	using type = VkPhysicalDeviceColorWriteEnableFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COLOR_WRITE_ENABLE_FEATURES_EXT;
@@ -106,18 +106,18 @@ struct vulkan_object_native<obj::feature::ext::color_write_enable>
 template<>
 struct expression_vulkan_tag<VkPipelineColorWriteCreateInfoEXT>
 {
-	using type = obj::state::ext::color_write;
+	using type = tag::state::ext::color_write;
 };
 
 template<>
-struct vulkan_object_native<obj::state::ext::color_write>
+struct vulkan_object_native<tag::state::ext::color_write>
 {
 	using type = VkPipelineColorWriteCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_COLOR_WRITE_CREATE_INFO_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::color_write_enable>
+struct vulkan_object_extensions<tag::feature::ext::color_write_enable>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_color_write_enable"};
 	constexpr static ::std::uint32_t core = 0;
@@ -125,7 +125,7 @@ struct vulkan_object_extensions<obj::feature::ext::color_write_enable>
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::ext::color_write>
+struct vulkan_object_extensions<tag::state::ext::color_write>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_color_write_enable"};
 	constexpr static ::std::uint32_t core = 0;
@@ -133,11 +133,11 @@ struct vulkan_object_extensions<obj::state::ext::color_write>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::color_write_enable> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::color_write_enable> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::color_write_enable> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::color_write_enable> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::color_blend, obj::state::ext::color_write> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::color_blend, tag::state::ext::color_write> = true;
 }
 
 namespace vkfu::param
@@ -148,7 +148,7 @@ using ::vkfu::operator|;
 
 struct color_write_enable
 {
-	using vulkan_tag_type = obj::feature::ext::color_write_enable;
+	using vulkan_tag_type = tag::feature::ext::color_write_enable;
 
 	bool enable = false;
 
@@ -170,7 +170,7 @@ using ::vkfu::operator|;
 
 struct color_write
 {
-	using vulkan_tag_type = obj::state::ext::color_write;
+	using vulkan_tag_type = tag::state::ext::color_write;
 
 	::std::span<VkBool32 const> enables{};
 

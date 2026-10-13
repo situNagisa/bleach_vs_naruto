@@ -71,7 +71,7 @@ enum class display_surface_stereo_type : ::std::underlying_type_t<VkDisplaySurfa
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::nv
 {
@@ -86,7 +86,7 @@ struct display_mode_stereo_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::nv::display_surface_stereo>
+struct vulkan_object_trait<tag::option::nv::display_surface_stereo>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -94,7 +94,7 @@ struct vulkan_object_trait<obj::option::nv::display_surface_stereo>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::nv::display_mode_stereo_properties>
+struct vulkan_object_trait<tag::result::nv::display_mode_stereo_properties>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -104,11 +104,11 @@ struct vulkan_object_trait<obj::result::nv::display_mode_stereo_properties>
 template<>
 struct expression_vulkan_tag<VkDisplaySurfaceStereoCreateInfoNV>
 {
-	using type = obj::option::nv::display_surface_stereo;
+	using type = tag::option::nv::display_surface_stereo;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::display_surface_stereo>
+struct vulkan_object_native<tag::option::nv::display_surface_stereo>
 {
 	using type = VkDisplaySurfaceStereoCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DISPLAY_SURFACE_STEREO_CREATE_INFO_NV;
@@ -117,18 +117,18 @@ struct vulkan_object_native<obj::option::nv::display_surface_stereo>
 template<>
 struct expression_vulkan_tag<VkDisplayModeStereoPropertiesNV>
 {
-	using type = obj::result::nv::display_mode_stereo_properties;
+	using type = tag::result::nv::display_mode_stereo_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::nv::display_mode_stereo_properties>
+struct vulkan_object_native<tag::result::nv::display_mode_stereo_properties>
 {
 	using type = VkDisplayModeStereoPropertiesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DISPLAY_MODE_STEREO_PROPERTIES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::display_surface_stereo>
+struct vulkan_object_extensions<tag::option::nv::display_surface_stereo>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_display_stereo"};
 	constexpr static ::std::uint32_t core = 0;
@@ -136,7 +136,7 @@ struct vulkan_object_extensions<obj::option::nv::display_surface_stereo>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::nv::display_mode_stereo_properties>
+struct vulkan_object_extensions<tag::result::nv::display_mode_stereo_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_display_stereo"};
 	constexpr static ::std::uint32_t core = 0;
@@ -144,9 +144,9 @@ struct vulkan_object_extensions<obj::result::nv::display_mode_stereo_properties>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::display_mode_properties2, obj::result::nv::display_mode_stereo_properties> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::display_mode_properties2, tag::result::nv::display_mode_stereo_properties> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::display_surface, obj::option::nv::display_surface_stereo> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::display_surface, tag::option::nv::display_surface_stereo> = true;
 }
 
 namespace vkfu::param
@@ -157,7 +157,7 @@ using ::vkfu::operator|;
 
 struct display_surface_stereo
 {
-	using vulkan_tag_type = obj::option::nv::display_surface_stereo;
+	using vulkan_tag_type = tag::option::nv::display_surface_stereo;
 
 	::vkfu::enums::display_surface_stereo_type stereo_type{};
 

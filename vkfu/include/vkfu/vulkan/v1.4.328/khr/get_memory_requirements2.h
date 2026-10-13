@@ -28,18 +28,18 @@
 
 #include "../version_1_1/get_memory_requirements2.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
-using buffer_memory_requirements2 = ::vkfu::obj::buffer_memory_requirements2;
-using image_memory_requirements2 = ::vkfu::obj::image_memory_requirements2;
-using image_sparse_memory_requirements2 = ::vkfu::obj::image_sparse_memory_requirements2;
+using buffer_memory_requirements2 = ::vkfu::tag::buffer_memory_requirements2;
+using image_memory_requirements2 = ::vkfu::tag::image_memory_requirements2;
+using image_sparse_memory_requirements2 = ::vkfu::tag::image_sparse_memory_requirements2;
 }
 namespace result::khr
 {
-using memory_requirements2 = ::vkfu::obj::result::memory_requirements2;
-using sparse_image_memory_requirements2 = ::vkfu::obj::result::sparse_image_memory_requirements2;
+using memory_requirements2 = ::vkfu::tag::result::memory_requirements2;
+using sparse_image_memory_requirements2 = ::vkfu::tag::result::sparse_image_memory_requirements2;
 }
 }
 

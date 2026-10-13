@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkDisplayPresentInfoKHR const& value) noexcept -> 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::khr
 {
@@ -54,7 +54,7 @@ struct display_present{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::khr::display_present>
+struct vulkan_object_trait<tag::option::khr::display_present>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::option::khr::display_present>
 template<>
 struct expression_vulkan_tag<VkDisplayPresentInfoKHR>
 {
-	using type = obj::option::khr::display_present;
+	using type = tag::option::khr::display_present;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::display_present>
+struct vulkan_object_native<tag::option::khr::display_present>
 {
 	using type = VkDisplayPresentInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DISPLAY_PRESENT_INFO_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::display_present>
+struct vulkan_object_extensions<tag::option::khr::display_present>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_display_swapchain"};
 	constexpr static ::std::uint32_t core = 0;
@@ -83,7 +83,7 @@ struct vulkan_object_extensions<obj::option::khr::display_present>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::present, obj::option::khr::display_present> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::present, tag::option::khr::display_present> = true;
 }
 
 namespace vkfu::param
@@ -94,7 +94,7 @@ using ::vkfu::operator|;
 
 struct display_present
 {
-	using vulkan_tag_type = obj::option::khr::display_present;
+	using vulkan_tag_type = tag::option::khr::display_present;
 
 	VkRect2D src_rect{};
 	VkRect2D dst_rect{};
@@ -120,7 +120,7 @@ namespace vkfu
 namespace khr
 {
 template<class... Expressions>
-	requires (sizeof...(Expressions) != 0 && (::vkfu::expression_for<Expressions, ::vkfu::obj::khr::swapchain> && ...))
+	requires (sizeof...(Expressions) != 0 && (::vkfu::expression_for<Expressions, ::vkfu::tag::khr::swapchain> && ...))
 [[nodiscard]] auto create_shared_swapchains(VkDevice device, ::VkAllocationCallbacks const* allocation_callbacks,
 	::std::nothrow_t, Expressions&&... infos) noexcept
 	-> ::std::expected<::std::array<VkSwapchainKHR, sizeof...(Expressions)>, ::VkResult>
@@ -142,7 +142,7 @@ template<class... Expressions>
 }
 
 template<class... Expressions>
-	requires (sizeof...(Expressions) != 0 && (::vkfu::expression_for<Expressions, ::vkfu::obj::khr::swapchain> && ...))
+	requires (sizeof...(Expressions) != 0 && (::vkfu::expression_for<Expressions, ::vkfu::tag::khr::swapchain> && ...))
 [[nodiscard]] auto create_shared_swapchains(VkDevice device, ::VkAllocationCallbacks const* allocation_callbacks,
 	Expressions&&... infos) -> ::std::array<VkSwapchainKHR, sizeof...(Expressions)>
 {
@@ -155,14 +155,14 @@ template<class... Expressions>
 }
 
 // One structure is the common case, and reads better than a one-element array.
-template<::vkfu::expression_for<::vkfu::obj::khr::swapchain> Expression>
+template<::vkfu::expression_for<::vkfu::tag::khr::swapchain> Expression>
 [[nodiscard]] auto create_shared_swapchain(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr)
 	-> VkSwapchainKHR
 {
 	return create_shared_swapchains(device, allocation_callbacks, ::std::forward<Expression>(info))[0];
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::swapchain> Expression>
+template<::vkfu::expression_for<::vkfu::tag::khr::swapchain> Expression>
 [[nodiscard]] auto create_shared_swapchain(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkSwapchainKHR, ::VkResult>
 {

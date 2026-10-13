@@ -28,11 +28,11 @@
 
 #include "../version_1_1/core.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::khr
 {
-using widget_limits = ::vkfu::obj::option::widget_limits;
+using widget_limits = ::vkfu::tag::option::widget_limits;
 }
 }
 

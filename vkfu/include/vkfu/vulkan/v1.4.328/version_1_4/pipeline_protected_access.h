@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDevicePipelineProtectedAccessFeatures co
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -55,7 +55,7 @@ struct pipeline_protected_access{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::pipeline_protected_access>
+struct vulkan_object_trait<tag::feature::pipeline_protected_access>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::pipeline_protected_access>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePipelineProtectedAccessFeatures>
 {
-	using type = obj::feature::pipeline_protected_access;
+	using type = tag::feature::pipeline_protected_access;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::pipeline_protected_access>
+struct vulkan_object_native<tag::feature::pipeline_protected_access>
 {
 	using type = VkPhysicalDevicePipelineProtectedAccessFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_PROTECTED_ACCESS_FEATURES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::pipeline_protected_access>
+struct vulkan_object_extensions<tag::feature::pipeline_protected_access>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_pipeline_protected_access"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::pipeline_protected_access>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::pipeline_protected_access> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::pipeline_protected_access> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::pipeline_protected_access> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::pipeline_protected_access> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct pipeline_protected_access
 {
-	using vulkan_tag_type = obj::feature::pipeline_protected_access;
+	using vulkan_tag_type = tag::feature::pipeline_protected_access;
 
 	bool enable = false;
 

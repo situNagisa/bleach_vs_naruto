@@ -75,7 +75,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceExternalMemoryHostPropertiesEXT co
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::ext
 {
@@ -94,7 +94,7 @@ struct memory_host_pointer_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::import_memory_host_pointer>
+struct vulkan_object_trait<tag::option::ext::import_memory_host_pointer>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -102,7 +102,7 @@ struct vulkan_object_trait<obj::option::ext::import_memory_host_pointer>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::memory_host_pointer_properties>
+struct vulkan_object_trait<tag::result::ext::memory_host_pointer_properties>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -110,7 +110,7 @@ struct vulkan_object_trait<obj::result::ext::memory_host_pointer_properties>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::ext::external_memory_host>
+struct vulkan_object_trait<tag::property::ext::external_memory_host>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -120,11 +120,11 @@ struct vulkan_object_trait<obj::property::ext::external_memory_host>
 template<>
 struct expression_vulkan_tag<VkImportMemoryHostPointerInfoEXT>
 {
-	using type = obj::option::ext::import_memory_host_pointer;
+	using type = tag::option::ext::import_memory_host_pointer;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::import_memory_host_pointer>
+struct vulkan_object_native<tag::option::ext::import_memory_host_pointer>
 {
 	using type = VkImportMemoryHostPointerInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMPORT_MEMORY_HOST_POINTER_INFO_EXT;
@@ -133,11 +133,11 @@ struct vulkan_object_native<obj::option::ext::import_memory_host_pointer>
 template<>
 struct expression_vulkan_tag<VkMemoryHostPointerPropertiesEXT>
 {
-	using type = obj::result::ext::memory_host_pointer_properties;
+	using type = tag::result::ext::memory_host_pointer_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::memory_host_pointer_properties>
+struct vulkan_object_native<tag::result::ext::memory_host_pointer_properties>
 {
 	using type = VkMemoryHostPointerPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MEMORY_HOST_POINTER_PROPERTIES_EXT;
@@ -146,18 +146,18 @@ struct vulkan_object_native<obj::result::ext::memory_host_pointer_properties>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceExternalMemoryHostPropertiesEXT>
 {
-	using type = obj::property::ext::external_memory_host;
+	using type = tag::property::ext::external_memory_host;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::external_memory_host>
+struct vulkan_object_native<tag::property::ext::external_memory_host>
 {
 	using type = VkPhysicalDeviceExternalMemoryHostPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_MEMORY_HOST_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::import_memory_host_pointer>
+struct vulkan_object_extensions<tag::option::ext::import_memory_host_pointer>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_external_memory_host"};
 	constexpr static ::std::uint32_t core = 0;
@@ -165,7 +165,7 @@ struct vulkan_object_extensions<obj::option::ext::import_memory_host_pointer>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::memory_host_pointer_properties>
+struct vulkan_object_extensions<tag::result::ext::memory_host_pointer_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_external_memory_host"};
 	constexpr static ::std::uint32_t core = 0;
@@ -173,7 +173,7 @@ struct vulkan_object_extensions<obj::result::ext::memory_host_pointer_properties
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::external_memory_host>
+struct vulkan_object_extensions<tag::property::ext::external_memory_host>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_external_memory_host"};
 	constexpr static ::std::uint32_t core = 0;
@@ -181,9 +181,9 @@ struct vulkan_object_extensions<obj::property::ext::external_memory_host>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::memory, obj::option::ext::import_memory_host_pointer> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::memory, tag::option::ext::import_memory_host_pointer> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::external_memory_host> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::external_memory_host> = true;
 }
 
 namespace vkfu::param
@@ -194,7 +194,7 @@ using ::vkfu::operator|;
 
 struct import_memory_host_pointer
 {
-	using vulkan_tag_type = obj::option::ext::import_memory_host_pointer;
+	using vulkan_tag_type = tag::option::ext::import_memory_host_pointer;
 
 	::vkfu::enums::external_memory_handle_type handle_type{};
 	void* host_pointer = nullptr;

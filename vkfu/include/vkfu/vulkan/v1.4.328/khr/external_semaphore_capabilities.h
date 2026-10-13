@@ -28,15 +28,15 @@
 
 #include "../version_1_1/external_semaphore_capabilities.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
-using physical_device_external_semaphore = ::vkfu::obj::physical_device_external_semaphore;
+using physical_device_external_semaphore = ::vkfu::tag::physical_device_external_semaphore;
 }
 namespace result::khr
 {
-using external_semaphore_properties = ::vkfu::obj::result::external_semaphore_properties;
+using external_semaphore_properties = ::vkfu::tag::result::external_semaphore_properties;
 }
 }
 

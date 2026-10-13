@@ -28,6 +28,7 @@
 
 #include "../version_1_0/memory.h"
 #include "../version_1_0/image.h"
+#include "external_memory_capabilities.h"
 
 constexpr auto _vkfu_address(VkExportMemoryAllocateInfoNV& value) noexcept -> void const*
 {
@@ -59,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkExternalMemoryImageCreateInfoNV const& value) no
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::nv
 {
@@ -71,7 +72,7 @@ struct external_memory_image{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::nv::export_memory>
+struct vulkan_object_trait<tag::option::nv::export_memory>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -79,7 +80,7 @@ struct vulkan_object_trait<obj::option::nv::export_memory>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::nv::external_memory_image>
+struct vulkan_object_trait<tag::option::nv::external_memory_image>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -89,11 +90,11 @@ struct vulkan_object_trait<obj::option::nv::external_memory_image>
 template<>
 struct expression_vulkan_tag<VkExportMemoryAllocateInfoNV>
 {
-	using type = obj::option::nv::export_memory;
+	using type = tag::option::nv::export_memory;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::export_memory>
+struct vulkan_object_native<tag::option::nv::export_memory>
 {
 	using type = VkExportMemoryAllocateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO_NV;
@@ -102,18 +103,18 @@ struct vulkan_object_native<obj::option::nv::export_memory>
 template<>
 struct expression_vulkan_tag<VkExternalMemoryImageCreateInfoNV>
 {
-	using type = obj::option::nv::external_memory_image;
+	using type = tag::option::nv::external_memory_image;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nv::external_memory_image>
+struct vulkan_object_native<tag::option::nv::external_memory_image>
 {
 	using type = VkExternalMemoryImageCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::export_memory>
+struct vulkan_object_extensions<tag::option::nv::export_memory>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_external_memory"};
 	constexpr static ::std::uint32_t core = 0;
@@ -121,7 +122,7 @@ struct vulkan_object_extensions<obj::option::nv::export_memory>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nv::external_memory_image>
+struct vulkan_object_extensions<tag::option::nv::external_memory_image>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_external_memory"};
 	constexpr static ::std::uint32_t core = 0;
@@ -129,9 +130,9 @@ struct vulkan_object_extensions<obj::option::nv::external_memory_image>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image, obj::option::nv::external_memory_image> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image, tag::option::nv::external_memory_image> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::memory, obj::option::nv::export_memory> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::memory, tag::option::nv::export_memory> = true;
 }
 
 namespace vkfu::param
@@ -142,18 +143,9 @@ using ::vkfu::operator|;
 
 struct export_memory
 {
-	using vulkan_tag_type = obj::option::nv::export_memory;
+	using vulkan_tag_type = tag::option::nv::export_memory;
 
-	struct handle_types_type
-	{
-		VkExternalMemoryHandleTypeFlagsNV opaque_win32 : 1 = 0;
-		VkExternalMemoryHandleTypeFlagsNV opaque_win32_kmt : 1 = 0;
-		VkExternalMemoryHandleTypeFlagsNV d3d11_image : 1 = 0;
-		VkExternalMemoryHandleTypeFlagsNV d3d11_image_kmt : 1 = 0;
-		VkExternalMemoryHandleTypeFlagsNV _reserved_4 : 28 = 0;
-	};
-
-	handle_types_type handle_types{};
+	::vkfu::flags::external_memory_handle_type_nv handle_types{};
 
 	constexpr auto evaluate() const noexcept -> VkExportMemoryAllocateInfoNV
 	{
@@ -165,28 +157,11 @@ struct export_memory
 	}
 };
 
-static_assert(sizeof(export_memory::handle_types_type) == sizeof(VkExternalMemoryHandleTypeFlagsNV));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlagsNV>(export_memory::handle_types_type{.opaque_win32 = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT_NV);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlagsNV>(export_memory::handle_types_type{.opaque_win32_kmt = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT_NV);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlagsNV>(export_memory::handle_types_type{.d3d11_image = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_IMAGE_BIT_NV);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlagsNV>(export_memory::handle_types_type{.d3d11_image_kmt = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_IMAGE_KMT_BIT_NV);
-#endif
-
 struct external_memory_image
 {
-	using vulkan_tag_type = obj::option::nv::external_memory_image;
+	using vulkan_tag_type = tag::option::nv::external_memory_image;
 
-	struct handle_types_type
-	{
-		VkExternalMemoryHandleTypeFlagsNV opaque_win32 : 1 = 0;
-		VkExternalMemoryHandleTypeFlagsNV opaque_win32_kmt : 1 = 0;
-		VkExternalMemoryHandleTypeFlagsNV d3d11_image : 1 = 0;
-		VkExternalMemoryHandleTypeFlagsNV d3d11_image_kmt : 1 = 0;
-		VkExternalMemoryHandleTypeFlagsNV _reserved_4 : 28 = 0;
-	};
-
-	handle_types_type handle_types{};
+	::vkfu::flags::external_memory_handle_type_nv handle_types{};
 
 	constexpr auto evaluate() const noexcept -> VkExternalMemoryImageCreateInfoNV
 	{
@@ -197,14 +172,6 @@ struct external_memory_image
 		};
 	}
 };
-
-static_assert(sizeof(external_memory_image::handle_types_type) == sizeof(VkExternalMemoryHandleTypeFlagsNV));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlagsNV>(external_memory_image::handle_types_type{.opaque_win32 = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT_NV);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlagsNV>(external_memory_image::handle_types_type{.opaque_win32_kmt = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT_NV);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlagsNV>(external_memory_image::handle_types_type{.d3d11_image = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_IMAGE_BIT_NV);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlagsNV>(external_memory_image::handle_types_type{.d3d11_image_kmt = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_IMAGE_KMT_BIT_NV);
-#endif
 
 }
 }

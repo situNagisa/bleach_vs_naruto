@@ -28,11 +28,11 @@
 
 #include "../version_1_1/16bit_storage.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using storage_16bit = ::vkfu::obj::feature::storage_16bit;
+using storage_16bit = ::vkfu::tag::feature::storage_16bit;
 }
 }
 

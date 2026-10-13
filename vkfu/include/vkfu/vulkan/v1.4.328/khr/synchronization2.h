@@ -28,21 +28,21 @@
 
 #include "../version_1_3/synchronization2.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using synchronization2 = ::vkfu::obj::feature::synchronization2;
+using synchronization2 = ::vkfu::tag::feature::synchronization2;
 }
 namespace khr
 {
-using buffer_memory_barrier2 = ::vkfu::obj::buffer_memory_barrier2;
-using command_buffer_submit = ::vkfu::obj::command_buffer_submit;
-using dependency = ::vkfu::obj::dependency;
-using image_memory_barrier2 = ::vkfu::obj::image_memory_barrier2;
-using memory_barrier2 = ::vkfu::obj::memory_barrier2;
-using semaphore_submit = ::vkfu::obj::semaphore_submit;
-using submit2 = ::vkfu::obj::submit2;
+using buffer_memory_barrier2 = ::vkfu::tag::buffer_memory_barrier2;
+using command_buffer_submit = ::vkfu::tag::command_buffer_submit;
+using dependency = ::vkfu::tag::dependency;
+using image_memory_barrier2 = ::vkfu::tag::image_memory_barrier2;
+using memory_barrier2 = ::vkfu::tag::memory_barrier2;
+using semaphore_submit = ::vkfu::tag::semaphore_submit;
+using submit2 = ::vkfu::tag::submit2;
 }
 }
 

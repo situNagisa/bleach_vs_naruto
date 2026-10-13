@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceMeshShaderPropertiesNV const& valu
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -74,7 +74,7 @@ struct mesh_shader{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::mesh_shader>
+struct vulkan_object_trait<tag::feature::nv::mesh_shader>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::feature::nv::mesh_shader>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::nv::mesh_shader>
+struct vulkan_object_trait<tag::property::nv::mesh_shader>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::property::nv::mesh_shader>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMeshShaderFeaturesNV>
 {
-	using type = obj::feature::nv::mesh_shader;
+	using type = tag::feature::nv::mesh_shader;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::mesh_shader>
+struct vulkan_object_native<tag::feature::nv::mesh_shader>
 {
 	using type = VkPhysicalDeviceMeshShaderFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::feature::nv::mesh_shader>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMeshShaderPropertiesNV>
 {
-	using type = obj::property::nv::mesh_shader;
+	using type = tag::property::nv::mesh_shader;
 };
 
 template<>
-struct vulkan_object_native<obj::property::nv::mesh_shader>
+struct vulkan_object_native<tag::property::nv::mesh_shader>
 {
 	using type = VkPhysicalDeviceMeshShaderPropertiesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::mesh_shader>
+struct vulkan_object_extensions<tag::feature::nv::mesh_shader>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_mesh_shader"};
 	constexpr static ::std::uint32_t core = 0;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::feature::nv::mesh_shader>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::nv::mesh_shader>
+struct vulkan_object_extensions<tag::property::nv::mesh_shader>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_mesh_shader"};
 	constexpr static ::std::uint32_t core = 0;
@@ -132,11 +132,11 @@ struct vulkan_object_extensions<obj::property::nv::mesh_shader>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::mesh_shader> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::mesh_shader> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::mesh_shader> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::mesh_shader> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::nv::mesh_shader> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::nv::mesh_shader> = true;
 }
 
 namespace vkfu::param
@@ -147,7 +147,7 @@ using ::vkfu::operator|;
 
 struct mesh_shader
 {
-	using vulkan_tag_type = obj::feature::nv::mesh_shader;
+	using vulkan_tag_type = tag::feature::nv::mesh_shader;
 
 	bool task_shader = false;
 	bool enable = false;

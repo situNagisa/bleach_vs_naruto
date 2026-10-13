@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceMultiDrawPropertiesEXT const& valu
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -74,7 +74,7 @@ struct multi_draw{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::multi_draw>
+struct vulkan_object_trait<tag::feature::ext::multi_draw>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::feature::ext::multi_draw>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::ext::multi_draw>
+struct vulkan_object_trait<tag::property::ext::multi_draw>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::property::ext::multi_draw>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMultiDrawFeaturesEXT>
 {
-	using type = obj::feature::ext::multi_draw;
+	using type = tag::feature::ext::multi_draw;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::multi_draw>
+struct vulkan_object_native<tag::feature::ext::multi_draw>
 {
 	using type = VkPhysicalDeviceMultiDrawFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTI_DRAW_FEATURES_EXT;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::feature::ext::multi_draw>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMultiDrawPropertiesEXT>
 {
-	using type = obj::property::ext::multi_draw;
+	using type = tag::property::ext::multi_draw;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::multi_draw>
+struct vulkan_object_native<tag::property::ext::multi_draw>
 {
 	using type = VkPhysicalDeviceMultiDrawPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTI_DRAW_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::multi_draw>
+struct vulkan_object_extensions<tag::feature::ext::multi_draw>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_multi_draw"};
 	constexpr static ::std::uint32_t core = 0;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::feature::ext::multi_draw>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::multi_draw>
+struct vulkan_object_extensions<tag::property::ext::multi_draw>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_multi_draw"};
 	constexpr static ::std::uint32_t core = 0;
@@ -132,11 +132,11 @@ struct vulkan_object_extensions<obj::property::ext::multi_draw>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::multi_draw> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::multi_draw> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::multi_draw> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::multi_draw> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::multi_draw> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::multi_draw> = true;
 }
 
 namespace vkfu::param
@@ -147,7 +147,7 @@ using ::vkfu::operator|;
 
 struct multi_draw
 {
-	using vulkan_tag_type = obj::feature::ext::multi_draw;
+	using vulkan_tag_type = tag::feature::ext::multi_draw;
 
 	bool enable = false;
 

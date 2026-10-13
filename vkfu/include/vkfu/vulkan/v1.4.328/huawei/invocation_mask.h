@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceInvocationMaskFeaturesHUAWEI const
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::huawei
 {
@@ -55,7 +55,7 @@ struct invocation_mask{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::huawei::invocation_mask>
+struct vulkan_object_trait<tag::feature::huawei::invocation_mask>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::huawei::invocation_mask>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceInvocationMaskFeaturesHUAWEI>
 {
-	using type = obj::feature::huawei::invocation_mask;
+	using type = tag::feature::huawei::invocation_mask;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::huawei::invocation_mask>
+struct vulkan_object_native<tag::feature::huawei::invocation_mask>
 {
 	using type = VkPhysicalDeviceInvocationMaskFeaturesHUAWEI;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INVOCATION_MASK_FEATURES_HUAWEI;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::huawei::invocation_mask>
+struct vulkan_object_extensions<tag::feature::huawei::invocation_mask>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_HUAWEI_invocation_mask"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::huawei::invocation_mask>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::huawei::invocation_mask> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::huawei::invocation_mask> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::huawei::invocation_mask> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::huawei::invocation_mask> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct invocation_mask
 {
-	using vulkan_tag_type = obj::feature::huawei::invocation_mask;
+	using vulkan_tag_type = tag::feature::huawei::invocation_mask;
 
 	bool enable = false;
 

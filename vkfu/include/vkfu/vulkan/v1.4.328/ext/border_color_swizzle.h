@@ -60,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkSamplerBorderColorComponentMappingCreateInfoEXT 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -75,7 +75,7 @@ struct sampler_border_color_component_mapping{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::border_color_swizzle>
+struct vulkan_object_trait<tag::feature::ext::border_color_swizzle>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -83,7 +83,7 @@ struct vulkan_object_trait<obj::feature::ext::border_color_swizzle>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::ext::sampler_border_color_component_mapping>
+struct vulkan_object_trait<tag::option::ext::sampler_border_color_component_mapping>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -93,11 +93,11 @@ struct vulkan_object_trait<obj::option::ext::sampler_border_color_component_mapp
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceBorderColorSwizzleFeaturesEXT>
 {
-	using type = obj::feature::ext::border_color_swizzle;
+	using type = tag::feature::ext::border_color_swizzle;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::border_color_swizzle>
+struct vulkan_object_native<tag::feature::ext::border_color_swizzle>
 {
 	using type = VkPhysicalDeviceBorderColorSwizzleFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BORDER_COLOR_SWIZZLE_FEATURES_EXT;
@@ -106,18 +106,18 @@ struct vulkan_object_native<obj::feature::ext::border_color_swizzle>
 template<>
 struct expression_vulkan_tag<VkSamplerBorderColorComponentMappingCreateInfoEXT>
 {
-	using type = obj::option::ext::sampler_border_color_component_mapping;
+	using type = tag::option::ext::sampler_border_color_component_mapping;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::sampler_border_color_component_mapping>
+struct vulkan_object_native<tag::option::ext::sampler_border_color_component_mapping>
 {
 	using type = VkSamplerBorderColorComponentMappingCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SAMPLER_BORDER_COLOR_COMPONENT_MAPPING_CREATE_INFO_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::border_color_swizzle>
+struct vulkan_object_extensions<tag::feature::ext::border_color_swizzle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_border_color_swizzle"};
 	constexpr static ::std::uint32_t core = 0;
@@ -125,7 +125,7 @@ struct vulkan_object_extensions<obj::feature::ext::border_color_swizzle>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::sampler_border_color_component_mapping>
+struct vulkan_object_extensions<tag::option::ext::sampler_border_color_component_mapping>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_border_color_swizzle"};
 	constexpr static ::std::uint32_t core = 0;
@@ -133,11 +133,11 @@ struct vulkan_object_extensions<obj::option::ext::sampler_border_color_component
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::border_color_swizzle> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::border_color_swizzle> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::border_color_swizzle> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::border_color_swizzle> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::sampler, obj::option::ext::sampler_border_color_component_mapping> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::sampler, tag::option::ext::sampler_border_color_component_mapping> = true;
 }
 
 namespace vkfu::param
@@ -148,7 +148,7 @@ using ::vkfu::operator|;
 
 struct border_color_swizzle
 {
-	using vulkan_tag_type = obj::feature::ext::border_color_swizzle;
+	using vulkan_tag_type = tag::feature::ext::border_color_swizzle;
 
 	bool enable = false;
 	bool from_image = false;
@@ -172,7 +172,7 @@ using ::vkfu::operator|;
 
 struct sampler_border_color_component_mapping
 {
-	using vulkan_tag_type = obj::option::ext::sampler_border_color_component_mapping;
+	using vulkan_tag_type = tag::option::ext::sampler_border_color_component_mapping;
 
 	VkComponentMapping components{};
 	bool srgb = false;

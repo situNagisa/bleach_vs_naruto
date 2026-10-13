@@ -115,7 +115,7 @@ enum class video_encode_rgb_range_compression : ::std::underlying_type_t<VkVideo
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::valve
 {
@@ -135,7 +135,7 @@ struct video_encode_rgb_conversion_capabilities{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::valve::video_encode_rgb_conversion>
+struct vulkan_object_trait<tag::feature::valve::video_encode_rgb_conversion>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -143,7 +143,7 @@ struct vulkan_object_trait<obj::feature::valve::video_encode_rgb_conversion>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::valve::video_encode_profile_rgb_conversion>
+struct vulkan_object_trait<tag::option::valve::video_encode_profile_rgb_conversion>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -151,7 +151,7 @@ struct vulkan_object_trait<obj::option::valve::video_encode_profile_rgb_conversi
 };
 
 template<>
-struct vulkan_object_trait<obj::option::valve::video_encode_session_rgb_conversion>
+struct vulkan_object_trait<tag::option::valve::video_encode_session_rgb_conversion>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -159,7 +159,7 @@ struct vulkan_object_trait<obj::option::valve::video_encode_session_rgb_conversi
 };
 
 template<>
-struct vulkan_object_trait<obj::result::valve::video_encode_rgb_conversion_capabilities>
+struct vulkan_object_trait<tag::result::valve::video_encode_rgb_conversion_capabilities>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -169,11 +169,11 @@ struct vulkan_object_trait<obj::result::valve::video_encode_rgb_conversion_capab
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceVideoEncodeRgbConversionFeaturesVALVE>
 {
-	using type = obj::feature::valve::video_encode_rgb_conversion;
+	using type = tag::feature::valve::video_encode_rgb_conversion;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::valve::video_encode_rgb_conversion>
+struct vulkan_object_native<tag::feature::valve::video_encode_rgb_conversion>
 {
 	using type = VkPhysicalDeviceVideoEncodeRgbConversionFeaturesVALVE;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VIDEO_ENCODE_RGB_CONVERSION_FEATURES_VALVE;
@@ -182,11 +182,11 @@ struct vulkan_object_native<obj::feature::valve::video_encode_rgb_conversion>
 template<>
 struct expression_vulkan_tag<VkVideoEncodeProfileRgbConversionInfoVALVE>
 {
-	using type = obj::option::valve::video_encode_profile_rgb_conversion;
+	using type = tag::option::valve::video_encode_profile_rgb_conversion;
 };
 
 template<>
-struct vulkan_object_native<obj::option::valve::video_encode_profile_rgb_conversion>
+struct vulkan_object_native<tag::option::valve::video_encode_profile_rgb_conversion>
 {
 	using type = VkVideoEncodeProfileRgbConversionInfoVALVE;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_ENCODE_PROFILE_RGB_CONVERSION_INFO_VALVE;
@@ -195,11 +195,11 @@ struct vulkan_object_native<obj::option::valve::video_encode_profile_rgb_convers
 template<>
 struct expression_vulkan_tag<VkVideoEncodeSessionRgbConversionCreateInfoVALVE>
 {
-	using type = obj::option::valve::video_encode_session_rgb_conversion;
+	using type = tag::option::valve::video_encode_session_rgb_conversion;
 };
 
 template<>
-struct vulkan_object_native<obj::option::valve::video_encode_session_rgb_conversion>
+struct vulkan_object_native<tag::option::valve::video_encode_session_rgb_conversion>
 {
 	using type = VkVideoEncodeSessionRgbConversionCreateInfoVALVE;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_ENCODE_SESSION_RGB_CONVERSION_CREATE_INFO_VALVE;
@@ -208,18 +208,18 @@ struct vulkan_object_native<obj::option::valve::video_encode_session_rgb_convers
 template<>
 struct expression_vulkan_tag<VkVideoEncodeRgbConversionCapabilitiesVALVE>
 {
-	using type = obj::result::valve::video_encode_rgb_conversion_capabilities;
+	using type = tag::result::valve::video_encode_rgb_conversion_capabilities;
 };
 
 template<>
-struct vulkan_object_native<obj::result::valve::video_encode_rgb_conversion_capabilities>
+struct vulkan_object_native<tag::result::valve::video_encode_rgb_conversion_capabilities>
 {
 	using type = VkVideoEncodeRgbConversionCapabilitiesVALVE;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_ENCODE_RGB_CONVERSION_CAPABILITIES_VALVE;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::valve::video_encode_rgb_conversion>
+struct vulkan_object_extensions<tag::feature::valve::video_encode_rgb_conversion>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_VALVE_video_encode_rgb_conversion"};
 	constexpr static ::std::uint32_t core = 0;
@@ -227,7 +227,7 @@ struct vulkan_object_extensions<obj::feature::valve::video_encode_rgb_conversion
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::valve::video_encode_profile_rgb_conversion>
+struct vulkan_object_extensions<tag::option::valve::video_encode_profile_rgb_conversion>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_VALVE_video_encode_rgb_conversion"};
 	constexpr static ::std::uint32_t core = 0;
@@ -235,7 +235,7 @@ struct vulkan_object_extensions<obj::option::valve::video_encode_profile_rgb_con
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::valve::video_encode_session_rgb_conversion>
+struct vulkan_object_extensions<tag::option::valve::video_encode_session_rgb_conversion>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_VALVE_video_encode_rgb_conversion"};
 	constexpr static ::std::uint32_t core = 0;
@@ -243,7 +243,7 @@ struct vulkan_object_extensions<obj::option::valve::video_encode_session_rgb_con
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::valve::video_encode_rgb_conversion_capabilities>
+struct vulkan_object_extensions<tag::result::valve::video_encode_rgb_conversion_capabilities>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_VALVE_video_encode_rgb_conversion"};
 	constexpr static ::std::uint32_t core = 0;
@@ -251,15 +251,15 @@ struct vulkan_object_extensions<obj::result::valve::video_encode_rgb_conversion_
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::valve::video_encode_rgb_conversion> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::valve::video_encode_rgb_conversion> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::valve::video_encode_rgb_conversion> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::valve::video_encode_rgb_conversion> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::video_capabilities, obj::result::valve::video_encode_rgb_conversion_capabilities> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::video_capabilities, tag::result::valve::video_encode_rgb_conversion_capabilities> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_profile, obj::option::valve::video_encode_profile_rgb_conversion> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_profile, tag::option::valve::video_encode_profile_rgb_conversion> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_session, obj::option::valve::video_encode_session_rgb_conversion> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_session, tag::option::valve::video_encode_session_rgb_conversion> = true;
 }
 
 namespace vkfu::param
@@ -270,7 +270,7 @@ using ::vkfu::operator|;
 
 struct video_encode_rgb_conversion
 {
-	using vulkan_tag_type = obj::feature::valve::video_encode_rgb_conversion;
+	using vulkan_tag_type = tag::feature::valve::video_encode_rgb_conversion;
 
 	bool enable = false;
 
@@ -292,7 +292,7 @@ using ::vkfu::operator|;
 
 struct video_encode_profile_rgb_conversion
 {
-	using vulkan_tag_type = obj::option::valve::video_encode_profile_rgb_conversion;
+	using vulkan_tag_type = tag::option::valve::video_encode_profile_rgb_conversion;
 
 	bool perform_encode_rgb_conversion = false;
 
@@ -308,7 +308,7 @@ struct video_encode_profile_rgb_conversion
 
 struct video_encode_session_rgb_conversion
 {
-	using vulkan_tag_type = obj::option::valve::video_encode_session_rgb_conversion;
+	using vulkan_tag_type = tag::option::valve::video_encode_session_rgb_conversion;
 
 	::vkfu::enums::video_encode_rgb_model_conversion rgb_model{};
 	::vkfu::enums::video_encode_rgb_range_compression rgb_range{};

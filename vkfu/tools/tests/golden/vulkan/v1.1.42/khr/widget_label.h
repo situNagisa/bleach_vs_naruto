@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkWidgetLabelInfoKHR const& value) noexcept -> VkW
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::khr
 {
@@ -54,7 +54,7 @@ struct widget_label{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::khr::widget_label>
+struct vulkan_object_trait<tag::option::khr::widget_label>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::option::khr::widget_label>
 template<>
 struct expression_vulkan_tag<VkWidgetLabelInfoKHR>
 {
-	using type = obj::option::khr::widget_label;
+	using type = tag::option::khr::widget_label;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::widget_label>
+struct vulkan_object_native<tag::option::khr::widget_label>
 {
 	using type = VkWidgetLabelInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIDGET_LABEL_INFO_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::widget_label>
+struct vulkan_object_extensions<tag::option::khr::widget_label>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_widget_label"};
 	constexpr static ::std::uint32_t core = 0;
@@ -83,7 +83,7 @@ struct vulkan_object_extensions<obj::option::khr::widget_label>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::widget, obj::option::khr::widget_label> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::widget, tag::option::khr::widget_label> = true;
 }
 
 namespace vkfu::param
@@ -94,7 +94,7 @@ using ::vkfu::operator|;
 
 struct widget_label
 {
-	using vulkan_tag_type = obj::option::khr::widget_label;
+	using vulkan_tag_type = tag::option::khr::widget_label;
 
 	::std::uint32_t tag{};
 

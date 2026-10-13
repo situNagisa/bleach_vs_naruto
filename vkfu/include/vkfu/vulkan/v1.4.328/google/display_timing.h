@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkPresentTimesInfoGOOGLE const& value) noexcept ->
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::google
 {
@@ -54,7 +54,7 @@ struct present_times{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::google::present_times>
+struct vulkan_object_trait<tag::option::google::present_times>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::option::google::present_times>
 template<>
 struct expression_vulkan_tag<VkPresentTimesInfoGOOGLE>
 {
-	using type = obj::option::google::present_times;
+	using type = tag::option::google::present_times;
 };
 
 template<>
-struct vulkan_object_native<obj::option::google::present_times>
+struct vulkan_object_native<tag::option::google::present_times>
 {
 	using type = VkPresentTimesInfoGOOGLE;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PRESENT_TIMES_INFO_GOOGLE;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::google::present_times>
+struct vulkan_object_extensions<tag::option::google::present_times>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_GOOGLE_display_timing"};
 	constexpr static ::std::uint32_t core = 0;
@@ -83,7 +83,7 @@ struct vulkan_object_extensions<obj::option::google::present_times>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::present, obj::option::google::present_times> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::present, tag::option::google::present_times> = true;
 }
 
 namespace vkfu::param
@@ -94,7 +94,7 @@ using ::vkfu::operator|;
 
 struct present_times
 {
-	using vulkan_tag_type = obj::option::google::present_times;
+	using vulkan_tag_type = tag::option::google::present_times;
 
 	::std::uint32_t swapchain_count{};
 	VkPresentTimeGOOGLE const* times = nullptr;

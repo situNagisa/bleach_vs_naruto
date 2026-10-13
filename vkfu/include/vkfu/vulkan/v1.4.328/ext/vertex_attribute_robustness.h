@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceVertexAttributeRobustnessFeaturesE
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct vertex_attribute_robustness{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::vertex_attribute_robustness>
+struct vulkan_object_trait<tag::feature::ext::vertex_attribute_robustness>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::vertex_attribute_robustness>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceVertexAttributeRobustnessFeaturesEXT>
 {
-	using type = obj::feature::ext::vertex_attribute_robustness;
+	using type = tag::feature::ext::vertex_attribute_robustness;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::vertex_attribute_robustness>
+struct vulkan_object_native<tag::feature::ext::vertex_attribute_robustness>
 {
 	using type = VkPhysicalDeviceVertexAttributeRobustnessFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VERTEX_ATTRIBUTE_ROBUSTNESS_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::vertex_attribute_robustness>
+struct vulkan_object_extensions<tag::feature::ext::vertex_attribute_robustness>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_vertex_attribute_robustness"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::vertex_attribute_robustness>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::vertex_attribute_robustness> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::vertex_attribute_robustness> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::vertex_attribute_robustness> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::vertex_attribute_robustness> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct vertex_attribute_robustness
 {
-	using vulkan_tag_type = obj::feature::ext::vertex_attribute_robustness;
+	using vulkan_tag_type = tag::feature::ext::vertex_attribute_robustness;
 
 	bool enable = false;
 

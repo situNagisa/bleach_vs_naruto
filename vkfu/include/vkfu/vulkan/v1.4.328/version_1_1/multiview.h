@@ -75,7 +75,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceMultiviewProperties const& value) 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -94,7 +94,7 @@ struct multiview{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::multiview>
+struct vulkan_object_trait<tag::feature::multiview>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -102,7 +102,7 @@ struct vulkan_object_trait<obj::feature::multiview>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::render_pass_multiview>
+struct vulkan_object_trait<tag::option::render_pass_multiview>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -110,7 +110,7 @@ struct vulkan_object_trait<obj::option::render_pass_multiview>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::multiview>
+struct vulkan_object_trait<tag::property::multiview>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -120,11 +120,11 @@ struct vulkan_object_trait<obj::property::multiview>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMultiviewFeatures>
 {
-	using type = obj::feature::multiview;
+	using type = tag::feature::multiview;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::multiview>
+struct vulkan_object_native<tag::feature::multiview>
 {
 	using type = VkPhysicalDeviceMultiviewFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_FEATURES;
@@ -133,11 +133,11 @@ struct vulkan_object_native<obj::feature::multiview>
 template<>
 struct expression_vulkan_tag<VkRenderPassMultiviewCreateInfo>
 {
-	using type = obj::option::render_pass_multiview;
+	using type = tag::option::render_pass_multiview;
 };
 
 template<>
-struct vulkan_object_native<obj::option::render_pass_multiview>
+struct vulkan_object_native<tag::option::render_pass_multiview>
 {
 	using type = VkRenderPassMultiviewCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RENDER_PASS_MULTIVIEW_CREATE_INFO;
@@ -146,18 +146,18 @@ struct vulkan_object_native<obj::option::render_pass_multiview>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMultiviewProperties>
 {
-	using type = obj::property::multiview;
+	using type = tag::property::multiview;
 };
 
 template<>
-struct vulkan_object_native<obj::property::multiview>
+struct vulkan_object_native<tag::property::multiview>
 {
 	using type = VkPhysicalDeviceMultiviewProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::multiview>
+struct vulkan_object_extensions<tag::feature::multiview>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_multiview"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -165,7 +165,7 @@ struct vulkan_object_extensions<obj::feature::multiview>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::render_pass_multiview>
+struct vulkan_object_extensions<tag::option::render_pass_multiview>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_multiview"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -173,7 +173,7 @@ struct vulkan_object_extensions<obj::option::render_pass_multiview>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::multiview>
+struct vulkan_object_extensions<tag::property::multiview>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_multiview"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -181,13 +181,13 @@ struct vulkan_object_extensions<obj::property::multiview>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::multiview> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::multiview> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::multiview> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::multiview> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::multiview> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::multiview> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::render_pass, obj::option::render_pass_multiview> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::render_pass, tag::option::render_pass_multiview> = true;
 }
 
 namespace vkfu::param
@@ -198,7 +198,7 @@ using ::vkfu::operator|;
 
 struct multiview
 {
-	using vulkan_tag_type = obj::feature::multiview;
+	using vulkan_tag_type = tag::feature::multiview;
 
 	bool enable = false;
 	bool geometry_shader = false;
@@ -224,7 +224,7 @@ using ::vkfu::operator|;
 
 struct render_pass_multiview
 {
-	using vulkan_tag_type = obj::option::render_pass_multiview;
+	using vulkan_tag_type = tag::option::render_pass_multiview;
 
 	::std::span<::std::uint32_t const> view_masks{};
 	::std::span<::std::int32_t const> view_offsets{};

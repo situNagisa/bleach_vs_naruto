@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeatu
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -55,7 +55,7 @@ struct workgroup_memory_explicit_layout{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::workgroup_memory_explicit_layout>
+struct vulkan_object_trait<tag::feature::khr::workgroup_memory_explicit_layout>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::khr::workgroup_memory_explicit_layout>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR>
 {
-	using type = obj::feature::khr::workgroup_memory_explicit_layout;
+	using type = tag::feature::khr::workgroup_memory_explicit_layout;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::workgroup_memory_explicit_layout>
+struct vulkan_object_native<tag::feature::khr::workgroup_memory_explicit_layout>
 {
 	using type = VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_WORKGROUP_MEMORY_EXPLICIT_LAYOUT_FEATURES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::workgroup_memory_explicit_layout>
+struct vulkan_object_extensions<tag::feature::khr::workgroup_memory_explicit_layout>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_workgroup_memory_explicit_layout"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::khr::workgroup_memory_explicit_lay
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::workgroup_memory_explicit_layout> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::workgroup_memory_explicit_layout> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::workgroup_memory_explicit_layout> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::workgroup_memory_explicit_layout> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct workgroup_memory_explicit_layout
 {
-	using vulkan_tag_type = obj::feature::khr::workgroup_memory_explicit_layout;
+	using vulkan_tag_type = tag::feature::khr::workgroup_memory_explicit_layout;
 
 	bool enable = false;
 	bool scalar_block_layout = false;

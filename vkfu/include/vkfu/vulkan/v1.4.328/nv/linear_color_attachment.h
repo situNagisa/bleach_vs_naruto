@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceLinearColorAttachmentFeaturesNV co
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -55,7 +55,7 @@ struct linear_color_attachment{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::linear_color_attachment>
+struct vulkan_object_trait<tag::feature::nv::linear_color_attachment>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::nv::linear_color_attachment>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceLinearColorAttachmentFeaturesNV>
 {
-	using type = obj::feature::nv::linear_color_attachment;
+	using type = tag::feature::nv::linear_color_attachment;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::linear_color_attachment>
+struct vulkan_object_native<tag::feature::nv::linear_color_attachment>
 {
 	using type = VkPhysicalDeviceLinearColorAttachmentFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LINEAR_COLOR_ATTACHMENT_FEATURES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::linear_color_attachment>
+struct vulkan_object_extensions<tag::feature::nv::linear_color_attachment>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_linear_color_attachment"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::nv::linear_color_attachment>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::linear_color_attachment> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::linear_color_attachment> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::linear_color_attachment> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::linear_color_attachment> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct linear_color_attachment
 {
-	using vulkan_tag_type = obj::feature::nv::linear_color_attachment;
+	using vulkan_tag_type = tag::feature::nv::linear_color_attachment;
 
 	bool enable = false;
 

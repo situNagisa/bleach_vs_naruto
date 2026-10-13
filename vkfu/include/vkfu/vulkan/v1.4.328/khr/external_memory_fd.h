@@ -74,7 +74,7 @@ constexpr auto _vkfu_evaluate(VkMemoryFdPropertiesKHR const& value) noexcept -> 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
@@ -93,7 +93,7 @@ struct memory_fd_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::khr::import_memory_fd>
+struct vulkan_object_trait<tag::option::khr::import_memory_fd>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -101,7 +101,7 @@ struct vulkan_object_trait<obj::option::khr::import_memory_fd>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::memory_get_fd>
+struct vulkan_object_trait<tag::khr::memory_get_fd>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -109,7 +109,7 @@ struct vulkan_object_trait<obj::khr::memory_get_fd>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::memory_fd_properties>
+struct vulkan_object_trait<tag::result::khr::memory_fd_properties>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -119,11 +119,11 @@ struct vulkan_object_trait<obj::result::khr::memory_fd_properties>
 template<>
 struct expression_vulkan_tag<VkImportMemoryFdInfoKHR>
 {
-	using type = obj::option::khr::import_memory_fd;
+	using type = tag::option::khr::import_memory_fd;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::import_memory_fd>
+struct vulkan_object_native<tag::option::khr::import_memory_fd>
 {
 	using type = VkImportMemoryFdInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR;
@@ -132,11 +132,11 @@ struct vulkan_object_native<obj::option::khr::import_memory_fd>
 template<>
 struct expression_vulkan_tag<VkMemoryGetFdInfoKHR>
 {
-	using type = obj::khr::memory_get_fd;
+	using type = tag::khr::memory_get_fd;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::memory_get_fd>
+struct vulkan_object_native<tag::khr::memory_get_fd>
 {
 	using type = VkMemoryGetFdInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR;
@@ -145,18 +145,18 @@ struct vulkan_object_native<obj::khr::memory_get_fd>
 template<>
 struct expression_vulkan_tag<VkMemoryFdPropertiesKHR>
 {
-	using type = obj::result::khr::memory_fd_properties;
+	using type = tag::result::khr::memory_fd_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::memory_fd_properties>
+struct vulkan_object_native<tag::result::khr::memory_fd_properties>
 {
 	using type = VkMemoryFdPropertiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MEMORY_FD_PROPERTIES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::import_memory_fd>
+struct vulkan_object_extensions<tag::option::khr::import_memory_fd>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_memory_fd"};
 	constexpr static ::std::uint32_t core = 0;
@@ -164,7 +164,7 @@ struct vulkan_object_extensions<obj::option::khr::import_memory_fd>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::memory_get_fd>
+struct vulkan_object_extensions<tag::khr::memory_get_fd>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_memory_fd"};
 	constexpr static ::std::uint32_t core = 0;
@@ -172,7 +172,7 @@ struct vulkan_object_extensions<obj::khr::memory_get_fd>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::memory_fd_properties>
+struct vulkan_object_extensions<tag::result::khr::memory_fd_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_memory_fd"};
 	constexpr static ::std::uint32_t core = 0;
@@ -180,7 +180,7 @@ struct vulkan_object_extensions<obj::result::khr::memory_fd_properties>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::memory, obj::option::khr::import_memory_fd> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::memory, tag::option::khr::import_memory_fd> = true;
 }
 
 namespace vkfu::param
@@ -191,7 +191,7 @@ using ::vkfu::operator|;
 
 struct memory_get_fd
 {
-	using vulkan_tag_type = obj::khr::memory_get_fd;
+	using vulkan_tag_type = tag::khr::memory_get_fd;
 
 	VkDeviceMemory memory{};
 	::vkfu::enums::external_memory_handle_type handle_type{};
@@ -215,7 +215,7 @@ using ::vkfu::operator|;
 
 struct import_memory_fd
 {
-	using vulkan_tag_type = obj::option::khr::import_memory_fd;
+	using vulkan_tag_type = tag::option::khr::import_memory_fd;
 
 	::vkfu::enums::external_memory_handle_type handle_type{};
 	int fd{};
@@ -238,7 +238,7 @@ namespace vkfu
 {
 namespace khr
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::memory_get_fd> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::memory_get_fd> Expression1>
 [[nodiscard]] auto get_memory_fd(VkDevice device, Expression1&& get_fd_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<int, ::VkResult>
 {
@@ -252,7 +252,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::memory_get_fd> Expression1>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::memory_get_fd> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::memory_get_fd> Expression1>
 [[nodiscard]] auto get_memory_fd(VkDevice device, Expression1&& get_fd_info) -> int
 {
 	auto outcome = get_memory_fd(device, ::std::forward<Expression1>(get_fd_info), ::std::nothrow);

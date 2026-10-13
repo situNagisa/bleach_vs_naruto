@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceDeviceMemoryReportFeaturesEXT cons
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -74,7 +74,7 @@ struct device_memory_report{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::device_memory_report>
+struct vulkan_object_trait<tag::option::ext::device_memory_report>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::option::ext::device_memory_report>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::ext::device_memory_report>
+struct vulkan_object_trait<tag::feature::ext::device_memory_report>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::feature::ext::device_memory_report>
 template<>
 struct expression_vulkan_tag<VkDeviceDeviceMemoryReportCreateInfoEXT>
 {
-	using type = obj::option::ext::device_memory_report;
+	using type = tag::option::ext::device_memory_report;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::device_memory_report>
+struct vulkan_object_native<tag::option::ext::device_memory_report>
 {
 	using type = VkDeviceDeviceMemoryReportCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEVICE_DEVICE_MEMORY_REPORT_CREATE_INFO_EXT;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::option::ext::device_memory_report>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDeviceMemoryReportFeaturesEXT>
 {
-	using type = obj::feature::ext::device_memory_report;
+	using type = tag::feature::ext::device_memory_report;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::device_memory_report>
+struct vulkan_object_native<tag::feature::ext::device_memory_report>
 {
 	using type = VkPhysicalDeviceDeviceMemoryReportFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_MEMORY_REPORT_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::device_memory_report>
+struct vulkan_object_extensions<tag::option::ext::device_memory_report>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_device_memory_report"};
 	constexpr static ::std::uint32_t core = 0;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::option::ext::device_memory_report>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::device_memory_report>
+struct vulkan_object_extensions<tag::feature::ext::device_memory_report>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_device_memory_report"};
 	constexpr static ::std::uint32_t core = 0;
@@ -132,11 +132,11 @@ struct vulkan_object_extensions<obj::feature::ext::device_memory_report>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::option::ext::device_memory_report> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::option::ext::device_memory_report> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::device_memory_report> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::device_memory_report> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::device_memory_report> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::device_memory_report> = true;
 }
 
 namespace vkfu::param
@@ -147,7 +147,7 @@ using ::vkfu::operator|;
 
 struct device_memory_report
 {
-	using vulkan_tag_type = obj::feature::ext::device_memory_report;
+	using vulkan_tag_type = tag::feature::ext::device_memory_report;
 
 	bool enable = false;
 
@@ -169,7 +169,7 @@ using ::vkfu::operator|;
 
 struct device_memory_report
 {
-	using vulkan_tag_type = obj::option::ext::device_memory_report;
+	using vulkan_tag_type = tag::option::ext::device_memory_report;
 
 	VkDeviceMemoryReportFlagsEXT flags{};
 	PFN_vkDeviceMemoryReportCallbackEXT user_callback{};

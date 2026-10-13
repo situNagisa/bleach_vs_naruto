@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkCopyCommandTransformInfoQCOM const& value) noexc
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::qcom
 {
@@ -55,7 +55,7 @@ struct copy_command_transform{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::qcom::copy_command_transform>
+struct vulkan_object_trait<tag::option::qcom::copy_command_transform>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::option::qcom::copy_command_transform>
 template<>
 struct expression_vulkan_tag<VkCopyCommandTransformInfoQCOM>
 {
-	using type = obj::option::qcom::copy_command_transform;
+	using type = tag::option::qcom::copy_command_transform;
 };
 
 template<>
-struct vulkan_object_native<obj::option::qcom::copy_command_transform>
+struct vulkan_object_native<tag::option::qcom::copy_command_transform>
 {
 	using type = VkCopyCommandTransformInfoQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_COPY_COMMAND_TRANSFORM_INFO_QCOM;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::qcom::copy_command_transform>
+struct vulkan_object_extensions<tag::option::qcom::copy_command_transform>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_rotated_copy_commands"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::option::qcom::copy_command_transform>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::buffer_image_copy2, obj::option::qcom::copy_command_transform> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::buffer_image_copy2, tag::option::qcom::copy_command_transform> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image_blit2, obj::option::qcom::copy_command_transform> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image_blit2, tag::option::qcom::copy_command_transform> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct copy_command_transform
 {
-	using vulkan_tag_type = obj::option::qcom::copy_command_transform;
+	using vulkan_tag_type = tag::option::qcom::copy_command_transform;
 
 	::vkfu::enums::surface_transform transform{};
 

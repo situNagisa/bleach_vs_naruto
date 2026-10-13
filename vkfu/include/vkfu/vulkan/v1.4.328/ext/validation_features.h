@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkValidationFeaturesEXT const& value) noexcept -> 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::ext
 {
@@ -55,7 +55,7 @@ struct validation_features{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::validation_features>
+struct vulkan_object_trait<tag::option::ext::validation_features>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::option::ext::validation_features>
 template<>
 struct expression_vulkan_tag<VkValidationFeaturesEXT>
 {
-	using type = obj::option::ext::validation_features;
+	using type = tag::option::ext::validation_features;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::validation_features>
+struct vulkan_object_native<tag::option::ext::validation_features>
 {
 	using type = VkValidationFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::validation_features>
+struct vulkan_object_extensions<tag::option::ext::validation_features>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_validation_features"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::option::ext::validation_features>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::instance, obj::option::ext::validation_features> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::instance, tag::option::ext::validation_features> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::shader_module, obj::option::ext::validation_features> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::shader_module, tag::option::ext::validation_features> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct validation_features
 {
-	using vulkan_tag_type = obj::option::ext::validation_features;
+	using vulkan_tag_type = tag::option::ext::validation_features;
 
 	::std::span<VkValidationFeatureEnableEXT const> enabled_validation_features{};
 	::std::span<VkValidationFeatureDisableEXT const> disabled_validation_features{};

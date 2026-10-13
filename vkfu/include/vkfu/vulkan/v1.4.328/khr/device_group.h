@@ -28,17 +28,17 @@
 
 #include "../version_1_1/device_group.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::khr
 {
-using bind_buffer_memory_device_group = ::vkfu::obj::option::bind_buffer_memory_device_group;
-using bind_image_memory_device_group = ::vkfu::obj::option::bind_image_memory_device_group;
-using device_group_bind_sparse = ::vkfu::obj::option::device_group_bind_sparse;
-using device_group_command_buffer_begin = ::vkfu::obj::option::device_group_command_buffer_begin;
-using device_group_render_pass_begin = ::vkfu::obj::option::device_group_render_pass_begin;
-using device_group_submit = ::vkfu::obj::option::device_group_submit;
-using memory_allocate_flags = ::vkfu::obj::option::memory_allocate_flags;
+using bind_buffer_memory_device_group = ::vkfu::tag::option::bind_buffer_memory_device_group;
+using bind_image_memory_device_group = ::vkfu::tag::option::bind_image_memory_device_group;
+using device_group_bind_sparse = ::vkfu::tag::option::device_group_bind_sparse;
+using device_group_command_buffer_begin = ::vkfu::tag::option::device_group_command_buffer_begin;
+using device_group_render_pass_begin = ::vkfu::tag::option::device_group_render_pass_begin;
+using device_group_submit = ::vkfu::tag::option::device_group_submit;
+using memory_allocate_flags = ::vkfu::tag::option::memory_allocate_flags;
 }
 }
 

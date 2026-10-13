@@ -28,19 +28,19 @@
 
 #include "../version_1_4/vertex_attribute_divisor.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using vertex_attribute_divisor = ::vkfu::obj::feature::vertex_attribute_divisor;
+using vertex_attribute_divisor = ::vkfu::tag::feature::vertex_attribute_divisor;
 }
 namespace property::khr
 {
-using vertex_attribute_divisor = ::vkfu::obj::property::vertex_attribute_divisor;
+using vertex_attribute_divisor = ::vkfu::tag::property::vertex_attribute_divisor;
 }
 namespace state::khr
 {
-using vertex_input_divisor = ::vkfu::obj::state::vertex_input_divisor;
+using vertex_input_divisor = ::vkfu::tag::state::vertex_input_divisor;
 }
 }
 

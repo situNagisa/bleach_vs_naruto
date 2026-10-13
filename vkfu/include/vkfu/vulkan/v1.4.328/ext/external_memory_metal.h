@@ -75,7 +75,7 @@ constexpr auto _vkfu_evaluate(VkMemoryMetalHandlePropertiesEXT const& value) noe
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace ext
 {
@@ -94,7 +94,7 @@ struct memory_metal_handle_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::import_memory_metal_handle>
+struct vulkan_object_trait<tag::option::ext::import_memory_metal_handle>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -102,7 +102,7 @@ struct vulkan_object_trait<obj::option::ext::import_memory_metal_handle>
 };
 
 template<>
-struct vulkan_object_trait<obj::ext::memory_get_metal_handle>
+struct vulkan_object_trait<tag::ext::memory_get_metal_handle>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -110,7 +110,7 @@ struct vulkan_object_trait<obj::ext::memory_get_metal_handle>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::ext::memory_metal_handle_properties>
+struct vulkan_object_trait<tag::result::ext::memory_metal_handle_properties>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -120,11 +120,11 @@ struct vulkan_object_trait<obj::result::ext::memory_metal_handle_properties>
 template<>
 struct expression_vulkan_tag<VkImportMemoryMetalHandleInfoEXT>
 {
-	using type = obj::option::ext::import_memory_metal_handle;
+	using type = tag::option::ext::import_memory_metal_handle;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::import_memory_metal_handle>
+struct vulkan_object_native<tag::option::ext::import_memory_metal_handle>
 {
 	using type = VkImportMemoryMetalHandleInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMPORT_MEMORY_METAL_HANDLE_INFO_EXT;
@@ -133,11 +133,11 @@ struct vulkan_object_native<obj::option::ext::import_memory_metal_handle>
 template<>
 struct expression_vulkan_tag<VkMemoryGetMetalHandleInfoEXT>
 {
-	using type = obj::ext::memory_get_metal_handle;
+	using type = tag::ext::memory_get_metal_handle;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::memory_get_metal_handle>
+struct vulkan_object_native<tag::ext::memory_get_metal_handle>
 {
 	using type = VkMemoryGetMetalHandleInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MEMORY_GET_METAL_HANDLE_INFO_EXT;
@@ -146,18 +146,18 @@ struct vulkan_object_native<obj::ext::memory_get_metal_handle>
 template<>
 struct expression_vulkan_tag<VkMemoryMetalHandlePropertiesEXT>
 {
-	using type = obj::result::ext::memory_metal_handle_properties;
+	using type = tag::result::ext::memory_metal_handle_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::ext::memory_metal_handle_properties>
+struct vulkan_object_native<tag::result::ext::memory_metal_handle_properties>
 {
 	using type = VkMemoryMetalHandlePropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MEMORY_METAL_HANDLE_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::import_memory_metal_handle>
+struct vulkan_object_extensions<tag::option::ext::import_memory_metal_handle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_external_memory_metal"};
 	constexpr static ::std::uint32_t core = 0;
@@ -165,7 +165,7 @@ struct vulkan_object_extensions<obj::option::ext::import_memory_metal_handle>
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::memory_get_metal_handle>
+struct vulkan_object_extensions<tag::ext::memory_get_metal_handle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_external_memory_metal"};
 	constexpr static ::std::uint32_t core = 0;
@@ -173,7 +173,7 @@ struct vulkan_object_extensions<obj::ext::memory_get_metal_handle>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::ext::memory_metal_handle_properties>
+struct vulkan_object_extensions<tag::result::ext::memory_metal_handle_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_external_memory_metal"};
 	constexpr static ::std::uint32_t core = 0;
@@ -181,7 +181,7 @@ struct vulkan_object_extensions<obj::result::ext::memory_metal_handle_properties
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::memory, obj::option::ext::import_memory_metal_handle> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::memory, tag::option::ext::import_memory_metal_handle> = true;
 }
 
 namespace vkfu::param
@@ -192,7 +192,7 @@ using ::vkfu::operator|;
 
 struct memory_get_metal_handle
 {
-	using vulkan_tag_type = obj::ext::memory_get_metal_handle;
+	using vulkan_tag_type = tag::ext::memory_get_metal_handle;
 
 	VkDeviceMemory memory{};
 	::vkfu::enums::external_memory_handle_type handle_type{};
@@ -216,7 +216,7 @@ using ::vkfu::operator|;
 
 struct import_memory_metal_handle
 {
-	using vulkan_tag_type = obj::option::ext::import_memory_metal_handle;
+	using vulkan_tag_type = tag::option::ext::import_memory_metal_handle;
 
 	::vkfu::enums::external_memory_handle_type handle_type{};
 	void* handle = nullptr;
@@ -239,7 +239,7 @@ namespace vkfu
 {
 namespace ext
 {
-template<::vkfu::expression_for<::vkfu::obj::ext::memory_get_metal_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::memory_get_metal_handle> Expression1>
 [[nodiscard]] auto get_memory_metal_handle(VkDevice device, Expression1&& get_metal_handle_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<void*, ::VkResult>
 {
@@ -253,7 +253,7 @@ template<::vkfu::expression_for<::vkfu::obj::ext::memory_get_metal_handle> Expre
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::memory_get_metal_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::ext::memory_get_metal_handle> Expression1>
 [[nodiscard]] auto get_memory_metal_handle(VkDevice device, Expression1&& get_metal_handle_info) -> void*
 {
 	auto outcome = get_memory_metal_handle(device, ::std::forward<Expression1>(get_metal_handle_info), ::std::nothrow);

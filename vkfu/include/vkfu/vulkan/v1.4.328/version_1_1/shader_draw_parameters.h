@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceShaderDrawParametersFeatures const
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -55,7 +55,7 @@ struct shader_draw_parameters{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::shader_draw_parameters>
+struct vulkan_object_trait<tag::feature::shader_draw_parameters>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::shader_draw_parameters>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderDrawParametersFeatures>
 {
-	using type = obj::feature::shader_draw_parameters;
+	using type = tag::feature::shader_draw_parameters;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::shader_draw_parameters>
+struct vulkan_object_native<tag::feature::shader_draw_parameters>
 {
 	using type = VkPhysicalDeviceShaderDrawParametersFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETERS_FEATURES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::shader_draw_parameters>
+struct vulkan_object_extensions<tag::feature::shader_draw_parameters>
 {
 	constexpr static ::std::array<char const*, 0> names{};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::shader_draw_parameters>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::shader_draw_parameters> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::shader_draw_parameters> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::shader_draw_parameters> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::shader_draw_parameters> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct shader_draw_parameters
 {
-	using vulkan_tag_type = obj::feature::shader_draw_parameters;
+	using vulkan_tag_type = tag::feature::shader_draw_parameters;
 
 	bool enable = false;
 

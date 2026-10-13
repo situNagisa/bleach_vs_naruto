@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDevicePipelineOpacityMicromapFeaturesARM
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::arm
 {
@@ -55,7 +55,7 @@ struct pipeline_opacity_micromap{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::arm::pipeline_opacity_micromap>
+struct vulkan_object_trait<tag::feature::arm::pipeline_opacity_micromap>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::arm::pipeline_opacity_micromap>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePipelineOpacityMicromapFeaturesARM>
 {
-	using type = obj::feature::arm::pipeline_opacity_micromap;
+	using type = tag::feature::arm::pipeline_opacity_micromap;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::arm::pipeline_opacity_micromap>
+struct vulkan_object_native<tag::feature::arm::pipeline_opacity_micromap>
 {
 	using type = VkPhysicalDevicePipelineOpacityMicromapFeaturesARM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_OPACITY_MICROMAP_FEATURES_ARM;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::arm::pipeline_opacity_micromap>
+struct vulkan_object_extensions<tag::feature::arm::pipeline_opacity_micromap>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_ARM_pipeline_opacity_micromap"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::arm::pipeline_opacity_micromap>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::arm::pipeline_opacity_micromap> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::arm::pipeline_opacity_micromap> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::arm::pipeline_opacity_micromap> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::arm::pipeline_opacity_micromap> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct pipeline_opacity_micromap
 {
-	using vulkan_tag_type = obj::feature::arm::pipeline_opacity_micromap;
+	using vulkan_tag_type = tag::feature::arm::pipeline_opacity_micromap;
 
 	bool enable = false;
 

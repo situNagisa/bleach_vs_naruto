@@ -22,7 +22,7 @@
 #include "version_1_1/external_memory.h"
 #include "version_1_1/external_fence_capabilities.h"
 #include "version_1_1/external_fence.h"
-#include "version_1_1/external_semaphore.h"
 #include "version_1_1/external_semaphore_capabilities.h"
+#include "version_1_1/external_semaphore.h"
 #include "version_1_1/maintenance3.h"
 #include "version_1_1/shader_draw_parameters.h"

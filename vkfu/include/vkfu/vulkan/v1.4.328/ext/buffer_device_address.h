@@ -61,7 +61,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceBufferDeviceAddressFeaturesEXT con
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -76,7 +76,7 @@ struct buffer_device_address{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::ext::buffer_device_address>
+struct vulkan_object_trait<tag::option::ext::buffer_device_address>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -84,7 +84,7 @@ struct vulkan_object_trait<obj::option::ext::buffer_device_address>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::ext::buffer_device_address>
+struct vulkan_object_trait<tag::feature::ext::buffer_device_address>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -94,11 +94,11 @@ struct vulkan_object_trait<obj::feature::ext::buffer_device_address>
 template<>
 struct expression_vulkan_tag<VkBufferDeviceAddressCreateInfoEXT>
 {
-	using type = obj::option::ext::buffer_device_address;
+	using type = tag::option::ext::buffer_device_address;
 };
 
 template<>
-struct vulkan_object_native<obj::option::ext::buffer_device_address>
+struct vulkan_object_native<tag::option::ext::buffer_device_address>
 {
 	using type = VkBufferDeviceAddressCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_CREATE_INFO_EXT;
@@ -107,18 +107,18 @@ struct vulkan_object_native<obj::option::ext::buffer_device_address>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceBufferDeviceAddressFeaturesEXT>
 {
-	using type = obj::feature::ext::buffer_device_address;
+	using type = tag::feature::ext::buffer_device_address;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::buffer_device_address>
+struct vulkan_object_native<tag::feature::ext::buffer_device_address>
 {
 	using type = VkPhysicalDeviceBufferDeviceAddressFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::ext::buffer_device_address>
+struct vulkan_object_extensions<tag::option::ext::buffer_device_address>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_buffer_device_address"};
 	constexpr static ::std::uint32_t core = 0;
@@ -126,7 +126,7 @@ struct vulkan_object_extensions<obj::option::ext::buffer_device_address>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::buffer_device_address>
+struct vulkan_object_extensions<tag::feature::ext::buffer_device_address>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_buffer_device_address"};
 	constexpr static ::std::uint32_t core = 0;
@@ -134,22 +134,22 @@ struct vulkan_object_extensions<obj::feature::ext::buffer_device_address>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::buffer, obj::option::ext::buffer_device_address> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::buffer, tag::option::ext::buffer_device_address> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::buffer_device_address> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::buffer_device_address> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::buffer_device_address> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::buffer_device_address> = true;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace ext
 {
-using buffer_device_address = ::vkfu::obj::buffer_device_address;
+using buffer_device_address = ::vkfu::tag::buffer_device_address;
 }
 namespace feature::ext::ext
 {
-using buffer_device_address = ::vkfu::obj::feature::ext::buffer_device_address;
+using buffer_device_address = ::vkfu::tag::feature::ext::buffer_device_address;
 }
 }
 
@@ -161,7 +161,7 @@ using ::vkfu::operator|;
 
 struct buffer_device_address
 {
-	using vulkan_tag_type = obj::feature::ext::buffer_device_address;
+	using vulkan_tag_type = tag::feature::ext::buffer_device_address;
 
 	bool enable = false;
 	bool capture_replay = false;
@@ -187,7 +187,7 @@ using ::vkfu::operator|;
 
 struct buffer_device_address
 {
-	using vulkan_tag_type = obj::option::ext::buffer_device_address;
+	using vulkan_tag_type = tag::option::ext::buffer_device_address;
 
 	VkDeviceAddress device_address{};
 

@@ -85,7 +85,7 @@ enum class coverage_reduction_mode : ::std::underlying_type_t<VkCoverageReductio
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -104,7 +104,7 @@ struct coverage_reduction{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::coverage_reduction_mode>
+struct vulkan_object_trait<tag::feature::nv::coverage_reduction_mode>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -112,7 +112,7 @@ struct vulkan_object_trait<obj::feature::nv::coverage_reduction_mode>
 };
 
 template<>
-struct vulkan_object_trait<obj::state::nv::coverage_reduction>
+struct vulkan_object_trait<tag::state::nv::coverage_reduction>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -120,7 +120,7 @@ struct vulkan_object_trait<obj::state::nv::coverage_reduction>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::nv::framebuffer_mixed_samples_combination>
+struct vulkan_object_trait<tag::result::nv::framebuffer_mixed_samples_combination>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -130,11 +130,11 @@ struct vulkan_object_trait<obj::result::nv::framebuffer_mixed_samples_combinatio
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceCoverageReductionModeFeaturesNV>
 {
-	using type = obj::feature::nv::coverage_reduction_mode;
+	using type = tag::feature::nv::coverage_reduction_mode;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::coverage_reduction_mode>
+struct vulkan_object_native<tag::feature::nv::coverage_reduction_mode>
 {
 	using type = VkPhysicalDeviceCoverageReductionModeFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COVERAGE_REDUCTION_MODE_FEATURES_NV;
@@ -143,11 +143,11 @@ struct vulkan_object_native<obj::feature::nv::coverage_reduction_mode>
 template<>
 struct expression_vulkan_tag<VkPipelineCoverageReductionStateCreateInfoNV>
 {
-	using type = obj::state::nv::coverage_reduction;
+	using type = tag::state::nv::coverage_reduction;
 };
 
 template<>
-struct vulkan_object_native<obj::state::nv::coverage_reduction>
+struct vulkan_object_native<tag::state::nv::coverage_reduction>
 {
 	using type = VkPipelineCoverageReductionStateCreateInfoNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_COVERAGE_REDUCTION_STATE_CREATE_INFO_NV;
@@ -156,18 +156,18 @@ struct vulkan_object_native<obj::state::nv::coverage_reduction>
 template<>
 struct expression_vulkan_tag<VkFramebufferMixedSamplesCombinationNV>
 {
-	using type = obj::result::nv::framebuffer_mixed_samples_combination;
+	using type = tag::result::nv::framebuffer_mixed_samples_combination;
 };
 
 template<>
-struct vulkan_object_native<obj::result::nv::framebuffer_mixed_samples_combination>
+struct vulkan_object_native<tag::result::nv::framebuffer_mixed_samples_combination>
 {
 	using type = VkFramebufferMixedSamplesCombinationNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_FRAMEBUFFER_MIXED_SAMPLES_COMBINATION_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::coverage_reduction_mode>
+struct vulkan_object_extensions<tag::feature::nv::coverage_reduction_mode>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_coverage_reduction_mode"};
 	constexpr static ::std::uint32_t core = 0;
@@ -175,7 +175,7 @@ struct vulkan_object_extensions<obj::feature::nv::coverage_reduction_mode>
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::nv::coverage_reduction>
+struct vulkan_object_extensions<tag::state::nv::coverage_reduction>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_coverage_reduction_mode"};
 	constexpr static ::std::uint32_t core = 0;
@@ -183,7 +183,7 @@ struct vulkan_object_extensions<obj::state::nv::coverage_reduction>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::nv::framebuffer_mixed_samples_combination>
+struct vulkan_object_extensions<tag::result::nv::framebuffer_mixed_samples_combination>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_coverage_reduction_mode"};
 	constexpr static ::std::uint32_t core = 0;
@@ -191,11 +191,11 @@ struct vulkan_object_extensions<obj::result::nv::framebuffer_mixed_samples_combi
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::coverage_reduction_mode> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::coverage_reduction_mode> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::coverage_reduction_mode> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::coverage_reduction_mode> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::multisample, obj::state::nv::coverage_reduction> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::multisample, tag::state::nv::coverage_reduction> = true;
 }
 
 namespace vkfu::param
@@ -206,7 +206,7 @@ using ::vkfu::operator|;
 
 struct coverage_reduction_mode
 {
-	using vulkan_tag_type = obj::feature::nv::coverage_reduction_mode;
+	using vulkan_tag_type = tag::feature::nv::coverage_reduction_mode;
 
 	bool enable = false;
 
@@ -228,7 +228,7 @@ using ::vkfu::operator|;
 
 struct coverage_reduction
 {
-	using vulkan_tag_type = obj::state::nv::coverage_reduction;
+	using vulkan_tag_type = tag::state::nv::coverage_reduction;
 
 	VkPipelineCoverageReductionStateCreateFlagsNV flags{};
 	::vkfu::enums::coverage_reduction_mode mode{};

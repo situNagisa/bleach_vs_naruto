@@ -137,7 +137,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDevicePerformanceQueryPropertiesKHR cons
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -166,7 +166,7 @@ struct performance_counter{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::khr::acquire_profiling_lock>
+struct vulkan_object_trait<tag::khr::acquire_profiling_lock>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -174,7 +174,7 @@ struct vulkan_object_trait<obj::khr::acquire_profiling_lock>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::performance_query_submit>
+struct vulkan_object_trait<tag::option::khr::performance_query_submit>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -182,7 +182,7 @@ struct vulkan_object_trait<obj::option::khr::performance_query_submit>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::khr::performance_query>
+struct vulkan_object_trait<tag::feature::khr::performance_query>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -190,7 +190,7 @@ struct vulkan_object_trait<obj::feature::khr::performance_query>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::query_pool_performance>
+struct vulkan_object_trait<tag::khr::query_pool_performance>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -198,7 +198,7 @@ struct vulkan_object_trait<obj::khr::query_pool_performance>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::performance_counter_description>
+struct vulkan_object_trait<tag::result::khr::performance_counter_description>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -206,7 +206,7 @@ struct vulkan_object_trait<obj::result::khr::performance_counter_description>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::performance_counter>
+struct vulkan_object_trait<tag::result::khr::performance_counter>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -214,7 +214,7 @@ struct vulkan_object_trait<obj::result::khr::performance_counter>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::khr::performance_query>
+struct vulkan_object_trait<tag::property::khr::performance_query>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -224,11 +224,11 @@ struct vulkan_object_trait<obj::property::khr::performance_query>
 template<>
 struct expression_vulkan_tag<VkAcquireProfilingLockInfoKHR>
 {
-	using type = obj::khr::acquire_profiling_lock;
+	using type = tag::khr::acquire_profiling_lock;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::acquire_profiling_lock>
+struct vulkan_object_native<tag::khr::acquire_profiling_lock>
 {
 	using type = VkAcquireProfilingLockInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ACQUIRE_PROFILING_LOCK_INFO_KHR;
@@ -237,11 +237,11 @@ struct vulkan_object_native<obj::khr::acquire_profiling_lock>
 template<>
 struct expression_vulkan_tag<VkPerformanceQuerySubmitInfoKHR>
 {
-	using type = obj::option::khr::performance_query_submit;
+	using type = tag::option::khr::performance_query_submit;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::performance_query_submit>
+struct vulkan_object_native<tag::option::khr::performance_query_submit>
 {
 	using type = VkPerformanceQuerySubmitInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PERFORMANCE_QUERY_SUBMIT_INFO_KHR;
@@ -250,11 +250,11 @@ struct vulkan_object_native<obj::option::khr::performance_query_submit>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePerformanceQueryFeaturesKHR>
 {
-	using type = obj::feature::khr::performance_query;
+	using type = tag::feature::khr::performance_query;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::performance_query>
+struct vulkan_object_native<tag::feature::khr::performance_query>
 {
 	using type = VkPhysicalDevicePerformanceQueryFeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_FEATURES_KHR;
@@ -263,11 +263,11 @@ struct vulkan_object_native<obj::feature::khr::performance_query>
 template<>
 struct expression_vulkan_tag<VkQueryPoolPerformanceCreateInfoKHR>
 {
-	using type = obj::khr::query_pool_performance;
+	using type = tag::khr::query_pool_performance;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::query_pool_performance>
+struct vulkan_object_native<tag::khr::query_pool_performance>
 {
 	using type = VkQueryPoolPerformanceCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_QUERY_POOL_PERFORMANCE_CREATE_INFO_KHR;
@@ -276,11 +276,11 @@ struct vulkan_object_native<obj::khr::query_pool_performance>
 template<>
 struct expression_vulkan_tag<VkPerformanceCounterDescriptionKHR>
 {
-	using type = obj::result::khr::performance_counter_description;
+	using type = tag::result::khr::performance_counter_description;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::performance_counter_description>
+struct vulkan_object_native<tag::result::khr::performance_counter_description>
 {
 	using type = VkPerformanceCounterDescriptionKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PERFORMANCE_COUNTER_DESCRIPTION_KHR;
@@ -289,11 +289,11 @@ struct vulkan_object_native<obj::result::khr::performance_counter_description>
 template<>
 struct expression_vulkan_tag<VkPerformanceCounterKHR>
 {
-	using type = obj::result::khr::performance_counter;
+	using type = tag::result::khr::performance_counter;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::performance_counter>
+struct vulkan_object_native<tag::result::khr::performance_counter>
 {
 	using type = VkPerformanceCounterKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PERFORMANCE_COUNTER_KHR;
@@ -302,18 +302,18 @@ struct vulkan_object_native<obj::result::khr::performance_counter>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePerformanceQueryPropertiesKHR>
 {
-	using type = obj::property::khr::performance_query;
+	using type = tag::property::khr::performance_query;
 };
 
 template<>
-struct vulkan_object_native<obj::property::khr::performance_query>
+struct vulkan_object_native<tag::property::khr::performance_query>
 {
 	using type = VkPhysicalDevicePerformanceQueryPropertiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_PROPERTIES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::acquire_profiling_lock>
+struct vulkan_object_extensions<tag::khr::acquire_profiling_lock>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_performance_query"};
 	constexpr static ::std::uint32_t core = 0;
@@ -321,7 +321,7 @@ struct vulkan_object_extensions<obj::khr::acquire_profiling_lock>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::performance_query_submit>
+struct vulkan_object_extensions<tag::option::khr::performance_query_submit>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_performance_query"};
 	constexpr static ::std::uint32_t core = 0;
@@ -329,7 +329,7 @@ struct vulkan_object_extensions<obj::option::khr::performance_query_submit>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::performance_query>
+struct vulkan_object_extensions<tag::feature::khr::performance_query>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_performance_query"};
 	constexpr static ::std::uint32_t core = 0;
@@ -337,7 +337,7 @@ struct vulkan_object_extensions<obj::feature::khr::performance_query>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::query_pool_performance>
+struct vulkan_object_extensions<tag::khr::query_pool_performance>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_performance_query"};
 	constexpr static ::std::uint32_t core = 0;
@@ -345,7 +345,7 @@ struct vulkan_object_extensions<obj::khr::query_pool_performance>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::performance_counter_description>
+struct vulkan_object_extensions<tag::result::khr::performance_counter_description>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_performance_query"};
 	constexpr static ::std::uint32_t core = 0;
@@ -353,7 +353,7 @@ struct vulkan_object_extensions<obj::result::khr::performance_counter_descriptio
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::performance_counter>
+struct vulkan_object_extensions<tag::result::khr::performance_counter>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_performance_query"};
 	constexpr static ::std::uint32_t core = 0;
@@ -361,7 +361,7 @@ struct vulkan_object_extensions<obj::result::khr::performance_counter>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::khr::performance_query>
+struct vulkan_object_extensions<tag::property::khr::performance_query>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_performance_query"};
 	constexpr static ::std::uint32_t core = 0;
@@ -369,17 +369,17 @@ struct vulkan_object_extensions<obj::property::khr::performance_query>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::performance_query> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::performance_query> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::performance_query> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::performance_query> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::khr::performance_query> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::khr::performance_query> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::query_pool, obj::khr::query_pool_performance> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::query_pool, tag::khr::query_pool_performance> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::submit, obj::option::khr::performance_query_submit> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::submit, tag::option::khr::performance_query_submit> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::submit2, obj::option::khr::performance_query_submit> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::submit2, tag::option::khr::performance_query_submit> = true;
 }
 
 namespace vkfu::param
@@ -390,7 +390,7 @@ using ::vkfu::operator|;
 
 struct performance_query
 {
-	using vulkan_tag_type = obj::feature::khr::performance_query;
+	using vulkan_tag_type = tag::feature::khr::performance_query;
 
 	bool performance_counter_query_pools = false;
 	bool performance_counter_multiple_query_pools = false;
@@ -414,7 +414,7 @@ using ::vkfu::operator|;
 
 struct acquire_profiling_lock
 {
-	using vulkan_tag_type = obj::khr::acquire_profiling_lock;
+	using vulkan_tag_type = tag::khr::acquire_profiling_lock;
 
 	VkAcquireProfilingLockFlagsKHR flags{};
 	::std::uint64_t timeout{};
@@ -432,7 +432,7 @@ struct acquire_profiling_lock
 
 struct query_pool_performance
 {
-	using vulkan_tag_type = obj::khr::query_pool_performance;
+	using vulkan_tag_type = tag::khr::query_pool_performance;
 
 	::std::uint32_t queue_family_index{};
 	::std::span<::std::uint32_t const> counter_indices{};
@@ -457,7 +457,7 @@ using ::vkfu::operator|;
 
 struct performance_query_submit
 {
-	using vulkan_tag_type = obj::option::khr::performance_query_submit;
+	using vulkan_tag_type = tag::option::khr::performance_query_submit;
 
 	::std::uint32_t counter_pass_index{};
 
@@ -478,7 +478,7 @@ namespace vkfu
 {
 namespace khr
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::acquire_profiling_lock> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::acquire_profiling_lock> Expression1>
 [[nodiscard]] auto acquire_profiling_lock(VkDevice device, Expression1&& info, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -491,7 +491,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::acquire_profiling_lock> Expres
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::acquire_profiling_lock> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::acquire_profiling_lock> Expression1>
 void acquire_profiling_lock(VkDevice device, Expression1&& info)
 {
 	auto outcome = acquire_profiling_lock(device, ::std::forward<Expression1>(info), ::std::nothrow);
@@ -501,7 +501,7 @@ void acquire_profiling_lock(VkDevice device, Expression1&& info)
 	}
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::query_pool_performance> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::query_pool_performance> Expression1>
 [[nodiscard]] auto get_physical_device_queue_family_performance_query_passes(VkPhysicalDevice physical_device, Expression1&& performance_query_create_info) -> ::std::uint32_t
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(performance_query_create_info));

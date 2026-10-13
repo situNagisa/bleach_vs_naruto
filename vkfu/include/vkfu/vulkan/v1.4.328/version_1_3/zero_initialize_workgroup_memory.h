@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeatu
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -55,7 +55,7 @@ struct zero_initialize_workgroup_memory{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::zero_initialize_workgroup_memory>
+struct vulkan_object_trait<tag::feature::zero_initialize_workgroup_memory>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::zero_initialize_workgroup_memory>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeatures>
 {
-	using type = obj::feature::zero_initialize_workgroup_memory;
+	using type = tag::feature::zero_initialize_workgroup_memory;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::zero_initialize_workgroup_memory>
+struct vulkan_object_native<tag::feature::zero_initialize_workgroup_memory>
 {
 	using type = VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ZERO_INITIALIZE_WORKGROUP_MEMORY_FEATURES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::zero_initialize_workgroup_memory>
+struct vulkan_object_extensions<tag::feature::zero_initialize_workgroup_memory>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_zero_initialize_workgroup_memory"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_3;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::zero_initialize_workgroup_memory>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::zero_initialize_workgroup_memory> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::zero_initialize_workgroup_memory> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::zero_initialize_workgroup_memory> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::zero_initialize_workgroup_memory> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct zero_initialize_workgroup_memory
 {
-	using vulkan_tag_type = obj::feature::zero_initialize_workgroup_memory;
+	using vulkan_tag_type = tag::feature::zero_initialize_workgroup_memory;
 
 	bool shader_zero_initialize_workgroup_memory = false;
 

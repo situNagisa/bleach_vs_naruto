@@ -28,11 +28,11 @@
 
 #include "../version_1_4/shader_subgroup_rotate.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using shader_subgroup_rotate = ::vkfu::obj::feature::shader_subgroup_rotate;
+using shader_subgroup_rotate = ::vkfu::tag::feature::shader_subgroup_rotate;
 }
 }
 

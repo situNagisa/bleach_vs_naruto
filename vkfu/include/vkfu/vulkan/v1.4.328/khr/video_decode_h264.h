@@ -131,7 +131,7 @@ enum class video_decode_h264_picture_layout : ::std::underlying_type_t<VkVideoDe
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
@@ -153,7 +153,7 @@ struct video_decode_h264_capabilities{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::khr::video_decode_h264_dpb_slot>
+struct vulkan_object_trait<tag::option::khr::video_decode_h264_dpb_slot>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -161,7 +161,7 @@ struct vulkan_object_trait<obj::option::khr::video_decode_h264_dpb_slot>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::video_decode_h264_picture>
+struct vulkan_object_trait<tag::option::khr::video_decode_h264_picture>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -169,7 +169,7 @@ struct vulkan_object_trait<obj::option::khr::video_decode_h264_picture>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::video_decode_h264_profile>
+struct vulkan_object_trait<tag::option::khr::video_decode_h264_profile>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -177,7 +177,7 @@ struct vulkan_object_trait<obj::option::khr::video_decode_h264_profile>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::video_decode_h264_session_parameters_add>
+struct vulkan_object_trait<tag::khr::video_decode_h264_session_parameters_add>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -185,7 +185,7 @@ struct vulkan_object_trait<obj::khr::video_decode_h264_session_parameters_add>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::video_decode_h264_session_parameters>
+struct vulkan_object_trait<tag::option::khr::video_decode_h264_session_parameters>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -193,7 +193,7 @@ struct vulkan_object_trait<obj::option::khr::video_decode_h264_session_parameter
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::video_decode_h264_capabilities>
+struct vulkan_object_trait<tag::result::khr::video_decode_h264_capabilities>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -203,11 +203,11 @@ struct vulkan_object_trait<obj::result::khr::video_decode_h264_capabilities>
 template<>
 struct expression_vulkan_tag<VkVideoDecodeH264DpbSlotInfoKHR>
 {
-	using type = obj::option::khr::video_decode_h264_dpb_slot;
+	using type = tag::option::khr::video_decode_h264_dpb_slot;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::video_decode_h264_dpb_slot>
+struct vulkan_object_native<tag::option::khr::video_decode_h264_dpb_slot>
 {
 	using type = VkVideoDecodeH264DpbSlotInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_DPB_SLOT_INFO_KHR;
@@ -216,11 +216,11 @@ struct vulkan_object_native<obj::option::khr::video_decode_h264_dpb_slot>
 template<>
 struct expression_vulkan_tag<VkVideoDecodeH264PictureInfoKHR>
 {
-	using type = obj::option::khr::video_decode_h264_picture;
+	using type = tag::option::khr::video_decode_h264_picture;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::video_decode_h264_picture>
+struct vulkan_object_native<tag::option::khr::video_decode_h264_picture>
 {
 	using type = VkVideoDecodeH264PictureInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_PICTURE_INFO_KHR;
@@ -229,11 +229,11 @@ struct vulkan_object_native<obj::option::khr::video_decode_h264_picture>
 template<>
 struct expression_vulkan_tag<VkVideoDecodeH264ProfileInfoKHR>
 {
-	using type = obj::option::khr::video_decode_h264_profile;
+	using type = tag::option::khr::video_decode_h264_profile;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::video_decode_h264_profile>
+struct vulkan_object_native<tag::option::khr::video_decode_h264_profile>
 {
 	using type = VkVideoDecodeH264ProfileInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_PROFILE_INFO_KHR;
@@ -242,11 +242,11 @@ struct vulkan_object_native<obj::option::khr::video_decode_h264_profile>
 template<>
 struct expression_vulkan_tag<VkVideoDecodeH264SessionParametersAddInfoKHR>
 {
-	using type = obj::khr::video_decode_h264_session_parameters_add;
+	using type = tag::khr::video_decode_h264_session_parameters_add;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::video_decode_h264_session_parameters_add>
+struct vulkan_object_native<tag::khr::video_decode_h264_session_parameters_add>
 {
 	using type = VkVideoDecodeH264SessionParametersAddInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_SESSION_PARAMETERS_ADD_INFO_KHR;
@@ -255,11 +255,11 @@ struct vulkan_object_native<obj::khr::video_decode_h264_session_parameters_add>
 template<>
 struct expression_vulkan_tag<VkVideoDecodeH264SessionParametersCreateInfoKHR>
 {
-	using type = obj::option::khr::video_decode_h264_session_parameters;
+	using type = tag::option::khr::video_decode_h264_session_parameters;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::video_decode_h264_session_parameters>
+struct vulkan_object_native<tag::option::khr::video_decode_h264_session_parameters>
 {
 	using type = VkVideoDecodeH264SessionParametersCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_SESSION_PARAMETERS_CREATE_INFO_KHR;
@@ -268,18 +268,18 @@ struct vulkan_object_native<obj::option::khr::video_decode_h264_session_paramete
 template<>
 struct expression_vulkan_tag<VkVideoDecodeH264CapabilitiesKHR>
 {
-	using type = obj::result::khr::video_decode_h264_capabilities;
+	using type = tag::result::khr::video_decode_h264_capabilities;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::video_decode_h264_capabilities>
+struct vulkan_object_native<tag::result::khr::video_decode_h264_capabilities>
 {
 	using type = VkVideoDecodeH264CapabilitiesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_CAPABILITIES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::video_decode_h264_dpb_slot>
+struct vulkan_object_extensions<tag::option::khr::video_decode_h264_dpb_slot>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_decode_h264"};
 	constexpr static ::std::uint32_t core = 0;
@@ -287,7 +287,7 @@ struct vulkan_object_extensions<obj::option::khr::video_decode_h264_dpb_slot>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::video_decode_h264_picture>
+struct vulkan_object_extensions<tag::option::khr::video_decode_h264_picture>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_decode_h264"};
 	constexpr static ::std::uint32_t core = 0;
@@ -295,7 +295,7 @@ struct vulkan_object_extensions<obj::option::khr::video_decode_h264_picture>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::video_decode_h264_profile>
+struct vulkan_object_extensions<tag::option::khr::video_decode_h264_profile>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_decode_h264"};
 	constexpr static ::std::uint32_t core = 0;
@@ -303,7 +303,7 @@ struct vulkan_object_extensions<obj::option::khr::video_decode_h264_profile>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::video_decode_h264_session_parameters_add>
+struct vulkan_object_extensions<tag::khr::video_decode_h264_session_parameters_add>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_decode_h264"};
 	constexpr static ::std::uint32_t core = 0;
@@ -311,7 +311,7 @@ struct vulkan_object_extensions<obj::khr::video_decode_h264_session_parameters_a
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::video_decode_h264_session_parameters>
+struct vulkan_object_extensions<tag::option::khr::video_decode_h264_session_parameters>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_decode_h264"};
 	constexpr static ::std::uint32_t core = 0;
@@ -319,7 +319,7 @@ struct vulkan_object_extensions<obj::option::khr::video_decode_h264_session_para
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::video_decode_h264_capabilities>
+struct vulkan_object_extensions<tag::result::khr::video_decode_h264_capabilities>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_decode_h264"};
 	constexpr static ::std::uint32_t core = 0;
@@ -327,19 +327,19 @@ struct vulkan_object_extensions<obj::result::khr::video_decode_h264_capabilities
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::query_pool, obj::option::khr::video_decode_h264_profile> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::query_pool, tag::option::khr::video_decode_h264_profile> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::video_capabilities, obj::result::khr::video_decode_h264_capabilities> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::video_capabilities, tag::result::khr::video_decode_h264_capabilities> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_decode, obj::option::khr::video_decode_h264_picture> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_decode, tag::option::khr::video_decode_h264_picture> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_profile, obj::option::khr::video_decode_h264_profile> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_profile, tag::option::khr::video_decode_h264_profile> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_reference_slot, obj::option::khr::video_decode_h264_dpb_slot> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_reference_slot, tag::option::khr::video_decode_h264_dpb_slot> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_session_parameters, obj::option::khr::video_decode_h264_session_parameters> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_session_parameters, tag::option::khr::video_decode_h264_session_parameters> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_session_parameters_update, obj::khr::video_decode_h264_session_parameters_add> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_session_parameters_update, tag::khr::video_decode_h264_session_parameters_add> = true;
 }
 
 namespace vkfu::param
@@ -350,7 +350,7 @@ using ::vkfu::operator|;
 
 struct video_decode_h264_session_parameters_add
 {
-	using vulkan_tag_type = obj::khr::video_decode_h264_session_parameters_add;
+	using vulkan_tag_type = tag::khr::video_decode_h264_session_parameters_add;
 
 	::std::span<StdVideoH264SequenceParameterSet const> std_sps{};
 	::std::span<StdVideoH264PictureParameterSet const> std_pps{};
@@ -376,7 +376,7 @@ using ::vkfu::operator|;
 
 struct video_decode_h264_dpb_slot
 {
-	using vulkan_tag_type = obj::option::khr::video_decode_h264_dpb_slot;
+	using vulkan_tag_type = tag::option::khr::video_decode_h264_dpb_slot;
 
 	StdVideoDecodeH264ReferenceInfo const* std_reference_info = nullptr;
 
@@ -392,7 +392,7 @@ struct video_decode_h264_dpb_slot
 
 struct video_decode_h264_picture
 {
-	using vulkan_tag_type = obj::option::khr::video_decode_h264_picture;
+	using vulkan_tag_type = tag::option::khr::video_decode_h264_picture;
 
 	StdVideoDecodeH264PictureInfo const* std_picture_info = nullptr;
 	::std::span<::std::uint32_t const> slice_offsets{};
@@ -411,7 +411,7 @@ struct video_decode_h264_picture
 
 struct video_decode_h264_profile
 {
-	using vulkan_tag_type = obj::option::khr::video_decode_h264_profile;
+	using vulkan_tag_type = tag::option::khr::video_decode_h264_profile;
 
 	StdVideoH264ProfileIdc std_profile_idc{};
 	::vkfu::enums::video_decode_h264_picture_layout picture_layout{};
@@ -427,10 +427,10 @@ struct video_decode_h264_profile
 	}
 };
 
-template<::vkfu::reference_expression_for<obj::khr::video_decode_h264_session_parameters_add> parameters_add_info_expression = ::vkfu::absent_expression>
+template<::vkfu::reference_expression_for<tag::khr::video_decode_h264_session_parameters_add> parameters_add_info_expression = ::vkfu::absent_expression>
 struct video_decode_h264_session_parameters
 {
-	using vulkan_tag_type = obj::option::khr::video_decode_h264_session_parameters;
+	using vulkan_tag_type = tag::option::khr::video_decode_h264_session_parameters;
 	using storage_type = ::vkfu::reference_storage<VkVideoDecodeH264SessionParametersCreateInfoKHR
 		, ::vkfu::reference_slot<&VkVideoDecodeH264SessionParametersCreateInfoKHR::pParametersAddInfo, ::vkfu::reference_storage_of_t<parameters_add_info_expression>>
 		>;

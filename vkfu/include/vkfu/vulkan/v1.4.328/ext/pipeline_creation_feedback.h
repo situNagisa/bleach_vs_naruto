@@ -28,11 +28,11 @@
 
 #include "../version_1_3/pipeline_creation_feedback.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::ext
 {
-using pipeline_creation_feedback = ::vkfu::obj::option::pipeline_creation_feedback;
+using pipeline_creation_feedback = ::vkfu::tag::option::pipeline_creation_feedback;
 }
 }
 

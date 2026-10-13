@@ -28,20 +28,20 @@
 
 #include "../version_1_2/imageless_framebuffer.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using imageless_framebuffer = ::vkfu::obj::feature::imageless_framebuffer;
+using imageless_framebuffer = ::vkfu::tag::feature::imageless_framebuffer;
 }
 namespace khr
 {
-using framebuffer_attachment_image = ::vkfu::obj::framebuffer_attachment_image;
+using framebuffer_attachment_image = ::vkfu::tag::framebuffer_attachment_image;
 }
 namespace option::khr
 {
-using framebuffer_attachments = ::vkfu::obj::option::framebuffer_attachments;
-using render_pass_attachment_begin = ::vkfu::obj::option::render_pass_attachment_begin;
+using framebuffer_attachments = ::vkfu::tag::option::framebuffer_attachments;
+using render_pass_attachment_begin = ::vkfu::tag::option::render_pass_attachment_begin;
 }
 }
 

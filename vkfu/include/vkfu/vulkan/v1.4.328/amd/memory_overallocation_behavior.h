@@ -54,7 +54,7 @@ enum class memory_overallocation_behavior : ::std::underlying_type_t<VkMemoryOve
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::amd
 {
@@ -65,7 +65,7 @@ struct device_memory_overallocation{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::amd::device_memory_overallocation>
+struct vulkan_object_trait<tag::option::amd::device_memory_overallocation>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -75,18 +75,18 @@ struct vulkan_object_trait<obj::option::amd::device_memory_overallocation>
 template<>
 struct expression_vulkan_tag<VkDeviceMemoryOverallocationCreateInfoAMD>
 {
-	using type = obj::option::amd::device_memory_overallocation;
+	using type = tag::option::amd::device_memory_overallocation;
 };
 
 template<>
-struct vulkan_object_native<obj::option::amd::device_memory_overallocation>
+struct vulkan_object_native<tag::option::amd::device_memory_overallocation>
 {
 	using type = VkDeviceMemoryOverallocationCreateInfoAMD;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEVICE_MEMORY_OVERALLOCATION_CREATE_INFO_AMD;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::amd::device_memory_overallocation>
+struct vulkan_object_extensions<tag::option::amd::device_memory_overallocation>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_AMD_memory_overallocation_behavior"};
 	constexpr static ::std::uint32_t core = 0;
@@ -94,7 +94,7 @@ struct vulkan_object_extensions<obj::option::amd::device_memory_overallocation>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::option::amd::device_memory_overallocation> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::option::amd::device_memory_overallocation> = true;
 }
 
 namespace vkfu::param
@@ -105,7 +105,7 @@ using ::vkfu::operator|;
 
 struct device_memory_overallocation
 {
-	using vulkan_tag_type = obj::option::amd::device_memory_overallocation;
+	using vulkan_tag_type = tag::option::amd::device_memory_overallocation;
 
 	::vkfu::enums::memory_overallocation_behavior overallocation_behavior{};
 

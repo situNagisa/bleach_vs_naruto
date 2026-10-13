@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceDedicatedAllocationImageAliasingFe
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -55,7 +55,7 @@ struct dedicated_allocation_image_aliasing{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::dedicated_allocation_image_aliasing>
+struct vulkan_object_trait<tag::feature::nv::dedicated_allocation_image_aliasing>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::nv::dedicated_allocation_image_aliasing
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceDedicatedAllocationImageAliasingFeaturesNV>
 {
-	using type = obj::feature::nv::dedicated_allocation_image_aliasing;
+	using type = tag::feature::nv::dedicated_allocation_image_aliasing;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::dedicated_allocation_image_aliasing>
+struct vulkan_object_native<tag::feature::nv::dedicated_allocation_image_aliasing>
 {
 	using type = VkPhysicalDeviceDedicatedAllocationImageAliasingFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEDICATED_ALLOCATION_IMAGE_ALIASING_FEATURES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::dedicated_allocation_image_aliasing>
+struct vulkan_object_extensions<tag::feature::nv::dedicated_allocation_image_aliasing>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_dedicated_allocation_image_aliasing"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::nv::dedicated_allocation_image_ali
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::dedicated_allocation_image_aliasing> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::dedicated_allocation_image_aliasing> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::dedicated_allocation_image_aliasing> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::dedicated_allocation_image_aliasing> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct dedicated_allocation_image_aliasing
 {
-	using vulkan_tag_type = obj::feature::nv::dedicated_allocation_image_aliasing;
+	using vulkan_tag_type = tag::feature::nv::dedicated_allocation_image_aliasing;
 
 	bool enable = false;
 

@@ -86,7 +86,7 @@ enum class queue_global_priority : ::std::underlying_type_t<VkQueueGlobalPriorit
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -105,7 +105,7 @@ struct queue_family_global_priority_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::device_queue_global_priority>
+struct vulkan_object_trait<tag::option::device_queue_global_priority>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -113,7 +113,7 @@ struct vulkan_object_trait<obj::option::device_queue_global_priority>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::global_priority_query>
+struct vulkan_object_trait<tag::feature::global_priority_query>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -121,7 +121,7 @@ struct vulkan_object_trait<obj::feature::global_priority_query>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::queue_family_global_priority_properties>
+struct vulkan_object_trait<tag::result::queue_family_global_priority_properties>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -131,11 +131,11 @@ struct vulkan_object_trait<obj::result::queue_family_global_priority_properties>
 template<>
 struct expression_vulkan_tag<VkDeviceQueueGlobalPriorityCreateInfo>
 {
-	using type = obj::option::device_queue_global_priority;
+	using type = tag::option::device_queue_global_priority;
 };
 
 template<>
-struct vulkan_object_native<obj::option::device_queue_global_priority>
+struct vulkan_object_native<tag::option::device_queue_global_priority>
 {
 	using type = VkDeviceQueueGlobalPriorityCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DEVICE_QUEUE_GLOBAL_PRIORITY_CREATE_INFO;
@@ -144,11 +144,11 @@ struct vulkan_object_native<obj::option::device_queue_global_priority>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceGlobalPriorityQueryFeatures>
 {
-	using type = obj::feature::global_priority_query;
+	using type = tag::feature::global_priority_query;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::global_priority_query>
+struct vulkan_object_native<tag::feature::global_priority_query>
 {
 	using type = VkPhysicalDeviceGlobalPriorityQueryFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_GLOBAL_PRIORITY_QUERY_FEATURES;
@@ -157,18 +157,18 @@ struct vulkan_object_native<obj::feature::global_priority_query>
 template<>
 struct expression_vulkan_tag<VkQueueFamilyGlobalPriorityProperties>
 {
-	using type = obj::result::queue_family_global_priority_properties;
+	using type = tag::result::queue_family_global_priority_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::queue_family_global_priority_properties>
+struct vulkan_object_native<tag::result::queue_family_global_priority_properties>
 {
 	using type = VkQueueFamilyGlobalPriorityProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_QUEUE_FAMILY_GLOBAL_PRIORITY_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::device_queue_global_priority>
+struct vulkan_object_extensions<tag::option::device_queue_global_priority>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_global_priority", "VK_KHR_global_priority"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -176,7 +176,7 @@ struct vulkan_object_extensions<obj::option::device_queue_global_priority>
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::global_priority_query>
+struct vulkan_object_extensions<tag::feature::global_priority_query>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_global_priority_query", "VK_KHR_global_priority"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -184,7 +184,7 @@ struct vulkan_object_extensions<obj::feature::global_priority_query>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::queue_family_global_priority_properties>
+struct vulkan_object_extensions<tag::result::queue_family_global_priority_properties>
 {
 	constexpr static ::std::array<char const*, 2> names{"VK_EXT_global_priority_query", "VK_KHR_global_priority"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_4;
@@ -192,13 +192,13 @@ struct vulkan_object_extensions<obj::result::queue_family_global_priority_proper
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::global_priority_query> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::global_priority_query> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device_queue, obj::option::device_queue_global_priority> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device_queue, tag::option::device_queue_global_priority> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::global_priority_query> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::global_priority_query> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::queue_family_properties2, obj::result::queue_family_global_priority_properties> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::queue_family_properties2, tag::result::queue_family_global_priority_properties> = true;
 }
 
 namespace vkfu::param
@@ -209,7 +209,7 @@ using ::vkfu::operator|;
 
 struct global_priority_query
 {
-	using vulkan_tag_type = obj::feature::global_priority_query;
+	using vulkan_tag_type = tag::feature::global_priority_query;
 
 	bool enable = false;
 
@@ -231,7 +231,7 @@ using ::vkfu::operator|;
 
 struct device_queue_global_priority
 {
-	using vulkan_tag_type = obj::option::device_queue_global_priority;
+	using vulkan_tag_type = tag::option::device_queue_global_priority;
 
 	::vkfu::enums::queue_global_priority global_priority{};
 

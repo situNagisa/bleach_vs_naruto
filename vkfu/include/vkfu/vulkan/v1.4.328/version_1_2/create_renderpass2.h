@@ -27,6 +27,8 @@
 #include <vkfu/vulkan_object.h>
 
 #include "../version_1_0/device_initialization.h"
+#include "../version_1_0/queue.h"
+#include "../version_1_0/sparse_memory.h"
 #include "../version_1_0/image.h"
 #include "../version_1_0/render_pass.h"
 #include "../version_1_0/command_buffer_building.h"
@@ -136,7 +138,7 @@ constexpr auto _vkfu_evaluate(VkSubpassEndInfo const& value) noexcept -> VkSubpa
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 struct attachment_description2{};
 struct attachment_reference2{};
@@ -150,7 +152,7 @@ struct subpass_end{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::attachment_description2>
+struct vulkan_object_trait<tag::attachment_description2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = true;
@@ -158,7 +160,7 @@ struct vulkan_object_trait<obj::attachment_description2>
 };
 
 template<>
-struct vulkan_object_trait<obj::attachment_reference2>
+struct vulkan_object_trait<tag::attachment_reference2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = true;
@@ -166,7 +168,7 @@ struct vulkan_object_trait<obj::attachment_reference2>
 };
 
 template<>
-struct vulkan_object_trait<obj::render_pass2>
+struct vulkan_object_trait<tag::render_pass2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -174,7 +176,7 @@ struct vulkan_object_trait<obj::render_pass2>
 };
 
 template<>
-struct vulkan_object_trait<obj::subpass_begin>
+struct vulkan_object_trait<tag::subpass_begin>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -182,7 +184,7 @@ struct vulkan_object_trait<obj::subpass_begin>
 };
 
 template<>
-struct vulkan_object_trait<obj::subpass_dependency2>
+struct vulkan_object_trait<tag::subpass_dependency2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = true;
@@ -190,7 +192,7 @@ struct vulkan_object_trait<obj::subpass_dependency2>
 };
 
 template<>
-struct vulkan_object_trait<obj::subpass_description2>
+struct vulkan_object_trait<tag::subpass_description2>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = true;
@@ -198,7 +200,7 @@ struct vulkan_object_trait<obj::subpass_description2>
 };
 
 template<>
-struct vulkan_object_trait<obj::subpass_end>
+struct vulkan_object_trait<tag::subpass_end>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -208,11 +210,11 @@ struct vulkan_object_trait<obj::subpass_end>
 template<>
 struct expression_vulkan_tag<VkAttachmentDescription2>
 {
-	using type = obj::attachment_description2;
+	using type = tag::attachment_description2;
 };
 
 template<>
-struct vulkan_object_native<obj::attachment_description2>
+struct vulkan_object_native<tag::attachment_description2>
 {
 	using type = VkAttachmentDescription2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
@@ -221,11 +223,11 @@ struct vulkan_object_native<obj::attachment_description2>
 template<>
 struct expression_vulkan_tag<VkAttachmentReference2>
 {
-	using type = obj::attachment_reference2;
+	using type = tag::attachment_reference2;
 };
 
 template<>
-struct vulkan_object_native<obj::attachment_reference2>
+struct vulkan_object_native<tag::attachment_reference2>
 {
 	using type = VkAttachmentReference2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
@@ -234,11 +236,11 @@ struct vulkan_object_native<obj::attachment_reference2>
 template<>
 struct expression_vulkan_tag<VkRenderPassCreateInfo2>
 {
-	using type = obj::render_pass2;
+	using type = tag::render_pass2;
 };
 
 template<>
-struct vulkan_object_native<obj::render_pass2>
+struct vulkan_object_native<tag::render_pass2>
 {
 	using type = VkRenderPassCreateInfo2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO_2;
@@ -247,11 +249,11 @@ struct vulkan_object_native<obj::render_pass2>
 template<>
 struct expression_vulkan_tag<VkSubpassBeginInfo>
 {
-	using type = obj::subpass_begin;
+	using type = tag::subpass_begin;
 };
 
 template<>
-struct vulkan_object_native<obj::subpass_begin>
+struct vulkan_object_native<tag::subpass_begin>
 {
 	using type = VkSubpassBeginInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SUBPASS_BEGIN_INFO;
@@ -260,11 +262,11 @@ struct vulkan_object_native<obj::subpass_begin>
 template<>
 struct expression_vulkan_tag<VkSubpassDependency2>
 {
-	using type = obj::subpass_dependency2;
+	using type = tag::subpass_dependency2;
 };
 
 template<>
-struct vulkan_object_native<obj::subpass_dependency2>
+struct vulkan_object_native<tag::subpass_dependency2>
 {
 	using type = VkSubpassDependency2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SUBPASS_DEPENDENCY_2;
@@ -273,11 +275,11 @@ struct vulkan_object_native<obj::subpass_dependency2>
 template<>
 struct expression_vulkan_tag<VkSubpassDescription2>
 {
-	using type = obj::subpass_description2;
+	using type = tag::subpass_description2;
 };
 
 template<>
-struct vulkan_object_native<obj::subpass_description2>
+struct vulkan_object_native<tag::subpass_description2>
 {
 	using type = VkSubpassDescription2;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_2;
@@ -286,18 +288,18 @@ struct vulkan_object_native<obj::subpass_description2>
 template<>
 struct expression_vulkan_tag<VkSubpassEndInfo>
 {
-	using type = obj::subpass_end;
+	using type = tag::subpass_end;
 };
 
 template<>
-struct vulkan_object_native<obj::subpass_end>
+struct vulkan_object_native<tag::subpass_end>
 {
 	using type = VkSubpassEndInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SUBPASS_END_INFO;
 };
 
 template<>
-struct vulkan_object_extensions<obj::attachment_description2>
+struct vulkan_object_extensions<tag::attachment_description2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_create_renderpass2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -305,7 +307,7 @@ struct vulkan_object_extensions<obj::attachment_description2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::attachment_reference2>
+struct vulkan_object_extensions<tag::attachment_reference2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_create_renderpass2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -313,7 +315,7 @@ struct vulkan_object_extensions<obj::attachment_reference2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::render_pass2>
+struct vulkan_object_extensions<tag::render_pass2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_create_renderpass2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -321,7 +323,7 @@ struct vulkan_object_extensions<obj::render_pass2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::subpass_begin>
+struct vulkan_object_extensions<tag::subpass_begin>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_create_renderpass2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -329,7 +331,7 @@ struct vulkan_object_extensions<obj::subpass_begin>
 };
 
 template<>
-struct vulkan_object_extensions<obj::subpass_dependency2>
+struct vulkan_object_extensions<tag::subpass_dependency2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_create_renderpass2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -337,7 +339,7 @@ struct vulkan_object_extensions<obj::subpass_dependency2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::subpass_description2>
+struct vulkan_object_extensions<tag::subpass_description2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_create_renderpass2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -345,7 +347,7 @@ struct vulkan_object_extensions<obj::subpass_description2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::subpass_end>
+struct vulkan_object_extensions<tag::subpass_end>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_create_renderpass2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -360,15 +362,9 @@ using ::vkfu::operator|;
 
 struct attachment_description2
 {
-	using vulkan_tag_type = obj::attachment_description2;
+	using vulkan_tag_type = tag::attachment_description2;
 
-	struct flags_type
-	{
-		VkAttachmentDescriptionFlags may_alias : 1 = 0;
-		VkAttachmentDescriptionFlags _reserved_1 : 31 = 0;
-	};
-
-	flags_type flags{};
+	::vkfu::flags::attachment_description flags{};
 	::vkfu::enums::format format{};
 	::vkfu::enums::sample_count samples{};
 	::vkfu::enums::attachment_load_op load_op{};
@@ -396,34 +392,13 @@ struct attachment_description2
 	}
 };
 
-static_assert(sizeof(attachment_description2::flags_type) == sizeof(VkAttachmentDescriptionFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkAttachmentDescriptionFlags>(attachment_description2::flags_type{.may_alias = 1}) == VK_ATTACHMENT_DESCRIPTION_MAY_ALIAS_BIT);
-#endif
-
 struct attachment_reference2
 {
-	using vulkan_tag_type = obj::attachment_reference2;
+	using vulkan_tag_type = tag::attachment_reference2;
 
 	::std::uint32_t attachment{};
 	::vkfu::enums::image_layout layout{};
-	struct aspect_mask_type
-	{
-		VkImageAspectFlags color : 1 = 0;
-		VkImageAspectFlags depth : 1 = 0;
-		VkImageAspectFlags stencil : 1 = 0;
-		VkImageAspectFlags metadata : 1 = 0;
-		VkImageAspectFlags plane_0 : 1 = 0;
-		VkImageAspectFlags plane_1 : 1 = 0;
-		VkImageAspectFlags plane_2 : 1 = 0;
-		VkImageAspectFlags memory_plane_0 : 1 = 0;
-		VkImageAspectFlags memory_plane_1 : 1 = 0;
-		VkImageAspectFlags memory_plane_2 : 1 = 0;
-		VkImageAspectFlags memory_plane_3 : 1 = 0;
-		VkImageAspectFlags _reserved_11 : 21 = 0;
-	};
-
-	aspect_mask_type aspect_mask{};
+	::vkfu::flags::image_aspect aspect_mask{};
 
 	constexpr auto evaluate() const noexcept -> VkAttachmentReference2
 	{
@@ -437,34 +412,11 @@ struct attachment_reference2
 	}
 };
 
-static_assert(sizeof(attachment_reference2::aspect_mask_type) == sizeof(VkImageAspectFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkImageAspectFlags>(attachment_reference2::aspect_mask_type{.color = 1}) == VK_IMAGE_ASPECT_COLOR_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(attachment_reference2::aspect_mask_type{.depth = 1}) == VK_IMAGE_ASPECT_DEPTH_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(attachment_reference2::aspect_mask_type{.stencil = 1}) == VK_IMAGE_ASPECT_STENCIL_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(attachment_reference2::aspect_mask_type{.metadata = 1}) == VK_IMAGE_ASPECT_METADATA_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(attachment_reference2::aspect_mask_type{.plane_0 = 1}) == VK_IMAGE_ASPECT_PLANE_0_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(attachment_reference2::aspect_mask_type{.plane_1 = 1}) == VK_IMAGE_ASPECT_PLANE_1_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(attachment_reference2::aspect_mask_type{.plane_2 = 1}) == VK_IMAGE_ASPECT_PLANE_2_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(attachment_reference2::aspect_mask_type{.memory_plane_0 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_0_BIT_EXT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(attachment_reference2::aspect_mask_type{.memory_plane_1 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_1_BIT_EXT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(attachment_reference2::aspect_mask_type{.memory_plane_2 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_2_BIT_EXT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(attachment_reference2::aspect_mask_type{.memory_plane_3 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_3_BIT_EXT);
-#endif
-
 struct render_pass2
 {
-	using vulkan_tag_type = obj::render_pass2;
+	using vulkan_tag_type = tag::render_pass2;
 
-	struct flags_type
-	{
-		VkRenderPassCreateFlags _reserved_0 : 1 = 0;
-		VkRenderPassCreateFlags transform : 1 = 0;
-		VkRenderPassCreateFlags per_layer_fragment_density : 1 = 0;
-		VkRenderPassCreateFlags _reserved_3 : 29 = 0;
-	};
-
-	flags_type flags{};
+	::vkfu::flags::render_pass_create flags{};
 	::std::span<VkAttachmentDescription2 const> attachments{};
 	::std::span<VkSubpassDescription2 const> subpasses{};
 	::std::span<VkSubpassDependency2 const> dependencies{};
@@ -488,15 +440,9 @@ struct render_pass2
 	}
 };
 
-static_assert(sizeof(render_pass2::flags_type) == sizeof(VkRenderPassCreateFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkRenderPassCreateFlags>(render_pass2::flags_type{.transform = 1}) == VK_RENDER_PASS_CREATE_TRANSFORM_BIT_QCOM);
-static_assert(::std::bit_cast<VkRenderPassCreateFlags>(render_pass2::flags_type{.per_layer_fragment_density = 1}) == VK_RENDER_PASS_CREATE_PER_LAYER_FRAGMENT_DENSITY_BIT_VALVE);
-#endif
-
 struct subpass_begin
 {
-	using vulkan_tag_type = obj::subpass_begin;
+	using vulkan_tag_type = tag::subpass_begin;
 
 	::vkfu::enums::subpass_contents contents{};
 
@@ -512,155 +458,15 @@ struct subpass_begin
 
 struct subpass_dependency2
 {
-	using vulkan_tag_type = obj::subpass_dependency2;
+	using vulkan_tag_type = tag::subpass_dependency2;
 
 	::std::uint32_t src_subpass{};
 	::std::uint32_t dst_subpass{};
-	struct src_stage_mask_type
-	{
-		VkPipelineStageFlags top_of_pipe : 1 = 0;
-		VkPipelineStageFlags draw_indirect : 1 = 0;
-		VkPipelineStageFlags vertex_input : 1 = 0;
-		VkPipelineStageFlags vertex_shader : 1 = 0;
-		VkPipelineStageFlags tessellation_control_shader : 1 = 0;
-		VkPipelineStageFlags tessellation_evaluation_shader : 1 = 0;
-		VkPipelineStageFlags geometry_shader : 1 = 0;
-		VkPipelineStageFlags fragment_shader : 1 = 0;
-		VkPipelineStageFlags early_fragment_tests : 1 = 0;
-		VkPipelineStageFlags late_fragment_tests : 1 = 0;
-		VkPipelineStageFlags color_attachment_output : 1 = 0;
-		VkPipelineStageFlags compute_shader : 1 = 0;
-		VkPipelineStageFlags transfer : 1 = 0;
-		VkPipelineStageFlags bottom_of_pipe : 1 = 0;
-		VkPipelineStageFlags host : 1 = 0;
-		VkPipelineStageFlags all_graphics : 1 = 0;
-		VkPipelineStageFlags all_commands : 1 = 0;
-		VkPipelineStageFlags command_preprocess : 1 = 0;
-		VkPipelineStageFlags conditional_rendering : 1 = 0;
-		VkPipelineStageFlags task_shader : 1 = 0;
-		VkPipelineStageFlags mesh_shader : 1 = 0;
-		VkPipelineStageFlags ray_tracing_shader : 1 = 0;
-		VkPipelineStageFlags fragment_shading_rate_attachment : 1 = 0;
-		VkPipelineStageFlags fragment_density_process : 1 = 0;
-		VkPipelineStageFlags transform_feedback : 1 = 0;
-		VkPipelineStageFlags acceleration_structure_build : 1 = 0;
-		VkPipelineStageFlags _reserved_26 : 6 = 0;
-	};
-
-	src_stage_mask_type src_stage_mask{};
-	struct dst_stage_mask_type
-	{
-		VkPipelineStageFlags top_of_pipe : 1 = 0;
-		VkPipelineStageFlags draw_indirect : 1 = 0;
-		VkPipelineStageFlags vertex_input : 1 = 0;
-		VkPipelineStageFlags vertex_shader : 1 = 0;
-		VkPipelineStageFlags tessellation_control_shader : 1 = 0;
-		VkPipelineStageFlags tessellation_evaluation_shader : 1 = 0;
-		VkPipelineStageFlags geometry_shader : 1 = 0;
-		VkPipelineStageFlags fragment_shader : 1 = 0;
-		VkPipelineStageFlags early_fragment_tests : 1 = 0;
-		VkPipelineStageFlags late_fragment_tests : 1 = 0;
-		VkPipelineStageFlags color_attachment_output : 1 = 0;
-		VkPipelineStageFlags compute_shader : 1 = 0;
-		VkPipelineStageFlags transfer : 1 = 0;
-		VkPipelineStageFlags bottom_of_pipe : 1 = 0;
-		VkPipelineStageFlags host : 1 = 0;
-		VkPipelineStageFlags all_graphics : 1 = 0;
-		VkPipelineStageFlags all_commands : 1 = 0;
-		VkPipelineStageFlags command_preprocess : 1 = 0;
-		VkPipelineStageFlags conditional_rendering : 1 = 0;
-		VkPipelineStageFlags task_shader : 1 = 0;
-		VkPipelineStageFlags mesh_shader : 1 = 0;
-		VkPipelineStageFlags ray_tracing_shader : 1 = 0;
-		VkPipelineStageFlags fragment_shading_rate_attachment : 1 = 0;
-		VkPipelineStageFlags fragment_density_process : 1 = 0;
-		VkPipelineStageFlags transform_feedback : 1 = 0;
-		VkPipelineStageFlags acceleration_structure_build : 1 = 0;
-		VkPipelineStageFlags _reserved_26 : 6 = 0;
-	};
-
-	dst_stage_mask_type dst_stage_mask{};
-	struct src_access_mask_type
-	{
-		VkAccessFlags indirect_command_read : 1 = 0;
-		VkAccessFlags index_read : 1 = 0;
-		VkAccessFlags vertex_attribute_read : 1 = 0;
-		VkAccessFlags uniform_read : 1 = 0;
-		VkAccessFlags input_attachment_read : 1 = 0;
-		VkAccessFlags shader_read : 1 = 0;
-		VkAccessFlags shader_write : 1 = 0;
-		VkAccessFlags color_attachment_read : 1 = 0;
-		VkAccessFlags color_attachment_write : 1 = 0;
-		VkAccessFlags depth_stencil_attachment_read : 1 = 0;
-		VkAccessFlags depth_stencil_attachment_write : 1 = 0;
-		VkAccessFlags transfer_read : 1 = 0;
-		VkAccessFlags transfer_write : 1 = 0;
-		VkAccessFlags host_read : 1 = 0;
-		VkAccessFlags host_write : 1 = 0;
-		VkAccessFlags memory_read : 1 = 0;
-		VkAccessFlags memory_write : 1 = 0;
-		VkAccessFlags command_preprocess_read : 1 = 0;
-		VkAccessFlags command_preprocess_write : 1 = 0;
-		VkAccessFlags color_attachment_read_noncoherent : 1 = 0;
-		VkAccessFlags conditional_rendering_read : 1 = 0;
-		VkAccessFlags acceleration_structure_read : 1 = 0;
-		VkAccessFlags acceleration_structure_write : 1 = 0;
-		VkAccessFlags fragment_shading_rate_attachment_read : 1 = 0;
-		VkAccessFlags fragment_density_map_read : 1 = 0;
-		VkAccessFlags transform_feedback_write : 1 = 0;
-		VkAccessFlags transform_feedback_counter_read : 1 = 0;
-		VkAccessFlags transform_feedback_counter_write : 1 = 0;
-		VkAccessFlags _reserved_28 : 4 = 0;
-	};
-
-	src_access_mask_type src_access_mask{};
-	struct dst_access_mask_type
-	{
-		VkAccessFlags indirect_command_read : 1 = 0;
-		VkAccessFlags index_read : 1 = 0;
-		VkAccessFlags vertex_attribute_read : 1 = 0;
-		VkAccessFlags uniform_read : 1 = 0;
-		VkAccessFlags input_attachment_read : 1 = 0;
-		VkAccessFlags shader_read : 1 = 0;
-		VkAccessFlags shader_write : 1 = 0;
-		VkAccessFlags color_attachment_read : 1 = 0;
-		VkAccessFlags color_attachment_write : 1 = 0;
-		VkAccessFlags depth_stencil_attachment_read : 1 = 0;
-		VkAccessFlags depth_stencil_attachment_write : 1 = 0;
-		VkAccessFlags transfer_read : 1 = 0;
-		VkAccessFlags transfer_write : 1 = 0;
-		VkAccessFlags host_read : 1 = 0;
-		VkAccessFlags host_write : 1 = 0;
-		VkAccessFlags memory_read : 1 = 0;
-		VkAccessFlags memory_write : 1 = 0;
-		VkAccessFlags command_preprocess_read : 1 = 0;
-		VkAccessFlags command_preprocess_write : 1 = 0;
-		VkAccessFlags color_attachment_read_noncoherent : 1 = 0;
-		VkAccessFlags conditional_rendering_read : 1 = 0;
-		VkAccessFlags acceleration_structure_read : 1 = 0;
-		VkAccessFlags acceleration_structure_write : 1 = 0;
-		VkAccessFlags fragment_shading_rate_attachment_read : 1 = 0;
-		VkAccessFlags fragment_density_map_read : 1 = 0;
-		VkAccessFlags transform_feedback_write : 1 = 0;
-		VkAccessFlags transform_feedback_counter_read : 1 = 0;
-		VkAccessFlags transform_feedback_counter_write : 1 = 0;
-		VkAccessFlags _reserved_28 : 4 = 0;
-	};
-
-	dst_access_mask_type dst_access_mask{};
-	struct dependency_flags_type
-	{
-		VkDependencyFlags by_region : 1 = 0;
-		VkDependencyFlags view_local : 1 = 0;
-		VkDependencyFlags device_group : 1 = 0;
-		VkDependencyFlags feedback_loop : 1 = 0;
-		VkDependencyFlags _reserved_4 : 1 = 0;
-		VkDependencyFlags queue_family_ownership_transfer_use_all_stages : 1 = 0;
-		VkDependencyFlags asymmetric_event : 1 = 0;
-		VkDependencyFlags _reserved_7 : 25 = 0;
-	};
-
-	dependency_flags_type dependency_flags{};
+	::vkfu::flags::pipeline_stage src_stage_mask{};
+	::vkfu::flags::pipeline_stage dst_stage_mask{};
+	::vkfu::flags::access src_access_mask{};
+	::vkfu::flags::access dst_access_mask{};
+	::vkfu::flags::dependency dependency_flags{};
 	::std::int32_t view_offset{};
 
 	constexpr auto evaluate() const noexcept -> VkSubpassDependency2
@@ -680,163 +486,15 @@ struct subpass_dependency2
 	}
 };
 
-static_assert(sizeof(subpass_dependency2::src_stage_mask_type) == sizeof(VkPipelineStageFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.top_of_pipe = 1}) == VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.draw_indirect = 1}) == VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.vertex_input = 1}) == VK_PIPELINE_STAGE_VERTEX_INPUT_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.vertex_shader = 1}) == VK_PIPELINE_STAGE_VERTEX_SHADER_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.tessellation_control_shader = 1}) == VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.tessellation_evaluation_shader = 1}) == VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.geometry_shader = 1}) == VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.fragment_shader = 1}) == VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.early_fragment_tests = 1}) == VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.late_fragment_tests = 1}) == VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.color_attachment_output = 1}) == VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.compute_shader = 1}) == VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.transfer = 1}) == VK_PIPELINE_STAGE_TRANSFER_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.bottom_of_pipe = 1}) == VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.host = 1}) == VK_PIPELINE_STAGE_HOST_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.all_graphics = 1}) == VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.all_commands = 1}) == VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.command_preprocess = 1}) == VK_PIPELINE_STAGE_COMMAND_PREPROCESS_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.conditional_rendering = 1}) == VK_PIPELINE_STAGE_CONDITIONAL_RENDERING_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.task_shader = 1}) == VK_PIPELINE_STAGE_TASK_SHADER_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.mesh_shader = 1}) == VK_PIPELINE_STAGE_MESH_SHADER_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.ray_tracing_shader = 1}) == VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.fragment_shading_rate_attachment = 1}) == VK_PIPELINE_STAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.fragment_density_process = 1}) == VK_PIPELINE_STAGE_FRAGMENT_DENSITY_PROCESS_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.transform_feedback = 1}) == VK_PIPELINE_STAGE_TRANSFORM_FEEDBACK_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::src_stage_mask_type{.acceleration_structure_build = 1}) == VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR);
-#endif
-
-static_assert(sizeof(subpass_dependency2::dst_stage_mask_type) == sizeof(VkPipelineStageFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.top_of_pipe = 1}) == VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.draw_indirect = 1}) == VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.vertex_input = 1}) == VK_PIPELINE_STAGE_VERTEX_INPUT_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.vertex_shader = 1}) == VK_PIPELINE_STAGE_VERTEX_SHADER_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.tessellation_control_shader = 1}) == VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.tessellation_evaluation_shader = 1}) == VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.geometry_shader = 1}) == VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.fragment_shader = 1}) == VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.early_fragment_tests = 1}) == VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.late_fragment_tests = 1}) == VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.color_attachment_output = 1}) == VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.compute_shader = 1}) == VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.transfer = 1}) == VK_PIPELINE_STAGE_TRANSFER_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.bottom_of_pipe = 1}) == VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.host = 1}) == VK_PIPELINE_STAGE_HOST_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.all_graphics = 1}) == VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.all_commands = 1}) == VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.command_preprocess = 1}) == VK_PIPELINE_STAGE_COMMAND_PREPROCESS_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.conditional_rendering = 1}) == VK_PIPELINE_STAGE_CONDITIONAL_RENDERING_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.task_shader = 1}) == VK_PIPELINE_STAGE_TASK_SHADER_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.mesh_shader = 1}) == VK_PIPELINE_STAGE_MESH_SHADER_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.ray_tracing_shader = 1}) == VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.fragment_shading_rate_attachment = 1}) == VK_PIPELINE_STAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.fragment_density_process = 1}) == VK_PIPELINE_STAGE_FRAGMENT_DENSITY_PROCESS_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.transform_feedback = 1}) == VK_PIPELINE_STAGE_TRANSFORM_FEEDBACK_BIT_EXT);
-static_assert(::std::bit_cast<VkPipelineStageFlags>(subpass_dependency2::dst_stage_mask_type{.acceleration_structure_build = 1}) == VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR);
-#endif
-
-static_assert(sizeof(subpass_dependency2::src_access_mask_type) == sizeof(VkAccessFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.indirect_command_read = 1}) == VK_ACCESS_INDIRECT_COMMAND_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.index_read = 1}) == VK_ACCESS_INDEX_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.vertex_attribute_read = 1}) == VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.uniform_read = 1}) == VK_ACCESS_UNIFORM_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.input_attachment_read = 1}) == VK_ACCESS_INPUT_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.shader_read = 1}) == VK_ACCESS_SHADER_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.shader_write = 1}) == VK_ACCESS_SHADER_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.color_attachment_read = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.color_attachment_write = 1}) == VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.depth_stencil_attachment_read = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.depth_stencil_attachment_write = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.transfer_read = 1}) == VK_ACCESS_TRANSFER_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.transfer_write = 1}) == VK_ACCESS_TRANSFER_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.host_read = 1}) == VK_ACCESS_HOST_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.host_write = 1}) == VK_ACCESS_HOST_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.memory_read = 1}) == VK_ACCESS_MEMORY_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.memory_write = 1}) == VK_ACCESS_MEMORY_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.command_preprocess_read = 1}) == VK_ACCESS_COMMAND_PREPROCESS_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.command_preprocess_write = 1}) == VK_ACCESS_COMMAND_PREPROCESS_WRITE_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.color_attachment_read_noncoherent = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_NONCOHERENT_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.conditional_rendering_read = 1}) == VK_ACCESS_CONDITIONAL_RENDERING_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.acceleration_structure_read = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.acceleration_structure_write = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.fragment_shading_rate_attachment_read = 1}) == VK_ACCESS_FRAGMENT_SHADING_RATE_ATTACHMENT_READ_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.fragment_density_map_read = 1}) == VK_ACCESS_FRAGMENT_DENSITY_MAP_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.transform_feedback_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_WRITE_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.transform_feedback_counter_read = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::src_access_mask_type{.transform_feedback_counter_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT);
-#endif
-
-static_assert(sizeof(subpass_dependency2::dst_access_mask_type) == sizeof(VkAccessFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.indirect_command_read = 1}) == VK_ACCESS_INDIRECT_COMMAND_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.index_read = 1}) == VK_ACCESS_INDEX_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.vertex_attribute_read = 1}) == VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.uniform_read = 1}) == VK_ACCESS_UNIFORM_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.input_attachment_read = 1}) == VK_ACCESS_INPUT_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.shader_read = 1}) == VK_ACCESS_SHADER_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.shader_write = 1}) == VK_ACCESS_SHADER_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.color_attachment_read = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.color_attachment_write = 1}) == VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.depth_stencil_attachment_read = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.depth_stencil_attachment_write = 1}) == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.transfer_read = 1}) == VK_ACCESS_TRANSFER_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.transfer_write = 1}) == VK_ACCESS_TRANSFER_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.host_read = 1}) == VK_ACCESS_HOST_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.host_write = 1}) == VK_ACCESS_HOST_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.memory_read = 1}) == VK_ACCESS_MEMORY_READ_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.memory_write = 1}) == VK_ACCESS_MEMORY_WRITE_BIT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.command_preprocess_read = 1}) == VK_ACCESS_COMMAND_PREPROCESS_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.command_preprocess_write = 1}) == VK_ACCESS_COMMAND_PREPROCESS_WRITE_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.color_attachment_read_noncoherent = 1}) == VK_ACCESS_COLOR_ATTACHMENT_READ_NONCOHERENT_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.conditional_rendering_read = 1}) == VK_ACCESS_CONDITIONAL_RENDERING_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.acceleration_structure_read = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.acceleration_structure_write = 1}) == VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.fragment_shading_rate_attachment_read = 1}) == VK_ACCESS_FRAGMENT_SHADING_RATE_ATTACHMENT_READ_BIT_KHR);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.fragment_density_map_read = 1}) == VK_ACCESS_FRAGMENT_DENSITY_MAP_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.transform_feedback_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_WRITE_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.transform_feedback_counter_read = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT);
-static_assert(::std::bit_cast<VkAccessFlags>(subpass_dependency2::dst_access_mask_type{.transform_feedback_counter_write = 1}) == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT);
-#endif
-
-static_assert(sizeof(subpass_dependency2::dependency_flags_type) == sizeof(VkDependencyFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkDependencyFlags>(subpass_dependency2::dependency_flags_type{.by_region = 1}) == VK_DEPENDENCY_BY_REGION_BIT);
-static_assert(::std::bit_cast<VkDependencyFlags>(subpass_dependency2::dependency_flags_type{.view_local = 1}) == VK_DEPENDENCY_VIEW_LOCAL_BIT);
-static_assert(::std::bit_cast<VkDependencyFlags>(subpass_dependency2::dependency_flags_type{.device_group = 1}) == VK_DEPENDENCY_DEVICE_GROUP_BIT);
-static_assert(::std::bit_cast<VkDependencyFlags>(subpass_dependency2::dependency_flags_type{.feedback_loop = 1}) == VK_DEPENDENCY_FEEDBACK_LOOP_BIT_EXT);
-static_assert(::std::bit_cast<VkDependencyFlags>(subpass_dependency2::dependency_flags_type{.queue_family_ownership_transfer_use_all_stages = 1}) == VK_DEPENDENCY_QUEUE_FAMILY_OWNERSHIP_TRANSFER_USE_ALL_STAGES_BIT_KHR);
-static_assert(::std::bit_cast<VkDependencyFlags>(subpass_dependency2::dependency_flags_type{.asymmetric_event = 1}) == VK_DEPENDENCY_ASYMMETRIC_EVENT_BIT_KHR);
-#endif
-
-template<::vkfu::reference_expression_for<obj::attachment_reference2> depth_stencil_attachment_expression = ::vkfu::absent_expression>
+template<::vkfu::reference_expression_for<tag::attachment_reference2> depth_stencil_attachment_expression = ::vkfu::absent_expression>
 struct subpass_description2
 {
-	using vulkan_tag_type = obj::subpass_description2;
+	using vulkan_tag_type = tag::subpass_description2;
 	using storage_type = ::vkfu::reference_storage<VkSubpassDescription2
 		, ::vkfu::reference_slot<&VkSubpassDescription2::pDepthStencilAttachment, ::vkfu::reference_storage_of_t<depth_stencil_attachment_expression>>
 		>;
 
-	struct flags_type
-	{
-		VkSubpassDescriptionFlags per_view_attributes : 1 = 0;
-		VkSubpassDescriptionFlags per_view_position_x_only : 1 = 0;
-		VkSubpassDescriptionFlags fragment_region : 1 = 0;
-		VkSubpassDescriptionFlags shader_resolve : 1 = 0;
-		VkSubpassDescriptionFlags rasterization_order_attachment_color_access : 1 = 0;
-		VkSubpassDescriptionFlags rasterization_order_attachment_depth_access : 1 = 0;
-		VkSubpassDescriptionFlags rasterization_order_attachment_stencil_access : 1 = 0;
-		VkSubpassDescriptionFlags enable_legacy_dithering : 1 = 0;
-		VkSubpassDescriptionFlags tile_shading_apron : 1 = 0;
-		VkSubpassDescriptionFlags _reserved_9 : 23 = 0;
-	};
-
-	flags_type flags{};
+	::vkfu::flags::subpass_description flags{};
 	::vkfu::enums::pipeline_bind_point pipeline_bind_point{};
 	::std::uint32_t view_mask{};
 	::std::span<VkAttachmentReference2 const> input_attachments{};
@@ -868,22 +526,9 @@ struct subpass_description2
 	}
 };
 
-static_assert(sizeof(subpass_description2<>::flags_type) == sizeof(VkSubpassDescriptionFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkSubpassDescriptionFlags>(subpass_description2<>::flags_type{.per_view_attributes = 1}) == VK_SUBPASS_DESCRIPTION_PER_VIEW_ATTRIBUTES_BIT_NVX);
-static_assert(::std::bit_cast<VkSubpassDescriptionFlags>(subpass_description2<>::flags_type{.per_view_position_x_only = 1}) == VK_SUBPASS_DESCRIPTION_PER_VIEW_POSITION_X_ONLY_BIT_NVX);
-static_assert(::std::bit_cast<VkSubpassDescriptionFlags>(subpass_description2<>::flags_type{.fragment_region = 1}) == VK_SUBPASS_DESCRIPTION_FRAGMENT_REGION_BIT_QCOM);
-static_assert(::std::bit_cast<VkSubpassDescriptionFlags>(subpass_description2<>::flags_type{.shader_resolve = 1}) == VK_SUBPASS_DESCRIPTION_SHADER_RESOLVE_BIT_QCOM);
-static_assert(::std::bit_cast<VkSubpassDescriptionFlags>(subpass_description2<>::flags_type{.rasterization_order_attachment_color_access = 1}) == VK_SUBPASS_DESCRIPTION_RASTERIZATION_ORDER_ATTACHMENT_COLOR_ACCESS_BIT_EXT);
-static_assert(::std::bit_cast<VkSubpassDescriptionFlags>(subpass_description2<>::flags_type{.rasterization_order_attachment_depth_access = 1}) == VK_SUBPASS_DESCRIPTION_RASTERIZATION_ORDER_ATTACHMENT_DEPTH_ACCESS_BIT_EXT);
-static_assert(::std::bit_cast<VkSubpassDescriptionFlags>(subpass_description2<>::flags_type{.rasterization_order_attachment_stencil_access = 1}) == VK_SUBPASS_DESCRIPTION_RASTERIZATION_ORDER_ATTACHMENT_STENCIL_ACCESS_BIT_EXT);
-static_assert(::std::bit_cast<VkSubpassDescriptionFlags>(subpass_description2<>::flags_type{.enable_legacy_dithering = 1}) == VK_SUBPASS_DESCRIPTION_ENABLE_LEGACY_DITHERING_BIT_EXT);
-static_assert(::std::bit_cast<VkSubpassDescriptionFlags>(subpass_description2<>::flags_type{.tile_shading_apron = 1}) == VK_SUBPASS_DESCRIPTION_TILE_SHADING_APRON_BIT_QCOM);
-#endif
-
 struct subpass_end
 {
-	using vulkan_tag_type = obj::subpass_end;
+	using vulkan_tag_type = tag::subpass_end;
 
 
 	constexpr auto evaluate() const noexcept -> VkSubpassEndInfo
@@ -898,7 +543,7 @@ struct subpass_end
 
 namespace vkfu
 {
-template<::vkfu::expression_for<::vkfu::obj::render_pass2> Expression>
+template<::vkfu::expression_for<::vkfu::tag::render_pass2> Expression>
 [[nodiscard]] auto create_render_pass2(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkRenderPass, ::VkResult>
 {
@@ -913,7 +558,7 @@ template<::vkfu::expression_for<::vkfu::obj::render_pass2> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::render_pass2> Expression>
+template<::vkfu::expression_for<::vkfu::tag::render_pass2> Expression>
 [[nodiscard]] auto create_render_pass2(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkRenderPass
 {
 	auto produced = create_render_pass2(device, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);
@@ -924,7 +569,7 @@ template<::vkfu::expression_for<::vkfu::obj::render_pass2> Expression>
 	return *produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::render_pass_begin> Expression1, ::vkfu::expression_for<::vkfu::obj::subpass_begin> Expression2>
+template<::vkfu::expression_for<::vkfu::tag::render_pass_begin> Expression1, ::vkfu::expression_for<::vkfu::tag::subpass_begin> Expression2>
 void cmd_begin_render_pass2(VkCommandBuffer command_buffer, Expression1&& render_pass_begin, Expression2&& subpass_begin_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(render_pass_begin));
@@ -932,14 +577,14 @@ void cmd_begin_render_pass2(VkCommandBuffer command_buffer, Expression1&& render
 	::vkCmdBeginRenderPass2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(::vkfu::unpack(storage2)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::subpass_end> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::subpass_end> Expression1>
 void cmd_end_render_pass2(VkCommandBuffer command_buffer, Expression1&& subpass_end_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(subpass_end_info));
 	::vkCmdEndRenderPass2(command_buffer, ::std::addressof(::vkfu::unpack(storage1)));
 }
 
-template<::vkfu::expression_for<::vkfu::obj::subpass_begin> Expression1, ::vkfu::expression_for<::vkfu::obj::subpass_end> Expression2>
+template<::vkfu::expression_for<::vkfu::tag::subpass_begin> Expression1, ::vkfu::expression_for<::vkfu::tag::subpass_end> Expression2>
 void cmd_next_subpass2(VkCommandBuffer command_buffer, Expression1&& subpass_begin_info, Expression2&& subpass_end_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(subpass_begin_info));

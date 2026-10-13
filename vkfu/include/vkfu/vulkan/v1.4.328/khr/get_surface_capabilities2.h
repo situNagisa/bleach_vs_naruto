@@ -73,7 +73,7 @@ constexpr auto _vkfu_evaluate(VkSurfaceFormat2KHR const& value) noexcept -> VkSu
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
@@ -89,7 +89,7 @@ struct surface_format2{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::khr::physical_device_surface2>
+struct vulkan_object_trait<tag::khr::physical_device_surface2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -97,7 +97,7 @@ struct vulkan_object_trait<obj::khr::physical_device_surface2>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::surface_capabilities2>
+struct vulkan_object_trait<tag::result::khr::surface_capabilities2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -105,7 +105,7 @@ struct vulkan_object_trait<obj::result::khr::surface_capabilities2>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::khr::surface_format2>
+struct vulkan_object_trait<tag::result::khr::surface_format2>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -115,11 +115,11 @@ struct vulkan_object_trait<obj::result::khr::surface_format2>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceSurfaceInfo2KHR>
 {
-	using type = obj::khr::physical_device_surface2;
+	using type = tag::khr::physical_device_surface2;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::physical_device_surface2>
+struct vulkan_object_native<tag::khr::physical_device_surface2>
 {
 	using type = VkPhysicalDeviceSurfaceInfo2KHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SURFACE_INFO_2_KHR;
@@ -128,11 +128,11 @@ struct vulkan_object_native<obj::khr::physical_device_surface2>
 template<>
 struct expression_vulkan_tag<VkSurfaceCapabilities2KHR>
 {
-	using type = obj::result::khr::surface_capabilities2;
+	using type = tag::result::khr::surface_capabilities2;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::surface_capabilities2>
+struct vulkan_object_native<tag::result::khr::surface_capabilities2>
 {
 	using type = VkSurfaceCapabilities2KHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SURFACE_CAPABILITIES_2_KHR;
@@ -141,18 +141,18 @@ struct vulkan_object_native<obj::result::khr::surface_capabilities2>
 template<>
 struct expression_vulkan_tag<VkSurfaceFormat2KHR>
 {
-	using type = obj::result::khr::surface_format2;
+	using type = tag::result::khr::surface_format2;
 };
 
 template<>
-struct vulkan_object_native<obj::result::khr::surface_format2>
+struct vulkan_object_native<tag::result::khr::surface_format2>
 {
 	using type = VkSurfaceFormat2KHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SURFACE_FORMAT_2_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::physical_device_surface2>
+struct vulkan_object_extensions<tag::khr::physical_device_surface2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_surface_capabilities2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -160,7 +160,7 @@ struct vulkan_object_extensions<obj::khr::physical_device_surface2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::surface_capabilities2>
+struct vulkan_object_extensions<tag::result::khr::surface_capabilities2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_surface_capabilities2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -168,7 +168,7 @@ struct vulkan_object_extensions<obj::result::khr::surface_capabilities2>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::khr::surface_format2>
+struct vulkan_object_extensions<tag::result::khr::surface_format2>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_get_surface_capabilities2"};
 	constexpr static ::std::uint32_t core = 0;
@@ -176,7 +176,7 @@ struct vulkan_object_extensions<obj::result::khr::surface_format2>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::result::khr::surface_capabilities2, obj::result::khr::shared_present_surface_capabilities> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::result::khr::surface_capabilities2, tag::result::khr::shared_present_surface_capabilities> = true;
 }
 
 namespace vkfu::param
@@ -187,7 +187,7 @@ using ::vkfu::operator|;
 
 struct physical_device_surface2
 {
-	using vulkan_tag_type = obj::khr::physical_device_surface2;
+	using vulkan_tag_type = tag::khr::physical_device_surface2;
 
 	VkSurfaceKHR surface{};
 
@@ -208,7 +208,7 @@ namespace vkfu
 {
 namespace khr
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::physical_device_surface2> Expression1>
 [[nodiscard]] auto count_physical_device_surface_formats2(VkPhysicalDevice physical_device, Expression1&& surface_info, ::std::nothrow_t)
 	-> ::std::expected<::std::uint32_t, ::VkResult>
 {
@@ -221,7 +221,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expr
 	return count;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::physical_device_surface2> Expression1>
 [[nodiscard]] auto count_physical_device_surface_formats2(VkPhysicalDevice physical_device, Expression1&& surface_info) -> ::std::uint32_t
 {
 	auto const outcome = count_physical_device_surface_formats2(physical_device, ::std::forward<Expression1>(surface_info), ::std::nothrow);
@@ -232,7 +232,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expr
 	return *outcome;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::physical_device_surface2> Expression1>
 [[nodiscard]] auto get_physical_device_surface_formats2(VkPhysicalDevice physical_device, Expression1&& surface_info, ::std::span<VkSurfaceFormat2KHR> out, ::std::nothrow_t)
 	-> ::std::expected<::std::span<VkSurfaceFormat2KHR>, ::VkResult>
 {
@@ -251,7 +251,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expr
 	return out.first(count);
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::physical_device_surface2> Expression1>
 [[nodiscard]] auto get_physical_device_surface_formats2(VkPhysicalDevice physical_device, Expression1&& surface_info, ::std::span<VkSurfaceFormat2KHR> out) -> ::std::span<VkSurfaceFormat2KHR>
 {
 	auto const outcome = get_physical_device_surface_formats2(physical_device, ::std::forward<Expression1>(surface_info), out, ::std::nothrow);
@@ -262,7 +262,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expr
 	return *outcome;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expression1, ::std::contiguous_iterator Out>
+template<::vkfu::expression_for<::vkfu::tag::khr::physical_device_surface2> Expression1, ::std::contiguous_iterator Out>
 	requires ::std::same_as<::std::iter_value_t<Out>, VkSurfaceFormat2KHR>
 [[nodiscard]] auto get_physical_device_surface_formats2(VkPhysicalDevice physical_device, Expression1&& surface_info, Out out) -> Out
 {
@@ -271,12 +271,12 @@ template<::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expr
 	return out + static_cast<::std::iter_difference_t<Out>>(written.size());
 }
 
-template<::vkfu::query_extension_of<::vkfu::obj::result::khr::surface_capabilities2>... Extras, ::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expression1>
+template<::vkfu::query_extension_of<::vkfu::tag::result::khr::surface_capabilities2>... Extras, ::vkfu::expression_for<::vkfu::tag::khr::physical_device_surface2> Expression1>
 [[nodiscard]] auto get_physical_device_surface_capabilities2(VkPhysicalDevice physical_device, Expression1&& surface_info, ::std::nothrow_t)
-	-> ::std::expected<::vkfu::query_chain<::vkfu::obj::result::khr::surface_capabilities2, Extras...>, ::VkResult>
+	-> ::std::expected<::vkfu::query_chain<::vkfu::tag::result::khr::surface_capabilities2, Extras...>, ::VkResult>
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(surface_info));
-	auto chain = ::vkfu::query_chain<::vkfu::obj::result::khr::surface_capabilities2, Extras...>{};
+	auto chain = ::vkfu::query_chain<::vkfu::tag::result::khr::surface_capabilities2, Extras...>{};
 	if (auto const outcome = ::vkGetPhysicalDeviceSurfaceCapabilities2KHR(physical_device, ::std::addressof(::vkfu::unpack(storage1)), ::std::addressof(chain.head())); outcome != ::VK_SUCCESS)
 	{
 		return ::std::unexpected{outcome};
@@ -284,8 +284,8 @@ template<::vkfu::query_extension_of<::vkfu::obj::result::khr::surface_capabiliti
 	return chain;
 }
 
-template<::vkfu::query_extension_of<::vkfu::obj::result::khr::surface_capabilities2>... Extras, ::vkfu::expression_for<::vkfu::obj::khr::physical_device_surface2> Expression1>
-[[nodiscard]] auto get_physical_device_surface_capabilities2(VkPhysicalDevice physical_device, Expression1&& surface_info) -> ::vkfu::query_chain<::vkfu::obj::result::khr::surface_capabilities2, Extras...>
+template<::vkfu::query_extension_of<::vkfu::tag::result::khr::surface_capabilities2>... Extras, ::vkfu::expression_for<::vkfu::tag::khr::physical_device_surface2> Expression1>
+[[nodiscard]] auto get_physical_device_surface_capabilities2(VkPhysicalDevice physical_device, Expression1&& surface_info) -> ::vkfu::query_chain<::vkfu::tag::result::khr::surface_capabilities2, Extras...>
 {
 	auto outcome = get_physical_device_surface_capabilities2<Extras...>(physical_device, ::std::forward<Expression1>(surface_info), ::std::nothrow);
 	if (!outcome)

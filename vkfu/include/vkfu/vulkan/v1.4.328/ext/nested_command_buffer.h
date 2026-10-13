@@ -59,7 +59,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceNestedCommandBufferPropertiesEXT c
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -74,7 +74,7 @@ struct nested_command_buffer{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::nested_command_buffer>
+struct vulkan_object_trait<tag::feature::ext::nested_command_buffer>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -82,7 +82,7 @@ struct vulkan_object_trait<obj::feature::ext::nested_command_buffer>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::ext::nested_command_buffer>
+struct vulkan_object_trait<tag::property::ext::nested_command_buffer>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -92,11 +92,11 @@ struct vulkan_object_trait<obj::property::ext::nested_command_buffer>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceNestedCommandBufferFeaturesEXT>
 {
-	using type = obj::feature::ext::nested_command_buffer;
+	using type = tag::feature::ext::nested_command_buffer;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::nested_command_buffer>
+struct vulkan_object_native<tag::feature::ext::nested_command_buffer>
 {
 	using type = VkPhysicalDeviceNestedCommandBufferFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_NESTED_COMMAND_BUFFER_FEATURES_EXT;
@@ -105,18 +105,18 @@ struct vulkan_object_native<obj::feature::ext::nested_command_buffer>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceNestedCommandBufferPropertiesEXT>
 {
-	using type = obj::property::ext::nested_command_buffer;
+	using type = tag::property::ext::nested_command_buffer;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::nested_command_buffer>
+struct vulkan_object_native<tag::property::ext::nested_command_buffer>
 {
 	using type = VkPhysicalDeviceNestedCommandBufferPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_NESTED_COMMAND_BUFFER_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::nested_command_buffer>
+struct vulkan_object_extensions<tag::feature::ext::nested_command_buffer>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_nested_command_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -124,7 +124,7 @@ struct vulkan_object_extensions<obj::feature::ext::nested_command_buffer>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::nested_command_buffer>
+struct vulkan_object_extensions<tag::property::ext::nested_command_buffer>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_nested_command_buffer"};
 	constexpr static ::std::uint32_t core = 0;
@@ -132,11 +132,11 @@ struct vulkan_object_extensions<obj::property::ext::nested_command_buffer>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::nested_command_buffer> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::nested_command_buffer> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::nested_command_buffer> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::nested_command_buffer> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::nested_command_buffer> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::nested_command_buffer> = true;
 }
 
 namespace vkfu::param
@@ -147,7 +147,7 @@ using ::vkfu::operator|;
 
 struct nested_command_buffer
 {
-	using vulkan_tag_type = obj::feature::ext::nested_command_buffer;
+	using vulkan_tag_type = tag::feature::ext::nested_command_buffer;
 
 	bool enable = false;
 	bool rendering = false;

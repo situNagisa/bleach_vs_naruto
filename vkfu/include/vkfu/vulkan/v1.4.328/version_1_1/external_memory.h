@@ -29,6 +29,7 @@
 #include "../version_1_0/memory.h"
 #include "../version_1_0/buffer.h"
 #include "../version_1_0/image.h"
+#include "external_memory_capabilities.h"
 
 constexpr auto _vkfu_address(VkExportMemoryAllocateInfo& value) noexcept -> void const*
 {
@@ -75,7 +76,7 @@ constexpr auto _vkfu_evaluate(VkExternalMemoryImageCreateInfo const& value) noex
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option
 {
@@ -88,7 +89,7 @@ struct external_memory_image{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::export_memory>
+struct vulkan_object_trait<tag::option::export_memory>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -96,7 +97,7 @@ struct vulkan_object_trait<obj::option::export_memory>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::external_memory_buffer>
+struct vulkan_object_trait<tag::option::external_memory_buffer>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -104,7 +105,7 @@ struct vulkan_object_trait<obj::option::external_memory_buffer>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::external_memory_image>
+struct vulkan_object_trait<tag::option::external_memory_image>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -114,11 +115,11 @@ struct vulkan_object_trait<obj::option::external_memory_image>
 template<>
 struct expression_vulkan_tag<VkExportMemoryAllocateInfo>
 {
-	using type = obj::option::export_memory;
+	using type = tag::option::export_memory;
 };
 
 template<>
-struct vulkan_object_native<obj::option::export_memory>
+struct vulkan_object_native<tag::option::export_memory>
 {
 	using type = VkExportMemoryAllocateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO;
@@ -127,11 +128,11 @@ struct vulkan_object_native<obj::option::export_memory>
 template<>
 struct expression_vulkan_tag<VkExternalMemoryBufferCreateInfo>
 {
-	using type = obj::option::external_memory_buffer;
+	using type = tag::option::external_memory_buffer;
 };
 
 template<>
-struct vulkan_object_native<obj::option::external_memory_buffer>
+struct vulkan_object_native<tag::option::external_memory_buffer>
 {
 	using type = VkExternalMemoryBufferCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO;
@@ -140,18 +141,18 @@ struct vulkan_object_native<obj::option::external_memory_buffer>
 template<>
 struct expression_vulkan_tag<VkExternalMemoryImageCreateInfo>
 {
-	using type = obj::option::external_memory_image;
+	using type = tag::option::external_memory_image;
 };
 
 template<>
-struct vulkan_object_native<obj::option::external_memory_image>
+struct vulkan_object_native<tag::option::external_memory_image>
 {
 	using type = VkExternalMemoryImageCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::export_memory>
+struct vulkan_object_extensions<tag::option::export_memory>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_memory"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -159,7 +160,7 @@ struct vulkan_object_extensions<obj::option::export_memory>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::external_memory_buffer>
+struct vulkan_object_extensions<tag::option::external_memory_buffer>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_memory"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -167,7 +168,7 @@ struct vulkan_object_extensions<obj::option::external_memory_buffer>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::external_memory_image>
+struct vulkan_object_extensions<tag::option::external_memory_image>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_memory"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -175,11 +176,11 @@ struct vulkan_object_extensions<obj::option::external_memory_image>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::buffer, obj::option::external_memory_buffer> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::buffer, tag::option::external_memory_buffer> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image, obj::option::external_memory_image> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image, tag::option::external_memory_image> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::memory, obj::option::export_memory> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::memory, tag::option::export_memory> = true;
 }
 
 namespace vkfu::param
@@ -190,33 +191,9 @@ using ::vkfu::operator|;
 
 struct export_memory
 {
-	using vulkan_tag_type = obj::option::export_memory;
+	using vulkan_tag_type = tag::option::export_memory;
 
-	struct handle_types_type
-	{
-		VkExternalMemoryHandleTypeFlags opaque_fd : 1 = 0;
-		VkExternalMemoryHandleTypeFlags opaque_win32 : 1 = 0;
-		VkExternalMemoryHandleTypeFlags opaque_win32_kmt : 1 = 0;
-		VkExternalMemoryHandleTypeFlags d3d11_texture : 1 = 0;
-		VkExternalMemoryHandleTypeFlags d3d11_texture_kmt : 1 = 0;
-		VkExternalMemoryHandleTypeFlags d3d12_heap : 1 = 0;
-		VkExternalMemoryHandleTypeFlags d3d12_resource : 1 = 0;
-		VkExternalMemoryHandleTypeFlags host_allocation : 1 = 0;
-		VkExternalMemoryHandleTypeFlags host_mapped_foreign_memory : 1 = 0;
-		VkExternalMemoryHandleTypeFlags dma_buf : 1 = 0;
-		VkExternalMemoryHandleTypeFlags android_hardware_buffer : 1 = 0;
-		VkExternalMemoryHandleTypeFlags zircon_vmo : 1 = 0;
-		VkExternalMemoryHandleTypeFlags rdma_address : 1 = 0;
-		VkExternalMemoryHandleTypeFlags _reserved_13 : 1 = 0;
-		VkExternalMemoryHandleTypeFlags screen_buffer : 1 = 0;
-		VkExternalMemoryHandleTypeFlags _reserved_15 : 1 = 0;
-		VkExternalMemoryHandleTypeFlags mtlbuffer : 1 = 0;
-		VkExternalMemoryHandleTypeFlags mtltexture : 1 = 0;
-		VkExternalMemoryHandleTypeFlags mtlheap : 1 = 0;
-		VkExternalMemoryHandleTypeFlags _reserved_19 : 13 = 0;
-	};
-
-	handle_types_type handle_types{};
+	::vkfu::flags::external_memory_handle_type handle_types{};
 
 	constexpr auto evaluate() const noexcept -> VkExportMemoryAllocateInfo
 	{
@@ -228,56 +205,11 @@ struct export_memory
 	}
 };
 
-static_assert(sizeof(export_memory::handle_types_type) == sizeof(VkExternalMemoryHandleTypeFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(export_memory::handle_types_type{.opaque_fd = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(export_memory::handle_types_type{.opaque_win32 = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(export_memory::handle_types_type{.opaque_win32_kmt = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(export_memory::handle_types_type{.d3d11_texture = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_TEXTURE_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(export_memory::handle_types_type{.d3d11_texture_kmt = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_TEXTURE_KMT_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(export_memory::handle_types_type{.d3d12_heap = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D12_HEAP_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(export_memory::handle_types_type{.d3d12_resource = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D12_RESOURCE_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(export_memory::handle_types_type{.host_allocation = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_HOST_ALLOCATION_BIT_EXT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(export_memory::handle_types_type{.host_mapped_foreign_memory = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_HOST_MAPPED_FOREIGN_MEMORY_BIT_EXT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(export_memory::handle_types_type{.dma_buf = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(export_memory::handle_types_type{.android_hardware_buffer = 1}) == 0x400);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(export_memory::handle_types_type{.zircon_vmo = 1}) == 0x800);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(export_memory::handle_types_type{.rdma_address = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_RDMA_ADDRESS_BIT_NV);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(export_memory::handle_types_type{.screen_buffer = 1}) == 0x4000);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(export_memory::handle_types_type{.mtlbuffer = 1}) == 0x10000);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(export_memory::handle_types_type{.mtltexture = 1}) == 0x20000);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(export_memory::handle_types_type{.mtlheap = 1}) == 0x40000);
-#endif
-
 struct external_memory_buffer
 {
-	using vulkan_tag_type = obj::option::external_memory_buffer;
+	using vulkan_tag_type = tag::option::external_memory_buffer;
 
-	struct handle_types_type
-	{
-		VkExternalMemoryHandleTypeFlags opaque_fd : 1 = 0;
-		VkExternalMemoryHandleTypeFlags opaque_win32 : 1 = 0;
-		VkExternalMemoryHandleTypeFlags opaque_win32_kmt : 1 = 0;
-		VkExternalMemoryHandleTypeFlags d3d11_texture : 1 = 0;
-		VkExternalMemoryHandleTypeFlags d3d11_texture_kmt : 1 = 0;
-		VkExternalMemoryHandleTypeFlags d3d12_heap : 1 = 0;
-		VkExternalMemoryHandleTypeFlags d3d12_resource : 1 = 0;
-		VkExternalMemoryHandleTypeFlags host_allocation : 1 = 0;
-		VkExternalMemoryHandleTypeFlags host_mapped_foreign_memory : 1 = 0;
-		VkExternalMemoryHandleTypeFlags dma_buf : 1 = 0;
-		VkExternalMemoryHandleTypeFlags android_hardware_buffer : 1 = 0;
-		VkExternalMemoryHandleTypeFlags zircon_vmo : 1 = 0;
-		VkExternalMemoryHandleTypeFlags rdma_address : 1 = 0;
-		VkExternalMemoryHandleTypeFlags _reserved_13 : 1 = 0;
-		VkExternalMemoryHandleTypeFlags screen_buffer : 1 = 0;
-		VkExternalMemoryHandleTypeFlags _reserved_15 : 1 = 0;
-		VkExternalMemoryHandleTypeFlags mtlbuffer : 1 = 0;
-		VkExternalMemoryHandleTypeFlags mtltexture : 1 = 0;
-		VkExternalMemoryHandleTypeFlags mtlheap : 1 = 0;
-		VkExternalMemoryHandleTypeFlags _reserved_19 : 13 = 0;
-	};
-
-	handle_types_type handle_types{};
+	::vkfu::flags::external_memory_handle_type handle_types{};
 
 	constexpr auto evaluate() const noexcept -> VkExternalMemoryBufferCreateInfo
 	{
@@ -289,56 +221,11 @@ struct external_memory_buffer
 	}
 };
 
-static_assert(sizeof(external_memory_buffer::handle_types_type) == sizeof(VkExternalMemoryHandleTypeFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_buffer::handle_types_type{.opaque_fd = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_buffer::handle_types_type{.opaque_win32 = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_buffer::handle_types_type{.opaque_win32_kmt = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_buffer::handle_types_type{.d3d11_texture = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_TEXTURE_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_buffer::handle_types_type{.d3d11_texture_kmt = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_TEXTURE_KMT_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_buffer::handle_types_type{.d3d12_heap = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D12_HEAP_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_buffer::handle_types_type{.d3d12_resource = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D12_RESOURCE_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_buffer::handle_types_type{.host_allocation = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_HOST_ALLOCATION_BIT_EXT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_buffer::handle_types_type{.host_mapped_foreign_memory = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_HOST_MAPPED_FOREIGN_MEMORY_BIT_EXT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_buffer::handle_types_type{.dma_buf = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_buffer::handle_types_type{.android_hardware_buffer = 1}) == 0x400);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_buffer::handle_types_type{.zircon_vmo = 1}) == 0x800);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_buffer::handle_types_type{.rdma_address = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_RDMA_ADDRESS_BIT_NV);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_buffer::handle_types_type{.screen_buffer = 1}) == 0x4000);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_buffer::handle_types_type{.mtlbuffer = 1}) == 0x10000);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_buffer::handle_types_type{.mtltexture = 1}) == 0x20000);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_buffer::handle_types_type{.mtlheap = 1}) == 0x40000);
-#endif
-
 struct external_memory_image
 {
-	using vulkan_tag_type = obj::option::external_memory_image;
+	using vulkan_tag_type = tag::option::external_memory_image;
 
-	struct handle_types_type
-	{
-		VkExternalMemoryHandleTypeFlags opaque_fd : 1 = 0;
-		VkExternalMemoryHandleTypeFlags opaque_win32 : 1 = 0;
-		VkExternalMemoryHandleTypeFlags opaque_win32_kmt : 1 = 0;
-		VkExternalMemoryHandleTypeFlags d3d11_texture : 1 = 0;
-		VkExternalMemoryHandleTypeFlags d3d11_texture_kmt : 1 = 0;
-		VkExternalMemoryHandleTypeFlags d3d12_heap : 1 = 0;
-		VkExternalMemoryHandleTypeFlags d3d12_resource : 1 = 0;
-		VkExternalMemoryHandleTypeFlags host_allocation : 1 = 0;
-		VkExternalMemoryHandleTypeFlags host_mapped_foreign_memory : 1 = 0;
-		VkExternalMemoryHandleTypeFlags dma_buf : 1 = 0;
-		VkExternalMemoryHandleTypeFlags android_hardware_buffer : 1 = 0;
-		VkExternalMemoryHandleTypeFlags zircon_vmo : 1 = 0;
-		VkExternalMemoryHandleTypeFlags rdma_address : 1 = 0;
-		VkExternalMemoryHandleTypeFlags _reserved_13 : 1 = 0;
-		VkExternalMemoryHandleTypeFlags screen_buffer : 1 = 0;
-		VkExternalMemoryHandleTypeFlags _reserved_15 : 1 = 0;
-		VkExternalMemoryHandleTypeFlags mtlbuffer : 1 = 0;
-		VkExternalMemoryHandleTypeFlags mtltexture : 1 = 0;
-		VkExternalMemoryHandleTypeFlags mtlheap : 1 = 0;
-		VkExternalMemoryHandleTypeFlags _reserved_19 : 13 = 0;
-	};
-
-	handle_types_type handle_types{};
+	::vkfu::flags::external_memory_handle_type handle_types{};
 
 	constexpr auto evaluate() const noexcept -> VkExternalMemoryImageCreateInfo
 	{
@@ -349,27 +236,6 @@ struct external_memory_image
 		};
 	}
 };
-
-static_assert(sizeof(external_memory_image::handle_types_type) == sizeof(VkExternalMemoryHandleTypeFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_image::handle_types_type{.opaque_fd = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_image::handle_types_type{.opaque_win32 = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_image::handle_types_type{.opaque_win32_kmt = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_image::handle_types_type{.d3d11_texture = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_TEXTURE_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_image::handle_types_type{.d3d11_texture_kmt = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D11_TEXTURE_KMT_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_image::handle_types_type{.d3d12_heap = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D12_HEAP_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_image::handle_types_type{.d3d12_resource = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_D3D12_RESOURCE_BIT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_image::handle_types_type{.host_allocation = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_HOST_ALLOCATION_BIT_EXT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_image::handle_types_type{.host_mapped_foreign_memory = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_HOST_MAPPED_FOREIGN_MEMORY_BIT_EXT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_image::handle_types_type{.dma_buf = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_image::handle_types_type{.android_hardware_buffer = 1}) == 0x400);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_image::handle_types_type{.zircon_vmo = 1}) == 0x800);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_image::handle_types_type{.rdma_address = 1}) == VK_EXTERNAL_MEMORY_HANDLE_TYPE_RDMA_ADDRESS_BIT_NV);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_image::handle_types_type{.screen_buffer = 1}) == 0x4000);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_image::handle_types_type{.mtlbuffer = 1}) == 0x10000);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_image::handle_types_type{.mtltexture = 1}) == 0x20000);
-static_assert(::std::bit_cast<VkExternalMemoryHandleTypeFlags>(external_memory_image::handle_types_type{.mtlheap = 1}) == 0x40000);
-#endif
 
 }
 }

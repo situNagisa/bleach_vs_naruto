@@ -28,11 +28,11 @@
 
 #include "../version_1_3/shader_terminate_invocation.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
-using shader_terminate_invocation = ::vkfu::obj::feature::shader_terminate_invocation;
+using shader_terminate_invocation = ::vkfu::tag::feature::shader_terminate_invocation;
 }
 }
 

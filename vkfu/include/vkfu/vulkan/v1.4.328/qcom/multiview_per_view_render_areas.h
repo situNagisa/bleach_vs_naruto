@@ -61,7 +61,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceMultiviewPerViewRenderAreasFeature
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::qcom
 {
@@ -76,7 +76,7 @@ struct multiview_per_view_render_areas{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::qcom::multiview_per_view_render_areas>
+struct vulkan_object_trait<tag::option::qcom::multiview_per_view_render_areas>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -84,7 +84,7 @@ struct vulkan_object_trait<obj::option::qcom::multiview_per_view_render_areas>
 };
 
 template<>
-struct vulkan_object_trait<obj::feature::qcom::multiview_per_view_render_areas>
+struct vulkan_object_trait<tag::feature::qcom::multiview_per_view_render_areas>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -94,11 +94,11 @@ struct vulkan_object_trait<obj::feature::qcom::multiview_per_view_render_areas>
 template<>
 struct expression_vulkan_tag<VkMultiviewPerViewRenderAreasRenderPassBeginInfoQCOM>
 {
-	using type = obj::option::qcom::multiview_per_view_render_areas;
+	using type = tag::option::qcom::multiview_per_view_render_areas;
 };
 
 template<>
-struct vulkan_object_native<obj::option::qcom::multiview_per_view_render_areas>
+struct vulkan_object_native<tag::option::qcom::multiview_per_view_render_areas>
 {
 	using type = VkMultiviewPerViewRenderAreasRenderPassBeginInfoQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_MULTIVIEW_PER_VIEW_RENDER_AREAS_RENDER_PASS_BEGIN_INFO_QCOM;
@@ -107,18 +107,18 @@ struct vulkan_object_native<obj::option::qcom::multiview_per_view_render_areas>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceMultiviewPerViewRenderAreasFeaturesQCOM>
 {
-	using type = obj::feature::qcom::multiview_per_view_render_areas;
+	using type = tag::feature::qcom::multiview_per_view_render_areas;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::qcom::multiview_per_view_render_areas>
+struct vulkan_object_native<tag::feature::qcom::multiview_per_view_render_areas>
 {
 	using type = VkPhysicalDeviceMultiviewPerViewRenderAreasFeaturesQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_PER_VIEW_RENDER_AREAS_FEATURES_QCOM;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::qcom::multiview_per_view_render_areas>
+struct vulkan_object_extensions<tag::option::qcom::multiview_per_view_render_areas>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_multiview_per_view_render_areas"};
 	constexpr static ::std::uint32_t core = 0;
@@ -126,7 +126,7 @@ struct vulkan_object_extensions<obj::option::qcom::multiview_per_view_render_are
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::qcom::multiview_per_view_render_areas>
+struct vulkan_object_extensions<tag::feature::qcom::multiview_per_view_render_areas>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_multiview_per_view_render_areas"};
 	constexpr static ::std::uint32_t core = 0;
@@ -134,13 +134,13 @@ struct vulkan_object_extensions<obj::feature::qcom::multiview_per_view_render_ar
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::qcom::multiview_per_view_render_areas> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::qcom::multiview_per_view_render_areas> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::qcom::multiview_per_view_render_areas> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::qcom::multiview_per_view_render_areas> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::render_pass_begin, obj::option::qcom::multiview_per_view_render_areas> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::render_pass_begin, tag::option::qcom::multiview_per_view_render_areas> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::rendering, obj::option::qcom::multiview_per_view_render_areas> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::rendering, tag::option::qcom::multiview_per_view_render_areas> = true;
 }
 
 namespace vkfu::param
@@ -151,7 +151,7 @@ using ::vkfu::operator|;
 
 struct multiview_per_view_render_areas
 {
-	using vulkan_tag_type = obj::feature::qcom::multiview_per_view_render_areas;
+	using vulkan_tag_type = tag::feature::qcom::multiview_per_view_render_areas;
 
 	bool enable = false;
 
@@ -173,7 +173,7 @@ using ::vkfu::operator|;
 
 struct multiview_per_view_render_areas
 {
-	using vulkan_tag_type = obj::option::qcom::multiview_per_view_render_areas;
+	using vulkan_tag_type = tag::option::qcom::multiview_per_view_render_areas;
 
 	::std::span<VkRect2D const> per_view_render_areas{};
 

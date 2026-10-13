@@ -61,7 +61,7 @@ constexpr auto _vkfu_evaluate(VkVideoInlineQueryInfoKHR const& value) noexcept -
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -76,7 +76,7 @@ struct video_inline_query{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::video_maintenance1>
+struct vulkan_object_trait<tag::feature::khr::video_maintenance1>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -84,7 +84,7 @@ struct vulkan_object_trait<obj::feature::khr::video_maintenance1>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::video_inline_query>
+struct vulkan_object_trait<tag::option::khr::video_inline_query>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -94,11 +94,11 @@ struct vulkan_object_trait<obj::option::khr::video_inline_query>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceVideoMaintenance1FeaturesKHR>
 {
-	using type = obj::feature::khr::video_maintenance1;
+	using type = tag::feature::khr::video_maintenance1;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::video_maintenance1>
+struct vulkan_object_native<tag::feature::khr::video_maintenance1>
 {
 	using type = VkPhysicalDeviceVideoMaintenance1FeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VIDEO_MAINTENANCE_1_FEATURES_KHR;
@@ -107,18 +107,18 @@ struct vulkan_object_native<obj::feature::khr::video_maintenance1>
 template<>
 struct expression_vulkan_tag<VkVideoInlineQueryInfoKHR>
 {
-	using type = obj::option::khr::video_inline_query;
+	using type = tag::option::khr::video_inline_query;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::video_inline_query>
+struct vulkan_object_native<tag::option::khr::video_inline_query>
 {
 	using type = VkVideoInlineQueryInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_VIDEO_INLINE_QUERY_INFO_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::video_maintenance1>
+struct vulkan_object_extensions<tag::feature::khr::video_maintenance1>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_maintenance1"};
 	constexpr static ::std::uint32_t core = 0;
@@ -126,7 +126,7 @@ struct vulkan_object_extensions<obj::feature::khr::video_maintenance1>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::video_inline_query>
+struct vulkan_object_extensions<tag::option::khr::video_inline_query>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_video_maintenance1"};
 	constexpr static ::std::uint32_t core = 0;
@@ -134,13 +134,13 @@ struct vulkan_object_extensions<obj::option::khr::video_inline_query>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::video_maintenance1> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::video_maintenance1> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::video_maintenance1> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::video_maintenance1> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_decode, obj::option::khr::video_inline_query> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_decode, tag::option::khr::video_inline_query> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::khr::video_encode, obj::option::khr::video_inline_query> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::khr::video_encode, tag::option::khr::video_inline_query> = true;
 }
 
 namespace vkfu::param
@@ -151,7 +151,7 @@ using ::vkfu::operator|;
 
 struct video_maintenance1
 {
-	using vulkan_tag_type = obj::feature::khr::video_maintenance1;
+	using vulkan_tag_type = tag::feature::khr::video_maintenance1;
 
 	bool enable = false;
 
@@ -173,7 +173,7 @@ using ::vkfu::operator|;
 
 struct video_inline_query
 {
-	using vulkan_tag_type = obj::option::khr::video_inline_query;
+	using vulkan_tag_type = tag::option::khr::video_inline_query;
 
 	VkQueryPool query_pool{};
 	::std::uint32_t first_query{};

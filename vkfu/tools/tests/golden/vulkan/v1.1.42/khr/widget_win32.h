@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkWidgetWin32InfoKHR const& value) noexcept -> VkW
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
@@ -55,7 +55,7 @@ struct widget_win32{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::khr::widget_win32>
+struct vulkan_object_trait<tag::khr::widget_win32>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::khr::widget_win32>
 template<>
 struct expression_vulkan_tag<VkWidgetWin32InfoKHR>
 {
-	using type = obj::khr::widget_win32;
+	using type = tag::khr::widget_win32;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::widget_win32>
+struct vulkan_object_native<tag::khr::widget_win32>
 {
 	using type = VkWidgetWin32InfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIDGET_WIN32_INFO_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::widget_win32>
+struct vulkan_object_extensions<tag::khr::widget_win32>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_widget_win32"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,7 +84,7 @@ struct vulkan_object_extensions<obj::khr::widget_win32>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::widget, obj::khr::widget_win32> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::widget, tag::khr::widget_win32> = true;
 }
 
 namespace vkfu::param
@@ -95,7 +95,7 @@ using ::vkfu::operator|;
 
 struct widget_win32
 {
-	using vulkan_tag_type = obj::khr::widget_win32;
+	using vulkan_tag_type = tag::khr::widget_win32;
 
 	void* handle = nullptr;
 
@@ -114,7 +114,7 @@ struct widget_win32
 
 namespace vkfu
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::widget_win32> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::widget_win32> Expression1>
 void cmd_set_win32_widget(VkRecorder recorder, Expression1&& info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));

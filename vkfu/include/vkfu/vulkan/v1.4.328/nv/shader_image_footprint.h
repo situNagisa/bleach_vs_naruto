@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceShaderImageFootprintFeaturesNV con
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::nv
 {
@@ -55,7 +55,7 @@ struct shader_image_footprint{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::nv::shader_image_footprint>
+struct vulkan_object_trait<tag::feature::nv::shader_image_footprint>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::nv::shader_image_footprint>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderImageFootprintFeaturesNV>
 {
-	using type = obj::feature::nv::shader_image_footprint;
+	using type = tag::feature::nv::shader_image_footprint;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::nv::shader_image_footprint>
+struct vulkan_object_native<tag::feature::nv::shader_image_footprint>
 {
 	using type = VkPhysicalDeviceShaderImageFootprintFeaturesNV;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_FOOTPRINT_FEATURES_NV;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::nv::shader_image_footprint>
+struct vulkan_object_extensions<tag::feature::nv::shader_image_footprint>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NV_shader_image_footprint"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::nv::shader_image_footprint>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::nv::shader_image_footprint> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::nv::shader_image_footprint> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::nv::shader_image_footprint> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::nv::shader_image_footprint> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct shader_image_footprint
 {
-	using vulkan_tag_type = obj::feature::nv::shader_image_footprint;
+	using vulkan_tag_type = tag::feature::nv::shader_image_footprint;
 
 	bool image_footprint = false;
 

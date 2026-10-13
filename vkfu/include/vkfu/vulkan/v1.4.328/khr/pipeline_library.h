@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkPipelineLibraryCreateInfoKHR const& value) noexc
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace state::khr
 {
@@ -54,7 +54,7 @@ struct library{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::state::khr::library>
+struct vulkan_object_trait<tag::state::khr::library>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::state::khr::library>
 template<>
 struct expression_vulkan_tag<VkPipelineLibraryCreateInfoKHR>
 {
-	using type = obj::state::khr::library;
+	using type = tag::state::khr::library;
 };
 
 template<>
-struct vulkan_object_native<obj::state::khr::library>
+struct vulkan_object_native<tag::state::khr::library>
 {
 	using type = VkPipelineLibraryCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_LIBRARY_CREATE_INFO_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::khr::library>
+struct vulkan_object_extensions<tag::state::khr::library>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_pipeline_library"};
 	constexpr static ::std::uint32_t core = 0;
@@ -83,7 +83,7 @@ struct vulkan_object_extensions<obj::state::khr::library>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::graphics_pipeline, obj::state::khr::library> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::graphics_pipeline, tag::state::khr::library> = true;
 }
 
 namespace vkfu::param
@@ -94,7 +94,7 @@ using ::vkfu::operator|;
 
 struct library
 {
-	using vulkan_tag_type = obj::state::khr::library;
+	using vulkan_tag_type = tag::state::khr::library;
 
 	::std::span<VkPipeline const> libraries{};
 

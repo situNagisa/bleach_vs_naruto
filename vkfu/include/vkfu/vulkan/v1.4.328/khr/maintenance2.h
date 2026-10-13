@@ -28,20 +28,20 @@
 
 #include "../version_1_1/maintenance2.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::khr
 {
-using image_view_usage = ::vkfu::obj::option::image_view_usage;
-using render_pass_input_attachment_aspect = ::vkfu::obj::option::render_pass_input_attachment_aspect;
+using image_view_usage = ::vkfu::tag::option::image_view_usage;
+using render_pass_input_attachment_aspect = ::vkfu::tag::option::render_pass_input_attachment_aspect;
 }
 namespace property::khr
 {
-using point_clipping = ::vkfu::obj::property::point_clipping;
+using point_clipping = ::vkfu::tag::property::point_clipping;
 }
 namespace state::khr
 {
-using tessellation_domain_origin = ::vkfu::obj::state::tessellation_domain_origin;
+using tessellation_domain_origin = ::vkfu::tag::state::tessellation_domain_origin;
 }
 }
 

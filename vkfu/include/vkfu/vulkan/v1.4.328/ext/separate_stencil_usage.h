@@ -28,11 +28,11 @@
 
 #include "../version_1_2/separate_stencil_usage.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option::ext
 {
-using image_stencil_usage = ::vkfu::obj::option::image_stencil_usage;
+using image_stencil_usage = ::vkfu::tag::option::image_stencil_usage;
 }
 }
 

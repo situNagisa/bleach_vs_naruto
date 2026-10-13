@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceShaderUntypedPointersFeaturesKHR c
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::khr
 {
@@ -55,7 +55,7 @@ struct shader_untyped_pointers{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::khr::shader_untyped_pointers>
+struct vulkan_object_trait<tag::feature::khr::shader_untyped_pointers>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::khr::shader_untyped_pointers>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceShaderUntypedPointersFeaturesKHR>
 {
-	using type = obj::feature::khr::shader_untyped_pointers;
+	using type = tag::feature::khr::shader_untyped_pointers;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::khr::shader_untyped_pointers>
+struct vulkan_object_native<tag::feature::khr::shader_untyped_pointers>
 {
 	using type = VkPhysicalDeviceShaderUntypedPointersFeaturesKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_UNTYPED_POINTERS_FEATURES_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::khr::shader_untyped_pointers>
+struct vulkan_object_extensions<tag::feature::khr::shader_untyped_pointers>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_shader_untyped_pointers"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::khr::shader_untyped_pointers>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::khr::shader_untyped_pointers> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::khr::shader_untyped_pointers> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::khr::shader_untyped_pointers> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::khr::shader_untyped_pointers> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct shader_untyped_pointers
 {
-	using vulkan_tag_type = obj::feature::khr::shader_untyped_pointers;
+	using vulkan_tag_type = tag::feature::khr::shader_untyped_pointers;
 
 	bool enable = false;
 

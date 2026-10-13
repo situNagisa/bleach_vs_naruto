@@ -78,7 +78,20 @@ class ContentTest(unittest.TestCase):
 		self.contains("VkWidgetFlags _reserved_3 : 29 = 0;")
 
 	def test_the_bit_layout_is_asserted_not_assumed(self) -> None:
-		self.contains("static_assert(::std::bit_cast<VkWidgetFlags>(widget<>::flags_type{.alpha = 1}) == VK_WIDGET_ALPHA_BIT);")
+		self.contains("static_assert(::std::bit_cast<VkWidgetFlags>(widget{.alpha = 1}) == VK_WIDGET_ALPHA_BIT);")
+
+	def test_a_flags_type_is_one_shared_struct_not_a_nested_one(self) -> None:
+		# The field names the shared struct, so a value moves between any two
+		# fields of the same flags type without a cast.
+		self.contains("namespace vkfu::flags\n{\nstruct widget\n{")
+		self.contains("\t::vkfu::flags::widget flags{};")
+		self.assertNotIn("flags_type", self.text)
+		self.assertEqual(self.text.count("VkWidgetFlags alpha : 1 = 0;"), 1)
+
+	def test_the_tag_namespace_is_called_tag(self) -> None:
+		self.contains("namespace vkfu::tag\n{")
+		self.assertNotIn("vkfu::obj", self.text)
+		self.assertNotIn("obj::", self.text)
 
 	def test_a_value_defined_entry_is_not_a_bit(self) -> None:
 		self.assertNotIn("VK_WIDGET_NONE", self.text)
@@ -89,7 +102,7 @@ class ContentTest(unittest.TestCase):
 		self.assertNotIn("part_count", self.text)
 
 	def test_a_lone_const_pointer_becomes_a_slot(self) -> None:
-		self.contains("template<::vkfu::reference_expression_for<obj::widget_tuning> tuning_expression = ::vkfu::absent_expression>")
+		self.contains("template<::vkfu::reference_expression_for<tag::widget_tuning> tuning_expression = ::vkfu::absent_expression>")
 		self.contains("::vkfu::reference_slot<&VkWidgetCreateInfo::pTuning,")
 
 	def test_a_fixed_array_is_copied_even_alongside_a_slot(self) -> None:
@@ -100,7 +113,7 @@ class ContentTest(unittest.TestCase):
 
 	def test_allow_duplicate_reaches_the_trait(self) -> None:
 		self.contains(
-			"struct vulkan_object_trait<obj::option::khr::widget_label>\n"
+			"struct vulkan_object_trait<tag::option::khr::widget_label>\n"
 			"{\n"
 			"\tconstexpr static auto root = false;\n"
 			"\tconstexpr static auto branch = false;\n"
@@ -110,7 +123,7 @@ class ContentTest(unittest.TestCase):
 
 	def test_structextends_becomes_a_compat_edge(self) -> None:
 		self.contains(
-			"inline constexpr auto is_vulkan_object_compatible_with_v<obj::widget, obj::option::ext::widget_colour> = true;"
+			"inline constexpr auto is_vulkan_object_compatible_with_v<tag::widget, tag::option::ext::widget_colour> = true;"
 		)
 
 	def test_a_platform_extension_is_guarded_once_as_a_whole(self) -> None:
@@ -121,7 +134,7 @@ class ContentTest(unittest.TestCase):
 		self.assertEqual(opens, closes)
 
 	def test_query_objects_get_a_tag_but_no_param(self) -> None:
-		self.contains("struct vulkan_object_native<obj::result::widget_properties>")
+		self.contains("struct vulkan_object_native<tag::result::widget_properties>")
 		self.contains("constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIDGET_PROPERTIES;")
 		# No param: nobody fills a query in.
 		self.assertNotIn("struct widget_properties\n{", self.text)
@@ -164,16 +177,16 @@ class ContentTest(unittest.TestCase):
 		self.contains("::std::span<VkWidgetReport>{::std::to_address(out), count}")
 
 	def test_an_alias_is_a_using_beside_the_real_name(self) -> None:
-		# Same structure, one namespace deeper, in both obj and param.
-		self.contains("using widget_limits = ::vkfu::obj::option::widget_limits;")
+		# Same structure, one namespace deeper, in both tag and param.
+		self.contains("using widget_limits = ::vkfu::tag::option::widget_limits;")
 		self.contains("using widget_limits = ::vkfu::param::option::widget_limits;")
 
 	def test_chain_query_takes_the_extras_as_a_pack(self) -> None:
-		self.contains("template<::vkfu::query_extension_of<::vkfu::obj::result::widget_properties>... Extras>")
+		self.contains("template<::vkfu::query_extension_of<::vkfu::tag::result::widget_properties>... Extras>")
 		self.contains("::std::addressof(chain.head())")
 
 	def test_the_producer_takes_an_expression(self) -> None:
-		self.contains("::vkfu::expression_for<::vkfu::obj::widget>")
+		self.contains("::vkfu::expression_for<::vkfu::tag::widget>")
 
 
 class SplitTest(unittest.TestCase):
@@ -211,7 +224,7 @@ class SplitTest(unittest.TestCase):
 		for marker in (
 			"struct widget{};",  # tag
 			"enum class widget_mode",  # enum
-			"struct vulkan_object_trait<obj::widget>",  # trait
+			"struct vulkan_object_trait<tag::widget>",  # trait
 			"namespace vkfu::param",  # param
 			"auto create_widget(",  # command
 		):

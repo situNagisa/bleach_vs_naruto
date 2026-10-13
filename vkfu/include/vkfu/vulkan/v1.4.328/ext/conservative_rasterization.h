@@ -70,7 +70,7 @@ enum class conservative_rasterization_mode : ::std::underlying_type_t<VkConserva
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property::ext
 {
@@ -85,7 +85,7 @@ struct rasterization_conservative{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::state::ext::rasterization_conservative>
+struct vulkan_object_trait<tag::state::ext::rasterization_conservative>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -93,7 +93,7 @@ struct vulkan_object_trait<obj::state::ext::rasterization_conservative>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::ext::conservative_rasterization>
+struct vulkan_object_trait<tag::property::ext::conservative_rasterization>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -103,11 +103,11 @@ struct vulkan_object_trait<obj::property::ext::conservative_rasterization>
 template<>
 struct expression_vulkan_tag<VkPipelineRasterizationConservativeStateCreateInfoEXT>
 {
-	using type = obj::state::ext::rasterization_conservative;
+	using type = tag::state::ext::rasterization_conservative;
 };
 
 template<>
-struct vulkan_object_native<obj::state::ext::rasterization_conservative>
+struct vulkan_object_native<tag::state::ext::rasterization_conservative>
 {
 	using type = VkPipelineRasterizationConservativeStateCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_CONSERVATIVE_STATE_CREATE_INFO_EXT;
@@ -116,18 +116,18 @@ struct vulkan_object_native<obj::state::ext::rasterization_conservative>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceConservativeRasterizationPropertiesEXT>
 {
-	using type = obj::property::ext::conservative_rasterization;
+	using type = tag::property::ext::conservative_rasterization;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::conservative_rasterization>
+struct vulkan_object_native<tag::property::ext::conservative_rasterization>
 {
 	using type = VkPhysicalDeviceConservativeRasterizationPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CONSERVATIVE_RASTERIZATION_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::ext::rasterization_conservative>
+struct vulkan_object_extensions<tag::state::ext::rasterization_conservative>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_conservative_rasterization"};
 	constexpr static ::std::uint32_t core = 0;
@@ -135,7 +135,7 @@ struct vulkan_object_extensions<obj::state::ext::rasterization_conservative>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::conservative_rasterization>
+struct vulkan_object_extensions<tag::property::ext::conservative_rasterization>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_conservative_rasterization"};
 	constexpr static ::std::uint32_t core = 0;
@@ -143,9 +143,9 @@ struct vulkan_object_extensions<obj::property::ext::conservative_rasterization>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::conservative_rasterization> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::conservative_rasterization> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::rasterization, obj::state::ext::rasterization_conservative> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::rasterization, tag::state::ext::rasterization_conservative> = true;
 }
 
 namespace vkfu::param
@@ -156,7 +156,7 @@ using ::vkfu::operator|;
 
 struct rasterization_conservative
 {
-	using vulkan_tag_type = obj::state::ext::rasterization_conservative;
+	using vulkan_tag_type = tag::state::ext::rasterization_conservative;
 
 	VkPipelineRasterizationConservativeStateCreateFlagsEXT flags{};
 	::vkfu::enums::conservative_rasterization_mode conservative_rasterization_mode{};

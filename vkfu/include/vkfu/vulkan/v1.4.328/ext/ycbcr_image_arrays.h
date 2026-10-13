@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceYcbcrImageArraysFeaturesEXT const&
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct ycbcr_image_arrays{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::ycbcr_image_arrays>
+struct vulkan_object_trait<tag::feature::ext::ycbcr_image_arrays>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::ycbcr_image_arrays>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceYcbcrImageArraysFeaturesEXT>
 {
-	using type = obj::feature::ext::ycbcr_image_arrays;
+	using type = tag::feature::ext::ycbcr_image_arrays;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::ycbcr_image_arrays>
+struct vulkan_object_native<tag::feature::ext::ycbcr_image_arrays>
 {
 	using type = VkPhysicalDeviceYcbcrImageArraysFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_YCBCR_IMAGE_ARRAYS_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::ycbcr_image_arrays>
+struct vulkan_object_extensions<tag::feature::ext::ycbcr_image_arrays>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_ycbcr_image_arrays"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::ycbcr_image_arrays>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::ycbcr_image_arrays> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::ycbcr_image_arrays> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::ycbcr_image_arrays> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::ycbcr_image_arrays> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct ycbcr_image_arrays
 {
-	using vulkan_tag_type = obj::feature::ext::ycbcr_image_arrays;
+	using vulkan_tag_type = tag::feature::ext::ycbcr_image_arrays;
 
 	bool enable = false;
 

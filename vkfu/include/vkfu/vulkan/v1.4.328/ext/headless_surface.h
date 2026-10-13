@@ -41,7 +41,7 @@ constexpr auto _vkfu_evaluate(VkHeadlessSurfaceCreateInfoEXT const& value) noexc
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace ext
 {
@@ -52,7 +52,7 @@ struct headless_surface{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::ext::headless_surface>
+struct vulkan_object_trait<tag::ext::headless_surface>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -62,18 +62,18 @@ struct vulkan_object_trait<obj::ext::headless_surface>
 template<>
 struct expression_vulkan_tag<VkHeadlessSurfaceCreateInfoEXT>
 {
-	using type = obj::ext::headless_surface;
+	using type = tag::ext::headless_surface;
 };
 
 template<>
-struct vulkan_object_native<obj::ext::headless_surface>
+struct vulkan_object_native<tag::ext::headless_surface>
 {
 	using type = VkHeadlessSurfaceCreateInfoEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_HEADLESS_SURFACE_CREATE_INFO_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::ext::headless_surface>
+struct vulkan_object_extensions<tag::ext::headless_surface>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_headless_surface"};
 	constexpr static ::std::uint32_t core = 0;
@@ -90,7 +90,7 @@ using ::vkfu::operator|;
 
 struct headless_surface
 {
-	using vulkan_tag_type = obj::ext::headless_surface;
+	using vulkan_tag_type = tag::ext::headless_surface;
 
 	VkHeadlessSurfaceCreateFlagsEXT flags{};
 
@@ -111,7 +111,7 @@ namespace vkfu
 {
 namespace ext
 {
-template<::vkfu::expression_for<::vkfu::obj::ext::headless_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::ext::headless_surface> Expression>
 [[nodiscard]] auto create_headless_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkSurfaceKHR, ::VkResult>
 {
@@ -126,7 +126,7 @@ template<::vkfu::expression_for<::vkfu::obj::ext::headless_surface> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::ext::headless_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::ext::headless_surface> Expression>
 [[nodiscard]] auto create_headless_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkSurfaceKHR
 {
 	auto produced = create_headless_surface(instance, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

@@ -86,7 +86,7 @@ constexpr auto _vkfu_evaluate(VkCuModuleTexturingModeCreateInfoNVX const& value)
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace nvx
 {
@@ -103,7 +103,7 @@ struct cu_module_texturing_mode{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::nvx::cu_function>
+struct vulkan_object_trait<tag::nvx::cu_function>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -111,7 +111,7 @@ struct vulkan_object_trait<obj::nvx::cu_function>
 };
 
 template<>
-struct vulkan_object_trait<obj::nvx::cu_launch>
+struct vulkan_object_trait<tag::nvx::cu_launch>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -119,7 +119,7 @@ struct vulkan_object_trait<obj::nvx::cu_launch>
 };
 
 template<>
-struct vulkan_object_trait<obj::nvx::cu_module>
+struct vulkan_object_trait<tag::nvx::cu_module>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -127,7 +127,7 @@ struct vulkan_object_trait<obj::nvx::cu_module>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::nvx::cu_module_texturing_mode>
+struct vulkan_object_trait<tag::option::nvx::cu_module_texturing_mode>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -137,11 +137,11 @@ struct vulkan_object_trait<obj::option::nvx::cu_module_texturing_mode>
 template<>
 struct expression_vulkan_tag<VkCuFunctionCreateInfoNVX>
 {
-	using type = obj::nvx::cu_function;
+	using type = tag::nvx::cu_function;
 };
 
 template<>
-struct vulkan_object_native<obj::nvx::cu_function>
+struct vulkan_object_native<tag::nvx::cu_function>
 {
 	using type = VkCuFunctionCreateInfoNVX;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_CU_FUNCTION_CREATE_INFO_NVX;
@@ -150,11 +150,11 @@ struct vulkan_object_native<obj::nvx::cu_function>
 template<>
 struct expression_vulkan_tag<VkCuLaunchInfoNVX>
 {
-	using type = obj::nvx::cu_launch;
+	using type = tag::nvx::cu_launch;
 };
 
 template<>
-struct vulkan_object_native<obj::nvx::cu_launch>
+struct vulkan_object_native<tag::nvx::cu_launch>
 {
 	using type = VkCuLaunchInfoNVX;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_CU_LAUNCH_INFO_NVX;
@@ -163,11 +163,11 @@ struct vulkan_object_native<obj::nvx::cu_launch>
 template<>
 struct expression_vulkan_tag<VkCuModuleCreateInfoNVX>
 {
-	using type = obj::nvx::cu_module;
+	using type = tag::nvx::cu_module;
 };
 
 template<>
-struct vulkan_object_native<obj::nvx::cu_module>
+struct vulkan_object_native<tag::nvx::cu_module>
 {
 	using type = VkCuModuleCreateInfoNVX;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_CU_MODULE_CREATE_INFO_NVX;
@@ -176,18 +176,18 @@ struct vulkan_object_native<obj::nvx::cu_module>
 template<>
 struct expression_vulkan_tag<VkCuModuleTexturingModeCreateInfoNVX>
 {
-	using type = obj::option::nvx::cu_module_texturing_mode;
+	using type = tag::option::nvx::cu_module_texturing_mode;
 };
 
 template<>
-struct vulkan_object_native<obj::option::nvx::cu_module_texturing_mode>
+struct vulkan_object_native<tag::option::nvx::cu_module_texturing_mode>
 {
 	using type = VkCuModuleTexturingModeCreateInfoNVX;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_CU_MODULE_TEXTURING_MODE_CREATE_INFO_NVX;
 };
 
 template<>
-struct vulkan_object_extensions<obj::nvx::cu_function>
+struct vulkan_object_extensions<tag::nvx::cu_function>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NVX_binary_import"};
 	constexpr static ::std::uint32_t core = 0;
@@ -195,7 +195,7 @@ struct vulkan_object_extensions<obj::nvx::cu_function>
 };
 
 template<>
-struct vulkan_object_extensions<obj::nvx::cu_launch>
+struct vulkan_object_extensions<tag::nvx::cu_launch>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NVX_binary_import"};
 	constexpr static ::std::uint32_t core = 0;
@@ -203,7 +203,7 @@ struct vulkan_object_extensions<obj::nvx::cu_launch>
 };
 
 template<>
-struct vulkan_object_extensions<obj::nvx::cu_module>
+struct vulkan_object_extensions<tag::nvx::cu_module>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NVX_binary_import"};
 	constexpr static ::std::uint32_t core = 0;
@@ -211,7 +211,7 @@ struct vulkan_object_extensions<obj::nvx::cu_module>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::nvx::cu_module_texturing_mode>
+struct vulkan_object_extensions<tag::option::nvx::cu_module_texturing_mode>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_NVX_binary_import"};
 	constexpr static ::std::uint32_t core = 0;
@@ -219,7 +219,7 @@ struct vulkan_object_extensions<obj::option::nvx::cu_module_texturing_mode>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::nvx::cu_module, obj::option::nvx::cu_module_texturing_mode> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::nvx::cu_module, tag::option::nvx::cu_module_texturing_mode> = true;
 }
 
 namespace vkfu::param
@@ -230,7 +230,7 @@ using ::vkfu::operator|;
 
 struct cu_function
 {
-	using vulkan_tag_type = obj::nvx::cu_function;
+	using vulkan_tag_type = tag::nvx::cu_function;
 
 	VkCuModuleNVX module{};
 	char const* name = nullptr;
@@ -248,7 +248,7 @@ struct cu_function
 
 struct cu_launch
 {
-	using vulkan_tag_type = obj::nvx::cu_launch;
+	using vulkan_tag_type = tag::nvx::cu_launch;
 
 	VkCuFunctionNVX function{};
 	::std::uint32_t grid_dim_x{};
@@ -286,7 +286,7 @@ struct cu_launch
 
 struct cu_module
 {
-	using vulkan_tag_type = obj::nvx::cu_module;
+	using vulkan_tag_type = tag::nvx::cu_module;
 
 	::std::size_t data_size{};
 	void const* data = nullptr;
@@ -310,7 +310,7 @@ using ::vkfu::operator|;
 
 struct cu_module_texturing_mode
 {
-	using vulkan_tag_type = obj::option::nvx::cu_module_texturing_mode;
+	using vulkan_tag_type = tag::option::nvx::cu_module_texturing_mode;
 
 	bool use64_bit_texturing = false;
 
@@ -331,7 +331,7 @@ namespace vkfu
 {
 namespace nvx
 {
-template<::vkfu::expression_for<::vkfu::obj::nvx::cu_function> Expression>
+template<::vkfu::expression_for<::vkfu::tag::nvx::cu_function> Expression>
 [[nodiscard]] auto create_cu_function(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkCuFunctionNVX, ::VkResult>
 {
@@ -346,7 +346,7 @@ template<::vkfu::expression_for<::vkfu::obj::nvx::cu_function> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nvx::cu_function> Expression>
+template<::vkfu::expression_for<::vkfu::tag::nvx::cu_function> Expression>
 [[nodiscard]] auto create_cu_function(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkCuFunctionNVX
 {
 	auto produced = create_cu_function(device, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);
@@ -357,7 +357,7 @@ template<::vkfu::expression_for<::vkfu::obj::nvx::cu_function> Expression>
 	return *produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nvx::cu_module> Expression>
+template<::vkfu::expression_for<::vkfu::tag::nvx::cu_module> Expression>
 [[nodiscard]] auto create_cu_module(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkCuModuleNVX, ::VkResult>
 {
@@ -372,7 +372,7 @@ template<::vkfu::expression_for<::vkfu::obj::nvx::cu_module> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nvx::cu_module> Expression>
+template<::vkfu::expression_for<::vkfu::tag::nvx::cu_module> Expression>
 [[nodiscard]] auto create_cu_module(VkDevice device, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkCuModuleNVX
 {
 	auto produced = create_cu_module(device, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);
@@ -383,7 +383,7 @@ template<::vkfu::expression_for<::vkfu::obj::nvx::cu_module> Expression>
 	return *produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::nvx::cu_launch> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::nvx::cu_launch> Expression1>
 void cmd_cu_launch_kernel(VkCommandBuffer command_buffer, Expression1&& launch_info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(launch_info));

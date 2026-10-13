@@ -60,7 +60,7 @@ constexpr auto _vkfu_evaluate(VkTilePropertiesQCOM const& value) noexcept -> VkT
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::qcom
 {
@@ -75,7 +75,7 @@ struct tile_properties{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::qcom::tile_properties>
+struct vulkan_object_trait<tag::feature::qcom::tile_properties>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -83,7 +83,7 @@ struct vulkan_object_trait<obj::feature::qcom::tile_properties>
 };
 
 template<>
-struct vulkan_object_trait<obj::result::qcom::tile_properties>
+struct vulkan_object_trait<tag::result::qcom::tile_properties>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -93,11 +93,11 @@ struct vulkan_object_trait<obj::result::qcom::tile_properties>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceTilePropertiesFeaturesQCOM>
 {
-	using type = obj::feature::qcom::tile_properties;
+	using type = tag::feature::qcom::tile_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::qcom::tile_properties>
+struct vulkan_object_native<tag::feature::qcom::tile_properties>
 {
 	using type = VkPhysicalDeviceTilePropertiesFeaturesQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TILE_PROPERTIES_FEATURES_QCOM;
@@ -106,18 +106,18 @@ struct vulkan_object_native<obj::feature::qcom::tile_properties>
 template<>
 struct expression_vulkan_tag<VkTilePropertiesQCOM>
 {
-	using type = obj::result::qcom::tile_properties;
+	using type = tag::result::qcom::tile_properties;
 };
 
 template<>
-struct vulkan_object_native<obj::result::qcom::tile_properties>
+struct vulkan_object_native<tag::result::qcom::tile_properties>
 {
 	using type = VkTilePropertiesQCOM;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_TILE_PROPERTIES_QCOM;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::qcom::tile_properties>
+struct vulkan_object_extensions<tag::feature::qcom::tile_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_tile_properties"};
 	constexpr static ::std::uint32_t core = 0;
@@ -125,7 +125,7 @@ struct vulkan_object_extensions<obj::feature::qcom::tile_properties>
 };
 
 template<>
-struct vulkan_object_extensions<obj::result::qcom::tile_properties>
+struct vulkan_object_extensions<tag::result::qcom::tile_properties>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_QCOM_tile_properties"};
 	constexpr static ::std::uint32_t core = 0;
@@ -133,9 +133,9 @@ struct vulkan_object_extensions<obj::result::qcom::tile_properties>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::qcom::tile_properties> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::qcom::tile_properties> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::qcom::tile_properties> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::qcom::tile_properties> = true;
 }
 
 namespace vkfu::param
@@ -146,7 +146,7 @@ using ::vkfu::operator|;
 
 struct tile_properties
 {
-	using vulkan_tag_type = obj::feature::qcom::tile_properties;
+	using vulkan_tag_type = tag::feature::qcom::tile_properties;
 
 	bool enable = false;
 
@@ -167,7 +167,7 @@ namespace vkfu
 {
 namespace qcom
 {
-template<::vkfu::expression_for<::vkfu::obj::rendering> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::rendering> Expression1>
 [[nodiscard]] auto get_dynamic_rendering_tile_properties(VkDevice device, Expression1&& rendering_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkTilePropertiesQCOM, ::VkResult>
 {
@@ -181,7 +181,7 @@ template<::vkfu::expression_for<::vkfu::obj::rendering> Expression1>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::rendering> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::rendering> Expression1>
 [[nodiscard]] auto get_dynamic_rendering_tile_properties(VkDevice device, Expression1&& rendering_info) -> VkTilePropertiesQCOM
 {
 	auto outcome = get_dynamic_rendering_tile_properties(device, ::std::forward<Expression1>(rendering_info), ::std::nothrow);

@@ -75,7 +75,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceFragmentDensityMapLayeredPropertie
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::valve
 {
@@ -94,7 +94,7 @@ struct fragment_density_map_layered{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::valve::fragment_density_map_layered>
+struct vulkan_object_trait<tag::feature::valve::fragment_density_map_layered>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -102,7 +102,7 @@ struct vulkan_object_trait<obj::feature::valve::fragment_density_map_layered>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::valve::pipeline_fragment_density_map_layered>
+struct vulkan_object_trait<tag::option::valve::pipeline_fragment_density_map_layered>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -110,7 +110,7 @@ struct vulkan_object_trait<obj::option::valve::pipeline_fragment_density_map_lay
 };
 
 template<>
-struct vulkan_object_trait<obj::property::valve::fragment_density_map_layered>
+struct vulkan_object_trait<tag::property::valve::fragment_density_map_layered>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -120,11 +120,11 @@ struct vulkan_object_trait<obj::property::valve::fragment_density_map_layered>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceFragmentDensityMapLayeredFeaturesVALVE>
 {
-	using type = obj::feature::valve::fragment_density_map_layered;
+	using type = tag::feature::valve::fragment_density_map_layered;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::valve::fragment_density_map_layered>
+struct vulkan_object_native<tag::feature::valve::fragment_density_map_layered>
 {
 	using type = VkPhysicalDeviceFragmentDensityMapLayeredFeaturesVALVE;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_LAYERED_FEATURES_VALVE;
@@ -133,11 +133,11 @@ struct vulkan_object_native<obj::feature::valve::fragment_density_map_layered>
 template<>
 struct expression_vulkan_tag<VkPipelineFragmentDensityMapLayeredCreateInfoVALVE>
 {
-	using type = obj::option::valve::pipeline_fragment_density_map_layered;
+	using type = tag::option::valve::pipeline_fragment_density_map_layered;
 };
 
 template<>
-struct vulkan_object_native<obj::option::valve::pipeline_fragment_density_map_layered>
+struct vulkan_object_native<tag::option::valve::pipeline_fragment_density_map_layered>
 {
 	using type = VkPipelineFragmentDensityMapLayeredCreateInfoVALVE;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_FRAGMENT_DENSITY_MAP_LAYERED_CREATE_INFO_VALVE;
@@ -146,18 +146,18 @@ struct vulkan_object_native<obj::option::valve::pipeline_fragment_density_map_la
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceFragmentDensityMapLayeredPropertiesVALVE>
 {
-	using type = obj::property::valve::fragment_density_map_layered;
+	using type = tag::property::valve::fragment_density_map_layered;
 };
 
 template<>
-struct vulkan_object_native<obj::property::valve::fragment_density_map_layered>
+struct vulkan_object_native<tag::property::valve::fragment_density_map_layered>
 {
 	using type = VkPhysicalDeviceFragmentDensityMapLayeredPropertiesVALVE;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_LAYERED_PROPERTIES_VALVE;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::valve::fragment_density_map_layered>
+struct vulkan_object_extensions<tag::feature::valve::fragment_density_map_layered>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_VALVE_fragment_density_map_layered"};
 	constexpr static ::std::uint32_t core = 0;
@@ -165,7 +165,7 @@ struct vulkan_object_extensions<obj::feature::valve::fragment_density_map_layere
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::valve::pipeline_fragment_density_map_layered>
+struct vulkan_object_extensions<tag::option::valve::pipeline_fragment_density_map_layered>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_VALVE_fragment_density_map_layered"};
 	constexpr static ::std::uint32_t core = 0;
@@ -173,7 +173,7 @@ struct vulkan_object_extensions<obj::option::valve::pipeline_fragment_density_ma
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::valve::fragment_density_map_layered>
+struct vulkan_object_extensions<tag::property::valve::fragment_density_map_layered>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_VALVE_fragment_density_map_layered"};
 	constexpr static ::std::uint32_t core = 0;
@@ -181,13 +181,13 @@ struct vulkan_object_extensions<obj::property::valve::fragment_density_map_layer
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::valve::fragment_density_map_layered> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::valve::fragment_density_map_layered> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::graphics_pipeline, obj::option::valve::pipeline_fragment_density_map_layered> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::graphics_pipeline, tag::option::valve::pipeline_fragment_density_map_layered> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::valve::fragment_density_map_layered> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::valve::fragment_density_map_layered> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::valve::fragment_density_map_layered> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::valve::fragment_density_map_layered> = true;
 }
 
 namespace vkfu::param
@@ -198,7 +198,7 @@ using ::vkfu::operator|;
 
 struct fragment_density_map_layered
 {
-	using vulkan_tag_type = obj::feature::valve::fragment_density_map_layered;
+	using vulkan_tag_type = tag::feature::valve::fragment_density_map_layered;
 
 	bool enable = false;
 
@@ -220,7 +220,7 @@ using ::vkfu::operator|;
 
 struct pipeline_fragment_density_map_layered
 {
-	using vulkan_tag_type = obj::option::valve::pipeline_fragment_density_map_layered;
+	using vulkan_tag_type = tag::option::valve::pipeline_fragment_density_map_layered;
 
 	::std::uint32_t max_fragment_density_map_layers{};
 

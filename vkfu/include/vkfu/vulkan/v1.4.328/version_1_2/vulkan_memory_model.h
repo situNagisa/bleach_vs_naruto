@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceVulkanMemoryModelFeatures const& v
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature
 {
@@ -55,7 +55,7 @@ struct vulkan_memory_model{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::vulkan_memory_model>
+struct vulkan_object_trait<tag::feature::vulkan_memory_model>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::vulkan_memory_model>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceVulkanMemoryModelFeatures>
 {
-	using type = obj::feature::vulkan_memory_model;
+	using type = tag::feature::vulkan_memory_model;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::vulkan_memory_model>
+struct vulkan_object_native<tag::feature::vulkan_memory_model>
 {
 	using type = VkPhysicalDeviceVulkanMemoryModelFeatures;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_MEMORY_MODEL_FEATURES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::vulkan_memory_model>
+struct vulkan_object_extensions<tag::feature::vulkan_memory_model>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_vulkan_memory_model"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::vulkan_memory_model>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::vulkan_memory_model> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::vulkan_memory_model> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::vulkan_memory_model> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::vulkan_memory_model> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct vulkan_memory_model
 {
-	using vulkan_tag_type = obj::feature::vulkan_memory_model;
+	using vulkan_tag_type = tag::feature::vulkan_memory_model;
 
 	bool enable = false;
 	bool device_scope = false;

@@ -26,6 +26,8 @@
 #include <vkfu/storage.h>
 #include <vkfu/vulkan_object.h>
 
+#include "../version_1_0/device_initialization.h"
+#include "../version_1_0/sparse_memory.h"
 #include "../version_1_0/image_view.h"
 #include "../version_1_0/pipeline.h"
 #include "../version_1_0/render_pass.h"
@@ -101,7 +103,7 @@ enum class tessellation_domain_origin : ::std::underlying_type_t<VkTessellationD
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option
 {
@@ -121,7 +123,7 @@ struct tessellation_domain_origin{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::image_view_usage>
+struct vulkan_object_trait<tag::option::image_view_usage>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -129,7 +131,7 @@ struct vulkan_object_trait<obj::option::image_view_usage>
 };
 
 template<>
-struct vulkan_object_trait<obj::state::tessellation_domain_origin>
+struct vulkan_object_trait<tag::state::tessellation_domain_origin>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -137,7 +139,7 @@ struct vulkan_object_trait<obj::state::tessellation_domain_origin>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::render_pass_input_attachment_aspect>
+struct vulkan_object_trait<tag::option::render_pass_input_attachment_aspect>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -145,7 +147,7 @@ struct vulkan_object_trait<obj::option::render_pass_input_attachment_aspect>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::point_clipping>
+struct vulkan_object_trait<tag::property::point_clipping>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -155,11 +157,11 @@ struct vulkan_object_trait<obj::property::point_clipping>
 template<>
 struct expression_vulkan_tag<VkImageViewUsageCreateInfo>
 {
-	using type = obj::option::image_view_usage;
+	using type = tag::option::image_view_usage;
 };
 
 template<>
-struct vulkan_object_native<obj::option::image_view_usage>
+struct vulkan_object_native<tag::option::image_view_usage>
 {
 	using type = VkImageViewUsageCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMAGE_VIEW_USAGE_CREATE_INFO;
@@ -168,11 +170,11 @@ struct vulkan_object_native<obj::option::image_view_usage>
 template<>
 struct expression_vulkan_tag<VkPipelineTessellationDomainOriginStateCreateInfo>
 {
-	using type = obj::state::tessellation_domain_origin;
+	using type = tag::state::tessellation_domain_origin;
 };
 
 template<>
-struct vulkan_object_native<obj::state::tessellation_domain_origin>
+struct vulkan_object_native<tag::state::tessellation_domain_origin>
 {
 	using type = VkPipelineTessellationDomainOriginStateCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_DOMAIN_ORIGIN_STATE_CREATE_INFO;
@@ -181,11 +183,11 @@ struct vulkan_object_native<obj::state::tessellation_domain_origin>
 template<>
 struct expression_vulkan_tag<VkRenderPassInputAttachmentAspectCreateInfo>
 {
-	using type = obj::option::render_pass_input_attachment_aspect;
+	using type = tag::option::render_pass_input_attachment_aspect;
 };
 
 template<>
-struct vulkan_object_native<obj::option::render_pass_input_attachment_aspect>
+struct vulkan_object_native<tag::option::render_pass_input_attachment_aspect>
 {
 	using type = VkRenderPassInputAttachmentAspectCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_RENDER_PASS_INPUT_ATTACHMENT_ASPECT_CREATE_INFO;
@@ -194,18 +196,18 @@ struct vulkan_object_native<obj::option::render_pass_input_attachment_aspect>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePointClippingProperties>
 {
-	using type = obj::property::point_clipping;
+	using type = tag::property::point_clipping;
 };
 
 template<>
-struct vulkan_object_native<obj::property::point_clipping>
+struct vulkan_object_native<tag::property::point_clipping>
 {
 	using type = VkPhysicalDevicePointClippingProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_POINT_CLIPPING_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::image_view_usage>
+struct vulkan_object_extensions<tag::option::image_view_usage>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -213,7 +215,7 @@ struct vulkan_object_extensions<obj::option::image_view_usage>
 };
 
 template<>
-struct vulkan_object_extensions<obj::state::tessellation_domain_origin>
+struct vulkan_object_extensions<tag::state::tessellation_domain_origin>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -221,7 +223,7 @@ struct vulkan_object_extensions<obj::state::tessellation_domain_origin>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::render_pass_input_attachment_aspect>
+struct vulkan_object_extensions<tag::option::render_pass_input_attachment_aspect>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -229,7 +231,7 @@ struct vulkan_object_extensions<obj::option::render_pass_input_attachment_aspect
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::point_clipping>
+struct vulkan_object_extensions<tag::property::point_clipping>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_maintenance2"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_1;
@@ -237,13 +239,13 @@ struct vulkan_object_extensions<obj::property::point_clipping>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::image_view, obj::option::image_view_usage> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::image_view, tag::option::image_view_usage> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::point_clipping> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::point_clipping> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::state::tessellation, obj::state::tessellation_domain_origin> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::tessellation, tag::state::tessellation_domain_origin> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::render_pass, obj::option::render_pass_input_attachment_aspect> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::render_pass, tag::option::render_pass_input_attachment_aspect> = true;
 }
 
 namespace vkfu::param
@@ -254,41 +256,9 @@ using ::vkfu::operator|;
 
 struct image_view_usage
 {
-	using vulkan_tag_type = obj::option::image_view_usage;
+	using vulkan_tag_type = tag::option::image_view_usage;
 
-	struct usage_type
-	{
-		VkImageUsageFlags transfer_src : 1 = 0;
-		VkImageUsageFlags transfer_dst : 1 = 0;
-		VkImageUsageFlags sampled : 1 = 0;
-		VkImageUsageFlags storage : 1 = 0;
-		VkImageUsageFlags color_attachment : 1 = 0;
-		VkImageUsageFlags depth_stencil_attachment : 1 = 0;
-		VkImageUsageFlags transient_attachment : 1 = 0;
-		VkImageUsageFlags input_attachment : 1 = 0;
-		VkImageUsageFlags fragment_shading_rate_attachment : 1 = 0;
-		VkImageUsageFlags fragment_density_map : 1 = 0;
-		VkImageUsageFlags video_decode_dst : 1 = 0;
-		VkImageUsageFlags video_decode_src : 1 = 0;
-		VkImageUsageFlags video_decode_dpb : 1 = 0;
-		VkImageUsageFlags video_encode_dst : 1 = 0;
-		VkImageUsageFlags video_encode_src : 1 = 0;
-		VkImageUsageFlags video_encode_dpb : 1 = 0;
-		VkImageUsageFlags _reserved_16 : 2 = 0;
-		VkImageUsageFlags invocation_mask : 1 = 0;
-		VkImageUsageFlags attachment_feedback_loop : 1 = 0;
-		VkImageUsageFlags sample_weight : 1 = 0;
-		VkImageUsageFlags sample_block_match : 1 = 0;
-		VkImageUsageFlags host_transfer : 1 = 0;
-		VkImageUsageFlags tensor_aliasing : 1 = 0;
-		VkImageUsageFlags _reserved_24 : 1 = 0;
-		VkImageUsageFlags video_encode_quantization_delta_map : 1 = 0;
-		VkImageUsageFlags video_encode_emphasis_map : 1 = 0;
-		VkImageUsageFlags tile_memory : 1 = 0;
-		VkImageUsageFlags _reserved_28 : 4 = 0;
-	};
-
-	usage_type usage{};
+	::vkfu::flags::image_usage usage{};
 
 	constexpr auto evaluate() const noexcept -> VkImageViewUsageCreateInfo
 	{
@@ -300,38 +270,9 @@ struct image_view_usage
 	}
 };
 
-static_assert(sizeof(image_view_usage::usage_type) == sizeof(VkImageUsageFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.transfer_src = 1}) == VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.transfer_dst = 1}) == VK_IMAGE_USAGE_TRANSFER_DST_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.sampled = 1}) == VK_IMAGE_USAGE_SAMPLED_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.storage = 1}) == VK_IMAGE_USAGE_STORAGE_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.color_attachment = 1}) == VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.depth_stencil_attachment = 1}) == VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.transient_attachment = 1}) == VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.input_attachment = 1}) == VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.fragment_shading_rate_attachment = 1}) == VK_IMAGE_USAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.fragment_density_map = 1}) == VK_IMAGE_USAGE_FRAGMENT_DENSITY_MAP_BIT_EXT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.video_decode_dst = 1}) == VK_IMAGE_USAGE_VIDEO_DECODE_DST_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.video_decode_src = 1}) == VK_IMAGE_USAGE_VIDEO_DECODE_SRC_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.video_decode_dpb = 1}) == VK_IMAGE_USAGE_VIDEO_DECODE_DPB_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.video_encode_dst = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_DST_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.video_encode_src = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_SRC_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.video_encode_dpb = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_DPB_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.invocation_mask = 1}) == VK_IMAGE_USAGE_INVOCATION_MASK_BIT_HUAWEI);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.attachment_feedback_loop = 1}) == VK_IMAGE_USAGE_ATTACHMENT_FEEDBACK_LOOP_BIT_EXT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.sample_weight = 1}) == VK_IMAGE_USAGE_SAMPLE_WEIGHT_BIT_QCOM);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.sample_block_match = 1}) == VK_IMAGE_USAGE_SAMPLE_BLOCK_MATCH_BIT_QCOM);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.host_transfer = 1}) == VK_IMAGE_USAGE_HOST_TRANSFER_BIT);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.tensor_aliasing = 1}) == VK_IMAGE_USAGE_TENSOR_ALIASING_BIT_ARM);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.video_encode_quantization_delta_map = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_QUANTIZATION_DELTA_MAP_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.video_encode_emphasis_map = 1}) == VK_IMAGE_USAGE_VIDEO_ENCODE_EMPHASIS_MAP_BIT_KHR);
-static_assert(::std::bit_cast<VkImageUsageFlags>(image_view_usage::usage_type{.tile_memory = 1}) == VK_IMAGE_USAGE_TILE_MEMORY_BIT_QCOM);
-#endif
-
 struct render_pass_input_attachment_aspect
 {
-	using vulkan_tag_type = obj::option::render_pass_input_attachment_aspect;
+	using vulkan_tag_type = tag::option::render_pass_input_attachment_aspect;
 
 	::std::span<VkInputAttachmentAspectReference const> aspect_references{};
 
@@ -354,7 +295,7 @@ using ::vkfu::operator|;
 
 struct tessellation_domain_origin
 {
-	using vulkan_tag_type = obj::state::tessellation_domain_origin;
+	using vulkan_tag_type = tag::state::tessellation_domain_origin;
 
 	::vkfu::enums::tessellation_domain_origin domain_origin{};
 
@@ -374,23 +315,7 @@ struct input_attachment_aspect_reference
 {
 	::std::uint32_t subpass{};
 	::std::uint32_t input_attachment_index{};
-	struct aspect_mask_type
-	{
-		VkImageAspectFlags color : 1 = 0;
-		VkImageAspectFlags depth : 1 = 0;
-		VkImageAspectFlags stencil : 1 = 0;
-		VkImageAspectFlags metadata : 1 = 0;
-		VkImageAspectFlags plane_0 : 1 = 0;
-		VkImageAspectFlags plane_1 : 1 = 0;
-		VkImageAspectFlags plane_2 : 1 = 0;
-		VkImageAspectFlags memory_plane_0 : 1 = 0;
-		VkImageAspectFlags memory_plane_1 : 1 = 0;
-		VkImageAspectFlags memory_plane_2 : 1 = 0;
-		VkImageAspectFlags memory_plane_3 : 1 = 0;
-		VkImageAspectFlags _reserved_11 : 21 = 0;
-	};
-
-	aspect_mask_type aspect_mask{};
+	::vkfu::flags::image_aspect aspect_mask{};
 
 	constexpr auto evaluate() const noexcept -> VkInputAttachmentAspectReference
 	{
@@ -401,19 +326,4 @@ struct input_attachment_aspect_reference
 		};
 	}
 };
-
-static_assert(sizeof(input_attachment_aspect_reference::aspect_mask_type) == sizeof(VkImageAspectFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.color = 1}) == VK_IMAGE_ASPECT_COLOR_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.depth = 1}) == VK_IMAGE_ASPECT_DEPTH_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.stencil = 1}) == VK_IMAGE_ASPECT_STENCIL_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.metadata = 1}) == VK_IMAGE_ASPECT_METADATA_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.plane_0 = 1}) == VK_IMAGE_ASPECT_PLANE_0_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.plane_1 = 1}) == VK_IMAGE_ASPECT_PLANE_1_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.plane_2 = 1}) == VK_IMAGE_ASPECT_PLANE_2_BIT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.memory_plane_0 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_0_BIT_EXT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.memory_plane_1 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_1_BIT_EXT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.memory_plane_2 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_2_BIT_EXT);
-static_assert(::std::bit_cast<VkImageAspectFlags>(input_attachment_aspect_reference::aspect_mask_type{.memory_plane_3 = 1}) == VK_IMAGE_ASPECT_MEMORY_PLANE_3_BIT_EXT);
-#endif
 }

@@ -15,7 +15,7 @@
 
 #include "../include/vkfu/vulkan/v1.4.328.h"
 
-namespace obj = ::vkfu::obj;
+namespace tag = ::vkfu::tag;
 namespace param = ::vkfu::param;
 
 // ------------------------------------------------- two-call enumerates
@@ -90,20 +90,20 @@ static_assert(::std::same_as<
 // Nothing named: just the head structure, owned and sType-stamped.
 static_assert(::std::same_as<
 	decltype(vkfu::get_physical_device_properties2(VkPhysicalDevice{})),
-	::vkfu::query_chain<obj::property::core>>);
+	::vkfu::query_chain<tag::property::core>>);
 
 using driver_and_id = decltype(vkfu::get_physical_device_properties2<
-	obj::property::driver, obj::property::id>(VkPhysicalDevice{}));
+	tag::property::driver, tag::property::id>(VkPhysicalDevice{}));
 static_assert(::std::same_as<
 	driver_and_id,
-	::vkfu::query_chain<obj::property::core, obj::property::driver, obj::property::id>>);
+	::vkfu::query_chain<tag::property::core, tag::property::driver, tag::property::id>>);
 
 // The head reads as the native structure; each extra is reached by its tag.
 static_assert(::std::same_as<
 	::std::remove_cvref_t<decltype(::std::declval<driver_and_id&>().head())>,
 	VkPhysicalDeviceProperties2>);
 static_assert(::std::same_as<
-	::std::remove_cvref_t<decltype(::std::declval<driver_and_id&>().get<obj::property::driver>())>,
+	::std::remove_cvref_t<decltype(::std::declval<driver_and_id&>().get<tag::property::driver>())>,
 	VkPhysicalDeviceDriverProperties>);
 
 // The same structextends edges that guard the write side guard this one: a
@@ -111,33 +111,33 @@ static_assert(::std::same_as<
 template<class... Extras>
 concept properties_of = requires { vkfu::get_physical_device_properties2<Extras...>(VkPhysicalDevice{}); };
 
-static_assert(properties_of<obj::property::driver>);
-static_assert(!properties_of<obj::feature::ext::mesh_shader>);
+static_assert(properties_of<tag::property::driver>);
+static_assert(!properties_of<tag::feature::ext::mesh_shader>);
 // Naming the same structure twice would produce a chain that points at itself.
-static_assert(!properties_of<obj::property::driver, obj::property::driver>);
+static_assert(!properties_of<tag::property::driver, tag::property::driver>);
 
 // A chain query that also reads an info structure takes it as an expression.
 static_assert(::std::same_as<
 	decltype(vkfu::get_buffer_memory_requirements2(VkDevice{}, param::buffer_memory_requirements2{})),
-	::vkfu::query_chain<obj::result::memory_requirements2>>);
+	::vkfu::query_chain<tag::result::memory_requirements2>>);
 
 // Old spellings of promoted types resolve to the same structure, one namespace
 // deeper. Code written before the promotion keeps compiling.
 static_assert(::std::same_as<param::khr::rendering<>, param::rendering<>>);
 static_assert(::std::same_as<param::feature::khr::core, param::feature::core>);
-static_assert(::std::same_as<obj::feature::khr::timeline_semaphore, obj::feature::timeline_semaphore>);
+static_assert(::std::same_as<tag::feature::khr::timeline_semaphore, tag::feature::timeline_semaphore>);
 
 int main()
 {
 	// The chain is a value: moving it has to keep pNext pointing at its own
 	// members, which is what basic_storage guarantees.
 	auto properties = ::vkfu::query_chain<
-		obj::property::core, obj::property::driver, obj::property::id>{};
+		tag::property::core, tag::property::driver, tag::property::id>{};
 	auto moved = ::std::move(properties);
 
 	auto const& head = moved.head();
-	auto const& driver = moved.get<obj::property::driver>();
-	auto const& id = moved.get<obj::property::id>();
+	auto const& driver = moved.get<tag::property::driver>();
+	auto const& id = moved.get<tag::property::id>();
 
 	if (head.sType != VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2
 		|| driver.sType != VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES

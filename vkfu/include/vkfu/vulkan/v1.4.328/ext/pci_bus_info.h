@@ -43,7 +43,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDevicePCIBusInfoPropertiesEXT const& val
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace property::ext
 {
@@ -54,7 +54,7 @@ struct pci_bus_info{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::property::ext::pci_bus_info>
+struct vulkan_object_trait<tag::property::ext::pci_bus_info>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -64,18 +64,18 @@ struct vulkan_object_trait<obj::property::ext::pci_bus_info>
 template<>
 struct expression_vulkan_tag<VkPhysicalDevicePCIBusInfoPropertiesEXT>
 {
-	using type = obj::property::ext::pci_bus_info;
+	using type = tag::property::ext::pci_bus_info;
 };
 
 template<>
-struct vulkan_object_native<obj::property::ext::pci_bus_info>
+struct vulkan_object_native<tag::property::ext::pci_bus_info>
 {
 	using type = VkPhysicalDevicePCIBusInfoPropertiesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PCI_BUS_INFO_PROPERTIES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::ext::pci_bus_info>
+struct vulkan_object_extensions<tag::property::ext::pci_bus_info>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_pci_bus_info"};
 	constexpr static ::std::uint32_t core = 0;
@@ -83,5 +83,5 @@ struct vulkan_object_extensions<obj::property::ext::pci_bus_info>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::ext::pci_bus_info> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::ext::pci_bus_info> = true;
 }

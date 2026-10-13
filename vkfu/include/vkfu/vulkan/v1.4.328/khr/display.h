@@ -70,7 +70,7 @@ enum class display_plane_alpha : ::std::underlying_type_t<VkDisplayPlaneAlphaFla
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
@@ -82,7 +82,7 @@ struct display_surface{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::khr::display_mode>
+struct vulkan_object_trait<tag::khr::display_mode>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -90,7 +90,7 @@ struct vulkan_object_trait<obj::khr::display_mode>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::display_surface>
+struct vulkan_object_trait<tag::khr::display_surface>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = true;
@@ -100,11 +100,11 @@ struct vulkan_object_trait<obj::khr::display_surface>
 template<>
 struct expression_vulkan_tag<VkDisplayModeCreateInfoKHR>
 {
-	using type = obj::khr::display_mode;
+	using type = tag::khr::display_mode;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::display_mode>
+struct vulkan_object_native<tag::khr::display_mode>
 {
 	using type = VkDisplayModeCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DISPLAY_MODE_CREATE_INFO_KHR;
@@ -113,18 +113,18 @@ struct vulkan_object_native<obj::khr::display_mode>
 template<>
 struct expression_vulkan_tag<VkDisplaySurfaceCreateInfoKHR>
 {
-	using type = obj::khr::display_surface;
+	using type = tag::khr::display_surface;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::display_surface>
+struct vulkan_object_native<tag::khr::display_surface>
 {
 	using type = VkDisplaySurfaceCreateInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_DISPLAY_SURFACE_CREATE_INFO_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::display_mode>
+struct vulkan_object_extensions<tag::khr::display_mode>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_display"};
 	constexpr static ::std::uint32_t core = 0;
@@ -132,7 +132,7 @@ struct vulkan_object_extensions<obj::khr::display_mode>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::display_surface>
+struct vulkan_object_extensions<tag::khr::display_surface>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_display"};
 	constexpr static ::std::uint32_t core = 0;
@@ -149,7 +149,7 @@ using ::vkfu::operator|;
 
 struct display_mode
 {
-	using vulkan_tag_type = obj::khr::display_mode;
+	using vulkan_tag_type = tag::khr::display_mode;
 
 	VkDisplayModeCreateFlagsKHR flags{};
 	VkDisplayModeParametersKHR parameters{};
@@ -167,7 +167,7 @@ struct display_mode
 
 struct display_surface
 {
-	using vulkan_tag_type = obj::khr::display_surface;
+	using vulkan_tag_type = tag::khr::display_surface;
 
 	VkDisplaySurfaceCreateFlagsKHR flags{};
 	VkDisplayModeKHR display_mode{};
@@ -220,7 +220,7 @@ namespace vkfu
 {
 namespace khr
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::display_mode> Expression>
+template<::vkfu::expression_for<::vkfu::tag::khr::display_mode> Expression>
 [[nodiscard]] auto create_display_mode(VkPhysicalDevice physicalDevice, VkDisplayKHR display, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkDisplayModeKHR, ::VkResult>
 {
@@ -235,7 +235,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::display_mode> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::display_mode> Expression>
+template<::vkfu::expression_for<::vkfu::tag::khr::display_mode> Expression>
 [[nodiscard]] auto create_display_mode(VkPhysicalDevice physicalDevice, VkDisplayKHR display, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkDisplayModeKHR
 {
 	auto produced = create_display_mode(physicalDevice, display, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);
@@ -246,7 +246,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::display_mode> Expression>
 	return *produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::display_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::khr::display_surface> Expression>
 [[nodiscard]] auto create_display_plane_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks, ::std::nothrow_t) noexcept
 	-> ::std::expected<VkSurfaceKHR, ::VkResult>
 {
@@ -261,7 +261,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::display_surface> Expression>
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::display_surface> Expression>
+template<::vkfu::expression_for<::vkfu::tag::khr::display_surface> Expression>
 [[nodiscard]] auto create_display_plane_surface(VkInstance instance, Expression&& info, ::VkAllocationCallbacks const* allocation_callbacks = nullptr) -> VkSurfaceKHR
 {
 	auto produced = create_display_plane_surface(instance, ::std::forward<Expression>(info), allocation_callbacks, ::std::nothrow);

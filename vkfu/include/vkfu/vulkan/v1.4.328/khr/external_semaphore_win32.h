@@ -30,6 +30,7 @@
 #include "../version_1_0/queue.h"
 #include "../version_1_0/semaphore.h"
 #include "../version_1_1/external_semaphore_capabilities.h"
+#include "../version_1_1/external_semaphore.h"
 
 constexpr auto _vkfu_address(VkD3D12FenceSubmitInfoKHR& value) noexcept -> void const*
 {
@@ -91,7 +92,7 @@ constexpr auto _vkfu_evaluate(VkSemaphoreGetWin32HandleInfoKHR const& value) noe
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace khr
 {
@@ -108,7 +109,7 @@ struct export_semaphore_win32_handle{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::khr::d_3d12_fence_submit>
+struct vulkan_object_trait<tag::option::khr::d_3d12_fence_submit>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -116,7 +117,7 @@ struct vulkan_object_trait<obj::option::khr::d_3d12_fence_submit>
 };
 
 template<>
-struct vulkan_object_trait<obj::option::khr::export_semaphore_win32_handle>
+struct vulkan_object_trait<tag::option::khr::export_semaphore_win32_handle>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -124,7 +125,7 @@ struct vulkan_object_trait<obj::option::khr::export_semaphore_win32_handle>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::import_semaphore_win32_handle>
+struct vulkan_object_trait<tag::khr::import_semaphore_win32_handle>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -132,7 +133,7 @@ struct vulkan_object_trait<obj::khr::import_semaphore_win32_handle>
 };
 
 template<>
-struct vulkan_object_trait<obj::khr::semaphore_get_win32_handle>
+struct vulkan_object_trait<tag::khr::semaphore_get_win32_handle>
 {
 	constexpr static auto root = true;
 	constexpr static auto branch = false;
@@ -142,11 +143,11 @@ struct vulkan_object_trait<obj::khr::semaphore_get_win32_handle>
 template<>
 struct expression_vulkan_tag<VkD3D12FenceSubmitInfoKHR>
 {
-	using type = obj::option::khr::d_3d12_fence_submit;
+	using type = tag::option::khr::d_3d12_fence_submit;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::d_3d12_fence_submit>
+struct vulkan_object_native<tag::option::khr::d_3d12_fence_submit>
 {
 	using type = VkD3D12FenceSubmitInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_D3D12_FENCE_SUBMIT_INFO_KHR;
@@ -155,11 +156,11 @@ struct vulkan_object_native<obj::option::khr::d_3d12_fence_submit>
 template<>
 struct expression_vulkan_tag<VkExportSemaphoreWin32HandleInfoKHR>
 {
-	using type = obj::option::khr::export_semaphore_win32_handle;
+	using type = tag::option::khr::export_semaphore_win32_handle;
 };
 
 template<>
-struct vulkan_object_native<obj::option::khr::export_semaphore_win32_handle>
+struct vulkan_object_native<tag::option::khr::export_semaphore_win32_handle>
 {
 	using type = VkExportSemaphoreWin32HandleInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_WIN32_HANDLE_INFO_KHR;
@@ -168,11 +169,11 @@ struct vulkan_object_native<obj::option::khr::export_semaphore_win32_handle>
 template<>
 struct expression_vulkan_tag<VkImportSemaphoreWin32HandleInfoKHR>
 {
-	using type = obj::khr::import_semaphore_win32_handle;
+	using type = tag::khr::import_semaphore_win32_handle;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::import_semaphore_win32_handle>
+struct vulkan_object_native<tag::khr::import_semaphore_win32_handle>
 {
 	using type = VkImportSemaphoreWin32HandleInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_WIN32_HANDLE_INFO_KHR;
@@ -181,18 +182,18 @@ struct vulkan_object_native<obj::khr::import_semaphore_win32_handle>
 template<>
 struct expression_vulkan_tag<VkSemaphoreGetWin32HandleInfoKHR>
 {
-	using type = obj::khr::semaphore_get_win32_handle;
+	using type = tag::khr::semaphore_get_win32_handle;
 };
 
 template<>
-struct vulkan_object_native<obj::khr::semaphore_get_win32_handle>
+struct vulkan_object_native<tag::khr::semaphore_get_win32_handle>
 {
 	using type = VkSemaphoreGetWin32HandleInfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::d_3d12_fence_submit>
+struct vulkan_object_extensions<tag::option::khr::d_3d12_fence_submit>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_semaphore_win32"};
 	constexpr static ::std::uint32_t core = 0;
@@ -200,7 +201,7 @@ struct vulkan_object_extensions<obj::option::khr::d_3d12_fence_submit>
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::khr::export_semaphore_win32_handle>
+struct vulkan_object_extensions<tag::option::khr::export_semaphore_win32_handle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_semaphore_win32"};
 	constexpr static ::std::uint32_t core = 0;
@@ -208,7 +209,7 @@ struct vulkan_object_extensions<obj::option::khr::export_semaphore_win32_handle>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::import_semaphore_win32_handle>
+struct vulkan_object_extensions<tag::khr::import_semaphore_win32_handle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_semaphore_win32"};
 	constexpr static ::std::uint32_t core = 0;
@@ -216,7 +217,7 @@ struct vulkan_object_extensions<obj::khr::import_semaphore_win32_handle>
 };
 
 template<>
-struct vulkan_object_extensions<obj::khr::semaphore_get_win32_handle>
+struct vulkan_object_extensions<tag::khr::semaphore_get_win32_handle>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_KHR_external_semaphore_win32"};
 	constexpr static ::std::uint32_t core = 0;
@@ -224,9 +225,9 @@ struct vulkan_object_extensions<obj::khr::semaphore_get_win32_handle>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::semaphore, obj::option::khr::export_semaphore_win32_handle> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::semaphore, tag::option::khr::export_semaphore_win32_handle> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::submit, obj::option::khr::d_3d12_fence_submit> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::submit, tag::option::khr::d_3d12_fence_submit> = true;
 }
 
 namespace vkfu::param
@@ -237,16 +238,10 @@ using ::vkfu::operator|;
 
 struct import_semaphore_win32_handle
 {
-	using vulkan_tag_type = obj::khr::import_semaphore_win32_handle;
+	using vulkan_tag_type = tag::khr::import_semaphore_win32_handle;
 
 	VkSemaphore semaphore{};
-	struct flags_type
-	{
-		VkSemaphoreImportFlags temporary : 1 = 0;
-		VkSemaphoreImportFlags _reserved_1 : 31 = 0;
-	};
-
-	flags_type flags{};
+	::vkfu::flags::semaphore_import flags{};
 	::vkfu::enums::external_semaphore_handle_type handle_type{};
 	HANDLE handle{};
 	LPCWSTR name{};
@@ -265,14 +260,9 @@ struct import_semaphore_win32_handle
 	}
 };
 
-static_assert(sizeof(import_semaphore_win32_handle::flags_type) == sizeof(VkSemaphoreImportFlags));
-#if !defined(__clang__)
-static_assert(::std::bit_cast<VkSemaphoreImportFlags>(import_semaphore_win32_handle::flags_type{.temporary = 1}) == VK_SEMAPHORE_IMPORT_TEMPORARY_BIT);
-#endif
-
 struct semaphore_get_win32_handle
 {
-	using vulkan_tag_type = obj::khr::semaphore_get_win32_handle;
+	using vulkan_tag_type = tag::khr::semaphore_get_win32_handle;
 
 	VkSemaphore semaphore{};
 	::vkfu::enums::external_semaphore_handle_type handle_type{};
@@ -296,7 +286,7 @@ using ::vkfu::operator|;
 
 struct d_3d12_fence_submit
 {
-	using vulkan_tag_type = obj::option::khr::d_3d12_fence_submit;
+	using vulkan_tag_type = tag::option::khr::d_3d12_fence_submit;
 
 	::std::uint32_t wait_semaphore_values_count{};
 	::std::uint64_t const* wait_semaphore_values = nullptr;
@@ -318,7 +308,7 @@ struct d_3d12_fence_submit
 
 struct export_semaphore_win32_handle
 {
-	using vulkan_tag_type = obj::option::khr::export_semaphore_win32_handle;
+	using vulkan_tag_type = tag::option::khr::export_semaphore_win32_handle;
 
 	SECURITY_ATTRIBUTES const* attributes = nullptr;
 	DWORD dw_access{};
@@ -343,7 +333,7 @@ namespace vkfu
 {
 namespace khr
 {
-template<::vkfu::expression_for<::vkfu::obj::khr::semaphore_get_win32_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::semaphore_get_win32_handle> Expression1>
 [[nodiscard]] auto get_semaphore_win32_handle(VkDevice device, Expression1&& get_win32_handle_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<HANDLE, ::VkResult>
 {
@@ -357,7 +347,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::semaphore_get_win32_handle> Ex
 	return produced;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::semaphore_get_win32_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::semaphore_get_win32_handle> Expression1>
 [[nodiscard]] auto get_semaphore_win32_handle(VkDevice device, Expression1&& get_win32_handle_info) -> HANDLE
 {
 	auto outcome = get_semaphore_win32_handle(device, ::std::forward<Expression1>(get_win32_handle_info), ::std::nothrow);
@@ -368,7 +358,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::semaphore_get_win32_handle> Ex
 	return *outcome;
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::import_semaphore_win32_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::import_semaphore_win32_handle> Expression1>
 [[nodiscard]] auto import_semaphore_win32_handle(VkDevice device, Expression1&& import_semaphore_win32_handle_info, ::std::nothrow_t) noexcept
 	-> ::std::expected<void, ::VkResult>
 {
@@ -381,7 +371,7 @@ template<::vkfu::expression_for<::vkfu::obj::khr::import_semaphore_win32_handle>
 	return {};
 }
 
-template<::vkfu::expression_for<::vkfu::obj::khr::import_semaphore_win32_handle> Expression1>
+template<::vkfu::expression_for<::vkfu::tag::khr::import_semaphore_win32_handle> Expression1>
 void import_semaphore_win32_handle(VkDevice device, Expression1&& import_semaphore_win32_handle_info)
 {
 	auto outcome = import_semaphore_win32_handle(device, ::std::forward<Expression1>(import_semaphore_win32_handle_info), ::std::nothrow);

@@ -16,7 +16,7 @@ import dataclasses
 import re
 
 from . import ir, producers
-from .plan import bit_layout, plan_struct, used_enums
+from .plan import bit_layout, plan_struct, used_enums, used_flags
 from .naming import CPP_KEYWORDS, Table
 
 
@@ -39,7 +39,7 @@ VKFU_NAMES = frozenset(
 		"expression_storage_t",
 		"expression_vulkan_tag",
 		"expression_vulkan_tag_t",
-		"obj",
+		"flags",
 		"param",
 		"reference_expression_for",
 		"reference_slot",
@@ -47,6 +47,7 @@ VKFU_NAMES = frozenset(
 		"reference_storage_of_t",
 		"set_next",
 		"storable",
+		"tag",
 		"unpack",
 		"vulkan_object",
 		"vulkan_object_trait",
@@ -175,8 +176,8 @@ def check(registry: ir.Registry, table: Table, scope: str = "closure") -> list[P
 
 		claimed: list[tuple[str, str]] = []
 		# Everything the param declares at class scope has to be distinct, not
-		# just the fields: a flags field adds `<field>_type`, a slot adds
-		# `<field>_expression`, and the aliases are always there.
+		# just the fields: a slot adds `<field>_expression`, and the aliases are
+		# always there.
 		scope_entries: list[tuple[str, str]] = [("vulkan_tag_type", "<alias>")]
 		if any(field.kind == "reference" for field in plan.fields):
 			scope_entries.append(("storage_type", "<alias>"))
@@ -192,26 +193,29 @@ def check(registry: ir.Registry, table: Table, scope: str = "closure") -> list[P
 				continue
 			claimed.append((field.member.name, value))
 			scope_entries.append((value, field.member.name))
-			if field.kind == "flags":
-				scope_entries.append((f"{value}_type", f"{field.member.name} (flags type)"))
 			if field.kind == "reference":
 				scope_entries.append((f"{value}_expression", f"{field.member.name} (slot)"))
 			if value == object_names.get(name, "").rpartition("::")[2]:
 				sink.warn("shadow", key, f"'{value}' is also the object's own name")
-			if field.kind == "enum" and value == table.enum_name(field.enum_type):
-				sink.warn("shadow", key, f"'{value}' hides the enum class it is typed with")
 
 		_unique(sink, "duplicate", f"struct.{name}", claimed)
 		_unique(sink, "scope", f"struct.{name}", [(source, entry) for entry, source in scope_entries])
 
+	# ------------------------------------------------------------ flags types
+	flags_types = used_flags(registry.closure, registry)
+	flags_names: list[tuple[str, str]] = []
+	for flags_type in flags_types:
+		key = f"flags.{flags_type}"
+		value = table.flags_name(flags_type)
+		if value is None:
+			if scope != "table":
+				sink.error("missing", key, "no name in the table")
+		elif sink.name(key, value):
+			flags_names.append((flags_type, value))
+	_unique(sink, "duplicate", "flags", flags_names)
+
 	# ------------------------------------------------------------ flag bits
-	used_bits: dict[str, str] = {}
-	for name in chain_objects:
-		if name not in registry.structs:
-			continue
-		for field in plan_struct(registry.structs[name], registry).fields:
-			if field.kind == "flags":
-				used_bits.setdefault(field.flag_bits, name)
+	used_bits = {registry.bitmask_to_flagbits[flags_type] for flags_type in flags_types}
 
 	for flag_bits in sorted(used_bits):
 		layout = bit_layout(registry.flagbits[flag_bits]) or []

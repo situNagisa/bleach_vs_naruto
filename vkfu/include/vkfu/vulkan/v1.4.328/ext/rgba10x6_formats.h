@@ -44,7 +44,7 @@ constexpr auto _vkfu_evaluate(VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT const& 
 	return value;
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
@@ -55,7 +55,7 @@ struct rgba10x6_formats{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::feature::ext::rgba10x6_formats>
+struct vulkan_object_trait<tag::feature::ext::rgba10x6_formats>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -65,18 +65,18 @@ struct vulkan_object_trait<obj::feature::ext::rgba10x6_formats>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT>
 {
-	using type = obj::feature::ext::rgba10x6_formats;
+	using type = tag::feature::ext::rgba10x6_formats;
 };
 
 template<>
-struct vulkan_object_native<obj::feature::ext::rgba10x6_formats>
+struct vulkan_object_native<tag::feature::ext::rgba10x6_formats>
 {
 	using type = VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RGBA10X6_FORMATS_FEATURES_EXT;
 };
 
 template<>
-struct vulkan_object_extensions<obj::feature::ext::rgba10x6_formats>
+struct vulkan_object_extensions<tag::feature::ext::rgba10x6_formats>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_rgba10x6_formats"};
 	constexpr static ::std::uint32_t core = 0;
@@ -84,9 +84,9 @@ struct vulkan_object_extensions<obj::feature::ext::rgba10x6_formats>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::device, obj::feature::ext::rgba10x6_formats> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::device, tag::feature::ext::rgba10x6_formats> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::feature::core, obj::feature::ext::rgba10x6_formats> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::feature::core, tag::feature::ext::rgba10x6_formats> = true;
 }
 
 namespace vkfu::param
@@ -97,7 +97,7 @@ using ::vkfu::operator|;
 
 struct rgba10x6_formats
 {
-	using vulkan_tag_type = obj::feature::ext::rgba10x6_formats;
+	using vulkan_tag_type = tag::feature::ext::rgba10x6_formats;
 
 	bool format_rgba10x6_without_ycbcr_sampler = false;
 

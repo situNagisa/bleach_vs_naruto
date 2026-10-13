@@ -9,7 +9,7 @@
 
 #include "../include/vkfu/vulkan/v1.4.328.h"
 
-namespace obj = vkfu::obj;
+namespace tag = vkfu::tag;
 namespace param = vkfu::param;
 
 // An unfilled slot leaves the native pointer null.

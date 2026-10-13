@@ -71,7 +71,7 @@ enum class sampler_reduction_mode : ::std::underlying_type_t<VkSamplerReductionM
 
 }
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace option
 {
@@ -86,7 +86,7 @@ struct sampler_filter_minmax{};
 namespace vkfu
 {
 template<>
-struct vulkan_object_trait<obj::option::sampler_reduction_mode>
+struct vulkan_object_trait<tag::option::sampler_reduction_mode>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -94,7 +94,7 @@ struct vulkan_object_trait<obj::option::sampler_reduction_mode>
 };
 
 template<>
-struct vulkan_object_trait<obj::property::sampler_filter_minmax>
+struct vulkan_object_trait<tag::property::sampler_filter_minmax>
 {
 	constexpr static auto root = false;
 	constexpr static auto branch = false;
@@ -104,11 +104,11 @@ struct vulkan_object_trait<obj::property::sampler_filter_minmax>
 template<>
 struct expression_vulkan_tag<VkSamplerReductionModeCreateInfo>
 {
-	using type = obj::option::sampler_reduction_mode;
+	using type = tag::option::sampler_reduction_mode;
 };
 
 template<>
-struct vulkan_object_native<obj::option::sampler_reduction_mode>
+struct vulkan_object_native<tag::option::sampler_reduction_mode>
 {
 	using type = VkSamplerReductionModeCreateInfo;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_SAMPLER_REDUCTION_MODE_CREATE_INFO;
@@ -117,18 +117,18 @@ struct vulkan_object_native<obj::option::sampler_reduction_mode>
 template<>
 struct expression_vulkan_tag<VkPhysicalDeviceSamplerFilterMinmaxProperties>
 {
-	using type = obj::property::sampler_filter_minmax;
+	using type = tag::property::sampler_filter_minmax;
 };
 
 template<>
-struct vulkan_object_native<obj::property::sampler_filter_minmax>
+struct vulkan_object_native<tag::property::sampler_filter_minmax>
 {
 	using type = VkPhysicalDeviceSamplerFilterMinmaxProperties;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_FILTER_MINMAX_PROPERTIES;
 };
 
 template<>
-struct vulkan_object_extensions<obj::option::sampler_reduction_mode>
+struct vulkan_object_extensions<tag::option::sampler_reduction_mode>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_sampler_filter_minmax"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -136,7 +136,7 @@ struct vulkan_object_extensions<obj::option::sampler_reduction_mode>
 };
 
 template<>
-struct vulkan_object_extensions<obj::property::sampler_filter_minmax>
+struct vulkan_object_extensions<tag::property::sampler_filter_minmax>
 {
 	constexpr static ::std::array<char const*, 1> names{"VK_EXT_sampler_filter_minmax"};
 	constexpr static ::std::uint32_t core = VK_API_VERSION_1_2;
@@ -144,9 +144,9 @@ struct vulkan_object_extensions<obj::property::sampler_filter_minmax>
 };
 
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::property::core, obj::property::sampler_filter_minmax> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::property::core, tag::property::sampler_filter_minmax> = true;
 template<>
-inline constexpr auto is_vulkan_object_compatible_with_v<obj::sampler, obj::option::sampler_reduction_mode> = true;
+inline constexpr auto is_vulkan_object_compatible_with_v<tag::sampler, tag::option::sampler_reduction_mode> = true;
 }
 
 namespace vkfu::param
@@ -157,7 +157,7 @@ using ::vkfu::operator|;
 
 struct sampler_reduction_mode
 {
-	using vulkan_tag_type = obj::option::sampler_reduction_mode;
+	using vulkan_tag_type = tag::option::sampler_reduction_mode;
 
 	::vkfu::enums::sampler_reduction_mode reduction_mode{};
 

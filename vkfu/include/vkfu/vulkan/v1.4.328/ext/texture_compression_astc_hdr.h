@@ -28,11 +28,11 @@
 
 #include "../version_1_3/texture_compression_astc_hdr.h"
 
-namespace vkfu::obj
+namespace vkfu::tag
 {
 namespace feature::ext
 {
-using texture_compression_astc_hdr = ::vkfu::obj::feature::texture_compression_astc_hdr;
+using texture_compression_astc_hdr = ::vkfu::tag::feature::texture_compression_astc_hdr;
 }
 }
 
