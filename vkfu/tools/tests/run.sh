@@ -36,7 +36,7 @@ echo
 echo "== the fixture's generated header is real C++ =="
 for cc in g++ clang++; do
 	command -v "$cc" >/dev/null || continue
-	"$cc" -std=c++23 -Wall -Wextra -Werror -O1 -I tests -I vulkan-headers \
+	"$cc" -std=c++23 -Wall -Wextra -Werror -O1 -I tests -I ../include -I vulkan-headers \
 		-o /tmp/vkfu-fixture tests/fixture_consumer.cpp
 	/tmp/vkfu-fixture
 	echo "$cc: ok"

@@ -16,16 +16,16 @@
 
 #include <vulkan/vulkan.h>
 
-#include "../../../include/vkfu/branch_pipe.h"
-#include "../../../include/vkfu/chain.h"
-#include "../../../include/vkfu/expression.h"
-#include "../../../include/vkfu/extension.h"
-#include "../../../include/vkfu/query.h"
-#include "../../../include/vkfu/reference.h"
-#include "../../../include/vkfu/storage.h"
-#include "../../../include/vkfu/vulkan_object.h"
+#include <vkfu/branch_pipe.h>
+#include <vkfu/chain.h>
+#include <vkfu/expression.h>
+#include <vkfu/extension.h>
+#include <vkfu/query.h>
+#include <vkfu/reference.h>
+#include <vkfu/storage.h>
+#include <vkfu/vulkan_object.h>
 
-// ---------------------------------------------------------------- VK_VERSION_1_0
+// ---------------------------------------------------------------- version_1_0/core.h
 
 constexpr auto _vkfu_address(VkWidgetCreateInfo& value) noexcept -> void const*
 {
@@ -425,7 +425,7 @@ template<::vkfu::query_extension_of<::vkfu::obj::result::widget_properties>... E
 }
 }
 
-// ---------------------------------------------------------------- VK_VERSION_1_1
+// ---------------------------------------------------------------- version_1_1/core.h
 
 constexpr auto _vkfu_address(VkWidgetLimits& value) noexcept -> void const*
 {
@@ -510,7 +510,7 @@ struct widget_limits
 }
 }
 
-// ---------------------------------------------------------------- VK_EXT_widget_colour
+// ---------------------------------------------------------------- ext/widget_colour.h
 
 constexpr auto _vkfu_address(VkWidgetColourInfoEXT& value) noexcept -> void const*
 {
@@ -645,7 +645,7 @@ struct widget_colour
 }
 }
 
-// ---------------------------------------------------------------- VK_KHR_widget_label
+// ---------------------------------------------------------------- khr/widget_label.h
 
 constexpr auto _vkfu_address(VkWidgetLabelInfoKHR& value) noexcept -> void const*
 {
@@ -730,7 +730,7 @@ struct widget_label
 }
 }
 
-// ---------------------------------------------------------------- VK_KHR_widget_limits
+// ---------------------------------------------------------------- khr/widget_limits.h
 
 namespace vkfu::obj
 {
@@ -748,7 +748,7 @@ using widget_limits = ::vkfu::param::option::widget_limits;
 }
 }
 
-// ---------------------------------------------------------------- VK_KHR_widget_win32
+// ---------------------------------------------------------------- khr/widget_win32.h
 
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
 constexpr auto _vkfu_address(VkWidgetWin32InfoKHR& value) noexcept -> void const*
@@ -765,21 +765,17 @@ constexpr auto _vkfu_evaluate(VkWidgetWin32InfoKHR const& value) noexcept -> VkW
 {
 	return value;
 }
-#endif
 
 namespace vkfu::obj
 {
 namespace khr
 {
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
 struct widget_win32{};
-#endif
 }
 }
 
 namespace vkfu
 {
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
 template<>
 struct vulkan_object_trait<obj::khr::widget_win32>
 {
@@ -787,9 +783,7 @@ struct vulkan_object_trait<obj::khr::widget_win32>
 	constexpr static auto branch = false;
 	constexpr static auto allow_duplicate = false;
 };
-#endif
 
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
 template<>
 struct expression_vulkan_tag<VkWidgetWin32InfoKHR>
 {
@@ -802,9 +796,7 @@ struct vulkan_object_native<obj::khr::widget_win32>
 	using type = VkWidgetWin32InfoKHR;
 	constexpr static auto structure_type = VK_STRUCTURE_TYPE_WIDGET_WIN32_INFO_KHR;
 };
-#endif
 
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
 template<>
 struct vulkan_object_extensions<obj::khr::widget_win32>
 {
@@ -812,12 +804,9 @@ struct vulkan_object_extensions<obj::khr::widget_win32>
 	constexpr static ::std::uint32_t core = 0;
 	constexpr static auto instance = true;
 };
-#endif
 
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
 template<>
 inline constexpr auto is_vulkan_object_compatible_with_v<obj::widget, obj::khr::widget_win32> = true;
-#endif
 }
 
 namespace vkfu::param
@@ -826,7 +815,6 @@ namespace khr
 {
 using ::vkfu::operator|;
 
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
 struct widget_win32
 {
 	using vulkan_tag_type = obj::khr::widget_win32;
@@ -842,19 +830,17 @@ struct widget_win32
 		};
 	}
 };
-#endif
 
 }
 }
 
 namespace vkfu
 {
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
 template<::vkfu::expression_for<::vkfu::obj::khr::widget_win32> Expression1>
 void cmd_set_win32_widget(VkRecorder recorder, Expression1&& info)
 {
 	decltype(auto) storage1 = ::vkfu::evaluate(::std::forward<Expression1>(info));
 	::vkCmdSetWin32Widget(recorder, ::std::addressof(::vkfu::unpack(storage1)));
 }
-#endif
 }
+#endif

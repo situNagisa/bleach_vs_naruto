@@ -59,6 +59,9 @@ class FlagBits:
 class EnumValue:
 	name: str  # VK_FORMAT_R8G8B8A8_SRGB
 	guards: list[str]
+	# The numeric value, for when the constant is behind a macro the header
+	# using it cannot assume: a platform's VkFormat is still a VkFormat.
+	literal: str | None = None
 
 
 @dataclasses.dataclass
@@ -166,6 +169,21 @@ class Alias:
 
 
 @dataclasses.dataclass
+class Origins:
+	"""Which <feature> or <extension> introduces each type and command.
+
+	"Introduces" is the first one in registry order to require it, so a type
+	core promoted belongs to the core version, and a type two extensions share
+	belongs to the older one. No judgement involved: vk.xml numbers both.
+	"""
+
+	modules: dict[str, str]  # name -> VK_VERSION_1_2 / VK_KHR_swapchain
+	sections: dict[str, str]  # name -> its <require> comment, for core names only
+	order: list[str]  # every module: core versions by number, then extensions by number
+	guards: dict[str, str]  # module -> the macro it needs, for platform and beta extensions
+
+
+@dataclasses.dataclass
 class Registry:
 	header_version: str
 	author_tags: list[str]  # vk.xml <tags>, e.g. KHR / EXT / HUAWEI
@@ -190,10 +208,8 @@ class Registry:
 	elements: list[tuple[str, str, str]]  # (owner, member, target) array element types
 	edges: list[tuple[str, str]]  # (parent, child) from structextends
 	# The <feature> or <extension> that first requires each type and command,
-	# i.e. the module it belongs to. `modules` is every one of them in registry
-	# order: core versions by number, then extensions by number.
-	origins: dict[str, str] = dataclasses.field(default_factory=dict)
-	modules: list[str] = dataclasses.field(default_factory=list)
+	# i.e. the module its declarations are generated into.
+	origins: Origins | None = None
 
 
 # ---------------------------------------------------------------- parsing
@@ -326,13 +342,7 @@ def _guards_for(requirements: dict[str, list[str | None]], name: str) -> list[st
 	return sorted({source for source in sources if source})
 
 
-def _origins(root: ET.Element, api: str, profile: Profile = EVERYTHING) -> tuple[dict[str, str], list[str]]:
-	"""type or command name -> the feature or extension that introduces it.
-
-	"Introduces" is the first one in registry order to require it, so a type
-	core promoted belongs to the core version, and a type two extensions share
-	belongs to the older one. No judgement involved: vk.xml numbers both.
-	"""
+def _origins(root: ET.Element, api: str, profile: Profile = EVERYTHING) -> Origins:
 	features = [
 		feature
 		for feature in root.iter("feature")
@@ -349,20 +359,29 @@ def _origins(root: ET.Element, api: str, profile: Profile = EVERYTHING) -> tuple
 		extensions.append(extension)
 	extensions.sort(key=lambda extension: int(extension.get("number") or "0"))
 
-	origins: dict[str, str] = {}
-	modules: list[str] = []
+	platforms = _platform_guards(root)
+	found = Origins(modules={}, sections={}, order=[], guards={})
 	for container in features + extensions:
 		module = container.get("name")
 		if not module:
 			continue
-		modules.append(module)
+		found.order.append(module)
+		is_feature = container.tag == "feature"
+		if not is_feature:
+			guard = _extension_guard(container, platforms)
+			if guard:
+				found.guards[module] = guard
 		for require in container.findall("require"):
 			if not _api_allows(require, api):
 				continue
 			for element in require.findall("type") + require.findall("command"):
-				if element.get("name"):
-					origins.setdefault(element.get("name"), module)
-	return origins, modules
+				name = element.get("name")
+				if not name or name in found.modules:
+					continue
+				found.modules[name] = module
+				if is_feature:
+					found.sections[name] = require.get("comment") or ""
+	return found
 
 
 def _provenance(root: ET.Element, api: str, profile: Profile = EVERYTHING) -> dict[str, Provenance]:
@@ -685,6 +704,28 @@ def _collect_flagbits(root: ET.Element, api: str, requirements: dict[str, list[s
 	return collected
 
 
+def _enum_literal(enum: ET.Element, extension_number: str | None) -> str | None:
+	"""The value vk.xml gives an enumerant, spelled as a C++ literal.
+
+	An extension's enumerant is usually an offset into the block its extension
+	number reserves, so the value has to be worked out the way the headers do.
+	"""
+	if enum.get("value") is not None:
+		return enum.get("value")
+	if enum.get("bitpos") is not None:
+		return bit_literal(int(enum.get("bitpos")))
+	offset = enum.get("offset")
+	number = enum.get("extnumber") or extension_number
+	if offset is None or number is None:
+		return None
+	value = 1000000000 + (int(number) - 1) * 1000 + int(offset)
+	return f"-{value}" if enum.get("dir") == "-" else str(value)
+
+
+def bit_literal(bitpos: int) -> str:
+	return f"0x{1 << bitpos:X}" + ("ULL" if bitpos >= 31 else "")
+
+
 def _collect_enums(root: ET.Element, api: str, requirements: dict[str, list[str | None]], profile: Profile = EVERYTHING) -> dict[str, EnumType]:
 	"""Plain enums, i.e. everything <enums> declares that is not a bitmask."""
 	collected: dict[str, EnumType] = {}
@@ -692,7 +733,7 @@ def _collect_enums(root: ET.Element, api: str, requirements: dict[str, list[str 
 		if enums.get("type") != "enum" or not enums.get("name"):
 			continue
 		values = [
-			EnumValue(name=enum.get("name"), guards=[])
+			EnumValue(name=enum.get("name"), guards=[], literal=_enum_literal(enum, None))
 			for enum in enums.findall("enum")
 			if enum.get("name") and not enum.get("alias") and _api_allows(enum, api)
 		]
@@ -716,7 +757,8 @@ def _collect_enums(root: ET.Element, api: str, requirements: dict[str, list[str 
 				target = collected.get(extends)
 				if target is None or any(value.name == name for value in target.values):
 					continue
-				target.values.append(EnumValue(name=name, guards=[guard] if guard else []))
+				literal = _enum_literal(enum, container.get("number") if container.tag == "extension" else None)
+				target.values.append(EnumValue(name=name, guards=[guard] if guard else [], literal=literal))
 
 	for feature in root.iter("feature"):
 		if _api_allows(feature, api) and profile.allows_feature(feature.get("name")):
@@ -746,7 +788,14 @@ def _flag_bits_as_enums(flagbits: dict[str, FlagBits], requirements: dict[str, l
 	return {
 		name: EnumType(
 			name=name,
-			values=[EnumValue(name=bit.name, guards=bit.guards) for bit in spec.bits],
+			values=[
+				EnumValue(
+					name=bit.name,
+					guards=bit.guards,
+					literal=bit_literal(bit.bitpos) if bit.bitpos is not None else bit.value,
+				)
+				for bit in spec.bits
+			],
 			guards=_guards_for(requirements, name),
 		)
 		for name, spec in flagbits.items()
@@ -1146,7 +1195,7 @@ def load(path: str, api: str = "vulkan", profile: Profile = EVERYTHING) -> Regis
 				edges.append((parent, name))
 
 	branches = sorted({parent for parent, _ in edges})
-	origins, modules = _origins(root, api, profile)
+	origins = _origins(root, api, profile)
 
 	return Registry(
 		header_version=header_version,
@@ -1176,5 +1225,4 @@ def load(path: str, api: str = "vulkan", profile: Profile = EVERYTHING) -> Regis
 		elements=elements,
 		edges=sorted(edges),
 		origins=origins,
-		modules=modules,
 	)

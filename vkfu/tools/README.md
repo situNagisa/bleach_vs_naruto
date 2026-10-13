@@ -1,7 +1,7 @@
 # vkfu_gen —— vk.xml → vkfu 生成器
 
-把 vk.xml 转成 `vkfu/include/vkfu/generated/vulkan-v<version>.h`（以及按模块拆开的
-`vulkan-v<version>/<模块>.h`，见下文"输出：按模块分文件"），内容是 vkfu 框架
+把 vk.xml 转成 `vkfu/include/vkfu/generated/vulkan-v<version>.h` 以及它旁边的
+`vulkan-v<version>/` 目录（见下文"输出：核心按功能、扩展按厂商"），内容是 vkfu 框架
 （`vulkan_object.h` / `storage.h` / `expression.h` / `branch_pipe.h`）所需的生成层：
 `vkfu::obj::*` 标签、`vulkan_object_trait` 特化、`is_vulkan_object_compatible_with_v`
 边、`vkfu::param::*` 参数结构体，以及原生 Vulkan 结构体的 `address`/`set_next` 胶水。
@@ -10,38 +10,68 @@
 
 | 文件 | 职责 |
 | --- | --- |
-| `ir.py` | vk.xml → IR，纯机械；含每个类型/命令的归属模块（`origins`） |
+| `ir.py` | vk.xml → IR，纯机械；含每个类型/命令的归属（`origins`）和枚举量的数值 |
 | `naming.py` | 命名表的加载，以及只产出复核材料的建议算法 |
 | `plan.py` | 原生成员 → param 字段的规划（`emit` / `check` / `rebuild` 共用） |
-| `cpp.py` | 与 Vulkan 无关的 C++ 书写工具：类型拼写、`#if` 守卫、命名空间分组 |
+| `layout.py` | 每个声明落到哪个文件：路径、`<require>` 注释转文件名、相对 include |
+| `cpp.py` | 与 Vulkan 无关的 C++ 书写工具：类型拼写、命名空间分组 |
 | `structs.py` | 单个结构体/枚举/别名的渲染：tag、glue、param、enum class、扩展需求 |
 | `producers.py` `commands.py` `queries.py` | 三类命令包装的渲染 |
-| `emit.py` | 校验 → 按模块归类 → 依赖排序 → 写文件 |
+| `emit.py` | 校验 → 按文件归类 → 依赖排序 → 计算条件 → 写文件和伞头文件 |
 | `check.py` | 命名表的机械性检查 |
 | `__main__.py` | 命令行：`dump-ir` `rebuild` `suggest` `promote` `check` `gen` |
 
-## 输出：按模块分文件
+## 输出：核心按功能、扩展按厂商
 
-`gen --split` 为每个 `<feature>` / `<extension>` 生成一个头文件，而不是按 enums / objects /
-param / commands 这样的种类切：
+`gen --split` 输出一棵树（v1.4.328 下 507 个文件）：
 
 ```
-generated/vulkan-v1.4.328.h               # 伞头文件，按依赖顺序包含全部模块
-generated/vulkan-v1.4.328/vk_version_1_0.h
-generated/vulkan-v1.4.328/vk_khr_swapchain.h
-generated/vulkan-v1.4.328/vk_ext_mesh_shader.h
-...                                       # v1.4.328 下共 378 个
+generated/vulkan-v1.4.328.h                       # 总伞头：全部核心版本和全部厂商
+generated/vulkan-v1.4.328/version_1_0.h           # 核心版本的伞头
+generated/vulkan-v1.4.328/version_1_0/buffer.h    # 按功能拆
+generated/vulkan-v1.4.328/version_1_3/synchronization2.h
+generated/vulkan-v1.4.328/khr.h                   # 厂商的伞头
+generated/vulkan-v1.4.328/khr/swapchain.h         # 一个扩展一个文件
+generated/vulkan-v1.4.328/ext/mesh_shader.h
 ```
 
-- **归属**：类型或命令属于 vk.xml 里**第一个** require 它的模块（核心版本按版本号，再按扩展编号）。
-  所以被提升进核心的类型归核心版本，它的旧名字别名归原扩展。
-- **一个模块里什么都有**：它引入的 tag、trait、pNext glue、enum class、param、别名和命令包装。
-- **依赖**：一个模块用到另一个模块声明的东西（枚举字段、槽的 tag、别名的目标、包装引用的 tag）
-  就 `#include` 它。兼容边 `is_vulkan_object_compatible_with_v<父, 子>` 放进两端中较晚的那个模块。
-  依赖成环会让生成硬失败；v1.4.328 下无环。
-- **每个模块头都能单独包含**（378 个逐一单独编译验证过）。只用到核心和交换链的翻译单元包含
-  `vk_version_1_0.h` 和 `vk_khr_swapchain.h` 即可。
-- 不加 `--split` 时输出单个文件，内容相同、按同样的模块顺序排列，各模块之间有分隔注释。
+- **归属**：类型或命令属于 vk.xml 里**第一个** require 它的 `<feature>` / `<extension>`（核心版本按
+  版本号，再按扩展编号）。被提升进核心的类型归核心版本，旧名字别名归原扩展。
+- **核心版本按功能拆**：直接用 vk.xml 把每个核心版本分成的 `<require>` 块。1.1 起的块注释是
+  "Promoted from VK_KHR_synchronization2"，文件就叫 `synchronization2.h`；1.0 的块注释是
+  "Buffer commands" 这类说明，去掉 `commands` 即可；少数说不短的句子在 `layout.py` 的
+  `_SECTION_NAMES` 里给了名字；没有注释的块是该版本自己加的（`VkPhysicalDeviceVulkan12Features`
+  这类），叫 `core.h`。
+- **扩展按厂商**：`VK_KHR_swapchain` → `khr/swapchain.h`，去掉 `VK_` 和厂商前缀。
+- **一个文件里什么都有**：它引入的 tag、trait、pNext glue、enum class、param、别名和命令包装。
+- **include**：vkfu 框架头一律 `<vkfu/xxx.h>`；同在 `vulkan-v<version>/` 下的生成文件之间用相对路径
+  （`"surface.h"`、`"../version_1_0/buffer.h"`）。一个文件用到哪个文件声明的东西就 include 它，
+  所以每个文件都能单独包含。依赖成环会让生成硬失败；v1.4.328 下无环。
+
+### 平台与 beta 宏只在伞头文件里
+
+单个文件里**没有** `#if defined(VK_USE_PLATFORM_...)` / `VK_ENABLE_BETA_EXTENSIONS`。每个文件有一个
+**条件**：自己扩展的宏，加上它 include 的所有文件的条件；伞头文件用它决定包不包含：
+
+```cpp
+// qnx.h
+#if defined(VK_USE_PLATFORM_SCREEN_QNX)
+#include "qnx/screen_surface.h"
+#include "qnx/external_memory_screen_buffer.h"
+#endif
+```
+
+需要宏的文件在注释里写明（`// Needs VK_USE_PLATFORM_WIN32_KHR; ...`），直接包含它时由调用方负责定义。
+为做到这一点，有两处换了写法：
+
+- 平台/beta 才有的**枚举量**（如 `VkFormat` 里的 beta 格式）写成数值
+  `static_cast<VkFormat>(1000xxx)` 而不是常量名，所以枚举在所有平台上一样、不需要宏。数值按
+  vulkan_core.h 的规则从 vk.xml 的 `value` / `bitpos` / `offset` + 扩展号算出。
+- flags 逐位的 `static_assert` 对平台才有的位同样比对数值。
+- 一条兼容边两端分属不同文件时，放进**有宏的那一端**（两端都没有或都有时放较晚的一端），这样
+  不需要宏的文件永远不会因为一条边而继承别人的宏。
+
+不加 `--split` 时输出单个文件，内容相同、顺序相同，有条件的文件整体包在一个 `#if` 里。
 
 ## 为什么是两段式
 
@@ -317,7 +347,7 @@ python -m vkfu_gen dump-ir  --xml vk.xml --out ir.json
 python -m vkfu_gen rebuild  --xml vk.xml --table naming.toml --overrides naming.overrides.toml
 python -m vkfu_gen suggest  --xml vk.xml --table naming.toml --out naming.suggested.toml
 python -m vkfu_gen promote  --xml vk.xml --table naming.toml --out naming.suggested.toml
-python -m vkfu_gen gen      --xml vk.xml --table naming.toml --scope closure \
+python -m vkfu_gen gen      --xml vk.xml --table naming.toml --scope closure --split \
     --out ../include/vkfu/generated/vulkan-v1.4.328.h
 ```
 
@@ -374,7 +404,7 @@ static_assert(::std::bit_cast<VkCommandPoolCreateFlags>(flags_type{.transient = 
 - **位域分配顺序是实现定义的**，所以不假设，而是逐位 `static_assert` 对着真正的
   `VK_*_BIT` 验一遍。换编译器/ABI 出错的话是编译期报错，不是静默错值。
 - 位域按 `bitpos` 定位而**不引用** `VK_*_BIT`，所以平台受限的位照样占位，
-  布局不会随平台漂移；只有那条 `static_assert` 需要 `#if` 包起来。
+  布局不会随平台漂移；平台才有的位，`static_assert` 比对的是数值而不是常量名。
 - 用 `value` 而非 `bitpos` 定义的条目被排除：v1.4.328 里是 8 个零哨兵
   （`..._DEFAULT` / `_UNKNOWN` / `_INVALID`，语义就是"没有任何位"）和 2 个复合别名
   （`VK_SHADER_STAGE_ALL_GRAPHICS` / `_ALL`，逐位设置即可表达）。排除后

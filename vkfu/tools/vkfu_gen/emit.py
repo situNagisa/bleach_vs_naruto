@@ -15,8 +15,8 @@ from __future__ import annotations
 
 import dataclasses
 
-from . import commands, ir, producers, queries, structs
-from .cpp import NEWLINE, TAB, bucketed, guard_close, guard_open, leaf_of, namespace_of
+from . import commands, ir, layout, producers, queries, structs
+from .cpp import NEWLINE, TAB, bucketed, leaf_of
 from .naming import Table
 from .plan import Plan, plan_struct, used_enums
 
@@ -254,14 +254,15 @@ def _select(registry: ir.Registry, table: Table, scope: str) -> tuple[Selection,
 	return selection, warnings
 
 
-# ---------------------------------------------------------------- modules
+# ---------------------------------------------------------------- units
 
 
 @dataclasses.dataclass
-class Module:
-	"""One <feature> or <extension>, and everything it introduces."""
+class Unit:
+	"""One generated file, and everything declared in it. See layout.py."""
 
-	name: str  # VK_VERSION_1_0, VK_KHR_swapchain
+	path: str  # khr/swapchain.h, version_1_3/synchronization2.h
+	module: str  # VK_KHR_swapchain, VK_VERSION_1_3
 	chained: list[str] = dataclasses.field(default_factory=list)
 	selected: list[str] = dataclasses.field(default_factory=list)
 	plain: list[str] = dataclasses.field(default_factory=list)
@@ -269,15 +270,13 @@ class Module:
 	aliases: list[str] = dataclasses.field(default_factory=list)
 	edges: list[tuple[str, str]] = dataclasses.field(default_factory=list)
 	commands: list[object] = dataclasses.field(default_factory=list)
-	depends: set[str] = dataclasses.field(default_factory=set)
-
-	@property
-	def file(self) -> str:
-		return f"{self.name.lower()}.h"
+	depends: set[str] = dataclasses.field(default_factory=set)  # unit paths
+	guard: str | None = None  # its own macro
+	condition: list[str] = dataclasses.field(default_factory=list)  # its own plus its dependencies'
 
 
 def _info_types(command: object, registry: ir.Registry) -> list[str]:
-	"""The structures a wrapper names by tag, so it needs their module."""
+	"""The structures a wrapper names by tag, so it needs their unit."""
 	if isinstance(command, ir.Command):
 		return [command.info.type]
 	if isinstance(command, ir.Query):
@@ -292,106 +291,119 @@ def _info_types(command: object, registry: ir.Registry) -> list[str]:
 	return names
 
 
-def _modules(registry: ir.Registry, table: Table, selection: Selection) -> list[Module]:
-	"""Selection split by owning module, in an order every include can follow.
+def _units(registry: ir.Registry, selection: Selection) -> list[Unit]:
+	"""Selection split by owning unit, in an order every include can follow.
 
-	A module depends on another when something it declares names something the
+	A unit depends on another when something it declares names something the
 	other declares: an enum-typed field, a slot's tag, an alias's target, the tag
-	a wrapper takes. A compat edge names two tags, so it goes to whichever of
-	its two modules comes later and makes that one depend on the other.
+	a wrapper takes. A compat edge names two tags, so it goes to one of its two
+	units and makes that one depend on the other: to the guarded one if only one
+	is guarded, so an unguarded unit never inherits a platform macro, otherwise
+	to the later one.
 	"""
-	modules = {name: Module(name) for name in registry.modules}
-	rank = {name: index for index, name in enumerate(registry.modules)}
+	placement = layout.place(registry.origins)
+	units: dict[str, Unit] = {}
 	unowned: list[str] = []
 
-	def owner(name: str) -> Module | None:
-		module = registry.origins.get(name)
-		if module is None or module not in modules:
+	def unit_of(path: str) -> Unit:
+		if path not in units:
+			units[path] = Unit(path=path, module=placement.modules[path], guard=placement.guards.get(path))
+		return units[path]
+
+	def owner(name: str) -> Unit | None:
+		path = placement.units.get(name)
+		if path is None:
 			unowned.append(name)
 			return None
-		return modules[module]
+		return unit_of(path)
 
-	def place(name: str, bucket: str) -> Module | None:
-		module = owner(name)
-		if module is not None:
-			getattr(module, bucket).append(name)
-		return module
+	def put(name: str, bucket: str) -> Unit | None:
+		unit = owner(name)
+		if unit is not None:
+			getattr(unit, bucket).append(name)
+		return unit
 
-	def needs(module: Module | None, name: str) -> None:
-		other = registry.origins.get(name)
-		if module is not None and other is not None and other != module.name:
-			module.depends.add(other)
+	def needs(unit: Unit | None, name: str) -> None:
+		other = placement.units.get(name)
+		if unit is not None and other is not None and other != unit.path:
+			unit.depends.add(other)
 
 	for name in selection.chained:
-		place(name, "chained")
+		put(name, "chained")
 	for name in selection.selected:
-		module = place(name, "selected")
+		unit = put(name, "selected")
 		for field in selection.plans[name].fields:
 			if field.kind == "enum":
-				needs(module, field.enum_type)
+				needs(unit, field.enum_type)
 			elif field.kind == "reference":
-				needs(module, field.target)
+				needs(unit, field.target)
 	for name in selection.plain:
-		module = place(name, "plain")
+		unit = put(name, "plain")
 		for field in plan_struct(registry.structs[name], registry).fields:
 			if field.kind == "enum":
-				needs(module, field.enum_type)
+				needs(unit, field.enum_type)
 	for name in selection.enums:
-		place(name, "enums")
+		put(name, "enums")
 	for name, alias in selection.aliases.items():
-		needs(place(name, "aliases"), alias.target)
+		needs(put(name, "aliases"), alias.target)
 	for command in selection.commands:
-		module = owner(command.name)
-		if module is None:
+		unit = owner(command.name)
+		if unit is None:
 			continue
-		module.commands.append(command)
+		unit.commands.append(command)
 		for name in _info_types(command, registry):
-			needs(module, name)
+			needs(unit, name)
 
 	emitted = selection.emitted
 	for parent, child in registry.edges:
 		if parent not in emitted or child not in emitted:
 			continue
-		ends = [registry.origins.get(parent), registry.origins.get(child)]
+		ends = [placement.units.get(parent), placement.units.get(child)]
 		if None in ends:
 			continue
-		later = max(ends, key=lambda name: rank[name])
-		modules[later].edges.append((parent, child))
-		needs(modules[later], parent)
-		needs(modules[later], child)
+		chosen = max(ends, key=lambda path: (path in placement.guards, placement.rank[path]))
+		unit = unit_of(chosen)
+		unit.edges.append((parent, child))
+		needs(unit, parent)
+		needs(unit, child)
 
 	if unowned:
 		raise GenerationError([], [f"{name}: no <feature> or <extension> requires it" for name in sorted(set(unowned))])
 
-	populated = {
-		name: module
-		for name, module in modules.items()
-		if module.chained or module.plain or module.enums or module.aliases or module.edges or module.commands
-	}
-	return _ordered(populated, rank)
+	ordered = _ordered(units, placement.rank)
+	# A unit is only usable where everything it includes is, so its condition is
+	# its own macro plus every dependency's -- computed in include order, so each
+	# dependency's condition is already final.
+	by_path = {unit.path: unit for unit in ordered}
+	for unit in ordered:
+		condition = {unit.guard} if unit.guard else set()
+		for path in unit.depends:
+			condition |= set(by_path[path].condition)
+		unit.condition = sorted(condition)
+	return ordered
 
 
-def _ordered(modules: dict[str, Module], rank: dict[str, int]) -> list[Module]:
+def _ordered(units: dict[str, Unit], rank: dict[str, tuple[int, int]]) -> list[Unit]:
 	"""Dependencies first; registry order wherever the includes leave a choice."""
-	pending = {name: set(module.depends) & set(modules) for name, module in modules.items()}
-	order: list[Module] = []
+	pending = {path: set(unit.depends) & set(units) for path, unit in units.items()}
+	order: list[Unit] = []
 	while pending:
-		ready = sorted((name for name, depends in pending.items() if not depends), key=lambda name: rank[name])
+		ready = sorted((path for path, depends in pending.items() if not depends), key=lambda path: rank[path])
 		if not ready:
-			cycle = ", ".join(sorted(pending, key=lambda name: rank[name]))
-			raise GenerationError([], [f"modules depend on each other in a cycle: {cycle}"])
-		name = ready[0]
-		order.append(modules[name])
-		del pending[name]
+			cycle = ", ".join(sorted(pending, key=lambda path: rank[path]))
+			raise GenerationError([], [f"generated files depend on each other in a cycle: {cycle}"])
+		path = ready[0]
+		order.append(units[path])
+		del pending[path]
 		for depends in pending.values():
-			depends.discard(name)
+			depends.discard(path)
 	return order
 
 
 # ---------------------------------------------------------------- rendering
 
 
-def _render_module(module: Module, registry: ir.Registry, table: Table, selection: Selection) -> list[str]:
+def _render_module(module: Unit, registry: ir.Registry, table: Table, selection: Selection) -> list[str]:
 	"""Everything one module declares, each kind in the order the next needs it:
 	glue and tags, enums, traits and edges, aliases, params, then wrappers."""
 	lines: list[str] = []
@@ -416,9 +428,7 @@ def _render_module(module: Module, registry: ir.Registry, table: Table, selectio
 					lines += [f"namespace {namespace}", "{"]
 				for name in names:
 					struct = registry.structs[name]
-					guard_open(lines, struct.guards)
 					lines.append(f"struct {leaf_of(struct_name(name))}{{}};")
-					guard_close(lines, struct.guards)
 				if namespace:
 					lines.append("}")
 			lines += ["}", ""]
@@ -458,7 +468,7 @@ def _render_module(module: Module, registry: ir.Registry, table: Table, selectio
 	return lines
 
 
-def _render_traits(module: Module, registry: ir.Registry, table: Table) -> list[str]:
+def _render_traits(module: Unit, registry: ir.Registry, table: Table) -> list[str]:
 	lines: list[str] = []
 	# A query chain needs a head as much as a create chain does, so the structures
 	# a command writes into count as roots too.
@@ -466,7 +476,6 @@ def _render_traits(module: Module, registry: ir.Registry, table: Table) -> list[
 	branches = set(registry.branches)
 	for name in module.chained:
 		struct = registry.structs[name]
-		guard_open(lines, struct.guards)
 		lines.append("template<>")
 		lines.append(f"struct vulkan_object_trait<obj::{table.struct_name(name)}>")
 		lines.append("{")
@@ -474,12 +483,10 @@ def _render_traits(module: Module, registry: ir.Registry, table: Table) -> list[
 		lines.append(f"{TAB}constexpr static auto branch = {'true' if name in branches else 'false'};")
 		lines.append(f"{TAB}constexpr static auto allow_duplicate = {'true' if struct.allow_duplicate else 'false'};")
 		lines.append("};")
-		guard_close(lines, struct.guards)
 		lines.append("")
 
 	for name in module.chained:
 		struct = registry.structs[name]
-		guard_open(lines, struct.guards)
 		lines.append("template<>")
 		lines.append(f"struct expression_vulkan_tag<{name}>")
 		lines.append("{")
@@ -494,7 +501,6 @@ def _render_traits(module: Module, registry: ir.Registry, table: Table) -> list[
 		lines.append(f"{TAB}using type = {name};")
 		lines.append(f"{TAB}constexpr static auto structure_type = {struct.stype};")
 		lines.append("};")
-		guard_close(lines, struct.guards)
 		lines.append("")
 
 	for name in module.chained:
@@ -508,17 +514,15 @@ def _render_traits(module: Module, registry: ir.Registry, table: Table) -> list[
 
 	for parent, child in module.edges:
 		guards = sorted(set(registry.structs[parent].guards) | set(registry.structs[child].guards))
-		guard_open(lines, guards)
 		lines.append("template<>")
 		lines.append(
 			f"inline constexpr auto is_vulkan_object_compatible_with_v<obj::{table.struct_name(parent)}, obj::{table.struct_name(child)}> = true;"
 		)
-		guard_close(lines, guards)
 	return lines
 
 
 def _render_params(
-	module: Module, aliases: list[str], registry: ir.Registry, table: Table, selection: Selection
+	module: Unit, aliases: list[str], registry: ir.Registry, table: Table, selection: Selection
 ) -> list[str]:
 	lines: list[str] = []
 	for namespace, names in bucketed(module.selected, table.struct_name):
@@ -594,7 +598,7 @@ def _render_commands(wrapped: list[object], registry: ir.Registry, table: Table)
 
 # ---------------------------------------------------------------- files
 
-# The vkfu core headers are small and each is #pragma once, so every module
+# The vkfu core headers are small and each is #pragma once, so every unit
 # includes all of them rather than tracking which it uses; what is worth
 # splitting is the generated bulk.
 _CORE_INCLUDES = [
@@ -612,14 +616,14 @@ _CORE_INCLUDES = [
 	"",
 	"#include <vulkan/vulkan.h>",
 	"",
-	'#include "{prefix}branch_pipe.h"',
-	'#include "{prefix}chain.h"',
-	'#include "{prefix}expression.h"',
-	'#include "{prefix}extension.h"',
-	'#include "{prefix}query.h"',
-	'#include "{prefix}reference.h"',
-	'#include "{prefix}storage.h"',
-	'#include "{prefix}vulkan_object.h"',
+	"#include <vkfu/branch_pipe.h>",
+	"#include <vkfu/chain.h>",
+	"#include <vkfu/expression.h>",
+	"#include <vkfu/extension.h>",
+	"#include <vkfu/query.h>",
+	"#include <vkfu/reference.h>",
+	"#include <vkfu/storage.h>",
+	"#include <vkfu/vulkan_object.h>",
 ]
 
 
@@ -627,75 +631,105 @@ def _banner(registry: ir.Registry) -> str:
 	return f"// Generated by vkfu_gen from vk.xml (VK_HEADER_VERSION {registry.header_version}). Do not edit."
 
 
-def _preamble(registry: ir.Registry, prefix: str, summary: str | None = None) -> list[str]:
-	lines = ["#pragma once", "", _banner(registry)]
-	if summary:
-		lines.append(f"// {summary}")
-	lines.append("")
-	lines += [entry.format(prefix=prefix) for entry in _CORE_INCLUDES]
-	lines.append("")
-	return lines
+def _condition(guards: list[str]) -> str:
+	# A unit needs every macro its includes need, so AND rather than OR.
+	return "#if " + " && ".join(f"defined({guard})" for guard in guards)
 
 
-def _summary(module: Module, registry: ir.Registry) -> str:
+def _summary(unit: Unit) -> str:
 	counts = [
-		(len(module.chained), "object"),
-		(len(module.plain), "plain structure"),
-		(len(module.enums), "enum"),
-		(len(module.aliases), "alias"),
-		(len(module.commands), "command"),
+		(len(unit.chained), "object"),
+		(len(unit.plain), "plain structure"),
+		(len(unit.enums), "enum"),
+		(len(unit.aliases), "alias"),
+		(len(unit.commands), "command"),
 	]
 	parts = [f"{count} {noun}{'' if count == 1 else 's'}" for count, noun in counts if count]
-	return f"{module.name}: " + (", ".join(parts) if parts else "compatibility edges only") + "."
+	text = f"{unit.module}: " + (", ".join(parts) if parts else "compatibility edges only") + "."
+	if unit.condition:
+		text += "\n// Needs " + " and ".join(unit.condition) + "; the umbrella only includes it then."
+	return text
 
 
-def _build(registry: ir.Registry, table: Table, scope: str) -> tuple[list[Module], dict[str, list[str]], list[str]]:
+def _build(registry: ir.Registry, table: Table, scope: str) -> tuple[list[Unit], dict[str, list[str]], list[str]]:
 	selection, warnings = _select(registry, table, scope)
-	modules = _modules(registry, table, selection)
-	bodies = {module.name: _render_module(module, registry, table, selection) for module in modules}
-	return modules, bodies, warnings
+	units = _units(registry, selection)
+	bodies = {unit.path: _render_module(unit, registry, table, selection) for unit in units}
+	return units, bodies, warnings
 
 
-def generate(
-	registry: ir.Registry, table: Table, scope: str, prefix: str = "../"
-) -> tuple[str, list[str]]:
-	"""One header, every module in include order."""
-	modules, bodies, warnings = _build(registry, table, scope)
-	lines = _preamble(registry, prefix)
-	for module in modules:
-		lines.append(f"// ---------------------------------------------------------------- {module.name}")
+def _included(lines: list[str], includes: list[tuple[str, list[str]]]) -> None:
+	"""`#include` each path, consecutive ones under the same condition sharing one #if."""
+	current: list[str] = []
+	for path, condition in includes:
+		if condition != current:
+			if current:
+				lines.append("#endif")
+			if condition:
+				lines.append(_condition(condition))
+			current = condition
+		lines.append(f'#include "{path}"')
+	if current:
+		lines.append("#endif")
+
+
+def generate(registry: ir.Registry, table: Table, scope: str) -> tuple[str, list[str]]:
+	"""One header, every unit in include order, each under its condition."""
+	units, bodies, warnings = _build(registry, table, scope)
+	lines = ["#pragma once", "", _banner(registry), ""] + _CORE_INCLUDES + [""]
+	for unit in units:
+		lines.append(f"// ---------------------------------------------------------------- {unit.path}")
 		lines.append("")
-		lines.extend(bodies[module.name])
+		if unit.condition:
+			lines.append(_condition(unit.condition))
+		lines.extend(bodies[unit.path])
+		if unit.condition:
+			lines.append("#endif")
 		lines.append("")
 	return NEWLINE.join(lines), warnings
 
 
 def generate_split(
-	registry: ir.Registry, table: Table, scope: str, stem: str, prefix: str = "../../"
+	registry: ir.Registry, table: Table, scope: str, stem: str
 ) -> tuple[dict[str, str], list[str]]:
-	"""One file per module under `<stem>/`, plus `<stem>.h` including them all.
+	"""The tree under `<stem>/`, plus `<stem>.h` beside it including everything.
 
-	A translation unit that only touches core 1.0 and VK_KHR_swapchain includes
-	those two and parses nothing else; each module includes what it depends on.
+	    <stem>/version_1_0/buffer.h   a core version, cut by vk.xml's <require> blocks
+	    <stem>/version_1_0.h          that version's umbrella
+	    <stem>/khr/swapchain.h        one extension
+	    <stem>/khr.h                  that vendor's umbrella
+
+	Paths in the result are relative to the directory holding `<stem>.h`.
 	"""
-	modules, bodies, warnings = _build(registry, table, scope)
+	units, bodies, warnings = _build(registry, table, scope)
 	files: dict[str, str] = {}
-	for module in modules:
-		lines = _preamble(registry, prefix, _summary(module, registry))
-		depends = [other for other in modules if other.name in module.depends]
+	groups: dict[str, list[Unit]] = {}
+	for unit in units:
+		lines = ["#pragma once", "", _banner(registry), f"// {_summary(unit)}", ""] + _CORE_INCLUDES + [""]
+		depends = [other for other in units if other.path in unit.depends]
 		if depends:
-			lines += [f'#include "{other.file}"' for other in depends]
+			lines += [f'#include "{layout.relative(unit.path, other.path)}"' for other in depends]
 			lines.append("")
-		lines.extend(bodies[module.name])
-		files[module.file] = NEWLINE.join(lines) + NEWLINE
-	umbrella = [
-		"#pragma once",
-		"",
-		_banner(registry),
-		"// Every module. Include one from the directory beside this file instead",
-		"// when that is all you need; each brings in the modules it depends on.",
-		"",
-	]
-	umbrella += [f'#include "{stem}/{module.file}"' for module in modules]
-	files[f"{stem}.h"] = NEWLINE.join(umbrella) + NEWLINE
+		lines.extend(bodies[unit.path])
+		files[f"{stem}/{unit.path}"] = NEWLINE.join(lines) + NEWLINE
+		groups.setdefault(layout.umbrella_of(unit.path), []).append(unit)
+
+	def umbrella(summary: list[str], includes: list[tuple[str, list[str]]]) -> str:
+		lines = ["#pragma once", "", _banner(registry)] + [f"// {line}" for line in summary] + [""]
+		_included(lines, includes)
+		return NEWLINE.join(lines) + NEWLINE
+
+	# Core versions first, then vendors alphabetically.
+	names = sorted(groups, key=lambda name: (not name.startswith("version_"), name))
+	for name in names:
+		members = groups[name]
+		label = members[0].module if layout.is_core(members[0].module) else f"Every {name[:-2].upper()} extension"
+		files[f"{stem}/{name}"] = umbrella(
+			[f"{label}. Each file below includes what it depends on, so including one", "of them directly works too."],
+			[(layout.relative(name, unit.path), unit.condition) for unit in members],
+		)
+	files[f"{stem}.h"] = umbrella(
+		["Every core version and every vendor's extensions."],
+		[(f"{stem}/{name}", []) for name in names],
+	)
 	return files, warnings

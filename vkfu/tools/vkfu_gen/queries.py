@@ -17,7 +17,7 @@ through a raw pointer -- that is why the iterator overload asks for
 from __future__ import annotations
 
 from . import commands, ir
-from .cpp import TAB, guard_close, guard_open
+from .cpp import TAB
 from .naming import Table
 
 
@@ -121,7 +121,6 @@ def render_query(query: ir.Query, table: Table, registry: ir.Registry) -> list[s
 		return head, "" if use_template or templates else "inline "
 
 	lines: list[str] = []
-	guard_open(lines, query.guards)
 
 	# ---------------------------------------------------------- count_*
 	probe = _call(
@@ -261,7 +260,6 @@ def render_query(query: ir.Query, table: Table, registry: ir.Registry) -> list[s
 	lines.append(f"{TAB}return out + static_cast<::std::iter_difference_t<Out>>(written.size());")
 	lines.append("}")
 
-	guard_close(lines, query.guards)
 	return lines
 
 
@@ -283,7 +281,6 @@ def render_chain_query(query: ir.ChainQuery, table: Table, registry: ir.Registry
 	call = _call(query.params, query.arguments, substitutions)
 
 	lines: list[str] = []
-	guard_open(lines, query.guards)
 
 	if query.returns == "VkResult":
 		lines.append(template_line)
@@ -325,5 +322,4 @@ def render_chain_query(query: ir.ChainQuery, table: Table, registry: ir.Registry
 		lines.append(f"{TAB}return chain;")
 		lines.append("}")
 
-	guard_close(lines, query.guards)
 	return lines

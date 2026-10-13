@@ -440,14 +440,9 @@ def main(argv: list[str] | None = None) -> int:
 		help="list warnings as well as errors",
 	)
 	parser.add_argument(
-		"--include-prefix",
-		default=None,
-		help="how the generated headers reach the vkfu core headers; defaults to the in-tree layout",
-	)
-	parser.add_argument(
 		"--split",
 		action="store_true",
-		help="write one header per Vulkan module (feature or extension) plus an umbrella, instead of a single file",
+		help="write a tree of headers -- core versions cut by area, extensions by vendor -- plus umbrellas, instead of a single file",
 	)
 	parser.add_argument(
 		"--core",
@@ -559,13 +554,10 @@ def main(argv: list[str] | None = None) -> int:
 	try:
 		stem = pathlib.Path(arguments.out or "generated").stem
 		if arguments.split:
-			prefix = arguments.include_prefix or "../../"
-			files, warnings = emit.generate_split(registry, table, arguments.scope, stem, prefix)
+			files, warnings = emit.generate_split(registry, table, arguments.scope, stem)
 			text = None
 		else:
-			text, warnings = emit.generate(
-				registry, table, arguments.scope, arguments.include_prefix or "../"
-			)
+			text, warnings = emit.generate(registry, table, arguments.scope)
 	except emit.GenerationError as error:
 		print(f"generation failed: {len(error.missing)} missing name(s), {len(error.problems)} problem(s)", file=sys.stderr)
 		for entry in error.missing[:40]:
@@ -584,18 +576,16 @@ def main(argv: list[str] | None = None) -> int:
 	unnamed = len(registry.closure) - named
 	destination = arguments.out or "-"
 	if text is None:
-		# The umbrella keeps the single-file path working; the modules live in a
+		# The umbrella keeps the single-file path working; the tree lives in a
 		# directory beside it, named after it.
 		root = pathlib.Path(destination).parent
-		(root / stem).mkdir(parents=True, exist_ok=True)
 		for name, body in sorted(files.items()):
-			target = root / name if name.endswith(f"{stem}.h") else root / stem / name
+			target = root / name
+			target.parent.mkdir(parents=True, exist_ok=True)
 			with open(target, "w", encoding="utf-8", newline=NEWLINE) as stream:
 				stream.write(body)
-		print(
-			f"{destination}: {len(files)} file(s), "
-			+ ", ".join(f"{name} {body.count(NEWLINE)} lines" for name, body in sorted(files.items()))
-		)
+		lines = sum(body.count(NEWLINE) for body in files.values())
+		print(f"{destination}: {len(files)} file(s), {lines} lines")
 		return 0
 	if destination == "-":
 		print(text)

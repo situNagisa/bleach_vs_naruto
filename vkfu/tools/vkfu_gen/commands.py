@@ -15,7 +15,7 @@ every other name in the generated header they do not go through the table.
 from __future__ import annotations
 
 from . import ir, naming
-from .cpp import TAB, base_type, guard_close, guard_open, span_element_type
+from .cpp import TAB, base_type, span_element_type
 from .naming import Table
 
 
@@ -139,7 +139,6 @@ def render(command: ir.Wrapper, table: Table) -> list[str]:
 	linkage = "" if template_line else "inline "
 
 	lines: list[str] = []
-	guard_open(lines, command.guards)
 
 	if command.returns == "VkResult":
 		result = produced or "void"
@@ -209,7 +208,6 @@ def render(command: ir.Wrapper, table: Table) -> list[str]:
 			lines.append(f"{TAB}::{command.name}({call});")
 		lines.append("}")
 
-	guard_close(lines, command.guards)
 	return lines
 
 

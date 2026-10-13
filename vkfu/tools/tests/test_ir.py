@@ -24,18 +24,25 @@ class LoadTest(unittest.TestCase):
 		self.assertEqual(self.registry.author_tags, ["EXT", "KHR"])
 
 	def test_every_type_and_command_has_the_module_that_introduces_it(self) -> None:
-		origins = self.registry.origins
-		self.assertEqual(origins["VkWidgetCreateInfo"], "VK_VERSION_1_0")
-		self.assertEqual(origins["VkWidgetLimits"], "VK_VERSION_1_1")
+		modules = self.registry.origins.modules
+		self.assertEqual(modules["VkWidgetCreateInfo"], "VK_VERSION_1_0")
+		self.assertEqual(modules["VkWidgetLimits"], "VK_VERSION_1_1")
 		# The alias is introduced by the extension, not by the core version.
-		self.assertEqual(origins["VkWidgetLimitsKHR"], "VK_KHR_widget_limits")
+		self.assertEqual(modules["VkWidgetLimitsKHR"], "VK_KHR_widget_limits")
 		# Commands too, including one in a require block with no types.
-		self.assertEqual(origins["vkCreateWidget"], "VK_VERSION_1_0")
-		self.assertEqual(origins["vkCmdSetWin32Widget"], "VK_KHR_widget_win32")
+		self.assertEqual(modules["vkCreateWidget"], "VK_VERSION_1_0")
+		self.assertEqual(modules["vkCmdSetWin32Widget"], "VK_KHR_widget_win32")
+
+	def test_core_names_remember_their_require_block(self) -> None:
+		self.assertEqual(self.registry.origins.sections["VkWidgetCreateInfo"], "")
+		self.assertNotIn("VkWidgetLimitsKHR", self.registry.origins.sections)
+
+	def test_a_platform_extension_records_its_macro(self) -> None:
+		self.assertEqual(self.registry.origins.guards, {"VK_KHR_widget_win32": "VK_USE_PLATFORM_WIN32_KHR"})
 
 	def test_modules_are_core_versions_then_extensions_by_number(self) -> None:
 		self.assertEqual(
-			self.registry.modules,
+			self.registry.origins.order,
 			[
 				"VK_VERSION_1_0",
 				"VK_VERSION_1_1",
@@ -45,6 +52,15 @@ class LoadTest(unittest.TestCase):
 				"VK_KHR_widget_win32",
 			],
 		)
+
+	def test_an_extension_enumerant_knows_its_value(self) -> None:
+		# Offsets count from the extension's own block, the way vulkan_core.h does.
+		from vkfu_gen.ir import _enum_literal
+		import xml.etree.ElementTree as ET
+
+		enum = ET.fromstring('<enum offset="4" extends="VkResult" dir="-" name="X"/>')
+		self.assertEqual(_enum_literal(enum, "2"), "-1000001004")
+		self.assertEqual(_enum_literal(ET.fromstring('<enum bitpos="3" name="Y"/>'), None), "0x8")
 
 	def test_roots_are_const_pointer_stype_parameters(self) -> None:
 		# VkWidgetPart is a root because vkCmdSubmitParts takes it directly, and

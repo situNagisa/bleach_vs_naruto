@@ -7,7 +7,7 @@ compile error three steps later.
 To accept a new golden, read the diff first, then:
 
 	python -m vkfu_gen gen --xml tests/fixture.xml --table tests/fixture.naming.toml \\
-		--scope closure --include-prefix ../../../include/vkfu/ --out tests/golden/fixture.h
+		--scope closure --out tests/golden/fixture.h
 """
 
 from __future__ import annotations
@@ -21,13 +21,12 @@ HERE = pathlib.Path(__file__).parent
 FIXTURE = str(HERE / "fixture.xml")
 TABLE = str(HERE / "fixture.naming.toml")
 GOLDEN = HERE / "golden" / "fixture.h"
-PREFIX = "../../../include/vkfu/"
 
 
 def generate() -> str:
 	registry = ir.load(FIXTURE)
 	table = naming.load_table(TABLE)
-	text, _warnings = emit.generate(registry, table, "closure", PREFIX)
+	text, _warnings = emit.generate(registry, table, "closure")
 	return text
 
 
@@ -104,10 +103,9 @@ class ContentTest(unittest.TestCase):
 			"inline constexpr auto is_vulkan_object_compatible_with_v<obj::widget, obj::option::ext::widget_colour> = true;"
 		)
 
-	def test_platform_guards_wrap_everything_they_reach(self) -> None:
-		# The win32 structure reaches the glue, the tag, the trait, the tag/native
-		# maps, the extension list, the compat edge, the param and the command.
-		self.assertGreaterEqual(self.text.count("#if defined(VK_USE_PLATFORM_WIN32_KHR)"), 7)
+	def test_a_platform_extension_is_guarded_once_as_a_whole(self) -> None:
+		# One #if around the win32 unit, nothing inside it.
+		self.assertEqual(self.text.count("#if defined(VK_USE_PLATFORM_WIN32_KHR)"), 1)
 		opens = sum(1 for line in self.text.splitlines() if line.startswith("#if"))
 		closes = sum(1 for line in self.text.splitlines() if line.startswith("#endif"))
 		self.assertEqual(opens, closes)
@@ -173,24 +171,28 @@ class SplitTest(unittest.TestCase):
 	def setUpClass(cls) -> None:
 		registry = ir.load(FIXTURE)
 		table = naming.load_table(TABLE)
-		cls.files, _ = emit.generate_split(registry, table, "closure", "fixture", PREFIX)
+		cls.files, _ = emit.generate_split(registry, table, "closure", "fixture")
 
-	def test_one_file_per_module_plus_an_umbrella(self) -> None:
+	def test_core_is_cut_by_area_and_extensions_are_filed_by_vendor(self) -> None:
 		self.assertEqual(
 			sorted(self.files),
 			[
 				"fixture.h",
-				"vk_ext_widget_colour.h",
-				"vk_khr_widget_label.h",
-				"vk_khr_widget_limits.h",
-				"vk_khr_widget_win32.h",
-				"vk_version_1_0.h",
-				"vk_version_1_1.h",
+				"fixture/ext.h",
+				"fixture/ext/widget_colour.h",
+				"fixture/khr.h",
+				"fixture/khr/widget_label.h",
+				"fixture/khr/widget_limits.h",
+				"fixture/khr/widget_win32.h",
+				"fixture/version_1_0.h",
+				"fixture/version_1_0/core.h",
+				"fixture/version_1_1.h",
+				"fixture/version_1_1/core.h",
 			],
 		)
 
-	def test_a_module_holds_every_kind_of_thing_it_introduces(self) -> None:
-		core = self.files["vk_version_1_0.h"]
+	def test_a_unit_holds_every_kind_of_thing_it_introduces(self) -> None:
+		core = self.files["fixture/version_1_0/core.h"]
 		for marker in (
 			"struct widget{};",  # tag
 			"enum class widget_mode",  # enum
@@ -200,12 +202,36 @@ class SplitTest(unittest.TestCase):
 		):
 			self.assertIn(marker, core)
 
-	def test_nothing_lands_in_a_module_that_does_not_introduce_it(self) -> None:
-		self.assertNotIn("widget_colour", self.files["vk_version_1_0.h"])
-		self.assertNotIn("create_widget", self.files["vk_ext_widget_colour.h"])
-		# The win32 command lives with its extension, not with core.
-		self.assertIn("cmd_set_win32_widget", self.files["vk_khr_widget_win32.h"])
-		self.assertNotIn("cmd_set_win32_widget", self.files["vk_version_1_0.h"])
+	def test_nothing_lands_in_a_unit_that_does_not_introduce_it(self) -> None:
+		self.assertNotIn("widget_colour", self.files["fixture/version_1_0/core.h"])
+		self.assertNotIn("create_widget", self.files["fixture/ext/widget_colour.h"])
+		self.assertIn("cmd_set_win32_widget", self.files["fixture/khr/widget_win32.h"])
+
+	def test_no_macro_guard_inside_a_unit(self) -> None:
+		for name, body in self.files.items():
+			if name.count("/") < 2:
+				continue  # an umbrella
+			guards = [line for line in body.splitlines() if line.startswith("#if") and "__clang__" not in line]
+			self.assertEqual(guards, [], name)
+
+	def test_the_vendor_umbrella_is_what_tests_the_platform(self) -> None:
+		umbrella = self.files["fixture/khr.h"]
+		self.assertIn(
+			'#if defined(VK_USE_PLATFORM_WIN32_KHR)\n#include "khr/widget_win32.h"\n#endif', umbrella
+		)
+		self.assertIn('#include "khr/widget_label.h"', umbrella)
+		self.assertNotIn("VK_USE_PLATFORM", self.files["fixture.h"])
+
+	def test_the_core_framework_is_included_by_its_install_path(self) -> None:
+		for name, body in self.files.items():
+			self.assertNotIn('"../../', body, name)
+		self.assertIn("#include <vkfu/expression.h>", self.files["fixture/version_1_0/core.h"])
+
+	def test_generated_files_include_each_other_relatively(self) -> None:
+		colour = self.files["fixture/ext/widget_colour.h"]
+		self.assertIn('#include "../version_1_0/core.h"', colour)
+		self.assertIn('#include "version_1_1/core.h"', self.files["fixture/version_1_1.h"])
+		self.assertIn('#include "fixture/version_1_0.h"', self.files["fixture.h"])
 
 	def test_every_part_stands_on_its_own(self) -> None:
 		for name, body in self.files.items():
@@ -214,33 +240,30 @@ class SplitTest(unittest.TestCase):
 			)
 			self.assertEqual(code.count("{"), code.count("}"), name)
 
-	def test_a_module_includes_what_it_depends_on(self) -> None:
-		colour = self.files["vk_ext_widget_colour.h"]
-		# Its param uses core's enum, and its compat edge names core's tag.
-		self.assertIn('#include "vk_version_1_0.h"', colour)
-		# An alias needs its target's module.
-		self.assertIn('#include "vk_version_1_1.h"', self.files["vk_khr_widget_limits.h"])
-
-	def test_the_umbrella_puts_dependencies_first(self) -> None:
-		umbrella = self.files["fixture.h"]
+	def test_an_include_always_names_a_file_that_exists(self) -> None:
 		for name, body in self.files.items():
-			if name == "fixture.h":
-				continue
+			directory = name.rpartition("/")[0]
 			for line in body.splitlines():
-				if line.startswith('#include "vk_'):
-					dependency = line.split('"')[1]
-					self.assertLess(umbrella.index(dependency), umbrella.index(name), f"{name} needs {dependency}")
+				if not line.startswith('#include "'):
+					continue
+				target = line.split('"')[1]
+				resolved = []
+				for part in (f"{directory}/{target}" if directory else target).split("/"):
+					if part == "..":
+						resolved.pop()
+					else:
+						resolved.append(part)
+				self.assertIn("/".join(resolved), self.files, f"{name}: {line}")
 
 	def test_the_split_and_the_single_file_agree(self) -> None:
-		single = generate()
 		def declarations(text: str) -> list[str]:
 			return sorted(
 				line
 				for line in text.splitlines()
 				if line.strip() and not line.startswith(("#", "//", "namespace", "{", "}", "using ::vkfu::operator|"))
 			)
-		joined = "\n".join(body for name, body in self.files.items() if name != "fixture.h")
-		self.assertEqual(declarations(joined), declarations(single))
+		joined = "\n".join(body for name, body in self.files.items() if name.count("/") >= 2)
+		self.assertEqual(declarations(joined), declarations(generate()))
 
 
 class FailureTest(unittest.TestCase):
@@ -249,9 +272,9 @@ class FailureTest(unittest.TestCase):
 		table = naming.load_table(TABLE)
 		# Pretend core's create-info hangs off the colour extension's structure
 		# and the extension's enum came from core: each module would need the other.
-		registry.origins["VkWidgetMode"] = "VK_EXT_widget_colour"
+		registry.origins.modules["VkWidgetMode"] = "VK_EXT_widget_colour"
 		with self.assertRaises(emit.GenerationError) as raised:
-			emit.generate(registry, table, "closure", PREFIX)
+			emit.generate(registry, table, "closure")
 		self.assertTrue(any("cycle" in problem for problem in raised.exception.problems))
 
 	def test_a_missing_name_stops_generation(self) -> None:
@@ -259,7 +282,7 @@ class FailureTest(unittest.TestCase):
 		table = naming.load_table(TABLE)
 		del table.structs["VkWidgetTuning"]
 		with self.assertRaises(emit.GenerationError) as raised:
-			emit.generate(registry, table, "closure", PREFIX)
+			emit.generate(registry, table, "closure")
 		self.assertIn("struct.VkWidgetTuning", raised.exception.missing)
 
 	def test_gen_and_check_agree_on_a_sound_table(self) -> None:
@@ -268,7 +291,7 @@ class FailureTest(unittest.TestCase):
 		self.assertEqual(
 			[p for p in check.check(registry, table) if p.severity == "error"], []
 		)
-		emit.generate(registry, table, "closure", PREFIX)
+		emit.generate(registry, table, "closure")
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ section. Where it lands is emit's business.
 from __future__ import annotations
 
 from . import ir
-from .cpp import TAB, base_type, guard_close, guard_open, leaf_of
+from .cpp import TAB, base_type, leaf_of
 from .naming import Table
 from .plan import Field, Plan
 
@@ -46,13 +46,18 @@ def _render_flags_type(field: Field, registry: ir.Registry, table: Table, field_
 	return lines
 
 
+def _bit_constant(bit: ir.Bit) -> str:
+	"""The constant's name, or its value when only some platforms declare it."""
+	return ir.bit_literal(bit.bitpos) if bit.guards else bit.name
+
+
 def _render_flags_checks(field: Field, table: Table, owner: str, field_name: str) -> list[str]:
 	"""Prove the bit-field layout against the real enum constants.
 
 	Bit-field allocation order is implementation-defined, so the mapping is
-	asserted rather than assumed. A platform-guarded constant is only asserted
-	where it exists; the field itself is unconditional so the layout never
-	shifts between platforms.
+	asserted rather than assumed. A platform-guarded constant is checked against
+	its value instead of its name, so the file needs no macro to compile; the
+	field itself is unconditional so the layout never shifts between platforms.
 	"""
 	nested = f"{owner}::{field_name}_type"
 	lines = [
@@ -63,11 +68,9 @@ def _render_flags_checks(field: Field, table: Table, owner: str, field_name: str
 	]
 	for bit in field.layout:
 		name = table.bit_name(field.flag_bits, bit.name)
-		guard_open(lines, bit.guards)
 		lines.append(
-			f"static_assert(::std::bit_cast<{field.member.type}>({nested}{{.{name} = 1}}) == {bit.name});"
+			f"static_assert(::std::bit_cast<{field.member.type}>({nested}{{.{name} = 1}}) == {_bit_constant(bit)});"
 		)
-		guard_close(lines, bit.guards)
 	lines.append("#endif")
 	return lines
 
@@ -87,7 +90,6 @@ def render_alias(
 	with every slot named explicitly.
 	"""
 	lines: list[str] = []
-	guard_open(lines, alias.guards)
 	leaf = leaf_of(chosen)
 	if area == "param" and slots:
 		declarations = ", ".join(
@@ -102,7 +104,6 @@ def render_alias(
 		lines.append(f"using {leaf} = ::vkfu::{area}::{target}<{arguments}>;")
 	else:
 		lines.append(f"using {leaf} = ::vkfu::{area}::{target};")
-	guard_close(lines, alias.guards)
 	return lines
 
 
@@ -119,7 +120,6 @@ def render_param(
 	parameters = {field.member.name: f"{names[field.member.name]}_expression" for field in slots}
 
 	lines: list[str] = []
-	guard_open(lines, struct.guards)
 	if slots:
 		# One template parameter per pointer slot, so a slot can hold a whole
 		# sub-expression and the parent's storage owns what it points at.
@@ -238,7 +238,6 @@ def render_param(
 				# Every template parameter has a default, so the layout of the
 				# nested bit-field type can be checked on the default instantiation.
 				lines.extend(_render_flags_checks(field, table, f"{leaf_of(object_name)}<>", names[field.member.name]))
-		guard_close(lines, struct.guards)
 		return lines
 
 	lines.append(f"{TAB}{TAB}}};")
@@ -257,7 +256,6 @@ def render_param(
 			lines.append("")
 			lines.extend(_render_flags_checks(field, table, leaf_of(object_name), names[field.member.name]))
 
-	guard_close(lines, struct.guards)
 	return lines
 
 
@@ -265,20 +263,18 @@ def render_enum(enum_type: ir.EnumType, table: Table) -> list[str]:
 	"""A scoped enum over the native one.
 
 	The underlying type is taken from the native enum so the static_cast back is
-	always value-preserving.
+	always value-preserving. An enumerator only some platforms declare is
+	written as its value, so the enum is the same everywhere and needs no macro.
 	"""
 	lines: list[str] = []
-	guard_open(lines, enum_type.guards)
 	lines += [
 		f"enum class {table.enum_name(enum_type.name)} : ::std::underlying_type_t<{enum_type.name}>",
 		"{",
 	]
 	for value in enum_type.values:
-		guard_open(lines, value.guards)
-		lines.append(f"{TAB}{table.value_name(enum_type.name, value.name)} = {value.name},")
-		guard_close(lines, value.guards)
+		constant = value.name if not value.guards else f"static_cast<{enum_type.name}>({value.literal})"
+		lines.append(f"{TAB}{table.value_name(enum_type.name, value.name)} = {constant},")
 	lines.append("};")
-	guard_close(lines, enum_type.guards)
 	return lines
 
 
@@ -294,7 +290,6 @@ def render_native_glue(struct: ir.Struct) -> list[str]:
 	pnext = next((member for member in struct.members if member.name == "pNext"), None)
 	assign = "value.pNext = next;" if pnext is not None and pnext.elem_const else "value.pNext = const_cast<void*>(next);"
 	lines: list[str] = []
-	guard_open(lines, struct.guards)
 	lines += [
 		f"constexpr auto _vkfu_address({struct.name}& value) noexcept -> void const*",
 		"{",
@@ -311,7 +306,6 @@ def render_native_glue(struct: ir.Struct) -> list[str]:
 		f"{TAB}return value;",
 		"}",
 	]
-	guard_close(lines, struct.guards)
 	return lines
 
 
@@ -333,7 +327,6 @@ def render_extensions(name: str, tag: str, provenance: ir.Provenance, guards: li
 	"""
 	core = _CORE_VERSION.get(provenance.core or "", "0")
 	lines: list[str] = []
-	guard_open(lines, guards)
 	lines.append("template<>")
 	lines.append(f"struct vulkan_object_extensions<obj::{tag}>")
 	lines.append("{")
@@ -346,5 +339,4 @@ def render_extensions(name: str, tag: str, provenance: ir.Provenance, guards: li
 	lines.append(f"{TAB}constexpr static ::std::uint32_t core = {core};")
 	lines.append(f"{TAB}constexpr static auto instance = {'true' if provenance.instance else 'false'};")
 	lines.append("};")
-	guard_close(lines, guards)
 	return lines

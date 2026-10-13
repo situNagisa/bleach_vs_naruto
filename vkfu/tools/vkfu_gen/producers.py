@@ -11,7 +11,7 @@ std::expected.
 from __future__ import annotations
 
 from . import ir
-from .cpp import TAB, guard_close, guard_open
+from .cpp import TAB
 from .naming import Table
 
 
@@ -174,7 +174,6 @@ def render(command: ir.Command, table: Table) -> list[str]:
 	tag = f"::vkfu::obj::{table.struct_name(command.info.type)}"
 	function = table.command_name(command.name).rpartition("::")[2]
 	lines: list[str] = []
-	guard_open(lines, command.guards)
 	shape = shape_of(command)
 	if shape == "single":
 		lines.extend(_single(command, function, tag))
@@ -182,5 +181,4 @@ def render(command: ir.Command, table: Table) -> list[str]:
 		lines.extend(_counted(command, function, tag))
 	else:
 		lines.extend(_array(command, function, table.command_singular(command.name).rpartition("::")[2], tag))
-	guard_close(lines, command.guards)
 	return lines
