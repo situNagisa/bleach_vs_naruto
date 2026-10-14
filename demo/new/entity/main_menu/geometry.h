@@ -3,6 +3,8 @@
 #include <array>
 #include <vector>
 #include <cassert>
+#include <cstdint>
+#include <limits>
 
 struct point
 {
@@ -13,7 +15,6 @@ struct vertex_type
 {
 	point position, uv;
 	color color;
-	::std::uint32_t textured;
 };
 
 struct geometry
@@ -40,35 +41,35 @@ struct geometry
 		assert(vertices.size() <= (::std::numeric_limits<::std::uint32_t>::max)() - 6u);
 		auto tint = color{ 1.0f, 1.0f, 1.0f, 1.0f };
 		vertices.append_range(::std::array{
-			vertex_type{ lt, uv_min, tint, 1 },
-			vertex_type{ rt, {uv_max.x, uv_min.y}, tint, 1 },
-			vertex_type{ rb, uv_max, tint, 1 },
-			vertex_type{ lt, uv_min, tint, 1 },
-			vertex_type{ rb, uv_max, tint, 1 },
-			vertex_type{ lb, {uv_min.x, uv_max.y}, tint, 1 } });
+			vertex_type{ lt, uv_min, tint },
+			vertex_type{ rt, {uv_max.x, uv_min.y}, tint },
+			vertex_type{ rb, uv_max, tint },
+			vertex_type{ lt, uv_min, tint },
+			vertex_type{ rb, uv_max, tint },
+			vertex_type{ lb, {uv_min.x, uv_max.y}, tint } });
 	}
 
 	auto rectangle(point minimum, point maximum, color color) -> void
 	{
 		assert(vertices.size() <= (::std::numeric_limits<::std::uint32_t>::max)() - 6u);
 		vertices.append_range(::std::array{
-			vertex_type{ minimum, {}, color, 0 },
-			vertex_type{ {maximum.x, minimum.y}, {}, color, 0 },
-			vertex_type{ maximum, {}, color, 0 },
-			vertex_type{ minimum, {}, color, 0 },
-			vertex_type{ maximum, {}, color, 0 },
-			vertex_type{ {minimum.x, maximum.y}, {}, color, 0 } });
+			vertex_type{ minimum, {}, color },
+			vertex_type{ {maximum.x, minimum.y}, {}, color },
+			vertex_type{ maximum, {}, color },
+			vertex_type{ minimum, {}, color },
+			vertex_type{ maximum, {}, color },
+			vertex_type{ {minimum.x, maximum.y}, {}, color } });
 	}
 
 	auto rectangle(point lt, point rt, point rb, point lb, color color) -> void
 	{
 		assert(vertices.size() <= (::std::numeric_limits<::std::uint32_t>::max)() - 6u);
 		vertices.append_range(::std::array{
-			vertex_type{ lt, {}, color, 0 },
-			vertex_type{ rt, {}, color, 0 },
-			vertex_type{ rb, {}, color, 0 },
-			vertex_type{ lt, {}, color, 0 },
-			vertex_type{ rb, {}, color, 0 },
-			vertex_type{ lb, {}, color, 0 } });
+			vertex_type{ lt, {}, color },
+			vertex_type{ rt, {}, color },
+			vertex_type{ rb, {}, color },
+			vertex_type{ lt, {}, color },
+			vertex_type{ rb, {}, color },
+			vertex_type{ lb, {}, color } });
 	}
 };

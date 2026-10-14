@@ -16,10 +16,7 @@
 
 #include "./detail/immovable.h"
 
-struct frame_context;
-
-/// 主菜单 entity，持有跨帧状态与绘制资源。
-struct main_menu : immovable
+struct main_menu
 {
 	struct state
 	{
@@ -33,23 +30,29 @@ struct main_menu : immovable
 		::std::optional<::std::size_t> activated{};
 	};
 
-	struct task
+	struct operation_state
 	{
+		using update_sender_type = decltype(::exec::split(::std::declval<values_sender_type<state, delta>>()));
+
 		struct impl;
 		::std::unique_ptr<impl> _impl;
 
-		[[nodiscard]] auto update() const noexcept;
+		explicit operation_state(main_menu& menu, input& i, input::operation_state::shared_state controls, renderer& r, renderer::operation_state::shared_state draw) noexcept;
+		~operation_state();
 
-		explicit task(main_menu& menu, input::task& controls, renderer& r, renderer::task& draw) noexcept;
-		task(task&&) noexcept;
-		auto operator=(task&&) noexcept -> task&;
-		~task();
+		struct shared_state
+		{
+			::std::reference_wrapper<operation_state> _state;
+
+			update_sender_type update() const noexcept;
+		};
+		shared_state start(frame_context& context) & noexcept;
 	};
 
 	main_menu(renderer& r);
 	~main_menu();
 
-	void build_task(frame_context& context, task& t, renderer& r, renderer::task& rt);
+	operation_state connect(input& i, input::operation_state::shared_state controls, renderer& r, renderer::operation_state::shared_state draw) { return operation_state(*this, i, controls, r, draw); }
 
 	state const& current_state() const noexcept;
 

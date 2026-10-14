@@ -17,7 +17,9 @@
 #include <glm/gtx/matrix_transform_2d.hpp>
 
 #include "./main_menu.h"
-#include "./main_menu/drawing.h"
+#include "./main_menu/background.h"
+#include "./main_menu/text.h"
+#include "./main_menu/vector_graph.h"
 
 inline static constexpr auto ignore = ::stdexec::then([](auto&&...) noexcept {});
 
@@ -57,9 +59,10 @@ struct main_menu::implementation : immovable
 	{}
 };
 
-struct main_menu::task::impl
+struct main_menu::operation_state::impl
 {
-	decltype(::exec::split(::std::declval<values_sender_type<state, delta>>())) update;
+	renderer::operation_state::shared_state render_task;
+	update_sender_type update;
 	decltype(::exec::split(::std::declval<values_sender_type<::vkkl::command_buffer>>())) begin_command;
 	decltype(::exec::split(::std::declval<values_sender_type<::std::vector<buffer_type>>>())) draw_bg;
 	decltype(::exec::split(::std::declval<values_sender_type<>>())) end_command;
@@ -70,8 +73,9 @@ struct main_menu::task::impl
 		return begin_command | ::stdexec::then([](::vkkl::command_buffer const& buffer) noexcept -> ::vkkl::command_buffer_observer { return buffer; });
 	}
 
-	impl(main_menu& menu, input::task& controls, renderer& r, renderer::task& rt)
-		: update(values_sender_type<state, delta>{controls.poll() | ::stdexec::let_value([&](input::state const& current, input::delta const& changes)
+	impl(main_menu& menu, input& i, input::operation_state::shared_state controls, renderer& r, renderer::operation_state::shared_state rt)
+		: render_task(rt)
+		, update(values_sender_type<state, delta>{controls.poll() | ::stdexec::let_value([&](input::state const& current, input::delta const& changes)
 			{
 				auto result = delta{};
 				auto now = ::std::chrono::steady_clock::now();
@@ -235,46 +239,45 @@ struct main_menu::task::impl
 					return buffers;
 				})} | ::exec::split())
 		, end_command(values_sender_type<>{ ::stdexec::when_all(command(), draw_bg | ignore)
-			| ::stdexec::then([&](::vkkl::command_buffer_observer command_buffer)
+			| ::stdexec::then([&, rt](::vkkl::command_buffer_observer command_buffer)
 				{
 					::consumer_arch_vulkan::check(::vkEndCommandBuffer(command_buffer.handle), "main menu: end draw");
-					auto lock = ::std::scoped_lock{ rt.secondary.mutex };
-					rt.secondary.commands.push_back(command_buffer);
+					auto lock = ::std::scoped_lock{ rt.secondary().mutex };
+					rt.secondary().commands.push_back(command_buffer);
 				})} | ::exec::split())
 	{}
 };
 
-main_menu::task::task(main_menu& menu, input::task& controls, renderer& r, renderer::task& draw) noexcept
-	: _impl(::std::make_unique<impl>(menu, controls, r, draw))
+main_menu::operation_state::operation_state(main_menu& menu, input& i, input::operation_state::shared_state controls, renderer& r, renderer::operation_state::shared_state draw) noexcept
+	: _impl(::std::make_unique<impl>(menu, i, controls, r, draw))
 {
 }
 
-main_menu::task::task(task&&) noexcept = default;
-auto main_menu::task::operator=(task&&) noexcept -> task& = default;
-main_menu::task::~task() = default;
+main_menu::operation_state::~operation_state() = default;
 
-auto main_menu::task::update() const noexcept
+main_menu::operation_state::update_sender_type main_menu::operation_state::shared_state::update() const noexcept
 {
-	return _impl->update;
+	return _state.get()._impl->update;
+}
+
+main_menu::operation_state::shared_state main_menu::operation_state::start(frame_context& context) & noexcept
+{
+	auto&& impl = *_impl;
+
+	auto release_command = ::stdexec::when_all(impl.end_command, impl.render_task.fence() | ignore);
+	auto release_bg_draw = ::stdexec::when_all(impl.draw_bg | ignore, impl.render_task.fence() | ignore);
+
+	impl.render_task.recorders().emplace_back(impl.draw_bg | ignore);
+	impl.render_task.recorders().emplace_back(impl.end_command);
+
+	context.roots.emplace_back(release_command);
+	context.roots.emplace_back(release_bg_draw);
+
+	return shared_state(*this);
 }
 
 main_menu::main_menu(renderer& r) : _impl(::std::make_unique<implementation>(r)) {}
 main_menu::~main_menu() = default;
-
-void main_menu::build_task(frame_context& context, task& t, renderer& r, renderer::task& rt)
-{
-	auto const global = r.vulkan.global_env();
-	auto&& menu = *_impl;
-
-	auto release_command = ::stdexec::when_all(t._impl->end_command, rt.fence() | ignore);
-	auto release_bg_draw = ::stdexec::when_all(t._impl->draw_bg | ignore, rt.fence() | ignore);
-
-	rt.recorders.emplace_back(t._impl->draw_bg | ignore);
-	rt.recorders.emplace_back(t._impl->end_command);
-
-	context.roots.emplace_back(release_command);
-	context.roots.emplace_back(release_bg_draw);
-}
 
 main_menu::state const& main_menu::current_state() const noexcept
 {

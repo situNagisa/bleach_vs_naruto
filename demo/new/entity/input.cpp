@@ -58,7 +58,7 @@ template <class Value, ::std::size_t Size>
 	return static_cast<::std::size_t>(found - mapping.begin());
 }
 
-input::task::task(input& input)
+input::operation_state::operation_state(input& input)
 	: _poll(values_sender_type<state, delta>{::stdexec::just()
 		| ::stdexec::let_value([&]
 			{
@@ -160,6 +160,11 @@ input::task::task(input& input)
 
 }
 
+input::operation_state::shared_state input::operation_state::start() & noexcept
+{
+	return shared_state(*this);
+}
+
 input::input(::bvn::platform::window const& window)
 	: _window_id(::SDL_GetWindowID(window.handle))
 {
@@ -188,8 +193,4 @@ input::input(::bvn::platform::window const& window)
 			_current.mouse._buttons[index] = (buttons & SDL_BUTTON_MASK(sdl_buttons[index])) != 0;
 		}
 	}
-}
-
-void input::build_task(task& t)
-{
 }

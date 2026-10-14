@@ -17,7 +17,9 @@
 #include <glm/gtx/matrix_transform_2d.hpp>
 
 #include "./setting_scene.h"
-#include "./main_menu/drawing.h"
+#include "./main_menu/background.h"
+#include "./main_menu/text.h"
+#include "./main_menu/vector_graph.h"
 
 #include "./setting_scene/settings.h"
 
@@ -75,9 +77,10 @@ struct setting_scene::implementation : immovable
 	}
 };
 
-struct setting_scene::task::impl
+struct setting_scene::operation_state::impl
 {
-	decltype(::exec::split(::std::declval<values_sender_type<state, delta>>())) update;
+	renderer::operation_state::shared_state renderer_shared_state;
+	update_sender_type update;
 	decltype(::exec::split(::std::declval<values_sender_type<::vkkl::command_buffer>>())) begin_command;
 	decltype(::exec::split(::std::declval<values_sender_type<::std::vector<buffer_type>>>())) draw_bg;
 	decltype(::exec::split(::std::declval<values_sender_type<>>())) end_command;
@@ -88,8 +91,9 @@ struct setting_scene::task::impl
 		return begin_command | ::stdexec::then([](::vkkl::command_buffer const& buffer) noexcept -> ::vkkl::command_buffer_observer { return buffer; });
 	}
 
-	impl(setting_scene& scene, input::task& controls, renderer& r, renderer::task& rt)
-		: update(values_sender_type<state, delta>{controls.poll() | ::stdexec::let_value([&](input::state const& current, input::delta const& changes)
+	impl(setting_scene& scene, input& i, input::operation_state::shared_state controls, renderer& r, renderer::operation_state::shared_state rt)
+		: renderer_shared_state(rt)
+		, update(values_sender_type<state, delta>{controls.poll() | ::stdexec::let_value([&](input::state const& current, input::delta const& changes)
 			{
 				auto result = delta{};
 				auto now = ::std::chrono::steady_clock::now();
@@ -288,43 +292,45 @@ struct setting_scene::task::impl
 					return buffers;
 				})} | ::exec::split())
 		, end_command(values_sender_type<>{ ::stdexec::when_all(command(), draw_bg | ignore)
-			| ::stdexec::then([&](::vkkl::command_buffer_observer command_buffer)
+			| ::stdexec::then([&, rt](::vkkl::command_buffer_observer command_buffer)
 				{
 					::consumer_arch_vulkan::check(::vkEndCommandBuffer(command_buffer.handle), "main scene: end draw");
-					auto lock = ::std::scoped_lock{ rt.secondary.mutex };
-					rt.secondary.commands.push_back(command_buffer);
+					auto lock = ::std::scoped_lock{ rt.secondary().mutex };
+					rt.secondary().commands.push_back(command_buffer);
 				})} | ::exec::split())
 	{}
 };
 
-setting_scene::task::task(setting_scene& scene, input::task& controls, renderer& r, renderer::task& draw)
-	: _impl(::std::make_unique<impl>(scene, controls, r, draw))
+setting_scene::operation_state::operation_state(setting_scene& scene, input& i, input::operation_state::shared_state controls, renderer& r, renderer::operation_state::shared_state draw)
+	: _impl(::std::make_unique<impl>(scene, i, controls, r, draw))
 {
 }
 
-setting_scene::task::task(task&&) noexcept = default;
-auto setting_scene::task::operator=(task&&) noexcept -> task& = default;
-setting_scene::task::~task() = default;
+setting_scene::operation_state::~operation_state() = default;
 
-auto setting_scene::task::update() const noexcept -> update_sender_type
+setting_scene::operation_state::update_sender_type setting_scene::operation_state::shared_state::update() const noexcept
 {
-	return _impl->update;
+	return _state.get()._impl->update;
+}
+
+setting_scene::operation_state::shared_state setting_scene::operation_state::start(frame_context& context) & noexcept
+{
+	auto&& impl = *_impl;
+
+	auto release_command = ::stdexec::when_all(impl.end_command, impl.renderer_shared_state.fence() | ignore);
+	auto release_bg_draw = ::stdexec::when_all(impl.draw_bg | ignore, impl.renderer_shared_state.fence() | ignore);
+
+	impl.renderer_shared_state.recorders().emplace_back(impl.draw_bg | ignore);
+	impl.renderer_shared_state.recorders().emplace_back(impl.end_command);
+
+	context.roots.emplace_back(release_command);
+	context.roots.emplace_back(release_bg_draw);
+
+	return shared_state(*this);
 }
 
 setting_scene::setting_scene(renderer& r) : _impl(::std::make_unique<implementation>(r)) {}
 setting_scene::~setting_scene() = default;
-
-void setting_scene::build_task(frame_context& context, task& t, renderer&, renderer::task& rt)
-{
-	auto release_command = ::stdexec::when_all(t._impl->end_command, rt.fence() | ignore);
-	auto release_bg_draw = ::stdexec::when_all(t._impl->draw_bg | ignore, rt.fence() | ignore);
-
-	rt.recorders.emplace_back(t._impl->draw_bg | ignore);
-	rt.recorders.emplace_back(t._impl->end_command);
-
-	context.roots.emplace_back(release_command);
-	context.roots.emplace_back(release_bg_draw);
-}
 
 auto setting_scene::current_state() const noexcept -> state const&
 {

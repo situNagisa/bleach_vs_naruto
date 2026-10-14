@@ -60,6 +60,11 @@
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)temp\compile\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
@@ -94,12 +99,75 @@
     <ClInclude Include="demo\consumer-arch\barrier.h" />
     <ClInclude Include="demo\consumer-arch\consumer_task.h" />
     <ClInclude Include="demo\consumer-arch\demo_vulkan.h" />
+    <ClInclude Include="demo\consumer-arch\frame_slot.h" />
     <ClInclude Include="demo\consumer-arch\job.h" />
     <ClInclude Include="demo\frame-graph\entities.h" />
     <ClInclude Include="demo\frame-graph\frame_graph.h" />
     <ClInclude Include="demo\frame-graph\renderer.h" />
+    <ClInclude Include="demo\gpu-sender-concepts\algorithms.h" />
+    <ClInclude Include="demo\gpu-sender-concepts\concepts.h" />
+    <ClInclude Include="demo\gpu-sender-concepts\cpo.h" />
+    <ClInclude Include="demo\gpu-sender-concepts\image_state.h" />
+    <ClInclude Include="demo\gpu-sender-concepts\mock_vulkan.h" />
+    <ClInclude Include="demo\gpu-sender-concepts\swapchain.h" />
+    <ClInclude Include="demo\gpu-sender-concepts\test_vulkan.h" />
+    <ClInclude Include="demo\gpu-sender-concepts\tracked_value.h" />
+    <ClInclude Include="demo\gpu-sender-concepts\vulkan_image_state.h" />
+    <ClInclude Include="demo\gpu-sender-concepts\vulkan_tracked_value.h" />
+    <ClInclude Include="demo\gpu-sender\context.h" />
+    <ClInclude Include="demo\gpu-sender\sender.h" />
+    <ClInclude Include="demo\new-arch-pro\entity\main_menu.h" />
+    <ClInclude Include="demo\new-arch-pro\framework\any_sender.h" />
+    <ClInclude Include="demo\new-arch-pro\entity\detail\demo_vulkan.h" />
+    <ClInclude Include="demo\new-arch-pro\framework\dependency_graph_v2.h" />
+    <ClInclude Include="demo\new-arch-pro\framework\entities.h" />
+    <ClInclude Include="demo\new-arch-pro\entity\entity.h" />
+    <ClInclude Include="demo\new-arch-pro\framework\frame_context.h" />
+    <ClInclude Include="demo\new-arch-pro\framework\frame_slot.h" />
+    <ClInclude Include="demo\new-arch-pro\entity\detail\immovable.h" />
+    <ClInclude Include="demo\new-arch-pro\entity\render.h" />
+    <ClInclude Include="demo\new-arch-pro\entity\input.h" />
+    <ClInclude Include="demo\new-arch\any_sender.h" />
     <ClInclude Include="demo\job-arch\dynamic_when_all.h" />
+    <ClInclude Include="demo\job-arch\entities.h" />
     <ClInclude Include="demo\job-arch\manual_lifetime.h" />
+    <ClInclude Include="demo\job-arch\node_sender.h" />
+    <ClInclude Include="demo\new-arch\demo_vulkan.h" />
+    <ClInclude Include="demo\new-arch-pro\framework\dependency_graph.h" />
+    <ClInclude Include="demo\new-arch\entities.h" />
+    <ClInclude Include="demo\new-arch\entity.h" />
+    <ClInclude Include="demo\new-arch\frame_context.h" />
+    <ClInclude Include="demo\new-arch\frame_slot.h" />
+    <ClInclude Include="demo\new-arch\immovable.h" />
+    <ClInclude Include="demo\new\entity\detail\demo_vulkan.h" />
+    <ClInclude Include="demo\new\entity\detail\immovable.h" />
+    <ClInclude Include="demo\new\entity\entity.h" />
+    <ClInclude Include="demo\new\entity\fighting_scene\player.h" />
+    <ClInclude Include="demo\new\entity\input.h" />
+    <ClInclude Include="demo\new\entity\main_menu.h" />
+    <ClInclude Include="demo\new\entity\main_menu\vector_graph_graphic_pipeline.h" />
+    <ClInclude Include="demo\new\entity\setting_scene.h" />
+    <ClInclude Include="demo\new\entity\fighting_scene.h" />
+    <ClInclude Include="demo\new\entity\setting_scene\settings.h" />
+    <ClInclude Include="demo\new\entity\main_menu\background.h" />
+    <ClInclude Include="demo\new\entity\main_menu\text.h" />
+    <ClInclude Include="demo\new\entity\main_menu\vector_graph.h" />
+    <ClInclude Include="demo\new\entity\main_menu\sprite.h" />
+    <ClInclude Include="demo\new\entity\main_menu\sprite_vertex.h" />
+    <ClInclude Include="demo\new\entity\main_menu\sprite_texture.h" />
+    <ClInclude Include="demo\new\entity\main_menu\sprite_graphic_pipeline.h" />
+    <ClInclude Include="demo\new\entity\main_menu\buffer_type.h" />
+    <ClInclude Include="demo\new\entity\main_menu\geometry.h" />
+    <ClInclude Include="demo\new\entity\main_menu\graphic_resource.h" />
+    <ClInclude Include="demo\new\entity\main_menu\texture.h" />
+    <ClInclude Include="demo\new\entity\render.h" />
+    <ClInclude Include="demo\new\entity\scence.h" />
+    <ClInclude Include="demo\new\framework\any_sender.h" />
+    <ClInclude Include="demo\new\framework\frame_context.h" />
+    <ClInclude Include="demo\new\framework\frame_slot.h" />
+    <ClInclude Include="demo\new-arch\render.h" />
+    <ClInclude Include="demo\new-arch\resource_pool.h" />
+    <ClInclude Include="demo\new-arch\swapchain.h" />
     <ClInclude Include="demo\pull-graph\pull_graph.h" />
     <ClInclude Include="demo\task-graph\dynamic_when_all.h" />
     <ClInclude Include="demo\task-graph\frame_context.h" />
@@ -177,15 +245,24 @@
     <ClInclude Include="vkfu\include\vkfu\vulkan_object.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="demo\consumer-arch\demo.cpp" />
-    <ClCompile Include="demo\job-arch\main.cpp" />
-    <ClCompile Include="demo\pull-graph\main.cpp" />
+    <ClCompile Include="demo\new\entity\input.cpp" />
+    <ClCompile Include="demo\new\entity\main_menu.cpp" />
+    <ClCompile Include="demo\new\entity\setting_scene.cpp" />
+    <ClCompile Include="demo\new\entity\fighting_scene.cpp" />
+    <ClCompile Include="demo\new\entity\setting_scene\settings.cpp" />
+    <ClCompile Include="demo\new\entity\main_menu\background.cpp" />
+    <ClCompile Include="demo\new\entity\main_menu\text.cpp" />
+    <ClCompile Include="demo\new\entity\main_menu\vector_graph.cpp" />
+    <ClCompile Include="demo\new\entity\main_menu\sprite.cpp" />
+    <ClCompile Include="demo\new\entity\main_menu\sprite_texture.cpp" />
+    <ClCompile Include="demo\new\entity\main_menu\sprite_graphic_pipeline.cpp" />
+    <ClCompile Include="demo\new\entity\render.cpp" />
+    <ClCompile Include="demo\new\new-arch.cpp" />
     <ClCompile Include="plugins\test_basic\test_plugin.cpp" />
     <ClCompile Include="source\assets\sprite_clip.cpp" />
     <ClCompile Include="source\platform\event.cpp" />
     <ClCompile Include="source\platform\sdl_context.cpp" />
     <ClCompile Include="source\platform\window.cpp" />
-    <ClCompile Include="source\sim\sim.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
@@ -201,6 +278,14 @@
   <ItemGroup>
     <None Include="CMakePresets.json" />
     <None Include="cmake\module.cmake" />
+    <None Include="demo\new\entity\main_menu\sprite.vert" />
+    <None Include="demo\new\entity\main_menu\sprite.frag" />
+    <None Include="demo\new\entity\main_menu\sprite.vert.spv" />
+    <None Include="demo\new\entity\main_menu\sprite.frag.spv" />
+    <None Include="demo\new\entity\main_menu\texture.frag" />
+    <None Include="demo\new\entity\main_menu\vector.frag" />
+    <None Include="demo\new\entity\main_menu\texture.vert" />
+    <None Include="demo\new\entity\main_menu\vector.vert" />
     <None Include="docs\animation.md" />
     <None Include="docs\asset.md" />
     <None Include="docs\coding-standard.md" />

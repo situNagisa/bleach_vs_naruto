@@ -1,6 +1,8 @@
 #pragma once
 
 #include <array>
+#include <cstddef>
+#include <cstdint>
 #include <filesystem>
 #include <span>
 
@@ -13,30 +15,23 @@
 
 inline static auto const resource_dir = ::std::filesystem::path{ __FILE__ }.parent_path();
 
-struct graphic_resource_type
+struct texture_graphic_pipeline_type
 {
 	::vkkl::descriptor_set_layout descriptor_layout;
-	::vkkl::descriptor_pool descriptor_pool;
 	::vkkl::pipeline_layout layout;
 	::vkkl::pipeline pipeline;
+	::vkkl::descriptor_pool descriptor_pool;
 	::std::array<::vkkl::descriptor_set, 1> descriptors;
 
-	graphic_resource_type(VkDevice device, VkFormat format)
-		: descriptor_layout(device, ::vkfu::create_descriptor_set_layout(device, ::vkfu::param::descriptor_set_layout{ 
+	texture_graphic_pipeline_type(VkDevice device, VkFormat format)
+		: descriptor_layout(device, ::vkfu::create_descriptor_set_layout(device, ::vkfu::param::descriptor_set_layout{
 				.bindings = ::std::array{ ::vkfu::evaluate(::vkfu::param::descriptor_set_layout_binding{
 				.descriptor_type = ::vkfu::enums::descriptor_type::combined_image_sampler,
 				.descriptor_count = 1,
 				.stage_flags = {.fragment = 1},
 			})}}))
-		, descriptor_pool(device, ::vkfu::create_descriptor_pool(device, ::vkfu::param::descriptor_pool{
-				.flags = {.free_descriptor_set = 1},
-				.max_sets = 2,
-				.pool_sizes = ::std::array{ ::vkfu::evaluate(::vkfu::param::descriptor_pool_size{
-					.type = ::vkfu::enums::descriptor_type::combined_image_sampler,
-					.descriptor_count = 2
-				})} }))
 		, layout(device, ::vkfu::create_pipeline_layout(device, ::vkfu::param::pipeline_layout{
-				.set_layouts = ::std::array{descriptor_layout.handle}
+				.set_layouts = ::std::span{ &descriptor_layout.handle, 1u }
 			}))
 		, pipeline([&]
 			{
@@ -47,8 +42,10 @@ struct graphic_resource_type
 					{
 						return ::vkkl::shader_module{ device, ::vkfu::create_shader_module(device, param::shader_module{.code_size = code.size_bytes(), .code = code.data()}) };
 					};
-				auto vertex = shader(::consumer_arch_vulkan::read_spirv((resource_dir / "menu.vert.spv").string().c_str()));
-				auto fragment = shader(::consumer_arch_vulkan::read_spirv((resource_dir / "menu.frag.spv").string().c_str()));
+				auto const vertex_path = resource_dir / "texture.vert.spv";
+				auto const fragment_path = resource_dir / "texture.frag.spv";
+				auto vertex = shader(::consumer_arch_vulkan::read_spirv(vertex_path.string().c_str()));
+				auto fragment = shader(::consumer_arch_vulkan::read_spirv(fragment_path.string().c_str()));
 				auto stages = ::std::array{
 					::vkfu::evaluate(param::state::shader_stage{.stage = shader_stage::vertex, .module = vertex.handle, .name = "main"}),
 					::vkfu::evaluate(param::state::shader_stage{.stage = shader_stage::fragment, .module = fragment.handle, .name = "main"})
@@ -70,8 +67,7 @@ struct graphic_resource_type
 							.vertex_attribute_descriptions = ::std::array{
 								::vkfu::evaluate(param::vertex_input_attribute_description{.location = 0, .format = format::r32g32_sfloat, .offset = offsetof(vertex_type, position)}),
 								::vkfu::evaluate(param::vertex_input_attribute_description{.location = 1, .format = format::r32g32_sfloat, .offset = offsetof(vertex_type, uv)}),
-								::vkfu::evaluate(param::vertex_input_attribute_description{.location = 2, .format = format::r32g32b32a32_sfloat, .offset = offsetof(vertex_type, color)}),
-								::vkfu::evaluate(param::vertex_input_attribute_description{.location = 3, .format = format::r32_uint, .offset = offsetof(vertex_type, textured)})
+								::vkfu::evaluate(param::vertex_input_attribute_description{.location = 2, .format = format::r32g32b32a32_sfloat, .offset = offsetof(vertex_type, color)})
 							}
 						},
 						.input_assembly_state = param::state::input_assembly{.topology = primitive_topology::triangle_list},
@@ -88,6 +84,13 @@ struct graphic_resource_type
 					} | param::option::pipeline_rendering{.color_attachment_formats = ::std::array{ format } }
 					) };
 			}())
+		, descriptor_pool(device, ::vkfu::create_descriptor_pool(device, ::vkfu::param::descriptor_pool{
+				.flags = {.free_descriptor_set = 1},
+				.max_sets = 2,
+				.pool_sizes = ::std::array{ ::vkfu::evaluate(::vkfu::param::descriptor_pool_size{
+					.type = ::vkfu::enums::descriptor_type::combined_image_sampler,
+					.descriptor_count = 2
+				})} }))
 		, descriptors([&]
 			{
 				auto descriptors = ::std::array{
@@ -105,5 +108,24 @@ struct graphic_resource_type
 				};
 			}())
 	{}
+
+	void update_descriptor_sets(VkDevice device, VkDescriptorSet descriptor_set, VkSampler sampler, VkImageView view)
+	{
+		auto const image_info = ::vkfu::evaluate(::vkfu::param::descriptor_image{
+			.sampler = sampler,
+			.image_view = view,
+			.image_layout = ::vkfu::enums::image_layout::shader_read_only_optimal }
+		);
+		::vkfu::update_descriptor_sets(
+			device
+			, ::std::array{ ::vkfu::evaluate(::vkfu::param::write_descriptor_set{
+				.dst_set = descriptor_set,
+				.descriptor_count = 1,
+				.descriptor_type = ::vkfu::enums::descriptor_type::combined_image_sampler,
+				.image_info = &image_info }
+				) }
+			, {}
+		);
+	}
 };
 

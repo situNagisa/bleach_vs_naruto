@@ -3,6 +3,7 @@
 #include <exception>
 #include <print>
 #include <memory>
+#include <optional>
 #include <variant>
 #include <chrono>
 #include <thread>
@@ -13,6 +14,7 @@
 #include <exec/static_thread_pool.hpp>
 
 #include <nagisa/concurrency/when_all_range.h>
+#include <nagisa/concurrency/_manual_lifetime.h>
 
 #include <bvn/platform/sdl_context.h>
 
@@ -20,6 +22,7 @@
 #include "./entity/input.h"
 #include "./entity/main_menu.h"
 #include "./entity/setting_scene.h"
+#include "./entity/fighting_scene.h"
 #include "./framework/frame_context.h"
 #include "./entity/setting_scene/settings.h"
 
@@ -39,6 +42,7 @@ int main() try
 		{
 			exit_scene exit;
 			main_menu menu;
+			fighting_scene fighting;
 
 			~scene_t() noexcept {}
 		} scene{};
@@ -50,6 +54,7 @@ int main() try
 
 	struct exit {};
 	struct open_settings {};
+	struct start_fighting {};
 	struct back_to_menu {};
 
 	struct machine
@@ -65,9 +70,15 @@ int main() try
 				, state<main_menu> + on_exit<_> / [] (entitites_t& entitites) noexcept { ::std::destroy_at(&entitites.scene.menu); }
 				, state<main_menu> + event<exit> = state<exit_scene>
 				, state<main_menu> + event<open_settings> = state<setting_scene>
+				, state<main_menu> + event<start_fighting> = state<fighting_scene>
 
 				, state<setting_scene> + event<back_to_menu> = state<main_menu>
 				, state<setting_scene> + event<exit> = state<exit_scene>
+
+				, state<fighting_scene> + on_entry<_> / [] (entitites_t& entitites) { ::std::construct_at(&entitites.scene.fighting, entitites.controls, entitites.draw); }
+				, state<fighting_scene> + on_exit<_> / [] (entitites_t& entitites) noexcept { ::std::destroy_at(&entitites.scene.fighting); }
+				, state<fighting_scene> + event<back_to_menu> = state<main_menu>
+				, state<fighting_scene> + event<exit> = state<exit_scene>
 				);
 		}
 	};
@@ -84,25 +95,48 @@ int main() try
 				.stop_token = stop_source.get_token(),
 			};
 
-			auto rt = renderer::task(entitites.draw, context.scheduler);
-			entitites.draw.build_task(context, rt);
-			auto it = input::task(entitites.controls);
-			entitites.controls.build_task(it);
+			auto rop = entitites.draw.connect(context.scheduler);
+			auto rt = rop.start(context);
+			auto iop = entitites.controls.connect();
+			auto it = iop.start();
 
-			::std::variant<::std::monostate, main_menu::task, setting_scene::task> st{};
+			union 
+			{
+				::nagisa::concurrency::details::manual_lifetime<main_menu::operation_state> menu;
+				::nagisa::concurrency::details::manual_lifetime<setting_scene::operation_state> setting;
+				::nagisa::concurrency::details::manual_lifetime<fighting_scene::operation_state> fighting;
+			}scene_op{};
 
 			if (sm.is(::boost::sml::state<main_menu>))
 			{
-				auto&& mmt = st.emplace<main_menu::task>(entitites.scene.menu, it, entitites.draw, rt);
-				entitites.scene.menu.build_task(context, mmt, entitites.draw, rt);
+				auto&& mmop = scene_op.menu.construct_from(&main_menu::connect, &entitites.scene.menu, entitites.controls, it, entitites.draw, rt);
+				auto mmt = mmop.start(context);
 			}
 			else if (sm.is(::boost::sml::state<setting_scene>))
 			{
-				auto&& settings_task = st.emplace<setting_scene::task>(entitites.settings, it, entitites.draw, rt);
-				entitites.settings.build_task(context, settings_task, entitites.draw, rt);
+				auto&& setting_op = scene_op.setting.construct_from(&setting_scene::connect, &entitites.settings, entitites.controls, it, entitites.draw, rt);
+				auto setting_shared = setting_op.start(context);
+			}
+			else if (sm.is(::boost::sml::state<fighting_scene>))
+			{
+				auto&& fighting_op = scene_op.fighting.construct_from(&fighting_scene::connect, &entitites.scene.fighting, entitites.controls, it, entitites.draw, rt);
+				auto fighting_shared = fighting_op.start(context);
 			}
 
 			::stdexec::sync_wait(::nagisa::concurrency::when_all_range(context.roots));
+
+			if (sm.is(::boost::sml::state<main_menu>))
+			{
+				scene_op.menu.destroy();
+			}
+			else if (sm.is(::boost::sml::state<setting_scene>))
+			{
+				scene_op.setting.destroy();
+			}
+			else if (sm.is(::boost::sml::state<fighting_scene>))
+			{
+				scene_op.fighting.destroy();
+			}
 		}
 
 		// Scene resources can be released after the frame tasks and GPU fence have completed.
@@ -114,7 +148,11 @@ int main() try
 		if (sm.is(::boost::sml::state<main_menu>))
 		{
 			auto const activated = entitites.scene.menu.current_state().activated;
-			if (activated == 1)
+			if (activated == 0)
+			{
+				sm.process_event(start_fighting{});
+			}
+			else if (activated == 1)
 			{
 				sm.process_event(open_settings{});
 			}
@@ -132,6 +170,11 @@ int main() try
 				::save_settings(setting_path, entitites.settings.preferences());;
 				sm.process_event(back_to_menu{});
 			}
+		}
+		else if (sm.is(::boost::sml::state<fighting_scene>))
+		{
+			if (entitites.scene.fighting.current_state().back_requested)
+				sm.process_event(back_to_menu{});
 		}
 		++frame_index;
 	}

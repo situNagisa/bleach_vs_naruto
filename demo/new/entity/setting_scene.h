@@ -34,25 +34,32 @@ struct setting_scene : immovable
 		bool back_requested = false;
 	};
 
-	struct task
+	struct operation_state
 	{
 		using update_sender_type = decltype(::exec::split(::std::declval<values_sender_type<state, delta>>()));
 
 		struct impl;
 		::std::unique_ptr<impl> _impl;
 
-		[[nodiscard]] auto update() const noexcept -> update_sender_type;
+		explicit operation_state(setting_scene& scene, input& i, input::operation_state::shared_state controls, renderer& r, renderer::operation_state::shared_state draw);
+		~operation_state();
 
-		explicit task(setting_scene& scene, input::task& controls, renderer& r, renderer::task& draw);
-		task(task&&) noexcept;
-		auto operator=(task&&) noexcept -> task&;
-		~task();
+		struct shared_state
+		{
+			::std::reference_wrapper<operation_state> _state;
+			update_sender_type update() const noexcept;
+		};
+		shared_state start(frame_context& context) & noexcept;
 	};
 
 	explicit setting_scene(renderer& r);
 	~setting_scene();
 
-	void build_task(frame_context& context, task& t, renderer& r, renderer::task& rt);
+	operation_state connect(input& i, input::operation_state::shared_state controls, renderer& r, renderer::operation_state::shared_state draw)
+	{
+		return operation_state(*this, i, controls, r, draw);
+	}
+
 	[[nodiscard]] auto current_state() const noexcept -> state const&;
 
 	game_settings const& preferences() const noexcept;
