@@ -86,7 +86,7 @@ int main() try
 	// union + manual_lifetime + 三段 sm.is()：构造哪一支、析构哪一支都由它管。
 	using menu_frame = decltype(::scene_frame(entitites.controls, entitites.scene.menu, entitites.draw));
 	using settings_frame = decltype(::scene_frame(entitites.controls, entitites.settings, entitites.draw));
-	using fighting_frame = decltype(entitites.scene.fighting.frame(entitites.controls));
+	using fighting_frame = decltype(entitites.scene.fighting.frame(entitites.controls, entitites.draw));
 	using frame_sender = ::exec::variant_sender<menu_frame, settings_frame, fighting_frame>;
 
 	auto const pick = [&]() -> frame_sender
@@ -95,7 +95,7 @@ int main() try
 			return ::scene_frame(entitites.controls, entitites.scene.menu, entitites.draw);
 		if (sm.is(::boost::sml::state<setting_scene>))
 			return ::scene_frame(entitites.controls, entitites.settings, entitites.draw);
-		return entitites.scene.fighting.frame(entitites.controls);
+		return entitites.scene.fighting.frame(entitites.controls, entitites.draw);
 	};
 
 	for (;;)
@@ -141,6 +141,8 @@ int main() try
 		}
 		else if (sm.is(::boost::sml::state<fighting_scene>))
 		{
+			// 帧边界：spawn / 加载 / 卸载 player，此时没有任何 operation_state 活着。
+			entitites.scene.fighting.apply_structural_changes();
 			if (entitites.scene.fighting.current_state().back_requested)
 				sm.process_event(back_to_menu{});
 		}
