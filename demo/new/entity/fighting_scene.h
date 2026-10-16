@@ -8,6 +8,8 @@
 #include "../framework/any_sender.h"
 #include "../framework/frame_context.h"
 
+#include "./main_menu/buffer_type.h"
+
 #include "./input.h"
 #include "./render.h"
 
@@ -18,30 +20,8 @@ struct fighting_scene
 		bool back_requested = false;
 	};
 
-	struct operation_state
-	{
-		using update_sender_type = decltype(::exec::split(::std::declval<values_sender_type<state>>()));
-
-		update_sender_type _update;
-
-		explicit operation_state(fighting_scene& scene, input& i, input::operation_state::shared_state controls, renderer& r, renderer::operation_state::shared_state draw);
-		[[nodiscard]] auto update() const noexcept { return _update; }
-
-		struct shared_state
-		{
-			::std::reference_wrapper<operation_state> _state;
-			[[nodiscard]] auto update() const noexcept { return _state.get()._update; }
-		};
-		shared_state start(frame_context& context) & noexcept;
-	};
-
-	operation_state connect(input& i, input::operation_state::shared_state controls, renderer& r, renderer::operation_state::shared_state draw)
-	{
-		return operation_state(*this, i, controls, r, draw);
-	}
-
-	state _state{};
+	[[nodiscard]] values_sender_type<state> update(input::state const& current, input::delta const& changes);
+	[[nodiscard]] values_sender_type<::std::vector<::VkCommandBuffer>, ::std::vector<buffer_type>> record(frame_slot&, state const& snapshot);
 
 	fighting_scene(input& i, renderer& r);
-	[[nodiscard]] auto&& current_state() const noexcept { return _state; }
 };

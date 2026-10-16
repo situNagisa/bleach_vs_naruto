@@ -155,24 +155,11 @@ struct input
 		bool quit_requested = false; ///< 本次采集首次收到退出请求。
 	};
 
-	struct operation_state
-	{
-		decltype(::exec::split(::std::declval<values_sender_type<state, delta>>())) _poll;
-
-		explicit operation_state(input& input);
-
-		struct shared_state
-		{
-			::std::reference_wrapper<operation_state> _state;
-			[[nodiscard]] auto poll() const noexcept { return _state.get()._poll; }
-		};
-		shared_state start() & noexcept;
-	};
+	
+	[[nodiscard]] values_sender_type<state, delta> poll();
 
 	/// 绑定平台窗口；窗口及平台初始化必须覆盖 input 的使用期。
 	explicit input(::bvn::platform::window const& window);
-
-	operation_state connect() { return operation_state(*this); }
 
 	::SDL_WindowID _window_id;
 	state _current{};

@@ -14,8 +14,9 @@
 #include "../framework/frame_context.h"
 
 #include "./setting_scene/settings.h"
+#include "./main_menu/buffer_type.h"
 
-inline static auto setting_path = ::std::filesystem::path(".") / "settings.ini";
+inline static auto const setting_path = ::std::filesystem::path(".") / "settings.ini";
 
 /// 设置场景，持有跨帧状态与绘制资源。
 struct setting_scene : immovable
@@ -34,31 +35,13 @@ struct setting_scene : immovable
 		bool back_requested = false;
 	};
 
-	struct operation_state
-	{
-		using update_sender_type = decltype(::exec::split(::std::declval<values_sender_type<state, delta>>()));
-
-		struct impl;
-		::std::unique_ptr<impl> _impl;
-
-		explicit operation_state(setting_scene& scene, input& i, input::operation_state::shared_state controls, renderer& r, renderer::operation_state::shared_state draw);
-		~operation_state();
-
-		struct shared_state
-		{
-			::std::reference_wrapper<operation_state> _state;
-			update_sender_type update() const noexcept;
-		};
-		shared_state start(frame_context& context) & noexcept;
-	};
-
 	explicit setting_scene(renderer& r);
 	~setting_scene();
 
-	operation_state connect(input& i, input::operation_state::shared_state controls, renderer& r, renderer::operation_state::shared_state draw)
-	{
-		return operation_state(*this, i, controls, r, draw);
-	}
+	[[nodiscard]] values_sender_type<state, delta> update(input::state const& current, input::delta const& changes);
+
+	/// sender<recording>。跑在组合方通过 env 提供的 scheduler 上。
+	[[nodiscard]] values_sender_type<::std::vector<::VkCommandBuffer>, ::std::vector<buffer_type>> record(frame_slot&, state const& snapshot);
 
 	[[nodiscard]] auto current_state() const noexcept -> state const&;
 

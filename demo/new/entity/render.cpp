@@ -120,7 +120,7 @@ namespace
 	void submit_present_frame(
 		::consumer_arch_vulkan::global_vulkan_env_renderer const& global
 		, frame_slot const& frame
-		, ::std::span<VkCommandBuffer> secondary_commands
+		, ::std::span<VkCommandBuffer const> secondary_commands
 	)
 	{
 		auto const primary_command_buffer = frame.primary_command_buffer();
@@ -202,43 +202,24 @@ renderer::renderer()
 	, _pool(::std::in_place, ::std::from_range, _frames | ::std::views::transform([](auto& frame) { return &frame; }))
 {}
 
-renderer::operation_state::operation_state(renderer& r, any_scheduler_type sched)
-	: _renderer(r)
-	, scheduler(::std::move(sched))
-	, _begin(values_sender_type<resource_pool::lease>{r._pool.acquire()
-		| ::stdexec::then([&r](resource_pool::lease slot) -> resource_pool::lease
-			{
-				::begin(r.vulkan.global_env(), *slot.token());
-				return slot;
-			})
-		} | ::exec::split())
-	, _end(values_sender_type<::std::reference_wrapper<frame_slot>>{_begin | _ref
-		| ::stdexec::let_value([&](::std::reference_wrapper<frame_slot> frame)
-			{
-				return ::nagisa::concurrency::when_all_range(recorders | ::std::views::as_rvalue)
-					| ::stdexec::continues_on(scheduler)
-					| ::stdexec::then([&, frame]
-						{
-							auto handles = secondary.commands
-								| ::std::views::transform(&::vkkl::command_buffer_observer::handle)
-								| ::std::ranges::to<::std::vector>();
-							::submit_present_frame(r.vulkan.global_env(), frame.get(), handles);
-							return frame;
-						});
-			})
-		} | ::exec::split())
-	, _fence(values_sender_type<>{_end
-		| ::stdexec::then([&](::std::reference_wrapper<frame_slot> frame)
-			{
-				::wait_fence(r.vulkan.global_env(), frame.get());
-			})
-		} | ::exec::split())
-{}
-
-renderer::operation_state::shared_state renderer::operation_state::start(frame_context & context) & noexcept
+values_sender_type<renderer::lease> renderer::begin()
 {
-	context.roots.emplace_back(_fence);
-	return shared_state(::std::ref(*this));
+	return _pool.acquire()
+		| ::stdexec::then([this](resource_pool::lease slot) -> resource_pool::lease
+			{
+				::begin(vulkan.global_env(), *slot.token());
+				return slot;
+			});
+}
+
+values_sender_type<> renderer::end(frame_slot& frame, std::span<VkCommandBuffer const> commands)
+{
+	return ::stdexec::just()
+		| ::stdexec::then([this, &frame, commands]
+			{
+				::submit_present_frame(vulkan.global_env(), frame, commands);
+				::wait_fence(vulkan.global_env(), frame);
+			});
 }
 
 void renderer::set_fullscreen(bool enabled)

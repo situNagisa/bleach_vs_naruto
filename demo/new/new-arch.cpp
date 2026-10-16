@@ -14,6 +14,8 @@
 #include <exec/static_thread_pool.hpp>
 
 #include <nagisa/concurrency/when_all_range.h>
+#include <nagisa/concurrency/coroutine.h>
+#include <nagisa/concurrency/simple_task.h>
 #include <nagisa/concurrency/_manual_lifetime.h>
 
 #include <bvn/platform/sdl_context.h>
@@ -95,47 +97,30 @@ int main() try
 				.stop_token = stop_source.get_token(),
 			};
 
-			auto rop = entitites.draw.connect(context.scheduler);
-			auto rt = rop.start(context);
-			auto iop = entitites.controls.connect();
-			auto it = iop.start();
-
-			union 
-			{
-				::nagisa::concurrency::details::manual_lifetime<main_menu::operation_state> menu;
-				::nagisa::concurrency::details::manual_lifetime<setting_scene::operation_state> setting;
-				::nagisa::concurrency::details::manual_lifetime<fighting_scene::operation_state> fighting;
-			}scene_op{};
-
 			if (sm.is(::boost::sml::state<main_menu>))
 			{
-				auto&& mmop = scene_op.menu.construct_from(&main_menu::connect, &entitites.scene.menu, entitites.controls, it, entitites.draw, rt);
-				auto mmt = mmop.start(context);
+				auto task = ::stdexec::when_all(
+					entitites.draw.begin()
+					, entitites.controls.poll() | ::stdexec::let_value(::std::bind_front(&main_menu::update, &entitites.scene.menu))
+					)
+					| ::stdexec::let_value([&](renderer::lease frame_slot, main_menu::state state, main_menu::delta delta)
+						{
+							return
+								entitites.scene.menu.record(*frame_slot.token(), ::std::move(state))
+								| ::stdexec::let_value([&](::std::vector<VkCommandBuffer> commands, auto...)
+									{
+										return entitites.draw.end(*frame_slot.token(), commands);
+									});
+						});
+				::stdexec::sync_wait(::std::move(task));
 			}
 			else if (sm.is(::boost::sml::state<setting_scene>))
 			{
-				auto&& setting_op = scene_op.setting.construct_from(&setting_scene::connect, &entitites.settings, entitites.controls, it, entitites.draw, rt);
-				auto setting_shared = setting_op.start(context);
+
 			}
 			else if (sm.is(::boost::sml::state<fighting_scene>))
 			{
-				auto&& fighting_op = scene_op.fighting.construct_from(&fighting_scene::connect, &entitites.scene.fighting, entitites.controls, it, entitites.draw, rt);
-				auto fighting_shared = fighting_op.start(context);
-			}
 
-			::stdexec::sync_wait(::nagisa::concurrency::when_all_range(context.roots));
-
-			if (sm.is(::boost::sml::state<main_menu>))
-			{
-				scene_op.menu.destroy();
-			}
-			else if (sm.is(::boost::sml::state<setting_scene>))
-			{
-				scene_op.setting.destroy();
-			}
-			else if (sm.is(::boost::sml::state<fighting_scene>))
-			{
-				scene_op.fighting.destroy();
 			}
 		}
 

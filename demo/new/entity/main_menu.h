@@ -15,6 +15,7 @@
 #include "../framework/frame_context.h"
 
 #include "./detail/immovable.h"
+#include "./main_menu/buffer_type.h"
 
 struct main_menu
 {
@@ -30,29 +31,11 @@ struct main_menu
 		::std::optional<::std::size_t> activated{};
 	};
 
-	struct operation_state
-	{
-		using update_sender_type = decltype(::exec::split(::std::declval<values_sender_type<state, delta>>()));
-
-		struct impl;
-		::std::unique_ptr<impl> _impl;
-
-		explicit operation_state(main_menu& menu, input& i, input::operation_state::shared_state controls, renderer& r, renderer::operation_state::shared_state draw) noexcept;
-		~operation_state();
-
-		struct shared_state
-		{
-			::std::reference_wrapper<operation_state> _state;
-
-			update_sender_type update() const noexcept;
-		};
-		shared_state start(frame_context& context) & noexcept;
-	};
-
 	main_menu(renderer& r);
 	~main_menu();
 
-	operation_state connect(input& i, input::operation_state::shared_state controls, renderer& r, renderer::operation_state::shared_state draw) { return operation_state(*this, i, controls, r, draw); }
+	[[nodiscard]] values_sender_type<state, delta> update(input::state const& current, input::delta const& changes);
+	[[nodiscard]] values_sender_type<::std::vector<::VkCommandBuffer>, ::std::vector<buffer_type>> record(frame_slot&, state const& snapshot);
 
 	state const& current_state() const noexcept;
 

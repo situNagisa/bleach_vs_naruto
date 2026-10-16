@@ -58,9 +58,10 @@ template <class Value, ::std::size_t Size>
 	return static_cast<::std::size_t>(found - mapping.begin());
 }
 
-input::operation_state::operation_state(input& input)
-	: _poll(values_sender_type<state, delta>{::stdexec::just()
-		| ::stdexec::let_value([&]
+values_sender_type<input::state, input::delta> input::poll()
+{
+	return ::stdexec::just()
+		| ::stdexec::let_value([this]
 			{
 				auto changes = delta{};
 				assert(::SDL_IsMainThread());
@@ -70,28 +71,28 @@ input::operation_state::operation_state(input& input)
 					switch (event.type)
 					{
 					case ::SDL_EVENT_QUIT:
-						changes.quit_requested |= !input._current.quit_requested;
-						input._current.quit_requested = true;
+						changes.quit_requested |= !_current.quit_requested;
+						_current.quit_requested = true;
 						break;
 					case ::SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-						if (event.window.windowID == input._window_id)
+						if (event.window.windowID == _window_id)
 						{
-							changes.quit_requested |= !input._current.quit_requested;
-							input._current.quit_requested = true;
+							changes.quit_requested |= !_current.quit_requested;
+							_current.quit_requested = true;
 						}
 						break;
 					case ::SDL_EVENT_KEY_DOWN:
 					case ::SDL_EVENT_KEY_UP:
-						if (event.key.windowID == input._window_id)
+						if (event.key.windowID == _window_id)
 						{
 							for (auto index = ::std::size_t{}; index < sdl_modifiers.size(); ++index)
 							{
-								_update(input._current.keyboard._modifiers[index], changes.keyboard._modifiers[index],
+								_update(_current.keyboard._modifiers[index], changes.keyboard._modifiers[index],
 									(event.key.mod & sdl_modifiers[index]) != 0);
 							}
 							if (auto const index = _index(sdl_keys, event.key.scancode))
 							{
-								auto&& key = input._current.keyboard._keys[*index];
+								auto&& key = _current.keyboard._keys[*index];
 								if (event.key.repeat)
 								{
 									key = true;
@@ -105,26 +106,26 @@ input::operation_state::operation_state(input& input)
 						break;
 					case ::SDL_EVENT_MOUSE_BUTTON_DOWN:
 					case ::SDL_EVENT_MOUSE_BUTTON_UP:
-						if (event.button.windowID == input._window_id)
+						if (event.button.windowID == _window_id)
 						{
-							input._current.mouse.position = { event.button.x, event.button.y };
+							_current.mouse.position = { event.button.x, event.button.y };
 							if (auto const index = _index(sdl_buttons, static_cast<int>(event.button.button)))
 							{
-								_update(input._current.mouse._buttons[*index], changes.mouse._buttons[*index],
+								_update(_current.mouse._buttons[*index], changes.mouse._buttons[*index],
 									event.type == ::SDL_EVENT_MOUSE_BUTTON_DOWN);
 							}
 						}
 						break;
 					case ::SDL_EVENT_MOUSE_MOTION:
-						if (event.motion.windowID == input._window_id)
+						if (event.motion.windowID == _window_id)
 						{
-							input._current.mouse.position = { event.motion.x, event.motion.y };
+							_current.mouse.position = { event.motion.x, event.motion.y };
 							changes.mouse.motion.x += event.motion.xrel;
 							changes.mouse.motion.y += event.motion.yrel;
 						}
 						break;
 					case ::SDL_EVENT_MOUSE_WHEEL:
-						if (event.wheel.windowID == input._window_id)
+						if (event.wheel.windowID == _window_id)
 						{
 							auto const direction = event.wheel.direction == ::SDL_MOUSEWHEEL_FLIPPED ? -1.0f : 1.0f;
 							changes.mouse.wheel.x += direction * event.wheel.x;
@@ -132,20 +133,20 @@ input::operation_state::operation_state(input& input)
 						}
 						break;
 					case ::SDL_EVENT_WINDOW_FOCUS_LOST:
-						if (event.window.windowID == input._window_id)
+						if (event.window.windowID == _window_id)
 						{
 							// 失去焦点后，松开事件可能发往其他窗口，主动释放避免输入卡住。
-							for (auto index = ::std::size_t{}; index < input._current.keyboard._keys.size(); ++index)
+							for (auto index = ::std::size_t{}; index < _current.keyboard._keys.size(); ++index)
 							{
-								_update(input._current.keyboard._keys[index], changes.keyboard._keys[index], false);
+								_update(_current.keyboard._keys[index], changes.keyboard._keys[index], false);
 							}
-							for (auto index = ::std::size_t{}; index < input._current.keyboard._modifiers.size(); ++index)
+							for (auto index = ::std::size_t{}; index < _current.keyboard._modifiers.size(); ++index)
 							{
-								_update(input._current.keyboard._modifiers[index], changes.keyboard._modifiers[index], false);
+								_update(_current.keyboard._modifiers[index], changes.keyboard._modifiers[index], false);
 							}
-							for (auto index = ::std::size_t{}; index < input._current.mouse._buttons.size(); ++index)
+							for (auto index = ::std::size_t{}; index < _current.mouse._buttons.size(); ++index)
 							{
-								_update(input._current.mouse._buttons[index], changes.mouse._buttons[index], false);
+								_update(_current.mouse._buttons[index], changes.mouse._buttons[index], false);
 							}
 						}
 						break;
@@ -153,16 +154,8 @@ input::operation_state::operation_state(input& input)
 						break;
 					}
 				}
-				return ::stdexec::just(input._current, ::std::move(changes));
-			})
-		} | ::exec::split())
-{
-
-}
-
-input::operation_state::shared_state input::operation_state::start() & noexcept
-{
-	return shared_state(*this);
+				return ::stdexec::just(_current, ::std::move(changes));
+			});
 }
 
 input::input(::bvn::platform::window const& window)
