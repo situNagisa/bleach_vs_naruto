@@ -101,6 +101,7 @@ auto text_type::label(
 	, float size
 	, float available_width
 	, ::glm::mat3x3 transform
+	, color tint
 	) const -> buffer_type
 {
 	geometry g;
@@ -136,6 +137,7 @@ auto text_type::label(
 			, transform_point({ left, glyph_top + glyph.height * scale })
 			, { glyph.x / font_size.x, glyph.y / font_size.y }
 			, { (glyph.x + glyph.width) / font_size.x, (glyph.y + glyph.height) / font_size.y }
+			, tint
 		);
 		x += glyph.advance * scale;
 	}
@@ -146,4 +148,22 @@ auto text_type::label(
 	::vkfu::cmd_bind_vertex_buffers(command_buffer, 0, ::std::array{ result.handle.handle }, ::std::array{ ::VkDeviceSize{} });
 	::vkCmdDraw(command_buffer, static_cast<::std::uint32_t>(g.vertices.size()), 1, 0, 0);
 	return result;
+}
+
+auto text_type::measure(::std::string_view label, float size, float available_width) const -> point
+{
+	if (label.empty())
+		return {};
+	auto advance = 0.0f;
+	auto top = (::std::numeric_limits<int>::max)();
+	auto bottom = (::std::numeric_limits<int>::min)();
+	for (auto character : label)
+	{
+		auto const& glyph = font.at(character);
+		advance += glyph.advance;
+		top = (::std::min)(top, glyph.y_offset);
+		bottom = (::std::max)(bottom, glyph.y_offset + glyph.height);
+	}
+	auto const scale = (::std::min)(size / font.size, available_width / (::std::max)(advance, 1.0f));
+	return { advance * scale, static_cast<float>(bottom - top) * scale };
 }

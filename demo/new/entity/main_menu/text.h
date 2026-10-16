@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 
 #include "./buffer_type.h"
+#include "./geometry.h"
 #include "./texture.h"
 #include "./graphic_resource.h"
 
@@ -36,5 +37,9 @@ struct text_type
 	text_type(::bvn::assets::image_rgba8 img, VkDevice device, VkPhysicalDevice physical_device, VkQueue graphics_queue, ::std::uint32_t graphics_queue_family, VkFormat format);
 
 	/// Centers the label at the local origin before applying the caller's complete transform.
-	auto label(VkDevice device, VkPhysicalDevice physical_device, VkCommandBuffer command_buffer, ::std::string_view label, float size, float available_width, ::glm::mat3x3 transform = ::glm::mat3{ 1.0f }) const -> buffer_type;
+	/// `tint` multiplies the glyph texture: text colour and opacity.
+	auto label(VkDevice device, VkPhysicalDevice physical_device, VkCommandBuffer command_buffer, ::std::string_view label, float size, float available_width, ::glm::mat3x3 transform = ::glm::mat3{ 1.0f }, color tint = { 1.0f, 1.0f, 1.0f, 1.0f }) const -> buffer_type;
+
+	/// Size in local units the label would occupy with the same `size` / `available_width` fitting as `label`.
+	[[nodiscard]] auto measure(::std::string_view label, float size, float available_width) const -> point;
 };

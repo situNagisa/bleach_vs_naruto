@@ -29,17 +29,16 @@ struct geometry
 		};
 	}
 
-	auto texture_rectangle(point minimum, point maximum, point uv_min = { 0.0f, 0.0f }, point uv_max = { 1.0f, 1.0f }) -> void
+	auto texture_rectangle(point minimum, point maximum, point uv_min = { 0.0f, 0.0f }, point uv_max = { 1.0f, 1.0f }, color tint = { 1.0f, 1.0f, 1.0f, 1.0f }) -> void
 	{
 		assert(vertices.size() <= (::std::numeric_limits<::std::uint32_t>::max)() - 6u);
-		auto tint = color{ 1.0f, 1.0f, 1.0f, 1.0f };
-		texture(minimum, { maximum.x, minimum.y }, maximum, { minimum.x, maximum.y }, uv_min, uv_max);
+		texture(minimum, { maximum.x, minimum.y }, maximum, { minimum.x, maximum.y }, uv_min, uv_max, tint);
 	}
 
-	auto texture(point lt, point rt, point rb, point lb, point uv_min = { 0.0f, 0.0f }, point uv_max = { 1.0f, 1.0f }) -> void
+	/// `tint` 在片元里与纹理相乘：文字着色、整体透明度都靠它。
+	auto texture(point lt, point rt, point rb, point lb, point uv_min = { 0.0f, 0.0f }, point uv_max = { 1.0f, 1.0f }, color tint = { 1.0f, 1.0f, 1.0f, 1.0f }) -> void
 	{
 		assert(vertices.size() <= (::std::numeric_limits<::std::uint32_t>::max)() - 6u);
-		auto tint = color{ 1.0f, 1.0f, 1.0f, 1.0f };
 		vertices.append_range(::std::array{
 			vertex_type{ lt, uv_min, tint },
 			vertex_type{ rt, {uv_max.x, uv_min.y}, tint },
