@@ -62,12 +62,12 @@ struct main_menu::implementation : immovable
 main_menu::main_menu(renderer& r) : _impl(::std::make_unique<implementation>(r)) {}
 main_menu::~main_menu() = default;
 
-values_sender_type<main_menu::state, main_menu::delta> main_menu::update(input::state const& current, input::delta const& changes)
+values_sender_type<main_menu::state, main_menu::delta> main_menu::update(app_state::menu_type& shared, frame_clock::frame_time const& time, input::state const& current, input::delta const& changes)
 {
-	return ::stdexec::just() | ::stdexec::let_value([&](input::state const& current, input::delta const& changes)
+	return ::stdexec::just() | ::stdexec::let_value([&]
 		{
 			auto result = delta{};
-			auto now = ::std::chrono::steady_clock::now();
+			auto const now = time.now;   // 整帧用同一个时刻
 			auto up = changes.keyboard.key(input::key_code::up).pressed;
 			auto down = changes.keyboard.key(input::key_code::down).pressed;
 			auto held = static_cast<int>(current.keyboard.key(input::key_code::down)) - static_cast<int>(current.keyboard.key(input::key_code::up));
@@ -100,11 +100,12 @@ values_sender_type<main_menu::state, main_menu::delta> main_menu::update(input::
 				_impl->_state.activated = _impl->_state.selected;
 				result.activated = _impl->_state.selected;
 			}
+			shared.activated = result.activated;   // 本帧输出：整体覆盖
 			return ::stdexec::just(_impl->_state, ::std::move(result));
 		});
 }
 
-values_sender_type<std::vector<VkCommandBuffer>, std::vector<buffer_type>> main_menu::record(frame_slot&, state const& snapshot)
+values_sender_type<main_menu::recording> main_menu::record(frame_slot&, state const& snapshot)
 {
 	return ::stdexec::just() | ::stdexec::let_value([&]
 		{
@@ -147,7 +148,7 @@ values_sender_type<std::vector<VkCommandBuffer>, std::vector<buffer_type>> main_
 			auto bg = impl._background.draw(device, physical_device, command.handle, viewport_transform * background_transform);
 			auto v1 = impl._vector_graph.draw_rectangle(device, physical_device, command.handle, viewport, { 0.02f, 0.03f, 0.06f, 0.32f }, viewport_transform);
 
-			// The split result keeps every draw buffer alive through the frame fence.
+			// recording 持有全部顶点缓冲，main 让它活到 fence 等完。
 			auto buffers = ::std::vector<buffer_type>{};
 			buffers.reserve(impl._options.size() + 5);
 			buffers.emplace_back(::std::move(bg));
@@ -227,11 +228,7 @@ values_sender_type<std::vector<VkCommandBuffer>, std::vector<buffer_type>> main_
 
 			::consumer_arch_vulkan::check(::vkEndCommandBuffer(command.handle), "main menu: end draw");
 
-			return ::stdexec::just(::std::vector{ command.handle }, ::std::move(buffers));
+			// 命令缓冲交给 recording 持有：原来只返回句柄，局部的 command 一析构就 vkFreeCommandBuffers 了。
+			return ::stdexec::just(recording{ .command = ::std::move(command), .buffers = ::std::move(buffers) });
 		});
-}
-
-main_menu::state const& main_menu::current_state() const noexcept
-{
-	return _impl->_state;
 }

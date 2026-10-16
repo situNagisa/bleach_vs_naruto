@@ -28,7 +28,6 @@ inline static constexpr auto ignore = ::stdexec::then([](auto&&...) noexcept {})
 struct setting_scene::implementation : immovable
 {
 	renderer& _renderer;
-	game_settings _settings;
 	::std::array<::std::string, 4> _options{};
 	::std::string _title = "Settings";
 	state _state{};
@@ -45,7 +44,6 @@ struct setting_scene::implementation : immovable
 
 	implementation(renderer& r)
 		: _renderer(r)
-		, _settings(::load_settings(setting_path))
 		, _background(
 			::bvn::assets::load_image(resource_dir / "background.jpg")
 			, r.vulkan.global_env().device()
@@ -65,15 +63,14 @@ struct setting_scene::implementation : immovable
 		, _vector_graph(r.vulkan.global_env().device(), r.vulkan.global_env().swapchain_image_format())
 		, _pool(::consumer_arch_vulkan::create_secondary_command_pool(r.vulkan.global_env()))
 	{
-		refresh_labels();
 	}
 
-	void refresh_labels()
+	void refresh_labels(game_settings const& settings)
 	{
 		_options = {
-			"Volume: " + ::std::to_string(_settings.volume) + "%",
-			_settings.fullscreen ? "Fullscreen: On" : "Fullscreen: Off",
-			_settings.frame_rate == 0 ? "FPS Limit: Unlimited" : "FPS Limit: " + ::std::to_string(_settings.frame_rate),
+			"Volume: " + ::std::to_string(settings.volume) + "%",
+			settings.fullscreen ? "Fullscreen: On" : "Fullscreen: Off",
+			settings.frame_rate == 0 ? "FPS Limit: Unlimited" : "FPS Limit: " + ::std::to_string(settings.frame_rate),
 			"Back"
 		};
 	}
@@ -82,12 +79,12 @@ struct setting_scene::implementation : immovable
 setting_scene::setting_scene(renderer& r) : _impl(::std::make_unique<implementation>(r)) {}
 setting_scene::~setting_scene() = default;
 
-values_sender_type<setting_scene::state, setting_scene::delta> setting_scene::update(input::state const& current, input::delta const& changes)
+values_sender_type<setting_scene::state, setting_scene::delta> setting_scene::update(app_state::settings_type& shared, frame_clock::frame_time const& time, input::state const& current, input::delta const& changes)
 {
 	return ::stdexec::just() | ::stdexec::let_value([&]
 		{
 			auto result = delta{};
-			auto now = ::std::chrono::steady_clock::now();
+			auto const now = time.now;   // 整帧用同一个时刻
 			auto up = changes.keyboard.key(input::key_code::up).pressed;
 			auto down = changes.keyboard.key(input::key_code::down).pressed;
 			auto held = static_cast<int>(current.keyboard.key(input::key_code::down)) - static_cast<int>(current.keyboard.key(input::key_code::up));
@@ -139,28 +136,28 @@ values_sender_type<setting_scene::state, setting_scene::delta> setting_scene::up
 			}
 			impl._held_adjust = held_adjust;
 			if (impl._state.selected == 0 && adjust != 0)
-				impl._settings.volume = ::std::clamp(impl._settings.volume + adjust * 5, 0, 100);
+				shared.preferences.volume = ::std::clamp(shared.preferences.volume + adjust * 5, 0, 100);
 			else if (impl._state.selected == 1 && (adjust != 0 || result.activated))
-				impl._settings.fullscreen = !impl._settings.fullscreen;
+				shared.preferences.fullscreen = !shared.preferences.fullscreen;
 			else if (impl._state.selected == 2 && (adjust != 0 || result.activated))
 			{
-				auto const found = ::std::ranges::find(game_settings::frame_rates, impl._settings.frame_rate);
+				auto const found = ::std::ranges::find(game_settings::frame_rates, shared.preferences.frame_rate);
 				auto const index = static_cast<int>(found - game_settings::frame_rates.begin());
 				auto const count = static_cast<int>(game_settings::frame_rates.size());
-				impl._settings.frame_rate = game_settings::frame_rates[(index + (adjust < 0 ? -1 : 1) + count) % count];
+				shared.preferences.frame_rate = game_settings::frame_rates[(index + (adjust < 0 ? -1 : 1) + count) % count];
 			}
-			impl.refresh_labels();
+			impl.refresh_labels(shared.preferences);
 			if (changes.keyboard.key(input::key_code::escape).pressed
 				|| (result.activated && *result.activated == _impl->_options.size() - 1))
 			{
-				_impl->_state.back_requested = true;
 				result.back_requested = true;
 			}
+			shared.back_requested = result.back_requested;   // 本帧输出：整体覆盖
 			return ::stdexec::just(_impl->_state, ::std::move(result));
 		});
 }
 
-values_sender_type<std::vector<VkCommandBuffer>, std::vector<buffer_type>> setting_scene::record(frame_slot&, state const& snapshot)
+values_sender_type<setting_scene::recording> setting_scene::record(frame_slot&, state const& snapshot)
 {
 	return ::stdexec::just() | ::stdexec::let_value([&]
 		{
@@ -202,7 +199,7 @@ values_sender_type<std::vector<VkCommandBuffer>, std::vector<buffer_type>> setti
 			auto bg = impl._background.draw(device, physical_device, command.handle, viewport_transform * background_transform);
 			auto v1 = impl._vector_graph.draw_rectangle(device, physical_device, command.handle, viewport, { 0.02f, 0.03f, 0.06f, 0.32f }, viewport_transform);
 
-			// The split result keeps every draw buffer alive through the frame fence.
+			// recording 持有全部顶点缓冲，main 让它活到 fence 等完。
 			auto buffers = ::std::vector<buffer_type>{};
 			buffers.reserve(impl._options.size() + 5);
 			buffers.emplace_back(::std::move(bg));
@@ -280,16 +277,7 @@ values_sender_type<std::vector<VkCommandBuffer>, std::vector<buffer_type>> setti
 			}
 
 			::consumer_arch_vulkan::check(::vkEndCommandBuffer(command.handle), "main scene: end draw");
-			return ::stdexec::just(::std::vector{ command.handle }, ::std::move(buffers));
+			// 命令缓冲交给 recording 持有：原来只返回句柄，局部的 command 一析构就 vkFreeCommandBuffers 了。
+			return ::stdexec::just(recording{ .command = ::std::move(command), .buffers = ::std::move(buffers) });
 		});
-}
-
-auto setting_scene::current_state() const noexcept -> state const&
-{
-	return _impl->_state;
-}
-
-game_settings const& setting_scene::preferences() const noexcept
-{
-	return _impl->_settings;
 }
