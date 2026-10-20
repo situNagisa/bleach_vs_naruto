@@ -381,6 +381,20 @@ def _rebuild(registry: ir.Registry, overrides_path: str) -> tuple[str, dict[str,
 		lines.append("")
 		stats["commands"] = stats.get("commands", 0) + 1
 
+	# Strings: each extension's own name from vk.xml, then the layer names that
+	# vk.xml does not have and the overrides therefore have to supply.
+	string_names = overrides.get("string") or {}
+	for entry in registry.extension_names:
+		lines.append(f"[string.{_quote(entry.macro)}]")
+		lines.append(f'name = "{string_names.get(entry.macro, naming.suggest_string_name(entry.macro))}"')
+		lines.append("")
+		stats["strings"] = stats.get("strings", 0) + 1
+	for layer, chosen in sorted((overrides.get("layer") or {}).items()):
+		lines.append(f"[layer.{_quote(layer)}]")
+		lines.append(f'name = "{chosen}"')
+		lines.append("")
+		stats["strings"] = stats.get("strings", 0) + 1
+
 	# Aliases last, because their names are derived from the objects above and a
 	# collision with a real object means the alias is the one that has to move.
 	alias_names = overrides.get("alias") or {}

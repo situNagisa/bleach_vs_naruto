@@ -6,10 +6,13 @@ enough to cover every construct the generator has a branch for:
   * a create-info root with flags, an enum member, a folded count+pointer pair,
     a single-pointer slot and an array of another sType structure;
   * a pNext extension (structextends) and a duplicatable one;
-  * an sType-less member structure, which gets a param and nothing else;
+  * an sType-less member structure, which gets a param and nothing else, and
+    which a create-info (and another such structure) embeds by value;
   * a returnedonly query root plus something that extends it;
-  * one producer, one span command, one two-call enumerate, one chain query;
+  * one producer, one span command, one two-call enumerate, one chain query,
+    one command with nothing to substitute, one that has extra success codes;
   * a platform-guarded structure and command;
+  * each extension's string name, including one with nothing else to its name;
   * a promoted type whose old name lives on an extension, for provenance.
 -->
 <registry>
@@ -46,6 +49,7 @@ enough to cover every construct the generator has a branch for:
 			<member len="partCount">const <type>VkWidgetPart</type>* <name>pParts</name></member>
 			<member optional="true">const <type>VkWidgetTuning</type>* <name>pTuning</name></member>
 			<member><type>VkExtent</type> <name>extent</name></member>
+			<member><type>VkBounds</type> <name>bounds</name></member>
 			<member><type>float</type> <name>weights</name>[4]</member>
 		</type>
 
@@ -67,6 +71,20 @@ enough to cover every construct the generator has a branch for:
 		<type category="struct" name="VkExtent">
 			<member><type>uint32_t</type> <name>width</name></member>
 			<member><type>uint32_t</type> <name>height</name></member>
+		</type>
+
+		<!-- Not the native structure under another name: it has an enum, so a field
+		     of this type takes the param. VkExtent above is the opposite case. -->
+		<type category="struct" name="VkZone">
+			<member><type>VkWidgetMode</type> <name>mode</name></member>
+			<member><type>uint32_t</type> <name>depth</name></member>
+		</type>
+
+		<!-- Embeds VkZone by value and sorts before it, so VkZone's param has to be
+		     declared first rather than in name order. VkExtent stays native. -->
+		<type category="struct" name="VkBounds">
+			<member><type>VkZone</type> <name>zone</name></member>
+			<member><type>VkExtent</type> <name>size</name></member>
 		</type>
 
 		<!-- pNext extensions. -->
@@ -158,6 +176,20 @@ enough to cover every construct the generator has a branch for:
 			<param><type>VkWidgetProperties</type>* <name>pProperties</name></param>
 		</command>
 
+		<!-- Nothing to substitute: no structure, no pointer and count. Still wrapped. -->
+		<command>
+			<proto><type>void</type> <name>vkCmdEndWidget</name></proto>
+			<param><type>VkRecorder</type> <name>recorder</name></param>
+		</command>
+
+		<!-- Nothing to substitute, and VK_NOT_READY is a success: a wrapper that
+		     throws on anything but VK_SUCCESS would be wrong, so there is none. -->
+		<command successcodes="VK_SUCCESS,VK_NOT_READY">
+			<proto><type>VkResult</type> <name>vkGetWidgetStatus</name></proto>
+			<param><type>VkDevice</type> <name>device</name></param>
+			<param><type>VkWidget</type> <name>widget</name></param>
+		</command>
+
 		<command>
 			<proto><type>void</type> <name>vkCmdSetWin32Widget</name></proto>
 			<param><type>VkRecorder</type> <name>recorder</name></param>
@@ -172,6 +204,8 @@ enough to cover every construct the generator has a branch for:
 			<type name="VkWidgetPart"/>
 			<type name="VkWidgetTuning"/>
 			<type name="VkExtent"/>
+			<type name="VkBounds"/>
+			<type name="VkZone"/>
 			<type name="VkWidgetProperties"/>
 			<type name="VkWidgetReport"/>
 			<type name="VkWidgetMode"/>
@@ -179,6 +213,8 @@ enough to cover every construct the generator has a branch for:
 			<type name="VkWidgetFlagBits"/>
 			<command name="vkCreateWidget"/>
 			<command name="vkCmdSubmitParts"/>
+			<command name="vkCmdEndWidget"/>
+			<command name="vkGetWidgetStatus"/>
 			<command name="vkEnumerateWidgetReports"/>
 			<command name="vkGetWidgetProperties"/>
 		</require>
@@ -193,6 +229,8 @@ enough to cover every construct the generator has a branch for:
 	<extensions>
 		<extension name="VK_EXT_widget_colour" number="1" type="device" supported="vulkan">
 			<require>
+				<enum value="1" name="VK_EXT_WIDGET_COLOUR_SPEC_VERSION"/>
+				<enum value="&quot;VK_EXT_widget_colour&quot;" name="VK_EXT_WIDGET_COLOUR_EXTENSION_NAME"/>
 				<type name="VkWidgetColourInfoEXT"/>
 				<type name="VkWidgetDriverPropertiesEXT"/>
 			</require>
@@ -212,8 +250,23 @@ enough to cover every construct the generator has a branch for:
 
 		<extension name="VK_KHR_widget_win32" number="4" type="instance" supported="vulkan" platform="win32">
 			<require>
+				<enum value="&quot;VK_KHR_widget_win32&quot;" name="VK_KHR_WIDGET_WIN32_EXTENSION_NAME"/>
 				<type name="VkWidgetWin32InfoKHR"/>
 				<command name="vkCmdSetWin32Widget"/>
+			</require>
+		</extension>
+
+		<!-- Nothing but a name: it still gets a file, so the name has somewhere to live. -->
+		<extension name="VK_KHR_widget_bare" number="5" type="device" supported="vulkan">
+			<require>
+				<enum value="&quot;VK_KHR_widget_bare&quot;" name="VK_KHR_WIDGET_BARE_EXTENSION_NAME"/>
+			</require>
+		</extension>
+
+		<!-- Not an api this registry serves: its name is not a constant. -->
+		<extension name="VK_KHR_widget_scsonly" number="6" type="device" supported="vulkansc">
+			<require>
+				<enum value="&quot;VK_KHR_widget_scsonly&quot;" name="VK_KHR_WIDGET_SCSONLY_EXTENSION_NAME"/>
 			</require>
 		</extension>
 	</extensions>

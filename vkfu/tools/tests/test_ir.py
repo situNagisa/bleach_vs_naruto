@@ -9,7 +9,7 @@ from __future__ import annotations
 import pathlib
 import unittest
 
-from vkfu_gen import ir
+from vkfu_gen import ir, plan
 
 FIXTURE = str(pathlib.Path(__file__).with_name("fixture.xml"))
 
@@ -52,6 +52,7 @@ class LoadTest(unittest.TestCase):
 				"VK_KHR_widget_label",
 				"VK_KHR_widget_limits",
 				"VK_KHR_widget_win32",
+				"VK_KHR_widget_bare",
 			],
 		)
 
@@ -87,7 +88,51 @@ class LoadTest(unittest.TestCase):
 		)
 
 	def test_plain_is_the_stypeless_members(self) -> None:
-		self.assertEqual(self.registry.plain, ["VkExtent"])
+		# VkBounds is reached from the create-info, VkExtent from it and from VkBounds,
+		# VkZone from VkBounds.
+		self.assertEqual(self.registry.plain, ["VkBounds", "VkExtent", "VkZone"])
+
+	def test_an_embedded_plain_structure_is_a_value_field(self) -> None:
+		fields = {
+			field.member.name: field
+			for field in plan.plan_struct(self.registry.structs["VkWidgetCreateInfo"], self.registry).fields
+		}
+		self.assertEqual((fields["bounds"].kind, fields["bounds"].target), ("value", "VkBounds"))
+		self.assertEqual(fields["weights"].kind, "array")
+		nested = plan.plan_struct(self.registry.structs["VkBounds"], self.registry).fields
+		self.assertEqual([(f.member.name, f.kind) for f in nested], [("zone", "value"), ("size", "scalar")])
+
+	def test_a_plain_structure_that_is_the_native_one_renamed_stays_native(self) -> None:
+		# VkExtent is width and height; its param would be exactly that, so a field
+		# of the type keeps the native structure rather than demanding a copy.
+		self.assertTrue(plan.is_transparent(self.registry.structs["VkExtent"], self.registry))
+		fields = {
+			field.member.name: field
+			for field in plan.plan_struct(self.registry.structs["VkWidgetCreateInfo"], self.registry).fields
+		}
+		self.assertEqual((fields["extent"].kind, fields["extent"].cpp_type), ("scalar", "VkExtent"))
+		# An enum member is something the param changes, so VkZone is not transparent,
+		# and neither is what embeds it.
+		self.assertFalse(plan.is_transparent(self.registry.structs["VkZone"], self.registry))
+		self.assertFalse(plan.is_transparent(self.registry.structs["VkBounds"], self.registry))
+
+	def test_an_extensions_name_macro_is_read_and_nothing_else_quoted(self) -> None:
+		self.assertEqual(
+			[(n.macro, n.value, n.module) for n in self.registry.extension_names],
+			[
+				("VK_EXT_WIDGET_COLOUR_EXTENSION_NAME", "VK_EXT_widget_colour", "VK_EXT_widget_colour"),
+				("VK_KHR_WIDGET_BARE_EXTENSION_NAME", "VK_KHR_widget_bare", "VK_KHR_widget_bare"),
+				("VK_KHR_WIDGET_WIN32_EXTENSION_NAME", "VK_KHR_widget_win32", "VK_KHR_widget_win32"),
+			],
+		)  # no SPEC_VERSION (not a string), no vulkansc-only extension
+
+	def test_a_command_with_nothing_to_substitute_is_still_wrapped(self) -> None:
+		wrapper = next(c for c in self.registry.wrappers if c.name == "vkCmdEndWidget")
+		self.assertEqual([(a.kind, a.member.name) for a in wrapper.arguments], [("passthrough", "recorder")])
+
+	def test_extra_success_codes_keep_a_bare_command_native(self) -> None:
+		# Its wrapper would throw on VK_NOT_READY, which is not an error.
+		self.assertNotIn("vkGetWidgetStatus", [c.name for c in self.registry.wrappers])
 
 	def test_reference_is_a_lone_const_pointer(self) -> None:
 		self.assertEqual(

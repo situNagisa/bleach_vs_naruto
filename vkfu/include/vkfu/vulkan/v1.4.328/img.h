@@ -4,4 +4,6 @@
 // Every IMG extension. Each file below includes what it depends on, so including one
 // of them directly works too.
 
+#include "img/filter_cubic.h"
+#include "img/format_pvrtc.h"
 #include "img/relaxed_line_rasterization.h"

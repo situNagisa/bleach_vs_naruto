@@ -20,6 +20,7 @@
 #include "v1.4.328/img.h"
 #include "v1.4.328/intel.h"
 #include "v1.4.328/khr.h"
+#include "v1.4.328/layer.h"
 #include "v1.4.328/lunarg.h"
 #include "v1.4.328/mesa.h"
 #include "v1.4.328/msft.h"

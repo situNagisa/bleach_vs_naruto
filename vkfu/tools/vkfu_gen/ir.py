@@ -169,6 +169,19 @@ class Alias:
 
 
 @dataclasses.dataclass
+class ExtensionName:
+	"""The string macro an extension declares for its own name.
+
+	`VK_EXT_DEBUG_UTILS_EXTENSION_NAME` is "VK_EXT_debug_utils", and vk.xml records
+	it as an <enum> with a quoted value inside that extension's <require>.
+	"""
+
+	macro: str  # VK_EXT_DEBUG_UTILS_EXTENSION_NAME
+	value: str  # VK_EXT_debug_utils
+	module: str  # the extension that declares it
+
+
+@dataclasses.dataclass
 class Origins:
 	"""Which <feature> or <extension> introduces each type and command.
 
@@ -212,6 +225,7 @@ class Registry:
 	chain_queries: list[ChainQuery]  # commands that fill in one sType structure
 	provenance: dict[str, Provenance]  # type name -> what enables it
 	aliases: list[Alias]  # old spellings whose target this header generates
+	extension_names: list[ExtensionName]  # one string macro per extension
 	query_roots: list[str]  # sType structures a command writes into
 	query_closure: list[str]  # those plus their pNext children, minus `closure`
 	closure: list[str]
@@ -356,9 +370,12 @@ def _guards_for(requirements: dict[str, list[str | None]], name: str) -> list[st
 
 
 def _origins(root: ET.Element, api: str, profile: Profile = EVERYTHING) -> Origins:
+	# Only the registry's own <feature> children. An extension's <require> also nests
+	# `<feature name="robustBufferAccess" struct=.../>` to say what it enables, and
+	# those are not modules: they would show up in `order` as 400 more of them.
 	features = [
 		feature
-		for feature in root.iter("feature")
+		for feature in root.findall("feature")
 		if _api_allows(feature, api) and profile.allows_feature(feature.get("name"))
 	]
 	features.sort(key=lambda feature: tuple(int(part) for part in (feature.get("number") or "0").split(".")))
@@ -395,6 +412,25 @@ def _origins(root: ET.Element, api: str, profile: Profile = EVERYTHING) -> Origi
 				if is_feature:
 					found.sections[name] = require.get("comment") or ""
 	return found
+
+
+def _extension_names(root: ET.Element, api: str, profile: Profile = EVERYTHING) -> list[ExtensionName]:
+	"""Every `..._EXTENSION_NAME` string macro of an extension this api has."""
+	found: list[ExtensionName] = []
+	for extension in root.iter("extension"):
+		supported = extension.get("supported")
+		module = extension.get("name")
+		if (supported and api not in supported.split(",")) or not module or not profile.allows_extension(module):
+			continue
+		for require in extension.findall("require"):
+			if not _api_allows(require, api):
+				continue
+			for element in require.findall("enum"):
+				name = element.get("name") or ""
+				value = element.get("value") or ""
+				if name.endswith("_EXTENSION_NAME") and len(value) >= 2 and value[0] == value[-1] == '"':
+					found.append(ExtensionName(macro=name, value=value[1:-1], module=module))
+	return sorted(found, key=lambda entry: entry.macro)
 
 
 def _provenance(root: ET.Element, api: str, profile: Profile = EVERYTHING) -> dict[str, Provenance]:
@@ -899,11 +935,22 @@ def _wrappers(
 	requirements: dict[str, list[str | None]],
 	chain_queried: set[str],
 ) -> tuple[list[Wrapper], list[str]]:
-	"""Commands other than vkCreate*/vkAllocate* that a wrapper would improve.
+	"""Every command other than vkCreate*/vkAllocate* that vkfu can wrap.
 
-	Worth wrapping when the command takes a structure the caller fills in, or a
-	pointer paired with its own count. The two-call enumerate pattern is left
-	alone: its count is an out parameter, which is a different shape entirely.
+	A command that takes a structure the caller fills in, or a pointer paired
+	with its own count, gets an expression or a span. One with neither (vkCmdDraw,
+	vkCmdEndRendering) has nothing to substitute, but is wrapped anyway: a
+	recording function should not have to mix `vkfu::cmd_begin_rendering` with a
+	native `::vkCmdEndRendering`. Handles and scalars pass through, and enum and
+	flags parameters take their vkfu spelling.
+
+	The two-call enumerate pattern is left alone: its count is an out parameter,
+	which is a different shape entirely.
+
+	The wrapper for a VkResult command treats anything but VK_SUCCESS as an error.
+	That is only right when VK_SUCCESS is the only success code, so a command with
+	nothing to substitute and other success codes (vkAcquireNextImageKHR's
+	VK_SUBOPTIMAL_KHR, vkGetFenceStatus's VK_NOT_READY) stays a native call.
 	"""
 	wrappers: list[Wrapper] = []
 	skipped: list[str] = []
@@ -979,8 +1026,11 @@ def _wrappers(
 				continue
 			arguments.append(Argument(kind="passthrough", member=param))
 
-		if not interesting:
-			continue
+		returns = proto.findtext("type") or "void"
+		if not interesting and returns == "VkResult":
+			codes = set((element.get("successcodes") or "VK_SUCCESS").split(","))
+			if codes != {"VK_SUCCESS"}:
+				continue
 		wrappers.append(
 			Wrapper(
 				name=name,
@@ -1259,6 +1309,7 @@ def load(path: str, api: str = "vulkan", profile: Profile = EVERYTHING) -> Regis
 			for alias in _aliases(root, structs, api, requirements)
 			if alias.target in in_closure or alias.target in plain or alias.target in query_closure
 		],
+		extension_names=_extension_names(root, api, profile),
 		query_roots=sorted(query_roots),
 		query_closure=sorted(query_closure),
 		closure=sorted(closure),

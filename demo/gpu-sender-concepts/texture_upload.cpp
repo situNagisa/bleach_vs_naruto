@@ -37,9 +37,9 @@ namespace scene::texture_upload
 		::gpu::vk::tracked_value<::VkImage, ::gpu::vk::transfer_dst> const& item)
 	{
 		auto const region = ::vkfu::evaluate(::vkfu::param::buffer_image_copy2{
-			.image_subresource = ::vkfu::evaluate(::vkfu::param::image_subresource_layers{
+			.image_subresource = ::vkfu::param::image_subresource_layers{
 				.aspect_mask = {.color = 1}, .layer_count = 1,
-			}),
+			},
 			.image_extent = extent,
 		});
 		::vkfu::cmd_copy_buffer_to_image2(dom.command_buffer(), ::vkfu::param::copy_buffer_to_image2{

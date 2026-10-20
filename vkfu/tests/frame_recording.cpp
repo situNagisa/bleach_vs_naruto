@@ -10,6 +10,7 @@
 #include <cassert>
 #include <cstdint>
 #include <span>
+#include <string_view>
 #include <vector>
 
 #include "../include/vkfu/vulkan/v1.4.328.h"
@@ -17,16 +18,22 @@
 namespace param = ::vkfu::param;
 using namespace ::vkfu::enums;
 
+// The generated name constants say what vulkan.h's own macros say.
+static_assert(::std::string_view{::vkfu::khr::surface_extension_name} == VK_KHR_SURFACE_EXTENSION_NAME);
+static_assert(::std::string_view{::vkfu::khr::swapchain_extension_name} == VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+static_assert(::std::string_view{::vkfu::ext::debug_utils_extension_name} == VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+static_assert(::std::string_view{::vkfu::layer::khronos_validation} == "VK_LAYER_KHRONOS_validation");
+
 namespace
 {
-auto colour_subresource() -> VkImageSubresourceRange
+auto colour_subresource() -> param::image_subresource_range
 {
-	return VkImageSubresourceRange{
-		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-		.baseMipLevel = 0,
-		.levelCount = 1,
-		.baseArrayLayer = 0,
-		.layerCount = 1,
+	return param::image_subresource_range{
+		.aspect_mask = {.color = 1},
+		.base_mip_level = 0,
+		.level_count = 1,
+		.base_array_layer = 0,
+		.layer_count = 1,
 	};
 }
 }
@@ -35,8 +42,9 @@ auto colour_subresource() -> VkImageSubresourceRange
 
 void test_instance_expression()
 {
-	auto const layers = ::std::vector<char const*>{"VK_LAYER_KHRONOS_validation"};
-	auto const extensions = ::std::vector<char const*>{VK_KHR_SURFACE_EXTENSION_NAME, VK_EXT_DEBUG_UTILS_EXTENSION_NAME};
+	auto const layers = ::std::vector<char const*>{::vkfu::layer::khronos_validation};
+	auto const extensions = ::std::vector<char const*>{
+		::vkfu::khr::surface_extension_name, ::vkfu::ext::debug_utils_extension_name};
 
 	// pApplicationInfo is a slot, so the storage owns the application info and
 	// points the instance info at it.

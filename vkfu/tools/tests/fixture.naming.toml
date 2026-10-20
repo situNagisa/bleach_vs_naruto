@@ -21,6 +21,18 @@ name = "extent"
 width = "width"
 height = "height"
 
+[struct."VkBounds"]
+name = "bounds"
+[struct."VkBounds".members]
+zone = "zone"
+size = "size"
+
+[struct."VkZone"]
+name = "zone"
+[struct."VkZone".members]
+mode = "mode"
+depth = "depth"
+
 [struct."VkWidgetColourInfoEXT"]
 name = "option::ext::widget_colour"
 [struct."VkWidgetColourInfoEXT".members]
@@ -35,6 +47,7 @@ enableTracing = "enable_tracing"
 pParts = "parts"
 pTuning = "tuning"
 extent = "extent"
+bounds = "bounds"
 weights = "weights"
 
 [struct."VkWidgetLabelInfoKHR"]
@@ -84,6 +97,9 @@ name = "cmd_set_win32_widget"
 [command."vkCmdSubmitParts"]
 name = "cmd_submit_parts"
 
+[command."vkCmdEndWidget"]
+name = "cmd_end_widget"
+
 [command."vkEnumerateWidgetReports"]
 name = "enumerate_widget_reports"
 count = "count_widget_reports"
@@ -93,3 +109,15 @@ name = "get_widget_properties"
 
 [alias."VkWidgetLimitsKHR"]
 name = "option::khr::widget_limits"
+
+[string."VK_EXT_WIDGET_COLOUR_EXTENSION_NAME"]
+name = "ext::widget_colour_extension_name"
+
+[string."VK_KHR_WIDGET_WIN32_EXTENSION_NAME"]
+name = "khr::widget_win32_extension_name"
+
+[string."VK_KHR_WIDGET_BARE_EXTENSION_NAME"]
+name = "khr::widget_bare_extension_name"
+
+[layer."VK_LAYER_FIXTURE_widget"]
+name = "layer::fixture_widget"

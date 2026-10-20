@@ -263,8 +263,8 @@ struct main_menu::implementation : immovable
 
 			auto staging = _buffer{global, pixels, {.transfer_src = 1}};
 			auto const extent = ::VkExtent3D{width, static_cast<::std::uint32_t>(height), 1};
-			auto const subresources = ::vkfu::evaluate(param::image_subresource_range{
-				.aspect_mask = {.color = 1}, .level_count = 1, .layer_count = 1});
+			auto const subresources = param::image_subresource_range{
+				.aspect_mask = {.color = 1}, .level_count = 1, .layer_count = 1};
 			_image = ::vkkl::image{_device, ::vkfu::create_image(_device, param::image{
 				.type = image_type::dim_2d, .format = format::r8g8b8a8_srgb, .extent = extent,
 				.mip_levels = 1, .array_layers = 1, .samples = sample_count::count_1,
@@ -288,7 +288,7 @@ struct main_menu::implementation : immovable
 				.image = _image.handle, .subresource_range = subresources});
 			::vkfu::cmd_pipeline_barrier2(command.handle, param::dependency{.image_memory_barriers = ::std::span{&to_transfer, 1u}});
 			auto const copy = ::vkfu::evaluate(param::buffer_image_copy2{
-				.image_subresource = ::vkfu::evaluate(param::image_subresource_layers{.aspect_mask = {.color = 1}, .layer_count = 1}),
+				.image_subresource = param::image_subresource_layers{.aspect_mask = {.color = 1}, .layer_count = 1},
 				.image_extent = extent});
 			::vkfu::cmd_copy_buffer_to_image2(command.handle, param::copy_buffer_to_image2{
 				.src_buffer = staging._handle.handle, .dst_image = _image.handle,

@@ -7,3 +7,4 @@
 #include "v1.1.42/version_1_1.h"
 #include "v1.1.42/ext.h"
 #include "v1.1.42/khr.h"
+#include "v1.1.42/layer.h"

@@ -28,6 +28,7 @@
 
 #include "../version_1_0/image.h"
 #include "../version_1_0/sampler.h"
+#include "../version_1_0/command_buffer_building.h"
 
 constexpr auto _vkfu_address(VkBlitImageInfo2& value) noexcept -> void const*
 {
@@ -590,7 +591,7 @@ struct buffer_image_copy2
 	VkDeviceSize buffer_offset{};
 	::std::uint32_t buffer_row_length{};
 	::std::uint32_t buffer_image_height{};
-	VkImageSubresourceLayers image_subresource{};
+	::vkfu::param::image_subresource_layers image_subresource{};
 	VkOffset3D image_offset{};
 	VkExtent3D image_extent{};
 
@@ -602,7 +603,7 @@ struct buffer_image_copy2
 			.bufferOffset = buffer_offset,
 			.bufferRowLength = buffer_row_length,
 			.bufferImageHeight = buffer_image_height,
-			.imageSubresource = image_subresource,
+			.imageSubresource = image_subresource.evaluate(),
 			.imageOffset = image_offset,
 			.imageExtent = image_extent,
 		};
@@ -705,9 +706,9 @@ struct image_blit2
 {
 	using vulkan_tag_type = tag::image_blit2;
 
-	VkImageSubresourceLayers src_subresource{};
+	::vkfu::param::image_subresource_layers src_subresource{};
 	::std::array<VkOffset3D, 2> src_offsets{};
-	VkImageSubresourceLayers dst_subresource{};
+	::vkfu::param::image_subresource_layers dst_subresource{};
 	::std::array<VkOffset3D, 2> dst_offsets{};
 
 	constexpr auto evaluate() const noexcept -> VkImageBlit2
@@ -715,9 +716,9 @@ struct image_blit2
 		auto value = VkImageBlit2{
 			.sType = VK_STRUCTURE_TYPE_IMAGE_BLIT_2,
 			.pNext = nullptr,
-			.srcSubresource = src_subresource,
+			.srcSubresource = src_subresource.evaluate(),
 			.srcOffsets = {},
-			.dstSubresource = dst_subresource,
+			.dstSubresource = dst_subresource.evaluate(),
 			.dstOffsets = {},
 		};
 		::std::ranges::copy(src_offsets, value.srcOffsets);
@@ -730,9 +731,9 @@ struct image_copy2
 {
 	using vulkan_tag_type = tag::image_copy2;
 
-	VkImageSubresourceLayers src_subresource{};
+	::vkfu::param::image_subresource_layers src_subresource{};
 	VkOffset3D src_offset{};
-	VkImageSubresourceLayers dst_subresource{};
+	::vkfu::param::image_subresource_layers dst_subresource{};
 	VkOffset3D dst_offset{};
 	VkExtent3D extent{};
 
@@ -741,9 +742,9 @@ struct image_copy2
 		return VkImageCopy2{
 			.sType = VK_STRUCTURE_TYPE_IMAGE_COPY_2,
 			.pNext = nullptr,
-			.srcSubresource = src_subresource,
+			.srcSubresource = src_subresource.evaluate(),
 			.srcOffset = src_offset,
-			.dstSubresource = dst_subresource,
+			.dstSubresource = dst_subresource.evaluate(),
 			.dstOffset = dst_offset,
 			.extent = extent,
 		};
@@ -754,9 +755,9 @@ struct image_resolve2
 {
 	using vulkan_tag_type = tag::image_resolve2;
 
-	VkImageSubresourceLayers src_subresource{};
+	::vkfu::param::image_subresource_layers src_subresource{};
 	VkOffset3D src_offset{};
-	VkImageSubresourceLayers dst_subresource{};
+	::vkfu::param::image_subresource_layers dst_subresource{};
 	VkOffset3D dst_offset{};
 	VkExtent3D extent{};
 
@@ -765,9 +766,9 @@ struct image_resolve2
 		return VkImageResolve2{
 			.sType = VK_STRUCTURE_TYPE_IMAGE_RESOLVE_2,
 			.pNext = nullptr,
-			.srcSubresource = src_subresource,
+			.srcSubresource = src_subresource.evaluate(),
 			.srcOffset = src_offset,
-			.dstSubresource = dst_subresource,
+			.dstSubresource = dst_subresource.evaluate(),
 			.dstOffset = dst_offset,
 			.extent = extent,
 		};

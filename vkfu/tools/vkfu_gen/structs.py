@@ -149,6 +149,8 @@ def render_param(
 			lines.append(f"{TAB}::vkfu::enums::{table.enum_name(field.enum_type)} {field_name}{{}};")
 		elif field.kind == "reference":
 			lines.append(f"{TAB}{parameters[field.member.name]} {field_name}{{}};")
+		elif field.kind == "value":
+			lines.append(f"{TAB}::vkfu::param::{table.struct_name(field.target)} {field_name}{{}};")
 		else:
 			lines.append(f"{TAB}{field.cpp_type} {field_name}{_field_default(field)};")
 
@@ -208,6 +210,8 @@ def render_param(
 			lines.append(f"{inner}.{member.name} = static_cast<{field.enum_type}>({field_name}),")
 		elif field.kind == "reference":
 			lines.append(f"{inner}.{member.name} = nullptr,")
+		elif field.kind == "value":
+			lines.append(f"{inner}.{member.name} = {field_name}.evaluate(),")
 		else:
 			lines.append(f"{inner}.{member.name} = {field_name},")
 
@@ -257,6 +261,16 @@ def render_enum(enum_type: ir.EnumType, table: Table) -> list[str]:
 		lines.append(f"{TAB}{table.value_name(enum_type.name, value.name)} = {constant},")
 	lines.append("};")
 	return lines
+
+
+def render_constant(qualified: str, value: str) -> str:
+	"""One string as a constant: `inline constexpr auto debug_utils_extension_name = "VK_EXT_debug_utils";`.
+
+	The literal is spelled out rather than naming the macro in vulkan.h, because a
+	platform extension's macro only exists on that platform and a unit has no #if.
+	"""
+	escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+	return f'inline constexpr auto {leaf_of(qualified)} = "{escaped}";'
 
 
 def render_native_glue(struct: ir.Struct) -> list[str]:

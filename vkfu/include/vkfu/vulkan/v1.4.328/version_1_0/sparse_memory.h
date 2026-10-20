@@ -149,37 +149,6 @@ struct vulkan_object_extensions<tag::bind_sparse>
 
 namespace vkfu::param
 {
-using ::vkfu::operator|;
-
-struct bind_sparse
-{
-	using vulkan_tag_type = tag::bind_sparse;
-
-	::std::span<VkSemaphore const> wait_semaphores{};
-	::std::span<VkSparseBufferMemoryBindInfo const> buffer_binds{};
-	::std::span<VkSparseImageOpaqueMemoryBindInfo const> image_opaque_binds{};
-	::std::span<VkSparseImageMemoryBindInfo const> image_binds{};
-	::std::span<VkSemaphore const> signal_semaphores{};
-
-	constexpr auto evaluate() const noexcept -> VkBindSparseInfo
-	{
-		return VkBindSparseInfo{
-			.sType = VK_STRUCTURE_TYPE_BIND_SPARSE_INFO,
-			.pNext = nullptr,
-			.waitSemaphoreCount = static_cast<::std::uint32_t>(wait_semaphores.size()),
-			.pWaitSemaphores = wait_semaphores.data(),
-			.bufferBindCount = static_cast<::std::uint32_t>(buffer_binds.size()),
-			.pBufferBinds = buffer_binds.data(),
-			.imageOpaqueBindCount = static_cast<::std::uint32_t>(image_opaque_binds.size()),
-			.pImageOpaqueBinds = image_opaque_binds.data(),
-			.imageBindCount = static_cast<::std::uint32_t>(image_binds.size()),
-			.pImageBinds = image_binds.data(),
-			.signalSemaphoreCount = static_cast<::std::uint32_t>(signal_semaphores.size()),
-			.pSignalSemaphores = signal_semaphores.data(),
-		};
-	}
-};
-
 struct image_subresource
 {
 	::vkfu::flags::image_aspect aspect_mask{};
@@ -213,7 +182,7 @@ struct sparse_buffer_memory_bind
 
 struct sparse_image_memory_bind
 {
-	VkImageSubresource subresource{};
+	::vkfu::param::image_subresource subresource{};
 	VkOffset3D offset{};
 	VkExtent3D extent{};
 	VkDeviceMemory memory{};
@@ -223,7 +192,7 @@ struct sparse_image_memory_bind
 	constexpr auto evaluate() const noexcept -> VkSparseImageMemoryBind
 	{
 		return VkSparseImageMemoryBind{
-			.subresource = subresource,
+			.subresource = subresource.evaluate(),
 			.offset = offset,
 			.extent = extent,
 			.memory = memory,
@@ -279,6 +248,37 @@ struct sparse_memory_bind
 			.memory = memory,
 			.memoryOffset = memory_offset,
 			.flags = ::std::bit_cast<VkSparseMemoryBindFlags>(flags),
+		};
+	}
+};
+
+using ::vkfu::operator|;
+
+struct bind_sparse
+{
+	using vulkan_tag_type = tag::bind_sparse;
+
+	::std::span<VkSemaphore const> wait_semaphores{};
+	::std::span<VkSparseBufferMemoryBindInfo const> buffer_binds{};
+	::std::span<VkSparseImageOpaqueMemoryBindInfo const> image_opaque_binds{};
+	::std::span<VkSparseImageMemoryBindInfo const> image_binds{};
+	::std::span<VkSemaphore const> signal_semaphores{};
+
+	constexpr auto evaluate() const noexcept -> VkBindSparseInfo
+	{
+		return VkBindSparseInfo{
+			.sType = VK_STRUCTURE_TYPE_BIND_SPARSE_INFO,
+			.pNext = nullptr,
+			.waitSemaphoreCount = static_cast<::std::uint32_t>(wait_semaphores.size()),
+			.pWaitSemaphores = wait_semaphores.data(),
+			.bufferBindCount = static_cast<::std::uint32_t>(buffer_binds.size()),
+			.pBufferBinds = buffer_binds.data(),
+			.imageOpaqueBindCount = static_cast<::std::uint32_t>(image_opaque_binds.size()),
+			.pImageOpaqueBinds = image_opaque_binds.data(),
+			.imageBindCount = static_cast<::std::uint32_t>(image_binds.size()),
+			.pImageBinds = image_binds.data(),
+			.signalSemaphoreCount = static_cast<::std::uint32_t>(signal_semaphores.size()),
+			.pSignalSemaphores = signal_semaphores.data(),
 		};
 	}
 };
