@@ -24,12 +24,14 @@ constexpr auto VK_STRUCTURE_TYPE_WIDGET_LIMITS = static_cast<VkStructureType>(10
 constexpr auto VK_STRUCTURE_TYPE_WIDGET_PROPERTIES = static_cast<VkStructureType>(1000900006);
 constexpr auto VK_STRUCTURE_TYPE_WIDGET_DRIVER_PROPERTIES_EXT = static_cast<VkStructureType>(1000900007);
 struct VkExtent { ::std::uint32_t width; ::std::uint32_t height; };
+struct VkZone { VkWidgetMode mode; ::std::uint32_t depth; };
+struct VkBounds { VkZone zone; VkExtent size; };
 struct VkWidgetPart { VkStructureType sType; void const* pNext; ::std::uint32_t index; };
 struct VkWidgetTuning { VkStructureType sType; void const* pNext; float bias; };
 struct VkWidgetCreateInfo {
 	VkStructureType sType; void const* pNext; VkWidgetFlags flags; VkWidgetMode mode;
 	VkBool32 enableTracing; ::std::uint32_t partCount; VkWidgetPart const* pParts;
-	VkWidgetTuning const* pTuning; VkExtent extent; float weights[4];
+	VkWidgetTuning const* pTuning; VkExtent extent; VkBounds bounds; float weights[4];
 };
 struct VkWidgetColourInfoEXT { VkStructureType sType; void const* pNext; VkWidgetMode fallbackMode; };
 struct VkWidgetLabelInfoKHR { VkStructureType sType; void const* pNext; ::std::uint32_t tag; };
@@ -40,6 +42,7 @@ struct VkWidgetReport { ::std::uint32_t code; };
 extern "C" {
 VkResult vkCreateWidget(VkDevice, VkWidgetCreateInfo const*, VkAllocationCallbacks const*, VkWidget*);
 void vkCmdSubmitParts(VkRecorder, ::std::uint32_t, VkWidgetPart const*);
+void vkCmdEndWidget(VkRecorder);
 VkResult vkEnumerateWidgetReports(VkDevice, ::std::uint32_t*, VkWidgetReport*);
 void vkGetWidgetProperties(VkDevice, VkWidgetProperties*);
 }
@@ -57,7 +60,11 @@ int main()
 		.mode = ::vkfu::enums::widget_mode::fancy,
 		.enable_tracing = true,
 		.parts = parts,
-		.extent = ::vkfu::evaluate(param::extent{.width = 4, .height = 2}),
+		// VkExtent is the native structure under another name, so the field keeps it
+		// and a VkExtent that came from Vulkan goes straight in.
+		.extent = VkExtent{.width = 4, .height = 2},
+		// VkZone has an enum, so a field of that type takes its param, nested ones included.
+		.bounds = {.zone = {.mode = ::vkfu::enums::widget_mode::fancy, .depth = 3}, .size = {.width = 8, .height = 6}},
 		.weights = {1.0f, 2.0f, 3.0f, 4.0f},
 	} | param::option::ext::widget_colour{.fallback_mode = ::vkfu::enums::widget_mode::plain};
 
@@ -67,6 +74,7 @@ int main()
 	if (head.weights[3] != 4.0f) return 2;          // the slot+array path
 	if (head.partCount != 1 || head.pParts != parts.data()) return 3;
 	if (head.extent.width != 4) return 4;
+	if (head.bounds.size.height != 6 || head.bounds.zone.depth != 3 || head.bounds.zone.mode != VK_WIDGET_MODE_FANCY) return 7;
 	auto const* next = static_cast<VkWidgetColourInfoEXT const*>(head.pNext);
 	if (next == nullptr || next->sType != VK_STRUCTURE_TYPE_WIDGET_COLOUR_INFO_EXT) return 5;
 

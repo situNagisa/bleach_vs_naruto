@@ -23,7 +23,7 @@
 
 ## 输出：核心按功能、扩展按厂商
 
-`gen` 输出一棵树（v1.4.328 下 507 个文件）：
+`gen` 输出一棵树（v1.4.328 下 562 个文件）：
 
 ```
 vulkan/v1.4.328.h                       # 总伞头：全部核心版本和全部厂商
@@ -33,6 +33,8 @@ vulkan/v1.4.328/version_1_3/synchronization2.h
 vulkan/v1.4.328/khr.h                   # 厂商的伞头
 vulkan/v1.4.328/khr/swapchain.h         # 一个扩展一个文件
 vulkan/v1.4.328/ext/mesh_shader.h
+vulkan/v1.4.328/layer.h                 # 层名的伞头（见"名字常量"）
+vulkan/v1.4.328/layer/names.h
 ```
 
 - **目录名由生成器决定**：`--out` 只给 vkfu 头文件所在的目录（默认 `../include/vkfu`），
@@ -46,7 +48,8 @@ vulkan/v1.4.328/ext/mesh_shader.h
   `_SECTION_NAMES` 里给了名字；没有注释的块是该版本自己加的（`VkPhysicalDeviceVulkan12Features`
   这类），叫 `core.h`。
 - **扩展按厂商**：`VK_KHR_swapchain` → `khr/swapchain.h`，去掉 `VK_` 和厂商前缀。
-- **一个文件里什么都有**：它引入的 tag、trait、pNext glue、enum class、param、别名和命令包装。
+- **一个文件里什么都有**：它引入的 tag、trait、pNext glue、enum class、param、别名、命令包装和扩展名常量。
+  一个扩展即使除了名字什么都没有，也有自己的文件。
 - **include**：vkfu 框架头一律 `<vkfu/xxx.h>`；同在 `v<version>/` 下的生成文件之间用相对路径
   （`"surface.h"`、`"../version_1_0/buffer.h"`）。一个文件用到哪个文件声明的东西就 include 它，
   所以每个文件都能单独包含。依赖成环会让生成硬失败；v1.4.328 下无环。
@@ -109,7 +112,7 @@ const 指针参数且其结构体有 `sType` 成员——`pAllocator` 因此自�
 native 的 span——span 是借用，父级无法拥有元素）。
 
 v1.4.328 下是 **257 个 root / 834 个链式对象 / 69 个无 sType 的 param / 246 个只读的查询对象 /
-377 个命令包装**，外加 41 个表达式槽和 55 个数组元素类型，全部已命名。
+593 个命令包装（74 个 create/allocate、443 个其它、52 个枚举、24 个查询链）**，外加 41 个表达式槽和 55 个数组元素类型，全部已命名。
 `param::command_buffer_begin`、`param::rendering`、`param::dependency`、`param::submit2`、
 `param::present`、`param::memory`、`param::image_memory_barrier2` 都在里面，所以命令录制和
 内存分配那一侧也不用再手写 `sType`。
@@ -248,10 +251,20 @@ python -m vkfu_gen check --xml vk.xml --table naming.toml --scope closure
 
 ## 命令包装：不止 create
 
-677 个 vulkan 命令里 **318 个值得包装**，判据是"有东西可换"：吃调用方填的结构体（换成表达式），
-或者有指针+长度的参数对（折成一个 span）。其余 293 个既无 info 又无 span（`vkCmdDraw`、
-`vkCmdBindPipeline`），包装没有收益，保持原样调用；57 个是 `vkGet*` 的两段式枚举模式，
-形态不同，暂不处理。
+这个注册表里有 607 个 vulkan 命令，**593 个有包装**：74 个 `vkCreate*` / `vkAllocate*`（见"create 系列"）、
+52 个两段式枚举、24 个查询链，剩下 443 个就是这一节说的。包装做三件事：吃调用方填的结构体的换成表达式，
+带指针+长度的参数对折成一个 span，按值传的 flags / enum 换成 vkfu 类型。
+
+**没有东西可换也照样包装**：`vkCmdEndRendering(cmd)` 只有一个句柄，`vkCmdDraw` 只有句柄和标量，但录制函数里
+不该是 `vkfu::cmd_begin_rendering` 配一个原生的 `::vkCmdEndRendering`。这样一个命令缓冲的录制函数从头到尾是同一套 API，
+`vkCmdBindPipeline` 的 `VkPipelineBindPoint` 也能拿到 `enums::pipeline_bind_point`。
+
+保持原样调用的只剩 14 个：
+
+- 11 个返回 `VkResult` 而成功码不止 `VK_SUCCESS`（`vkAcquireNextImageKHR` 的 `VK_SUBOPTIMAL_KHR`、
+  `vkGetFenceStatus` 的 `VK_NOT_READY`）。包装把一切非 `VK_SUCCESS` 当错误，对它们是错的，所以不生成；
+- 2 个有多个出参（`vkGetCalibratedTimestampsKHR`、`vkGetPipelineBinaryDataKHR`）；
+- `vkCreateDeferredOperationKHR`，没有 info，形状不属于 create 的骨架。
 
 ```cpp
 vkfu::cmd_execute_commands(cmd, secondaries);              // count + pointer -> 一个 span
@@ -391,6 +404,48 @@ param::descriptor_set_layout_binding{
     .stage_flags = {.vertex = 1, .fragment = 1},
 }
 ```
+
+## 按值嵌入的结构体
+
+`VkImageMemoryBarrier2::subresourceRange` 是按值嵌入的 `VkImageSubresourceRange`，没有 sType，所以有自己的 param。
+嵌入它的 param，字段就用这个 param，`evaluate()` 里调它的 `evaluate()`，而不是留一个原生字段：
+
+```cpp
+param::image_memory_barrier2{
+    .dst_stage_mask = {.color_attachment_output = 1},
+    .subresource_range = {.aspect_mask = {.color = 1}, .level_count = 1, .layer_count = 1},
+}
+```
+
+- **param 和原生结构体同构时不换**。`VkExtent2D` 是 `width`、`height`，param 也是；`VkOffset3D`、`VkRect2D` 同理。
+  判据只看注册表：每个成员都是标量或另一个同构结构体，名字本来就是小写单词，没有 flags 要拆、没有 enum 要加作用域、
+  没有驼峰要转。这种字段仍是原生类型，所以从 Vulkan 拿回来的 `VkExtent2D`（`currentExtent`）可以直接放进去，
+  不用逐字段拷一遍。它们的 param 照样生成，要用可以用。v1.4.328 下 83 个嵌入字段里 47 个同构、36 个换成 param。
+- **声明顺序**：同一个文件里 plain param 排在 chain 对象前面，被嵌入的排在嵌入它的前面；跨文件靠 include，
+  文件之间成环仍然硬失败。
+- **带 sType 的结构体按值嵌入的不换**（`VkComputePipelineCreateInfo::stage` 等 15 处）：换成 param 就没处挂它自己的
+  pNext 了，需要一种"按值的槽"，目前没有。联合体（`VkClearValue`、`VkClearColorValue`）不在 IR 里，同样保持原生。
+
+## 名字常量：扩展名与层名
+
+vk.xml 给每个扩展声明了一个字符串宏（`VK_EXT_DEBUG_UTILS_EXTENSION_NAME` 是 `"VK_EXT_debug_utils"`）。生成器为每个扩展
+（425 个）在它自己的文件里、在厂商命名空间中写一个常量，层名也一样：
+
+```cpp
+namespace vkfu::ext   { inline constexpr auto debug_utils_extension_name = "VK_EXT_debug_utils"; }
+namespace vkfu::khr   { inline constexpr auto swapchain_extension_name   = "VK_KHR_swapchain"; }
+namespace vkfu::layer { inline constexpr auto khronos_validation         = "VK_LAYER_KHRONOS_validation"; }
+```
+
+- **名字进命名表**：`[string."VK_EXT_DEBUG_UTILS_EXTENSION_NAME"]`。规则是厂商标记当命名空间，宏里其余的词小写，从宏推出来，
+  所以找得到它替换的是哪个宏（`VK_KHR_MAINTENANCE_1_EXTENSION_NAME` 是 `khr::maintenance_1_extension_name`）。
+  叶名以数字开头的三个是人工定的：`khr::storage_16bit_extension_name`、`khr::storage_8bit_extension_name`、
+  `ext::format_4444_extension_name`。
+- **写的是字面量，不是宏名**：平台扩展的宏只在那个平台上才有，而单个文件里没有 `#if`。平台扩展的常量照样在它
+  带宏的那个文件里，由伞头文件决定包不包含。`SPEC_VERSION` 不是字符串，不生成。
+- **层名不在 vk.xml 里**，没法从注册表推出来。`naming.overrides.toml` 的 `[layer]` 一节一条一个，键就是字符串本身，
+  `rebuild` 把它们写进 `naming.toml`。目前只有 `VK_LAYER_KHRONOS_validation`。
+- `check` 查它们：空名、非标识符、重名（和命令共用命名空间，所以也和命令比）、缺条目、孤儿。
 
 ## flags 的处理
 
@@ -571,9 +626,12 @@ clang 没有位域上的 constexpr `bit_cast`、位名跨厂商撞名导致位�
 - 创建期元信息（physical_device / allocator / 池句柄）与 `create_*` 函数还没做；
   框架侧也还没有"非 pNext 节点"这个概念。
 - 查询侧未做（`returnedonly` + `vkGet*` 的出参）。
-- **没有 `sType` 的值结构体不生成 param**：`VkPipelineColorBlendAttachmentState`、`VkViewport`、
-  `VkVertexInputBindingDescription` 这些没有 pNext 要管，直接用原生聚合初始化就行。这是
-  刻意的边界，不是遗漏。
+- **没有 `sType` 的值结构体的 param 不是借用**：数组元素（`VkViewport` 一类）仍是原生 span，见"flags 与枚举的两个已知边界"；
+  按值嵌入的见"按值嵌入的结构体"。
+- **已包装的 `VkResult` 命令把非 `VK_SUCCESS` 一律当错误**，其中成功码不止 `VK_SUCCESS` 的有 66 个，包括
+  `queue_present`（`VK_SUBOPTIMAL_KHR`）、`wait_for_fences`（`VK_TIMEOUT`）、`create_graphics_pipelines`
+  （`VK_PIPELINE_COMPILE_REQUIRED_EXT`）。新放进来的命令已经避开了这一类（见"命令包装"），这 66 个还没改：
+  `vk.xml` 的 `successcodes` 需要进 IR，包装要把它们当成功返回。
 - 枚举的 span/数组保持 native 元素类型（见上）。
 - 引擎侧 `include/bvn/graphics/vulkan_renderer.h` 和 `source/client/context.h` 还在用
   vk-bootstrap，所以 `vcpkg.json` 里的依赖没有摘掉。demo 已经不用它了。

@@ -136,6 +136,14 @@ class Table:
 	enums: dict[str, str]  # VkFormat -> enum class name
 	flags: dict[str, str]  # VkAccessFlags2 -> flags struct name
 	values: dict[str, dict[str, str]]  # VkFormat -> {VK_FORMAT_...: enumerator}
+	# VK_EXT_DEBUG_UTILS_EXTENSION_NAME -> ext::debug_utils_extension_name
+	strings: dict[str, str] = dataclasses.field(default_factory=dict)
+	# VK_LAYER_KHRONOS_validation -> layer::khronos_validation. The key is the
+	# string itself: vk.xml describes the API, not the layers that wrap it.
+	layers: dict[str, str] = dataclasses.field(default_factory=dict)
+
+	def string_name(self, macro: str) -> str | None:
+		return self.strings.get(macro)
 
 	def struct_name(self, struct: str) -> str | None:
 		return self.structs.get(struct)
@@ -219,6 +227,13 @@ def load_table(path: str) -> Table:
 		if entry.get("name"):
 			aliases[struct] = entry["name"]
 
+	strings = {
+		macro: entry["name"] for macro, entry in (document.get("string") or {}).items() if entry.get("name")
+	}
+	layers = {
+		layer: entry["name"] for layer, entry in (document.get("layer") or {}).items() if entry.get("name")
+	}
+
 	return Table(
 		structs=structs,
 		members=members,
@@ -230,6 +245,8 @@ def load_table(path: str) -> Table:
 		enums=enums,
 		flags=flags,
 		values=values,
+		strings=strings,
+		layers=layers,
 	)
 
 
@@ -559,6 +576,17 @@ def suggest_command_name(command: str, author_tags: frozenset[str]) -> tuple[str
 		f"{namespace}::{name}" if namespace else name,
 		f"{namespace}::{singular}" if namespace else singular,
 	)
+
+
+def suggest_string_name(macro: str) -> str:
+	"""VK_EXT_DEBUG_UTILS_EXTENSION_NAME -> ext::debug_utils_extension_name.
+
+	The vendor tag is a namespace, as it is for commands and objects, and the rest
+	of the macro is the name, so the constant is findable from the macro it
+	replaces. A tag is whatever sits between `VK_` and the extension's own words.
+	"""
+	_, tag, *words = macro.split("_")
+	return f"{tag.lower()}::{'_'.join(word.lower() for word in words)}"
 
 
 def suggest_count_name(command_name: str) -> str:

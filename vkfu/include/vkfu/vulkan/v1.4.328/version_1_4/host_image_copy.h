@@ -28,6 +28,8 @@
 
 #include "../version_1_0/device.h"
 #include "../version_1_0/image.h"
+#include "../version_1_0/image_view.h"
+#include "../version_1_0/command_buffer_building.h"
 #include "../version_1_1/get_physical_device_properties2.h"
 #include "maintenance5.h"
 
@@ -607,7 +609,7 @@ struct host_image_layout_transition
 	VkImage image{};
 	::vkfu::enums::image_layout old_layout{};
 	::vkfu::enums::image_layout new_layout{};
-	VkImageSubresourceRange subresource_range{};
+	::vkfu::param::image_subresource_range subresource_range{};
 
 	constexpr auto evaluate() const noexcept -> VkHostImageLayoutTransitionInfo
 	{
@@ -617,7 +619,7 @@ struct host_image_layout_transition
 			.image = image,
 			.oldLayout = static_cast<VkImageLayout>(old_layout),
 			.newLayout = static_cast<VkImageLayout>(new_layout),
-			.subresourceRange = subresource_range,
+			.subresourceRange = subresource_range.evaluate(),
 		};
 	}
 };
@@ -629,7 +631,7 @@ struct image_to_memory_copy
 	void* host_pointer = nullptr;
 	::std::uint32_t memory_row_length{};
 	::std::uint32_t memory_image_height{};
-	VkImageSubresourceLayers image_subresource{};
+	::vkfu::param::image_subresource_layers image_subresource{};
 	VkOffset3D image_offset{};
 	VkExtent3D image_extent{};
 
@@ -641,7 +643,7 @@ struct image_to_memory_copy
 			.pHostPointer = host_pointer,
 			.memoryRowLength = memory_row_length,
 			.memoryImageHeight = memory_image_height,
-			.imageSubresource = image_subresource,
+			.imageSubresource = image_subresource.evaluate(),
 			.imageOffset = image_offset,
 			.imageExtent = image_extent,
 		};
@@ -655,7 +657,7 @@ struct memory_to_image_copy
 	void const* host_pointer = nullptr;
 	::std::uint32_t memory_row_length{};
 	::std::uint32_t memory_image_height{};
-	VkImageSubresourceLayers image_subresource{};
+	::vkfu::param::image_subresource_layers image_subresource{};
 	VkOffset3D image_offset{};
 	VkExtent3D image_extent{};
 
@@ -667,7 +669,7 @@ struct memory_to_image_copy
 			.pHostPointer = host_pointer,
 			.memoryRowLength = memory_row_length,
 			.memoryImageHeight = memory_image_height,
-			.imageSubresource = image_subresource,
+			.imageSubresource = image_subresource.evaluate(),
 			.imageOffset = image_offset,
 			.imageExtent = image_extent,
 		};

@@ -15,7 +15,7 @@ from .cpp import base_type, pointer_type, span_element_type
 
 @dataclasses.dataclass
 class Field:
-	kind: str  # bool | scalar | enum | flags | span | pointer | reference | array
+	kind: str  # bool | scalar | enum | flags | span | pointer | reference | value | array
 	member: ir.Member
 	cpp_type: str  # declared type of the param field
 	count_member: str | None = None  # span: the native count member it drives
@@ -23,7 +23,7 @@ class Field:
 	flag_bits: str | None = None  # flags: the VkXxxFlagBits enum
 	layout: list[ir.Bit] | None = None  # flags: bits in ascending bitpos order
 	enum_type: str | None = None  # enum: the VkXxx plain enum it wraps
-	target: str | None = None  # reference: the VkXxx the pointer names
+	target: str | None = None  # reference: the VkXxx the pointer names; value: the one it embeds
 
 
 @dataclasses.dataclass
@@ -57,6 +57,35 @@ def bit_layout(flag_bits: ir.FlagBits) -> list[ir.Bit] | None:
 	if positions and max(positions) >= flag_bits.width:
 		return None
 	return bits
+
+
+def is_transparent(struct: ir.Struct, registry: ir.Registry) -> bool:
+	"""A plain structure whose param would be the native structure spelled the same.
+
+	VkExtent2D is `width` and `height`; so is its param. Every member is a scalar
+	or another transparent structure, and every name is already lowercase, so there
+	is no flag to unpack, no enum to scope and no camelCase to convert. VkRect2D is
+	transparent for the same reason, through its offset and extent.
+
+	Decided from the registry alone, so check, rebuild and emit agree on it without
+	consulting the naming table that rebuild is busy producing.
+	"""
+	for member in struct.members:
+		if member.ptr_depth or member.array_dims or member.name != member.name.lower():
+			return False
+		target = registry.structs.get(member.type)
+		if target is not None:
+			if target.stype is not None or not is_transparent(target, registry):
+				return False
+			continue
+		declared = ir.resolve_type(registry, member.type)
+		if (
+			member.type == "VkBool32"
+			or registry.bitmask_to_flagbits.get(declared)
+			or (declared in registry.enums and registry.enums[declared].values)
+		):
+			return False
+	return True
 
 
 def plan_struct(struct: ir.Struct, registry: ir.Registry) -> Plan:
@@ -126,6 +155,18 @@ def plan_struct(struct: ir.Struct, registry: ir.Registry) -> Plan:
 
 		if member.ptr_depth >= 1:
 			fields.append(Field(kind="pointer", member=member, cpp_type=pointer_type(member)))
+			continue
+
+		# A structure embedded by value with no sType is a plain value: vkfu has a
+		# param for it (ir.Registry.plain), so the field takes that param and the
+		# parent's evaluate() calls its evaluate(). Left native, a barrier's
+		# subresource_range would be the one field still spelled in Vulkan's names.
+		# Unless the param would be the native structure under another name: then
+		# there is nothing to gain, and a VkExtent2D that came from Vulkan should go
+		# straight in.
+		embedded = registry.structs.get(member.type)
+		if embedded is not None and embedded.stype is None and not is_transparent(embedded, registry):
+			fields.append(Field(kind="value", member=member, cpp_type=member.type, target=member.type))
 			continue
 
 		if member.type == "VkBool32":

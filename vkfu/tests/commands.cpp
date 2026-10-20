@@ -31,6 +31,15 @@ static_assert(::std::same_as<
 		VkCommandBuffer{}, 0u, ::std::span<VkBuffer const>{}, ::std::span<VkDeviceSize const>{})),
 	void>);
 
+// A command with nothing to substitute is wrapped too, so a recording function
+// does not mix vkfu::cmd_begin_rendering with a native ::vkCmdEndRendering.
+static_assert(::std::same_as<decltype(vkfu::cmd_end_rendering(VkCommandBuffer{})), void>);
+static_assert(::std::same_as<decltype(vkfu::cmd_end_render_pass(VkCommandBuffer{})), void>);
+// Its enum parameter takes the vkfu spelling rather than VkPipelineBindPoint.
+static_assert(::std::same_as<
+	decltype(vkfu::cmd_bind_pipeline(VkCommandBuffer{}, pipeline_bind_point::graphics, VkPipeline{})),
+	void>);
+
 // A void command that takes a structure takes an expression instead, and has no
 // nothrow twin because there is nothing to fail.
 static_assert(::std::same_as<

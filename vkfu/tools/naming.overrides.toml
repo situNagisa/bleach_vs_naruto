@@ -90,6 +90,8 @@ VkBufferCollectionImageCreateInfoFUCHSIA = "image_from_collection"
 "VkVideoComponentBitDepthFlagBitsKHR.VK_VIDEO_COMPONENT_BIT_DEPTH_8_BIT_KHR" = "depth_8"
 "VkVideoComponentBitDepthFlagBitsKHR.VK_VIDEO_COMPONENT_BIT_DEPTH_10_BIT_KHR" = "depth_10"
 "VkVideoComponentBitDepthFlagBitsKHR.VK_VIDEO_COMPONENT_BIT_DEPTH_12_BIT_KHR" = "depth_12"
+# vkGetQueryPoolResults / vkCmdCopyQueryPoolResults: each result is written as a 64-bit value.
+"VkQueryResultFlagBits.VK_QUERY_RESULT_64_BIT" = "value_64"
 
 [value]
 # Dimensions, spelled so they do not start with a digit.
@@ -121,3 +123,15 @@ VkBufferCollectionImageCreateInfoFUCHSIA = "image_from_collection"
 "VkFragmentShadingRateNV.VK_FRAGMENT_SHADING_RATE_4_INVOCATIONS_PER_PIXEL_NV" = "four_per_pixel"
 "VkFragmentShadingRateNV.VK_FRAGMENT_SHADING_RATE_8_INVOCATIONS_PER_PIXEL_NV" = "eight_per_pixel"
 "VkFragmentShadingRateNV.VK_FRAGMENT_SHADING_RATE_16_INVOCATIONS_PER_PIXEL_NV" = "sixteen_per_pixel"
+
+[string]
+# An extension's own name: `<vendor>::<the macro's words>_extension_name` unless
+# that would start with a digit, which no identifier can.
+"VK_KHR_16BIT_STORAGE_EXTENSION_NAME" = "khr::storage_16bit_extension_name"
+"VK_KHR_8BIT_STORAGE_EXTENSION_NAME" = "khr::storage_8bit_extension_name"
+"VK_EXT_4444_FORMATS_EXTENSION_NAME" = "ext::format_4444_extension_name"
+
+[layer]
+# Layers are not in vk.xml, which describes the API and not what wraps it, so each
+# one has to be listed here. The key is the string itself.
+"VK_LAYER_KHRONOS_validation" = "layer::khronos_validation"

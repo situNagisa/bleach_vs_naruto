@@ -12,6 +12,7 @@
 #include "version_1_1/device_group_creation.h"
 #include "version_1_1/get_memory_requirements2.h"
 #include "version_1_1/get_physical_device_properties2.h"
+#include "version_1_1/maintenance1.h"
 #include "version_1_1/maintenance2.h"
 #include "version_1_1/multiview.h"
 #include "version_1_1/variable_pointers.h"

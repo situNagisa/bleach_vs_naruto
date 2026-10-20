@@ -192,6 +192,20 @@ inline constexpr auto is_vulkan_object_compatible_with_v<tag::state::vertex_inpu
 
 namespace vkfu::param
 {
+struct vertex_input_binding_divisor_description
+{
+	::std::uint32_t binding{};
+	::std::uint32_t divisor{};
+
+	constexpr auto evaluate() const noexcept -> VkVertexInputBindingDivisorDescription
+	{
+		return VkVertexInputBindingDivisorDescription{
+			.binding = binding,
+			.divisor = divisor,
+		};
+	}
+};
+
 namespace feature
 {
 using ::vkfu::operator|;
@@ -238,18 +252,4 @@ struct vertex_input_divisor
 };
 
 }
-
-struct vertex_input_binding_divisor_description
-{
-	::std::uint32_t binding{};
-	::std::uint32_t divisor{};
-
-	constexpr auto evaluate() const noexcept -> VkVertexInputBindingDivisorDescription
-	{
-		return VkVertexInputBindingDivisorDescription{
-			.binding = binding,
-			.divisor = divisor,
-		};
-	}
-};
 }

@@ -26,6 +26,8 @@ def sound_table(registry: ir.Registry) -> naming.Table:
 		"VkWidgetLimits": "option::widget_limits",
 		"VkWidgetWin32InfoKHR": "option::khr::widget_win32",
 		"VkExtent": "extent",
+		"VkBounds": "bounds",
+		"VkZone": "zone",
 		"VkWidgetProperties": "property::widget",
 		"VkWidgetDriverPropertiesEXT": "property::ext::widget_driver",
 	}
@@ -37,6 +39,7 @@ def sound_table(registry: ir.Registry) -> naming.Table:
 			"pParts": "parts",
 			"pTuning": "tuning",
 			"extent": "extent",
+			"bounds": "bounds",
 			"weights": "weights",
 		},
 		"VkWidgetPart": {"index": "index"},
@@ -46,6 +49,8 @@ def sound_table(registry: ir.Registry) -> naming.Table:
 		"VkWidgetLimits": {"maxParts": "max_parts"},
 		"VkWidgetWin32InfoKHR": {"handle": "handle"},
 		"VkExtent": {"width": "width", "height": "height"},
+		"VkBounds": {"zone": "zone", "size": "size"},
+		"VkZone": {"mode": "mode", "depth": "depth"},
 	}
 	return naming.Table(
 		structs=dict(objects),
@@ -54,6 +59,7 @@ def sound_table(registry: ir.Registry) -> naming.Table:
 		commands={
 			"vkCreateWidget": "create_widget",
 			"vkCmdSubmitParts": "cmd_submit_parts",
+			"vkCmdEndWidget": "cmd_end_widget",
 			"vkCmdSetWin32Widget": "khr::cmd_set_win32_widget",
 			"vkEnumerateWidgetReports": "enumerate_widget_reports",
 			"vkGetWidgetProperties": "get_widget_properties",
@@ -64,6 +70,12 @@ def sound_table(registry: ir.Registry) -> naming.Table:
 		enums={"VkWidgetMode": "widget_mode"},
 		flags={"VkWidgetFlags": "widget"},
 		values={"VkWidgetMode": {"VK_WIDGET_MODE_PLAIN": "plain", "VK_WIDGET_MODE_FANCY": "fancy"}},
+		strings={
+			"VK_EXT_WIDGET_COLOUR_EXTENSION_NAME": "ext::widget_colour_extension_name",
+			"VK_KHR_WIDGET_BARE_EXTENSION_NAME": "khr::widget_bare_extension_name",
+			"VK_KHR_WIDGET_WIN32_EXTENSION_NAME": "khr::widget_win32_extension_name",
+		},
+		layers={"VK_LAYER_FIXTURE_widget": "layer::fixture_widget"},
 	)
 
 
@@ -214,6 +226,29 @@ class CheckTest(unittest.TestCase):
 
 		problem = self.assert_error("missing", drop)
 		self.assertEqual(problem.where, "struct.VkWidgetTuning")
+
+	def test_an_extension_name_without_an_entry_is_missing(self) -> None:
+		problem = self.assert_error("missing", lambda t: t.strings.pop("VK_KHR_WIDGET_BARE_EXTENSION_NAME"))
+		self.assertEqual(problem.where, "string.VK_KHR_WIDGET_BARE_EXTENSION_NAME")
+
+	def test_a_string_constant_must_be_an_identifier(self) -> None:
+		# What a macro that starts with a digit would produce unless a human names it.
+		self.assert_error(
+			"invalid", lambda t: t.strings.update({"VK_KHR_WIDGET_BARE_EXTENSION_NAME": "khr::16bit_extension_name"})
+		)
+		self.assert_error("invalid", lambda t: t.layers.update({"VK_LAYER_FIXTURE_widget": "layer::fixture-widget"}))
+
+	def test_a_string_constant_cannot_share_a_name_with_a_command(self) -> None:
+		def clash(table: naming.Table) -> None:
+			table.strings["VK_KHR_WIDGET_BARE_EXTENSION_NAME"] = "khr::cmd_set_win32_widget"
+
+		self.assert_error("duplicate", clash)
+
+	def test_a_string_entry_for_no_extension_is_an_orphan(self) -> None:
+		table = sound_table(self.registry)
+		table.strings["VK_KHR_NOT_AN_EXTENSION_NAME"] = "khr::not_an_extension_name"
+		orphans = [p for p in check.check(self.registry, table) if p.kind == "orphan"]
+		self.assertEqual([p.where for p in orphans], ["string.VK_KHR_NOT_AN_EXTENSION_NAME"])
 
 	def test_a_missing_entry_is_allowed_in_table_scope(self) -> None:
 		table = sound_table(self.registry)

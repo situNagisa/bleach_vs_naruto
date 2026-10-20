@@ -4,7 +4,9 @@
 // Every QCOM extension. Each file below includes what it depends on, so including one
 // of them directly works too.
 
+#include "qcom/render_pass_shader_resolve.h"
 #include "qcom/render_pass_transform.h"
+#include "qcom/render_pass_store_ops.h"
 #include "qcom/tile_shading.h"
 #include "qcom/rotated_copy_commands.h"
 #include "qcom/image_processing.h"

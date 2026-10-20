@@ -293,6 +293,31 @@ def check(registry: ir.Registry, table: Table, scope: str = "closure") -> list[P
 	_unique(sink, "duplicate", "commands", command_names)
 	_namespace_conflicts(sink, "commands", dict(command_names))
 
+	# ------------------------------------------------------------ strings
+	# An extension's name and a layer's name are constants in the same namespaces
+	# the commands live in, so the two compete for names.
+	string_names: list[tuple[str, str]] = []
+	for entry in registry.extension_names:
+		key = f"string.{entry.macro}"
+		value = table.string_name(entry.macro)
+		if value is None:
+			if scope != "table":
+				sink.error("missing", key, "no name in the table")
+			continue
+		if sink.name(key, value, qualified=True):
+			string_names.append((entry.macro, value))
+	for layer, value in sorted(table.layers.items()):
+		if sink.name(f"layer.{layer}", value, qualified=True):
+			string_names.append((layer, value))
+
+	_unique(sink, "duplicate", "strings", command_names + string_names)
+	_namespace_conflicts(sink, "strings", dict(command_names + string_names))
+
+	known_macros = {entry.macro for entry in registry.extension_names}
+	for macro in sorted(table.strings):
+		if macro not in known_macros:
+			sink.warn("orphan", f"string.{macro}", "named in the table but not an extension name in scope")
+
 	# ------------------------------------------------------------ aliases
 	# An alias shares a namespace with the objects, so it competes with them for
 	# names -- and a `using` that collides with a real structure is a redefinition.

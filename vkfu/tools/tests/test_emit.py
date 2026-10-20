@@ -188,6 +188,53 @@ class ContentTest(unittest.TestCase):
 	def test_the_producer_takes_an_expression(self) -> None:
 		self.contains("::vkfu::expression_for<::vkfu::tag::widget>")
 
+	def test_an_embedded_plain_structure_takes_its_param_not_the_native_one(self) -> None:
+		# The field is typed with the param, and the parent evaluates it. A native
+		# VkBounds field would leave `.bounds = {.zone = {...}}` the only place in a
+		# param that still speaks Vulkan's names.
+		self.contains("\t::vkfu::param::bounds bounds{};")
+		self.contains("\t\t\t.bounds = bounds.evaluate(),")
+		self.assertNotIn("\tVkBounds bounds{};", self.text)
+		self.contains("\t::vkfu::param::zone zone{};")
+		self.contains("\t\t\t.zone = zone.evaluate(),")
+
+	def test_a_plain_structure_that_is_the_native_one_renamed_keeps_the_native_field(self) -> None:
+		# VkExtent is width and height either way. Its param exists, but a field of
+		# the type stays native, so a VkExtent from Vulkan goes straight in.
+		self.contains("\tVkExtent extent{};")
+		self.contains("\t\t\t.extent = extent,")
+		self.assertNotIn("::vkfu::param::extent extent", self.text)
+		self.contains("\tVkExtent size{};")
+		self.contains("struct extent\n{")  # the param is still generated
+
+	def test_the_embedded_param_is_declared_before_the_param_that_embeds_it(self) -> None:
+		# `bounds` sorts before `zone`, so name order alone would get this wrong.
+		core = self.text
+		self.assertLess(core.index("struct zone\n{"), core.index("struct bounds\n{"))
+		# And plain params come before the chain objects that embed them.
+		# (`struct widget` alone would find the flags struct of the same name first.)
+		self.assertLess(core.index("struct bounds\n{"), core.index("using vulkan_tag_type = tag::widget;"))
+
+	def test_a_command_with_nothing_to_substitute_is_still_wrapped(self) -> None:
+		self.contains("inline void cmd_end_widget(VkRecorder recorder)")
+		self.contains("::vkCmdEndWidget(recorder);")
+
+	def test_a_wrapper_that_would_throw_on_a_success_code_is_not_generated(self) -> None:
+		self.assertNotIn("get_widget_status", self.text)
+
+	def test_an_extension_name_is_a_constant_in_its_vendor_namespace(self) -> None:
+		self.contains('namespace vkfu::ext\n{\ninline constexpr auto widget_colour_extension_name = "VK_EXT_widget_colour";\n}')
+		# The literal, not the macro: a platform extension's macro only exists there.
+		self.assertNotIn("= VK_EXT_WIDGET_COLOUR_EXTENSION_NAME", self.text)
+
+	def test_a_layer_name_is_a_constant_too(self) -> None:
+		self.contains('namespace vkfu::layer\n{\ninline constexpr auto fixture_widget = "VK_LAYER_FIXTURE_widget";\n}')
+
+	def test_only_the_extension_name_is_a_constant(self) -> None:
+		# Not its SPEC_VERSION, and not the name of an extension for another api.
+		self.assertNotIn("spec_version", self.text)
+		self.assertNotIn("scsonly", self.text)
+
 
 class SplitTest(unittest.TestCase):
 	@classmethod
@@ -209,9 +256,12 @@ class SplitTest(unittest.TestCase):
 				"vulkan/v1.1.42/ext.h",
 				"vulkan/v1.1.42/ext/widget_colour.h",
 				"vulkan/v1.1.42/khr.h",
+				"vulkan/v1.1.42/khr/widget_bare.h",
 				"vulkan/v1.1.42/khr/widget_label.h",
 				"vulkan/v1.1.42/khr/widget_limits.h",
 				"vulkan/v1.1.42/khr/widget_win32.h",
+				"vulkan/v1.1.42/layer.h",
+				"vulkan/v1.1.42/layer/names.h",
 				"vulkan/v1.1.42/version_1_0.h",
 				"vulkan/v1.1.42/version_1_0/core.h",
 				"vulkan/v1.1.42/version_1_1.h",
@@ -234,6 +284,23 @@ class SplitTest(unittest.TestCase):
 		self.assertNotIn("widget_colour", self.files["vulkan/v1.1.42/version_1_0/core.h"])
 		self.assertNotIn("create_widget", self.files["vulkan/v1.1.42/ext/widget_colour.h"])
 		self.assertIn("cmd_set_win32_widget", self.files["vulkan/v1.1.42/khr/widget_win32.h"])
+
+	def test_an_extension_with_nothing_else_still_gets_a_file_for_its_name(self) -> None:
+		bare = self.files["vulkan/v1.1.42/khr/widget_bare.h"]
+		self.assertIn('inline constexpr auto widget_bare_extension_name = "VK_KHR_widget_bare";', bare)
+		self.assertIn("1 name constant", bare)
+		self.assertNotIn("namespace vkfu::param", bare)
+		self.assertIn('#include "khr/widget_bare.h"', self.files["vulkan/v1.1.42/khr.h"])
+
+	def test_a_platform_extensions_name_goes_in_the_unit_the_umbrella_guards(self) -> None:
+		win32 = self.files["vulkan/v1.1.42/khr/widget_win32.h"]
+		self.assertIn('widget_win32_extension_name = "VK_KHR_widget_win32";', win32)
+		# It says which macro it needs, in a comment, but tests nothing itself.
+		self.assertEqual([line for line in win32.splitlines() if line.startswith("#if")], [])
+
+	def test_layer_names_have_their_own_umbrella(self) -> None:
+		self.assertIn('#include "layer/names.h"', self.files["vulkan/v1.1.42/layer.h"])
+		self.assertIn('#include "v1.1.42/layer.h"', self.files["vulkan/v1.1.42.h"])
 
 	def test_no_macro_guard_inside_a_unit(self) -> None:
 		for name, body in self.files.items():
@@ -301,6 +368,46 @@ class FailureTest(unittest.TestCase):
 		with self.assertRaises(emit.GenerationError) as raised:
 			emit.generate(registry, table, "closure")
 		self.assertIn("struct.VkWidgetTuning", raised.exception.missing)
+
+	def test_an_extension_name_without_a_table_entry_stops_generation(self) -> None:
+		registry = ir.load(FIXTURE)
+		table = naming.load_table(TABLE)
+		del table.strings["VK_EXT_WIDGET_COLOUR_EXTENSION_NAME"]
+		with self.assertRaises(emit.GenerationError) as raised:
+			emit.generate(registry, table, "closure")
+		self.assertIn("string.VK_EXT_WIDGET_COLOUR_EXTENSION_NAME", raised.exception.missing)
+		# In table scope an unnamed one is simply not generated.
+		files, _ = emit.generate(registry, table, "table")
+		self.assertNotIn("widget_colour_extension_name", "".join(files.values()))
+
+	def test_a_constant_cannot_take_a_commands_name(self) -> None:
+		registry = ir.load(FIXTURE)
+		table = naming.load_table(TABLE)
+		table.strings["VK_KHR_WIDGET_BARE_EXTENSION_NAME"] = "khr::cmd_set_win32_widget"
+		table.commands["vkCmdSetWin32Widget"] = "khr::cmd_set_win32_widget"
+		with self.assertRaises(emit.GenerationError) as raised:
+			emit.generate(registry, table, "closure")
+		self.assertTrue(any("name collision" in problem for problem in raised.exception.problems))
+
+	def test_an_unnamed_embedded_structure_stops_generation_even_in_table_scope(self) -> None:
+		registry = ir.load(FIXTURE)
+		table = naming.load_table(TABLE)
+		# `table` scope skips what has no name, but a field typed with that
+		# structure's param cannot be left dangling.
+		del table.structs["VkBounds"]
+		with self.assertRaises(emit.GenerationError) as raised:
+			emit.generate(registry, table, "table")
+		self.assertIn("struct.VkBounds", raised.exception.missing)
+
+	def test_an_embedded_param_that_lands_after_its_user_stops_generation(self) -> None:
+		registry = ir.load(FIXTURE)
+		table = naming.load_table(TABLE)
+		# Put the two in different namespaces, so grouping by namespace would
+		# declare `bounds` (root) ahead of `deep::zone` and break the nesting.
+		table.structs["VkZone"] = "deep::zone"
+		with self.assertRaises(emit.GenerationError) as raised:
+			emit.generate(registry, table, "closure")
+		self.assertTrue(any("VkBounds embeds VkZone" in problem for problem in raised.exception.problems))
 
 	def test_gen_and_check_agree_on_a_sound_table(self) -> None:
 		registry = ir.load(FIXTURE)

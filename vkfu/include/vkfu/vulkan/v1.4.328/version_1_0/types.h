@@ -27,6 +27,7 @@
 #include <vkfu/vulkan_object.h>
 
 #include "image.h"
+#include "image_view.h"
 #include "render_pass.h"
 
 constexpr auto _vkfu_address(VkBufferMemoryBarrier& value) noexcept -> void const*
@@ -240,84 +241,6 @@ struct vulkan_object_extensions<tag::memory_barrier>
 
 namespace vkfu::param
 {
-using ::vkfu::operator|;
-
-struct buffer_memory_barrier
-{
-	using vulkan_tag_type = tag::buffer_memory_barrier;
-
-	::vkfu::flags::access src_access_mask{};
-	::vkfu::flags::access dst_access_mask{};
-	::std::uint32_t src_queue_family_index{};
-	::std::uint32_t dst_queue_family_index{};
-	VkBuffer buffer{};
-	VkDeviceSize offset{};
-	VkDeviceSize size{};
-
-	constexpr auto evaluate() const noexcept -> VkBufferMemoryBarrier
-	{
-		return VkBufferMemoryBarrier{
-			.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
-			.pNext = nullptr,
-			.srcAccessMask = ::std::bit_cast<VkAccessFlags>(src_access_mask),
-			.dstAccessMask = ::std::bit_cast<VkAccessFlags>(dst_access_mask),
-			.srcQueueFamilyIndex = src_queue_family_index,
-			.dstQueueFamilyIndex = dst_queue_family_index,
-			.buffer = buffer,
-			.offset = offset,
-			.size = size,
-		};
-	}
-};
-
-struct image_memory_barrier
-{
-	using vulkan_tag_type = tag::image_memory_barrier;
-
-	::vkfu::flags::access src_access_mask{};
-	::vkfu::flags::access dst_access_mask{};
-	::vkfu::enums::image_layout old_layout{};
-	::vkfu::enums::image_layout new_layout{};
-	::std::uint32_t src_queue_family_index{};
-	::std::uint32_t dst_queue_family_index{};
-	VkImage image{};
-	VkImageSubresourceRange subresource_range{};
-
-	constexpr auto evaluate() const noexcept -> VkImageMemoryBarrier
-	{
-		return VkImageMemoryBarrier{
-			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-			.pNext = nullptr,
-			.srcAccessMask = ::std::bit_cast<VkAccessFlags>(src_access_mask),
-			.dstAccessMask = ::std::bit_cast<VkAccessFlags>(dst_access_mask),
-			.oldLayout = static_cast<VkImageLayout>(old_layout),
-			.newLayout = static_cast<VkImageLayout>(new_layout),
-			.srcQueueFamilyIndex = src_queue_family_index,
-			.dstQueueFamilyIndex = dst_queue_family_index,
-			.image = image,
-			.subresourceRange = subresource_range,
-		};
-	}
-};
-
-struct memory_barrier
-{
-	using vulkan_tag_type = tag::memory_barrier;
-
-	::vkfu::flags::access src_access_mask{};
-	::vkfu::flags::access dst_access_mask{};
-
-	constexpr auto evaluate() const noexcept -> VkMemoryBarrier
-	{
-		return VkMemoryBarrier{
-			.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER,
-			.pNext = nullptr,
-			.srcAccessMask = ::std::bit_cast<VkAccessFlags>(src_access_mask),
-			.dstAccessMask = ::std::bit_cast<VkAccessFlags>(dst_access_mask),
-		};
-	}
-};
-
 struct extent_2d
 {
 	::std::uint32_t width{};
@@ -388,6 +311,84 @@ struct rect_2d
 		return VkRect2D{
 			.offset = offset,
 			.extent = extent,
+		};
+	}
+};
+
+using ::vkfu::operator|;
+
+struct buffer_memory_barrier
+{
+	using vulkan_tag_type = tag::buffer_memory_barrier;
+
+	::vkfu::flags::access src_access_mask{};
+	::vkfu::flags::access dst_access_mask{};
+	::std::uint32_t src_queue_family_index{};
+	::std::uint32_t dst_queue_family_index{};
+	VkBuffer buffer{};
+	VkDeviceSize offset{};
+	VkDeviceSize size{};
+
+	constexpr auto evaluate() const noexcept -> VkBufferMemoryBarrier
+	{
+		return VkBufferMemoryBarrier{
+			.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+			.pNext = nullptr,
+			.srcAccessMask = ::std::bit_cast<VkAccessFlags>(src_access_mask),
+			.dstAccessMask = ::std::bit_cast<VkAccessFlags>(dst_access_mask),
+			.srcQueueFamilyIndex = src_queue_family_index,
+			.dstQueueFamilyIndex = dst_queue_family_index,
+			.buffer = buffer,
+			.offset = offset,
+			.size = size,
+		};
+	}
+};
+
+struct image_memory_barrier
+{
+	using vulkan_tag_type = tag::image_memory_barrier;
+
+	::vkfu::flags::access src_access_mask{};
+	::vkfu::flags::access dst_access_mask{};
+	::vkfu::enums::image_layout old_layout{};
+	::vkfu::enums::image_layout new_layout{};
+	::std::uint32_t src_queue_family_index{};
+	::std::uint32_t dst_queue_family_index{};
+	VkImage image{};
+	::vkfu::param::image_subresource_range subresource_range{};
+
+	constexpr auto evaluate() const noexcept -> VkImageMemoryBarrier
+	{
+		return VkImageMemoryBarrier{
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+			.pNext = nullptr,
+			.srcAccessMask = ::std::bit_cast<VkAccessFlags>(src_access_mask),
+			.dstAccessMask = ::std::bit_cast<VkAccessFlags>(dst_access_mask),
+			.oldLayout = static_cast<VkImageLayout>(old_layout),
+			.newLayout = static_cast<VkImageLayout>(new_layout),
+			.srcQueueFamilyIndex = src_queue_family_index,
+			.dstQueueFamilyIndex = dst_queue_family_index,
+			.image = image,
+			.subresourceRange = subresource_range.evaluate(),
+		};
+	}
+};
+
+struct memory_barrier
+{
+	using vulkan_tag_type = tag::memory_barrier;
+
+	::vkfu::flags::access src_access_mask{};
+	::vkfu::flags::access dst_access_mask{};
+
+	constexpr auto evaluate() const noexcept -> VkMemoryBarrier
+	{
+		return VkMemoryBarrier{
+			.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER,
+			.pNext = nullptr,
+			.srcAccessMask = ::std::bit_cast<VkAccessFlags>(src_access_mask),
+			.dstAccessMask = ::std::bit_cast<VkAccessFlags>(dst_access_mask),
 		};
 	}
 };

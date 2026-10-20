@@ -9,3 +9,4 @@
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
 #include "khr/widget_win32.h"
 #endif
+#include "khr/widget_bare.h"

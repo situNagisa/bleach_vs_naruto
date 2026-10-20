@@ -83,11 +83,11 @@ namespace
 			.dst_queue_family_index = VK_QUEUE_FAMILY_IGNORED,
 			.image = frame.active_image(),
 			.subresource_range = {
-				.aspectMask = ::VK_IMAGE_ASPECT_COLOR_BIT,
-				.baseMipLevel = 0,
-				.levelCount = 1,
-				.baseArrayLayer = 0,
-				.layerCount = 1,
+				.aspect_mask = {.color = 1},
+				.base_mip_level = 0,
+				.level_count = 1,
+				.base_array_layer = 0,
+				.layer_count = 1,
 			},
 			});
 		::vkfu::cmd_pipeline_barrier2(frame.primary_command_buffer(),
@@ -139,11 +139,11 @@ namespace
 			.dst_queue_family_index = VK_QUEUE_FAMILY_IGNORED,
 			.image = frame.active_image(),
 			.subresource_range = {
-				.aspectMask = ::VK_IMAGE_ASPECT_COLOR_BIT,
-				.baseMipLevel = 0,
-				.levelCount = 1,
-				.baseArrayLayer = 0,
-				.layerCount = 1,
+				.aspect_mask = {.color = 1},
+				.base_mip_level = 0,
+				.level_count = 1,
+				.base_array_layer = 0,
+				.layer_count = 1,
 			},
 			});
 		::vkfu::cmd_pipeline_barrier2(primary_command_buffer, param::dependency{

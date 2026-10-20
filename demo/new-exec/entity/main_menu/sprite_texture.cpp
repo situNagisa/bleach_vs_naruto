@@ -52,9 +52,9 @@ sprite_texture_type::sprite_texture_type(
 
 	auto const layer_count = static_cast<::std::uint32_t>(source.frame_count);
 	auto const extent = VkExtent3D{ source.frame_width, source.frame_height, 1 };
-	auto const subresources = ::vkfu::evaluate(param::image_subresource_range{
+	auto const subresources = param::image_subresource_range{
 		.aspect_mask = {.color = 1}, .level_count = 1, .layer_count = layer_count
-	});
+	};
 	image = ::vkkl::image{ device, ::vkfu::create_image(device, param::image{
 		.type = image_type::dim_2d,
 		.format = format::r8g8b8a8_srgb,
@@ -121,7 +121,7 @@ sprite_texture_type::sprite_texture_type(
 		.dst_image = image.handle,
 		.dst_image_layout = image_layout::transfer_dst_optimal,
 		.regions = ::std::array{ ::vkfu::evaluate(param::buffer_image_copy2{
-			.image_subresource = ::vkfu::evaluate(param::image_subresource_layers{ .aspect_mask = {.color = 1}, .layer_count = layer_count }),
+			.image_subresource = param::image_subresource_layers{ .aspect_mask = {.color = 1}, .layer_count = layer_count },
 			.image_extent = extent
 		}) }
 	});

@@ -5,3 +5,7 @@
 // of them directly works too.
 
 #include "google/display_timing.h"
+#include "google/hlsl_functionality1.h"
+#include "google/decorate_string.h"
+#include "google/user_type.h"
+#include "google/surfaceless_query.h"

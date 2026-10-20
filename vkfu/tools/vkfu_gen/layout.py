@@ -96,6 +96,12 @@ class Placement:
 	rank: dict[str, tuple[int, int]]  # unit path -> registry order
 
 
+# Layer names are not in vk.xml, so no <extension> owns them: they get a unit of
+# their own, after every extension, under an umbrella of its own.
+LAYER_UNIT = "layer/names.h"
+LAYER_MODULE = "layers"
+
+
 def place(origins: ir.Origins) -> Placement:
 	module_rank = {module: index for index, module in enumerate(origins.order)}
 	placement = Placement(units={}, modules={}, guards={}, rank={})
@@ -111,4 +117,17 @@ def place(origins: ir.Origins) -> Placement:
 			sections[module] += 1
 			if module in origins.guards:
 				placement.guards[path] = origins.guards[module]
+
+	# An extension with no type or command of its own still has a name, so it
+	# still has somewhere to put it. Only units something is put into are written.
+	for module in origins.order:
+		path = unit_path(module, None) if not is_core(module) else None
+		if path is not None and path not in placement.modules:
+			placement.modules[path] = module
+			placement.rank[path] = (module_rank[module], 0)
+			if module in origins.guards:
+				placement.guards[path] = origins.guards[module]
+
+	placement.modules[LAYER_UNIT] = LAYER_MODULE
+	placement.rank[LAYER_UNIT] = (len(origins.order), 0)
 	return placement

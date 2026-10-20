@@ -250,6 +250,22 @@ inline constexpr auto is_vulkan_object_compatible_with_v<tag::render_pass, tag::
 
 namespace vkfu::param
 {
+struct input_attachment_aspect_reference
+{
+	::std::uint32_t subpass{};
+	::std::uint32_t input_attachment_index{};
+	::vkfu::flags::image_aspect aspect_mask{};
+
+	constexpr auto evaluate() const noexcept -> VkInputAttachmentAspectReference
+	{
+		return VkInputAttachmentAspectReference{
+			.subpass = subpass,
+			.inputAttachmentIndex = input_attachment_index,
+			.aspectMask = ::std::bit_cast<VkImageAspectFlags>(aspect_mask),
+		};
+	}
+};
+
 namespace option
 {
 using ::vkfu::operator|;
@@ -310,20 +326,4 @@ struct tessellation_domain_origin
 };
 
 }
-
-struct input_attachment_aspect_reference
-{
-	::std::uint32_t subpass{};
-	::std::uint32_t input_attachment_index{};
-	::vkfu::flags::image_aspect aspect_mask{};
-
-	constexpr auto evaluate() const noexcept -> VkInputAttachmentAspectReference
-	{
-		return VkInputAttachmentAspectReference{
-			.subpass = subpass,
-			.inputAttachmentIndex = input_attachment_index,
-			.aspectMask = ::std::bit_cast<VkImageAspectFlags>(aspect_mask),
-		};
-	}
-};
 }

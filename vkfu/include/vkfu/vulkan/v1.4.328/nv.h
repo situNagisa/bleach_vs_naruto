@@ -4,6 +4,7 @@
 // Every NV extension. Each file below includes what it depends on, so including one
 // of them directly works too.
 
+#include "nv/glsl_shader.h"
 #include "nv/dedicated_allocation.h"
 #include "nv/corner_sampled_image.h"
 #include "nv/external_memory_capabilities.h"
@@ -13,12 +14,17 @@
 #include "nv/win32_keyed_mutex.h"
 #endif
 #include "nv/clip_space_w_scaling.h"
+#include "nv/sample_mask_override_coverage.h"
+#include "nv/geometry_shader_passthrough.h"
+#include "nv/viewport_array2.h"
 #include "nv/viewport_swizzle.h"
 #include "nv/fragment_coverage_to_color.h"
 #include "nv/framebuffer_mixed_samples.h"
+#include "nv/fill_rectangle.h"
 #include "nv/shader_sm_builtins.h"
 #include "nv/shading_rate_image.h"
 #include "nv/representative_fragment_test.h"
+#include "nv/shader_subgroup_partitioned.h"
 #include "nv/mesh_shader.h"
 #include "nv/shader_image_footprint.h"
 #include "nv/scissor_exclusive.h"
@@ -37,6 +43,9 @@
 #include "nv/fragment_shader_barycentric.h"
 #include "nv/fragment_shading_rate_enums.h"
 #include "nv/ray_tracing_motion_blur.h"
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+#include "nv/acquire_winrt_display.h"
+#endif
 #include "nv/ray_tracing.h"
 #include "nv/external_memory_rdma.h"
 #if defined(VK_ENABLE_BETA_EXTENSIONS)

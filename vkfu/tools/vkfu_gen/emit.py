@@ -33,6 +33,16 @@ class GenerationError(Exception):
 
 
 @dataclasses.dataclass
+class Constant:
+	"""A string vkfu spells as `inline constexpr auto`: an extension's name or a layer's."""
+
+	key: str  # VK_EXT_DEBUG_UTILS_EXTENSION_NAME, or the layer name itself
+	qualified: str  # ext::debug_utils_extension_name
+	value: str  # "VK_EXT_debug_utils"
+	module: str | None  # the extension that declares it; None for a layer
+
+
+@dataclasses.dataclass
 class Selection:
 	"""What survives validation, i.e. what the headers will contain."""
 
@@ -44,6 +54,7 @@ class Selection:
 	flags: list[str]  # VkXxxFlags types: one shared bit-field struct each
 	aliases: dict[str, ir.Alias]  # alias name -> alias, for those with a table name
 	commands: list[object]  # ir.Command | ir.Wrapper | ir.Query | ir.ChainQuery
+	constants: list[Constant] = dataclasses.field(default_factory=list)
 
 	@property
 	def chained(self) -> list[str]:
@@ -105,6 +116,8 @@ def _select(registry: ir.Registry, table: Table, scope: str) -> tuple[Selection,
 		plans[name] = plan
 		used: dict[str, str] = {}
 		for field in plan.fields:
+			if field.kind == "value" and not table.struct_name(field.target):
+				missing.append(f"struct.{field.target}")  # the param this field is typed with
 			field_name = table.member_name(name, field.member.name)
 			if not field_name:
 				missing.append(f"member.{name}.{field.member.name}")
@@ -134,6 +147,8 @@ def _select(registry: ir.Registry, table: Table, scope: str) -> tuple[Selection,
 		problems.extend(plan.unsupported)
 		used_names: dict[str, str] = {}
 		for field in plan.fields:
+			if field.kind == "value" and not table.struct_name(field.target):
+				missing.append(f"struct.{field.target}")
 			field_name = table.member_name(name, field.member.name)
 			if not field_name:
 				missing.append(f"member.{name}.{field.member.name}")
@@ -191,6 +206,28 @@ def _select(registry: ir.Registry, table: Table, scope: str) -> tuple[Selection,
 			missing.append(f"command.{command.name}")
 		elif producers.shape_of(command) == "array" and not table.command_singular(command.name):
 			missing.append(f"command.{command.name}.singular")
+
+	# Strings: an extension's own name from vk.xml, and the layer names the table
+	# lists. They share a namespace with the commands, so they compete with them.
+	constants: list[Constant] = []
+	for entry in registry.extension_names:
+		qualified = table.string_name(entry.macro)
+		if qualified is None:
+			if scope != "table":
+				missing.append(f"string.{entry.macro}")
+			continue
+		constants.append(Constant(entry.macro, qualified, entry.value, entry.module))
+	constants += [Constant(layer, qualified, layer, None) for layer, qualified in sorted(table.layers.items())]
+	claimed_constants: dict[str, str] = {qualified: command for command, qualified in table.commands.items()}
+	for constant in constants:
+		if not all(segment.isidentifier() for segment in constant.qualified.split("::")):
+			problems.append(f"{constant.key}: '{constant.qualified}' is not a valid qualified name")
+		elif constant.qualified in claimed_constants:
+			problems.append(
+				f"name collision: {claimed_constants[constant.qualified]} and {constant.key} both map to '{constant.qualified}'"
+			)
+		else:
+			claimed_constants[constant.qualified] = constant.key
 
 	# Everything a param struct declares at class scope has to be distinct: the
 	# fields, the `<field>_expression` template parameter of a slot, and the
@@ -257,6 +294,7 @@ def _select(registry: ir.Registry, table: Table, scope: str) -> tuple[Selection,
 		flags=flags,
 		aliases=by_alias,
 		commands=wrapped,
+		constants=constants,
 	)
 	return selection, warnings
 
@@ -278,6 +316,7 @@ class Unit:
 	aliases: list[str] = dataclasses.field(default_factory=list)
 	edges: list[tuple[str, str]] = dataclasses.field(default_factory=list)
 	commands: list[object] = dataclasses.field(default_factory=list)
+	constants: list[Constant] = dataclasses.field(default_factory=list)
 	depends: set[str] = dataclasses.field(default_factory=set)  # unit paths
 	guard: str | None = None  # its own macro
 	condition: list[str] = dataclasses.field(default_factory=list)  # its own plus its dependencies'
@@ -310,11 +349,11 @@ def _units(registry: ir.Registry, selection: Selection, values: Values) -> list[
 	"""Selection split by owning unit, in an order every include can follow.
 
 	A unit depends on another when something it declares names something the
-	other declares: an enum-typed field, a slot's tag, an alias's target, the tag
-	a wrapper takes. A compat edge names two tags, so it goes to one of its two
-	units and makes that one depend on the other: to the guarded one if only one
-	is guarded, so an unguarded unit never inherits a platform macro, otherwise
-	to the later one.
+	other declares: an enum-typed field, a plain structure it embeds, a slot's
+	tag, an alias's target, the tag a wrapper takes. A compat edge names two tags,
+	so it goes to one of its two units and makes that one depend on the other: to
+	the guarded one if only one is guarded, so an unguarded unit never inherits a
+	platform macro, otherwise to the later one.
 	"""
 	placement = layout.place(registry.origins)
 	units: dict[str, Unit] = {}
@@ -351,7 +390,7 @@ def _units(registry: ir.Registry, selection: Selection, values: Values) -> list[
 				needs(unit, field.enum_type)
 			elif field.kind == "flags":
 				needs(unit, field.flags_type)
-			elif field.kind == "reference":
+			elif field.kind in ("reference", "value"):
 				needs(unit, field.target)
 
 	for name in selection.selected:
@@ -373,6 +412,11 @@ def _units(registry: ir.Registry, selection: Selection, values: Values) -> list[
 			needs(unit, name)
 		for name in values.types(_value_parameters(command)):
 			needs(unit, name)
+
+	# A constant needs nothing but itself, so it adds no dependency.
+	for constant in selection.constants:
+		path = layout.LAYER_UNIT if constant.module is None else layout.unit_path(constant.module, None)
+		unit_of(path).constants.append(constant)
 
 	emitted = selection.emitted
 	for parent, child in registry.edges:
@@ -492,6 +536,12 @@ def _render_module(
 		lines.extend(_render_commands(module.commands, registry, table, values))
 		lines += ["}", ""]
 
+	for namespace, constants in bucketed(module.constants, lambda constant: constant.qualified):
+		lines += [f"namespace vkfu::{namespace}" if namespace else "namespace vkfu", "{"]
+		for constant in constants:
+			lines.append(structs.render_constant(constant.qualified, constant.value))
+		lines += ["}", ""]
+
 	while lines and lines[-1] == "":
 		lines.pop()
 	return lines
@@ -550,10 +600,60 @@ def _render_traits(module: Unit, registry: ir.Registry, table: Table) -> list[st
 	return lines
 
 
+def _embedded_first(plain: list[str], registry: ir.Registry) -> list[str]:
+	"""The plain structures, each after the plain structures it embeds by value.
+
+	A param names the param of every structure it embeds, and C++ wants that one
+	declared first. Only structures in this file can be out of order: another
+	file's are included, and unit dependencies already put them first.
+	"""
+	here = set(plain)
+	ordered: list[str] = []
+	placed: set[str] = set()
+
+	def place(name: str) -> None:
+		if name in placed:
+			return
+		placed.add(name)
+		for field in plan_struct(registry.structs[name], registry).fields:
+			if field.kind == "value" and field.target in here:
+				place(field.target)
+		ordered.append(name)
+
+	for name in plain:
+		place(name)
+	return ordered
+
+
 def _render_params(
 	module: Unit, aliases: list[str], registry: ir.Registry, table: Table, selection: Selection
 ) -> list[str]:
 	lines: list[str] = []
+
+	# Structures with no sType: a param and an evaluate(), nothing else. They have
+	# no pNext to manage, so no tag, no trait and no chain hooks. They come before
+	# the chain objects because those embed them by value.
+	declared: list[str] = []
+	for namespace, names in bucketed(_embedded_first(module.plain, registry), table.struct_name):
+		if namespace:
+			lines += [f"namespace {namespace}", "{"]
+		for name in names:
+			struct = registry.structs[name]
+			lines.extend(structs.render_param(struct, plan_struct(struct, registry), registry, table, table.struct_name(name)))
+			lines.append("")
+			declared.append(name)
+		if namespace:
+			lines += ["}", ""]
+
+	# Grouping by namespace can still reorder across groups, which would undo
+	# _embedded_first; better a stop here than a header that does not compile.
+	for position, name in enumerate(declared):
+		for field in plan_struct(registry.structs[name], registry).fields:
+			if field.kind == "value" and field.target in declared and declared.index(field.target) > position:
+				raise GenerationError(
+					[], [f"{name} embeds {field.target}, which its namespace puts after it in {module.path}"]
+				)
+
 	for namespace, names in bucketed(module.selected, table.struct_name):
 		if namespace:
 			lines += [f"namespace {namespace}", "{"]
@@ -565,18 +665,6 @@ def _render_params(
 			lines.extend(
 				structs.render_param(registry.structs[name], selection.plans[name], registry, table, table.struct_name(name))
 			)
-			lines.append("")
-		if namespace:
-			lines += ["}", ""]
-
-	# Structures with no sType: a param and an evaluate(), nothing else. They have
-	# no pNext to manage, so no tag, no trait and no chain hooks.
-	for namespace, names in bucketed(module.plain, table.struct_name):
-		if namespace:
-			lines += [f"namespace {namespace}", "{"]
-		for name in names:
-			struct = registry.structs[name]
-			lines.extend(structs.render_param(struct, plan_struct(struct, registry), registry, table, table.struct_name(name)))
 			lines.append("")
 		if namespace:
 			lines += ["}", ""]
@@ -673,6 +761,7 @@ def _summary(unit: Unit) -> str:
 		(len(unit.flags), "flags type"),
 		(len(unit.aliases), "alias"),
 		(len(unit.commands), "command"),
+		(len(unit.constants), "name constant"),
 	]
 	parts = [f"{count} {noun}{'' if count == 1 else 's'}" for count, noun in counts if count]
 	text = f"{unit.module}: " + (", ".join(parts) if parts else "compatibility edges only") + "."
@@ -752,7 +841,12 @@ def generate(
 	names = sorted(groups, key=lambda name: (not name.startswith("version_"), name))
 	for name in names:
 		members = groups[name]
-		label = members[0].module if layout.is_core(members[0].module) else f"Every {name[:-2].upper()} extension"
+		if layout.is_core(members[0].module):
+			label = members[0].module
+		elif members[0].module == layout.LAYER_MODULE:
+			label = "The names of layers"
+		else:
+			label = f"Every {name[:-2].upper()} extension"
 		files[f"{stem}/{name}"] = umbrella(
 			[f"{label}. Each file below includes what it depends on, so including one", "of them directly works too."],
 			[(layout.relative(name, unit.path), unit.condition) for unit in members],

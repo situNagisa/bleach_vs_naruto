@@ -519,14 +519,14 @@ struct core
 {
 	using vulkan_tag_type = tag::feature::core;
 
-	VkPhysicalDeviceFeatures features{};
+	::vkfu::param::feature::vulkan10 features{};
 
 	constexpr auto evaluate() const noexcept -> VkPhysicalDeviceFeatures2
 	{
 		return VkPhysicalDeviceFeatures2{
 			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
 			.pNext = nullptr,
-			.features = features,
+			.features = features.evaluate(),
 		};
 	}
 };

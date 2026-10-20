@@ -109,6 +109,20 @@ inline constexpr auto is_vulkan_object_compatible_with_v<tag::graphics_pipeline,
 
 namespace vkfu::param
 {
+struct pipeline_creation_feedback
+{
+	::vkfu::flags::pipeline_creation_feedback flags{};
+	::std::uint64_t duration{};
+
+	constexpr auto evaluate() const noexcept -> VkPipelineCreationFeedback
+	{
+		return VkPipelineCreationFeedback{
+			.flags = ::std::bit_cast<VkPipelineCreationFeedbackFlags>(flags),
+			.duration = duration,
+		};
+	}
+};
+
 namespace option
 {
 using ::vkfu::operator|;
@@ -133,18 +147,4 @@ struct pipeline_creation_feedback
 };
 
 }
-
-struct pipeline_creation_feedback
-{
-	::vkfu::flags::pipeline_creation_feedback flags{};
-	::std::uint64_t duration{};
-
-	constexpr auto evaluate() const noexcept -> VkPipelineCreationFeedback
-	{
-		return VkPipelineCreationFeedback{
-			.flags = ::std::bit_cast<VkPipelineCreationFeedbackFlags>(flags),
-			.duration = duration,
-		};
-	}
-};
 }

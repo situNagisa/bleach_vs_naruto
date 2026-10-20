@@ -14,7 +14,7 @@
 
 struct texture_type
 {
-	constexpr static auto subresources = ::vkfu::evaluate(::vkfu::param::image_subresource_range{ .aspect_mask = {.color = 1}, .level_count = 1, .layer_count = 1 });
+	constexpr static auto subresources = ::vkfu::param::image_subresource_range{ .aspect_mask = {.color = 1}, .level_count = 1, .layer_count = 1 };
 
 	::bvn::assets::image_rgba8 source;
 	::vkkl::image image;
@@ -98,7 +98,7 @@ struct texture_type
 			.src_buffer = staging.handle.handle,
 			.dst_image = image.handle,
 			.dst_image_layout = image_layout::transfer_dst_optimal,
-			.regions = ::std::array{ ::vkfu::evaluate(param::buffer_image_copy2{.image_subresource = ::vkfu::evaluate(param::image_subresource_layers{.aspect_mask = {.color = 1}, .layer_count = 1}), .image_extent = ::VkExtent3D{ source.width, source.height, 1 } }) }
+			.regions = ::std::array{ ::vkfu::evaluate(param::buffer_image_copy2{.image_subresource = param::image_subresource_layers{.aspect_mask = {.color = 1}, .layer_count = 1}, .image_extent = ::VkExtent3D{ source.width, source.height, 1 } }) }
 			});
 		::vkfu::cmd_pipeline_barrier2(command.handle, param::dependency{ .image_memory_barriers = ::std::array{ ::vkfu::evaluate(param::image_memory_barrier2{
 			.src_stage_mask = {.all_transfer = 1},

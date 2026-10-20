@@ -482,11 +482,11 @@ inline auto create_swapchain(vulkan_context& renderer, ::bvn::platform::window c
 			.view_type = image_view_type::dim_2d,
 			.format = static_cast<format>(renderer._swapchain_image_format),
 			.subresource_range = {
-				.aspectMask = ::VK_IMAGE_ASPECT_COLOR_BIT,
-				.baseMipLevel = 0,
-				.levelCount = 1,
-				.baseArrayLayer = 0,
-				.layerCount = 1,
+				.aspect_mask = {.color = 1},
+				.base_mip_level = 0,
+				.level_count = 1,
+				.base_array_layer = 0,
+				.layer_count = 1,
 			},
 		});
 		auto view = renderer._device.create_image_view(info);
