@@ -327,6 +327,51 @@ void test_diamond()
 	}
 }
 
+void test_triangle()
+{
+	test::section("三角形 a -> b -> c, a -> c：传递边不去重，a 共享、b 独占，c 等两个前驱都到齐");
+	for (auto policy_index : {0, 1})
+	{
+		::std::vector<int> sequence;
+		bool a_shared_in_c = false;
+		bool b_unique_in_c = false;
+		auto build = [&](auto policy)
+		{
+			return ::sdag::dag(policy,
+				::sdag::make_node<a>(::stdexec::just(::std::string("a")) | ::stdexec::then([&](::std::string s) { sequence.push_back(1); return s; })),
+				::sdag::make_node<b, ::sdag::after<a>>(::stdexec::then([&](::std::string const& s) { sequence.push_back(2); return s + "b"; })),
+				::sdag::make_node<c, ::sdag::after<a, b>>(::stdexec::then([&](auto&& from_a, auto&& from_b)
+				{
+					sequence.push_back(3);
+					a_shared_in_c = shared_access<decltype(from_a)>;
+					b_unique_in_c = !shared_access<decltype(from_b)>;
+					return from_a + from_b;
+				})));
+		};
+		using fused_graph = decltype(build(::sdag::fused{}));
+		static_assert(::std::same_as<::stdexec::completion_signatures_of_t<fused_graph, ::stdexec::env<>>,
+			::stdexec::completion_signatures<::stdexec::set_value_t(::std::string), ::stdexec::set_error_t(::std::exception_ptr)>>);
+		constexpr auto shape = fused_graph::shape;
+		static_assert(shape.in_degree[2] == 2 && shape.out_degree[0] == 2 && shape.out_degree[1] == 1);
+		static_assert(shape.order[0] == 0 && shape.order[1] == 1 && shape.order[2] == 2);
+
+		::std::string text = policy_index == 0
+			? ::std::get<0>(::stdexec::sync_wait(build(::sdag::fused{})).value())
+			: ::std::get<0>(::stdexec::sync_wait(build(::sdag::composed{})).value());
+		test::check(text == "aab", "c 同时拿到 a 的值和 b 的值");
+		test::check(sequence == ::std::vector<int>{1, 2, 3}, "c 只启动一次，且在 a、b 之后");
+		if (policy_index == 0)
+		{
+			test::check(a_shared_in_c && b_unique_in_c, "fused：a 有两个后继按 const& 共享，b 只有 c 一个后继按值移动");
+		}
+		else
+		{
+			// when_all 会把 split 给的 const& 再拷贝一份存进自己的 op-state，然后按右值交给后继
+			test::check(!a_shared_in_c && b_unique_in_c, "composed：when_all 把共享值拷贝后按右值交给后继");
+		}
+	}
+}
+
 void test_move_only_chain()
 {
 	test::section("链：move-only 值沿独占边移动；左值 sender 可重复连接");
@@ -645,6 +690,7 @@ void test_policies_agree()
 int main()
 {
 	test_diamond();
+	test_triangle();
 	test_move_only_chain();
 	test_multi_sink_and_control();
 	test_error_propagation();
