@@ -1,0 +1,122 @@
+{
+  "version": 8,
+  "cmakeMinimumRequired": {
+    "major": 4,
+    "minor": 4,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "windows-clang-cl",
+      "hidden": true,
+      "inherits": "base",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "toolset": {
+        "value": "host=x64",
+        "strategy": "external"
+      },
+      "environment": {
+        "BVN_LLVM_ROOT": "C:/Program Files/LLVM"
+      },
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "$env{BVN_LLVM_ROOT}/bin/clang-cl.exe"
+      }
+    },
+    {
+      "name": "windows-clang-cl-debug",
+      "displayName": "Windows clang-cl Debug",
+      "inherits": "windows-clang-cl",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "windows-clang-cl-release",
+      "displayName": "Windows clang-cl Release（带 PDB）",
+      "inherits": "windows-clang-cl",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "linux-clang",
+      "hidden": true,
+      "inherits": "base",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      },
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "clang++"
+      }
+    },
+    {
+      "name": "linux-clang-debug",
+      "displayName": "Linux clang++ Debug",
+      "inherits": "linux-clang",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "linux-clang-release",
+      "displayName": "Linux clang++ Release",
+      "inherits": "linux-clang",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "windows-clang-cl-debug",
+      "configurePreset": "windows-clang-cl-debug"
+    },
+    {
+      "name": "windows-clang-cl-release",
+      "configurePreset": "windows-clang-cl-release"
+    },
+    {
+      "name": "linux-clang-debug",
+      "configurePreset": "linux-clang-debug"
+    },
+    {
+      "name": "linux-clang-release",
+      "configurePreset": "linux-clang-release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "linux-clang-debug",
+      "configurePreset": "linux-clang-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "linux-clang-release",
+      "configurePreset": "linux-clang-release",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}
