@@ -1,6 +1,13 @@
 module;
 
-#include <vkfu/vulkan/v1.4.328.h>
+// 只包含真正用到的 vkfu 头，而不是囊括全部厂商扩展的 <vkfu/vulkan/v1.4.328.h>：
+// 这是本实现单元最大的一块解析开销。
+#include <vkfu/vulkan/v1.4.328/version_1_0.h>
+#include <vkfu/vulkan/v1.4.328/version_1_1.h>
+#include <vkfu/vulkan/v1.4.328/version_1_3.h>
+#include <vkfu/vulkan/v1.4.328/khr/swapchain.h>
+#include <vkfu/vulkan/v1.4.328/ext/debug_utils.h>
+#include <vkfu/vulkan/v1.4.328/layer/names.h>
 
 #include <vkkl/instance.h>
 #include <vkkl/device.h>
@@ -11,11 +18,10 @@ module;
 #include <vkkl/semaphore.h>
 #include <vkkl/command_buffer.h>
 
-#include <stdexec/execution.hpp>
-
-#include <bvn/platform/platform.h>
-
 module demo.render;
+
+// 实现单元隐式导入 demo.render 的接口；接口 import 的 std 与 demo.execution 在这里同样可见，
+// 所以 sender 算法直接用 demo.execution 导出的 just / then，不再包含 stdexec 头文件。
 
 inline auto check(::VkResult result, char const* operation) -> void
 {
@@ -255,7 +261,7 @@ inline auto get_queue(::VkDevice device, ::std::uint32_t family) noexcept -> ::V
 inline ::vkfu::param::khr::swapchain make_swapchain_info(
 	::VkPhysicalDevice physical_device,
 	::VkSurfaceKHR surface,
-	::bvn::platform::window const& target_window,
+	window const& target_window,
 	::std::span<::std::uint32_t const, 2> queue_families)
 {
 	using namespace ::vkfu::enums;
@@ -396,10 +402,11 @@ struct frame
 
 struct renderer::impl
 {
-	::bvn::platform::window window{ "vkkl Vulkan secondary triangle", 960, 540 };
-	::vkkl::instance instance{ ::create_instance(window.required_vulkan_extensions()) };
+	// 引用成员放在最前面：后面所有默认成员初始化器都依赖它。
+	window const& target;
+	::vkkl::instance instance{ ::create_instance(target.required_vulkan_extensions()) };
 	::vkkl::debug_utils_messenger debug_messenger{ ::create_debug_messenger(instance.handle) };
-	::vkkl::surface surface{ instance.handle, window.vulkan_surface(instance.handle) };
+	::vkkl::surface surface{ instance.handle, target.vulkan_surface(instance.handle) };
 	device_selection selected{ ::select_physical_device(instance.handle, surface.handle)  };
 	::vkkl::physical_device_observer physical_device{ selected.handle };
 	::vkkl::device device{ ::create_device(selected) };
@@ -407,7 +414,7 @@ struct renderer::impl
 	::VkQueue graphic_queue{ ::get_queue(device.handle, selected.graphics_family) };
 	::VkQueue present_queue{ ::get_queue(device.handle, selected.present_family) };
 	::std::array<::std::uint32_t, 2> queue_families{ selected.graphics_family, selected.present_family };
-	::vkfu::param::khr::swapchain swapchain_info{ ::make_swapchain_info(physical_device.handle, surface.handle, window, queue_families) };
+	::vkfu::param::khr::swapchain swapchain_info{ ::make_swapchain_info(physical_device.handle, surface.handle, target, queue_families) };
 	::vkkl::swapchain swapchain{ device.handle, ::vkfu::khr::create_swapchain(device.handle, swapchain_info) };
 	::VkExtent2D swapchain_extent{ swapchain_info.image_extent };
 	::std::vector<::VkImage> swapchain_images{ ::get_swapchain_images(device.handle, swapchain.handle) };
@@ -420,10 +427,14 @@ struct renderer::impl
 		frame{ device.handle, graphics_queue_family },
 	};
 	renderer::frame_pool frame_pool{ ::std::in_place, ::std::from_range, frames | ::std::views::transform([](frame& frame) noexcept { return &frame; }) };
+
+	explicit impl(window const& target_window)
+		: target(target_window)
+	{}
 };
 
-renderer::renderer()
-	: _impl(::std::make_unique<impl>())
+renderer::renderer(window const& target)
+	: _impl(::std::make_unique<impl>(target))
 {}
 
 renderer::~renderer() = default;

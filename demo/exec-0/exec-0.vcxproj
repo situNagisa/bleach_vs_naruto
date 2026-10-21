@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  demo/exec-0 的 Visual Studio 工程：Makefile（NMake）类型。
+  VS 不自己编译任何东西，F5 / Ctrl+Shift+B 时由 MSBuild 调用下面的 NMakeBuildCommandLine，
+  即 `cmake -\-preset … && cmake -\-build -\-preset …`，然后调试 NMakeOutput 指向的 exec-0.exe（PDB 在同目录）。
+  本机相关路径（LLVM、CMake、依赖根目录）放在 exec-0.local.props（已 gitignore），模板见 exec-0.local.props.example。
+-->
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>MakeFileProj</Keyword>
+    <ProjectGuid>{46576488-BCF2-4D20-A52B-0B8C547258CB}</ProjectGuid>
+    <RootNamespace>exec0</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>exec-0</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <!-- 工具集只用来提供 MSVC STL（std.ixx）、link.exe、Windows SDK 的环境与 IntelliSense，不参与编译。 -->
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <!-- 本机路径覆盖：复制 exec-0.local.props.example 为 exec-0.local.props 后修改。 -->
+    <Import Project="$(ProjectDir)exec-0.local.props" Condition="exists('$(ProjectDir)exec-0.local.props')" />
+  </ImportGroup>
+  <!-- ======================================================= 用户宏（exec-0.local.props 可覆盖） -->
+  <PropertyGroup Label="UserMacros">
+    <!-- LLVM 安装根目录；预设用 $env{BVN_LLVM_ROOT}/bin/clang-cl.exe -->
+    <BvnLlvmRoot Condition="'$(BvnLlvmRoot)'==''">C:\Program Files\LLVM</BvnLlvmRoot>
+    <!-- cmake.exe：留空则用 PATH 上的 cmake（需要 >= 4.4；VS 自带的版本太旧） -->
+    <BvnCMakeExe Condition="'$(BvnCMakeExe)'==''">cmake</BvnCMakeExe>
+    <!-- 依赖根目录：默认取系统环境变量 NAGISA_LIBRARY_ROOT / NAGISA_ROOT -->
+    <BvnNagisaLibraryRoot Condition="'$(BvnNagisaLibraryRoot)'==''">$(NAGISA_LIBRARY_ROOT)</BvnNagisaLibraryRoot>
+    <BvnNagisaRoot Condition="'$(BvnNagisaRoot)'==''">$(NAGISA_ROOT)</BvnNagisaRoot>
+    <!-- 对应 CMakePresets.json 里的预设名 -->
+    <BvnCMakePreset Condition="'$(Configuration)'=='Debug'">windows-clang-cl-debug</BvnCMakePreset>
+    <BvnCMakePreset Condition="'$(Configuration)'=='Release'">windows-clang-cl-release</BvnCMakePreset>
+    <BvnBuildDir>$(ProjectDir)out\build\$(BvnCMakePreset)\</BvnBuildDir>
+  </PropertyGroup>
+  <!-- ======================================================= NMake 命令 -->
+  <PropertyGroup>
+    <!--
+      命令在 MSBuild 给 Makefile 工程准备的环境里运行：PATH/INCLUDE/LIB 已按工具集设置。
+      这里再补三件事：VS 自带的 Ninja 加入 PATH；VCToolsInstallDir 导出为环境变量（std_module.cmake 据此找 std.ixx）；
+      依赖根目录与 LLVM 根目录导出为预设要读的环境变量。
+    -->
+    <BvnEnvSetup>set "PATH=$(DevEnvDir)CommonExtensions\Microsoft\CMake\Ninja;%PATH%" &amp;&amp; set "VCToolsInstallDir=$(VCToolsInstallDir)" &amp;&amp; set "BVN_LLVM_ROOT=$(BvnLlvmRoot)" &amp;&amp; set "NAGISA_LIBRARY_ROOT=$(BvnNagisaLibraryRoot)" &amp;&amp; set "NAGISA_ROOT=$(BvnNagisaRoot)" &amp;&amp; cd /d "$(ProjectDir)."</BvnEnvSetup>
+    <NMakeBuildCommandLine>$(BvnEnvSetup) &amp;&amp; "$(BvnCMakeExe)" --preset $(BvnCMakePreset) &amp;&amp; "$(BvnCMakeExe)" --build --preset $(BvnCMakePreset)</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>$(BvnEnvSetup) &amp;&amp; "$(BvnCMakeExe)" --preset $(BvnCMakePreset) &amp;&amp; "$(BvnCMakeExe)" --build --preset $(BvnCMakePreset) --clean-first</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>$(BvnEnvSetup) &amp;&amp; if exist "$(BvnBuildDir)build.ninja" "$(BvnCMakeExe)" --build --preset $(BvnCMakePreset) --target clean</NMakeCleanCommandLine>
+    <!-- F5 调试的就是它；PDB 在同目录（exec-0.pdb）。 -->
+    <NMakeOutput>$(BvnBuildDir)exec-0.exe</NMakeOutput>
+    <OutDir>$(BvnBuildDir)</OutDir>
+    <IntDir>$(BvnBuildDir)CMakeFiles\</IntDir>
+    <!-- 以下只喂给 IntelliSense（模块的 IntelliSense 在 VS 里仍是实验性）。 -->
+    <NMakeIncludeSearchPath>$(ProjectDir)..\..\include;$(ProjectDir)..\..\vkfu\include;$(BvnNagisaLibraryRoot)\stdexec\include;$(BvnNagisaLibraryRoot)\glfw\include;$(BvnNagisaRoot)\include;$(VULKAN_SDK)\Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakePreprocessorDefinitions>_WIN32;WIN32;_WINDOWS;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <AdditionalOptions>/std:c++latest /permissive- /Zc:__cplusplus /utf-8 /EHsc</AdditionalOptions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <NMakePreprocessorDefinitions>_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <NMakePreprocessorDefinitions>NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <!-- 调试器：工作目录设为工程目录，与命令行运行一致。 -->
+  <PropertyGroup>
+    <LocalDebuggerCommand>$(NMakeOutput)</LocalDebuggerCommand>
+    <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <!-- ======================================================= 文件列表（仅供编辑器浏览） -->
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="execution\execution.cppm" />
+    <ClCompile Include="window\window.cppm" />
+    <ClCompile Include="window\window.cpp" />
+    <ClCompile Include="input\input.cppm" />
+    <ClCompile Include="input\input.cpp" />
+    <ClCompile Include="render\renderer.cppm" />
+    <ClCompile Include="render\renderer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt" />
+    <Text Include="cmake\build_settings.cmake" />
+    <Text Include="cmake\locate.cmake" />
+    <Text Include="cmake\nagisa.cmake" />
+    <Text Include="cmake\glfw.cmake" />
+    <Text Include="cmake\std_module.cmake" />
+    <Text Include="cmake\stdexec.cmake" />
+    <Text Include="cmake\toolchain_guard.cmake" />
+    <Text Include="cmake\vkfu.cmake" />
+    <Text Include="cmake\vkkl.cmake" />
+    <Text Include="cmake\vulkan.cmake" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="CMakePresets.json" />
+    <None Include="CMakeUserPresets.json.example" />
+    <None Include="exec-0.local.props.example" />
+    <None Include="README.md" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

@@ -18,3 +18,5 @@ vkfu/tools/__pycache__/
 vkfu/tools/vkfu_gen/__pycache__/
 vkfu/tools/probe/
 vkfu/tools/vulkan-headers/
+CMakeUserPresets.json
+*.local.props

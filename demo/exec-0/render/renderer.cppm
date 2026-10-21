@@ -1,7 +1,6 @@
 module;
 
 #include <vulkan/vulkan.h>
-#include <bvn/platform/window.h>
 
 #include <nagisa/concurrency/lease.h>
 
@@ -9,6 +8,7 @@ export module demo.render;
 
 import std;
 import demo.execution;
+import demo.window;
 
 export
 struct image_acquisition
@@ -19,6 +19,7 @@ struct image_acquisition
 	VkImageView view;
 };
 
+// frame 的定义只存在于 renderer.cpp（实现单元）；接口只把它当作租约令牌的指针目标。
 export struct frame;
 
 export
@@ -26,7 +27,8 @@ struct renderer
 {
 	using frame_pool = ::nagisa::concurrency::bounded_lease_pool<frame*, 4>;
 
-	explicit renderer();
+	// window 由调用方持有，必须比 renderer 活得久；GLFW 需要先由 glfw_context 初始化。
+	explicit renderer(window const& target);
 	~renderer();
 	renderer(renderer&&) noexcept;
 	renderer& operator=(renderer&&) noexcept;

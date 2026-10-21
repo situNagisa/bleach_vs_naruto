@@ -1,15 +1,8 @@
-module;
-
-// MSVC 14.44 needs these declarations locally when importing constrained queries.
-#include <stdexec/execution.hpp>
-
-#include <bvn/platform/window.h>
-#include <SDL3/SDL_init.h>
-
 export module demo.input;
 
 import std;
 import demo.execution;
+import demo.window;
 
 export
 enum class key_code : ::std::uint8_t
@@ -41,14 +34,22 @@ export struct input
 	struct state_type
 	{
 		::std::array<key_status, ::std::to_underlying(key_code::_max)> _status{};
+		// 本次轮询期间窗口收到了关闭请求。
+		bool _quit = false;
+
+		[[nodiscard]] constexpr key_status const& operator[](key_code key) const noexcept
+		{
+			return _status[::std::to_underlying(key)];
+		}
 	};
 
-	// Start on SDL's main thread; consume the result before the next poll.
+	// 必须在主线程启动（GLFW 的事件泵约束）；下一次 poll 之前先 consume 结果。
 	[[nodiscard]] values_sender_type<state_type> poll() const;
 	void consume(state_type state);
 
-	explicit input(::bvn::platform::window const& window);
+	// window 由调用方持有，必须比 input 活得久。
+	explicit input(window const& target);
 
-	::SDL_WindowID _window_id;
+	window const* _window;
 	state_type _current{};
 };

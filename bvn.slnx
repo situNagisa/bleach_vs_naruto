@@ -3,4 +3,5 @@
     <Platform Name="x64" />
   </Configurations>
   <Project Path="bvn.vcxproj" Id="4958090e-5dc0-49b2-961e-e0a025c33594" />
+  <Project Path="demo/exec-0/exec-0.vcxproj" Id="46576488-bcf2-4d20-a52b-0b8c547258cb" />
 </Solution>

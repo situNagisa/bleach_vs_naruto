@@ -1,5 +1,7 @@
 module;
 
+// 这是整个 demo 里唯一允许直接看到 stdexec 头文件的模块接口单元。
+// 其他模块只 import demo.execution，不再各自重新解析 stdexec。
 #include <stdexec/execution.hpp>
 #include <exec/any_sender_of.hpp>
 #include <exec/static_thread_pool.hpp>
@@ -19,6 +21,22 @@ using values_sender_type = ::exec::any_sender<values_receiver_type<Vs...>>;
 
 export using any_scheduler_type = ::exec::any_scheduler<values_sender_type<>>;
 
-export using ::exec::static_thread_pool;
-export using ::stdexec::just;
-export using ::stdexec::then;
+// stdexec / exec 的符号在各自的命名空间里重新导出：下游必须写 ::stdexec::just、::exec::static_thread_pool，
+// 不允许出现无限定的 just / then。需要新的算法时在这里追加。
+export namespace stdexec
+{
+using ::stdexec::just;
+using ::stdexec::then;
+using ::stdexec::let_value;
+using ::stdexec::when_all;
+using ::stdexec::starts_on;
+using ::stdexec::continues_on;
+using ::stdexec::sync_wait;
+}
+
+// stdexec 里 exec 只是 experimental::execution 的命名空间别名，别名本身也要导出，下游才能写 ::exec::。
+export namespace experimental::execution
+{
+using ::experimental::execution::static_thread_pool;
+}
+export namespace exec = ::experimental::execution;

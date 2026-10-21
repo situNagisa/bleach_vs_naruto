@@ -1,22 +1,13 @@
 module;
 
-#include <cassert>
-
-// Keep the stdexec declarations visible before importing demo.input on MSVC 14.44.
-#include <stdexec/execution.hpp>
-
-#include <SDL3/SDL_events.h>
-#include <SDL3/SDL_init.h>
-#include <SDL3/SDL_keyboard.h>
-#include <SDL3/SDL_mouse.h>
-#include <SDL3/SDL_video.h>
+// 只为 GLFW_KEY_* 常量；窗口本身通过 demo.window 访问。
+#include <GLFW/glfw3.h>
 
 module demo.input;
 
-input::input(::bvn::platform::window const& window)
-	: _window_id(::SDL_GetWindowID(window.handle))
+input::input(window const& target)
+	: _window(::std::addressof(target))
 {
-	
 }
 
 values_sender_type<input::state_type> input::poll() const
@@ -25,28 +16,26 @@ values_sender_type<input::state_type> input::poll() const
 		::stdexec::just()
 		| ::stdexec::then([this]
 			{
-				assert(::SDL_IsMainThread());
-				::SDL_PumpEvents();
+				window::poll_events();
+
+				auto state = state_type{};
+				state._quit = _window->should_close();
 
 				static constexpr auto keys = ::std::array{
-					::SDL_SCANCODE_UP, ::SDL_SCANCODE_DOWN,
-					::SDL_SCANCODE_LEFT, ::SDL_SCANCODE_RIGHT,
-					::SDL_SCANCODE_J, ::SDL_SCANCODE_K, ::SDL_SCANCODE_L,
-					::SDL_SCANCODE_U, ::SDL_SCANCODE_I, ::SDL_SCANCODE_O,
-					::SDL_SCANCODE_P,
+					GLFW_KEY_UP, GLFW_KEY_DOWN,
+					GLFW_KEY_LEFT, GLFW_KEY_RIGHT,
+					GLFW_KEY_J, GLFW_KEY_K, GLFW_KEY_L,
+					GLFW_KEY_U, GLFW_KEY_I, GLFW_KEY_O,
+					GLFW_KEY_P,
 				};
 				static_assert(keys.size() == ::std::to_underlying(key_code::_max));
 
-				auto state = state_type{};
-				auto const focus = ::SDL_GetKeyboardFocus();
-				if (focus == nullptr || ::SDL_GetWindowID(focus) != _window_id)
+				if (!_window->focused())
 					return state;
 
-				auto count = int{};
-				auto const keyboard = ::SDL_GetKeyboardState(&count);
 				for (auto index = ::std::size_t{}; index < keys.size(); ++index)
 				{
-					auto const active = keys[index] < count && keyboard[keys[index]];
+					auto const active = _window->key_pressed(keys[index]);
 					state._status[index] = {
 						.active = active,
 						.signal = active && !_current._status[index].active,
