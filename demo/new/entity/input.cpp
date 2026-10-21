@@ -64,7 +64,6 @@ values_sender_type<input::state, input::delta> input::poll()
 		| ::stdexec::let_value([this]
 			{
 				auto changes = delta{};
-				assert(::SDL_IsMainThread());
 				auto event = ::SDL_Event{};
 				while (::SDL_PollEvent(&event))
 				{

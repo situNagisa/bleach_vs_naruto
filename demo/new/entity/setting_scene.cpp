@@ -23,8 +23,6 @@
 
 #include "./setting_scene/settings.h"
 
-inline static constexpr auto ignore = ::stdexec::then([](auto&&...) noexcept {});
-
 struct setting_scene::implementation : immovable
 {
 	renderer& _renderer;
@@ -79,11 +77,11 @@ struct setting_scene::implementation : immovable
 setting_scene::setting_scene(renderer& r) : _impl(::std::make_unique<implementation>(r)) {}
 setting_scene::~setting_scene() = default;
 
-values_sender_type<setting_scene::state, setting_scene::delta> setting_scene::update(app_state::settings_type& shared, frame_clock::frame_time const& time, input::state const& current, input::delta const& changes)
+values_sender_type<setting_scene::state> setting_scene::update(frame_clock::frame_time const& time, input::state const& current, input::delta const& changes)
 {
-	return ::stdexec::just() | ::stdexec::let_value([&]
+	return ::stdexec::just() | ::stdexec::then([this, &time, &current, &changes]() -> state
 		{
-			auto result = delta{};
+			_impl->_state.activated = false;
 			auto const now = time.now;   // 整帧用同一个时刻
 			auto up = changes.keyboard.key(input::key_code::up).pressed;
 			auto down = changes.keyboard.key(input::key_code::down).pressed;
@@ -104,60 +102,29 @@ values_sender_type<setting_scene::state, setting_scene::delta> setting_scene::up
 			_impl->_held_direction = held;
 			if (direction != 0)
 			{
-				auto const previous = _impl->_state.selected;
-				_impl->_state.selected = direction < 0 ? (_impl->_state.selected + _impl->_options.size() - 1) % _impl->_options.size()
-					: (_impl->_state.selected + 1) % _impl->_options.size();
-				result.moved = previous != _impl->_state.selected;
-				_impl->_state.activated.reset();
+				auto const options = ::std::array{ selected_type::volume, selected_type::fullscreen, selected_type::back };
+				auto const found = ::std::ranges::find(options, _impl->_state.selected);
+				auto const index = static_cast<::std::size_t>(found - options.begin());
+				_impl->_state.selected = found == options.end()
+					? (direction < 0 ? options.back() : options.front())
+					: options[(index + (direction < 0 ? options.size() - 1 : 1)) % options.size()];
 			}
 			if (changes.keyboard.key(input::key_code::enter).pressed
 				|| changes.keyboard.key(input::key_code::keypad_enter).pressed
 				|| changes.keyboard.key(input::key_code::space).pressed)
 			{
-				_impl->_state.activated = _impl->_state.selected;
-				result.activated = _impl->_state.selected;
+				_impl->_state.activated = _impl->_state.selected != selected_type::none;
 			}
-			auto&& impl = *_impl;
-			auto const left = changes.keyboard.key(input::key_code::left).pressed;
-			auto const right = changes.keyboard.key(input::key_code::right).pressed;
-			auto const held_adjust = static_cast<int>(current.keyboard.key(input::key_code::right)) - static_cast<int>(current.keyboard.key(input::key_code::left));
-			auto adjust = int{};
-			if (left != right)
+			if (changes.keyboard.key(input::key_code::escape).pressed)
 			{
-				adjust = right ? 1 : -1;
-				impl._next_adjust = now + ::std::chrono::milliseconds{ 350 };
+				_impl->_state.selected = selected_type::back;
+				_impl->_state.activated = true;
 			}
-			else if (held_adjust != impl._held_adjust || result.moved)
-				impl._next_adjust = now + ::std::chrono::milliseconds{ 350 };
-			else if (held_adjust != 0 && impl._state.selected != 1 && now >= impl._next_adjust)
-			{
-				adjust = held_adjust;
-				impl._next_adjust = now + ::std::chrono::milliseconds{ 120 };
-			}
-			impl._held_adjust = held_adjust;
-			if (impl._state.selected == 0 && adjust != 0)
-				shared.preferences.volume = ::std::clamp(shared.preferences.volume + adjust * 5, 0, 100);
-			else if (impl._state.selected == 1 && (adjust != 0 || result.activated))
-				shared.preferences.fullscreen = !shared.preferences.fullscreen;
-			else if (impl._state.selected == 2 && (adjust != 0 || result.activated))
-			{
-				auto const found = ::std::ranges::find(game_settings::frame_rates, shared.preferences.frame_rate);
-				auto const index = static_cast<int>(found - game_settings::frame_rates.begin());
-				auto const count = static_cast<int>(game_settings::frame_rates.size());
-				shared.preferences.frame_rate = game_settings::frame_rates[(index + (adjust < 0 ? -1 : 1) + count) % count];
-			}
-			impl.refresh_labels(shared.preferences);
-			if (changes.keyboard.key(input::key_code::escape).pressed
-				|| (result.activated && *result.activated == _impl->_options.size() - 1))
-			{
-				result.back_requested = true;
-			}
-			shared.back_requested = result.back_requested;   // 本帧输出：整体覆盖
-			return ::stdexec::just(_impl->_state, ::std::move(result));
+			return _impl->_state;
 		});
 }
 
-values_sender_type<setting_scene::recording> setting_scene::record(frame_slot&, state const& snapshot)
+values_sender_type<::std::vector<::vkkl::command_buffer>, ::std::vector<buffer_type>> setting_scene::record(frame_slot&, state const& snapshot) const
 {
 	return ::stdexec::just() | ::stdexec::let_value([&]
 		{
@@ -234,7 +201,7 @@ values_sender_type<setting_scene::recording> setting_scene::record(frame_slot&, 
 				for (auto index = ::std::size_t{}; index < impl._options.size(); ++index)
 				{
 					auto y = top + static_cast<float>(index) * (row_height + gap);
-					auto selected = index == snapshot.selected;
+					auto selected = index == ::std::to_underlying(snapshot.selected);
 					auto text_color = selected ? color{ 0.08f, 0.06f, 0.04f, 1 } : color{ 0.9f, 0.92f, 0.95f, 1 };
 					draw_rectangle(
 						{ left, y }, { left + width, y + row_height },
@@ -277,7 +244,6 @@ values_sender_type<setting_scene::recording> setting_scene::record(frame_slot&, 
 			}
 
 			::consumer_arch_vulkan::check(::vkEndCommandBuffer(command.handle), "main scene: end draw");
-			// 命令缓冲交给 recording 持有：原来只返回句柄，局部的 command 一析构就 vkFreeCommandBuffers 了。
-			return ::stdexec::just(recording{ .command = ::std::move(command), .buffers = ::std::move(buffers) });
+			return ::stdexec::just(::std::vector{ ::std::move(command) }, ::std::move(buffers));
 		});
 }

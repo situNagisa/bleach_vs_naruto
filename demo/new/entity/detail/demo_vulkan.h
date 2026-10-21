@@ -221,7 +221,7 @@ inline auto create_instance(vulkan_context& renderer, ::bvn::platform::window co
 	{
 		return;
 	}
-
+	
 	auto const messenger_info = ::vkfu::evaluate(param::ext::debug_utils_messenger{
 		.message_severity = {.warning = 1, .error = 1},
 		.message_type = {.general = 1, .validation = 1, .performance = 1},

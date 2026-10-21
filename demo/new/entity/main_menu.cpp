@@ -62,11 +62,11 @@ struct main_menu::implementation : immovable
 main_menu::main_menu(renderer& r) : _impl(::std::make_unique<implementation>(r)) {}
 main_menu::~main_menu() = default;
 
-values_sender_type<main_menu::state, main_menu::delta> main_menu::update(app_state::menu_type& shared, frame_clock::frame_time const& time, input::state const& current, input::delta const& changes)
+values_sender_type<main_menu::state> main_menu::update(frame_clock::frame_time const& time, input::state const& current, input::delta const& changes)
 {
-	return ::stdexec::just() | ::stdexec::let_value([&]
+	return ::stdexec::just() | ::stdexec::then([this, &time, &current, &changes]() -> state
 		{
-			auto result = delta{};
+			_impl->_state.activated = false;
 			auto const now = time.now;   // 整帧用同一个时刻
 			auto up = changes.keyboard.key(input::key_code::up).pressed;
 			auto down = changes.keyboard.key(input::key_code::down).pressed;
@@ -87,25 +87,24 @@ values_sender_type<main_menu::state, main_menu::delta> main_menu::update(app_sta
 			_impl->_held_direction = held;
 			if (direction != 0)
 			{
-				auto const previous = _impl->_state.selected;
-				_impl->_state.selected = direction < 0 ? (_impl->_state.selected + _impl->_options.size() - 1) % _impl->_options.size()
-					: (_impl->_state.selected + 1) % _impl->_options.size();
-				result.moved = previous != _impl->_state.selected;
-				_impl->_state.activated.reset();
+				auto const options = ::std::array{ selected_type::start_game, selected_type::settings, selected_type::exit };
+				auto const found = ::std::ranges::find(options, _impl->_state.selected);
+				auto const index = static_cast<::std::size_t>(found - options.begin());
+				_impl->_state.selected = found == options.end()
+					? (direction < 0 ? options.back() : options.front())
+					: options[(index + (direction < 0 ? options.size() - 1 : 1)) % options.size()];
 			}
 			if (changes.keyboard.key(input::key_code::enter).pressed
 				|| changes.keyboard.key(input::key_code::keypad_enter).pressed
 				|| changes.keyboard.key(input::key_code::space).pressed)
 			{
-				_impl->_state.activated = _impl->_state.selected;
-				result.activated = _impl->_state.selected;
+				_impl->_state.activated = _impl->_state.selected != selected_type::none;
 			}
-			shared.activated = result.activated;   // 本帧输出：整体覆盖
-			return ::stdexec::just(_impl->_state, ::std::move(result));
+			return _impl->_state;
 		});
 }
 
-values_sender_type<main_menu::recording> main_menu::record(frame_slot&, state const& snapshot)
+values_sender_type<::std::vector<::vkkl::command_buffer>, ::std::vector<buffer_type>> main_menu::record(frame_slot&, state const& snapshot)
 {
 	return ::stdexec::just() | ::stdexec::let_value([&]
 		{

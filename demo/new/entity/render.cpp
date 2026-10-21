@@ -146,36 +146,21 @@ namespace
 				.layer_count = 1,
 			},
 			});
-		::vkfu::cmd_pipeline_barrier2(primary_command_buffer, param::dependency{
-										  .image_memory_barriers = ::std::span{&present_barrier, 1u},
-			});
-		::consumer_arch_vulkan::check(::vkEndCommandBuffer(primary_command_buffer),
-			"failed to end primary command buffer");
+		::vkfu::cmd_pipeline_barrier2(primary_command_buffer, param::dependency{ .image_memory_barriers = ::std::span{&present_barrier, 1u}, });
+		::consumer_arch_vulkan::check(::vkEndCommandBuffer(primary_command_buffer), "failed to end primary command buffer");
 
-		auto const image_available = frame.image_available();
-		auto const render_finished = frame.render_finished();
-		auto const wait_semaphore = ::vkfu::evaluate(param::semaphore_submit{
-			.semaphore = image_available, .stage_mask = {.color_attachment_output = 1},
-			});
-		auto const command_buffer = ::vkfu::evaluate(param::command_buffer_submit{
-			.command_buffer = primary_command_buffer,
-			});
-		auto const signal_semaphore = ::vkfu::evaluate(param::semaphore_submit{
-			.semaphore = render_finished, .stage_mask = {.all_commands = 1},
-			});
-		auto const submit = ::vkfu::evaluate(param::submit2{
-			.wait_semaphore_infos = ::std::span{&wait_semaphore, 1u},
-			.command_buffer_infos = ::std::span{&command_buffer, 1u},
-			.signal_semaphore_infos = ::std::span{&signal_semaphore, 1u},
-			});
-		::vkfu::queue_submit2(global.graphics_queue(), ::std::span{ &submit, 1u }, frame.in_flight());
+		::vkfu::queue_submit2(global.graphics_queue(), ::std::array{ ::vkfu::evaluate(param::submit2{
+			.wait_semaphore_infos = ::std::array{ ::vkfu::evaluate(param::semaphore_submit{ .semaphore = frame.image_available(), .stage_mask = {.color_attachment_output = 1}, })},
+			.command_buffer_infos = ::std::array{ ::vkfu::evaluate(param::command_buffer_submit{ .command_buffer = primary_command_buffer, }) },
+			.signal_semaphore_infos = ::std::array{ ::vkfu::evaluate(param::semaphore_submit{ .semaphore = frame.render_finished(), .stage_mask = {.all_commands = 1}, }) },
+			}) }, frame.in_flight());
 
 		auto const swapchain = global.swapchain();
 		auto const active_image_index = frame.active_image_index();
 		auto const outcome = ::vkfu::khr::queue_present(
 			global.present_queue(),
 			param::khr::present{
-				.wait_semaphores = ::std::span{&render_finished, 1u},
+				.wait_semaphores = ::std::array{ frame.render_finished() },
 				.swapchain_count = 1,
 				.swapchains = &swapchain,
 				.image_indices = &active_image_index,
@@ -224,7 +209,6 @@ values_sender_type<> renderer::end(frame_slot& frame, std::span<VkCommandBuffer 
 
 void renderer::set_fullscreen(bool enabled)
 {
-	assert(::SDL_IsMainThread());
 	if (((::SDL_GetWindowFlags(window.handle) & SDL_WINDOW_FULLSCREEN) != 0) == enabled)
 		return;
 	::consumer_arch_vulkan::check(::vkDeviceWaitIdle(vulkan.global_env().device()), "fullscreen: wait for device");
