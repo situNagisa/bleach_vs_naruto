@@ -8,8 +8,6 @@
       "inherits": "windows-clang-cl-debug",
       "environment": {
         "BVN_LLVM_ROOT": "D:/tools/LLVM",
-        "NAGISA_ROOT": "C:/Users/<你>/nagisa",
-        "NAGISA_LIBRARY_ROOT": "C:/Users/<你>"
       }
     },
     {

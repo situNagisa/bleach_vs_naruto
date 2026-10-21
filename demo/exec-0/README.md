@@ -275,3 +275,11 @@ Makefile 工程的调试设置就是普通的“属性 → 调试”页：命令
   `arm/tensors.h:395`、`arm/data_graph.h:286/301/316/331`、`khr/surface_protected_capabilities.h:38`、
   `nv/optical_flow.h:116`、`nv/display_stereo.h:54`。本 demo 通过只包含用到的头规避；生成器应按结构的 `pNext`
   常量性生成形参类型。
+
+## Windows vcpkg 配置
+
+Windows 预设通过 `$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake` 启用 manifest 模式，使用 `x64-windows`。本目录的 `vcpkg.json` 声明 GLFW 和 Vulkan；首次配置自动安装到构建目录下的 `vcpkg_installed`，无需配置仓库根目录的全部游戏依赖。
+
+在 `exec-0.local.props` 中设置 `BvnVcpkgRoot`（vcpkg 根目录），或设置环境变量 `VCPKG_ROOT`。VS 包装工程会将该属性传给 CMake。命令行使用者还需设置 `BVN_LLVM_ROOT` 并进入 x64 VS 开发者环境；用户预设示例包含这两个路径。
+
+从没有 vcpkg 的旧缓存迁移时，首次运行 `cmake --fresh --preset windows-clang-cl-debug`（Release 同理），随后正常构建。Windows 预设显式选择 LLVM 的 `lld-link.exe`，避免 PATH 中的 MinGW `ld.exe` 被误选。

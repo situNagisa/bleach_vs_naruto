@@ -40,8 +40,19 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
   <ImportGroup Label="Shared" />
-  <ImportGroup Label="PropertySheets">
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VS_PROP_ROOT)\nagisa.props" Condition="exists('$(VS_PROP_ROOT)\nagisa.props')" />
+    <Import Project="$(NAGISA_LIBRARY_ROOT)\nagisa_library.props" Condition="exists('$(NAGISA_LIBRARY_ROOT)\nagisa_library.props')" />
+    <Import Project="$(SolutionDir)\prop\solution.props" Condition="exists('$(SolutionDir)\prop\solution.props')" />
+    <!-- 本机路径覆盖：复制 exec-0.local.props.example 为 exec-0.local.props 后修改。 -->
+    <Import Project="$(ProjectDir)exec-0.local.props" Condition="exists('$(ProjectDir)exec-0.local.props')" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VS_PROP_ROOT)\nagisa.props" Condition="exists('$(VS_PROP_ROOT)\nagisa.props')" />
+    <Import Project="$(NAGISA_LIBRARY_ROOT)\nagisa_library.props" Condition="exists('$(NAGISA_LIBRARY_ROOT)\nagisa_library.props')" />
+    <Import Project="$(SolutionDir)\prop\solution.props" Condition="exists('$(SolutionDir)\prop\solution.props')" />
     <!-- 本机路径覆盖：复制 exec-0.local.props.example 为 exec-0.local.props 后修改。 -->
     <Import Project="$(ProjectDir)exec-0.local.props" Condition="exists('$(ProjectDir)exec-0.local.props')" />
   </ImportGroup>
@@ -50,6 +61,7 @@
     <!-- LLVM 安装根目录；预设用 $env{BVN_LLVM_ROOT}/bin/clang-cl.exe -->
     <BvnLlvmRoot Condition="'$(BvnLlvmRoot)'==''">C:\Program Files\LLVM</BvnLlvmRoot>
     <!-- cmake.exe：留空则用 PATH 上的 cmake（需要 >= 4.4；VS 自带的版本太旧） -->
+    <BvnVcpkgRoot Condition="'$(BvnVcpkgRoot)'==''">$(VCPKG_ROOT)</BvnVcpkgRoot>
     <BvnCMakeExe Condition="'$(BvnCMakeExe)'==''">cmake</BvnCMakeExe>
     <!-- 依赖根目录：默认取系统环境变量 NAGISA_LIBRARY_ROOT / NAGISA_ROOT -->
     <BvnNagisaLibraryRoot Condition="'$(BvnNagisaLibraryRoot)'==''">$(NAGISA_LIBRARY_ROOT)</BvnNagisaLibraryRoot>
@@ -58,6 +70,11 @@
     <BvnCMakePreset Condition="'$(Configuration)'=='Debug'">windows-clang-cl-debug</BvnCMakePreset>
     <BvnCMakePreset Condition="'$(Configuration)'=='Release'">windows-clang-cl-release</BvnCMakePreset>
     <BvnBuildDir>$(ProjectDir)out\build\$(BvnCMakePreset)\</BvnBuildDir>
+    <!-- IntelliSense 优先使用当前配置的依赖；未配置 Release 时可复用 Debug 头文件。 -->
+    <BvnVcpkgIncludeDir Condition="'$(BvnVcpkgIncludeDir)'=='' and Exists('$(BvnBuildDir)vcpkg_installed\x64-windows\include\GLFW\glfw3.h')">$(BvnBuildDir)vcpkg_installed\x64-windows\include</BvnVcpkgIncludeDir>
+    <BvnVcpkgIncludeDir Condition="'$(BvnVcpkgIncludeDir)'=='' and Exists('$(ProjectDir)out\build\windows-clang-cl-debug\vcpkg_installed\x64-windows\include\GLFW\glfw3.h')">$(ProjectDir)out\build\windows-clang-cl-debug\vcpkg_installed\x64-windows\include</BvnVcpkgIncludeDir>
+    <BvnVcpkgIncludeDir Condition="'$(BvnVcpkgIncludeDir)'=='' and Exists('$(ProjectDir)out\build\windows-clang-cl-release\vcpkg_installed\x64-windows\include\GLFW\glfw3.h')">$(ProjectDir)out\build\windows-clang-cl-release\vcpkg_installed\x64-windows\include</BvnVcpkgIncludeDir>
+    <BvnVcpkgIncludeDir Condition="'$(BvnVcpkgIncludeDir)'==''">$(BvnBuildDir)vcpkg_installed\x64-windows\include</BvnVcpkgIncludeDir>
   </PropertyGroup>
   <!-- ======================================================= NMake 命令 -->
   <PropertyGroup>
@@ -66,7 +83,7 @@
       这里再补三件事：VS 自带的 Ninja 加入 PATH；VCToolsInstallDir 导出为环境变量（std_module.cmake 据此找 std.ixx）；
       依赖根目录与 LLVM 根目录导出为预设要读的环境变量。
     -->
-    <BvnEnvSetup>set "PATH=$(DevEnvDir)CommonExtensions\Microsoft\CMake\Ninja;%PATH%" &amp;&amp; set "VCToolsInstallDir=$(VCToolsInstallDir)" &amp;&amp; set "BVN_LLVM_ROOT=$(BvnLlvmRoot)" &amp;&amp; set "NAGISA_LIBRARY_ROOT=$(BvnNagisaLibraryRoot)" &amp;&amp; set "NAGISA_ROOT=$(BvnNagisaRoot)" &amp;&amp; cd /d "$(ProjectDir)."</BvnEnvSetup>
+    <BvnEnvSetup>set "PATH=$(VSInstallDir)Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja;%PATH%" &amp;&amp; set "VCToolsInstallDir=$(VCToolsInstallDir)" &amp;&amp; set "BVN_LLVM_ROOT=$(BvnLlvmRoot)" &amp;&amp; set "VCPKG_ROOT=$(BvnVcpkgRoot)" &amp;&amp; set "NAGISA_LIBRARY_ROOT=$(BvnNagisaLibraryRoot)" &amp;&amp; set "NAGISA_ROOT=$(BvnNagisaRoot)" &amp;&amp; cd /d "$(ProjectDir)."</BvnEnvSetup>
     <NMakeBuildCommandLine>$(BvnEnvSetup) &amp;&amp; "$(BvnCMakeExe)" --preset $(BvnCMakePreset) &amp;&amp; "$(BvnCMakeExe)" --build --preset $(BvnCMakePreset)</NMakeBuildCommandLine>
     <NMakeReBuildCommandLine>$(BvnEnvSetup) &amp;&amp; "$(BvnCMakeExe)" --preset $(BvnCMakePreset) &amp;&amp; "$(BvnCMakeExe)" --build --preset $(BvnCMakePreset) --clean-first</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>$(BvnEnvSetup) &amp;&amp; if exist "$(BvnBuildDir)build.ninja" "$(BvnCMakeExe)" --build --preset $(BvnCMakePreset) --target clean</NMakeCleanCommandLine>
@@ -75,7 +92,7 @@
     <OutDir>$(BvnBuildDir)</OutDir>
     <IntDir>$(BvnBuildDir)CMakeFiles\</IntDir>
     <!-- 以下只喂给 IntelliSense（模块的 IntelliSense 在 VS 里仍是实验性）。 -->
-    <NMakeIncludeSearchPath>$(ProjectDir)..\..\include;$(ProjectDir)..\..\vkfu\include;$(BvnNagisaLibraryRoot)\stdexec\include;$(BvnNagisaLibraryRoot)\glfw\include;$(BvnNagisaRoot)\include;$(VULKAN_SDK)\Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(BvnVcpkgIncludeDir);$(ProjectDir)..\..\include;$(ProjectDir)..\..\vkfu\include;$(BvnNagisaLibraryRoot)\stdexec\include;$(BvnNagisaLibraryRoot)\glfw\include;$(BvnNagisaRoot)\include;$(VULKAN_SDK)\Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakePreprocessorDefinitions>_WIN32;WIN32;_WINDOWS;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <AdditionalOptions>/std:c++latest /permissive- /Zc:__cplusplus /utf-8 /EHsc</AdditionalOptions>
   </PropertyGroup>
@@ -117,6 +134,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CMakePresets.json" />
+    <None Include="vcpkg.json" />
     <None Include="CMakeUserPresets.json.example" />
     <None Include="exec-0.local.props.example" />
     <None Include="README.md" />
