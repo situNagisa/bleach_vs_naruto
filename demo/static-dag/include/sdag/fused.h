@@ -10,17 +10,19 @@
 ///   - 全部成功：set_value(汇点 1 的值..., 汇点 2 的值..., ...)（汇点按声明顺序）
 ///   - 任一节点 set_error：请求停止、未启动的后继跳过、全部在飞节点结束后以第一个错误完成
 ///   - 任一节点 set_stopped：同上，以 set_stopped 完成（错误优先于停止）
-///   - 值的传递：只有一个后继的前驱把值 move 给它；多个后继的前驱按 V const& 共享
+///   - 值的传递：只有一个后继读值的前驱把值 move 给它；多个后继读值的前驱按 V const& 共享
 
 #include <atomic>
 #include <concepts>
 #include <cstddef>
 #include <exception>
+#include <meta>
 #include <optional>
 #include <tuple>
 #include <type_traits>
 #include <utility>
 #include <variant>
+#include <vector>
 
 #include <stdexec/execution.hpp>
 
@@ -34,12 +36,10 @@ namespace sdag::fused_detail
 {
 
 using ::std::size_t;
-using graph_detail::traits_of;
+using meta::info;
+using meta::infos;
 using graph_detail::node_sender_t;
 using graph_detail::graph_state;
-using graph_detail::sink_indices;
-using graph_detail::root_indices;
-using graph_detail::shared_v;
 
 template<size_t Initial>
 struct counter
@@ -89,13 +89,33 @@ struct node_receiver
 	}
 };
 
-template<class Self, class Receiver, class Indices>
-struct fused_core_impl;
+/// 入度 ≥ 2 的节点一个倒计数，其余不占空间。
+template<auto Shape>
+[[nodiscard]] consteval info pending_types()
+{
+	infos types;
+	for (size_t index = 0; index < Shape.count; ++index)
+	{
+		types.push_back(Shape.in_degree[index] > 1
+			? ::std::meta::substitute(^^counter, {::std::meta::reflect_constant(Shape.in_degree[index])})
+			: ^^meta::empty);
+	}
+	return meta::list(types);
+}
+
+/// std::variant<std::monostate, 错误类型...>。错误类型本身也可能是 std::monostate，所以访问一律按下标（错误 k 在第 k + 1 位）。
+[[nodiscard]] consteval info error_variant_type(info error_types)
+{
+	return ::std::meta::substitute(^^::std::variant, meta::concat({{^^::std::monostate}, meta::arguments(error_types)}));
+}
+
+template<class Self, class Receiver>
+struct fused_operation;
 
 /// 除节点 op-state 之外的全部状态与调度逻辑。节点接收者只指向这一层，
 /// 这样它的类型在节点 op-state 类型（定义在派生类里）算出来之前就是完整的。
-template<class Self, class Receiver, size_t... I>
-struct SDAG_EMPTY_BASES fused_core_impl<Self, Receiver, ::std::index_sequence<I...>> : graph_state<Self, ::stdexec::env_of_t<Receiver>>
+template<class Self, class Receiver>
+struct fused_core : graph_state<Self, ::stdexec::env_of_t<Receiver>>
 {
 	using env_type = ::stdexec::env_of_t<Receiver>;
 	using state_base = graph_state<Self, env_type>;
@@ -104,20 +124,20 @@ struct SDAG_EMPTY_BASES fused_core_impl<Self, Receiver, ::std::index_sequence<I.
 	using operation_type = fused_operation<Self, Receiver>;
 
 	static constexpr auto shape = state_base::shape;
-	static constexpr size_t count = state_base::count;
+	static constexpr size_t count = shape.count;
 	static constexpr bool stoppable = state_base::stoppable;
-	static constexpr bool sends_stopped = analysis_type::sends_stopped;
+	static constexpr auto& result = state_base::result;
+	static constexpr bool sends_stopped = result.any_stopped;
 	static constexpr size_t sink_count = shape.sink_count();
-	static constexpr bool direct_sink = analysis_type::direct_sink;
-	static constexpr size_t sink_index = analysis_type::sink_index;
+	static constexpr bool direct_sink = result.direct_sink;
+	static constexpr size_t sink_index = result.sink_index;
 
-	using error_types = typename analysis_type::error_types;
-	static constexpr bool has_errors = error_types::size != 0;
-	using error_variant = meta::rebind_t<::std::variant, meta::concat_t<meta::type_list<::std::monostate>, error_types>>;
+	static constexpr bool has_errors = result.has_errors || !result.nothrow_store;
+	using error_variant = typename [: fused_detail::error_variant_type(result.error_types) :];
 
 	struct forward_stop
 	{
-		fused_core_impl* _core;
+		fused_core* _core;
 
 		void operator()() const noexcept
 		{
@@ -130,9 +150,6 @@ struct SDAG_EMPTY_BASES fused_core_impl<Self, Receiver, ::std::index_sequence<I.
 	static constexpr bool needs_callback = stoppable && !::stdexec::unstoppable_token<stop_token_t>;
 	using stop_callback_t = ::stdexec::stop_callback_for_t<stop_token_t, forward_stop>;
 
-	template<size_t J>
-	using pending_t = ::std::conditional_t<(shape.in_degree[J] > 1), counter<shape.in_degree[J]>, meta::empty>;
-
 	struct state_tag;
 	struct stop_source_tag;
 	struct on_stop_tag;
@@ -144,15 +161,15 @@ struct SDAG_EMPTY_BASES fused_core_impl<Self, Receiver, ::std::index_sequence<I.
 	SDAG_NO_UNIQUE_ADDRESS ::std::conditional_t<stoppable, ::stdexec::inplace_stop_source, meta::empty_for<stop_source_tag>> _stop_source{};
 	SDAG_NO_UNIQUE_ADDRESS ::std::conditional_t<needs_callback, ::std::optional<stop_callback_t>, meta::empty_for<on_stop_tag>> _on_stop{};
 	SDAG_NO_UNIQUE_ADDRESS ::std::conditional_t<stoppable && has_errors, error_variant, meta::empty_for<error_tag>> _error{};
-	SDAG_NO_UNIQUE_ADDRESS meta::indexed_tuple<pending_t<I>...> _pending{};
+	SDAG_NO_UNIQUE_ADDRESS meta::indexed_tuple_of<typename [: fused_detail::pending_types<shape>() :]> _pending{};
 	SDAG_NO_UNIQUE_ADDRESS ::std::conditional_t<(sink_count > 1), counter<sink_count>, meta::empty_for<sinks_tag>> _sinks{};
 
-	explicit fused_core_impl(Receiver&& receiver) noexcept(::std::is_nothrow_move_constructible_v<Receiver>)
+	explicit fused_core(Receiver&& receiver) noexcept(::std::is_nothrow_move_constructible_v<Receiver>)
 		: _receiver(::std::move(receiver))
 	{
 	}
 
-	fused_core_impl(fused_core_impl&&) = delete;
+	fused_core(fused_core&&) = delete;
 
 	[[nodiscard]] node_env_type make_node_env() noexcept
 	{
@@ -253,23 +270,26 @@ struct SDAG_EMPTY_BASES fused_core_impl<Self, Receiver, ::std::index_sequence<I.
 		node_done<J>();
 	}
 
+	/// 错误类型在 error_types 里的位置 + 1 = 它在 _error 里的下标。
+	template<class Error>
+	static constexpr size_t error_alternative = meta::index_of(::std::meta::dealias(^^::std::decay_t<Error>), meta::arguments(result.error_types)) + 1;
+
 	template<class Error>
 	void store_error(Error&& error) noexcept
 	{
-		using stored = ::std::decay_t<Error>;
-		if constexpr (sig::nothrow_decay_copyable<Error>)
+		if constexpr (sig::nothrow_decay_copyable_v<Error>)
 		{
-			_error.template emplace<stored>(::std::forward<Error>(error));
+			_error.template emplace<error_alternative<Error>>(::std::forward<Error>(error));
 		}
 		else
 		{
 			try
 			{
-				_error.template emplace<stored>(::std::forward<Error>(error));
+				_error.template emplace<error_alternative<Error>>(::std::forward<Error>(error));
 			}
 			catch (...)
 			{
-				_error.template emplace<::std::exception_ptr>(::std::current_exception());
+				_error.template emplace<error_alternative<::std::exception_ptr>>(::std::current_exception());
 			}
 		}
 	}
@@ -286,23 +306,23 @@ struct SDAG_EMPTY_BASES fused_core_impl<Self, Receiver, ::std::index_sequence<I.
 		}
 		else
 		{
-			(notify_edge<J, I>(), ...);
+			template for (constexpr size_t to : ::std::define_static_array(shape.successors(J)))
+			{
+				notify_edge<J, to>();
+			}
 		}
 	}
 
 	template<size_t From, size_t To>
 	void notify_edge() noexcept
 	{
-		if constexpr (shape.edge[From][To])
+		if constexpr (shape.in_degree[To] == 1)
 		{
-			if constexpr (shape.in_degree[To] == 1)
-			{
-				launch<To>();
-			}
-			else if (meta::get<To>(_pending).value.fetch_sub(1, ::std::memory_order_acq_rel) == 1)
-			{
-				launch<To>();
-			}
+			launch<To>();
+		}
+		else if (meta::get<To>(_pending).value.fetch_sub(1, ::std::memory_order_acq_rel) == 1)
+		{
+			launch<To>();
 		}
 	}
 
@@ -386,54 +406,40 @@ struct SDAG_EMPTY_BASES fused_core_impl<Self, Receiver, ::std::index_sequence<I.
 				break;
 			}
 		}
-		if constexpr (direct_sink || !analysis_type::has_values)
+		if constexpr (direct_sink || !result.all_has_values)
 		{
 			// 唯一汇点的值在 node_set_value 里直接转发；没有值完成的图也不会以 running 状态走到这里。
 			::std::unreachable();
 		}
 		else
 		{
-			emit_values(meta::index_sequence_of<sink_indices<shape>>{});
+			emit_values(::std::make_index_sequence<sink_value_count>{});
 		}
 	}
 
 	void emit_error() noexcept
 	{
-		[this]<size_t... K>(::std::index_sequence<K...>)
+		template for (constexpr size_t alternative : ::std::define_static_array(meta::iota(meta::arguments(result.error_types).size())))
 		{
-			(void)((_error.index() == K + 1
-				? (::stdexec::set_error(::std::move(_receiver), ::std::get<K + 1>(::std::move(_error))), true)
-				: false) || ...);
-		}(::std::make_index_sequence<error_types::size>{});
-	}
-
-	template<size_t S, size_t... Rest, class... Accumulated>
-	void emit_values(::std::index_sequence<S, Rest...>, Accumulated&&... accumulated) noexcept
-	{
-		if constexpr (analysis_type::template values_t<S>::size == 0)
-		{
-			emit_values(::std::index_sequence<Rest...>{}, ::std::forward<Accumulated>(accumulated)...);
-		}
-		else
-		{
-			::std::apply(
-				[&](auto&... values) noexcept
-				{
-					emit_values(::std::index_sequence<Rest...>{}, ::std::forward<Accumulated>(accumulated)..., ::std::move(values)...);
-				},
-				*meta::get<S>(this->_slots));
+			if (_error.index() == alternative + 1)
+			{
+				::stdexec::set_error(::std::move(_receiver), ::std::get<alternative + 1>(::std::move(_error)));
+				return;
+			}
 		}
 	}
 
-	template<class... Accumulated>
-	void emit_values(::std::index_sequence<>, Accumulated&&... accumulated) noexcept
+	/// 各汇点的值按声明顺序铺平，全部 move 给整图的接收者。
+	static constexpr size_t sink_value_count = graph_detail::delivery_plan<Self, node_env_type>(shape.sinks(), false).size();
+	static constexpr auto sink_table =
+		meta::to_array<sink_value_count>(graph_detail::delivery_plan<Self, node_env_type>(shape.sinks(), false));
+
+	template<size_t... E>
+	void emit_values(::std::index_sequence<E...>) noexcept
 	{
-		::stdexec::set_value(::std::move(_receiver), ::std::forward<Accumulated>(accumulated)...);
+		::stdexec::set_value(::std::move(_receiver), this->template access<sink_table[E]>()...);
 	}
 };
-
-template<class Self, class Receiver>
-using fused_core = fused_core_impl<Self, Receiver, ::std::make_index_sequence<traits_of<Self>::count>>;
 
 template<class Self, class Receiver, class Indices>
 struct fused_operation_impl;
@@ -480,21 +486,18 @@ struct fused_operation_impl<Self, Receiver, ::std::index_sequence<I...>> : fused
 		{
 			this->_on_stop.emplace(::stdexec::get_stop_token(::stdexec::get_env(this->_receiver)), typename core::forward_stop{this});
 		}
-		launch_roots(meta::index_sequence_of<root_indices<core::shape>>{});
-	}
-
-	template<size_t... R>
-	void launch_roots(::std::index_sequence<R...>) noexcept
-	{
-		(this->template launch<R>(), ...);
+		template for (constexpr size_t root : ::std::define_static_array(core::shape.roots()))
+		{
+			this->template launch<root>();
+		}
 	}
 };
 
 /// 整图 operation state；Self 是图 sender 的引用类型（X&& 或 X const&）。
 template<class Self, class Receiver>
-struct fused_operation : fused_operation_impl<Self, Receiver, ::std::make_index_sequence<traits_of<Self>::count>>
+struct fused_operation : fused_operation_impl<Self, Receiver, ::std::make_index_sequence<graph_detail::count_of(^^Self)>>
 {
-	using fused_operation_impl<Self, Receiver, ::std::make_index_sequence<traits_of<Self>::count>>::fused_operation_impl;
+	using fused_operation_impl<Self, Receiver, ::std::make_index_sequence<graph_detail::count_of(^^Self)>>::fused_operation_impl;
 };
 
 }

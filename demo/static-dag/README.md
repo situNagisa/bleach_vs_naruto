@@ -1,10 +1,14 @@
 # sdag —— 静态 DAG sender
 
-一个只依赖 `std` 与 [stdexec](https://github.com/NVIDIA/stdexec) 的 header-only 模板库：
+一个只依赖 `std` 与 [stdexec](https://github.com/NVIDIA/stdexec) 的 header-only 库：
 把一组各自声明了依赖的 sender 节点整理成一张 **编译期确定** 的有向无环图。整张图是一个带 `dag_t`
 标签的 stdexec sender 表达式（`__sexpr`），子 sender 就是用户给的节点；完成语义与 `when_all`
 同一套理念。默认连接走 0 开销的融合 operation state：没有堆分配、没有引用计数、没有类型擦除。
 所在 domain 定制了 `when_all` 时，图自动降解成 `when_all` / `split` / `let_value` 组合交给 domain。
+
+编译期计算全部用 **C++26 静态反射（P2996）+ 展开语句** 写成普通的 `consteval` 函数：类型列表是
+`std::vector<std::meta::info>`，图分析是对它的循环，签名是 `substitute` 拼出来的。没有递归模板、没有
+SFINAE 技巧。目前只有 GCC ≥ 16 的 `-freflection` 实现了这些（本机 clang 22 还没有）。
 
 ```cpp
 #include <sdag/sdag.h>
@@ -71,17 +75,17 @@ static_assert(::stdexec::sender<dag>);
 - 每个节点的 op-state 是整图 op-state 的直接成员（`connect` 的纯右值原地构造，没有移动）；
 - 节点的值存一份在整图里，后继按引用读 —— **扇出不需要 `split`**，因为整图拥有所有节点，不存在"谁最后释放"的问题；
 - 入度 ≥ 2 的节点有一个原子倒计数，入度 1 的节点由前驱直接启动 —— **扇入不需要 `when_all`**；
-- 不会失败 / 停止 / 抛异常的图连停止源、状态字、错误槽都不存在（与 `when_all` 的 `__uses_stop_source` 同理）；外层令牌是 `unstoppable_token` 时连回调槽也没有；只有一个汇点的图没有汇点计数，**唯一汇点的值不存槽位，完成时直接转发给整图的接收者**（像 `then` 一样不物化，整图的值签名就是它的原始签名）；值没人读的节点没有值槽。被优化掉的成员是真正的 0 字节（MSVC ABI 下用 `[[msvc::no_unique_address]]` 与 `__declspec(empty_bases)`）。
+- 不会失败 / 停止 / 抛异常的图连停止源、状态字、错误槽都不存在（与 `when_all` 的 `__uses_stop_source` 同理）；外层令牌是 `unstoppable_token` 时连回调槽也没有；只有一个汇点的图没有汇点计数，**唯一汇点的值不存槽位，完成时直接转发给整图的接收者**（像 `then` 一样不物化，整图的值签名就是它的原始签名）；值没人读的节点没有值槽。被优化掉的成员是真正的 0 字节。
 - 共享还是独占按"读值的后继个数"判断：只有控制依赖的后继不算，所以 `a -> b`（读值）、`a -> c`（只等先后）时 `a` 的值仍然 move 给 `b`。
 
-`test/zero_overhead.cpp` 的实测（clang 22，libc++，Release）：
+`test/zero_overhead.cpp` 的实测（g++ 16.2，libstdc++，Release）：
 
 | | 分配次数 | `sizeof(op-state)` |
 | --- | --- | --- |
-| 菱形 `a -> {b, c} -> d`，融合 | **0** | 104 = 节点 op-state 64 + 接收者 8 + 3 个值槽 24 + 1 个入度计数 8（汇点 d 不存槽位） |
+| 菱形 `a -> {b, c} -> d`，融合 | **0** | 128 = 节点 op-state 88 + 接收者 8 + 3 个值槽 24 + 1 个入度计数 8（汇点 d 不存槽位） |
 | 同一张图，降解（`when_all` + `split`） | 1（split 的共享状态） | —— |
 
-`-O2` 下 `just(1) -> then(+1) -> then(*3)` 这条链的三个节点全部折叠成常量 1、2、6，剩下的指令是 `sync_wait` 自己的 `run_loop`，与手写 `just(1) | then | then` 相同。
+`-O2` 下 `just(1) -> then(+1) -> then(*3)` 这条链经 `sync_wait` 跑完的函数是 30 条指令，手写 `just(1) | then | then` 是 29 条，节点全部折叠成常量。
 相对手写 `then` 链，融合路径唯一多出来的是**链式边上的一次值物化**（出度 1 → 入度 1 的值先存进槽位再 move 给后继）：后继的输入 op 什么时候启动是后继自己决定的（`starts_on`、`let_value` 都可能推迟），值必须有个地方待着。这是"与扇入 / 扇出同等调度的最小成本"，不是 `then` 链的成本。
 
 ### 自动降解：让定制了 `when_all` 的 domain 接管
@@ -114,13 +118,15 @@ static_assert(::stdexec::sender<dag>);
 
 ```
 include/sdag/
-  meta.h        类型列表、indexed_tuple（按工厂原地构造、空元素 0 字节）
-  signatures.h  completion_signatures 的拆解与拼装
+  meta.h        反射版的类型列表运算（arguments / list / index_of / unique / concat / map / indices）；
+                indexed_tuple（运行期容器：按工厂原地构造、空元素 0 字节）
+  signatures.h  completion_signatures 的拆解（summarize）与拼装（make_completions），全部是 consteval 函数
   node.h        after<>、node<>、make_node、原语（类型特征 + payload CPO）与 concept
-  shape.h       编译期形状分析：邻接矩阵、入出度、拓扑序、错误诊断（shape_of 不断言，checked_shape_of_lists 断言）
-  graph.h       图 sender：dag_t、input_sender、节点环境、整图状态与分析、attrs、降解判据、__sexpr_impl<dag_t>
-  fused.h       融合 op-state（默认连接）与 fused 策略
-  composed.h    lower（输入叶子替换 + when_all/split/let_value 组合）与 composed 策略
+  shape.h       编译期形状分析：邻接矩阵、入出度、拓扑序、后继 / 汇点 / 根、错误诊断
+  graph.h       图 sender：dag_t、input_sender、analyze（拓扑序 template for 一次算完整图）、节点环境、整图状态、
+                substituted（反射重建 sexpr）、attrs、降解判据、__sexpr_impl<dag_t>
+  fused.h       融合 op-state（默认连接）：调度用 template for 展开后继 / 根 / 错误分支；fused 策略
+  composed.h    lowered（降解后各节点类型的 consteval 计算）、builder、lower、composed 策略
   dag.h         dag()、graph_policy_for、dag_sender
   sdag.h        总头
 test/
@@ -128,26 +134,47 @@ test/
   zero_overhead.cpp  分配计数与 op-state 大小
 ```
 
+### 反射怎么用的
+
+| 原来的模板技巧 | 现在 |
+| --- | --- |
+| `index_of` / `unique` / `concat` 递归偏特化 | 对 `std::vector<std::meta::info>` 的普通循环（`meta.h`） |
+| `completion_signatures` 的 `classify<Sig>` 偏特化 + 折叠 | `summarize(^^Completions)`：遍历 `template_arguments_of`，按 `return_type_of` 分类 |
+| `analysis_impl<Self, index_sequence<I...>>` 里十几个折叠表达式 | `analyze<Self, Env...>()`：`template for` 按拓扑序逐节点取签名，填一个 `analysis_result<N>` 结构体 |
+| `warm_up<Self, Step>` 基类链保证实例化顺序 | 不需要：`template for` 本身就按拓扑序实例化 |
+| `substituted<CvSender, Input>` 偏特化重建 sexpr | `substituted(sender, input)`：递归 consteval 函数，`substitute(^^__sexpr, {tag, data, children...})` |
+| `keys_to_indices` / `filtered_indices` / `index_sequence_of` | `meta::indices(vector<size_t>)`，直接从 `shape.sinks()` 等拼 `index_sequence` |
+| `notify_edge<J, I>()...` 折叠、`launch_roots(index_sequence)` | `template for (constexpr size_t to : shape.successors(J))` |
+| `deliver_impl` / `emit_values` 带累积参数包的递归 | consteval 先铺平一张交付表（哪个节点、第几个值、共享还是 move），再做一次包展开 `access<table[E]>()...` |
+| composed 里 `node_sender<I>` / `input<I, index_sequence>` 的互递归偏特化 | `lowered::node_sender(i)` 等几个互相调用的 consteval 函数 |
+
+运行期的东西（op-state 成员、`indexed_tuple`、一次性的包展开）保持模板：它们不是"计算"，反射帮不上忙。
+
+反射特有的两个坑，代码里都绕开了：类模板的成员别名在类实例化时就会求值（所以不合法时 `completions` 给 `void`，
+而不是让 `make_completions` 在 `^^void` 上抛异常）；consteval 计算没有编译器缓存（所以降解的类型按拓扑序一次算进
+`lowered_tables` 查表，不写互递归——否则计算量随图里的路径数指数增长）。
+
 ## 构建
 
-只依赖 stdexec 与 pthread；只支持 Clang ≥ 22（Linux 上 clang++ + libc++，Windows 上 clang-cl + MSVC STL），C++26，Ninja。
+只依赖 stdexec 与 pthread；需要 GCC ≥ 16（`-std=c++26 -freflection`）与 Ninja。
 
 ```bash
-cmake --preset linux-clang-release
+cmake --preset linux-gcc-release
 ```
 
 ```bash
-cmake --build --preset linux-clang-release && ctest --preset linux-clang-release
+cmake --build --preset linux-gcc-release && ctest --preset linux-gcc-release
 ```
 
 stdexec 的位置：`$NAGISA_LIBRARY_ROOT/stdexec`，或 `-DSDAG_STDEXEC_ROOT=...`；都没有时 FetchContent 拉取验证过的提交。
-本库在 stdexec `8398d5a`（2026-10-20）上验证。
+本库在 stdexec `8398d5a`（2026-10-20）与 GCC 16.2.1 上验证。
 
 ## 实现要点与边界
 
-- **用到的 stdexec 作者级接口**。`__sexpr` / `__sexpr_impl` / `__get<I>` / `__copy_cvref_t` / `__throw_dependent_sender_error` / `__has_transform_sender` / `__completion_domain_of_t` 等带双下划线的名字是 stdexec 给算法作者用的那一层（`exec::split`、`exec::when_any` 自己也这么写）。本库在 stdexec `8398d5a` 上验证；这一层升级时可能要跟着改。
-- **编译期深度**。`then(f)` 问子 sender 的签名时，节点 N 的类型计算会嵌套进节点 N-1 的，长链会撞上 clang 的模板深度上限。`graph.h` 里的 `warm_up` 按拓扑序逐个实例化节点签名，让后面的计算全部命中编译器缓存，嵌套深度变成常数。48 节点长链 + 16 路扇入的测试文件在本机编译约 40 s —— 这是模板实例化总量的代价，不是深度的。
-- **内联完成的栈深度**。节点在前驱的完成回调里被启动，一条全内联的链会递归 O(深度) 层；静态图的规模是编译期已知的常量，这与 `then` 链的行为一致。
+- **用到的 stdexec 作者级接口**。`__sexpr` / `__sexpr_impl` / `__get<I>` / `__copy_cvref_t` / `__throw_dependent_sender_error` / `__default_domain_like` / `__completion_domain_of_t` 等带双下划线的名字是 stdexec 给算法作者用的那一层（`exec::split`、`exec::when_any` 自己也这么写）。本库在 stdexec `8398d5a` 上验证；这一层升级时可能要跟着改。
+- **编译期深度**。`then(f)` 问子 sender 的签名时，节点 N 的类型计算会嵌套进节点 N-1 的，长链会撞上编译器的模板深度上限。`analyze` 用 `template for` 按拓扑序逐个取节点签名，前驱先实例化，后面的计算全部命中编译器缓存，嵌套深度变成常数。48 节点长链 + 16 路扇入的测试文件在本机 g++ 16 下编译约 24 s —— 这是实例化总量的代价，不是深度的。
+- **GCC 16 反射的几个坑**：模板实参位置的类型拼接要写 `typename [: :]`；`^^` 不能作用于 using 声明（`std::exception_ptr` 要经别名 + `dealias`）；`template for` 的范围必须是常量表达式（静态成员可以，consteval 函数里的 constexpr 局部变量不行）；`std::array<info, 0>` 没有可用的 `operator[]`（空图用 `info_array` 留一个占位元素）；noexcept / requires 里不能引用 `auto&&` 形参本身（`payload` CPO 以类型为参数）。
+- **内联完成的栈深度**。节点在前驱的完成回调里被启动，一条全内联的链会递归 O(深度) 层；静态图的规模是编译期已知的常量，这与 `then` 链的行为一致。编译器对函数体的实例化也沿 `launch -> start -> ... -> node_done -> notify_edge -> launch` 这条路径嵌套，最长路径约 60 个节点以上会撞上 GCC 的模板深度上限（`-ftemplate-depth` 可以调）；拓扑序 `template for` 只解决了完成签名那一侧的深度。
 - **节点的值在整图 op-state 里停留到整图完成**。共享的 `const&` 因此一直有效；这也是 `split` 做不到 0 开销而整图可以的原因。
 - **错误发生后未启动的节点被跳过**，这是对 `when_all`"全部启动"语义的细化：跳过不改变结果（结果一定是错误 / 停止），只是不做无用功。
 - 节点必须恰好完成一次；完成签名不能"撒谎"（`deliver` 里有 `static_assert` 对照接收者环境与整图环境下算出的输入签名）。

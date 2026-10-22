@@ -6,17 +6,19 @@
 /// 这样整张图就是 stdexec 生态里的普通算法节点：tag_of_t / sender_for / 子节点内省 /
 /// transform_sender 定制都成立；节点 sender 连接时照常被所在 domain 变换。
 ///
-/// 本文件只有类型层面的分析与节点环境；真正的 operation state 在 fused.h，
-/// 向 when_all / split 组合的降解在 composed.h。
+/// 本文件只有类型层面的分析（全部用反射写成 consteval 函数）与节点环境；
+/// 真正的 operation state 在 fused.h，向 when_all / split 组合的降解在 composed.h。
 
 #include <array>
 #include <concepts>
 #include <cstddef>
 #include <exception>
+#include <meta>
 #include <optional>
 #include <tuple>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 #include <stdexec/execution.hpp>
 #include <exec/completion_signatures.hpp>
@@ -31,15 +33,17 @@ namespace sdag
 
 struct dag_t;
 
-/// 节点 I 的输入 sender（输入 keys 就是它 after<...> 里的键）：启动时把前驱的值一次性 set_value 给接收者。
+/// 节点的输入 sender（Dependency 就是它的 after<...>）：启动时把前驱的值一次性 set_value 给接收者。
 /// 本身没有状态，完成签名由接收者环境里的整图状态类型决定——这是一个"依赖环境"的 sender，像 read_env。
-template<class Keys>
+template<class Dependency>
 struct input_sender;
 
 namespace graph_detail
 {
 
 using ::std::size_t;
+using meta::info;
+using meta::infos;
 
 // ---------------------------------------------------------------- 查询：取回整图状态
 
@@ -57,7 +61,7 @@ struct get_graph_state_t : ::stdexec::forwarding_query_t
 
 inline constexpr get_graph_state_t get_graph_state{};
 
-// ---------------------------------------------------------------- 静态数据与特征
+// ---------------------------------------------------------------- 静态数据
 
 /// sexpr 的 data：只有类型，运行期是空对象。
 template<class Keys, class Dependencies>
@@ -66,130 +70,164 @@ struct dag_data
 	using keys = Keys;
 	using dependencies = Dependencies;
 	static constexpr auto shape = checked_shape_of_lists<Keys, Dependencies>();
-	static constexpr size_t count = Keys::size;
+	static constexpr size_t count = shape.count;
 
 	template<size_t I>
-	using dependencies_t = keys_to_indices_t<Keys, typename meta::at_t<I, Dependencies>::keys>;
+	using dependencies_t = keys_to_indices_t<Keys, meta::at_t<I, Dependencies>>;
 };
 
-template<class Sender>
-struct sender_traits;
+// ---------------------------------------------------------------- 图 sender 的组成部分（反射）
 
-template<class Data, class... Children>
-struct sender_traits<::stdexec::__sexpr<dag_t, Data, Children...>>
+/// Self 永远是图 sender 的引用类型（X&& 或 X const&）；这里先剥掉引用与别名。
+[[nodiscard]] consteval info graph_type(info self)
 {
-	using data = Data;
-	using children = meta::type_list<Children...>;
-	static constexpr auto shape = Data::shape;
-	static constexpr size_t count = sizeof...(Children);
+	return ::std::meta::remove_cvref(::std::meta::dealias(self));
+}
 
-	template<size_t I>
-	using child_t = meta::at_t<I, children>;
+[[nodiscard]] consteval info data_of(info self)
+{
+	return meta::arguments(graph_type(self))[1];
+}
 
-	template<size_t I>
-	using dependencies_t = typename Data::template dependencies_t<I>;
-};
+/// 子 sender（节点 sender）类型，按声明顺序。
+[[nodiscard]] consteval infos children_of(info self)
+{
+	infos all = meta::arguments(graph_type(self));
+	return infos(all.begin() + 2, all.end());
+}
 
-/// Self 永远是图 sender 的引用类型（X&& 或 X const&），调用方先规范化再传入。
+[[nodiscard]] consteval size_t count_of(info self)
+{
+	return children_of(self).size();
+}
+
 template<class Self>
-using traits_of = sender_traits<::std::remove_cvref_t<Self>>;
+using data_t = typename [: graph_detail::data_of(^^Self) :];
+
+template<class Self>
+inline constexpr auto shape_of_v = data_t<Self>::shape;
 
 template<class Self, size_t I>
-using node_sender_t = ::stdexec::__copy_cvref_t<Self, typename traits_of<Self>::template child_t<I>>;
+using child_t = typename [: graph_detail::children_of(^^Self)[I] :];
 
-// ---------------------------------------------------------------- 节点 sender 里的输入叶子
+/// 节点 I 的 sender，带上 Self 的值类别：右值图 move 子 sender，const& 图拷贝它们。
+template<class Self, size_t I>
+using node_sender_t = ::stdexec::__copy_cvref_t<Self, child_t<Self, I>>;
 
-template<class T>
-inline constexpr size_t input_count_v = 0;
+template<class Self, size_t I>
+using dependencies_t = typename data_t<Self>::template dependencies_t<I>;
 
-template<class Keys>
-inline constexpr size_t input_count_v<input_sender<Keys>> = 1;
-
-template<class T>
-	requires requires { typename T::__children_t; }
-inline constexpr size_t input_count_v<T> = []<class... Children>(::stdexec::__mlist<Children...>*)
+/// 节点 I 在图里的前驱索引（after<...> 声明顺序）。
+template<class Self>
+[[nodiscard]] consteval ::std::vector<size_t> dependency_indices(info dependency)
 {
-	return (input_count_v<::std::remove_cvref_t<Children>> + ... + size_t{0});
-}(static_cast<typename T::__children_t*>(nullptr));
+	return indices_of(meta::arguments(dependency), meta::arguments(^^typename data_t<Self>::keys));
+}
+
+// ---------------------------------------------------------------- 节点 sender 里的输入叶子（反射）
 
 template<class T>
-inline constexpr bool contains_input_v = input_count_v<T> != 0;
+using sexpr_children_alias = typename T::__children_t;
+
+template<class T>
+using sexpr_tag_alias = typename T::__tag_t;
+
+template<class T>
+using sexpr_data_alias = typename T::__data_t;
+
+/// 所有对 sender 类型的检查都先做这一步：去别名、去 cv / 引用。
+[[nodiscard]] consteval info plain(info type)
+{
+	return ::std::meta::remove_cvref(::std::meta::dealias(type));
+}
+
+/// stdexec 算法 sender（含它们的派生类型）的子 sender；不是 sexpr 的类型给出空列表。
+[[nodiscard]] consteval infos sexpr_children(info sender)
+{
+	sender = plain(sender);
+	if (!::std::meta::can_substitute(^^sexpr_children_alias, {sender}))
+	{
+		return {};
+	}
+	return meta::arguments(::std::meta::substitute(^^sexpr_children_alias, {sender}));
+}
+
+[[nodiscard]] consteval bool is_input(info sender)
+{
+	sender = plain(sender);
+	return ::std::meta::has_template_arguments(sender) && ::std::meta::template_of(sender) == ^^input_sender;
+}
+
+/// 节点 sender 里输入叶子的个数（递归穿过 stdexec 的算法层）。
+[[nodiscard]] consteval size_t input_count(info sender)
+{
+	sender = plain(sender);
+	if (is_input(sender))
+	{
+		return 1;
+	}
+	size_t total = 0;
+	for (info child : sexpr_children(sender))
+	{
+		total += input_count(child);
+	}
+	return total;
+}
+
+template<class T>
+inline constexpr size_t input_count_v = graph_detail::input_count(^^T);
 
 /// 节点 I 是否消费前驱的值：含输入叶子的节点消费，纯 sender 载荷的节点只有控制依赖。
-template<class Self, size_t I>
-inline constexpr bool consumes_input = contains_input_v<typename traits_of<Self>::template child_t<I>>;
-
-template<class Self, size_t D, class Indices>
-struct consumer_count;
-
-template<class Self, size_t D, size_t... I>
-struct consumer_count<Self, D, ::std::index_sequence<I...>>
+[[nodiscard]] consteval bool consumes_input(info self, size_t index)
 {
-	static constexpr size_t value = (((traits_of<Self>::shape.edge[D][I] && consumes_input<Self, I>) ? size_t{1} : size_t{0}) + ... + size_t{0});
-};
+	return input_count(children_of(self)[index]) != 0;
+}
 
-/// 节点 D 的值要不要共享：读它的值的后继（只有控制依赖的后继不算）超过一个才共享，否则 move 给唯一的消费者。
+/// 读节点 D 的值的后继个数（只有控制依赖的后继不算）。
+template<class Self>
+[[nodiscard]] consteval size_t consumer_count(size_t from)
+{
+	size_t total = 0;
+	for (size_t to : shape_of_v<Self>.successors(from))
+	{
+		total += consumes_input(^^Self, to) ? 1 : 0;
+	}
+	return total;
+}
+
+/// 节点 D 的值要不要共享：读它的值的后继超过一个才共享，否则 move 给唯一的消费者。
 template<class Self, size_t D>
-inline constexpr bool shared_v = consumer_count<Self, D, ::std::make_index_sequence<traits_of<Self>::count>>::value > 1;
-
-template<auto Shape>
-constexpr auto sink_indices = meta::filtered_indices<Shape.count, [](size_t index) { return Shape.is_sink(index); }>;
-
-template<auto Shape>
-constexpr auto root_indices = meta::filtered_indices<Shape.count, [](size_t index) { return Shape.is_root(index); }>;
+inline constexpr bool shared_v = graph_detail::consumer_count<Self>(D) > 1;
 
 // ---------------------------------------------------------------- 把输入叶子换成别的 sender（只算类型）
 
-template<class T>
-inline constexpr bool is_input_v = false;
-
-template<class Keys>
-inline constexpr bool is_input_v<input_sender<Keys>> = true;
-
-template<class CvSender, class Input>
-struct substituted;
-
-template<class CvSender, class Input>
-using substituted_t = typename substituted<CvSender, Input>::type;
-
-template<class CvSender, class Input, class Children>
-struct rebuilt;
-
-/// sexpr 原地重建：标签、data 不变，子 sender 递归替换。重建出的是裸 __sexpr<Tag, Data, Child...>，
-/// 与算法自己的派生 sender 类型共用同一个 __sexpr_impl<Tag>。
-template<class CvSender, class Input, class... Children>
-struct rebuilt<CvSender, Input, ::stdexec::__mlist<Children...>>
+/// 沿 stdexec 的 sexpr 层层重建：标签、data 不变，含输入叶子的子树递归替换，其余子树原样保留。
+/// 重建出的是裸 __sexpr<Tag, Data, Child...>，与算法自己的派生 sender 类型共用同一个 __sexpr_impl<Tag>。
+/// （input_count 只穿过 sexpr 层去数叶子，所以数到叶子的 sender 一定是 sexpr：这里不会遇到不透明层。）
+[[nodiscard]] consteval info substituted(info sender, info input)
 {
-	using sender = ::std::remove_cvref_t<CvSender>;
-	using type = ::stdexec::__sexpr<typename sender::__tag_t, ::std::decay_t<typename sender::__data_t>,
-		substituted_t<::stdexec::__copy_cvref_t<CvSender, Children>, Input>...>;
-};
-
-template<class CvSender, class Input>
-struct substituted
-{
-	using sender = ::std::remove_cvref_t<CvSender>;
-
-	static consteval auto compute() noexcept
+	sender = plain(sender);
+	if (is_input(sender))
 	{
-		if constexpr (is_input_v<sender>)
-		{
-			return meta::tag<::std::decay_t<Input>>{};
-		}
-		else if constexpr (!contains_input_v<sender>)
-		{
-			return meta::tag<sender>{};
-		}
-		else
-		{
-			static_assert(requires { typename sender::__children_t; },
-				"sdag: 节点 sender 里有一层不是 stdexec 的 sexpr，无法把输入叶子替换进去；降解只支持由 stdexec 算法组成的节点");
-			return meta::tag<typename rebuilt<CvSender, Input, typename sender::__children_t>::type>{};
-		}
+		return ::std::meta::decay(input);
 	}
+	if (input_count(sender) == 0)
+	{
+		return sender;
+	}
+	infos rebuilt{
+		::std::meta::dealias(::std::meta::substitute(^^sexpr_tag_alias, {sender})),
+		::std::meta::decay(::std::meta::substitute(^^sexpr_data_alias, {sender})),
+	};
+	for (info child : sexpr_children(sender))
+	{
+		rebuilt.push_back(substituted(child, input));
+	}
+	return ::std::meta::substitute(^^::stdexec::__sexpr, rebuilt);
+}
 
-	using type = typename decltype(compute())::type;
-};
+template<class CvSender, class Input>
+using substituted_t = typename [: graph_detail::substituted(^^CvSender, ^^Input) :];
 
 /// 输入 sender（与探针占位 sender）在 start 里内联完成。
 struct input_attrs
@@ -201,137 +239,153 @@ struct input_attrs
 	}
 };
 
-// ---------------------------------------------------------------- 完成签名分析
+// ---------------------------------------------------------------- 完成签名分析（反射 + 展开语句）
 
 template<class Self, size_t I, class... Env>
 using node_completions_t = decltype(::stdexec::get_completion_signatures<node_sender_t<Self, I>, Env...>());
 
-template<class Completions>
-struct node_summary
+[[nodiscard]] consteval size_t value_completion_count(info completions)
 {
-	using summary = sig::summary<Completions>;
-	static_assert(summary::value_lists::size <= 1,
-		"sdag: 每个节点至多只能有一种 set_value 完成；有多种时请先 ::stdexec::into_variant");
+	return sig::summarize(completions).value_lists.size();
+}
 
-	/// 没有值完成的节点（例如 just_stopped()）永远不会带着值结束，它的后继也永远不会以值启动。
-	static constexpr bool has_values = summary::value_lists::size == 1;
-	using raw_values = meta::at_t<0, meta::concat_t<typename summary::value_lists, meta::type_list<meta::type_list<>>>>;
-	using raw_errors = typename summary::error_types;
-	using values = meta::transform_t<sig::decay_t, raw_values>;
-	using errors = meta::transform_t<sig::decay_t, raw_errors>;
-	static constexpr bool sends_stopped = summary::sends_stopped;
-	/// 存进 op-state 的拷贝 / 移动是否不抛；抛的话整图多一个 exception_ptr 错误完成。
-	static constexpr bool nothrow_values = sig::all_nothrow_decay_copyable<raw_values>::value;
-	static constexpr bool nothrow_errors = sig::all_nothrow_decay_copyable<raw_errors>::value;
-};
+/// libstdc++ 的 std::array<T, 0> 没有 consteval 的 operator[]，装不了 consteval-only 的 info；空图时留一个占位元素。
+template<size_t N>
+using info_array = ::std::array<info, N == 0 ? 1 : N>;
 
-/// 唯一汇点时整图的值签名就是它的原始签名；否则是各汇点衰变后的值拼接。延迟到确定 Direct 之后再取下标。
-template<class Self, bool Direct, size_t Sink, class Fallback, class... Env>
-struct graph_value_types
+/// 整图在某个节点环境下的分析结果；全部是字面量，可以做 static constexpr 成员。
+template<size_t N>
+struct analysis_result
 {
-	using type = Fallback;
-};
+	/// 有节点算不出完成签名时为假，first_invalid 是那个结果类型（依赖环境的错误对象等），原样透传给 stdexec。
+	bool valid = true;
+	info first_invalid = ^^void;
 
-template<class Self, size_t Sink, class Fallback, class... Env>
-struct graph_value_types<Self, true, Sink, Fallback, Env...>
-{
-	using type = typename node_summary<node_completions_t<Self, Sink, Env...>>::raw_values;
-};
-
-template<class Self, class Indices, class... Env>
-struct analysis_impl;
-
-template<class Self, size_t... I, class... Env>
-struct analysis_impl<Self, ::std::index_sequence<I...>, Env...>
-{
-	static constexpr auto shape = traits_of<Self>::shape;
-
-	template<size_t J>
-	using node = node_summary<node_completions_t<Self, J, Env...>>;
-
-	template<size_t J>
-	using values_t = typename node<J>::values;
+	::std::array<bool, N> has_values{};
+	::std::array<bool, N> sends_stopped{};
+	::std::array<bool, N> nothrow_values{};
+	::std::array<bool, N> nothrow_errors{};
+	/// 值要不要存进整图 op-state：既不是要存值的汇点、后继又都只是控制依赖，或根本没有值时不存。
+	::std::array<bool, N> slot_needed{};
+	/// 每个节点：原始值类型列表、衰变后的值类型列表、衰变后的错误类型列表（都是 type_list）。
+	info_array<N> raw_values{};
+	info_array<N> values{};
+	info_array<N> errors{};
 
 	/// 只有一个汇点时它的值不存槽位：完成时直接转发给整图的接收者（与 then 一样不物化）。
-	static constexpr bool direct_sink = shape.sink_count() == 1;
-	static constexpr size_t sink_index = direct_sink ? sink_indices<shape>[0] : size_t{0};
-
-	/// 值没人读（既不是要存值的汇点、后继又都只是控制依赖）或者根本没有值时，不占存储。
-	template<size_t J>
-	static constexpr bool slot_needed = values_t<J>::size != 0
-		&& ((shape.is_sink(J) && !direct_sink) || ((shape.edge[J][I] && consumes_input<Self, I>) || ...));
-
-	static constexpr bool sends_stopped = (node<I>::sends_stopped || ...);
-	static constexpr bool has_errors = ((node<I>::errors::size != 0) || ...);
-	/// 存值 / 存错误会不会抛：不存槽位的值不算。
-	static constexpr bool nothrow_store = (node<I>::nothrow_errors && ...) && ((!slot_needed<I> || node<I>::nothrow_values) && ...);
-	static constexpr bool can_fail = has_errors || sends_stopped || !nothrow_store;
+	bool direct_sink = false;
+	size_t sink_index = 0;
+	bool any_stopped = false;
+	bool has_errors = false;
 	/// 任一节点永远不会带值结束，整图就永远不会以 set_value 完成（每个节点都是某个汇点的祖先）。
-	static constexpr bool has_values = (node<I>::has_values && ...);
-
-	using error_types = meta::unique_t<meta::concat_t<
-		typename node<I>::errors...,
-		::std::conditional_t<nothrow_store, meta::type_list<>, meta::type_list<::std::exception_ptr>>>>;
-	using value_types = typename graph_value_types<Self, direct_sink, sink_index,
-		meta::concat_t<::std::conditional_t<shape.is_sink(I), values_t<I>, meta::type_list<>>...>, Env...>::type;
-	using completions = sig::make_completions_t<has_values, value_types, error_types, sends_stopped>;
+	bool all_has_values = true;
+	/// 存值 / 存错误会不会抛：不存槽位的值不算。
+	bool nothrow_store = true;
+	bool can_fail = false;
+	/// 整图的错误类型列表与值类型列表（type_list）。
+	info error_types = ^^void;
+	info value_types = ^^void;
 };
 
+/// 按拓扑序逐个节点取完成签名并汇总。按拓扑序走还顺带解决了嵌套实例化深度：
+/// then(f) 问子 sender 的签名时，节点 N 的计算会嵌套进节点 N-1 的；先算前驱，后面的计算全部命中编译器已有的实例化结果。
 template<class Self, class... Env>
-using analysis = analysis_impl<Self, ::std::make_index_sequence<traits_of<Self>::count>, Env...>;
-
-template<class Self, class Indices, class... Env>
-struct validity;
-
-template<class Self, size_t... I, class... Env>
-struct validity<Self, ::std::index_sequence<I...>, Env...>
+[[nodiscard]] consteval auto analyze()
 {
-	static constexpr bool value = (sig::is_completion_signatures<node_completions_t<Self, I, Env...>> && ...);
+	constexpr auto shape = shape_of_v<Self>;
+	analysis_result<shape.count> result;
 
-	/// 第一个不合法的结果原样返回（依赖环境的 sender 在无环境下的错误对象等）。
-	template<size_t Cursor = 0>
-	static consteval auto first_invalid()
+	// 范围必须是常量表达式：用静态成员，不用上面的局部变量。
+	template for (constexpr size_t index : shape_of_v<Self>.order)
 	{
-		constexpr ::std::array<size_t, sizeof...(I)> indices{I...};
-		if constexpr (Cursor == sizeof...(I))
+		using completions = node_completions_t<Self, index, Env...>;
+		if constexpr (!sig::is_completion_signatures_v<completions>)
 		{
-			::std::unreachable();
-		}
-		else if constexpr (!sig::is_completion_signatures<node_completions_t<Self, indices[Cursor], Env...>>)
-		{
-			return node_completions_t<Self, indices[Cursor], Env...>{};
+			if (result.valid)
+			{
+				result.valid = false;
+				result.first_invalid = ::std::meta::dealias(^^completions);
+			}
 		}
 		else
 		{
-			return first_invalid<Cursor + 1>();
+			static_assert(value_completion_count(^^completions) <= 1,
+				"sdag: 每个节点至多只能有一种 set_value 完成；有多种时请先 ::stdexec::into_variant");
+			sig::summary const summary = sig::summarize(^^completions);
+			result.has_values[index] = !summary.value_lists.empty();
+			result.raw_values[index] = result.has_values[index] ? summary.value_lists[0] : meta::list({});
+			result.values[index] = meta::list(meta::map(^^::std::decay_t, meta::arguments(result.raw_values[index])));
+			result.errors[index] = meta::list(meta::map(^^::std::decay_t, summary.error_types));
+			result.sends_stopped[index] = summary.sends_stopped;
+			result.nothrow_values[index] = sig::all_nothrow_decay_copyable(meta::arguments(result.raw_values[index]));
+			result.nothrow_errors[index] = sig::all_nothrow_decay_copyable(summary.error_types);
 		}
 	}
-};
+	if (!result.valid)
+	{
+		return result;
+	}
+
+	result.direct_sink = shape.sink_count() == 1;
+	result.sink_index = result.direct_sink ? shape.sinks()[0] : 0;
+	for (size_t index = 0; index < shape.count; ++index)
+	{
+		bool consumed = false;
+		for (size_t to : shape.successors(index))
+		{
+			consumed = consumed || consumes_input(^^Self, to);
+		}
+		result.slot_needed[index] = meta::arguments(result.values[index]).size() != 0
+			&& ((shape.is_sink(index) && !result.direct_sink) || consumed);
+		result.any_stopped = result.any_stopped || result.sends_stopped[index];
+		result.has_errors = result.has_errors || meta::arguments(result.errors[index]).size() != 0;
+		result.all_has_values = result.all_has_values && result.has_values[index];
+		result.nothrow_store = result.nothrow_store && result.nothrow_errors[index] && (!result.slot_needed[index] || result.nothrow_values[index]);
+	}
+	result.can_fail = result.has_errors || result.any_stopped || !result.nothrow_store;
+
+	::std::vector<infos> error_lists;
+	for (size_t index = 0; index < shape.count; ++index)
+	{
+		error_lists.push_back(meta::arguments(result.errors[index]));
+	}
+	if (!result.nothrow_store)
+	{
+		error_lists.push_back({sig::exception_ptr_type()});
+	}
+	result.error_types = meta::list(meta::unique(meta::concat(error_lists)));
+
+	if (result.direct_sink)
+	{
+		result.value_types = result.raw_values[result.sink_index];
+	}
+	else
+	{
+		::std::vector<infos> value_lists;
+		for (size_t sink : shape.sinks())
+		{
+			value_lists.push_back(meta::arguments(result.values[sink]));
+		}
+		result.value_types = meta::list(meta::concat(value_lists));
+	}
+	return result;
+}
 
 template<class Self, class... Env>
-using all_nodes_validity = validity<Self, ::std::make_index_sequence<traits_of<Self>::count>, Env...>;
-
-// ---------------------------------------------------------------- 按拓扑序预热
-
-/// 节点 sender 的完成签名要先算前驱的：then(f) 问子 sender 的签名时，节点 N 的计算会嵌套进
-/// 节点 N-1 的……每层几十个实例化帧，长链会撞上编译器的模板深度上限。这里按拓扑序逐个
-/// 实例化（基类先于派生类），让后面的计算全部命中编译器已有的实例化结果，嵌套深度变成常数。
-template<class Self, size_t Step, class... Env>
-struct warm_up : warm_up<Self, Step - 1, Env...>
+struct analysis
 {
-	static constexpr size_t index = traits_of<Self>::shape.order[Step - 1];
-	static constexpr bool done = warm_up<Self, Step - 1, Env...>::done
-		&& sizeof(meta::tag<node_completions_t<Self, index, Env...>>) > 0;
-};
+	static constexpr auto result = graph_detail::analyze<Self, Env...>();
 
-template<class Self, class... Env>
-struct warm_up<Self, 0, Env...>
-{
-	static constexpr bool done = true;
-};
+	template<size_t J>
+	using values_t = typename [: result.values[J] :];
 
-template<class Self, class... Env>
-inline constexpr bool warmed_up = warm_up<Self, traits_of<Self>::count, Env...>::done;
+	using first_invalid_t = typename [: result.first_invalid :];
+
+	/// 类的成员别名在类实例化时就会求值，所以不合法时给 void，别让 make_completions 在 ^^void 上抛异常。
+	using completions = typename [: result.valid
+		? sig::make_completions(result.all_has_values, result.value_types, result.error_types, result.any_stopped)
+		: ^^void :];
+};
 
 // ---------------------------------------------------------------- 节点环境
 
@@ -374,7 +428,7 @@ using probe_env = node_env<Self, Env, false>;
 
 /// 先在"只转发外层停止令牌"的环境下探测：没有任何节点会失败 / 停止 / 抛异常，就不需要停止源。
 template<class Self, class Env>
-inline constexpr bool stoppable_v = analysis<Self, probe_env<Self, Env>>::can_fail;
+inline constexpr bool stoppable_v = analysis<Self, probe_env<Self, Env>>::result.can_fail;
 
 template<class Self, class Env>
 using node_env_t = node_env<Self, Env, stoppable_v<Self, Env>>;
@@ -397,27 +451,26 @@ template<class Env>
 	requires inside_graph<Env>
 using graph_of_env_t = typename graph_of<decltype(graph_detail::get_graph_state(::std::declval<Env const&>()))>::type;
 
-/// 输入 sender 在给定接收者环境下的完成签名：从环境里拿到图类型，再按前驱算。
-template<class Keys, class Env>
-	requires inside_graph<Env>
-[[nodiscard]] consteval auto input_completions_from_env();
-
 /// 有接收者环境时的完成签名：先按探测环境、再按最终节点环境检查每个节点。
 template<class Self, class Env>
 [[nodiscard]] consteval auto completions_with_env()
 {
-	static_assert(warmed_up<Self> && warmed_up<Self, probe_env<Self, Env>>);
-	if constexpr (!all_nodes_validity<Self, probe_env<Self, Env>>::value)
+	using probe = analysis<Self, probe_env<Self, Env>>;
+	if constexpr (!probe::result.valid)
 	{
-		return all_nodes_validity<Self, probe_env<Self, Env>>::first_invalid();
-	}
-	else if constexpr (!(warmed_up<Self, node_env_t<Self, Env>> && all_nodes_validity<Self, node_env_t<Self, Env>>::value))
-	{
-		return all_nodes_validity<Self, node_env_t<Self, Env>>::first_invalid();
+		return typename probe::first_invalid_t{};
 	}
 	else
 	{
-		return typename analysis<Self, node_env_t<Self, Env>>::completions{};
+		using final = analysis<Self, node_env_t<Self, Env>>;
+		if constexpr (!final::result.valid)
+		{
+			return typename final::first_invalid_t{};
+		}
+		else
+		{
+			return typename final::completions{};
+		}
 	}
 }
 
@@ -438,64 +491,69 @@ template<class Self, class... Env>
 
 // ---------------------------------------------------------------- 输入 sender 的完成签名
 
-template<bool Shared>
-struct accessor
+/// 共享的值按 const& 交给后继；独占的值 move 过去（签名写成按值）。
+[[nodiscard]] consteval info access_type(info value, bool shared)
 {
-	/// 共享的值按 const& 交给后继；独占的值 move 过去（签名写成按值）。
-	template<class V>
-	using fn = ::std::conditional_t<Shared, V const&, V>;
-};
-
-template<class Self, class Dependencies, class... Env>
-struct input_values;
-
-/// 只看前驱节点的完成签名，不触发整图分析——否则会沿着"节点 -> 输入 sender -> 整图"递归实例化。
-template<class Self, size_t... D, class... Env>
-struct input_values<Self, ::std::index_sequence<D...>, Env...>
-{
-	static_assert(((D < traits_of<Self>::count) && ...), "sdag: 输入 sender 引用了图里不存在的键");
-
-	template<size_t J>
-	using node = node_summary<node_completions_t<Self, J, Env...>>;
-
-	static constexpr bool has_values = (node<D>::has_values && ...);
-
-	using type = meta::concat_t<
-		meta::transform_t<accessor<shared_v<Self, D>>::template fn, typename node<D>::values>...>;
-
-	using completions = ::std::conditional_t<has_values,
-		::stdexec::completion_signatures<sig::value_signature_t<type>>,
-		::stdexec::completion_signatures<>>;
-};
-
-template<class Self, class Keys>
-using dependencies_of_keys_t = keys_to_indices_t<typename traits_of<Self>::data::keys, Keys>;
-
-template<class Self, class Keys, class... Env>
-[[nodiscard]] consteval auto input_completions()
-{
-	using dependencies = dependencies_of_keys_t<Self, Keys>;
-	using checks = validity<Self, dependencies, Env...>;
-	if constexpr (!checks::value)
-	{
-		return checks::first_invalid();
-	}
-	else
-	{
-		return typename input_values<Self, dependencies, Env...>::completions{};
-	}
+	return shared ? ::std::meta::add_lvalue_reference(::std::meta::add_const(value)) : value;
 }
 
-template<class Keys, class Env>
+/// 只看前驱节点的完成签名，不触发整图分析——否则会沿着"节点 -> 输入 sender -> 整图"递归实例化。
+/// 返回 completion_signatures<set_value_t(...)>；某个前驱永远不会带值结束时返回 completion_signatures<>；
+/// 前驱签名算不出来时原样返回那个结果类型。
+template<class Self, class Dependency, class... Env>
+[[nodiscard]] consteval info input_completions_type()
+{
+	infos values;
+	bool has_values = true;
+	template for (constexpr size_t from : ::std::define_static_array(graph_detail::dependency_indices<Self>(^^Dependency)))
+	{
+		static_assert(from < count_of(^^Self), "sdag: 输入 sender 引用了图里不存在的键");
+		using completions = node_completions_t<Self, from, Env...>;
+		if constexpr (!sig::is_completion_signatures_v<completions>)
+		{
+			return ::std::meta::dealias(^^completions);
+		}
+		else
+		{
+			static_assert(value_completion_count(^^completions) <= 1,
+				"sdag: 每个节点至多只能有一种 set_value 完成；有多种时请先 ::stdexec::into_variant");
+			sig::summary const summary = sig::summarize(^^completions);
+			if (summary.value_lists.empty())
+			{
+				has_values = false;
+			}
+			else
+			{
+				for (info value : meta::map(^^::std::decay_t, meta::arguments(summary.value_lists[0])))
+				{
+					values.push_back(access_type(value, shared_v<Self, from>));
+				}
+			}
+		}
+	}
+	if (!has_values)
+	{
+		return ^^::stdexec::completion_signatures<>;
+	}
+	return ::std::meta::substitute(^^::stdexec::completion_signatures, {sig::make_signature(^^::stdexec::set_value_t, values)});
+}
+
+template<class Self, class Dependency, class... Env>
+[[nodiscard]] consteval auto input_completions()
+{
+	return typename [: graph_detail::input_completions_type<Self, Dependency, Env...>() :]{};
+}
+
+template<class Dependency, class Env>
 	requires inside_graph<Env>
 [[nodiscard]] consteval auto input_completions_from_env()
 {
-	return graph_detail::input_completions<graph_of_env_t<Env>, Keys, Env>();
+	return graph_detail::input_completions<graph_of_env_t<Env>, Dependency, Env>();
 }
 
 struct _THE_INPUT_SENDER_OF_A_DAG_NODE_WAS_CONNECTED_OUTSIDE_OF_A_DAG_;
 
-template<class Keys, class Receiver>
+template<class Dependency, class Receiver>
 struct input_operation
 {
 	Receiver _receiver;
@@ -503,112 +561,127 @@ struct input_operation
 	void start() noexcept
 	{
 		auto* state = graph_detail::get_graph_state(::stdexec::get_env(_receiver));
-		state->template deliver<Keys>(::std::move(_receiver));
+		state->template deliver<Dependency>(::std::move(_receiver));
 	}
 };
 
 // ---------------------------------------------------------------- 整图状态：值槽
 
-template<class Values>
-struct slot_type;
-
-template<class... Vs>
-struct slot_type<meta::type_list<Vs...>>
+/// 每个节点的值槽类型：optional<tuple<值...>> 或 meta::empty。
+template<class Self, class Env>
+[[nodiscard]] consteval info slot_types()
 {
-	using type = ::std::optional<::std::tuple<Vs...>>;
+	constexpr auto& result = analysis<Self, Env>::result;
+	infos slots;
+	for (size_t index = 0; index < count_of(^^Self); ++index)
+	{
+		if (result.slot_needed[index])
+		{
+			slots.push_back(::std::meta::substitute(^^::std::optional,
+				{::std::meta::substitute(^^::std::tuple, meta::arguments(result.values[index]))}));
+		}
+		else
+		{
+			slots.push_back(^^meta::empty);
+		}
+	}
+	return meta::list(slots);
+}
+
+/// 交付表的一项：从哪个节点的槽位取第几个值，按 const& 共享还是 move。
+struct slot_access
+{
+	size_t node;
+	size_t element;
+	bool shared;
 };
 
-template<class Self, class Env, class Indices>
-struct graph_state_impl;
-
-template<class Self, class Env, size_t... I>
-struct graph_state_impl<Self, Env, ::std::index_sequence<I...>>
+/// 把一组节点的值按顺序铺平成交付表；allow_shared 为假时一律 move（汇点交给整图接收者）。
+template<class Self, class Env>
+[[nodiscard]] consteval ::std::vector<slot_access> delivery_plan(::std::vector<size_t> const& nodes, bool allow_shared)
 {
-	static_assert(warmed_up<Self, probe_env<Self, Env>>);
-	static_assert(all_nodes_validity<Self, probe_env<Self, Env>>::value, "sdag: 有节点在接收者环境下无法给出完成签名");
-	static_assert(warmed_up<Self, node_env_t<Self, Env>>);
-	static_assert(all_nodes_validity<Self, node_env_t<Self, Env>>::value, "sdag: 有节点在整图环境下无法给出完成签名");
+	::std::vector<slot_access> plan;
+	for (size_t node : nodes)
+	{
+		size_t const elements = meta::arguments(analysis<Self, Env>::result.values[node]).size();
+		for (size_t element = 0; element < elements; ++element)
+		{
+			plan.push_back({node, element, allow_shared && consumer_count<Self>(node) > 1});
+		}
+	}
+	return plan;
+}
 
-	using traits = traits_of<Self>;
-	static constexpr auto shape = traits::shape;
-	static constexpr size_t count = traits::count;
+/// 节点值的存放处；fused_core 从它派生，节点环境里只暴露这一层。
+template<class Self, class Env>
+struct graph_state
+{
+	static_assert(analysis<Self, probe_env<Self, Env>>::result.valid, "sdag: 有节点在接收者环境下无法给出完成签名");
+	static_assert(analysis<Self, node_env_t<Self, Env>>::result.valid, "sdag: 有节点在整图环境下无法给出完成签名");
+
+	static constexpr auto shape = shape_of_v<Self>;
+	static constexpr size_t count = shape.count;
 	static constexpr bool stoppable = stoppable_v<Self, Env>;
 	using env_type = node_env_t<Self, Env>;
 	using analysis_type = analysis<Self, env_type>;
+	static constexpr auto& result = analysis_type::result;
 	using completions = typename analysis_type::completions;
 
 	template<size_t J>
 	using values_t = typename analysis_type::template values_t<J>;
 
 	template<size_t J>
-	static constexpr bool slot_needed = analysis_type::template slot_needed<J>;
+	static constexpr bool slot_needed = result.slot_needed[J];
 
-	template<size_t J>
-	using slot_t = ::std::conditional_t<slot_needed<J>, typename slot_type<values_t<J>>::type, meta::empty>;
+	SDAG_NO_UNIQUE_ADDRESS meta::indexed_tuple_of<typename [: graph_detail::slot_types<Self, env_type>() :]> _slots{};
 
-	SDAG_NO_UNIQUE_ADDRESS meta::indexed_tuple<slot_t<I>...> _slots{};
-};
+	/// 按交付表的一项取值：共享的给 const&，独占的 move 出去。
+	template<slot_access Access>
+	[[nodiscard]] decltype(auto) access() noexcept
+	{
+		auto& value = ::std::get<Access.element>(*meta::get<Access.node>(_slots));
+		if constexpr (Access.shared)
+		{
+			return ::std::as_const(value);
+		}
+		else
+		{
+			return ::std::move(value);
+		}
+	}
 
-/// 节点值的存放处；fused_core 从它派生，节点环境里只暴露这一层。
-template<class Self, class Env>
-struct graph_state : graph_state_impl<Self, Env, ::std::make_index_sequence<traits_of<Self>::count>>
-{
-	using base = graph_state_impl<Self, Env, ::std::make_index_sequence<traits_of<Self>::count>>;
-	using base::shape;
-	using typename base::analysis_type;
+	template<class Dependency>
+	static constexpr size_t delivery_size = delivery_plan<Self, env_type>(dependency_indices<Self>(^^Dependency), true).size();
 
-	/// input_operation 启动时调用：把 Keys 对应前驱的值交给接收者。
-	template<class Keys, class Receiver>
+	/// Dependency（after<...>）对应前驱的值，按声明顺序铺平。
+	template<class Dependency>
+	static constexpr auto delivery_table =
+		meta::to_array<delivery_size<Dependency>>(delivery_plan<Self, env_type>(dependency_indices<Self>(^^Dependency), true));
+
+	/// input_operation 启动时调用：把 Dependency 对应前驱的值交给接收者。
+	template<class Dependency, class Receiver>
 	void deliver(Receiver&& receiver) noexcept
 	{
-		using dependencies = dependencies_of_keys_t<Self, Keys>;
 		// 接收者那条链路是在它自己的环境下算出输入签名的；必须与这里存的槽位一致，
 		// 否则说明某个节点 sender 在不同环境下报告了不同的值类型。
-		using declared = decltype(graph_detail::input_completions<Self, Keys, ::stdexec::env_of_t<Receiver>>());
-		using stored = decltype(graph_detail::input_completions<Self, Keys, typename base::env_type>());
-		static_assert(::std::same_as<declared, stored>, "sdag: 节点在接收者环境与整图环境下报告的值类型不一致");
-		if constexpr (!input_values<Self, dependencies, typename base::env_type>::has_values)
+		constexpr info declared = graph_detail::input_completions_type<Self, Dependency, ::stdexec::env_of_t<Receiver>>();
+		constexpr info stored = graph_detail::input_completions_type<Self, Dependency, env_type>();
+		static_assert(meta::same(declared, stored), "sdag: 节点在接收者环境与整图环境下报告的值类型不一致");
+		if constexpr (meta::same(stored, ^^::stdexec::completion_signatures<>))
 		{
 			// 某个前驱永远不会带值结束，这个节点也就永远不会被启动。
 			::std::terminate();
 		}
 		else
 		{
-			deliver_impl(dependencies{}, ::std::forward<Receiver>(receiver));
+			deliver_entries<Dependency>(::std::make_index_sequence<delivery_size<Dependency>>{}, ::std::forward<Receiver>(receiver));
 		}
 	}
 
-	template<::std::size_t D, ::std::size_t... Rest, class Receiver, class... Accumulated>
-	void deliver_impl(::std::index_sequence<D, Rest...>, Receiver&& receiver, Accumulated&&... accumulated) noexcept
+	template<class Dependency, size_t... E, class Receiver>
+	void deliver_entries(::std::index_sequence<E...>, Receiver&& receiver) noexcept
 	{
-		if constexpr (base::template values_t<D>::size == 0)
-		{
-			deliver_impl(::std::index_sequence<Rest...>{}, ::std::forward<Receiver>(receiver), ::std::forward<Accumulated>(accumulated)...);
-		}
-		else
-		{
-			::std::apply(
-				[&](auto&... values) noexcept
-				{
-					if constexpr (shared_v<Self, D>)
-					{
-						deliver_impl(::std::index_sequence<Rest...>{}, ::std::forward<Receiver>(receiver),
-							::std::forward<Accumulated>(accumulated)..., ::std::as_const(values)...);
-					}
-					else
-					{
-						deliver_impl(::std::index_sequence<Rest...>{}, ::std::forward<Receiver>(receiver),
-							::std::forward<Accumulated>(accumulated)..., ::std::move(values)...);
-					}
-				},
-				*meta::get<D>(this->_slots));
-		}
-	}
-
-	template<class Receiver, class... Accumulated>
-	void deliver_impl(::std::index_sequence<>, Receiver&& receiver, Accumulated&&... accumulated) noexcept
-	{
-		::stdexec::set_value(::std::forward<Receiver>(receiver), ::std::forward<Accumulated>(accumulated)...);
+		::stdexec::set_value(::std::forward<Receiver>(receiver), access<delivery_table<Dependency>[E]>()...);
 	}
 };
 
@@ -616,11 +689,11 @@ struct graph_state : graph_state_impl<Self, Env, ::std::make_index_sequence<trai
 
 // ---------------------------------------------------------------- 输入 sender
 
-template<class Keys>
+template<class Dependency>
 struct input_sender
 {
 	using sender_concept = ::stdexec::sender_t;
-	using keys = Keys;
+	using dependency = Dependency;
 
 	[[nodiscard]] static constexpr graph_detail::input_attrs get_env() noexcept
 	{
@@ -640,12 +713,12 @@ struct input_sender
 		}
 		else
 		{
-			return graph_detail::input_completions_from_env<Keys, Env...>();
+			return graph_detail::input_completions_from_env<Dependency, Env...>();
 		}
 	}
 
 	template<::stdexec::receiver Receiver>
-	[[nodiscard]] constexpr graph_detail::input_operation<Keys, Receiver> connect(Receiver receiver) const
+	[[nodiscard]] constexpr graph_detail::input_operation<Dependency, Receiver> connect(Receiver receiver) const
 		noexcept(::std::is_nothrow_move_constructible_v<Receiver>)
 	{
 		return {::std::move(receiver)};
@@ -680,36 +753,25 @@ namespace graph_detail
 template<class Node>
 [[nodiscard]] constexpr auto make_child(Node&& node)
 {
-	using keys = typename node_dependencies_t<Node>::keys;
+	using dependency = node_dependencies_t<Node>;
 	using payload_type = decltype(::sdag::payload(::std::forward<Node>(node)));
-	static_assert(node_payload<payload_type, input_sender<keys>>,
+	static_assert(node_payload<payload_type, input_sender<dependency>>,
 		"sdag: 节点载荷既不是 sender，也不是能接受输入 sender 的适配器（例如 ::stdexec::then(f)）");
 	if constexpr (sender_payload<payload_type>)
 	{
-		static_assert(!contains_input_v<::std::decay_t<payload_type>>, "sdag: 只有控制依赖的节点 sender 里不能出现输入 sender");
+		static_assert(input_count_v<::std::decay_t<payload_type>> == 0, "sdag: 只有控制依赖的节点 sender 里不能出现输入 sender");
 		return ::std::decay_t<payload_type>(::sdag::payload(::std::forward<Node>(node)));
 	}
 	else
 	{
-		using child = decltype(::sdag::payload(::std::forward<Node>(node))(input_sender<keys>{}));
+		using child = decltype(::sdag::payload(::std::forward<Node>(node))(input_sender<dependency>{}));
 		static_assert(input_count_v<child> == 1,
-			"sdag: 节点适配器必须把输入 sender 恰好用一次（它的值只会被交付一次，repeat / retry 这类会重启子 sender 的适配器不能套在输入上）");
-		return ::sdag::payload(::std::forward<Node>(node))(input_sender<keys>{});
+			"sdag: 节点适配器必须把输入 sender 恰好用一次，而且中间只能隔着 stdexec 的算法层："
+			"它的值只会被交付一次，repeat / retry 这类会重启子 sender 的适配器不能套在输入上；"
+			"不透明的自定义 sender 包着输入时这里会数成 0 次");
+		return ::sdag::payload(::std::forward<Node>(node))(input_sender<dependency>{});
 	}
 }
-
-template<class Self, class Indices>
-struct children_at;
-
-template<class Self, size_t... I>
-struct children_at<Self, ::std::index_sequence<I...>>
-{
-	using type = meta::type_list<typename traits_of<Self>::template child_t<I>...>;
-};
-
-/// 汇点的子 sender 类型列表（声明顺序）。
-template<class Self>
-using sink_children_t = typename children_at<Self, meta::index_sequence_of<sink_indices<traits_of<Self>::shape>>>::type;
 
 /// 探针用的占位 sender：完成签名与节点真实的输入 sender 在整图环境下一致，属性也一致；只用来算类型，不会被连接。
 template<class Completions>
@@ -729,50 +791,39 @@ struct placeholder_sender
 	}
 };
 
-template<class Self, class Env, class Indices>
-struct when_all_probe;
-
 /// 探针：when_all<汇点 sender（输入叶子换成占位 sender）...>。保留汇点的属性（完成调度器等），
 /// 签名与真实降解后的汇点一致，又不需要整图环境就能被 domain 的 transform_sender 检查。
-template<class Self, class Env, size_t... S>
-struct when_all_probe<Self, Env, ::std::index_sequence<S...>>
+/// 真实的 when_all 至少两个子 sender；只有一个汇点时把它重复一次，免得 domain 按子节点数约束时漏判。
+template<class Self, class Env>
+[[nodiscard]] consteval info when_all_probe()
 {
-	template<size_t J>
-	using keys_t = typename meta::at_t<J, typename traits_of<Self>::data::dependencies>::keys;
-
-	template<size_t J>
-	using placeholder_t = placeholder_sender<decltype(graph_detail::input_completions<Self, keys_t<J>, node_env_t<Self, Env>>())>;
-
-	template<size_t J>
-	using probe_child_t = substituted_t<typename traits_of<Self>::template child_t<J>, placeholder_t<J>>;
-
-	/// 真实的 when_all 至少两个子 sender；只有一个汇点时把它重复一次，免得 domain 按子节点数约束时漏判。
-	static consteval auto compute() noexcept
+	infos probes;
+	template for (constexpr size_t sink : ::std::define_static_array(shape_of_v<Self>.sinks()))
 	{
-		if constexpr (sizeof...(S) == 1)
-		{
-			return meta::tag<::stdexec::__sexpr<::stdexec::when_all_t, ::stdexec::__, probe_child_t<S>..., probe_child_t<S>...>>{};
-		}
-		else
-		{
-			return meta::tag<::stdexec::__sexpr<::stdexec::when_all_t, ::stdexec::__, probe_child_t<S>...>>{};
-		}
+		using dependency = meta::at_t<sink, typename data_t<Self>::dependencies>;
+		using placeholder = placeholder_sender<typename [: input_completions_type<Self, dependency, node_env_t<Self, Env>>() :]>;
+		probes.push_back(substituted(children_of(^^Self)[sink], ^^placeholder));
 	}
-
-	using type = typename decltype(compute())::type;
-};
+	if (probes.size() == 1)
+	{
+		probes.push_back(probes[0]);
+	}
+	infos arguments{^^::stdexec::when_all_t, ^^::stdexec::__};
+	arguments.insert(arguments.end(), probes.begin(), probes.end());
+	return ::std::meta::substitute(^^::stdexec::__sexpr, arguments);
+}
 
 /// transform_sender 分两个阶段：start_t 用环境的起始 domain，set_value_t 用 sender 自己报告的完成域。
 template<class OpTag, class Self, class Env>
-[[nodiscard]] consteval auto phase_domain() noexcept
+[[nodiscard]] consteval info phase_domain()
 {
 	if constexpr (::std::same_as<OpTag, ::stdexec::start_t>)
 	{
-		return meta::tag<::stdexec::__detail::__starting_domain_t<Env>>{};
+		return ^^::stdexec::__detail::__starting_domain_t<Env>;
 	}
 	else
 	{
-		return meta::tag<::stdexec::__detail::__completing_domain_t<void, Self, Env>>{};
+		return ^^::stdexec::__detail::__completing_domain_t<void, Self, Env>;
 	}
 }
 
@@ -782,24 +833,24 @@ template<class OpTag, class Self, class Env>
 template<class OpTag, class Self, class Env>
 [[nodiscard]] consteval bool lowering_wanted_in() noexcept
 {
-	if constexpr (!(warmed_up<Self, probe_env<Self, Env>> && all_nodes_validity<Self, probe_env<Self, Env>>::value))
+	if constexpr (!analysis<Self, probe_env<Self, Env>>::result.valid)
 	{
 		return false;
 	}
-	else if constexpr (!(warmed_up<Self, node_env_t<Self, Env>> && all_nodes_validity<Self, node_env_t<Self, Env>>::value))
+	else if constexpr (!analysis<Self, node_env_t<Self, Env>>::result.valid)
 	{
 		return false;
 	}
 	else
 	{
-		using domain = typename decltype(graph_detail::phase_domain<OpTag, Self, Env>())::type;
+		using domain = typename [: graph_detail::phase_domain<OpTag, Self, Env>() :];
 		if constexpr (::std::same_as<domain, ::stdexec::default_domain>)
 		{
 			return false;
 		}
 		else
 		{
-			using probe = typename when_all_probe<Self, Env, meta::index_sequence_of<sink_indices<traits_of<Self>::shape>>>::type;
+			using probe = typename [: graph_detail::when_all_probe<Self, Env>() :];
 			return !::stdexec::__default_domain_like<domain, OpTag, probe, Env>;
 		}
 	}
@@ -810,66 +861,73 @@ inline constexpr bool lowering_wanted = graph_detail::lowering_wanted_in<OpTag, 
 
 // ---------------------------------------------------------------- 属性（与 when_all 的 __attrs 同一套语义）
 
+/// 一组节点在某环境下 set_value 完成域的公共域；有节点给不出（例如没有 set_value 完成）时为 void，
+/// 让下面的查询在立即上下文里被排除掉（与 when_all 一致）。
+[[nodiscard]] consteval info common_domain(infos const& nodes, info env)
+{
+	infos domains;
+	for (info node : nodes)
+	{
+		if (!::std::meta::can_substitute(^^::stdexec::__completion_domain_of_t, {^^::stdexec::set_value_t, node, env}))
+		{
+			return ^^void;
+		}
+		domains.push_back(::std::meta::dealias(::std::meta::substitute(^^::stdexec::__completion_domain_of_t, {^^::stdexec::set_value_t, node, env})));
+	}
+	return ::std::meta::dealias(::std::meta::substitute(^^::stdexec::__common_domain_t, domains));
+}
+
 /// 完成域：值完成发生在最后一个汇点完成的地方——取汇点在整图节点环境下的公共完成域；
 /// 错误 / 停止可能来自任一节点——取全部节点的公共域。完成行为取全部节点的合成。
 template<class Data, class... Children>
 struct attrs
 {
 	using self_type = ::stdexec::__sexpr<dag_t, Data, Children...>&&;
-	static constexpr auto shape = Data::shape;
 
 	template<class Env>
-	static consteval bool evaluable_in() noexcept
+	[[nodiscard]] static consteval bool evaluable_in() noexcept
 	{
-		if constexpr (!all_nodes_validity<self_type, probe_env<self_type, Env>>::value)
+		if constexpr (!analysis<self_type, probe_env<self_type, Env>>::result.valid)
 		{
 			return false;
 		}
 		else
 		{
-			return all_nodes_validity<self_type, node_env_t<self_type, Env>>::value;
+			return analysis<self_type, node_env_t<self_type, Env>>::result.valid;
 		}
 	}
 
 	template<class Env>
-	static constexpr bool evaluable = evaluable_in<Env>();
-
-	template<class Env>
-	using child_env_t = node_env_t<self_type, Env>;
-
-	/// 有节点不发 set_value 时没有 type，让下面的查询在立即上下文里被排除掉（与 when_all 一致）。
-	template<class Env, class Nodes>
-	struct common_domain
+	[[nodiscard]] static consteval info value_domain() noexcept
 	{
-	};
+		infos sinks;
+		for (size_t sink : Data::shape.sinks())
+		{
+			sinks.push_back(children_of(^^self_type)[sink]);
+		}
+		return common_domain(sinks, ^^node_env_t<self_type, Env>);
+	}
 
-	template<class Env, class... Nodes>
-		requires requires { typename ::stdexec::__common_domain_t<::stdexec::__completion_domain_of_t<::stdexec::set_value_t, Nodes, child_env_t<Env>>...>; }
-	struct common_domain<Env, meta::type_list<Nodes...>>
+	template<class Env>
+	[[nodiscard]] static consteval info any_node_domain() noexcept
 	{
-		using type = ::stdexec::__common_domain_t<::stdexec::__completion_domain_of_t<::stdexec::set_value_t, Nodes, child_env_t<Env>>...>;
-	};
+		return common_domain(children_of(^^self_type), ^^node_env_t<self_type, Env>);
+	}
 
 	template<class Env>
-	using value_domain_t = typename common_domain<Env, sink_children_t<self_type>>::type;
-
-	template<class Env>
-	using any_node_domain_t = typename common_domain<Env, meta::type_list<Children...>>::type;
-
-	template<class Env>
-		requires evaluable<Env>
+		requires (evaluable_in<Env>()) && (value_domain<Env>() != ^^void)
 	[[nodiscard]] constexpr auto query(::stdexec::get_completion_domain_t<::stdexec::set_value_t>, Env const&) const noexcept
-		-> value_domain_t<Env>;
+		-> typename [: value_domain<Env>() :];
 
 	template<class Env>
-		requires evaluable<Env>
+		requires (evaluable_in<Env>()) && (value_domain<Env>() != ^^void) && (any_node_domain<Env>() != ^^void)
 	[[nodiscard]] constexpr auto query(::stdexec::get_completion_domain_t<::stdexec::set_error_t>, Env const&) const noexcept
-		-> ::stdexec::__common_domain_t<value_domain_t<Env>, any_node_domain_t<Env>>;
+		-> ::stdexec::__common_domain_t<typename [: value_domain<Env>() :], typename [: any_node_domain<Env>() :]>;
 
 	template<class Env>
-		requires evaluable<Env>
+		requires (evaluable_in<Env>()) && (value_domain<Env>() != ^^void) && (any_node_domain<Env>() != ^^void)
 	[[nodiscard]] constexpr auto query(::stdexec::get_completion_domain_t<::stdexec::set_stopped_t>, Env const&) const noexcept
-		-> ::stdexec::__common_domain_t<value_domain_t<Env>, any_node_domain_t<Env>>;
+		-> ::stdexec::__common_domain_t<typename [: value_domain<Env>() :], typename [: any_node_domain<Env>() :]>;
 
 	template<class Tag, class... Env>
 	[[nodiscard]] constexpr auto query(::stdexec::__get_completion_behavior_t<Tag>, Env const&...) const noexcept
@@ -891,8 +949,6 @@ struct attrs<Data>
 }
 
 /// 图算法的标签。dag_t{}(nodes...) 得到图 sender；dag() 是它的策略化包装。
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-braces" // __sexpr 的聚合初始化靠大括号省略，stdexec 自己也这样写
 struct dag_t
 {
 	template<graph_node... Nodes>
@@ -913,11 +969,9 @@ struct dag_t
 	}
 };
 
-#pragma clang diagnostic pop
-
 /// 图 sender 的形状（邻接矩阵、入出度、拓扑序）。
 template<class Graph>
-constexpr auto shape_v = graph_detail::traits_of<Graph&&>::shape;
+constexpr auto shape_v = graph_detail::shape_of_v<Graph&&>;
 
 }
 

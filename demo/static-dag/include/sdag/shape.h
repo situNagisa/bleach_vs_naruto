@@ -1,10 +1,12 @@
 #pragma once
 
 /// 图形状的编译期分析：邻接矩阵、入度 / 出度、拓扑序、错误诊断。
-/// 两种策略共用，所有结果都是 constexpr 值，运行期不存在。
+/// 输入是反射得到的键与依赖列表；所有结果都是 constexpr 值，运行期不存在。
 
 #include <array>
 #include <cstddef>
+#include <meta>
+#include <vector>
 
 #include "meta.h"
 #include "node.h"
@@ -65,6 +67,47 @@ struct shape
 			total += is_sink(index) ? 1 : 0;
 		}
 		return total;
+	}
+
+	/// 下面三个只在编译期用（返回 vector）。
+	[[nodiscard]] consteval ::std::vector<::std::size_t> roots() const
+	{
+		::std::vector<::std::size_t> result;
+		for (::std::size_t index = 0; index < N; ++index)
+		{
+			if (is_root(index))
+			{
+				result.push_back(index);
+			}
+		}
+		return result;
+	}
+
+	[[nodiscard]] consteval ::std::vector<::std::size_t> sinks() const
+	{
+		::std::vector<::std::size_t> result;
+		for (::std::size_t index = 0; index < N; ++index)
+		{
+			if (is_sink(index))
+			{
+				result.push_back(index);
+			}
+		}
+		return result;
+	}
+
+	/// from 的后继（索引升序）。
+	[[nodiscard]] consteval ::std::vector<::std::size_t> successors(::std::size_t from) const
+	{
+		::std::vector<::std::size_t> result;
+		for (::std::size_t to = 0; to < N; ++to)
+		{
+			if (edge[from][to])
+			{
+				result.push_back(to);
+			}
+		}
+		return result;
 	}
 
 	constexpr void fail(shape_error what, ::std::size_t where) noexcept
@@ -140,57 +183,41 @@ struct shape
 	}
 };
 
-namespace shape_detail
+/// 把一组键换成它们在 keys 里的索引（不存在的键给出 keys.size()）。
+[[nodiscard]] consteval ::std::vector<::std::size_t> indices_of(meta::infos const& wanted, meta::infos const& keys)
 {
-
-template<class Dependencies, class Keys, ::std::size_t N>
-constexpr void add_node(shape<N>& result, ::std::size_t index) noexcept
-{
-	[&]<class... Keys2>(meta::type_list<Keys2...>)
+	::std::vector<::std::size_t> result;
+	for (meta::info key : wanted)
 	{
-		(result.add_edge(meta::index_of_v<Keys2, Keys>, index), ...);
-	}(typename Dependencies::keys{});
-}
-
-template<class Keys, class Dependencies>
-struct shape_from;
-
-/// Keys = type_list<键...>，Dependencies = type_list<after<...>...>，一一对应。
-template<class... Keys, dependency_list... Dependencies>
-	requires (sizeof...(Keys) == sizeof...(Dependencies))
-struct shape_from<meta::type_list<Keys...>, meta::type_list<Dependencies...>>
-{
-	[[nodiscard]] static consteval shape<sizeof...(Keys)> compute() noexcept
-	{
-		using keys = meta::type_list<Keys...>;
-		shape<sizeof...(Keys)> result{};
-		::std::size_t index = 0;
-		(
-			[&]
-			{
-				if (meta::index_of_v<Keys, keys> != index)
-				{
-					result.fail(shape_error::duplicate_key, index);
-				}
-				shape_detail::add_node<Dependencies, keys>(result, index);
-				++index;
-			}(),
-			...);
-		if (result.error == shape_error::none)
-		{
-			result.sort();
-		}
-		return result;
+		result.push_back(meta::index_of(key, keys));
 	}
-};
-
+	return result;
 }
 
-/// 分析键列表与依赖列表；不做断言，错误写在 error 里（便于测试）。
+/// Keys = type_list<键...>，Dependencies = type_list<after<...>...>，一一对应。不做断言，错误写在 error 里（便于测试）。
 template<class Keys, class Dependencies>
 [[nodiscard]] consteval auto shape_of_lists() noexcept
 {
-	return shape_detail::shape_from<Keys, Dependencies>::compute();
+	constexpr ::std::size_t count = meta::arguments(^^Keys).size();
+	shape<count> result{};
+	meta::infos const keys = meta::arguments(^^Keys);
+	meta::infos const dependencies = meta::arguments(^^Dependencies);
+	for (::std::size_t index = 0; index < count; ++index)
+	{
+		if (meta::index_of(keys[index], keys) != index)
+		{
+			result.fail(shape_error::duplicate_key, index);
+		}
+		for (::std::size_t from : indices_of(meta::arguments(dependencies[index]), keys))
+		{
+			result.add_edge(from, index);
+		}
+	}
+	if (result.error == shape_error::none)
+	{
+		result.sort();
+	}
+	return result;
 }
 
 /// 分析节点列表；不做断言。
@@ -213,17 +240,12 @@ template<class Keys, class Dependencies>
 	return result;
 }
 
-template<class Keys, class Dependencies>
-struct keys_to_indices;
+/// 把 after<...> 里的键按声明顺序换成节点索引（std::index_sequence）。
+template<class Keys, class Dependency>
+using keys_to_indices_t = typename [: meta::indices(indices_of(meta::arguments(^^Dependency), meta::arguments(^^Keys))) :];
 
-/// 把 after<...> 的键按声明顺序换成节点索引（std::index_sequence）。
-template<class Keys, class... Dependencies>
-struct keys_to_indices<Keys, meta::type_list<Dependencies...>>
-{
-	using type = ::std::index_sequence<meta::index_of_v<Dependencies, Keys>...>;
-};
-
-template<class Keys, class Dependencies>
-using keys_to_indices_t = typename keys_to_indices<Keys, Dependencies>::type;
+/// 汇点的 index_sequence，供包展开使用。
+template<auto Shape>
+using sink_sequence = typename [: meta::indices(Shape.sinks()) :];
 
 }

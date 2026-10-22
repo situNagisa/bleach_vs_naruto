@@ -92,15 +92,18 @@ struct choice_result
 
 void payload(); // 普通查找屏障：下面的非限定 payload(...) 只走 ADL
 
-consteval choice_result choice(auto&& node) noexcept
+/// 按实参类型（含值类别）选择策略。GCC 16 不允许在 noexcept / requires 里引用 auto&& 形参本身，
+/// 所以这里以类型为参数、用 declval 构造与 operator() 里完全同形的表达式。
+template<class Node>
+[[nodiscard]] consteval choice_result choice() noexcept
 {
-	if constexpr (requires { ::std::forward<decltype(node)>(node).payload(); })
+	if constexpr (requires { ::std::declval<Node>().payload(); })
 	{
-		return {choose::member, noexcept(::std::forward<decltype(node)>(node).payload())};
+		return {choose::member, noexcept(::std::declval<Node>().payload())};
 	}
-	else if constexpr (requires { payload(::std::forward<decltype(node)>(node)); })
+	else if constexpr (requires { payload(::std::declval<Node>()); })
 	{
-		return {choose::adl, noexcept(payload(::std::forward<decltype(node)>(node)))};
+		return {choose::adl, noexcept(payload(::std::declval<Node>()))};
 	}
 	else
 	{
@@ -110,18 +113,19 @@ consteval choice_result choice(auto&& node) noexcept
 
 struct payload_t
 {
-	static constexpr decltype(auto) operator()(auto&& node)
-		noexcept(choice(::std::forward<decltype(node)>(node)).nothrow)
-		requires (choice(::std::forward<decltype(node)>(node)).strategy != choose::none)
+	template<class Node>
+	static constexpr decltype(auto) operator()(Node&& node)
+		noexcept(choice<Node&&>().nothrow)
+		requires (choice<Node&&>().strategy != choose::none)
 	{
-		constexpr choose strategy = choice(::std::forward<decltype(node)>(node)).strategy;
+		constexpr choose strategy = choice<Node&&>().strategy;
 		if constexpr (strategy == choose::member)
 		{
-			return ::std::forward<decltype(node)>(node).payload();
+			return ::std::forward<Node>(node).payload();
 		}
 		else
 		{
-			return payload(::std::forward<decltype(node)>(node));
+			return payload(::std::forward<Node>(node));
 		}
 	}
 };

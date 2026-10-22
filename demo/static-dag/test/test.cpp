@@ -349,6 +349,17 @@ static_assert(::stdexec::sender<env_dag>);
 static_assert(!::stdexec::sender_in<env_dag>);
 static_assert(::stdexec::sender_in<env_dag, ::stdexec::env<>>);
 
+// 节点签名在某个环境下算不出来时，结果原样透传给 stdexec：sender 成立、sender_in 不成立，不是硬错误
+using needs_scheduler = ::sdag::node<a, ::sdag::after<>,
+	decltype(::stdexec::read_env(::stdexec::get_scheduler) | ::stdexec::then([](auto) { return 1; }))>;
+using scheduler_dag = ::sdag::dag_sender<::sdag::fused, needs_scheduler>;
+static_assert(::stdexec::sender<scheduler_dag>);
+static_assert(!::stdexec::sender_in<scheduler_dag, ::stdexec::env<>>, "env<> 里没有调度器");
+// 属性查询与降解判据这两条实例化路径同样不能硬错误：完成域退回默认 domain，不降解
+static_assert(::std::same_as<decltype(::stdexec::get_completion_domain<::stdexec::set_value_t>(::stdexec::get_env(::std::declval<scheduler_dag&>()), ::stdexec::env<>{})),
+	::stdexec::default_domain>);
+static_assert(!::sdag::graph_detail::lowering_wanted<::stdexec::start_t, scheduler_dag&&, ::stdexec::env<>>);
+
 // 空图：立即以 set_value() 完成
 static_assert(::std::same_as<::stdexec::completion_signatures_of_t<::sdag::dag_sender<::sdag::fused>, ::stdexec::env<>>,
 	::stdexec::completion_signatures<::stdexec::set_value_t()>>);
@@ -554,6 +565,16 @@ void test_error_propagation()
 		test::check(ran_d == 0, "失败节点的后继被跳过");
 	}
 
+	// 错误类型恰好是 std::monostate（与 variant 的占位类型同名）也要能存、能发
+	{
+		auto monostate_error = ::sdag::dag(::sdag::make_node<a>(::stdexec::just_error(::std::monostate{})));
+		outcome result = outcome::none;
+		int count = 0;
+		auto op = ::stdexec::connect(::std::move(monostate_error), probe_receiver{&result, &count, {}});
+		::stdexec::start(op);
+		test::check(result == outcome::error, "std::monostate 作为错误类型");
+	}
+
 	// 两个根都失败：只保留第一个错误
 	auto twice = ::sdag::dag(
 		::sdag::make_node<a>(::stdexec::just_error(1)),
@@ -685,6 +706,27 @@ struct step
 {
 };
 
+template<::std::size_t I>
+struct left
+{
+};
+
+template<::std::size_t I>
+struct right
+{
+};
+
+/// 叠起来的菱形梯子：每一层的两个节点都依赖上一层的两个节点；节点刻意不按拓扑序声明。
+template<::std::size_t... I>
+auto make_ladder(::std::index_sequence<I...>, auto policy)
+{
+	return ::sdag::dag(policy,
+		::sdag::make_node<left<0>>(::stdexec::just(1)),
+		::sdag::make_node<right<0>>(::stdexec::just(2)),
+		::sdag::make_node<left<I + 1>, ::sdag::after<left<I>, right<I>>>(::stdexec::then([](int const& x, int const& y) { return x + y; }))...,
+		::sdag::make_node<right<I + 1>, ::sdag::after<left<I>, right<I>>>(::stdexec::then([](int const& x, int const& y) { return x * 2 + y; }))...);
+}
+
 template<::std::size_t... I>
 auto make_chain(::std::index_sequence<I...>)
 {
@@ -709,6 +751,11 @@ void test_scale()
 	test::check(depth == 47, "长链逐级 +1");
 	auto [fan] = ::stdexec::sync_wait(make_fan(::std::make_index_sequence<16>{})).value();
 	test::check(fan == 16 + (15 * 16) / 2, "扇入收齐 16 路");
+
+	// 8 层菱形梯子（18 个节点，路径数指数级）：两种路径都应线性编译、结果一致
+	auto [fused_left, fused_right] = ::stdexec::sync_wait(make_ladder(::std::make_index_sequence<8>{}, ::sdag::fused{})).value();
+	auto [composed_left, composed_right] = ::stdexec::sync_wait(make_ladder(::std::make_index_sequence<8>{}, ::sdag::composed{})).value();
+	test::check(fused_left == composed_left && fused_right == composed_right && fused_left > 0, "梯子：融合与降解结果一致");
 }
 
 void test_policies_agree()
