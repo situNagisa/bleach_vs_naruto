@@ -16,28 +16,26 @@
 #include <concepts>
 #include <cstddef>
 #include <exception>
-#include <meta>
 #include <optional>
 #include <tuple>
 #include <type_traits>
 #include <utility>
 #include <variant>
-#include <vector>
 
 #include <stdexec/execution.hpp>
 
 #include "meta.h"
-#include "signatures.h"
 #include "node.h"
 #include "shape.h"
+#include "graph_sender.h"
 #include "graph.h"
+#include "compute/primitives.h"
+#include "compute/analysis.h"
 
 namespace sdag::fused_detail
 {
 
 using ::std::size_t;
-using meta::info;
-using meta::infos;
 using graph_detail::node_sender_t;
 using graph_detail::graph_state;
 
@@ -89,25 +87,15 @@ struct node_receiver
 	}
 };
 
-/// 入度 ≥ 2 的节点一个倒计数，其余不占空间。
-template<auto Shape>
-[[nodiscard]] consteval info pending_types()
-{
-	infos types;
-	for (size_t index = 0; index < Shape.count; ++index)
-	{
-		types.push_back(Shape.in_degree[index] > 1
-			? ::std::meta::substitute(^^counter, {::std::meta::reflect_constant(Shape.in_degree[index])})
-			: ^^meta::empty);
-	}
-	return meta::list(types);
-}
+template<auto Shape, class Indices = ::std::make_index_sequence<Shape.count>>
+struct pending;
 
-/// std::variant<std::monostate, 错误类型...>。错误类型本身也可能是 std::monostate，所以访问一律按下标（错误 k 在第 k + 1 位）。
-[[nodiscard]] consteval info error_variant_type(info error_types)
+/// 入度 ≥ 2 的节点一个倒计数，其余不占空间。
+template<auto Shape, size_t... I>
+struct pending<Shape, ::std::index_sequence<I...>>
 {
-	return ::std::meta::substitute(^^::std::variant, meta::concat({{^^::std::monostate}, meta::arguments(error_types)}));
-}
+	using type = meta::indexed_tuple<::std::conditional_t<(Shape.in_degree[I] > 1), counter<Shape.in_degree[I]>, meta::empty>...>;
+};
 
 template<class Self, class Receiver>
 struct fused_operation;
@@ -126,14 +114,15 @@ struct fused_core : graph_state<Self, ::stdexec::env_of_t<Receiver>>
 	static constexpr auto shape = state_base::shape;
 	static constexpr size_t count = shape.count;
 	static constexpr bool stoppable = state_base::stoppable;
-	static constexpr auto& result = state_base::result;
-	static constexpr bool sends_stopped = result.any_stopped;
+	static constexpr bool sends_stopped = analysis_type::sends_stopped;
 	static constexpr size_t sink_count = shape.sink_count();
-	static constexpr bool direct_sink = result.direct_sink;
-	static constexpr size_t sink_index = result.sink_index;
+	static constexpr bool direct_sink = analysis_type::direct_sink;
+	static constexpr size_t sink_index = analysis_type::sink_index;
 
-	static constexpr bool has_errors = result.has_errors || !result.nothrow_store;
-	using error_variant = typename [: fused_detail::error_variant_type(result.error_types) :];
+	using error_types = typename analysis_type::error_types;
+	static constexpr bool has_errors = error_types::size != 0;
+	/// std::variant<std::monostate, 错误类型...>。错误类型本身也可能是 std::monostate，所以访问一律按下标（错误 k 在第 k + 1 位）。
+	using error_variant = compute::rebind_t<::std::variant, compute::concat_t<meta::type_list<::std::monostate>, error_types>>;
 
 	struct forward_stop
 	{
@@ -161,7 +150,7 @@ struct fused_core : graph_state<Self, ::stdexec::env_of_t<Receiver>>
 	SDAG_NO_UNIQUE_ADDRESS ::std::conditional_t<stoppable, ::stdexec::inplace_stop_source, meta::empty_for<stop_source_tag>> _stop_source{};
 	SDAG_NO_UNIQUE_ADDRESS ::std::conditional_t<needs_callback, ::std::optional<stop_callback_t>, meta::empty_for<on_stop_tag>> _on_stop{};
 	SDAG_NO_UNIQUE_ADDRESS ::std::conditional_t<stoppable && has_errors, error_variant, meta::empty_for<error_tag>> _error{};
-	SDAG_NO_UNIQUE_ADDRESS meta::indexed_tuple_of<typename [: fused_detail::pending_types<shape>() :]> _pending{};
+	SDAG_NO_UNIQUE_ADDRESS typename pending<shape>::type _pending{};
 	SDAG_NO_UNIQUE_ADDRESS ::std::conditional_t<(sink_count > 1), counter<sink_count>, meta::empty_for<sinks_tag>> _sinks{};
 
 	explicit fused_core(Receiver&& receiver) noexcept(::std::is_nothrow_move_constructible_v<Receiver>)
@@ -216,7 +205,7 @@ struct fused_core : graph_state<Self, ::stdexec::env_of_t<Receiver>>
 		}
 		else if constexpr (state_base::template slot_needed<J>)
 		{
-			using tuple_type = meta::rebind_t<::std::tuple, typename analysis_type::template values_t<J>>;
+			using tuple_type = compute::rebind_t<::std::tuple, typename analysis_type::template values_t<J>>;
 			static_assert(::std::is_constructible_v<tuple_type, Args&&...>, "sdag: 节点实际发出的值与它声明的完成签名不符");
 			auto& slot = meta::get<J>(this->_slots);
 			if constexpr (::std::is_nothrow_constructible_v<tuple_type, Args&&...>)
@@ -272,12 +261,12 @@ struct fused_core : graph_state<Self, ::stdexec::env_of_t<Receiver>>
 
 	/// 错误类型在 error_types 里的位置 + 1 = 它在 _error 里的下标。
 	template<class Error>
-	static constexpr size_t error_alternative = meta::index_of(::std::meta::dealias(^^::std::decay_t<Error>), meta::arguments(result.error_types)) + 1;
+	static constexpr size_t error_alternative = compute::index_of_v<::std::decay_t<Error>, error_types> + 1;
 
 	template<class Error>
 	void store_error(Error&& error) noexcept
 	{
-		if constexpr (sig::nothrow_decay_copyable_v<Error>)
+		if constexpr (::std::is_nothrow_constructible_v<::std::decay_t<Error>, Error>)
 		{
 			_error.template emplace<error_alternative<Error>>(::std::forward<Error>(error));
 		}
@@ -306,10 +295,11 @@ struct fused_core : graph_state<Self, ::stdexec::env_of_t<Receiver>>
 		}
 		else
 		{
-			template for (constexpr size_t to : ::std::define_static_array(shape.successors(J)))
+			// 最后一个后继被通知之前整图不可能结束（每个后继都是某个汇点的祖先），所以循环里一直可以碰 this。
+			compute::for_each_value<successors_v<shape, J>>([this]<size_t To>() noexcept
 			{
-				notify_edge<J, to>();
-			}
+				this->template notify_edge<J, To>();
+			});
 		}
 	}
 
@@ -406,7 +396,7 @@ struct fused_core : graph_state<Self, ::stdexec::env_of_t<Receiver>>
 				break;
 			}
 		}
-		if constexpr (direct_sink || !result.all_has_values)
+		if constexpr (direct_sink || !analysis_type::has_values)
 		{
 			// 唯一汇点的值在 node_set_value 里直接转发；没有值完成的图也不会以 running 状态走到这里。
 			::std::unreachable();
@@ -419,20 +409,18 @@ struct fused_core : graph_state<Self, ::stdexec::env_of_t<Receiver>>
 
 	void emit_error() noexcept
 	{
-		template for (constexpr size_t alternative : ::std::define_static_array(meta::iota(meta::arguments(result.error_types).size())))
+		// set_error 之后 op-state 可能已经销毁：用短路的 || 保证命中之后不再读 _error。
+		[this]<size_t... K>(::std::index_sequence<K...>)
 		{
-			if (_error.index() == alternative + 1)
-			{
-				::stdexec::set_error(::std::move(_receiver), ::std::get<alternative + 1>(::std::move(_error)));
-				return;
-			}
-		}
+			(void)((_error.index() == K + 1
+				? (::stdexec::set_error(::std::move(_receiver), ::std::get<K + 1>(::std::move(_error))), true)
+				: false) || ...);
+		}(::std::make_index_sequence<error_types::size>{});
 	}
 
 	/// 各汇点的值按声明顺序铺平，全部 move 给整图的接收者。
-	static constexpr size_t sink_value_count = graph_detail::delivery_plan<Self, node_env_type>(shape.sinks(), false).size();
-	static constexpr auto sink_table =
-		meta::to_array<sink_value_count>(graph_detail::delivery_plan<Self, node_env_type>(shape.sinks(), false));
+	static constexpr auto sink_table = graph_detail::delivery_plan<Self, node_env_type, sinks_v<shape>>(false);
+	static constexpr size_t sink_value_count = sink_table.size();
 
 	template<size_t... E>
 	void emit_values(::std::index_sequence<E...>) noexcept
@@ -469,8 +457,8 @@ struct fused_operation_impl<Self, Receiver, ::std::index_sequence<I...>> : fused
 		, _operations(meta::from_factory,
 			[&]
 			{
-				// 每个工厂只从 sexpr 里取自己那一个子 sender（第 I + 2 个元素），右值 Self 下也不会重复移动。
-				return ::stdexec::connect(::stdexec::__get<I + 2>(::std::forward<Self>(self)), node_receiver_t<I>{this});
+				// 每个工厂只从图 sender 里取自己那一个子 sender（第 I + 2 个元素），右值 Self 下也不会重复移动。
+				return ::stdexec::connect(::std::forward<Self>(self).template get<I + 2>(), node_receiver_t<I>{this});
 			}...)
 	{
 	}
@@ -486,18 +474,19 @@ struct fused_operation_impl<Self, Receiver, ::std::index_sequence<I...>> : fused
 		{
 			this->_on_stop.emplace(::stdexec::get_stop_token(::stdexec::get_env(this->_receiver)), typename core::forward_stop{this});
 		}
-		template for (constexpr size_t root : ::std::define_static_array(core::shape.roots()))
+		// 最后一个根启动之前整图不可能结束（每个汇点都有某个根是祖先，而整图要等所有汇点）。
+		compute::for_each_value<roots_v<core::shape>>([this]<size_t Root>() noexcept
 		{
-			this->template launch<root>();
-		}
+			this->template launch<Root>();
+		});
 	}
 };
 
 /// 整图 operation state；Self 是图 sender 的引用类型（X&& 或 X const&）。
 template<class Self, class Receiver>
-struct fused_operation : fused_operation_impl<Self, Receiver, ::std::make_index_sequence<graph_detail::count_of(^^Self)>>
+struct fused_operation : fused_operation_impl<Self, Receiver, ::std::make_index_sequence<graph_detail::count_of_v<Self>>>
 {
-	using fused_operation_impl<Self, Receiver, ::std::make_index_sequence<graph_detail::count_of(^^Self)>>::fused_operation_impl;
+	using fused_operation_impl<Self, Receiver, ::std::make_index_sequence<graph_detail::count_of_v<Self>>>::fused_operation_impl;
 };
 
 }

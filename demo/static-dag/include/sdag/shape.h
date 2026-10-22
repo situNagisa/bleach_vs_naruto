@@ -1,15 +1,17 @@
 #pragma once
 
 /// 图形状的编译期分析：邻接矩阵、入度 / 出度、拓扑序、错误诊断。
-/// 输入是反射得到的键与依赖列表；所有结果都是 constexpr 值，运行期不存在。
+/// 这是普通的 constexpr 数组算法，两种计算模式共用；键到索引的换算交给计算层。
+/// 所有结果都是 constexpr 值，运行期不存在。
 
 #include <array>
 #include <cstddef>
-#include <meta>
+#include <utility>
 #include <vector>
 
 #include "meta.h"
 #include "node.h"
+#include "compute/primitives.h"
 
 namespace sdag
 {
@@ -69,7 +71,7 @@ struct shape
 		return total;
 	}
 
-	/// 下面三个只在编译期用（返回 vector）。
+	/// 下面三个只在编译期用（返回 vector）；运行期要遍历时用 roots_v / sinks_v / successors_v。
 	[[nodiscard]] consteval ::std::vector<::std::size_t> roots() const
 	{
 		::std::vector<::std::size_t> result;
@@ -183,36 +185,28 @@ struct shape
 	}
 };
 
-/// 把一组键换成它们在 keys 里的索引（不存在的键给出 keys.size()）。
-[[nodiscard]] consteval ::std::vector<::std::size_t> indices_of(meta::infos const& wanted, meta::infos const& keys)
-{
-	::std::vector<::std::size_t> result;
-	for (meta::info key : wanted)
-	{
-		result.push_back(meta::index_of(key, keys));
-	}
-	return result;
-}
-
 /// Keys = type_list<键...>，Dependencies = type_list<after<...>...>，一一对应。不做断言，错误写在 error 里（便于测试）。
 template<class Keys, class Dependencies>
 [[nodiscard]] consteval auto shape_of_lists() noexcept
 {
-	constexpr ::std::size_t count = meta::arguments(^^Keys).size();
+	constexpr ::std::size_t count = Keys::size;
 	shape<count> result{};
-	meta::infos const keys = meta::arguments(^^Keys);
-	meta::infos const dependencies = meta::arguments(^^Dependencies);
-	for (::std::size_t index = 0; index < count; ++index)
+	[&]<::std::size_t... I>(::std::index_sequence<I...>)
 	{
-		if (meta::index_of(keys[index], keys) != index)
-		{
-			result.fail(shape_error::duplicate_key, index);
-		}
-		for (::std::size_t from : indices_of(meta::arguments(dependencies[index]), keys))
-		{
-			result.add_edge(from, index);
-		}
-	}
+		(
+			[&]
+			{
+				if (compute::index_of_v<meta::at_t<I, Keys>, Keys> != I)
+				{
+					result.fail(shape_error::duplicate_key, I);
+				}
+				for (::std::size_t from : compute::dependency_indices_v<Keys, meta::at_t<I, Dependencies>>)
+				{
+					result.add_edge(from, I);
+				}
+			}(),
+			...);
+	}(::std::make_index_sequence<count>{});
 	if (result.error == shape_error::none)
 	{
 		result.sort();
@@ -240,12 +234,14 @@ template<class Keys, class Dependencies>
 	return result;
 }
 
-/// 把 after<...> 里的键按声明顺序换成节点索引（std::index_sequence）。
-template<class Keys, class Dependency>
-using keys_to_indices_t = typename [: meta::indices(indices_of(meta::arguments(^^Dependency), meta::arguments(^^Keys))) :];
-
-/// 汇点的 index_sequence，供包展开使用。
+/// 汇点 / 根 / 后继，固定成 std::array，供 compute::for_each_value 与 compute::sequence_t 使用。
 template<auto Shape>
-using sink_sequence = typename [: meta::indices(Shape.sinks()) :];
+inline constexpr auto sinks_v = meta::to_array<Shape.sink_count()>(Shape.sinks());
+
+template<auto Shape>
+inline constexpr auto roots_v = meta::to_array<Shape.root_count()>(Shape.roots());
+
+template<auto Shape, ::std::size_t From>
+inline constexpr auto successors_v = meta::to_array<Shape.out_degree[From]>(Shape.successors(From));
 
 }

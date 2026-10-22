@@ -1,34 +1,18 @@
 #pragma once
 
-/// 编译期工具：类型列表的运算全部用 C++26 静态反射（P2996）写成普通的 consteval 函数，
-/// 类型层面只留下把 std::meta::info 拼回类型的几个别名。运行期容器 indexed_tuple 保持模板。
-
-#if !defined(__cpp_impl_reflection)
-#error "sdag 需要 C++26 静态反射（P2996）：请用 g++ >= 16 并打开 -freflection"
-#endif
+/// 两种计算实现共享的基础设施：类型列表的壳、运行期容器 indexed_tuple，以及几个与计算方式无关的小工具。
+/// 类型列表上的运算（查找、去重、拼接……）在 compute/ 下，按 SDAG_REFLECTION 分别实现。
 
 #include <array>
 #include <cstddef>
-#include <meta>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
-/// MSVC ABI 下 [[no_unique_address]] 被忽略，要用 [[msvc::no_unique_address]]；
-/// 多个空基类也只有第一个能做空基类优化，要加 __declspec(empty_bases)。
-#if defined(_MSC_VER)
-#define SDAG_NO_UNIQUE_ADDRESS [[msvc::no_unique_address]]
-#define SDAG_EMPTY_BASES __declspec(empty_bases)
-#else
-#define SDAG_NO_UNIQUE_ADDRESS [[no_unique_address]]
-#define SDAG_EMPTY_BASES
-#endif
+#include "config.h"
 
 namespace sdag::meta
 {
-
-using info = ::std::meta::info;
-using infos = ::std::vector<info>;
 
 /// 被优化掉的成员用它占位。indexed_tuple 对它特化成真正的空基类，不占空间。
 struct empty
@@ -47,102 +31,24 @@ struct type_list
 	static constexpr ::std::size_t size = sizeof...(Ts);
 };
 
-// ---------------------------------------------------------------- 反射：类型列表运算
+template<::std::size_t I, class List>
+struct at;
 
-/// 模板特化的实参（先去掉别名）。
-[[nodiscard]] consteval infos arguments(info type)
+template<::std::size_t I, class... Ts>
+struct at<I, type_list<Ts...>>
 {
-	return ::std::meta::template_arguments_of(::std::meta::dealias(type));
-}
+	using type = Ts...[I];
+};
 
-[[nodiscard]] consteval info list(infos const& types)
-{
-	return ::std::meta::substitute(^^type_list, types);
-}
+template<::std::size_t I, class List>
+using at_t = typename at<I, List>::type;
 
-[[nodiscard]] consteval bool same(info left, info right)
-{
-	return ::std::meta::dealias(left) == ::std::meta::dealias(right);
-}
+template<class From, class To>
+using copy_cvref_t = decltype(::std::forward_like<From>(::std::declval<To&>()));
 
-/// 不存在时等于 size。
-[[nodiscard]] consteval ::std::size_t index_of(info type, infos const& types)
-{
-	for (::std::size_t index = 0; index < types.size(); ++index)
-	{
-		if (same(type, types[index]))
-		{
-			return index;
-		}
-	}
-	return types.size();
-}
-
-[[nodiscard]] consteval bool contains(info type, infos const& types)
-{
-	return index_of(type, types) != types.size();
-}
-
-/// 保留首次出现的顺序去重。
-[[nodiscard]] consteval infos unique(infos const& types)
-{
-	infos result;
-	for (info type : types)
-	{
-		if (!contains(type, result))
-		{
-			result.push_back(type);
-		}
-	}
-	return result;
-}
-
-[[nodiscard]] consteval infos concat(::std::vector<infos> const& lists)
-{
-	infos result;
-	for (infos const& one : lists)
-	{
-		result.insert(result.end(), one.begin(), one.end());
-	}
-	return result;
-}
-
-/// 对每个类型套一层单参数模板（别名模板也可以）。
-[[nodiscard]] consteval infos map(info function, infos const& types)
-{
-	infos result;
-	for (info type : types)
-	{
-		result.push_back(::std::meta::dealias(::std::meta::substitute(function, {type})));
-	}
-	return result;
-}
-
-/// 0, 1, ..., count - 1
-[[nodiscard]] consteval ::std::vector<::std::size_t> iota(::std::size_t count)
-{
-	::std::vector<::std::size_t> result;
-	for (::std::size_t index = 0; index < count; ++index)
-	{
-		result.push_back(index);
-	}
-	return result;
-}
-
-/// std::index_sequence<values...>
-[[nodiscard]] consteval info indices(::std::vector<::std::size_t> const& values)
-{
-	infos constants;
-	for (::std::size_t value : values)
-	{
-		constants.push_back(::std::meta::reflect_constant(value));
-	}
-	return ::std::meta::substitute(^^::std::index_sequence, constants);
-}
-
-/// 把 consteval 里的 vector 固定成 std::array（长度要先用另一次 consteval 调用算出来）。
+/// 把编译期的 vector 固定成 std::array（长度要先用另一次常量求值算出来）。
 template<::std::size_t N, class T>
-[[nodiscard]] consteval ::std::array<T, N> to_array(::std::vector<T> const& values)
+[[nodiscard]] constexpr ::std::array<T, N> to_array(::std::vector<T> const& values)
 {
 	::std::array<T, N> result{};
 	for (::std::size_t index = 0; index < N; ++index)
@@ -151,15 +57,6 @@ template<::std::size_t N, class T>
 	}
 	return result;
 }
-
-// ---------------------------------------------------------------- 把 info 拼回类型
-
-template<::std::size_t I, class List>
-using at_t = typename [: meta::arguments(^^List)[I] :];
-
-/// 把 type_list 的元素喂给另一个模板。
-template<template<class...> class To, class List>
-using rebind_t = typename [: ::std::meta::substitute(^^To, meta::arguments(^^List)) :];
 
 // ---------------------------------------------------------------- 按索引放置的元组（运行期容器）
 
@@ -171,8 +68,25 @@ struct from_factory_t
 };
 inline constexpr from_factory_t from_factory{};
 
+/// 非空元素：clang 上加 no_unique_address 复用尾部填充，GCC 上不加（见 config.h 的 SDAG_OVERLAPPING_ELEMENT）。
 template<::std::size_t I, class T>
 struct leaf
+{
+	SDAG_OVERLAPPING_ELEMENT T value;
+
+	constexpr leaf() = default;
+
+	template<class Factory>
+	constexpr explicit leaf(from_factory_t, Factory&& factory)
+		noexcept(noexcept(T(::std::forward<Factory>(factory)())))
+		: value(::std::forward<Factory>(factory)())
+	{
+	}
+};
+
+template<::std::size_t I, class T>
+	requires (::std::is_empty_v<T> && !::std::is_same_v<T, empty>)
+struct leaf<I, T>
 {
 	SDAG_NO_UNIQUE_ADDRESS T value;
 
@@ -223,9 +137,6 @@ struct indexed_tuple : indexed_tuple_impl<::std::index_sequence_for<Ts...>, Ts..
 	using indexed_tuple_impl<::std::index_sequence_for<Ts...>, Ts...>::indexed_tuple_impl;
 };
 
-template<class List>
-using indexed_tuple_of = rebind_t<indexed_tuple, List>;
-
 template<::std::size_t I, class T>
 [[nodiscard]] constexpr T& get(leaf<I, T>& l) noexcept
 {
@@ -236,6 +147,18 @@ template<::std::size_t I, class T>
 [[nodiscard]] constexpr T const& get(leaf<I, T> const& l) noexcept
 {
 	return l.value;
+}
+
+template<::std::size_t I, class T>
+[[nodiscard]] constexpr T&& get(leaf<I, T>&& l) noexcept
+{
+	return static_cast<T&&>(l.value);
+}
+
+template<::std::size_t I, class T>
+[[nodiscard]] constexpr T const&& get(leaf<I, T> const&& l) noexcept
+{
+	return static_cast<T const&&>(l.value);
 }
 
 }

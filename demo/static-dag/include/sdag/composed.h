@@ -1,7 +1,7 @@
 #pragma once
 
-/// 降解：把 dag_t sexpr 变成由现成扇入 / 扇出算法（默认 ::stdexec::when_all + ::exec::split）
-/// 拼成的普通 sender 表达式树。类型全部用反射算出，运行期只做构造。
+/// 降解：把图 sender 变成由现成扇入 / 扇出算法（默认 ::stdexec::when_all + ::exec::split）
+/// 拼成的普通 sender 表达式树。类型由编译期计算层算好（compute::lowered），这里只做构造。
 ///
 ///   节点 sender = 节点原来的 sender，其中的输入叶子换成 fanin(前驱 1, 前驱 2, ...)
 ///   出度 > 1 的节点先经过 fanout，各后继拿到它的拷贝；出度 1 的节点直接 move 给后继
@@ -13,12 +13,10 @@
 /// 它不追求 0 开销——split 会堆分配，这是组合现成 combinator 的固有代价。
 
 #include <cstddef>
-#include <meta>
 #include <optional>
 #include <tuple>
 #include <type_traits>
 #include <utility>
-#include <vector>
 
 #include <stdexec/execution.hpp>
 #include <exec/sender_for.hpp>
@@ -27,167 +25,72 @@
 #include "meta.h"
 #include "node.h"
 #include "shape.h"
+#include "stdexec_bridge.h"
+#include "graph_sender.h"
 #include "graph.h"
+#include "compute/primitives.h"
+#include "compute/analysis.h"
 
 namespace sdag::composed_detail
 {
 
 using ::std::size_t;
-using meta::info;
-using meta::infos;
-using graph_detail::input_count;
-using graph_detail::is_input;
-using graph_detail::substituted;
-using graph_detail::substituted_t;
 
-/// 只有控制依赖的节点：等输入完成后忽略它的值，直接启动载荷 sender。
-template<class Sender>
-struct constant_sender
-{
-	Sender _sender;
+template<class T>
+inline constexpr bool is_input_v = false;
 
-	template<class... Args>
-	[[nodiscard]] constexpr Sender operator()(Args&&...) const& noexcept(::std::is_nothrow_copy_constructible_v<Sender>)
-	{
-		return _sender;
-	}
+template<class Dependency>
+inline constexpr bool is_input_v<input_sender<Dependency>> = true;
 
-	template<class... Args>
-	[[nodiscard]] constexpr Sender operator()(Args&&...) && noexcept(::std::is_nothrow_move_constructible_v<Sender>)
-	{
-		return ::std::move(_sender);
-	}
-};
-
-// ---------------------------------------------------------------- 把输入叶子换成真正的扇入 sender（运行期）
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmissing-braces" // __sexpr 的聚合初始化靠大括号省略，stdexec 自己也这样写
+/// 把输入叶子换成真正的扇入 sender：沿 sender 表达式拆开、替换、重建。
 template<class Input, class CvSender>
-[[nodiscard]] constexpr substituted_t<CvSender&&, Input> substitute(CvSender&& sender, Input&& input)
+[[nodiscard]] constexpr compute::substituted_t<CvSender&&, Input> substitute(CvSender&& sender, Input&& input)
 {
 	using sender_type = ::std::remove_cvref_t<CvSender>;
-	if constexpr (is_input(^^sender_type))
+	if constexpr (is_input_v<sender_type>)
 	{
 		return ::std::forward<Input>(input);
 	}
-	else if constexpr (input_count(^^sender_type) == 0)
+	else if constexpr (compute::input_count_v<sender_type> == 0)
 	{
 		return ::std::forward<CvSender>(sender);
 	}
 	else
 	{
-		return ::stdexec::__apply(
-			[&]<class Tag, class Data, class... Children>(Tag tag, Data&& data, Children&&... children)
+		return bridge::apply(
+			[&]<class Tag, class Data, class... Children>(Tag&& tag, Data&& data, Children&&... children)
 			{
 				// 只有一个子树含输入叶子，input 只会被真正移动一次。
-				return ::stdexec::__sexpr{tag, ::std::decay_t<Data>(::std::forward<Data>(data)),
-					composed_detail::substitute(::std::forward<Children>(children), ::std::forward<Input>(input))...};
+				return bridge::make_expression(::std::forward<Tag>(tag), ::std::forward<Data>(data),
+					composed_detail::substitute(::std::forward<Children>(children), ::std::forward<Input>(input))...);
 			},
 			::std::forward<CvSender>(sender));
 	}
 }
-#pragma GCC diagnostic pop
-
-// ---------------------------------------------------------------- 降解后的类型（反射）
-
-/// 每个节点降解后的三种类型；consteval 计算没有缓存，所以按拓扑序一次算完存成表，不做互递归。
-template<size_t N>
-struct lowered_tables
-{
-	/// 节点的输入：根是 just()，否则 fanin(前驱...)。
-	graph_detail::info_array<N> input{};
-	/// 节点 sender：输入叶子换成 input 之后的 sender；只有控制依赖的节点是 let_value(input, 常量 sender)。
-	graph_detail::info_array<N> node_sender{};
-	/// 存进构造表里的东西：出度 > 1 的节点存扇出后的 sender。
-	graph_detail::info_array<N> built{};
-};
-
-template<class Self, class FanIn, class FanOut>
-[[nodiscard]] consteval auto lower_types()
-{
-	constexpr auto shape = graph_detail::shape_of_v<Self>;
-	lowered_tables<shape.count> tables;
-	infos const dependencies = meta::arguments(^^typename graph_detail::data_t<Self>::dependencies);
-	infos const children = graph_detail::children_of(^^Self);
-
-	// 后继取前驱的方式：共享的拷贝一份扇出 sender，独占的直接 move。
-	auto dependency_input = [&](size_t from)
-	{
-		return shape.out_degree[from] > 1
-			? ::std::meta::add_lvalue_reference(::std::meta::add_const(tables.built[from]))
-			: ::std::meta::add_rvalue_reference(tables.built[from]);
-	};
-
-	for (size_t index : shape.order)
-	{
-		infos fanin_arguments{^^FanIn const&};
-		for (size_t from : graph_detail::dependency_indices<Self>(dependencies[index]))
-		{
-			fanin_arguments.push_back(dependency_input(from));
-		}
-		tables.input[index] = fanin_arguments.size() == 1
-			? ^^decltype(::stdexec::just())
-			: ::std::meta::dealias(::std::meta::substitute(^^::std::invoke_result_t, fanin_arguments));
-
-		info const child = ::std::meta::substitute(^^::stdexec::__copy_cvref_t, {^^Self, children[index]});
-		if (input_count(child) != 0)
-		{
-			tables.node_sender[index] = substituted(child, tables.input[index]);
-		}
-		else if (shape.is_root(index))
-		{
-			tables.node_sender[index] = graph_detail::plain(child);
-		}
-		else
-		{
-			tables.node_sender[index] = ::std::meta::dealias(::std::meta::substitute(^^::std::invoke_result_t,
-				{^^::stdexec::let_value_t const&, tables.input[index], ::std::meta::substitute(^^constant_sender, {graph_detail::plain(child)})}));
-		}
-
-		tables.built[index] = shape.out_degree[index] > 1
-			? ::std::meta::dealias(::std::meta::substitute(^^::std::invoke_result_t, {^^FanOut const&, tables.node_sender[index]}))
-			: tables.node_sender[index];
-	}
-	return tables;
-}
-
-/// std::tuple<std::optional<built...>...>
-template<size_t N>
-[[nodiscard]] consteval info storage_type(lowered_tables<N> const& tables)
-{
-	infos slots;
-	for (size_t index = 0; index < N; ++index)
-	{
-		slots.push_back(::std::meta::substitute(^^::std::optional, {tables.built[index]}));
-	}
-	return ::std::meta::substitute(^^::std::tuple, slots);
-}
-
-// ---------------------------------------------------------------- 构造
 
 template<class Self, class FanIn, class FanOut>
 struct builder
 {
+	using types = compute::lowered<Self, FanIn, FanOut>;
 	static constexpr auto shape = graph_detail::shape_of_v<Self>;
 	static constexpr size_t count = shape.count;
-	static constexpr auto tables = composed_detail::lower_types<Self, FanIn, FanOut>();
 
 	template<size_t I>
 	using child_t = graph_detail::node_sender_t<Self, I>;
 
 	template<size_t I>
-	using node_sender_t = typename [: tables.node_sender[I] :];
+	using node_sender_t = typename types::template node_sender_t<I>;
 
 	template<size_t I>
-	using input_t = typename [: tables.input[I] :];
+	using input_t = typename types::template input_t<I>;
 
+	/// 后继取前驱的方式：共享的拷贝一份扇出 sender，独占的直接 move。
 	template<size_t D>
 	using dependency_input_t = ::std::conditional_t<(shape.out_degree[D] > 1),
-		typename [: tables.built[D] :] const&,
-		typename [: tables.built[D] :]&&>;
+		typename types::template built_t<D> const&,
+		typename types::template built_t<D>&&>;
 
-	using storage_t = typename [: composed_detail::storage_type(tables) :];
+	using storage_t = typename types::storage_t;
 
 	FanIn const& _fanin;
 	FanOut const& _fanout;
@@ -225,8 +128,8 @@ struct builder
 	{
 		using child = child_t<I>;
 		using dependencies = graph_detail::dependencies_t<Self, I>;
-		decltype(auto) sender = ::stdexec::__get<I + 2>(::std::forward<Self>(_graph));
-		if constexpr (input_count(^^child) != 0)
+		decltype(auto) sender = ::std::forward<Self>(_graph).template get<I + 2>();
+		if constexpr (compute::input_count_v<child> != 0)
 		{
 			return composed_detail::substitute(::std::forward<child>(sender), make_input<I>(dependencies{}));
 		}
@@ -237,7 +140,7 @@ struct builder
 		else
 		{
 			return ::stdexec::let_value(make_input<I>(dependencies{}),
-				constant_sender<::std::remove_cvref_t<child>>{::std::forward<child>(sender)});
+				graph_detail::constant_sender<::std::remove_cvref_t<child>>{::std::forward<child>(sender)});
 		}
 	}
 
@@ -270,11 +173,11 @@ struct builder
 	[[nodiscard]] auto build()
 	{
 		// 按拓扑序构造，保证前驱的 sender 先于后继存在。
-		template for (constexpr size_t index : shape.order)
+		compute::for_each_value<shape.order>([this]<size_t I>()
 		{
-			build_one<index>();
-		}
-		return join_sinks(sink_sequence<shape>{});
+			this->template build_one<I>();
+		});
+		return join_sinks(compute::sequence_t<sinks_v<shape>>{});
 	}
 };
 

@@ -758,6 +758,26 @@ void test_scale()
 	test::check(fused_left == composed_left && fused_right == composed_right && fused_left > 0, "梯子：融合与降解结果一致");
 }
 
+void test_wide_expressions()
+{
+	test::section("节点里是子 sender 多于 6 个的 stdexec 算法（when_all 有 7 个子 sender）");
+	auto seven = [](auto policy)
+	{
+		auto ones = [] { return ::stdexec::just(1); };
+		return ::sdag::dag(policy,
+			::sdag::make_node<a>(::stdexec::when_all(ones(), ones(), ones(), ones(), ones(), ones(), ones())
+				| ::stdexec::then([](auto... xs) { return (xs + ...); })),
+			::sdag::make_node<b, ::sdag::after<a>>([ones](auto input)
+			{
+				return ::stdexec::when_all(::std::move(input), ones(), ones(), ones(), ones(), ones(), ones())
+					| ::stdexec::then([](auto... xs) { return (xs + ...); });
+			}));
+	};
+	auto [fused_value] = ::stdexec::sync_wait(seven(::sdag::fused{})).value();
+	auto [composed_value] = ::stdexec::sync_wait(seven(::sdag::composed{})).value();
+	test::check(fused_value == 13 && composed_value == 13, "根节点 7 路 when_all，后继把输入与 6 个 sender 一起 when_all");
+}
+
 void test_policies_agree()
 {
 	test::section("复杂形状：两种策略结果一致");
@@ -819,7 +839,7 @@ void test_ecosystem()
 	using graph = decltype(build());
 	static_assert(::exec::sender_for<graph, ::sdag::dag_t>);
 	static_assert(::std::same_as<::stdexec::tag_of_t<graph>, ::sdag::dag_t>);
-	static_assert(::std::same_as<::stdexec::__child_of<graph>, decltype(::stdexec::just(1))>, "子 sender 就是用户给的节点 sender");
+	static_assert(::std::same_as<::std::tuple_element_t<2, graph>, decltype(::stdexec::just(1))>, "子 sender 就是用户给的节点 sender");
 
 	// 没有 domain：连接结果是融合 op-state
 	static_assert(::std::same_as<::stdexec::connect_result_t<graph, probe_receiver>,
@@ -882,6 +902,7 @@ int main()
 	test_stop_propagation();
 	test_thread_pool();
 	test_scale();
+	test_wide_expressions();
 	test_policies_agree();
 	test_ecosystem();
 	return test::report();
