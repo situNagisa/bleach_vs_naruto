@@ -163,7 +163,7 @@ struct node
 	using dependencies_type = Dependencies;
 	using payload_type = Payload;
 
-	[[no_unique_address]] Payload _payload;
+	SDAG_NO_UNIQUE_ADDRESS Payload _payload;
 
 	template<class Self>
 	[[nodiscard]] constexpr auto&& payload(this Self&& self) noexcept

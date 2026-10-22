@@ -125,13 +125,13 @@ int main()
 		static_assert(operation::sink_count == 1);
 
 		// 节点 op-state：just<int> -> 4 字节值 + 接收者指针；then -> 接收者指针 + 空输入 op；
-		// 值槽：a 被两个后继共享 -> optional<tuple<int>>；b、c 各给 d -> optional<tuple<int>>；d 是汇点 -> optional<tuple<int>>
-		// d 入度 2 -> 一个 atomic<size_t>
+		// 值槽：a 被两个后继共享 -> optional<tuple<int>>；b、c 各给 d -> optional<tuple<int>>；
+		// d 是唯一的汇点，值直接转发给接收者，不存槽位；d 入度 2 -> 一个 atomic<size_t>
 		constexpr auto node_operations = sizeof(operation::operations_t);
 		constexpr auto receiver = sizeof(null_receiver);
-		constexpr auto slots = 4 * sizeof(::std::optional<::std::tuple<int>>);
+		constexpr auto slots = 3 * sizeof(::std::optional<::std::tuple<int>>);
 		constexpr auto pending = sizeof(::std::atomic<::std::size_t>);
-		::std::println("  sizeof(op-state) = {}，节点 op-state {} + 接收者 {} + 值槽 {} + 入度计数 {} = {}",
+		::std::println("  sizeof(op-state) = {}，节点 op-state {} + 接收者 {} + 3 个值槽 {} + 入度计数 {} = {}",
 			sizeof(operation), node_operations, receiver, slots, pending, node_operations + receiver + slots + pending);
 		test::check(sizeof(operation) == node_operations + receiver + slots + pending,
 			"没有停止源 / 状态字 / 汇点计数等多余成员，被优化掉的成员不占字节");

@@ -1,13 +1,16 @@
 #pragma once
 
-/// 组合策略：用现成的扇入 / 扇出算法（默认 ::stdexec::when_all + ::exec::split）把图拼成
-/// 一棵普通的 sender 表达式树。它是语义参照与可配置入口，不追求 0 开销——split 会堆分配。
+/// 降解：把 dag_t sexpr 变成由现成扇入 / 扇出算法（默认 ::stdexec::when_all + ::exec::split）
+/// 拼成的普通 sender 表达式树。
 ///
-///   节点 sender = 载荷(扇入(前驱 1 的 sender, 前驱 2 的 sender, ...))
-///   出度 > 1 的节点先经过扇出，各后继拿到它的拷贝；出度 1 的节点直接 move 给后继
-///   整图 = 扇入(汇点...)
+///   节点 sender = 节点原来的 sender，其中的输入叶子换成 fanin(前驱 1, 前驱 2, ...)
+///   出度 > 1 的节点先经过 fanout，各后继拿到它的拷贝；出度 1 的节点直接 move 给后继
+///   只有控制依赖的节点 = let_value(fanin(前驱...), 常量 sender)
+///   整图 = fanin(汇点...)
 ///
-/// 值的传递规则与融合策略一致：独占的 move，共享的按 const&（split 的语义）。
+/// 两个用途：所在 domain 定制了 when_all 时 dag_t::transform_sender 自动走这里，让 domain 看到
+/// 它认识的标准算法；composed 策略则无条件走这里，作为语义参照与可配置入口。
+/// 它不追求 0 开销——split 会堆分配，这是组合现成 combinator 的固有代价。
 
 #include <cstddef>
 #include <optional>
@@ -16,19 +19,20 @@
 #include <utility>
 
 #include <stdexec/execution.hpp>
+#include <exec/sender_for.hpp>
 #include <exec/split.hpp>
 
 #include "meta.h"
 #include "node.h"
 #include "shape.h"
+#include "graph.h"
 
-namespace sdag
-{
-
-namespace composed_detail
+namespace sdag::composed_detail
 {
 
 using ::std::size_t;
+using graph_detail::traits_of;
+using graph_detail::contains_input_v;
 
 /// 只有控制依赖的节点：等输入完成后忽略它的值，直接启动载荷 sender。
 template<class Sender>
@@ -49,17 +53,53 @@ struct constant_sender
 	}
 };
 
-template<class FanIn, class FanOut, class... Nodes>
+// ---------------------------------------------------------------- 把输入叶子换成真正的扇入 sender
+
+using graph_detail::is_input_v;
+using graph_detail::substituted_t;
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-braces" // __sexpr 的聚合初始化靠大括号省略，stdexec 自己也这样写
+template<class Input, class CvSender>
+[[nodiscard]] constexpr substituted_t<CvSender&&, Input> substitute(CvSender&& sender, Input&& input)
+{
+	using sender_type = ::std::remove_cvref_t<CvSender>;
+	if constexpr (is_input_v<sender_type>)
+	{
+		return ::std::forward<Input>(input);
+	}
+	else if constexpr (!contains_input_v<sender_type>)
+	{
+		return ::std::forward<CvSender>(sender);
+	}
+	else
+	{
+		return ::stdexec::__apply(
+			[&]<class Tag, class Data, class... Children>(Tag tag, Data&& data, Children&&... children)
+			{
+				// 只有一个子树含输入叶子，input 只会被真正移动一次。
+				return ::stdexec::__sexpr{tag, ::std::decay_t<Data>(::std::forward<Data>(data)),
+					composed_detail::substitute(::std::forward<Children>(children), ::std::forward<Input>(input))...};
+			},
+			::std::forward<CvSender>(sender));
+	}
+}
+#pragma clang diagnostic pop
+
+// ---------------------------------------------------------------- 构造
+
+template<class Self, class FanIn, class FanOut>
 struct builder
 {
-	static constexpr auto shape = checked_shape<Nodes...>();
-	static constexpr size_t count = sizeof...(Nodes);
+	using traits = traits_of<Self>;
+	static constexpr auto shape = traits::shape;
+	static constexpr size_t count = traits::count;
 
 	template<size_t I>
-	using dependencies_t = dependency_indices_t<I, Nodes...>;
+	using child_t = graph_detail::node_sender_t<Self, I>;
 
 	template<size_t I>
-	using payload_t = decltype(::sdag::payload(::std::declval<meta::at_t<I, meta::type_list<Nodes...>>>()));
+	using dependencies_t = typename traits::template dependencies_t<I>;
 
 	template<size_t I>
 	struct node_sender;
@@ -76,6 +116,7 @@ struct builder
 	/// 后继取前驱的方式：共享的拷贝一份扇出 sender，独占的直接 move。
 	template<size_t D>
 	using dependency_input_t = ::std::conditional_t<(shape.out_degree[D] > 1), built_t<D> const&, built_t<D>&&>;
+
 
 	template<size_t I, class Dependencies>
 	struct input;
@@ -99,22 +140,20 @@ struct builder
 	template<size_t I>
 	struct node_sender
 	{
-		static_assert(node_payload<payload_t<I>, input_t<I>>,
-			"sdag: 节点载荷既不是 sender，也不是能接受输入 sender 的适配器（例如 ::stdexec::then(f)）");
-
 		static consteval auto compute() noexcept
 		{
-			if constexpr (!sender_payload<payload_t<I>>)
+			if constexpr (contains_input_v<::std::remove_cvref_t<child_t<I>>>)
 			{
-				return meta::tag<::std::invoke_result_t<payload_t<I>, input_t<I>>>{};
+				return meta::tag<substituted_t<child_t<I>, input_t<I>>>{};
 			}
 			else if constexpr (shape.is_root(I))
 			{
-				return meta::tag<::std::decay_t<payload_t<I>>>{};
+				return meta::tag<::std::remove_cvref_t<child_t<I>>>{};
 			}
 			else
 			{
-				return meta::tag<decltype(::stdexec::let_value(::std::declval<input_t<I>>(), ::std::declval<constant_sender<::std::decay_t<payload_t<I>>>>()))>{};
+				return meta::tag<decltype(::stdexec::let_value(::std::declval<input_t<I>>(),
+					::std::declval<constant_sender<::std::remove_cvref_t<child_t<I>>>>()))>{};
 			}
 		}
 
@@ -134,7 +173,7 @@ struct builder
 
 	FanIn const& _fanin;
 	FanOut const& _fanout;
-	::std::tuple<Nodes&&...> _nodes;
+	Self _graph;
 	storage_t _built{};
 
 	template<size_t D>
@@ -166,23 +205,20 @@ struct builder
 	template<size_t I>
 	[[nodiscard]] node_sender_t<I> make_node_sender()
 	{
-		decltype(auto) payload = ::sdag::payload(::std::get<I>(::std::move(_nodes)));
-		using payload_type = decltype(payload);
-		if constexpr (sender_payload<payload_type>)
+		using child = child_t<I>;
+		decltype(auto) sender = ::stdexec::__get<I + 2>(::std::forward<Self>(_graph));
+		if constexpr (contains_input_v<::std::remove_cvref_t<child>>)
 		{
-			if constexpr (shape.is_root(I))
-			{
-				return ::std::decay_t<payload_type>(::std::forward<payload_type>(payload));
-			}
-			else
-			{
-				return ::stdexec::let_value(make_input<I>(dependencies_t<I>{}),
-					constant_sender<::std::decay_t<payload_type>>{::std::forward<payload_type>(payload)});
-			}
+			return composed_detail::substitute(::std::forward<child>(sender), make_input<I>(dependencies_t<I>{}));
+		}
+		else if constexpr (shape.is_root(I))
+		{
+			return ::std::remove_cvref_t<child>(::std::forward<child>(sender));
 		}
 		else
 		{
-			return ::std::forward<payload_type>(payload)(make_input<I>(dependencies_t<I>{}));
+			return ::stdexec::let_value(make_input<I>(dependencies_t<I>{}),
+				constant_sender<::std::remove_cvref_t<child>>{::std::forward<child>(sender)});
 		}
 	}
 
@@ -214,25 +250,35 @@ struct builder
 			{
 				return _fanin(::std::move(*::std::get<S>(_built))...);
 			}
-		}(meta::index_sequence_of<meta::filtered_indices<count, [](size_t index) { return shape.is_sink(index); }>>{});
+		}(meta::index_sequence_of<graph_detail::sink_indices<shape>>{});
 	}
 };
 
 }
 
-/// 组合策略：fanin 接收 1 个或多个 sender（当只有 1 个时应原样返回），fanout 接收 1 个 sender 并返回可拷贝的 sender。
+namespace sdag
+{
+
+template<class Graph, class FanIn, class FanOut>
+auto lower_t::operator()(Graph&& graph, FanIn const& fanin, FanOut const& fanout) const
+{
+	static_assert(::exec::sender_for<Graph, dag_t>, "sdag: lower 只接受 dag_t{}(...) / dag(...) 得到的图 sender");
+	using builder_type = composed_detail::builder<Graph&&, FanIn, FanOut>;
+	builder_type builder{fanin, fanout, ::std::forward<Graph>(graph)};
+	return builder.build(::std::make_index_sequence<builder_type::count>{});
+}
+
+/// 组合策略：fanin 接收 1 个或多个 sender（只有 1 个时应原样返回），fanout 接收 1 个 sender 并返回可拷贝的 sender。
 template<class FanIn = ::stdexec::when_all_t, class FanOut = ::exec::split_t>
 struct composed
 {
-	[[no_unique_address]] FanIn _fanin{};
-	[[no_unique_address]] FanOut _fanout{};
+	SDAG_NO_UNIQUE_ADDRESS FanIn _fanin{};
+	SDAG_NO_UNIQUE_ADDRESS FanOut _fanout{};
 
 	template<graph_node... Nodes>
 	[[nodiscard]] auto compose(Nodes&&... nodes) const
 	{
-		using builder_type = composed_detail::builder<FanIn, FanOut, Nodes...>;
-		builder_type builder{_fanin, _fanout, ::std::tuple<Nodes&&...>(::std::forward<Nodes>(nodes)...)};
-		return builder.build(::std::make_index_sequence<sizeof...(Nodes)>{});
+		return ::sdag::lower(dag_t{}(::std::forward<Nodes>(nodes)...), _fanin, _fanout);
 	}
 };
 

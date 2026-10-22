@@ -143,48 +143,68 @@ struct shape
 namespace shape_detail
 {
 
-template<class Node, class Keys, ::std::size_t N>
+template<class Dependencies, class Keys, ::std::size_t N>
 constexpr void add_node(shape<N>& result, ::std::size_t index) noexcept
 {
-	using dependencies = typename node_dependencies_t<Node>::keys;
 	[&]<class... Keys2>(meta::type_list<Keys2...>)
 	{
 		(result.add_edge(meta::index_of_v<Keys2, Keys>, index), ...);
-	}(dependencies{});
+	}(typename Dependencies::keys{});
 }
+
+template<class Keys, class Dependencies>
+struct shape_from;
+
+/// Keys = type_list<键...>，Dependencies = type_list<after<...>...>，一一对应。
+template<class... Keys, dependency_list... Dependencies>
+	requires (sizeof...(Keys) == sizeof...(Dependencies))
+struct shape_from<meta::type_list<Keys...>, meta::type_list<Dependencies...>>
+{
+	[[nodiscard]] static consteval shape<sizeof...(Keys)> compute() noexcept
+	{
+		using keys = meta::type_list<Keys...>;
+		shape<sizeof...(Keys)> result{};
+		::std::size_t index = 0;
+		(
+			[&]
+			{
+				if (meta::index_of_v<Keys, keys> != index)
+				{
+					result.fail(shape_error::duplicate_key, index);
+				}
+				shape_detail::add_node<Dependencies, keys>(result, index);
+				++index;
+			}(),
+			...);
+		if (result.error == shape_error::none)
+		{
+			result.sort();
+		}
+		return result;
+	}
+};
 
 }
 
-/// 分析节点列表；不做断言，错误写在 error 里（便于测试）。
+/// 分析键列表与依赖列表；不做断言，错误写在 error 里（便于测试）。
+template<class Keys, class Dependencies>
+[[nodiscard]] consteval auto shape_of_lists() noexcept
+{
+	return shape_detail::shape_from<Keys, Dependencies>::compute();
+}
+
+/// 分析节点列表；不做断言。
 template<graph_node... Nodes>
 [[nodiscard]] consteval shape<sizeof...(Nodes)> shape_of() noexcept
 {
-	using keys = meta::type_list<node_key_t<Nodes>...>;
-	shape<sizeof...(Nodes)> result{};
-	::std::size_t index = 0;
-	(
-		[&]
-		{
-			if (meta::index_of_v<node_key_t<Nodes>, keys> != index)
-			{
-				result.fail(shape_error::duplicate_key, index);
-			}
-			shape_detail::add_node<Nodes, keys>(result, index);
-			++index;
-		}(),
-		...);
-	if (result.error == shape_error::none)
-	{
-		result.sort();
-	}
-	return result;
+	return shape_of_lists<meta::type_list<node_key_t<Nodes>...>, meta::type_list<node_dependencies_t<Nodes>...>>();
 }
 
 /// 分析并把每类错误变成一条独立的 static_assert 消息。
-template<graph_node... Nodes>
-[[nodiscard]] consteval shape<sizeof...(Nodes)> checked_shape() noexcept
+template<class Keys, class Dependencies>
+[[nodiscard]] consteval auto checked_shape_of_lists() noexcept
 {
-	constexpr auto result = shape_of<Nodes...>();
+	constexpr auto result = shape_of_lists<Keys, Dependencies>();
 	static_assert(result.error != shape_error::duplicate_key, "sdag: 两个节点使用了同一个键");
 	static_assert(result.error != shape_error::unknown_dependency, "sdag: 节点依赖了不存在的键");
 	static_assert(result.error != shape_error::self_dependency, "sdag: 节点依赖了自己");
@@ -196,16 +216,14 @@ template<graph_node... Nodes>
 template<class Keys, class Dependencies>
 struct keys_to_indices;
 
+/// 把 after<...> 的键按声明顺序换成节点索引（std::index_sequence）。
 template<class Keys, class... Dependencies>
 struct keys_to_indices<Keys, meta::type_list<Dependencies...>>
 {
 	using type = ::std::index_sequence<meta::index_of_v<Dependencies, Keys>...>;
 };
 
-/// 节点 Index 的前驱索引（std::index_sequence），按 after<...> 的声明顺序。
-template<::std::size_t Index, graph_node... Nodes>
-using dependency_indices_t = typename keys_to_indices<
-	meta::type_list<node_key_t<Nodes>...>,
-	typename node_dependencies_t<meta::at_t<Index, meta::type_list<Nodes...>>>::keys>::type;
+template<class Keys, class Dependencies>
+using keys_to_indices_t = typename keys_to_indices<Keys, Dependencies>::type;
 
 }

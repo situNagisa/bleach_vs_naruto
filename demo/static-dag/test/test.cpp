@@ -221,6 +221,73 @@ struct notify_receiver
 template<class V>
 constexpr bool shared_access = ::std::is_const_v<::std::remove_reference_t<V>>;
 
+// ---------------------------------------------------------------- 模拟一个会定制 when_all 的 domain
+
+inline int custom_when_all_uses = 0;
+
+template<class Sender>
+struct counted_when_all
+{
+	Sender _sender;
+
+	auto operator()() const
+	{
+		++custom_when_all_uses;
+		// 内层 when_all 连接时环境里的 domain 换回默认，避免被再次定制。
+		return ::stdexec::write_env(_sender, ::stdexec::prop{::stdexec::get_domain, ::stdexec::default_domain{}});
+	}
+};
+
+/// 只定制 when_all（起始阶段）：把它包进一个计数的 let_value。
+struct mock_domain : ::stdexec::default_domain
+{
+	template<::exec::sender_for<::stdexec::when_all_t> Sender, class Env>
+	static auto transform_sender(::stdexec::start_t, Sender&& sender, Env const&)
+	{
+		return ::stdexec::let_value(::stdexec::just(), counted_when_all<::std::remove_cvref_t<Sender>>{::std::forward<Sender>(sender)});
+	}
+};
+
+struct domain_env
+{
+	[[nodiscard]] mock_domain query(::stdexec::get_domain_t) const noexcept
+	{
+		return {};
+	}
+};
+
+/// 环境里带 mock_domain 的接收者。
+struct domain_receiver
+{
+	using receiver_concept = ::stdexec::receiver_t;
+
+	outcome* _outcome;
+	int* _value_count;
+
+	template<class... Args>
+	void set_value(Args&&...) noexcept
+	{
+		*_outcome = outcome::value;
+		*_value_count = sizeof...(Args);
+	}
+
+	template<class Error>
+	void set_error(Error&&) noexcept
+	{
+		*_outcome = outcome::error;
+	}
+
+	void set_stopped() noexcept
+	{
+		*_outcome = outcome::stopped;
+	}
+
+	[[nodiscard]] domain_env get_env() const noexcept
+	{
+		return {};
+	}
+};
+
 // ---------------------------------------------------------------- 编译期
 
 namespace compile_time
@@ -351,7 +418,7 @@ void test_triangle()
 		using fused_graph = decltype(build(::sdag::fused{}));
 		static_assert(::std::same_as<::stdexec::completion_signatures_of_t<fused_graph, ::stdexec::env<>>,
 			::stdexec::completion_signatures<::stdexec::set_value_t(::std::string), ::stdexec::set_error_t(::std::exception_ptr)>>);
-		constexpr auto shape = fused_graph::shape;
+		constexpr auto shape = ::sdag::shape_v<fused_graph>;
 		static_assert(shape.in_degree[2] == 2 && shape.out_degree[0] == 2 && shape.out_degree[1] == 1);
 		static_assert(shape.order[0] == 0 && shape.order[1] == 1 && shape.order[2] == 2);
 
@@ -499,11 +566,16 @@ void test_error_propagation()
 	::stdexec::start(op);
 	test::check(result == outcome::error, "没有值完成的图以错误结束");
 
-	// 存值时抛异常 -> exception_ptr
+	// 存值时抛异常 -> exception_ptr（a 的值要存给 b 读；唯一汇点的值不存槽位，所以单节点图不会走这条路）
 	bool explode = false;
-	auto storing = ::sdag::dag(::sdag::make_node<a>(::stdexec::just(fragile{&explode})));
+	auto storing = ::sdag::dag(
+		::sdag::make_node<a>(::stdexec::just(fragile{&explode})),
+		::sdag::make_node<b, ::sdag::after<a>>(::stdexec::then([](fragile) noexcept { return 1; })));
 	static_assert(::std::same_as<::stdexec::completion_signatures_of_t<decltype(storing), ::stdexec::env<>>,
-		::stdexec::completion_signatures<::stdexec::set_value_t(fragile), ::stdexec::set_error_t(::std::exception_ptr)>>);
+		::stdexec::completion_signatures<::stdexec::set_value_t(int), ::stdexec::set_error_t(::std::exception_ptr)>>);
+	using single = decltype(::sdag::dag(::sdag::make_node<a>(::stdexec::just(fragile{&explode}))));
+	static_assert(::std::same_as<::stdexec::completion_signatures_of_t<single, ::stdexec::env<>>,
+		::stdexec::completion_signatures<::stdexec::set_value_t(fragile)>>, "唯一汇点的值不存槽位，也就没有存值抛异常这回事");
 	bool store_failed = false;
 	explode = true;
 	try
@@ -685,6 +757,72 @@ void test_policies_agree()
 	test::check(respects_order(fused_sequence) && respects_order(composed_sequence), "控制依赖保证了先后顺序");
 }
 
+void test_ecosystem()
+{
+	test::section("stdexec 生态：图是 dag_t 标签的 sexpr；定制 when_all 的 domain 看到降解后的标准算法，其它 domain 走融合");
+	auto build = []
+	{
+		return ::sdag::dag(
+			::sdag::make_node<a>(::stdexec::just(1)),
+			::sdag::make_node<b, ::sdag::after<a>>(::stdexec::then([](int const& x) { return x + 1; })),
+			::sdag::make_node<c, ::sdag::after<a>>(::stdexec::then([](int const& x) { return x * 2; })),
+			::sdag::make_node<d, ::sdag::after<b, c>>(::stdexec::then([](int y, int z) { return y + z; })),
+			::sdag::make_node<e, ::sdag::after<c>>(::stdexec::then([](int z) { return z * 10; })));
+	};
+	using graph = decltype(build());
+	static_assert(::exec::sender_for<graph, ::sdag::dag_t>);
+	static_assert(::std::same_as<::stdexec::tag_of_t<graph>, ::sdag::dag_t>);
+	static_assert(::std::same_as<::stdexec::__child_of<graph>, decltype(::stdexec::just(1))>, "子 sender 就是用户给的节点 sender");
+
+	// 没有 domain：连接结果是融合 op-state
+	static_assert(::std::same_as<::stdexec::connect_result_t<graph, probe_receiver>,
+		::sdag::fused_detail::fused_operation<graph&&, probe_receiver>>);
+	// mock_domain：连接结果不是融合 op-state，而是降解后的标准算法树
+	static_assert(!::std::same_as<::stdexec::connect_result_t<graph, domain_receiver>,
+		::sdag::fused_detail::fused_operation<graph&&, domain_receiver>>);
+
+	custom_when_all_uses = 0;
+	{
+		outcome result = outcome::none;
+		int count = 0;
+		auto op = ::stdexec::connect(build(), probe_receiver{&result, &count, {}});
+		::stdexec::start(op);
+		test::check(result == outcome::value && count == 2 && custom_when_all_uses == 0, "默认 domain 下 when_all 定制从未被触发");
+	}
+	{
+		outcome result = outcome::none;
+		int count = 0;
+		auto op = ::stdexec::connect(build(), domain_receiver{&result, &count});
+		::stdexec::start(op);
+		test::check(result == outcome::value && count == 2, "降解后的图完成值与融合一致（两个汇点）");
+		test::check(custom_when_all_uses > 0, "domain 对 when_all 的定制在降解后的图上生效");
+	}
+
+	// 手动降解与 composed 策略是同一条路
+	auto [x, y] = ::stdexec::sync_wait(::sdag::lower(build(), ::stdexec::when_all, ::exec::split)).value();
+	test::check(x == 4 && y == 20, "lower(graph, when_all, split)");
+
+	// 完成域属性：图在汇点完成的地方完成
+	{
+		::exec::static_thread_pool pool{1};
+		auto scheduler = pool.get_scheduler();
+		auto on_pool = ::sdag::dag(
+			::sdag::make_node<a>(::stdexec::just(1)),
+			::sdag::make_node<b, ::sdag::after<a>>(::stdexec::continues_on(scheduler) | ::stdexec::then([](int x) { return x + 1; })));
+		using env = ::stdexec::env<>;
+		using graph_domain = decltype(::stdexec::get_completion_domain<::stdexec::set_value_t>(::stdexec::get_env(on_pool), env{}));
+		using sink_domain = decltype(::stdexec::get_completion_domain<::stdexec::set_value_t>(
+			::stdexec::get_env(::stdexec::continues_on(::stdexec::just(1), scheduler)), env{}));
+		static_assert(::std::same_as<graph_domain, sink_domain>);
+		static_assert(!::std::same_as<graph_domain, ::stdexec::default_domain>, "线程池有自己的 domain");
+		// 线程池的 domain 不定制 when_all：仍然走融合
+		static_assert(::std::same_as<::stdexec::connect_result_t<decltype(on_pool), probe_receiver>,
+			::sdag::fused_detail::fused_operation<decltype(on_pool)&&, probe_receiver>>);
+		auto [value] = ::stdexec::sync_wait(::std::move(on_pool)).value();
+		test::check(value == 2, "线程池上的图照常完成");
+	}
+}
+
 }
 
 int main()
@@ -698,5 +836,6 @@ int main()
 	test_thread_pool();
 	test_scale();
 	test_policies_agree();
+	test_ecosystem();
 	return test::report();
 }

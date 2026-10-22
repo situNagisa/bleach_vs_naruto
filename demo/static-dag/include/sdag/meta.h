@@ -7,6 +7,16 @@
 #include <type_traits>
 #include <utility>
 
+/// MSVC ABI（clang-cl）下 [[no_unique_address]] 被忽略，要用 [[msvc::no_unique_address]]；
+/// 多个空基类也只有第一个能做空基类优化，要加 __declspec(empty_bases)。
+#if defined(_MSC_VER)
+#define SDAG_NO_UNIQUE_ADDRESS [[msvc::no_unique_address]]
+#define SDAG_EMPTY_BASES __declspec(empty_bases)
+#else
+#define SDAG_NO_UNIQUE_ADDRESS [[no_unique_address]]
+#define SDAG_EMPTY_BASES
+#endif
+
 namespace sdag::meta
 {
 
@@ -15,7 +25,7 @@ struct empty
 {
 };
 
-/// 同一个类里多个被优化掉的成员要用互不相同的空类型，否则 [[no_unique_address]] 也得给它们分配不同地址。
+/// 同一个类里多个被优化掉的成员要用互不相同的空类型，否则 no_unique_address 也得给它们分配不同地址。
 template<class Tag>
 struct empty_for
 {
@@ -159,7 +169,7 @@ inline constexpr from_factory_t from_factory{};
 template<::std::size_t I, class T>
 struct leaf
 {
-	[[no_unique_address]] T value;
+	SDAG_NO_UNIQUE_ADDRESS T value;
 
 	constexpr leaf() = default;
 
@@ -187,7 +197,7 @@ template<class Indices, class... Ts>
 struct indexed_tuple_impl;
 
 template<::std::size_t... Is, class... Ts>
-struct indexed_tuple_impl<::std::index_sequence<Is...>, Ts...> : leaf<Is, Ts>...
+struct SDAG_EMPTY_BASES indexed_tuple_impl<::std::index_sequence<Is...>, Ts...> : leaf<Is, Ts>...
 {
 	constexpr indexed_tuple_impl() = default;
 
@@ -200,7 +210,7 @@ struct indexed_tuple_impl<::std::index_sequence<Is...>, Ts...> : leaf<Is, Ts>...
 	}
 };
 
-/// 每个元素独立占一个基类，空类型靠 [[no_unique_address]] 消失；
+/// 每个元素独立占一个基类，空类型靠空基类优化消失；
 /// 没有 std::tuple 那种"先构造再移动"的要求。
 template<class... Ts>
 struct indexed_tuple : indexed_tuple_impl<::std::index_sequence_for<Ts...>, Ts...>

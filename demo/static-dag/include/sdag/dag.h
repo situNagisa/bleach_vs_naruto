@@ -8,6 +8,7 @@
 #include <stdexec/execution.hpp>
 
 #include "node.h"
+#include "graph.h"
 #include "fused.h"
 
 namespace sdag
