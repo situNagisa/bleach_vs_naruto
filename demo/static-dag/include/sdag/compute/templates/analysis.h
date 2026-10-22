@@ -1,6 +1,11 @@
 #pragma once
 
-/// 编译期计算层（二）的模板实现：给还不支持静态反射的编译器用。编译器都支持反射之后，整个 templates/ 目录可以删除。
+/// 编译期计算层（二）的模板实现。接口说明见 compute/analysis.h。
+///
+/// 给还不支持静态反射的编译器用；名字与 reflection/analysis.h 一一对应。编译器都支持反射之后，整个 templates/ 目录可以删除。
+///
+/// 结构：analysis<Self, Env> 在 valid_analysis（全部节点签名合法）与 invalid_analysis（只给出第一个不合法的结果）之间选。
+/// 先判合法再选，是因为 valid_analysis 的成员一实例化就会去拆每个节点的签名，不合法时会硬错误。
 
 #include <array>
 #include <cstddef>
@@ -14,7 +19,7 @@
 #include <stdexec/execution.hpp>
 
 #include "../../meta.h"
-#include "../../graph_sender.h"
+#include "../../graph_traits.h"
 #include "primitives.h"
 
 namespace sdag::compute
@@ -67,9 +72,11 @@ struct validity<Self, ::std::index_sequence<I...>, Env>
 	using first_invalid_t = typename decltype(first_invalid())::type;
 };
 
-/// 节点 sender 的完成签名要先算前驱的：then(f) 问子 sender 的签名时，节点 N 的计算会嵌套进节点 N-1 的……
-/// 长链会撞上编译器的模板深度上限。这里按拓扑序逐个实例化（基类先于派生类），让后面的计算全部命中
-/// 编译器已有的实例化结果，嵌套深度变成常数。
+/// 按拓扑序预热节点签名。
+///
+/// 节点 N 是 then(input_sender, f) 这样的表达式，then 算签名时要问输入 sender，输入 sender 又要问前驱的签名——
+/// 一条长链的签名计算会层层嵌套，几十个节点就撞上编译器的模板深度上限。这里按拓扑序逐个实例化
+/// （warm_up<N> 的基类是 warm_up<N - 1>，基类先实例化），让后面的计算全部命中已有的实例化结果，嵌套深度变成常数。
 template<class Self, size_t Step, class Env>
 struct warm_up : warm_up<Self, Step - 1, Env>
 {
@@ -177,7 +184,8 @@ struct accessor
 template<class Self, class Env, class Indices>
 struct input_completions;
 
-/// 只看前驱节点的完成签名，不触发整图分析——否则会沿着"节点 -> 输入 sender -> 整图"递归实例化。
+/// 输入 sender 的完成签名。只看前驱节点的签名，不碰整图分析：
+/// 整图分析要算每个节点的签名，节点的签名又要问它的输入 sender——如果输入 sender 反过来要整图分析，就成环了。
 template<class Self, class Env, size_t... D>
 struct input_completions<Self, Env, ::std::index_sequence<D...>>
 {
@@ -344,7 +352,7 @@ struct common_completion_domain<Env, meta::type_list<Nodes...>>
 
 }
 
-// ---------------------------------------------------------------- 对外接口
+// ---------------------------------------------------------------- 对外接口（名字与 reflection/analysis.h 一一对应）
 
 template<class Self, class Env>
 struct analysis : ::std::conditional_t<tmpl::all_valid<Self, Env>,

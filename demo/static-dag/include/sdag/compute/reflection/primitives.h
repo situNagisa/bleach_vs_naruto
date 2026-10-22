@@ -1,6 +1,9 @@
 #pragma once
 
-/// 编译期计算层（一）的反射实现：所有运算都是对 std::vector<std::meta::info> 的普通 consteval 函数。
+/// 编译期计算层（一）的反射实现。接口说明见 compute/primitives.h。
+///
+/// 写法：类型用 std::meta::info 表示，类型列表就是 std::vector<info>，运算都是普通的 consteval 函数（refl::）；
+/// 对外接口（文件末尾）把结果用 [: :] 拼回类型。GCC 16 的几个限制在用到的地方注明。
 
 #include <array>
 #include <cstddef>
@@ -116,6 +119,8 @@ using infos = ::std::vector<info>;
 	return result;
 }
 
+/// 别名模板里不能直接写 {arguments(^^Lists)...} 这样的临时 vector（consteval-only 的值不能出现在常量求值之外），
+/// 所以包一层 consteval 函数。
 template<class... Lists>
 [[nodiscard]] consteval info concat_lists()
 {
@@ -245,7 +250,7 @@ using function_type = R(Args...);
 template<class Sender>
 inline constexpr bool is_expression_v = bridge::sender_expression<Sender>;
 
-/// stdexec 算法 sender 的子 sender（经 [tag, data, child...] 结构化绑定读出）；不是 sender 表达式的类型给出空列表。
+/// stdexec 算法 sender 的子 sender（经 bridge::parts_t 读出）；不是 stdexec 算法 sender 的类型给出空列表。
 [[nodiscard]] consteval infos children(info sender)
 {
 	sender = plain(sender);
@@ -257,7 +262,8 @@ inline constexpr bool is_expression_v = bridge::sender_expression<Sender>;
 	return infos(parts.begin() + 2, parts.end());
 }
 
-/// 输入叶子的个数（递归穿过 stdexec 的算法层；嵌套的图有自己的输入，不算在这里）。
+/// 输入叶子的个数：递归穿过 stdexec 的算法层。
+/// 嵌套的图是另一张图的节点，它里面的输入叶子属于内层图，不算；自定义 sender 拆不开，当作不透明的叶子。
 [[nodiscard]] consteval ::std::size_t input_count(info sender)
 {
 	if (specializes(sender, ^^input_sender))
@@ -276,8 +282,9 @@ inline constexpr bool is_expression_v = bridge::sender_expression<Sender>;
 	return total;
 }
 
-/// 沿 sender 表达式层层重建：标签、data 不变，含输入叶子的子树递归替换，其余子树原样保留。
-/// （input_count 只穿过 sender 表达式去数叶子，所以数到叶子的 sender 一定能拆开：这里不会遇到不透明层。）
+/// 输入叶子换成 input 之后的类型：沿 stdexec 的算法层重建，标签、data 不变，含输入叶子的子树递归替换，其余子树原样保留。
+/// 重建出的是裸的 bridge::expression_t<Tag, Data, Child...>：stdexec 的算法 sender 都是它的空派生类，行为一致。
+/// input_count 只穿过算法层去数叶子，所以这里遇到的含叶子的 sender 一定拆得开。
 [[nodiscard]] consteval info substituted(info sender, info input)
 {
 	sender = plain(sender);
@@ -300,7 +307,7 @@ inline constexpr bool is_expression_v = bridge::sender_expression<Sender>;
 
 }
 
-// ---------------------------------------------------------------- 对外接口
+// ---------------------------------------------------------------- 对外接口（名字与 templates/primitives.h 一一对应）
 
 template<class T, class List>
 inline constexpr ::std::size_t index_of_v = refl::index_of(^^T, refl::arguments(^^List));

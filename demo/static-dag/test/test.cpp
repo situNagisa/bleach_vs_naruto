@@ -358,7 +358,7 @@ static_assert(!::stdexec::sender_in<scheduler_dag, ::stdexec::env<>>, "env<> 里
 // 属性查询与降解判据这两条实例化路径同样不能硬错误：完成域退回默认 domain，不降解
 static_assert(::std::same_as<decltype(::stdexec::get_completion_domain<::stdexec::set_value_t>(::stdexec::get_env(::std::declval<scheduler_dag&>()), ::stdexec::env<>{})),
 	::stdexec::default_domain>);
-static_assert(!::sdag::graph_detail::lowering_wanted<::stdexec::start_t, scheduler_dag&&, ::stdexec::env<>>);
+static_assert(!::sdag::graph_detail::lowering_wanted<::stdexec::start_t, scheduler_dag&&, ::stdexec::env<>>());
 
 // 空图：立即以 set_value() 完成
 static_assert(::std::same_as<::stdexec::completion_signatures_of_t<::sdag::dag_sender<::sdag::fused>, ::stdexec::env<>>,

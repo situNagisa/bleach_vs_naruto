@@ -1,6 +1,8 @@
 #pragma once
 
-/// 编译期计算层（一）的模板实现：给还不支持静态反射的编译器（clang 22 / 23 等）用。
+/// 编译期计算层（一）的模板实现。接口说明见 compute/primitives.h。
+///
+/// 给还不支持静态反射的编译器（clang 22 / 23 等）用；名字与 reflection/primitives.h 一一对应。
 /// 编译器都支持反射之后，整个 templates/ 目录可以删除。
 
 #include <array>
@@ -260,7 +262,8 @@ inline constexpr bool is_graph_v = false;
 template<class Data, class... Children>
 inline constexpr bool is_graph_v<graph_sender<Data, Children...>> = true;
 
-/// 输入叶子的个数（递归穿过 stdexec 的算法层；嵌套的图有自己的输入，不算在这里）。
+/// 输入叶子的个数：递归穿过 stdexec 的算法层。
+/// 嵌套的图是另一张图的节点，它里面的输入叶子属于内层图，不算；自定义 sender 拆不开，当作不透明的叶子。
 template<class Sender>
 [[nodiscard]] consteval ::std::size_t input_count()
 {
@@ -294,7 +297,8 @@ using substituted_t = typename substituted<Sender, Input>::type;
 template<class Parts, class Input>
 struct rebuilt;
 
-/// 沿 sender 表达式层层重建：标签、data 不变，子 sender 递归替换。
+/// 输入叶子换成 Input 之后的类型：沿 stdexec 的算法层重建，标签、data 不变，子 sender 递归替换。
+/// 重建出的是裸的 bridge::expression_t<Tag, Data, Child...>：stdexec 的算法 sender 都是它的空派生类，行为一致。
 template<class Tag, class Data, class... Children, class Input>
 struct rebuilt<meta::type_list<Tag, Data, Children...>, Input>
 {

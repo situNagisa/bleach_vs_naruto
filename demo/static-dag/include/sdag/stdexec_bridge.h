@@ -1,17 +1,21 @@
 #pragma once
 
 /// stdexec 的边界：sdag 对 stdexec 内部实现（带双下划线的名字）的全部依赖都在这个文件里。
+/// 标准给出公开接口、或者 stdexec 升级时，只需要改这里。
 ///
 /// 除此之外，sdag 只用 stdexec / exec 的公开接口：sender / receiver 协议、completion_signatures、
 /// 查询（get_env / get_stop_token / get_domain / get_completion_domain）、when_all / split / let_value 等算法、
 /// exec::completion_behavior、exec::sender_for、exec::throw_compile_time_error。
 ///
-/// 这里分两部分：
-///   1. 读：stdexec 的算法 sender（then / let_value / continues_on / when_all ……）的 [tag, data, child...]。
-///      P2300 说 sender 表达式可以结构化绑定成这个形状，但 stdexec 的 __tuple 超过 8 个元素就不能结构化绑定了
-///      （when_all 有 7 个子 sender 时就是这样），所以这里直接用它的内部别名与 __apply。
-///   2. 写：重建 sender 表达式、依赖型 sender 的报错。
-/// 标准给出公开接口、或者 stdexec 升级时，只需要改这个文件。
+/// 为什么需要它：降解时要把节点 sender 里的输入叶子换成真正的 fanin(...)，这需要把 then(input, f) 这样的
+/// stdexec 算法 sender 拆成 [tag, data, child...]、替换子 sender、再拼回去。
+///
+///   读   P2300 说 sender 表达式可以结构化绑定成 [tag, data, child...]，但 stdexec 的 __tuple 超过 8 个元素
+///        就不能结构化绑定了（when_all 有 7 个子 sender 时就是这样），所以直接用它的内部别名 __tag_t /
+///        __data_t / __children_t 与 __apply。只认 stdexec 自己的算法 sender：自定义 sender 和 sdag 的图 sender
+///        都不满足 sender_expression，被当作不透明的叶子。
+///   写   重建用 __sexpr（标准里对应的 make-sender 只是说明用的，没有公开接口）；依赖型 sender 的报错用
+///        __throw_dependent_sender_error（stdexec 按是否支持 constexpr 异常在"返回"与"抛出"之间切换）。
 
 #include <tuple>
 #include <type_traits>
@@ -26,7 +30,7 @@ namespace sdag::bridge
 
 // ---------------------------------------------------------------- 1. 读：sender 表达式的结构
 
-/// stdexec 的算法 sender（__sexpr 及其派生类型）。自定义 sender、sdag 的图 sender 都不算。
+/// stdexec 的算法 sender（__sexpr 及其派生类型）。
 template<class Sender>
 concept sender_expression = requires {
 	typename ::std::remove_cvref_t<Sender>::__tag_t;

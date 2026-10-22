@@ -23,7 +23,7 @@
 ///       一组节点在 Env 下 set_value 完成域的公共域；有节点给不出时为 void
 
 #include "../config.h"
-#include "../graph_sender.h"
+#include "../graph_traits.h"
 
 #if SDAG_REFLECTION
 #include "reflection/analysis.h"

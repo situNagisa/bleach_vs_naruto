@@ -1,6 +1,15 @@
 #pragma once
 
-/// 编译期计算层（二）的反射实现：整图分析是一个按拓扑序展开的 consteval 函数，结果是一个字面量结构体。
+/// 编译期计算层（二）的反射实现。接口说明见 compute/analysis.h。
+///
+/// 整图分析是一个按拓扑序展开的 consteval 函数 analyze()，结果是一个字面量结构体 analysis_result，
+/// 对外的 analysis<Self, Env> 只是把它的字段转出来。
+///
+/// 反射特有的两个坑：
+///   - 类模板的成员别名在类实例化时就会求值。节点签名不合法时 analysis::completions 不能去拼签名（会在不合法的结果上
+///     抛 std::meta::exception），所以写成 valid ? make_completions(...) : ^^void。
+///   - consteval 计算没有编译器缓存。降解的类型（lower_types）如果写成"节点类型依赖前驱类型"的互递归函数，
+///     计算量随图里的路径数指数增长；所以按拓扑序一次填进表里，后面查表。模板版用类模板，编译器会缓存，没有这个问题。
 
 #include <array>
 #include <cstddef>
@@ -16,7 +25,7 @@
 #include <stdexec/execution.hpp>
 
 #include "../../meta.h"
-#include "../../graph_sender.h"
+#include "../../graph_traits.h"
 #include "primitives.h"
 
 namespace sdag::compute
@@ -58,8 +67,11 @@ struct analysis_result
 	info value_types = ^^meta::type_list<>;
 };
 
-/// 按拓扑序逐个节点取完成签名并汇总。按拓扑序走还顺带解决了嵌套实例化深度：
-/// then(f) 问子 sender 的签名时，节点 N 的计算会嵌套进节点 N-1 的；先算前驱，后面的计算全部命中编译器已有的实例化结果。
+/// 按拓扑序逐个节点取完成签名并汇总。
+///
+/// 为什么按拓扑序：节点 N 是 then(input_sender, f) 这样的表达式，then 算签名时要问输入 sender，输入 sender 又要问前驱的签名——
+/// 一条长链的签名计算会层层嵌套，几十个节点就撞上编译器的模板深度上限。先算前驱，后面的计算全部命中编译器已有的
+/// 实例化结果，嵌套深度变成常数。
 template<class Self, class Env>
 [[nodiscard]] consteval auto analyze()
 {
@@ -148,7 +160,8 @@ template<class Self, class Env>
 	return shared ? ::std::meta::add_lvalue_reference(::std::meta::add_const(value)) : value;
 }
 
-/// 只看前驱节点的完成签名，不触发整图分析——否则会沿着"节点 -> 输入 sender -> 整图"递归实例化。
+/// 输入 sender 的完成签名。只看前驱节点的签名，不碰整图分析：
+/// 整图分析要算每个节点的签名，节点的签名又要问它的输入 sender——如果输入 sender 反过来要整图分析，就成环了。
 template<class Self, class Dependency, class Env>
 [[nodiscard]] consteval info input_completions()
 {
@@ -182,8 +195,7 @@ template<class Self, class Dependency, class Env>
 	return ::std::meta::substitute(^^::stdexec::completion_signatures, {make_signature(^^::stdexec::set_value_t, values)});
 }
 
-/// 每个节点降解后的三种类型。consteval 计算没有编译器缓存，所以按拓扑序一次算完存成表，不写互递归——
-/// 否则计算量随图里的路径数指数增长。
+/// 每个节点降解后的三种类型，按拓扑序一次算完存成表（为什么不写成互递归见文件开头）。
 template<::std::size_t N>
 struct lowered_tables
 {
@@ -300,7 +312,7 @@ inline constexpr bool sends_value_v = completion_summary<::stdexec::completion_s
 
 }
 
-// ---------------------------------------------------------------- 对外接口
+// ---------------------------------------------------------------- 对外接口（名字与 templates/analysis.h 一一对应）
 
 template<class Self, class Env>
 struct analysis

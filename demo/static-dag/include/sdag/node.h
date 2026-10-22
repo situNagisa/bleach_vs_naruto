@@ -2,6 +2,12 @@
 
 /// 节点：键（编译期身份）+ 依赖声明 + 载荷。
 ///
+/// 载荷有两种，决定节点怎么用前驱：
+///   sender      控制依赖。make_node<b, after<a>>(just(1))：a 结束后启动 just(1)，不看 a 的值。
+///   适配器      数据依赖。make_node<b, after<a>>(then(f))：dag 把一个输入 sender 喂给 then，
+///               得到 then(输入, f) 作为节点 sender；输入 sender 启动时把 a 的值交出来，f 就收到了它。
+///               任何"接收一个 sender、返回一个 sender"的可调用对象都行（continues_on(sch) | then(f)、自写的 lambda……）。
+///
 /// 原语：
 ///   - node_key<N> / node_dependencies<N>   —— 类型特征，可特化
 ///   - payload(n)                           —— CPO，成员优先，其次 ADL
@@ -22,7 +28,7 @@
 namespace sdag
 {
 
-/// 依赖声明：本节点在 Keys... 对应的节点全部完成后才启动，并按此顺序接收它们的值。
+/// 依赖声明：本节点在 Keys... 对应的节点全部完成后才启动；数据依赖时按此顺序接收它们的值。
 template<class... Keys>
 struct after
 {
@@ -39,6 +45,9 @@ template<class T>
 concept dependency_list = is_after<::std::remove_cvref_t<T>>;
 
 // ---------------------------------------------------------------- 原语：类型特征
+//
+// 默认从节点类型的嵌套 key_type / dependencies_type 取；自定义节点类型也可以直接特化这两个模板。
+// 没有嵌套类型时主模板是空的，于是 node_key_t / node_dependencies_t 替换失败，graph_node 为假（不是硬错误）。
 
 template<class Node>
 struct node_key
@@ -92,8 +101,9 @@ struct choice_result
 
 void payload(); // 普通查找屏障：下面的非限定 payload(...) 只走 ADL
 
-/// 按实参类型（含值类别）选择策略。GCC 16 不允许在 noexcept / requires 里引用 auto&& 形参本身，
-/// 所以这里以类型为参数、用 declval 构造与 operator() 里完全同形的表达式。
+/// 按实参类型（含值类别）选择策略：成员 payload() 优先，其次 ADL 找到的 payload(node)。
+/// 以类型为参数、用 declval 构造与 operator() 里完全同形的表达式：GCC 16 不允许在 noexcept / requires 里
+/// 引用 auto&& 形参本身，所以没法像 skill 骨架那样把实参转发进 choice。
 template<class Node>
 [[nodiscard]] consteval choice_result choice() noexcept
 {

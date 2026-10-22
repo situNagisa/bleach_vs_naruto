@@ -5,8 +5,12 @@
 /// SDAG_REFLECTION：编译期计算用 C++26 静态反射（P2996 + 展开语句）还是传统模板元编程。
 ///   - 默认自动探测：编译器打开了反射（g++ 16 的 -freflection）并且有 <meta> 时为 1，否则为 0。
 ///   - 也可以在命令行上强制指定 -DSDAG_REFLECTION=0 / 1。
-/// 两种实现只在 include/sdag/compute/ 下分开，运行期代码共享一份。
-/// 等所用的编译器都支持反射之后，删掉 compute/templates/ 目录与 compute/*.h 里的 #else 分支即可。
+/// 两种实现只在 include/sdag/compute/ 下分开（接口相同），运行期代码只有一份；同一编译器下两种模式生成的机器码相同。
+///
+/// 等所用的编译器都支持反射之后，删除模板版：
+///   1. 删掉 compute/templates/ 目录，以及 compute/primitives.h、compute/analysis.h 里的 #else 分支；
+///   2. 下面"SDAG_REFLECTION 为 0"的分支改成 #error；
+///   3. CMake 与预设里的 SDAG_REFLECTION 开关一并去掉（见 README）。
 
 #if !defined(SDAG_REFLECTION)
 #if defined(__cpp_impl_reflection) && __has_include(<meta>)

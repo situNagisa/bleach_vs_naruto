@@ -1,6 +1,6 @@
 #pragma once
 
-/// 两种计算实现共享的基础设施：类型列表的壳、运行期容器 indexed_tuple，以及几个与计算方式无关的小工具。
+/// 与计算方式无关的基础设施：类型列表的壳、几个小工具，以及运行期容器 indexed_tuple。
 /// 类型列表上的运算（查找、去重、拼接……）在 compute/ 下，按 SDAG_REFLECTION 分别实现。
 
 #include <array>
@@ -14,12 +14,13 @@
 namespace sdag::meta
 {
 
-/// 被优化掉的成员用它占位。indexed_tuple 对它特化成真正的空基类，不占空间。
+/// 被优化掉的元素用它占位：indexed_tuple 里它是真正的 0 字节空基类。
 struct empty
 {
 };
 
-/// 同一个类里多个被优化掉的成员要用互不相同的空类型，否则 no_unique_address 也得给它们分配不同地址。
+/// 一个类里有多个被优化掉的成员时，各用一个互不相同的空类型：两个同类型的空成员必须有不同地址，
+/// no_unique_address 也压不掉其中一个。
 template<class Tag>
 struct empty_for
 {
@@ -43,6 +44,7 @@ struct at<I, type_list<Ts...>>
 template<::std::size_t I, class List>
 using at_t = typename at<I, List>::type;
 
+/// To 带上 From 的 const 与值类别（std::forward_like 的类型版）。
 template<class From, class To>
 using copy_cvref_t = decltype(::std::forward_like<From>(::std::declval<To&>()));
 
@@ -59,16 +61,26 @@ template<::std::size_t N, class T>
 }
 
 // ---------------------------------------------------------------- 按索引放置的元组（运行期容器）
+//
+// indexed_tuple<T...> 是 sdag 运行期唯一的容器：图 sender 存节点 sender、融合 op-state 存节点 op-state / 值槽 / 入度计数，都用它。
+// 选它而不用 std::tuple，是因为两点：
+//   1. 元素能从"工厂的返回值"直接构造（保证复制消除），所以能装不可移动的 operation state；
+//      std::tuple 的构造函数总是先物化一个临时对象再移动进去。
+//   2. 被优化掉的元素（meta::empty）真正是 0 字节。
+//
+// 每个元素是一个基类 leaf<I, T>，按元素种类有三种写法：
+//   leaf<I, empty>   被优化掉的元素：没有成员。各个 leaf<I, empty> 类型互不相同（I 不同），空基类优化让它们都不占空间。
+//   leaf<I, 空类型>  用户的空类型（无状态的 lambda、空 data……）：成员加 no_unique_address，同样不占空间。
+//   leaf<I, 非空>    clang 上也加 no_unique_address，让后面的元素复用它的尾部填充；GCC 上不加，原因见 config.h 的
+//                    SDAG_OVERLAPPING_ELEMENT（GCC 对"可能重叠的子对象"不做复制消除，不可移动的 op-state 会编不过）。
 
-/// 工厂构造标记：元素从 `factory()` 的纯右值直接构造（保证复制消除），
-/// 所以可以装 operation state 这类不可移动的对象。
+/// 工厂构造标记：元素从 factory() 的纯右值直接构造。
 struct from_factory_t
 {
 	explicit from_factory_t() = default;
 };
 inline constexpr from_factory_t from_factory{};
 
-/// 非空元素：clang 上加 no_unique_address 复用尾部填充，GCC 上不加（见 config.h 的 SDAG_OVERLAPPING_ELEMENT）。
 template<::std::size_t I, class T>
 struct leaf
 {
@@ -100,12 +112,12 @@ struct leaf<I, T>
 	}
 };
 
-/// 被优化掉的元素：没有任何成员，各个 leaf<I, empty> 类型互不相同，空基类优化让它们都是 0 字节。
 template<::std::size_t I>
 struct leaf<I, empty>
 {
 	constexpr leaf() = default;
 
+	/// 被优化掉的元素：工厂不调用。
 	template<class Factory>
 	constexpr explicit leaf(from_factory_t, Factory&&) noexcept
 	{
@@ -129,8 +141,6 @@ struct SDAG_EMPTY_BASES indexed_tuple_impl<::std::index_sequence<Is...>, Ts...> 
 	}
 };
 
-/// 每个元素独立占一个基类，空类型靠空基类优化消失；
-/// 没有 std::tuple 那种"先构造再移动"的要求。
 template<class... Ts>
 struct indexed_tuple : indexed_tuple_impl<::std::index_sequence_for<Ts...>, Ts...>
 {

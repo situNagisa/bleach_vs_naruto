@@ -136,26 +136,28 @@ static_assert(::stdexec::sender<dag>);
 ## 文件
 
 ```
-include/sdag/
-  config.h          SDAG_REFLECTION 选择宏、no_unique_address 宏
+include/sdag/                    （按依赖从底到顶）
+  config.h          SDAG_REFLECTION 选择宏、no_unique_address 宏、ABI 命名空间
+  meta.h            type_list、indexed_tuple（按工厂原地构造、空元素 0 字节）等与计算方式无关的基础设施
   stdexec_bridge.h  对 stdexec 内部实现（双下划线名字）的全部依赖，见下文
-  meta.h            共享：type_list、indexed_tuple（按工厂原地构造、空元素 0 字节）等运行期容器
-  fwd.h             前向声明（dag_t、input_sender、graph_sender）
-  node.h            after<>、node<>、make_node、原语（类型特征 + payload CPO）与 concept
-  shape.h           编译期形状分析：邻接矩阵、入出度、拓扑序、错误诊断（普通 constexpr 数组算法）
-  graph_sender.h    图 sender 的类型（tuple-like）、dag_data、图的特征
+  fwd.h             打断头文件环的前向声明
+  node.h            节点：after<>、node<>、make_node、payload CPO 与 concept
   compute/
     primitives.h    计算层（一）的接口说明与选择：类型列表、完成签名、sender 表达式遍历
     analysis.h      计算层（二）的接口说明与选择：整图分析、输入签名、降解类型表、公共完成域
     reflection/     反射实现（consteval 函数 + std::vector<std::meta::info> + 展开语句）
     templates/      模板实现（编译器都支持反射后整个删除）
-  graph.h           图 sender 的行为：节点环境、整图状态与交付、输入 sender、属性、降解判据、dag_t
-  fused.h           融合 op-state（默认连接）与 fused 策略
-  composed.h        lower（输入叶子替换 + when_all/split/let_value 组合）与 composed 策略
-  dag.h             dag()、graph_policy_for、dag_sender
+  shape.h           图形状：邻接矩阵、入出度、拓扑序、错误诊断（普通 constexpr 数组算法）
+  graph_traits.h    图的类型级查询：第 I 个节点是谁、依赖谁、谁读它的值
+  graph_sender.h    图 sender 的类型与 tuple-like 协议
+  node_input.h      节点怎么拿到前驱的值：输入 sender、节点环境、整图状态（值槽与交付表）
+  attributes.h      图 sender 的完成签名、属性（完成域、完成行为）、降解判据
+  fused.h           融合 op-state（默认连接）：调度算法与生命周期规则写在文件开头
+  lowering.h        降解成 when_all / split / let_value，以及 lower()
+  dag.h             dag_t、fused / composed 策略、dag()
   sdag.h            总头
 test/
-  test.cpp           编译期 + 运行期测试（两种路径、错误 / 停止传播、线程池、48 节点长链、16 路扇入、梯子、生态接入）
+  test.cpp           编译期 + 运行期测试（两种路径、错误 / 停止传播、线程池、48 节点长链、16 路扇入、梯子、宽 when_all、生态接入）
   zero_overhead.cpp  分配计数与 op-state 大小
   concurrency.cpp    峰值并发
 ```
