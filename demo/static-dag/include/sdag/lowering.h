@@ -99,7 +99,7 @@ struct builder
 	typename types::storage_t _built{};
 
 	template<size_t D>
-	[[nodiscard]] dependency_input_t<D> take_dependency() noexcept
+	[[nodiscard]] constexpr dependency_input_t<D> take_dependency() noexcept
 	{
 		if constexpr (shape.out_degree[D] > 1)
 		{
@@ -112,7 +112,7 @@ struct builder
 	}
 
 	template<size_t I, size_t... D>
-	[[nodiscard]] input_t<I> make_input(::std::index_sequence<D...>)
+	[[nodiscard]] constexpr input_t<I> make_input(::std::index_sequence<D...>)
 	{
 		if constexpr (sizeof...(D) == 0)
 		{
@@ -125,7 +125,7 @@ struct builder
 	}
 
 	template<size_t I>
-	[[nodiscard]] node_sender_t<I> make_node_sender()
+	[[nodiscard]] constexpr node_sender_t<I> make_node_sender()
 	{
 		using child = child_t<I>;
 		using dependencies = graph_detail::dependencies_t<Self, I>;
@@ -148,7 +148,7 @@ struct builder
 	}
 
 	template<size_t I>
-	void build_one()
+	constexpr void build_one()
 	{
 		if constexpr (shape.out_degree[I] > 1)
 		{
@@ -161,7 +161,7 @@ struct builder
 	}
 
 	template<size_t... S>
-	[[nodiscard]] auto join_sinks(::std::index_sequence<S...>)
+	[[nodiscard]] constexpr auto join_sinks(::std::index_sequence<S...>)
 	{
 		if constexpr (sizeof...(S) == 0)
 		{
@@ -173,7 +173,7 @@ struct builder
 		}
 	}
 
-	[[nodiscard]] auto build()
+	[[nodiscard]] constexpr auto build()
 	{
 		compute::for_each_value<shape.order>([this]<size_t I>()
 		{
@@ -190,7 +190,7 @@ struct builder
 struct lower_t
 {
 	template<class Graph, class FanIn, class FanOut>
-	[[nodiscard]] auto operator()(Graph&& graph, FanIn const& fanin, FanOut const& fanout) const
+	[[nodiscard]] constexpr auto operator()(Graph&& graph, FanIn const& fanin, FanOut const& fanout) const
 	{
 		static_assert(::exec::sender_for<Graph, dag_t>, "sdag: lower 只接受 dag(...) 得到的图 sender");
 		lowering_detail::builder<Graph&&, FanIn, FanOut> builder{fanin, fanout, ::std::forward<Graph>(graph)};

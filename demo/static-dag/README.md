@@ -116,6 +116,12 @@ static_assert(::stdexec::sender<dag>);
 
 降解要求节点 sender 由 stdexec 的 sexpr 算法组成（`then`、`let_value`、`continues_on`……都是），这样才能把输入叶子替换进去；不透明的自定义 sender 包着输入时会有一条 `static_assert`。
 
+## 常量求值
+
+图这一层的函数都标了 `constexpr`，常量求值止步于原子量与停止源：入度计数、汇点计数、状态字是 `std::atomic`，停止源是
+`stdexec::inplace_stop_source`，都不能常量求值。所以能在 `static_assert` 里跑完的只有不碰它们的图——
+只有一个汇点、没有入度 > 1 的节点、不会失败，例如一条 `noexcept` 的 `just | then` 链。`test/constexpr.cpp` 覆盖链与空图。
+
 ## 并发度
 
 `test/concurrency.cpp` 测图的峰值并发：每个节点体进入时给"正在运行"计数加一并更新峰值；要验证并发的层，节点体在会合点
@@ -160,6 +166,7 @@ test/
   test.cpp           编译期 + 运行期测试（两种路径、错误 / 停止传播、线程池、48 节点长链、16 路扇入、梯子、宽 when_all、生态接入）
   zero_overhead.cpp  分配计数与 op-state 大小
   concurrency.cpp    峰值并发
+  constexpr.cpp      常量求值：不碰原子量与停止源的图在 static_assert 里跑完
 ```
 
 ### 两份编译期计算

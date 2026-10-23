@@ -46,4 +46,6 @@ if(SDAG_BUILD_TESTS)
     sdag_add_test(sdag_test test/test.cpp)
     sdag_add_test(sdag_zero_overhead test/zero_overhead.cpp)
     sdag_add_test(sdag_concurrency test/concurrency.cpp)
+    # 常量求值测试：全部是 static_assert，编过即通过；运行时什么都不做。
+    sdag_add_test(sdag_constexpr test/constexpr.cpp)
 endif()

@@ -26,6 +26,10 @@
 ///
 /// 生命周期：整图在 finish 里完成外层接收者，接收者可能当场销毁整个 op-state。所以一个函数"可能触发 finish"之后
 /// 就不能再碰 this。几处遍历（通知后继、启动根）都能保证这一点，原因写在各自的循环旁边。
+///
+/// 常量求值：成员函数都标了 constexpr，常量求值止步于原子量与停止源——入度计数、汇点计数、状态字是 std::atomic，
+/// 停止源是 inplace_stop_source，都不能常量求值。能在 static_assert 里跑完的只有不碰它们的图：只有一个汇点、
+/// 没有入度 > 1 的节点、不会失败（例如一条 noexcept 的链），见 test/constexpr.cpp。
 
 #include <atomic>
 #include <cstddef>
@@ -88,23 +92,23 @@ struct node_receiver
 	Core* _core;
 
 	template<class... Args>
-	void set_value(Args&&... args) noexcept
+	constexpr void set_value(Args&&... args) noexcept
 	{
 		_core->template node_set_value<I>(::std::forward<Args>(args)...);
 	}
 
 	template<class Error>
-	void set_error(Error&& error) noexcept
+	constexpr void set_error(Error&& error) noexcept
 	{
 		_core->template node_set_error<I>(::std::forward<Error>(error));
 	}
 
-	void set_stopped() noexcept
+	constexpr void set_stopped() noexcept
 	{
 		_core->template node_set_stopped<I>();
 	}
 
-	[[nodiscard]] typename Core::node_env_type get_env() const noexcept
+	[[nodiscard]] constexpr typename Core::node_env_type get_env() const noexcept
 	{
 		return _core->make_node_env();
 	}
@@ -141,7 +145,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 	{
 		fused_core* _core;
 
-		void operator()() const noexcept
+		constexpr void operator()() const noexcept
 		{
 			_core->on_outer_stop();
 		}
@@ -169,14 +173,14 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 	SDAG_NO_UNIQUE_ADDRESS typename pending<shape>::type _pending{};
 	SDAG_NO_UNIQUE_ADDRESS ::std::conditional_t<(sink_count > 1), counter<sink_count>, meta::empty_for<sinks_tag>> _sinks{};
 
-	explicit fused_core(Receiver&& receiver) noexcept(::std::is_nothrow_move_constructible_v<Receiver>)
+	constexpr explicit fused_core(Receiver&& receiver) noexcept(::std::is_nothrow_move_constructible_v<Receiver>)
 		: _receiver(::std::move(receiver))
 	{
 	}
 
 	fused_core(fused_core&&) = delete;
 
-	[[nodiscard]] node_env_type make_node_env() noexcept
+	[[nodiscard]] constexpr node_env_type make_node_env() noexcept
 	{
 		if constexpr (stoppable)
 		{
@@ -191,7 +195,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 	// ------------------------------------------------------------ 节点完成
 
 	template<size_t J, class... Args>
-	void node_set_value(Args&&... args) noexcept
+	constexpr void node_set_value(Args&&... args) noexcept
 	{
 		if constexpr (direct_sink && J == sink_index)
 		{
@@ -248,7 +252,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 	}
 
 	template<size_t J, class Error>
-	void node_set_error(Error&& error) noexcept
+	constexpr void node_set_error(Error&& error) noexcept
 	{
 		static_assert(stoppable && has_errors);
 		switch (_state.value.exchange(state_kind::error, ::std::memory_order_acq_rel))
@@ -267,7 +271,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 	}
 
 	template<size_t J>
-	void node_set_stopped() noexcept
+	constexpr void node_set_stopped() noexcept
 	{
 		static_assert(stoppable && sends_stopped);
 		auto expected = state_kind::running;
@@ -282,7 +286,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 	static constexpr size_t error_alternative = compute::index_of_v<::std::decay_t<Error>, error_types> + 1;
 
 	template<class Error>
-	void store_error(Error&& error) noexcept
+	constexpr void store_error(Error&& error) noexcept
 	{
 		if constexpr (::std::is_nothrow_constructible_v<::std::decay_t<Error>, Error>)
 		{
@@ -305,7 +309,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 
 	/// 节点 J 结束（成功、失败、停止或被跳过）。
 	template<size_t J>
-	void node_done() noexcept
+	constexpr void node_done() noexcept
 	{
 		if constexpr (shape.is_sink(J))
 		{
@@ -324,7 +328,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 	}
 
 	template<size_t From, size_t To>
-	void notify_edge() noexcept
+	constexpr void notify_edge() noexcept
 	{
 		if constexpr (shape.in_degree[To] == 1)
 		{
@@ -339,7 +343,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 
 	/// 节点 J 的前驱全部到齐。整图已经失败 / 停止时不启动，直接当作结束往下传。
 	template<size_t J>
-	void launch() noexcept
+	constexpr void launch() noexcept
 	{
 		if constexpr (stoppable)
 		{
@@ -352,7 +356,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 		::stdexec::start(meta::get<J>(static_cast<operation_type*>(this)->_operations));
 	}
 
-	void sink_arrive() noexcept
+	constexpr void sink_arrive() noexcept
 	{
 		if constexpr (sink_count > 1)
 		{
@@ -367,7 +371,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 	/// 外层请求停止。图能以 stopped 完成时把状态切到 stopped（还没启动的节点跳过）；
 	/// 不能时只把请求转给节点，整图仍以它们的结果完成——与 when_all 一致。
 	/// request_stop 可能同步完成整图并销毁 this（inplace_stop_source 自己处理"回调里 source 被销毁"），之后不再碰 this。
-	void on_outer_stop() noexcept
+	constexpr void on_outer_stop() noexcept
 	{
 		if constexpr (sends_stopped)
 		{
@@ -384,7 +388,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 	}
 
 	/// 最后一个汇点到达：所有节点都已结束，按状态完成外层接收者。
-	void finish() noexcept
+	constexpr void finish() noexcept
 	{
 		if constexpr (stoppable)
 		{
@@ -429,7 +433,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 		}
 	}
 
-	void emit_error() noexcept
+	constexpr void emit_error() noexcept
 	{
 		// set_error 之后 op-state 可能已经销毁：用短路的 || 保证命中那一项之后不再读 _error。
 		[this]<size_t... K>(::std::index_sequence<K...>)
@@ -444,7 +448,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 	static constexpr auto sink_table = graph_detail::delivery_plan<Self, node_env_type, sinks_v<shape>>(false);
 
 	template<size_t... E>
-	void emit_values(::std::index_sequence<E...>) noexcept
+	constexpr void emit_values(::std::index_sequence<E...>) noexcept
 	{
 		::stdexec::set_value(::std::move(_receiver), this->template access<sink_table[E]>()...);
 	}
@@ -471,7 +475,7 @@ struct fused_operation_impl<Self, Receiver, ::std::index_sequence<I...>> : fused
 	using operations_t = meta::indexed_tuple<node_operation_t<I>...>;
 	operations_t _operations;
 
-	explicit fused_operation_impl(Self self, Receiver receiver)
+	constexpr explicit fused_operation_impl(Self self, Receiver receiver)
 		noexcept(::std::is_nothrow_move_constructible_v<Receiver> && nothrow_connect)
 		: core(::std::move(receiver))
 		, _operations(meta::from_factory,
@@ -483,7 +487,7 @@ struct fused_operation_impl<Self, Receiver, ::std::index_sequence<I...>> : fused
 	{
 	}
 
-	void start() noexcept
+	constexpr void start() noexcept
 	{
 		if constexpr (core::shape.count == 0)
 		{

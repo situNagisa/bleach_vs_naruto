@@ -76,7 +76,7 @@ struct graph_sender
 	}
 
 	template<::stdexec::receiver Receiver>
-	[[nodiscard]] fused_detail::fused_operation<graph_sender&&, Receiver> connect(Receiver receiver) &&
+	[[nodiscard]] constexpr fused_detail::fused_operation<graph_sender&&, Receiver> connect(Receiver receiver) &&
 		noexcept(::std::is_nothrow_constructible_v<fused_detail::fused_operation<graph_sender&&, Receiver>, graph_sender&&, Receiver>)
 	{
 		return fused_detail::fused_operation<graph_sender&&, Receiver>(::std::move(*this), ::std::move(receiver));
@@ -84,7 +84,7 @@ struct graph_sender
 
 	template<::stdexec::receiver Receiver>
 		requires ::std::copy_constructible<graph_sender>
-	[[nodiscard]] fused_detail::fused_operation<graph_sender const&, Receiver> connect(Receiver receiver) const&
+	[[nodiscard]] constexpr fused_detail::fused_operation<graph_sender const&, Receiver> connect(Receiver receiver) const&
 		noexcept(::std::is_nothrow_constructible_v<fused_detail::fused_operation<graph_sender const&, Receiver>, graph_sender const&, Receiver>)
 	{
 		return fused_detail::fused_operation<graph_sender const&, Receiver>(*this, ::std::move(receiver));

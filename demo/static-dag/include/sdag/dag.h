@@ -80,7 +80,7 @@ struct dag_t
 	/// 不会时（默认 domain、只定制 bulk 的线程池 domain 等）这个重载不参与，stdexec 用 graph_sender::connect 走融合 op-state。
 	template<class OpTag, class Sender, class Env>
 		requires (graph_detail::lowering_wanted<OpTag, Sender&&, Env>())
-	[[nodiscard]] static auto transform_sender(OpTag, Sender&& sender, Env const&)
+	[[nodiscard]] static constexpr auto transform_sender(OpTag, Sender&& sender, Env const&)
 	{
 		return ::sdag::lower(::std::forward<Sender>(sender), ::stdexec::when_all, ::exec::split);
 	}
@@ -110,7 +110,7 @@ struct composed
 	SDAG_NO_UNIQUE_ADDRESS FanOut _fanout{};
 
 	template<graph_node... Nodes>
-	[[nodiscard]] auto compose(Nodes&&... nodes) const
+	[[nodiscard]] constexpr auto compose(Nodes&&... nodes) const
 	{
 		return ::sdag::lower(dag_t{}(::std::forward<Nodes>(nodes)...), _fanin, _fanout);
 	}

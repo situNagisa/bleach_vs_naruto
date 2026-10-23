@@ -160,7 +160,7 @@ struct input_operation
 {
 	Receiver _receiver;
 
-	void start() noexcept
+	constexpr void start() noexcept
 	{
 		auto* state = graph_detail::get_graph_state(::stdexec::get_env(_receiver));
 		state->template deliver<Dependency>(::std::move(_receiver));
@@ -291,7 +291,7 @@ struct graph_state
 
 	/// 按交付表的一项取值：共享的给 const&，独占的 move 出去。
 	template<slot_access Access>
-	[[nodiscard]] decltype(auto) access() noexcept
+	[[nodiscard]] constexpr decltype(auto) access() noexcept
 	{
 		auto& value = ::std::get<Access.element>(*meta::get<Access.node>(_slots));
 		if constexpr (Access.shared)
@@ -310,7 +310,7 @@ struct graph_state
 
 	/// input_operation 启动时调用：把 Dependency 对应前驱的值交给接收者。
 	template<class Dependency, class Receiver>
-	void deliver(Receiver&& receiver) noexcept
+	constexpr void deliver(Receiver&& receiver) noexcept
 	{
 		// 接收者那一侧是在它自己的环境（node_env 外面可能又包了几层适配器）下算出输入签名的，
 		// 这里是在整图环境下存的值。两边必须一致，否则说明某个节点 sender 在不同环境下报告了不同的值类型。
@@ -329,7 +329,7 @@ struct graph_state
 	}
 
 	template<class Dependency, size_t... E, class Receiver>
-	void deliver_entries(::std::index_sequence<E...>, Receiver&& receiver) noexcept
+	constexpr void deliver_entries(::std::index_sequence<E...>, Receiver&& receiver) noexcept
 	{
 		::stdexec::set_value(::std::forward<Receiver>(receiver), access<delivery_table<Dependency>[E]>()...);
 	}
