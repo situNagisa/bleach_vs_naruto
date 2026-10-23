@@ -142,25 +142,37 @@ static_assert(::stdexec::sender<dag>);
 ## 文件
 
 ```
-include/sdag/                    （按依赖从底到顶）
-  config.h          SDAG_REFLECTION 选择宏、no_unique_address 宏、ABI 命名空间
-  meta.h            type_list、indexed_tuple（按工厂原地构造、空元素 0 字节）等与计算方式无关的基础设施
-  stdexec_bridge.h  对 stdexec 内部实现（双下划线名字）的全部依赖，见下文
-  fwd.h             打断头文件环的前向声明
-  node.h            节点：after<>、node<>、make_node、payload CPO 与 concept
-  compute/
-    primitives.h    计算层（一）的接口说明与选择：类型列表、完成签名、sender 表达式遍历
-    analysis.h      计算层（二）的接口说明与选择：整图分析、输入签名、降解类型表、公共完成域
-    reflection/     反射实现（consteval 函数 + std::vector<std::meta::info> + 展开语句）
-    templates/      模板实现（编译器都支持反射后整个删除）
-  shape.h           图形状：邻接矩阵、入出度、拓扑序、错误诊断（普通 constexpr 数组算法）
-  graph_traits.h    图的类型级查询：第 I 个节点是谁、依赖谁、谁读它的值
-  graph_sender.h    图 sender 的类型与 tuple-like 协议
-  node_input.h      节点怎么拿到前驱的值：输入 sender、节点环境、整图状态（值槽与交付表）
-  attributes.h      图 sender 的完成签名、属性（完成域、完成行为）、降解判据
-  fused.h           融合 op-state（默认连接）：调度算法与生命周期规则写在文件开头
-  lowering.h        降解成 when_all / split / let_value，以及 lower()
-  dag.h             dag_t、fused / composed 策略、dag()
+include/sdag/                    （按依赖从底到顶，下层不认识上层）
+  config.h, fwd.h   编译开关；打断头文件环的前向声明
+  meta_program/     与 sdag 无关的元编程
+    type_list.h         type_list、at_t
+    utility.h           被优化掉的成员的占位类型、copy_cvref_t、to_array
+    indexed_tuple.h     运行期容器：按工厂原地构造、空元素 0 字节
+    reflection.h        反射实现共用的基础
+    index_of.h  concat.h  unique.h  transform.h  rebind.h  dependency_indices.h  sequence.h  for_each_value.h
+  concurrency/      与 stdexec 打交道的通用部分
+    completion_signatures.h  is_stdexec_completion_signatures_v、completion_trait
+    stdexec_bridge.h         对 stdexec 内部实现（双下划线名字）的全部依赖，见下文
+    constant_sender.h        给 let_value 用的"忽略参数、交出存好的 sender"
+  graph/            图本身
+    node.h              节点：after<>、node<>、make_node、payload CPO 与 concept
+    shape.h             形状：邻接矩阵、入出度、拓扑序、错误诊断
+    traits.h            类型级查询：第 I 个节点是谁、依赖谁
+    analyze/            编译期分析
+      sender_expression.h  input_count_v、substituted_t（节点 sender 里的输入叶子）
+      consumers.h          consumes_input_v、consumer_counts_v、shared_v（谁读谁的值、共享还是独占）
+      completions.h        拼装完成签名（不导出）
+      graph_analysis.h     analysis<Self, Env>：整图分析
+      input_completions.h  input_completions_t：输入 sender 的签名
+      lowered.h            lowered<Self, FanIn, FanOut>：降解后各节点的类型
+      common_domain.h      common_domain_t、common_completion_domain_t
+  execution/        图怎么作为 sender 执行
+    graph_sender.h      图 sender 的类型与 tuple-like 协议
+    node_input.h        输入 sender、节点环境、整图状态（值槽与交付表）
+    attributes.h        图 sender 的完成签名、属性、降解判据
+    fused.h             融合 op-state（默认连接）：调度算法与生命周期规则写在文件开头
+    lowering.h          降解成 when_all / split / let_value，以及 lower()
+  dag.h             入口：dag_t、fused / composed 策略、dag()
   sdag.h            总头
 test/
   test.cpp           编译期 + 运行期测试（两种路径、错误 / 停止传播、线程池、48 节点长链、16 路扇入、梯子、宽 when_all、生态接入）
@@ -174,17 +186,17 @@ test/
 `include/sdag/config.h` 自动探测：编译器定义了 `__cpp_impl_reflection` 且有 `<meta>` 时 `SDAG_REFLECTION = 1`，否则为 0；
 也可以用 `-DSDAG_REFLECTION=0/1` 强制。CMake 选项 `SDAG_REFLECTION`（GCC 上默认 ON）只决定加不加 `-freflection`。
 
-只有 `compute/` 下分两份，对外名字完全相同（接口清单写在 `compute/primitives.h` 与 `compute/analysis.h` 的文件头）；
-其余代码只用这些名字。两种模式生成的实体放在不同的 inline namespace 里（`SDAG_ABI_NAMESPACE`），同一个程序混用两种模式
-编译的翻译单元时链接期就会报错，而不是静默的 ODR 违规。
+编译期计算在 `meta_program/`、`concurrency/`、`graph/analyze/` 三个目录下，每个文件对外只有一两个名字，两种实现写在同一个文件里，
+用 `#if SDAG_REFLECTION` / `#else` 隔开，对外名字完全相同；跨文件复用的反射函数放在各模块的 `refl` 命名空间，
+其余实现细节放在 `detail`。两种模式生成的实体在不同的 inline namespace 里（`SDAG_ABI_NAMESPACE`），
+同一个程序混用两种模式编译的翻译单元时链接期就会报错，而不是静默的 ODR 违规。
 
 等所用的编译器都支持反射之后，删除模板版：
 
-1. 删掉 `include/sdag/compute/templates/` 目录；
-2. `compute/primitives.h`、`compute/analysis.h` 去掉 `#else` 分支；
-3. `config.h` 里 `SDAG_REFLECTION` 为 0 的分支改成 `#error`；
-4. CMake：`cmake/build_settings.cmake` 的 `SDAG_REFLECTION` 选项改为无条件 `-freflection`，`cmake/toolchain_guard.cmake` 按新的编译器下限调整，`CMakePresets.json` 删掉 `linux-gcc-templates-release`；
-5. README 里两份实现的对照表。
+1. 三个目录下每个文件删掉 `#else` 分支（`grep -rn "#if SDAG_REFLECTION" include/sdag`）；
+2. `config.h` 里 `SDAG_REFLECTION` 为 0 的分支改成 `#error`；
+3. CMake：`cmake/build_settings.cmake` 的 `SDAG_REFLECTION` 选项改为无条件 `-freflection`，`cmake/toolchain_guard.cmake` 按新的编译器下限调整，`CMakePresets.json` 删掉 `linux-gcc-templates-release`；
+4. README 里两份实现的对照表。
 
 两份实现的对应关系：
 
@@ -229,7 +241,7 @@ stdexec 的位置：`$NAGISA_LIBRARY_ROOT/stdexec`，或 `-DSDAG_STDEXEC_ROOT=..
 
 ## 实现要点与边界
 
-- **对 stdexec 内部实现的依赖只在 `stdexec_bridge.h`**。其余代码只用公开接口：sender / receiver 协议、`completion_signatures`、查询（`get_domain`、`get_completion_domain`、`get_stop_token`……）、`when_all` / `split` / `let_value`、`exec::completion_behavior` 与 `exec::get_completion_behavior_t`、`exec::sender_for`、`exec::throw_compile_time_error`。桥接层里：
+- **对 stdexec 内部实现的依赖只在 `concurrency/stdexec_bridge.h`**。其余代码只用公开接口：sender / receiver 协议、`completion_signatures`、查询（`get_domain`、`get_completion_domain`、`get_stop_token`……）、`when_all` / `split` / `let_value`、`exec::completion_behavior` 与 `exec::get_completion_behavior_t`、`exec::sender_for`、`exec::throw_compile_time_error`。桥接层里：
   - **读**：stdexec 的算法 sender 的 `[tag, data, child...]`（`bridge::sender_expression`、`bridge::parts_t`、`bridge::apply`）。P2300 说 sender 表达式可以结构化绑定成这个形状，但 stdexec 的 `__tuple` 超过 8 个元素就不能结构化绑定（`when_all` 有 7 个子 sender 时就是这样），所以这里用它的内部别名 `__tag_t` / `__data_t` / `__children_t` 与 `__apply`。只认 stdexec 自己的算法 sender，自定义 sender 与 sdag 的图 sender 都被当作不透明的叶子。
   - **写**（没有公开替代）：降解时重建 sender 表达式用 `::stdexec::__sexpr`（标准里对应的 make-sender 只是说明用的）；依赖型 sender 的报错用 `::stdexec::__throw_dependent_sender_error`（stdexec 按是否支持 constexpr 异常在"返回"与"抛出"之间切换）。
   - stdexec 升级、或者标准给出公开接口时只改这一个文件。

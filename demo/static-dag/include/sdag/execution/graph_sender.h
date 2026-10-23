@@ -18,8 +18,10 @@
 
 #include <stdexec/execution.hpp>
 
-#include "meta.h"
-#include "fwd.h"
+#include "../meta_program/type_list.h"
+#include "../meta_program/utility.h"
+#include "../meta_program/indexed_tuple.h"
+#include "../fwd.h"
 
 namespace sdag
 {

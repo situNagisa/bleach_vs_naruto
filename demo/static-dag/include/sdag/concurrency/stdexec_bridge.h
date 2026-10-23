@@ -23,9 +23,9 @@
 
 #include <stdexec/execution.hpp>
 
-#include "meta.h"
+#include "../meta_program/type_list.h"
 
-namespace sdag::bridge
+namespace sdag::concurrency::bridge
 {
 
 // ---------------------------------------------------------------- 1. 读：sender 表达式的结构

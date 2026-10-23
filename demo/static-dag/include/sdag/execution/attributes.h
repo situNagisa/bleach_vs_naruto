@@ -27,13 +27,18 @@
 #include <stdexec/execution.hpp>
 #include <exec/completion_behavior.hpp>
 
-#include "meta.h"
-#include "fwd.h"
-#include "stdexec_bridge.h"
-#include "graph_traits.h"
-#include "node_input.h"
-#include "compute/primitives.h"
-#include "compute/analysis.h"
+#include "../meta_program/type_list.h"
+#include "../meta_program/utility.h"
+#include "../meta_program/indexed_tuple.h"
+#include "../fwd.h"
+#include "../concurrency/stdexec_bridge.h"
+#include "../graph/traits.h"
+#include "../execution/node_input.h"
+#include "../meta_program/sequence.h"
+#include "../graph/analyze/graph_analysis.h"
+#include "../graph/analyze/input_completions.h"
+#include "../graph/analyze/sender_expression.h"
+#include "../graph/analyze/common_domain.h"
 
 namespace sdag::graph_detail
 {
@@ -45,14 +50,14 @@ namespace sdag::graph_detail
 template<class Self, class Env>
 [[nodiscard]] consteval auto completions_with_env()
 {
-	using probe = compute::analysis<Self, probe_env<Self, Env>>;
+	using probe = analyze::analysis<Self, probe_env<Self, Env>>;
 	if constexpr (!probe::valid)
 	{
 		return typename probe::first_invalid_t{};
 	}
 	else
 	{
-		using final = compute::analysis<Self, node_env_t<Self, Env>>;
+		using final = analyze::analysis<Self, node_env_t<Self, Env>>;
 		if constexpr (!final::valid)
 		{
 			return typename final::first_invalid_t{};
@@ -70,7 +75,7 @@ template<class Self, class... Env>
 	if constexpr (sizeof...(Env) == 0)
 	{
 		// 节点里的输入 sender 依赖环境，所以整图在无环境下必然是 dependent sender。
-		return bridge::dependent_sender_error<::std::remove_cvref_t<Self>>();
+		return concurrency::bridge::dependent_sender_error<::std::remove_cvref_t<Self>>();
 	}
 	else
 	{
@@ -82,13 +87,13 @@ template<class Self, class... Env>
 template<class Self, class Env>
 [[nodiscard]] consteval bool evaluable_in() noexcept
 {
-	if constexpr (!compute::analysis<Self, probe_env<Self, Env>>::valid)
+	if constexpr (!analyze::analysis<Self, probe_env<Self, Env>>::valid)
 	{
 		return false;
 	}
 	else
 	{
-		return compute::analysis<Self, node_env_t<Self, Env>>::valid;
+		return analyze::analysis<Self, node_env_t<Self, Env>>::valid;
 	}
 }
 
@@ -99,7 +104,7 @@ struct attrs
 {
 	using self_type = graph_sender<Data, Children...>&&;
 
-	template<class Env, class Indices = compute::sequence_t<sinks_v<Data::shape>>>
+	template<class Env, class Indices = meta::sequence_t<sinks_v<Data::shape>>>
 	struct sink_children;
 
 	template<class Env, size_t... S>
@@ -110,14 +115,14 @@ struct attrs
 
 	/// 汇点在节点环境下的公共值完成域；有汇点给不出时为 void。
 	template<class Env>
-	using value_domain_t = compute::common_completion_domain_t<node_env_t<self_type, Env>, typename sink_children<Env>::type>;
+	using value_domain_t = analyze::common_completion_domain_t<node_env_t<self_type, Env>, typename sink_children<Env>::type>;
 
 	/// 全部节点的公共值完成域；有节点给不出时为 void。
 	template<class Env>
-	using any_node_domain_t = compute::common_completion_domain_t<node_env_t<self_type, Env>, meta::type_list<Children...>>;
+	using any_node_domain_t = analyze::common_completion_domain_t<node_env_t<self_type, Env>, meta::type_list<Children...>>;
 
 	template<class Env>
-	using failure_domain_t = compute::common_domain_t<meta::type_list<value_domain_t<Env>, any_node_domain_t<Env>>>;
+	using failure_domain_t = analyze::common_domain_t<meta::type_list<value_domain_t<Env>, any_node_domain_t<Env>>>;
 
 	template<class Env>
 		requires (evaluable_in<self_type, Env>()) && (!::std::is_void_v<value_domain_t<Env>>)
@@ -188,10 +193,10 @@ struct placeholder_sender
 
 /// 汇点 S 的 sender，输入叶子换成占位 sender：保留了汇点的属性（完成调度器等），又不需要整图环境就能算签名。
 template<class Self, class Env, size_t S>
-using probe_sink_t = compute::substituted_t<child_t<Self, S>,
-	placeholder_sender<compute::input_completions_t<Self, dependency_t<Self, S>, node_env_t<Self, Env>>>>;
+using probe_sink_t = analyze::substituted_t<child_t<Self, S>,
+	placeholder_sender<analyze::input_completions_t<Self, dependency_t<Self, S>, node_env_t<Self, Env>>>>;
 
-template<class Self, class Env, class Sinks = compute::sequence_t<sinks_v<shape_of_v<Self>>>>
+template<class Self, class Env, class Sinks = meta::sequence_t<sinks_v<shape_of_v<Self>>>>
 struct when_all_probe;
 
 /// 探针 when_all(汇点...)。when_all 只有一个子 sender 时会原样返回它（不再是 when_all），所以只有一个汇点时重复一次。

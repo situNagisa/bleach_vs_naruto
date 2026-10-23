@@ -42,13 +42,18 @@
 
 #include <stdexec/execution.hpp>
 
-#include "meta.h"
-#include "fwd.h"
-#include "shape.h"
-#include "graph_traits.h"
-#include "node_input.h"
-#include "compute/primitives.h"
-#include "compute/analysis.h"
+#include "../meta_program/type_list.h"
+#include "../meta_program/utility.h"
+#include "../meta_program/indexed_tuple.h"
+#include "../fwd.h"
+#include "../graph/shape.h"
+#include "../graph/traits.h"
+#include "../execution/node_input.h"
+#include "../meta_program/index_of.h"
+#include "../meta_program/concat.h"
+#include "../meta_program/rebind.h"
+#include "../meta_program/for_each_value.h"
+#include "../graph/analyze/graph_analysis.h"
 
 namespace sdag::fused_detail
 {
@@ -138,7 +143,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 	using error_types = typename analysis_type::error_types;
 	static constexpr bool has_errors = error_types::size != 0;
 	/// std::variant<std::monostate, 错误类型...>。错误类型本身也可能是 std::monostate，所以一律按下标访问：错误 k 在第 k + 1 位。
-	using error_variant = compute::rebind_t<::std::variant, compute::concat_t<meta::type_list<::std::monostate>, error_types>>;
+	using error_variant = meta::rebind_t<::std::variant, meta::concat_t<meta::type_list<::std::monostate>, error_types>>;
 
 	/// 外层停止令牌上挂的回调：把外层的停止请求转进整图。
 	struct forward_stop
@@ -227,7 +232,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 		}
 		else if constexpr (state_base::analysis_type::slot_needed[J])
 		{
-			using tuple_type = compute::rebind_t<::std::tuple, typename analysis_type::template values_t<J>>;
+			using tuple_type = meta::rebind_t<::std::tuple, typename analysis_type::template values_t<J>>;
 			static_assert(::std::is_constructible_v<tuple_type, Args&&...>, "sdag: 节点实际发出的值与它声明的完成签名不符");
 			auto& slot = meta::get<J>(this->_slots);
 			if constexpr (::std::is_nothrow_constructible_v<tuple_type, Args&&...>)
@@ -283,7 +288,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 	}
 
 	template<class Error>
-	static constexpr size_t error_alternative = compute::index_of_v<::std::decay_t<Error>, error_types> + 1;
+	static constexpr size_t error_alternative = meta::index_of_v<::std::decay_t<Error>, error_types> + 1;
 
 	template<class Error>
 	constexpr void store_error(Error&& error) noexcept
@@ -320,7 +325,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 			// 通知后继可能启动它们，后继又可能同步完成整张图。但在通知完最后一个后继之前整图不可能结束：
 			// 每个后继都是某个汇点的祖先，还没被通知的后继所在的那条路还没走完。所以循环里一直可以碰 this，
 			// 最后一次通知之后不再碰。
-			compute::for_each_value<successors_v<shape, J>>([this]<size_t To>() noexcept
+			meta::for_each_value<successors_v<shape, J>>([this]<size_t To>() noexcept
 			{
 				this->template notify_edge<J, To>();
 			});
@@ -499,7 +504,7 @@ struct fused_operation_impl<Self, Receiver, ::std::index_sequence<I...>> : fused
 			this->_on_stop.emplace(::stdexec::get_stop_token(::stdexec::get_env(this->_receiver)), typename core::forward_stop{this});
 		}
 		// 启动完最后一个根之前整图不可能结束：整图要等所有汇点，而还没启动的根下面的汇点还没到。
-		compute::for_each_value<roots_v<core::shape>>([this]<size_t Root>() noexcept
+		meta::for_each_value<roots_v<core::shape>>([this]<size_t Root>() noexcept
 		{
 			this->template launch<Root>();
 		});

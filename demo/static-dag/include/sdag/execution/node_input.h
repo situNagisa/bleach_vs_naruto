@@ -31,12 +31,16 @@
 #include <exec/completion_behavior.hpp>
 #include <exec/completion_signatures.hpp> // exec::throw_compile_time_error
 
-#include "meta.h"
-#include "fwd.h"
-#include "stdexec_bridge.h"
-#include "graph_traits.h"
-#include "compute/primitives.h"
-#include "compute/analysis.h"
+#include "../meta_program/type_list.h"
+#include "../meta_program/utility.h"
+#include "../meta_program/indexed_tuple.h"
+#include "../fwd.h"
+#include "../concurrency/stdexec_bridge.h"
+#include "../graph/traits.h"
+#include "../meta_program/rebind.h"
+#include "../graph/analyze/graph_analysis.h"
+#include "../graph/analyze/input_completions.h"
+#include "../graph/analyze/consumers.h"
 
 namespace sdag
 {
@@ -109,7 +113,7 @@ template<class Self, class Env>
 using probe_env = node_env<Self, Env, false>;
 
 template<class Self, class Env>
-inline constexpr bool stoppable_v = compute::analysis<Self, probe_env<Self, Env>>::can_fail;
+inline constexpr bool stoppable_v = analyze::analysis<Self, probe_env<Self, Env>>::can_fail;
 
 /// 节点实际看到的环境。
 template<class Self, class Env>
@@ -150,7 +154,7 @@ template<class Dependency, class Env>
 	requires inside_graph<Env>
 [[nodiscard]] consteval auto input_completions_in()
 {
-	return compute::input_completions_t<graph_of_env_t<Env>, Dependency, Env>{};
+	return analyze::input_completions_t<graph_of_env_t<Env>, Dependency, Env>{};
 }
 
 struct _THE_INPUT_SENDER_OF_A_DAG_NODE_WAS_CONNECTED_OUTSIDE_OF_A_DAG_;
@@ -187,7 +191,7 @@ struct input_sender
 	{
 		if constexpr (sizeof...(Env) == 0)
 		{
-			return bridge::dependent_sender_error<Self>();
+			return concurrency::bridge::dependent_sender_error<Self>();
 		}
 		else if constexpr (!(graph_detail::inside_graph<Env> && ...))
 		{
@@ -219,11 +223,11 @@ struct slots;
 template<class Self, class Env, size_t... I>
 struct slots<Self, Env, ::std::index_sequence<I...>>
 {
-	using analysis = compute::analysis<Self, Env>;
+	using analysis = analyze::analysis<Self, Env>;
 
 	template<size_t J>
 	using slot_t = ::std::conditional_t<analysis::slot_needed[J],
-		::std::optional<compute::rebind_t<::std::tuple, typename analysis::template values_t<J>>>,
+		::std::optional<meta::rebind_t<::std::tuple, typename analysis::template values_t<J>>>,
 		meta::empty>;
 
 	using type = meta::indexed_tuple<slot_t<I>...>;
@@ -279,13 +283,13 @@ template<class Self, class Env, auto Nodes>
 template<class Self, class Env>
 struct graph_state
 {
-	static_assert(compute::analysis<Self, probe_env<Self, Env>>::valid, "sdag: 有节点在接收者环境下无法给出完成签名");
-	static_assert(compute::analysis<Self, node_env_t<Self, Env>>::valid, "sdag: 有节点在整图环境下无法给出完成签名");
+	static_assert(analyze::analysis<Self, probe_env<Self, Env>>::valid, "sdag: 有节点在接收者环境下无法给出完成签名");
+	static_assert(analyze::analysis<Self, node_env_t<Self, Env>>::valid, "sdag: 有节点在整图环境下无法给出完成签名");
 
 	static constexpr auto shape = shape_of_v<Self>;
 	static constexpr bool stoppable = stoppable_v<Self, Env>;
 	using env_type = node_env_t<Self, Env>;
-	using analysis_type = compute::analysis<Self, env_type>;
+	using analysis_type = analyze::analysis<Self, env_type>;
 
 	SDAG_NO_UNIQUE_ADDRESS typename slots<Self, env_type>::type _slots{};
 
@@ -314,8 +318,8 @@ struct graph_state
 	{
 		// 接收者那一侧是在它自己的环境（node_env 外面可能又包了几层适配器）下算出输入签名的，
 		// 这里是在整图环境下存的值。两边必须一致，否则说明某个节点 sender 在不同环境下报告了不同的值类型。
-		using declared = compute::input_completions_t<Self, Dependency, ::stdexec::env_of_t<Receiver>>;
-		using stored = compute::input_completions_t<Self, Dependency, env_type>;
+		using declared = analyze::input_completions_t<Self, Dependency, ::stdexec::env_of_t<Receiver>>;
+		using stored = analyze::input_completions_t<Self, Dependency, env_type>;
 		static_assert(::std::same_as<declared, stored>, "sdag: 节点在接收者环境与整图环境下报告的值类型不一致");
 		if constexpr (::std::same_as<stored, ::stdexec::completion_signatures<>>)
 		{

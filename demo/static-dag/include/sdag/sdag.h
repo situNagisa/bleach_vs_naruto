@@ -14,34 +14,44 @@
 /// 默认连接走 0 开销的融合 op-state；所在 domain 定制了 when_all 时自动降解为 when_all / split / let_value
 /// 组合交给 domain；composed<FanIn, FanOut> 策略则无条件降解，作为语义参照与可配置入口。
 ///
-/// 头文件按依赖从底到顶：
-///   config.h          SDAG_REFLECTION、no_unique_address、ABI 命名空间等宏
-///   meta.h            type_list、indexed_tuple 等与计算方式无关的基础设施
-///   stdexec_bridge.h  对 stdexec 内部实现的全部依赖
-///   fwd.h             打断头文件环的前向声明
-///   node.h            节点：after<>、node<>、make_node、payload CPO 与 concept
-///   compute/          编译期计算层：反射与模板两份实现，接口相同
-///   shape.h           图形状：邻接矩阵、入出度、拓扑序、错误诊断
-///   graph_traits.h    图的类型级查询：第 I 个节点是谁、依赖谁、谁读它的值
-///   graph_sender.h    图 sender 的类型与 tuple-like 协议
-///   node_input.h      节点怎么拿到前驱的值：输入 sender、节点环境、整图状态
-///   attributes.h      图 sender 的完成签名、属性、降解判据
-///   fused.h           融合 op-state（默认连接）
-///   lowering.h        降解成 when_all / split / let_value
-///   dag.h             dag_t、fused / composed 策略、dag()
+/// 模块（依赖从底到顶，下层不认识上层）：
+///   config.h, fwd.h   编译开关与打断头文件环的前向声明
+///   meta_program/     与 sdag 无关的元编程：type_list 与其上的元函数、indexed_tuple、小工具
+///   concurrency/      与 stdexec 打交道的通用部分：完成签名的读取、stdexec 内部接口的桥、constant_sender
+///   graph/            图本身：节点（node）、形状（shape）、类型级查询（traits）、编译期分析（analyze/）
+///   execution/        图怎么作为 sender 执行：图 sender、输入 sender 与整图状态、属性、融合 op-state、降解
+///   dag.h             入口：dag_t、fused / composed 策略、dag()
+///
+/// meta_program / concurrency / graph/analyze 下每个文件都有反射与模板两种实现，用 SDAG_REFLECTION 隔开。
 
 #include "config.h"
-#include "meta.h"
-#include "stdexec_bridge.h"
 #include "fwd.h"
-#include "node.h"
-#include "compute/primitives.h"
-#include "shape.h"
-#include "graph_traits.h"
-#include "graph_sender.h"
-#include "compute/analysis.h"
-#include "node_input.h"
-#include "attributes.h"
-#include "fused.h"
-#include "lowering.h"
+#include "meta_program/type_list.h"
+#include "meta_program/utility.h"
+#include "meta_program/indexed_tuple.h"
+#include "meta_program/index_of.h"
+#include "meta_program/concat.h"
+#include "meta_program/unique.h"
+#include "meta_program/transform.h"
+#include "meta_program/rebind.h"
+#include "meta_program/dependency_indices.h"
+#include "meta_program/sequence.h"
+#include "meta_program/for_each_value.h"
+#include "concurrency/stdexec_bridge.h"
+#include "concurrency/completion_signatures.h"
+#include "concurrency/constant_sender.h"
+#include "graph/node.h"
+#include "graph/shape.h"
+#include "graph/traits.h"
+#include "graph/analyze/sender_expression.h"
+#include "graph/analyze/consumers.h"
+#include "graph/analyze/graph_analysis.h"
+#include "graph/analyze/input_completions.h"
+#include "graph/analyze/lowered.h"
+#include "graph/analyze/common_domain.h"
+#include "execution/graph_sender.h"
+#include "execution/node_input.h"
+#include "execution/attributes.h"
+#include "execution/fused.h"
+#include "execution/lowering.h"
 #include "dag.h"

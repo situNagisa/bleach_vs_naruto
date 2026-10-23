@@ -16,16 +16,18 @@
 #include <stdexec/execution.hpp>
 #include <exec/split.hpp>
 
-#include "meta.h"
+#include "meta_program/type_list.h"
+#include "meta_program/utility.h"
+#include "meta_program/indexed_tuple.h"
 #include "fwd.h"
-#include "node.h"
-#include "graph_traits.h"
-#include "graph_sender.h"
-#include "node_input.h"
-#include "attributes.h"
-#include "fused.h"
-#include "lowering.h"
-#include "compute/primitives.h"
+#include "graph/node.h"
+#include "graph/traits.h"
+#include "execution/graph_sender.h"
+#include "execution/node_input.h"
+#include "execution/attributes.h"
+#include "execution/fused.h"
+#include "execution/lowering.h"
+#include "graph/analyze/sender_expression.h"
 
 namespace sdag
 {
@@ -43,13 +45,13 @@ template<class Node>
 		"sdag: 节点载荷既不是 sender，也不是能接受输入 sender 的适配器（例如 ::stdexec::then(f)）");
 	if constexpr (sender_payload<payload_type>)
 	{
-		static_assert(compute::input_count_v<::std::decay_t<payload_type>> == 0, "sdag: 只有控制依赖的节点 sender 里不能出现输入 sender");
+		static_assert(analyze::input_count_v<::std::decay_t<payload_type>> == 0, "sdag: 只有控制依赖的节点 sender 里不能出现输入 sender");
 		return ::std::decay_t<payload_type>(::sdag::payload(::std::forward<Node>(node)));
 	}
 	else
 	{
 		using child = decltype(::sdag::payload(::std::forward<Node>(node))(input_sender<dependency>{}));
-		static_assert(compute::input_count_v<child> == 1,
+		static_assert(analyze::input_count_v<child> == 1,
 			"sdag: 节点适配器必须把输入 sender 恰好用一次，而且中间只能隔着 stdexec 的算法层："
 			"它的值只会被交付一次，repeat / retry 这类会重启子 sender 的适配器不能套在输入上；"
 			"不透明的自定义 sender 包着输入时这里会数成 0 次");

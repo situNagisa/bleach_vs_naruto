@@ -23,7 +23,9 @@
 
 #include <stdexec/execution.hpp>
 
-#include "meta.h"
+#include "../meta_program/type_list.h"
+#include "../meta_program/utility.h"
+#include "../meta_program/indexed_tuple.h"
 
 namespace sdag
 {

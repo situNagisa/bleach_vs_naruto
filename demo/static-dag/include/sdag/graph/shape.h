@@ -13,9 +13,12 @@
 #include <utility>
 #include <vector>
 
-#include "meta.h"
-#include "node.h"
-#include "compute/primitives.h"
+#include "../meta_program/type_list.h"
+#include "../meta_program/utility.h"
+#include "../meta_program/indexed_tuple.h"
+#include "../graph/node.h"
+#include "../meta_program/index_of.h"
+#include "../meta_program/dependency_indices.h"
 
 namespace sdag
 {
@@ -200,11 +203,11 @@ template<class Keys, class Dependencies>
 		(
 			[&]
 			{
-				if (compute::index_of_v<meta::at_t<I, Keys>, Keys> != I)
+				if (meta::index_of_v<meta::at_t<I, Keys>, Keys> != I)
 				{
 					result.fail(shape_error::duplicate_key, I);
 				}
-				for (::std::size_t from : compute::dependency_indices_v<Keys, meta::at_t<I, Dependencies>>)
+				for (::std::size_t from : meta::dependency_indices_v<Keys, meta::at_t<I, Dependencies>>)
 				{
 					result.add_edge(from, I);
 				}
@@ -238,7 +241,7 @@ template<class Keys, class Dependencies>
 	return result;
 }
 
-/// 汇点 / 根 / 后继，固定成 std::array，供 compute::for_each_value 与 compute::sequence_t 使用。
+/// 汇点 / 根 / 后继，固定成 std::array，供 meta::for_each_value 与 meta::sequence_t 使用。
 template<auto Shape>
 inline constexpr auto sinks_v = meta::to_array<Shape.sink_count()>(Shape.sinks());
 

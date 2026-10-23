@@ -12,7 +12,7 @@
 /// 这条路不追求 0 开销：split 必须堆分配共享状态，这是组合现成算法的固有代价。
 ///
 /// 构造顺序：节点按拓扑序逐个构造，前驱的 sender 已经在 _built 里了，后继再把它取走（独占）或拷贝（共享）。
-/// 所有类型由编译期计算层的 compute::lowered 预先算好，这里只做运行期的构造。
+/// 所有类型由编译期计算层的 analyze::lowered 预先算好，这里只做运行期的构造。
 
 #include <cstddef>
 #include <optional>
@@ -23,12 +23,17 @@
 #include <stdexec/execution.hpp>
 #include <exec/sender_for.hpp>
 
-#include "meta.h"
-#include "fwd.h"
-#include "stdexec_bridge.h"
-#include "graph_traits.h"
-#include "compute/primitives.h"
-#include "compute/analysis.h"
+#include "../meta_program/type_list.h"
+#include "../meta_program/utility.h"
+#include "../meta_program/indexed_tuple.h"
+#include "../fwd.h"
+#include "../concurrency/stdexec_bridge.h"
+#include "../graph/traits.h"
+#include "../meta_program/sequence.h"
+#include "../meta_program/for_each_value.h"
+#include "../graph/analyze/sender_expression.h"
+#include "../graph/analyze/lowered.h"
+#include "../concurrency/constant_sender.h"
 
 namespace sdag
 {
@@ -45,26 +50,26 @@ template<class Dependency>
 inline constexpr bool is_input_v<input_sender<Dependency>> = true;
 
 /// 把节点 sender 里的输入叶子换成 input：沿 stdexec 的算法层拆开、替换、重建。
-/// 类型与 compute::substituted_t 算出的一致；不含输入叶子的子树原样转发。
+/// 类型与 analyze::substituted_t 算出的一致；不含输入叶子的子树原样转发。
 template<class Input, class CvSender>
-[[nodiscard]] constexpr compute::substituted_t<CvSender&&, Input> substitute(CvSender&& sender, Input&& input)
+[[nodiscard]] constexpr analyze::substituted_t<CvSender&&, Input> substitute(CvSender&& sender, Input&& input)
 {
 	using sender_type = ::std::remove_cvref_t<CvSender>;
 	if constexpr (is_input_v<sender_type>)
 	{
 		return ::std::forward<Input>(input);
 	}
-	else if constexpr (compute::input_count_v<sender_type> == 0)
+	else if constexpr (analyze::input_count_v<sender_type> == 0)
 	{
 		return ::std::forward<CvSender>(sender);
 	}
 	else
 	{
-		return bridge::apply(
+		return concurrency::bridge::apply(
 			[&]<class Tag, class Data, class... Children>(Tag&& tag, Data&& data, Children&&... children)
 			{
 				// 节点只含一个输入叶子，所以只有一个子树会真正用到 input，它只会被移动一次。
-				return bridge::make_expression(::std::forward<Tag>(tag), ::std::forward<Data>(data),
+				return concurrency::bridge::make_expression(::std::forward<Tag>(tag), ::std::forward<Data>(data),
 					lowering_detail::substitute(::std::forward<Children>(children), ::std::forward<Input>(input))...);
 			},
 			::std::forward<CvSender>(sender));
@@ -74,7 +79,7 @@ template<class Input, class CvSender>
 template<class Self, class FanIn, class FanOut>
 struct builder
 {
-	using types = compute::lowered<Self, FanIn, FanOut>;
+	using types = analyze::lowered<Self, FanIn, FanOut>;
 	static constexpr auto shape = graph_detail::shape_of_v<Self>;
 
 	template<size_t I>
@@ -130,7 +135,7 @@ struct builder
 		using child = child_t<I>;
 		using dependencies = graph_detail::dependencies_t<Self, I>;
 		decltype(auto) sender = ::std::forward<Self>(_graph).template get<I + 2>();
-		if constexpr (compute::input_count_v<child> != 0)
+		if constexpr (analyze::input_count_v<child> != 0)
 		{
 			// 数据依赖：输入叶子换成 fanin(前驱...)。
 			return lowering_detail::substitute(::std::forward<child>(sender), make_input<I>(dependencies{}));
@@ -143,7 +148,7 @@ struct builder
 		{
 			// 控制依赖：等前驱都结束，丢掉它们的值，再启动载荷 sender。
 			return ::stdexec::let_value(make_input<I>(dependencies{}),
-				graph_detail::constant_sender<::std::remove_cvref_t<child>>{::std::forward<child>(sender)});
+				concurrency::constant_sender<::std::remove_cvref_t<child>>{::std::forward<child>(sender)});
 		}
 	}
 
@@ -175,11 +180,11 @@ struct builder
 
 	[[nodiscard]] constexpr auto build()
 	{
-		compute::for_each_value<shape.order>([this]<size_t I>()
+		meta::for_each_value<shape.order>([this]<size_t I>()
 		{
 			this->template build_one<I>();
 		});
-		return join_sinks(compute::sequence_t<sinks_v<shape>>{});
+		return join_sinks(meta::sequence_t<sinks_v<shape>>{});
 	}
 };
 
