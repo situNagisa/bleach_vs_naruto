@@ -5,6 +5,7 @@ module;
 #include <stdexec/execution.hpp>
 #include <exec/any_sender_of.hpp>
 #include <exec/static_thread_pool.hpp>
+#include <exec/start_detached.hpp>
 
 export module demo.execution;
 
@@ -26,6 +27,7 @@ export using any_scheduler_type = ::exec::any_scheduler<values_sender_type<>>;
 export namespace stdexec
 {
 using ::stdexec::just;
+using ::stdexec::schedule;
 using ::stdexec::then;
 using ::stdexec::let_value;
 using ::stdexec::when_all;
@@ -38,5 +40,6 @@ using ::stdexec::sync_wait;
 export namespace experimental::execution
 {
 using ::experimental::execution::static_thread_pool;
+using ::experimental::execution::start_detached;
 }
 export namespace exec = ::experimental::execution;

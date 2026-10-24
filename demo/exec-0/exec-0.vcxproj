@@ -91,6 +91,8 @@
     <NMakeOutput>$(BvnBuildDir)exec-0.exe</NMakeOutput>
     <OutDir>$(BvnBuildDir)</OutDir>
     <IntDir>$(BvnBuildDir)CMakeFiles\</IntDir>
+    <!-- NMake 实际调用 Clang；空标识会让 ReSharper 的 VS API 路径误选 MSVC 方言。 -->
+    <ToolsetISenseIdentifier>Clang.Windows</ToolsetISenseIdentifier>
     <!-- 以下只喂给 IntelliSense（模块的 IntelliSense 在 VS 里仍是实验性）。 -->
     <NMakeIncludeSearchPath>$(BvnVcpkgIncludeDir);$(ProjectDir)..\..\include;$(ProjectDir)..\..\vkfu\include;$(BvnNagisaLibraryRoot)\stdexec\include;$(BvnNagisaLibraryRoot)\glfw\include;$(BvnNagisaRoot)\include;$(VULKAN_SDK)\Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakePreprocessorDefinitions>_WIN32;WIN32;_WINDOWS;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
@@ -118,6 +120,18 @@
     <ClCompile Include="input\input.cpp" />
     <ClCompile Include="render\renderer.cppm" />
     <ClCompile Include="render\renderer.cpp" />
+    <ClCompile Include="renderable\image.cppm" />
+    <ClCompile Include="renderable\font.cppm" />
+    <ClCompile Include="renderable\sprite.cppm" />
+    <ClCompile Include="renderable\buffer_type.cpp" />
+    <ClCompile Include="renderable\buffer_type.cppm" />
+    <ClCompile Include="renderable\image.cpp" />
+    <ClCompile Include="renderable\font.cpp" />
+    <ClCompile Include="renderable\sprite.cpp" />
+    <ClCompile Include="renderable\vector_graph.cppm" />
+    <ClCompile Include="renderable\vector_graph.cpp" />
+    <ClCompile Include="scene\menu\menu.cppm" />
+    <ClCompile Include="scene\menu\menu.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
@@ -138,6 +152,7 @@
     <None Include="CMakeUserPresets.json.example" />
     <None Include="exec-0.local.props.example" />
     <None Include="README.md" />
+    <None Include="tests\smoke_windows.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

@@ -1,68 +1,109 @@
-// main.cpp 是普通翻译单元：除了 stderr 宏需要的 <cstdio>，其余全部通过 import 获得。
-// 这里不会解析 stdexec / vkfu / vkkl / Vulkan / GLFW 的任何头文件。
 #include <cstdio>
+#include <vkkl/command_buffer.h>
 
 import std;
 import demo.execution;
 import demo.window;
 import demo.input;
 import demo.render;
+import demo.scene.menu;
 
 namespace
 {
-// 一帧的渲染流水线：租一个 frame -> 取 swapchain 图像 -> 录制 / 提交 / 呈现。
-// 返回的是 sender，由调用方决定在哪个 scheduler 上启动。
-auto render_frame(renderer const& target)
+auto render_frame(renderer const& target, menu const& scene, menu::state snapshot)
 {
 	return target.acquire_frame()
-		| ::stdexec::let_value([&target](renderer::frame_pool::lease& lease)
+		| ::stdexec::let_value([&target, &scene, snapshot](renderer::frame_pool::lease& lease)
 			{
 				auto& frame = *lease.token();
 				return target.acquire_image(frame)
-					| ::stdexec::let_value([&target, &frame](image_acquisition& acquisition)
+					| ::stdexec::let_value([&target, &scene, &frame, snapshot](image_acquisition& acquisition)
 						{
-							return target.render(frame, acquisition, {});
+							return scene.record(snapshot, target.extent())
+								| ::stdexec::let_value([&target, &frame, &acquisition](auto& commands, auto&)
+									{
+										auto handles = commands | ::std::views::transform([](auto const& command) { return command.handle; }) | ::std::ranges::to<::std::vector>();
+										return ::stdexec::just(::std::move(handles)) | ::stdexec::let_value([&target, &frame, &acquisition](auto& handles) { return target.render(frame, acquisition, handles); });
+									});
 						});
 			});
 }
-
-constexpr auto key_names = ::std::array{
-	"up", "down", "left", "right", "a", "b", "c", "d", "e", "f", "g",
-};
-static_assert(key_names.size() == ::std::to_underlying(key_code::_max));
 }
 
-int main()
+int main(int argc, char** argv)
 {
 	try
 	{
+		auto font_path = ::std::filesystem::path{};
+		for (auto index = 1; index < argc; ++index)
+		{
+			auto const argument = ::std::string_view{ argv[index] };
+			if (argument == "--font" && index + 1 < argc)
+				font_path = argv[++index];
+			else
+				throw ::std::runtime_error{ "usage: exec-0 [--font <TTF/OTF file>]" };
+		}
 		auto const glfw = glfw_context{};
-		auto const main_window = window{ "bvn exec-0", 960, 540 };
-		auto const target = renderer{ main_window };
+		auto const main_window = window{ "BVN - Main Menu", 960, 540 };
+		auto target = renderer{ main_window };
+		auto scene = menu{ target.device(), target.physical_device(), target.graphics_queue(), target.graphics_queue_family(), target.format(), font_path };
 		auto keyboard = input{ main_window };
-
-		// 输入必须在主线程轮询（GLFW 约束）；渲染放到独立的工作线程上。
 		auto workers = ::exec::static_thread_pool{ 1 };
 		auto const render_scheduler = workers.get_scheduler();
-
+		auto resize_pending = false;
 		for (;;)
 		{
 			auto polled = ::stdexec::sync_wait(keyboard.poll());
 			if (!polled)
 				break;
-			auto const [state] = *::std::move(polled);
-			keyboard.consume(state);
-			if (state._quit)
+			auto const [keys] = *::std::move(polled);
+			keyboard.consume(keys);
+			auto updated = ::stdexec::sync_wait(scene.update(keys));
+			if (!updated)
 				break;
-
-			for (auto index = ::std::size_t{}; index < key_names.size(); ++index)
+			scene.current_state = ::std::get<0>(*updated);
+			auto const action = scene.current_state.requested;
+			if (action == menu::action::quit)
+				break;
+			if (action == menu::action::start_game)
+				::std::println("exec-0: start_game requested (game scene is not installed)");
+			auto const extent = main_window.drawable_extent();
+			if (extent.width == 0 || extent.height == 0)
 			{
-				if (state._status[index].signal)
-					::std::println("exec-0: key {} pressed", key_names[index]);
+				::std::this_thread::sleep_for(::std::chrono::milliseconds{ 16 });
+				continue;
 			}
-
-			if (!::stdexec::sync_wait(::stdexec::starts_on(render_scheduler, render_frame(target))))
+			auto const current_extent = target.extent();
+			if (resize_pending || extent.width != current_extent.width || extent.height != current_extent.height)
+			{
+				target.resize();
+				resize_pending = false;
+			}
+			try
+			{
+				auto completion = ::std::make_shared<::std::promise<bool>>();
+				auto rendered = completion->get_future();
+				::exec::start_detached(::stdexec::schedule(render_scheduler)
+					| ::stdexec::then([&target, &scene, state = scene.current_state, completion]
+						{
+							try
+							{
+								completion->set_value(::stdexec::sync_wait(::render_frame(target, scene, state)).has_value());
+							}
+							catch (...)
+							{
+								completion->set_exception(::std::current_exception());
+							}
+						}));
+				while (rendered.wait_for(::std::chrono::milliseconds{ 1 }) != ::std::future_status::ready)
+					window::poll_events();
+				if (!rendered.get())
 				break;
+			}
+			catch (surface_changed const&)
+			{
+				resize_pending = true;
+			}
 		}
 		return 0;
 	}

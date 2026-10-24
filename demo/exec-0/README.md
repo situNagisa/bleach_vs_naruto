@@ -1,9 +1,77 @@
 # demo/exec-0 —— bvn 第一个完全用 C++20 模块组织的 demo
 
 一个 sender/receiver 风格的帧循环：主线程用 `demo.input` 轮询键盘，渲染工作线程用 `demo.render`
-走 Vulkan 1.3 dynamic rendering 清屏并呈现；窗口由 `demo.window`（直接包 GLFW 原生 API）提供，
+走 Vulkan 1.3 dynamic rendering 绘制主菜单并呈现；窗口由 `demo.window`（直接包 GLFW 原生 API）提供，
 两者共用 `demo.execution` 里对 stdexec 的类型擦除封装。本 demo 不依赖仓库的 `bvn::platform`（SDL）层。
 它是 bvn 从“头文件 + .cpp”迁移到“具名模块”的样板：整个仓库里所有模块化代码都按这里的约定来写、来构建。
+
+`renderable/` 提供四个独立模块。每个模块的 `.cppm` 只声明接口，`.cpp` 定义实现；共同使用 `demo.renderable.buffer_type` 管理缓冲，不依赖其它 demo 的代码、shader 或图片：
+
+- `demo.renderable.image`：`image` 接收 `bvn::assets::image_rgba8`，`draw` 绘制完整图片。
+- `demo.renderable.sprite`：`sprite` 接收 `bvn::assets::sprite_clip_data`，`draw` 通过从零开始的帧号选择纹理数组层。
+- `demo.renderable.font`：`font(path)` 用 FreeType 加载真实 `.ttf` / `.otf` 字体文件；`prepare` 接收 UTF-8 文本和像素字号，返回独立持有 GPU 资源的 `font::text`，再通过它的 `draw` 重复绘制。无需 `.fnt` 或预制字体图片。支持 Unicode 字形查找、换行和字偶间距；缺字和非法 UTF-8 抛异常，不提供复杂文字塑形或字体回退。
+
+`demo.renderable.vector_graph` 提供纯色矩形绘制，接口参照主菜单的 vector_graph，代码和 shader 独立实现：
+
+```cpp
+import demo.renderable.vector_graph;
+
+auto graph = vector_graph{ device, format };
+// 在匹配 format 的 dynamic rendering 内，先设置 viewport / scissor。
+auto vertices = graph.draw_rectangle(device, physical_device, command_buffer,
+    { 200.0f, 80.0f }, { 0.2f, 0.6f, 1.0f, 0.8f }, transform);
+```
+
+矩形局部范围为 `(0, 0)` 到 `size`；`transform` 为 GLM 3×3 仿射矩阵，映射到裁剪空间，默认单位矩阵。
+颜色为线性 RGBA，使用 straight-alpha 混合。尺寸必须有限且非负，任一尺寸为零时不绘制。
+`graph` 和返回的只移动 RAII 缓冲都必须保留到 GPU 完成；分配失败会抛异常。
+
+例如，在已有 Vulkan 设备、图形队列和渲染目标的调用处：
+
+```cpp
+import demo.renderable.font;
+
+// device / physical_device / graphics_queue / family / format 由调用方提供。
+auto typeface = font{ font_path };
+auto label = typeface.prepare("Hello", 32, device, physical_device, graphics_queue, family, format);
+// 在 dynamic rendering 内，设置 viewport/scissor 后录制。
+auto vertices = label.draw(device, physical_device, command_buffer, transform);
+```
+
+所有 `draw` 的 transform 都把局部像素坐标映射到裁剪空间；默认单位矩阵不做屏幕坐标换算。
+字体文字从左上方排版，字形溢出（如斜体负 bearing）会扩展位图边界。文字使用白色，保留字形覆盖率作为 alpha。
+`image` / `sprite` 构造和 `font::prepare` 同步上传数据，需要调用方串行访问图形队列。
+绘制对象与 `draw` 返回的顶点缓冲必须保留到 GPU 完成；设备必须比它们活得久。
+四个模块各自内嵌 SPIR-V，不依赖运行时 shader 文件路径。新增构建依赖为 GLM 与 FreeType。
+
+`scene/menu/menu.cppm` / `scene/menu/menu.cpp` 实现 `demo.scene.menu`，启动程序即显示主菜单。
+菜单用 `vector_graph` 绘制背景和静态选中项，通过 FreeType 加载系统字体；可用 `exec-0 --font <字体文件>` 或 `BVN_FONT` 指定 TTF/OTF 文件。
+`image::draw` 与 `font::text::draw` 可传入 tint；`extent()` 获取局部像素尺寸，sprite 另有 `frame_count()`。
+
+- 上下键按下时循环选择，无计时参数或重复限频。
+- Enter、Space、小键盘 Enter 或 J 确认；Escape 或 K 退出。
+- 菜单仅含 Start Game 和 Exit。Start Game 设置返回状态的 `requested = menu::action::start_game`，main 打印事件，游戏功能后续实现。
+- Exit 或关闭窗口退出；关闭窗口不受焦点状态影响。窗口缩放会重建交换链，最小化时暂停绘制。
+
+`menu` 直接持有 `current_state`；`update(keys) const` 返回 `values_sender_type<state>`，按捕获的状态副本计算，不修改自身。
+`record` 返回 `values_sender_type<vector<vkkl::command_buffer>, vector<buffer_type>>`，不再有 recording 类。
+command pool 由 menu 持有，命令缓冲每次 record 执行时创建，所有权移动到返回的 vector；同一池的分配、录制和释放必须串行。
+主循环使用 `let_value` 将提交和 GPU fence 等待接在 record 后，保留命令缓冲所有者及两个完成值到 GPU 完成，然后才进入下一帧。返回的两个 vector 必须保留到 GPU 完成，menu 和设备必须比命令缓冲活得久。
+
+`renderer` 通过 `device()`、`physical_device()`、`graphics_queue()`、`graphics_queue_family()`、`format()`、`extent()` 直接返回 Vulkan 句柄或值；菜单构造显式接收所需参数。
+
+实际帧循环用 `schedule | then` 启动渲染线程任务，在该任务内等待帧 sender 完成，使用 promise/future 向主线程传回结果或异常。
+这样避开了当前 Clang 模块构建中 `starts_on(scheduler, 嵌套帧 sender)` 在首次调度时的访问冲突。
+主线程等待 future 时仍泵窗口事件，避免窗口呈现与阻塞事件线程互相等待。
+
+Windows 实际启动回归测试（会打开自己的测试窗口）：
+
+```powershell
+python tests/smoke_windows.py out/build/windows-clang-cl-debug/exec-0.exe
+```
+
+测试直接运行生产可执行文件，检查持续运行、三次缩放、最小化/恢复和正常退出，并检查运行日志。
+它按进程 ID 定位 GLFW 窗口，避免误关闭控制台或驱动内部窗口。
 
 > 结论先行：**只用 Clang（≥ 22），C++ 标准永远最新，构建用 CMake（≥ 4.4）+ Ninja；
 > Windows 上由 `bvn.slnx` 里的 Makefile 型工程 `exec-0.vcxproj` 调用 CMake 构建，F5 一键构建 + 调试，PDB 自动生成。

@@ -37,6 +37,8 @@ include(cmake/stdexec.cmake)    # exec0_stdexec
 include(cmake/nagisa.cmake)     # exec0_nagisa
 include(cmake/vkfu.cmake)       # vkfu::vkfu
 include(cmake/vkkl.cmake)       # exec0_vkkl
+find_package(glm CONFIG REQUIRED)
+find_package(Freetype REQUIRED)
 
 # ---------------------------------------------------------------- demo 本体
 # 模块依赖：std <- demo.execution <- demo.input  <- main
@@ -50,11 +52,23 @@ target_sources(exec0_demo
         window/window.cpp
         input/input.cpp
         render/renderer.cpp
+        renderable/buffer_type.cpp
+        renderable/image.cpp
+        renderable/font.cpp
+        renderable/sprite.cpp
+        renderable/vector_graph.cpp
+        scene/menu/menu.cpp
     PRIVATE FILE_SET CXX_MODULES FILES
         execution/execution.cppm
         window/window.cppm
         input/input.cppm
         render/renderer.cppm
+        renderable/buffer_type.cppm
+        renderable/image.cppm
+        renderable/font.cppm
+        renderable/sprite.cppm
+        renderable/vector_graph.cppm
+        scene/menu/menu.cppm
 )
 target_link_libraries(exec0_demo
     PRIVATE
@@ -66,5 +80,7 @@ target_link_libraries(exec0_demo
         exec0_nagisa
         glfw
         Vulkan::Vulkan
+        glm::glm
+        Freetype::Freetype
 )
 set_target_properties(exec0_demo PROPERTIES OUTPUT_NAME exec-0)

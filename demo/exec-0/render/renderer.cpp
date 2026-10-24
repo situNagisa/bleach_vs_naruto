@@ -23,7 +23,7 @@ module demo.render;
 // 实现单元隐式导入 demo.render 的接口；接口 import 的 std 与 demo.execution 在这里同样可见，
 // 所以 sender 算法直接用 demo.execution 导出的 just / then，不再包含 stdexec 头文件。
 
-inline auto check(::VkResult result, char const* operation) -> void
+inline void check(::VkResult result, char const* operation)
 {
 	if (result != ::VK_SUCCESS)
 	{
@@ -31,7 +31,7 @@ inline auto check(::VkResult result, char const* operation) -> void
 	}
 }
 
-inline auto read_spirv(char const* path) -> ::std::vector<::std::uint32_t>
+inline ::std::vector<::std::uint32_t> read_spirv(char const* path)
 {
 	auto file = ::std::ifstream{ path, ::std::ios::binary | ::std::ios::ate };
 	if (!file)
@@ -54,7 +54,7 @@ inline auto read_spirv(char const* path) -> ::std::vector<::std::uint32_t>
 	return words;
 }
 
-inline auto has_layer(::std::span<::VkLayerProperties const> available, ::std::string_view wanted) -> bool
+inline bool has_layer(::std::span<::VkLayerProperties const> available, ::std::string_view wanted)
 {
 	return ::std::ranges::any_of(available, [wanted](::VkLayerProperties const& entry)
 		{
@@ -62,7 +62,7 @@ inline auto has_layer(::std::span<::VkLayerProperties const> available, ::std::s
 		});
 }
 
-inline auto has_extension(::std::span<::VkExtensionProperties const> available, ::std::string_view wanted) -> bool
+inline bool has_extension(::std::span<::VkExtensionProperties const> available, ::std::string_view wanted)
 {
 	return ::std::ranges::any_of(available, [wanted](::VkExtensionProperties const& entry)
 		{
@@ -70,7 +70,7 @@ inline auto has_extension(::std::span<::VkExtensionProperties const> available, 
 		});
 }
 
-inline auto instance_layers() -> ::std::vector<::VkLayerProperties>
+inline ::std::vector<::VkLayerProperties> instance_layers()
 {
 	auto count = ::std::uint32_t{};
 	::check(::vkEnumerateInstanceLayerProperties(&count, nullptr), "failed to count instance layers");
@@ -80,7 +80,7 @@ inline auto instance_layers() -> ::std::vector<::VkLayerProperties>
 	return layers;
 }
 
-inline auto device_extensions(::VkPhysicalDevice device) -> ::std::vector<::VkExtensionProperties>
+inline ::std::vector<::VkExtensionProperties> device_extensions(::VkPhysicalDevice device)
 {
 	auto count = ::std::uint32_t{};
 	::check(::vkEnumerateDeviceExtensionProperties(device, nullptr, &count, nullptr), "failed to count device extensions");
@@ -90,11 +90,7 @@ inline auto device_extensions(::VkPhysicalDevice device) -> ::std::vector<::VkEx
 	return extensions;
 }
 
-inline VKAPI_ATTR auto VKAPI_CALL report_debug_message(
-	::VkDebugUtilsMessageSeverityFlagBitsEXT,
-	::VkDebugUtilsMessageTypeFlagsEXT,
-	::VkDebugUtilsMessengerCallbackDataEXT const* data,
-	void*) -> ::VkBool32
+inline VKAPI_ATTR ::VkBool32 VKAPI_CALL report_debug_message(::VkDebugUtilsMessageSeverityFlagBitsEXT, ::VkDebugUtilsMessageTypeFlagsEXT, ::VkDebugUtilsMessengerCallbackDataEXT const* data, void*)
 {
 	if (data != nullptr && data->pMessage != nullptr)
 	{
@@ -133,7 +129,7 @@ inline auto create_instance(::std::vector<char const*> enabled_extensions)
 
 }
 
-inline auto create_debug_messenger(::VkInstance instance) -> ::vkkl::debug_utils_messenger
+inline ::vkkl::debug_utils_messenger create_debug_messenger(::VkInstance instance)
 {
 	if (!::has_layer(::instance_layers(), ::vkfu::layer::khronos_validation))
 		return {};
@@ -151,7 +147,7 @@ struct device_selection
 	bool discrete;
 };
 
-inline auto select_physical_device(::VkInstance instance, ::VkSurfaceKHR surface) -> device_selection
+inline device_selection select_physical_device(::VkInstance instance, ::VkSurfaceKHR surface)
 {
 	auto device_count = ::std::uint32_t{};
 	::check(::vkEnumeratePhysicalDevices(instance, &device_count, nullptr), "failed to count physical devices");
@@ -215,7 +211,7 @@ inline auto select_physical_device(::VkInstance instance, ::VkSurfaceKHR surface
 	return *best;
 }
 
-inline auto create_device(device_selection const& selected) -> ::vkkl::device
+inline ::vkkl::device create_device(device_selection const& selected)
 {
 	namespace param = ::vkfu::param;
 
@@ -251,7 +247,7 @@ inline auto create_device(device_selection const& selected) -> ::vkkl::device
 }
 
 
-inline auto get_queue(::VkDevice device, ::std::uint32_t family) noexcept -> ::VkQueue
+inline ::VkQueue get_queue(::VkDevice device, ::std::uint32_t family) noexcept
 {
 	auto queue = ::VkQueue{};
 	::vkGetDeviceQueue(device, family, 0, &queue);
@@ -326,7 +322,7 @@ inline ::vkfu::param::khr::swapchain make_swapchain_info(
 }
 
 
-inline auto get_swapchain_images(::VkDevice device, ::VkSwapchainKHR swapchain) -> ::std::vector<::VkImage>
+inline ::std::vector<::VkImage> get_swapchain_images(::VkDevice device, ::VkSwapchainKHR swapchain)
 {
 	for (;;)
 	{
@@ -342,10 +338,7 @@ inline auto get_swapchain_images(::VkDevice device, ::VkSwapchainKHR swapchain) 
 	}
 }
 
-inline auto create_swapchain_image_views(
-	::VkDevice device,
-	::std::span<::VkImage const> images,
-	::vkfu::enums::format format) -> ::std::vector<::vkkl::image_view>
+inline ::std::vector<::vkkl::image_view> create_swapchain_image_views( ::VkDevice device, ::std::span<::VkImage const> images, ::vkfu::enums::format format)
 {
 	auto views = ::std::vector<::vkkl::image_view>{};
 	views.reserve(images.size());
@@ -437,9 +430,38 @@ renderer::renderer(window const& target)
 	: _impl(::std::make_unique<impl>(target))
 {}
 
-renderer::~renderer() = default;
+renderer::~renderer()
+{
+	if (_impl)
+		::vkDeviceWaitIdle(_impl->device.handle);
+}
 renderer::renderer(renderer&&) noexcept = default;
 renderer& renderer::operator=(renderer&&) noexcept = default;
+
+::VkDevice renderer::device() const noexcept { return _impl->device.handle; }
+::VkPhysicalDevice renderer::physical_device() const noexcept { return _impl->physical_device.handle; }
+::VkQueue renderer::graphics_queue() const noexcept { return _impl->graphic_queue; }
+::std::uint32_t renderer::graphics_queue_family() const noexcept { return _impl->graphics_queue_family; }
+::VkFormat renderer::format() const noexcept { return static_cast<::VkFormat>(_impl->swapchain_info.image_format); }
+::VkExtent2D renderer::extent() const noexcept { return _impl->swapchain_extent; }
+
+void renderer::resize()
+{
+	::check(::vkDeviceWaitIdle(_impl->device.handle), "wait before swapchain resize");
+	auto info = ::make_swapchain_info(_impl->physical_device.handle, _impl->surface.handle, _impl->target, _impl->queue_families);
+	info.old_swapchain = _impl->swapchain.handle;
+	if (info.image_format != _impl->swapchain_info.image_format)
+		throw ::std::runtime_error{ "surface format changed; scene pipelines must be recreated" };
+	auto replacement = ::vkkl::swapchain{ _impl->device.handle, ::vkfu::khr::create_swapchain(_impl->device.handle, info) };
+	auto images = ::get_swapchain_images(_impl->device.handle, replacement.handle);
+	auto views = ::create_swapchain_image_views(_impl->device.handle, images, info.image_format);
+	_impl->swapchain_image_views.clear();
+	_impl->swapchain = ::std::move(replacement);
+	_impl->swapchain_images = ::std::move(images);
+	_impl->swapchain_image_views = ::std::move(views);
+	_impl->swapchain_info = info;
+	_impl->swapchain_extent = info.image_extent;
+}
 
 values_sender_type<renderer::frame_pool::lease> renderer::acquire_frame() const
 {
@@ -452,13 +474,13 @@ values_sender_type<image_acquisition> renderer::acquire_image(frame const& frame
 		::stdexec::just()
 		| ::stdexec::then([&]
 			{
-				auto index = ::vkfu::khr::acquire_next_image2(_impl->device.handle, ::vkfu::param::khr::acquire_next_image{
-					.swapchain = _impl->swapchain.handle,
-					.timeout = (::std::numeric_limits<::std::uint64_t>::max)(),
-					.semaphore = frame.image_available.handle,
-					.fence = VK_NULL_HANDLE,
-					.device_mask = 1,
-					});
+				auto index = ::std::uint32_t{};
+				auto const result = ::vkAcquireNextImageKHR(_impl->device.handle, _impl->swapchain.handle,
+					(::std::numeric_limits<::std::uint64_t>::max)(), frame.image_available.handle, VK_NULL_HANDLE, &index);
+				if (result == VK_ERROR_OUT_OF_DATE_KHR)
+					throw surface_changed{};
+				if (result != VK_SUBOPTIMAL_KHR)
+					::check(result, "acquire swapchain image");
 				return image_acquisition{
 					.index = index,
 					.semaphore = frame.image_available.handle,
@@ -473,9 +495,9 @@ values_sender_type<> renderer::render(frame const& frame, image_acquisition cons
 {
 	return {
 		::stdexec::just()
-		| ::stdexec::then([&]
+		| ::stdexec::then([this, &frame, &acquisition, commands]
 			{
-				::vkResetCommandPool(_impl->device.handle, frame.primary_command_pool.handle, 0);
+				::vkfu::reset_command_pool(_impl->device.handle, frame.primary_command_pool.handle, {});
 				::vkfu::begin_command_buffer(frame.primary_command_buffer.handle, ::vkfu::param::command_buffer_begin{ .flags = {.one_time_submit = 1}, });
 				::vkfu::cmd_pipeline_barrier2(frame.primary_command_buffer.handle, ::vkfu::param::dependency{ .image_memory_barriers = ::std::array{ ::vkfu::evaluate(::vkfu::param::image_memory_barrier2{
 					.dst_stage_mask = {.color_attachment_output = 1},
@@ -525,22 +547,24 @@ values_sender_type<> renderer::render(frame const& frame, image_acquisition cons
 						.layer_count = 1,
 					},
 					})}, });
-				::vkEndCommandBuffer(frame.primary_command_buffer.handle);
+				::vkfu::end_command_buffer(frame.primary_command_buffer.handle);
 
 				::vkfu::queue_submit2(_impl->graphic_queue, ::std::array{ ::vkfu::evaluate(::vkfu::param::submit2{
 					.wait_semaphore_infos = ::std::array{ ::vkfu::evaluate(::vkfu::param::semaphore_submit{.semaphore = frame.image_available.handle, .stage_mask = {.color_attachment_output = 1}, })},
 					.command_buffer_infos = ::std::array{ ::vkfu::evaluate(::vkfu::param::command_buffer_submit{.command_buffer = frame.primary_command_buffer.handle, }) },
 					.signal_semaphore_infos = ::std::array{ ::vkfu::evaluate(::vkfu::param::semaphore_submit{.semaphore = frame.render_finished.handle, .stage_mask = {.all_commands = 1}, }) },
 					}) }, frame.in_flight.handle);
-				::vkfu::khr::queue_present(_impl->present_queue, ::vkfu::param::khr::present{
-						.wait_semaphores = ::std::array{ frame.render_finished.handle },
-						.swapchain_count = 1,
-						.swapchains = &_impl->swapchain.handle,
-						.image_indices = &acquisition.index,
-					});
+				auto const present_waits = ::std::array{ frame.render_finished.handle };
+				auto const present_info = ::vkfu::evaluate(::vkfu::param::khr::present{
+					.wait_semaphores = present_waits,
+					.swapchain_count = 1, .swapchains = &_impl->swapchain.handle, .image_indices = &acquisition.index });
+				auto const presented = ::vkQueuePresentKHR(_impl->present_queue, &present_info);
 				::vkfu::wait_for_fences(_impl->device.handle, ::std::array{ frame.in_flight.handle }, VK_TRUE, (::std::numeric_limits<::std::uint64_t>::max)());
 				::vkfu::reset_fences(_impl->device.handle, ::std::array{ frame.in_flight.handle });
 				::vkfu::queue_wait_idle(_impl->present_queue);
+				if (presented == VK_ERROR_OUT_OF_DATE_KHR || presented == VK_SUBOPTIMAL_KHR)
+					throw surface_changed{};
+				::check(presented, "present swapchain image");
 			})
 	};
 }

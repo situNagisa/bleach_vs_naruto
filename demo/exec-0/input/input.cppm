@@ -7,6 +7,7 @@ import demo.window;
 export
 enum class key_code : ::std::uint8_t
 {
+	quit,
 	up,
 	down,
 	left,
@@ -18,13 +19,13 @@ enum class key_code : ::std::uint8_t
 	e,
 	f,
 	g,
+	confirm,
 	_max,
 };
 
 export
 struct key_status
 {
-	// Held state and press edge relative to the last consumed snapshot.
 	bool active : 1;
 	bool signal : 1;
 };
@@ -34,8 +35,7 @@ export struct input
 	struct state_type
 	{
 		::std::array<key_status, ::std::to_underlying(key_code::_max)> _status{};
-		// 本次轮询期间窗口收到了关闭请求。
-		bool _quit = false;
+		bool close_requested = false;
 
 		[[nodiscard]] constexpr key_status const& operator[](key_code key) const noexcept
 		{

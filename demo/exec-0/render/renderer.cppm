@@ -22,6 +22,8 @@ struct image_acquisition
 // frame 的定义只存在于 renderer.cpp（实现单元）；接口只把它当作租约令牌的指针目标。
 export struct frame;
 
+export struct surface_changed {};
+
 export
 struct renderer
 {
@@ -32,6 +34,13 @@ struct renderer
 	~renderer();
 	renderer(renderer&&) noexcept;
 	renderer& operator=(renderer&&) noexcept;
+	[[nodiscard]] ::VkDevice device() const noexcept;
+	[[nodiscard]] ::VkPhysicalDevice physical_device() const noexcept;
+	[[nodiscard]] ::VkQueue graphics_queue() const noexcept;
+	[[nodiscard]] ::std::uint32_t graphics_queue_family() const noexcept;
+	[[nodiscard]] ::VkFormat format() const noexcept;
+	[[nodiscard]] ::VkExtent2D extent() const noexcept;
+	void resize();
 
 	values_sender_type<frame_pool::lease> acquire_frame() const;
 	values_sender_type<image_acquisition> acquire_image(frame const&) const;
