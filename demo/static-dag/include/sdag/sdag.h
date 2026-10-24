@@ -10,48 +10,82 @@
 ///   static_assert(::stdexec::sender<decltype(g)>);
 ///   auto [sum] = ::stdexec::sync_wait(::std::move(g)).value();   // 4
 ///
-/// 图本身是一个以 dag_t 为标签、可按 [tag, data, child...] 结构化绑定的 sender，子 sender 就是各节点。
-/// 默认连接走 0 开销的融合 op-state；所在 domain 定制了 when_all 时自动降解为 when_all / split / let_value
-/// 组合交给 domain；composed<FanIn, FanOut> 策略则无条件降解，作为语义参照与可配置入口。
+/// 目录对应概念模型的分组，文件对应模块（依赖从上往下，下层不认识上层）：
 ///
-/// 模块（依赖从底到顶，下层不认识上层）：
-///   config.h, fwd.h   编译开关与打断头文件环的前向声明
-///   meta_program/     与 sdag 无关的元编程：type_list 与其上的元函数、indexed_tuple、小工具
-///   concurrency/      与 stdexec 打交道的通用部分：完成签名的读取、stdexec 内部接口的桥、constant_sender
-///   graph/            图本身：节点（node）、形状（shape）、类型级查询（traits）、编译期分析（analyze/）
-///   execution/        图怎么作为 sender 执行：图 sender、输入 sender 与整图状态、属性、融合 op-state、降解
-///   dag.h             入口：dag_t、fused / composed 策略、dag()
+///   general/     通用，与图无关
+///     type_list.h            类型列表：一组类型怎么查、去重、拼接、映射
+///     sequence.h             编译期序列：一串编译期整数怎么展开成逐项调用 / 参数包
+///     tuple.h                不可移动元组：按序存放、就地构造不可移动对象、空元素 0 字节
+///     digraph.h              有向无环图：拓扑序、入出度、根与汇点、成环检查
+///     cvref.h                cv/引用转抄：让一个类型带上另一个类型的 const 与值类别
+///     signatures.h           完成签名：怎么拆开 / 拼装一组完成签名
+///     domain_merge.h         domain 合并：一组 domain 合成哪一个
+///     domain_custom.h        domain 改写：某个 domain 在某个阶段会不会改写某个 sender
+///   stdexec/     对 stdexec 的适配
+///     expressions.h          sender 表达式：拆开 / 重建 stdexec 的算法 sender
+///     dependent.h            依赖型报错：「没有环境，算不出签名」怎么向 stdexec 报告
+///   node/        节点
+///     node.h                 节点：一个节点是什么：键 + 依赖声明 + 载荷
+///     node_graph.h           节点集合成图：一组节点的键与依赖 → 一张有向无环图，以及键相关的错误诊断
+///   protocol/    节点与图之间的约定
+///     value_source.h         取值源协议：节点到哪里取前驱的值：环境里的句柄 + 两个接口（算签名、交付值）
+///     hole.h                 前驱占位符：节点 sender 里「这里是前驱的值」的标记，以及找它、数它、换掉它
+///     node_env.h             节点运行环境：节点看到的环境：取值源句柄 + 可选停止令牌 + 外层转发
+///     node_sender.h          节点变 sender：把占位符喂给节点载荷得到节点 sender，并检查占位符恰好用一次
+///   graph/       图
+///     description.h          图的描述：纯数据：有哪些节点、谁依赖谁；tuple-like 协议（对算法标签泛型）
+///     readers.h              值的读者：谁读谁的值 → 每个值是共享还是独占
+///     node_signature.h       节点的签名：第 I 个节点在某个环境下的完成签名（只是对节点 sender 的一次查询）
+///     analysis.h             节点完成分析：每个节点可能怎么完成：有值 / 有错误 / 会停止，各是什么类型
+///     storage_plan.h         存储计划：哪些值要存进整图、存的时候会不会抛、唯一汇点是否直接转发
+///     pred_sigs.h            前驱的签名：占位符的签名 = 前驱节点的值签名（共享的给 const&）；实现取值源的「签名接口」
+///     visibility.h           节点所见环境：节点实际看到哪个环境（要不要自带停止令牌），以及各节点签名在其中是否都合法
+///     slots.h                值槽与交付：前驱的值存哪里、怎么按序交给读者；实现取值源的「交付接口」
+///     completions.h          图的完成签名：在给定外层环境下，整张图的值 / 错误类型与完成签名（节点不合法时原样透传）
+///     node_domain.h          节点的完成域：一个节点在某个环境下的值完成域，以及一组节点的公共值完成域
+///     attributes.h           图的属性：图的完成域与完成行为（值完成在汇点，失败可能来自任一节点）
+///   execution/   怎么执行
+///     completion_state.h     完成状态机：运行中 / 错误 / 停止；第一个错误胜出；外层停止请求怎么传
+///     fused.h                融合执行：整张图作为一个 operation state 怎么调度：根、后继、入度计数、汇点
+///     lowering.h             降解：把图改写成 when_all / split / let_value
+///     lowering_policy.h      是否降解：当前 domain 会不会改写降解后的 when_all
+///   assembly/    拼装与入口
+///     graph_sender.h         图 sender：把 描述 + 完成签名 + 属性 + 执行 拼成一个 stdexec sender；并保证取值源的两个接口都有实现者
+///     dag.h                  公开入口：dag / fused / composed；定义算法标签 dag_t 及其 transform_sender
 ///
-/// meta_program / concurrency / graph/analyze 下每个文件都有反射与模板两种实现，用 SDAG_REFLECTION 隔开。
+/// 有反射与模板两种实现的文件，用 SDAG_REFLECTION 隔开（见 config.h）。
 
 #include "config.h"
-#include "fwd.h"
-#include "meta_program/type_list.h"
-#include "meta_program/utility.h"
-#include "meta_program/indexed_tuple.h"
-#include "meta_program/index_of.h"
-#include "meta_program/concat.h"
-#include "meta_program/unique.h"
-#include "meta_program/transform.h"
-#include "meta_program/rebind.h"
-#include "meta_program/dependency_indices.h"
-#include "meta_program/sequence.h"
-#include "meta_program/for_each_value.h"
-#include "concurrency/stdexec_bridge.h"
-#include "concurrency/completion_signatures.h"
-#include "concurrency/constant_sender.h"
-#include "graph/node.h"
-#include "graph/shape.h"
-#include "graph/traits.h"
-#include "graph/analyze/sender_expression.h"
-#include "graph/analyze/consumers.h"
-#include "graph/analyze/graph_analysis.h"
-#include "graph/analyze/input_completions.h"
-#include "graph/analyze/lowered.h"
-#include "graph/analyze/common_domain.h"
-#include "execution/graph_sender.h"
-#include "execution/node_input.h"
-#include "execution/attributes.h"
+#include "general/type_list.h"
+#include "general/sequence.h"
+#include "general/tuple.h"
+#include "general/digraph.h"
+#include "general/cvref.h"
+#include "general/signatures.h"
+#include "general/domain_merge.h"
+#include "general/domain_custom.h"
+#include "stdexec/expressions.h"
+#include "stdexec/dependent.h"
+#include "node/node.h"
+#include "node/node_graph.h"
+#include "protocol/value_source.h"
+#include "protocol/hole.h"
+#include "protocol/node_env.h"
+#include "protocol/node_sender.h"
+#include "graph/description.h"
+#include "graph/readers.h"
+#include "graph/node_signature.h"
+#include "graph/analysis.h"
+#include "graph/storage_plan.h"
+#include "graph/pred_sigs.h"
+#include "graph/visibility.h"
+#include "graph/slots.h"
+#include "graph/completions.h"
+#include "graph/node_domain.h"
+#include "graph/attributes.h"
+#include "execution/completion_state.h"
 #include "execution/fused.h"
 #include "execution/lowering.h"
-#include "dag.h"
+#include "execution/lowering_policy.h"
+#include "assembly/graph_sender.h"
+#include "assembly/dag.h"

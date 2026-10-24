@@ -1,7 +1,7 @@
 # 公共编译设置目标 sdag_build_settings，以及反射开关。
 #
 # SDAG_REFLECTION（ON / OFF）：编译期计算用 C++26 静态反射。目前只有 GCC >= 16 的 -freflection 实现了它，
-# 所以默认只在 GCC 上打开；Clang 上打开会直接报错。关掉时走 include/sdag/compute/templates/ 的模板实现。
+# 所以默认只在 GCC 上打开；Clang 上打开会直接报错。关掉时走各头文件里 #else 分支的模板实现。
 # 头文件会按编译器是否真的打开了反射自动选择（include/sdag/config.h），这里只决定加不加 -freflection。
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(_sdag_reflection_default ON)

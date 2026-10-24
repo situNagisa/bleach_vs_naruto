@@ -317,12 +317,12 @@ static_assert(!::sdag::graph_policy_for<int, root, inc>);
 using n_a = ::sdag::node<a, ::sdag::after<>, int>;
 using n_b = ::sdag::node<b, ::sdag::after<a>, int>;
 using n_c = ::sdag::node<c, ::sdag::after<a, b>, int>;
-static_assert(::sdag::shape_of<n_a, n_b, n_c>().error == ::sdag::shape_error::none);
-static_assert(::sdag::shape_of<n_a, n_a>().error == ::sdag::shape_error::duplicate_key);
-static_assert(::sdag::shape_of<n_b>().error == ::sdag::shape_error::unknown_dependency);
-static_assert(::sdag::shape_of<::sdag::node<a, ::sdag::after<a>, int>>().error == ::sdag::shape_error::self_dependency);
-static_assert(::sdag::shape_of<n_a, ::sdag::node<b, ::sdag::after<a, a>, int>>().error == ::sdag::shape_error::duplicate_dependency);
-static_assert(::sdag::shape_of<::sdag::node<a, ::sdag::after<b>, int>, ::sdag::node<b, ::sdag::after<a>, int>>().error == ::sdag::shape_error::cycle);
+static_assert(::sdag::shape_of<n_a, n_b, n_c>().error == ::sdag::general::shape_error::none);
+static_assert(::sdag::shape_of<n_a, n_a>().error == ::sdag::general::shape_error::duplicate_key);
+static_assert(::sdag::shape_of<n_b>().error == ::sdag::general::shape_error::unknown_dependency);
+static_assert(::sdag::shape_of<::sdag::node<a, ::sdag::after<a>, int>>().error == ::sdag::general::shape_error::self_dependency);
+static_assert(::sdag::shape_of<n_a, ::sdag::node<b, ::sdag::after<a, a>, int>>().error == ::sdag::general::shape_error::duplicate_dependency);
+static_assert(::sdag::shape_of<::sdag::node<a, ::sdag::after<b>, int>, ::sdag::node<b, ::sdag::after<a>, int>>().error == ::sdag::general::shape_error::cycle);
 
 // 拓扑序：声明顺序 c, a, b（c 依赖 a、b）-> 顺序 a, b, c
 constexpr auto shape = ::sdag::shape_of<n_c, n_a, n_b>();
@@ -358,7 +358,7 @@ static_assert(!::stdexec::sender_in<scheduler_dag, ::stdexec::env<>>, "env<> 里
 // 属性查询与降解判据这两条实例化路径同样不能硬错误：完成域退回默认 domain，不降解
 static_assert(::std::same_as<decltype(::stdexec::get_completion_domain<::stdexec::set_value_t>(::stdexec::get_env(::std::declval<scheduler_dag&>()), ::stdexec::env<>{})),
 	::stdexec::default_domain>);
-static_assert(!::sdag::graph_detail::lowering_wanted<::stdexec::start_t, scheduler_dag&&, ::stdexec::env<>>());
+static_assert(!::sdag::execution::lowering_wanted<::stdexec::start_t, ::sdag::graph::graph_state, scheduler_dag&&, ::stdexec::env<>>());
 
 // 空图：立即以 set_value() 完成
 static_assert(::std::same_as<::stdexec::completion_signatures_of_t<::sdag::dag_sender<::sdag::fused>, ::stdexec::env<>>,
@@ -843,10 +843,10 @@ void test_ecosystem()
 
 	// 没有 domain：连接结果是融合 op-state
 	static_assert(::std::same_as<::stdexec::connect_result_t<graph, probe_receiver>,
-		::sdag::fused_detail::fused_operation<graph&&, probe_receiver>>);
+		::sdag::execution::fused_operation<graph&&, probe_receiver>>);
 	// mock_domain：连接结果不是融合 op-state，而是降解后的标准算法树
 	static_assert(!::std::same_as<::stdexec::connect_result_t<graph, domain_receiver>,
-		::sdag::fused_detail::fused_operation<graph&&, domain_receiver>>);
+		::sdag::execution::fused_operation<graph&&, domain_receiver>>);
 
 	custom_when_all_uses = 0;
 	{
@@ -884,7 +884,7 @@ void test_ecosystem()
 		static_assert(!::std::same_as<graph_domain, ::stdexec::default_domain>, "线程池有自己的 domain");
 		// 线程池的 domain 不定制 when_all：仍然走融合
 		static_assert(::std::same_as<::stdexec::connect_result_t<decltype(on_pool), probe_receiver>,
-			::sdag::fused_detail::fused_operation<decltype(on_pool)&&, probe_receiver>>);
+			::sdag::execution::fused_operation<decltype(on_pool)&&, probe_receiver>>);
 		auto [value] = ::stdexec::sync_wait(::std::move(on_pool)).value();
 		test::check(value == 2, "线程池上的图照常完成");
 	}

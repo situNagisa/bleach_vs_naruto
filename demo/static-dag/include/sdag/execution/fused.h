@@ -3,7 +3,7 @@
 /// 融合 op-state：图 sender 默认的连接结果，整张图连接后就是一个 operation state。
 ///
 /// 布局（fused_operation 从上往下继承）：
-///   graph_state     节点的值槽（node_input.h）。节点环境里只暴露这一层。
+///   graph_state     节点的值槽（graph/slots.h），也是这张图的取值源。节点环境里只暴露这一层。
 ///   fused_core      调度状态与逻辑：外层接收者、入度计数、汇点计数，以及（需要时）状态字、停止源、错误槽。
 ///   fused_operation 各节点的 op-state。节点接收者只指向 fused_core，所以接收者的类型在节点 op-state 的类型
 ///                   算出来之前就是完整的——否则"节点 op-state 依赖接收者、接收者依赖 op-state"会成环。
@@ -42,41 +42,23 @@
 
 #include <stdexec/execution.hpp>
 
-#include "../meta_program/type_list.h"
-#include "../meta_program/utility.h"
-#include "../meta_program/indexed_tuple.h"
-#include "../fwd.h"
-#include "../graph/shape.h"
-#include "../graph/traits.h"
-#include "../execution/node_input.h"
-#include "../meta_program/index_of.h"
-#include "../meta_program/concat.h"
-#include "../meta_program/rebind.h"
-#include "../meta_program/for_each_value.h"
-#include "../graph/analyze/graph_analysis.h"
+#include "../config.h"
+#include "../general/type_list.h"
+#include "../general/tuple.h"
+#include "../general/sequence.h"
+#include "../general/digraph.h"
+#include "../graph/description.h"
+#include "../graph/analysis.h"
+#include "../graph/storage_plan.h"
+#include "../graph/completions.h"
+#include "../graph/slots.h"
+#include "../graph/visibility.h"
+#include "completion_state.h"
 
-namespace sdag::fused_detail
+namespace sdag::execution
 {
 
 using ::std::size_t;
-
-template<size_t Initial>
-struct counter
-{
-	::std::atomic<size_t> value{Initial};
-};
-
-enum class state_kind : unsigned char
-{
-	running,
-	error,
-	stopped,
-};
-
-struct state_cell
-{
-	::std::atomic<state_kind> value{state_kind::running};
-};
 
 /// 入度 > 1 的节点一个倒计数（初值是入度），其余节点 0 字节。
 template<auto Shape, class Indices = ::std::make_index_sequence<Shape.count>>
@@ -85,7 +67,7 @@ struct pending;
 template<auto Shape, size_t... I>
 struct pending<Shape, ::std::index_sequence<I...>>
 {
-	using type = meta::indexed_tuple<::std::conditional_t<(Shape.in_degree[I] > 1), counter<Shape.in_degree[I]>, meta::empty>...>;
+	using type = general::indexed_tuple<::std::conditional_t<(Shape.in_degree[I] > 1), counter<Shape.in_degree[I]>, general::empty>...>;
 };
 
 /// 节点 I 的接收者：把完成转给 fused_core，环境是节点环境。
@@ -119,13 +101,19 @@ struct node_receiver
 	}
 };
 
+/// fused_core 要把自己 static_cast 成完整的 op-state 才能启动节点 op-state；完整类型在本文件末尾定义。
 template<class Self, class Receiver>
-struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver>>
+struct fused_operation;
+
+template<class Self, class Receiver>
+struct fused_core : graph::graph_state<Self, ::stdexec::env_of_t<Receiver>>
 {
 	using env_type = ::stdexec::env_of_t<Receiver>;
-	using state_base = graph_detail::graph_state<Self, env_type>;
+	using state_base = graph::graph_state<Self, env_type>;
 	using node_env_type = typename state_base::env_type;
 	using analysis_type = typename state_base::analysis_type;
+	using plan_type = typename state_base::plan_type;
+	using completions_type = graph::graph_completions<Self, node_env_type>;
 	using operation_type = fused_operation<Self, Receiver>;
 
 	static constexpr auto shape = state_base::shape;
@@ -135,15 +123,15 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 
 	/// 有节点可能失败 / 停止 / 存值时抛异常：需要状态字与停止源。
 	static constexpr bool stoppable = state_base::stoppable;
-	static constexpr bool sends_stopped = analysis_type::sends_stopped;
+	static constexpr bool sends_stopped = analysis_type::any_stopped;
 	/// 只有一个汇点：它的值不存槽位，在 node_set_value 里直接转发给外层接收者。
-	static constexpr bool direct_sink = analysis_type::direct_sink;
-	static constexpr size_t sink_index = analysis_type::sink_index;
+	static constexpr bool direct_sink = plan_type::direct_sink;
+	static constexpr size_t sink_index = plan_type::sink_index;
 
-	using error_types = typename analysis_type::error_types;
+	using error_types = typename completions_type::error_types;
 	static constexpr bool has_errors = error_types::size != 0;
 	/// std::variant<std::monostate, 错误类型...>。错误类型本身也可能是 std::monostate，所以一律按下标访问：错误 k 在第 k + 1 位。
-	using error_variant = meta::rebind_t<::std::variant, meta::concat_t<meta::type_list<::std::monostate>, error_types>>;
+	using error_variant = error_variant_t<error_types>;
 
 	/// 外层停止令牌上挂的回调：把外层的停止请求转进整图。
 	struct forward_stop
@@ -171,12 +159,12 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 	struct sinks_tag;
 
 	Receiver _receiver;
-	SDAG_NO_UNIQUE_ADDRESS ::std::conditional_t<stoppable, state_cell, meta::empty_for<state_tag>> _state{};
-	SDAG_NO_UNIQUE_ADDRESS ::std::conditional_t<stoppable, ::stdexec::inplace_stop_source, meta::empty_for<stop_source_tag>> _stop_source{};
-	SDAG_NO_UNIQUE_ADDRESS ::std::conditional_t<needs_callback, ::std::optional<stop_callback_t>, meta::empty_for<on_stop_tag>> _on_stop{};
-	SDAG_NO_UNIQUE_ADDRESS ::std::conditional_t<stoppable && has_errors, error_variant, meta::empty_for<error_tag>> _error{};
+	SDAG_NO_UNIQUE_ADDRESS ::std::conditional_t<stoppable, state_cell, general::empty_for<state_tag>> _state{};
+	SDAG_NO_UNIQUE_ADDRESS ::std::conditional_t<stoppable, ::stdexec::inplace_stop_source, general::empty_for<stop_source_tag>> _stop_source{};
+	SDAG_NO_UNIQUE_ADDRESS ::std::conditional_t<needs_callback, ::std::optional<stop_callback_t>, general::empty_for<on_stop_tag>> _on_stop{};
+	SDAG_NO_UNIQUE_ADDRESS ::std::conditional_t<stoppable && has_errors, error_variant, general::empty_for<error_tag>> _error{};
 	SDAG_NO_UNIQUE_ADDRESS typename pending<shape>::type _pending{};
-	SDAG_NO_UNIQUE_ADDRESS ::std::conditional_t<(sink_count > 1), counter<sink_count>, meta::empty_for<sinks_tag>> _sinks{};
+	SDAG_NO_UNIQUE_ADDRESS ::std::conditional_t<(sink_count > 1), counter<sink_count>, general::empty_for<sinks_tag>> _sinks{};
 
 	constexpr explicit fused_core(Receiver&& receiver) noexcept(::std::is_nothrow_move_constructible_v<Receiver>)
 		: _receiver(::std::move(receiver))
@@ -230,11 +218,11 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 			::stdexec::set_value(::std::move(_receiver), ::std::forward<Args>(args)...);
 			return;
 		}
-		else if constexpr (state_base::analysis_type::slot_needed[J])
+		else if constexpr (plan_type::slot_needed[J])
 		{
-			using tuple_type = meta::rebind_t<::std::tuple, typename analysis_type::template values_t<J>>;
+			using tuple_type = general::rebind_t<::std::tuple, typename analysis_type::template values_t<J>>;
 			static_assert(::std::is_constructible_v<tuple_type, Args&&...>, "sdag: 节点实际发出的值与它声明的完成签名不符");
-			auto& slot = meta::get<J>(this->_slots);
+			auto& slot = general::get<J>(this->_slots);
 			if constexpr (::std::is_nothrow_constructible_v<tuple_type, Args&&...>)
 			{
 				slot.emplace(::std::forward<Args>(args)...);
@@ -288,7 +276,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 	}
 
 	template<class Error>
-	static constexpr size_t error_alternative = meta::index_of_v<::std::decay_t<Error>, error_types> + 1;
+	static constexpr size_t error_alternative = general::index_of_v<::std::decay_t<Error>, error_types> + 1;
 
 	template<class Error>
 	constexpr void store_error(Error&& error) noexcept
@@ -325,7 +313,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 			// 通知后继可能启动它们，后继又可能同步完成整张图。但在通知完最后一个后继之前整图不可能结束：
 			// 每个后继都是某个汇点的祖先，还没被通知的后继所在的那条路还没走完。所以循环里一直可以碰 this，
 			// 最后一次通知之后不再碰。
-			meta::for_each_value<successors_v<shape, J>>([this]<size_t To>() noexcept
+			general::for_each_value<general::successors_v<shape, J>>([this]<size_t To>() noexcept
 			{
 				this->template notify_edge<J, To>();
 			});
@@ -339,7 +327,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 		{
 			launch<To>();
 		}
-		else if (meta::get<To>(_pending).value.fetch_sub(1, ::std::memory_order_acq_rel) == 1)
+		else if (general::get<To>(_pending).value.fetch_sub(1, ::std::memory_order_acq_rel) == 1)
 		{
 			// 最后一个到达的前驱启动它。acq_rel 让这个线程看得到其它前驱存进槽位的值。
 			launch<To>();
@@ -358,7 +346,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 				return;
 			}
 		}
-		::stdexec::start(meta::get<J>(static_cast<operation_type*>(this)->_operations));
+		::stdexec::start(general::get<J>(static_cast<operation_type*>(this)->_operations));
 	}
 
 	constexpr void sink_arrive() noexcept
@@ -427,7 +415,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 				break;
 			}
 		}
-		if constexpr (direct_sink || !analysis_type::has_values)
+		if constexpr (direct_sink || !analysis_type::all_have_values)
 		{
 			// 唯一汇点的值在 node_set_value 里已经直接转发了；没有值完成的图也不会以 running 状态走到这里。
 			::std::unreachable();
@@ -450,7 +438,7 @@ struct fused_core : graph_detail::graph_state<Self, ::stdexec::env_of_t<Receiver
 	}
 
 	/// 各汇点的值按声明顺序铺平，全部 move 给外层接收者。
-	static constexpr auto sink_table = graph_detail::delivery_plan<Self, node_env_type, sinks_v<shape>>(false);
+	static constexpr auto sink_table = graph::delivery_plan<Self, node_env_type, general::sinks_v<shape>>(false);
 
 	template<size_t... E>
 	constexpr void emit_values(::std::index_sequence<E...>) noexcept
@@ -471,19 +459,19 @@ struct fused_operation_impl<Self, Receiver, ::std::index_sequence<I...>> : fused
 	using node_receiver_t = node_receiver<core, J>;
 
 	template<size_t J>
-	using node_operation_t = ::stdexec::connect_result_t<graph_detail::node_sender_t<Self, J>, node_receiver_t<J>>;
+	using node_operation_t = ::stdexec::connect_result_t<graph::node_sender_t<Self, J>, node_receiver_t<J>>;
 
 	static constexpr bool nothrow_connect =
-		(noexcept(::stdexec::connect(::std::declval<graph_detail::node_sender_t<Self, I>>(), ::std::declval<node_receiver_t<I>>())) && ...);
+		(noexcept(::stdexec::connect(::std::declval<graph::node_sender_t<Self, I>>(), ::std::declval<node_receiver_t<I>>())) && ...);
 
 	/// 各节点的 op-state，由工厂直接构造在这里（op-state 不可移动）。
-	using operations_t = meta::indexed_tuple<node_operation_t<I>...>;
+	using operations_t = general::indexed_tuple<node_operation_t<I>...>;
 	operations_t _operations;
 
 	constexpr explicit fused_operation_impl(Self self, Receiver receiver)
 		noexcept(::std::is_nothrow_move_constructible_v<Receiver> && nothrow_connect)
 		: core(::std::move(receiver))
-		, _operations(meta::from_factory,
+		, _operations(general::from_factory,
 			[&]
 			{
 				// 每个工厂只从图 sender 里取自己那一个节点 sender（第 I + 2 个元素），右值 Self 也不会被重复移动。
@@ -504,7 +492,7 @@ struct fused_operation_impl<Self, Receiver, ::std::index_sequence<I...>> : fused
 			this->_on_stop.emplace(::stdexec::get_stop_token(::stdexec::get_env(this->_receiver)), typename core::forward_stop{this});
 		}
 		// 启动完最后一个根之前整图不可能结束：整图要等所有汇点，而还没启动的根下面的汇点还没到。
-		meta::for_each_value<roots_v<core::shape>>([this]<size_t Root>() noexcept
+		general::for_each_value<general::roots_v<core::shape>>([this]<size_t Root>() noexcept
 		{
 			this->template launch<Root>();
 		});
@@ -513,9 +501,9 @@ struct fused_operation_impl<Self, Receiver, ::std::index_sequence<I...>> : fused
 
 /// 整图 operation state。Self 是图 sender 的引用类型（G&& 或 G const&）。
 template<class Self, class Receiver>
-struct fused_operation : fused_operation_impl<Self, Receiver, ::std::make_index_sequence<graph_detail::count_of_v<Self>>>
+struct fused_operation : fused_operation_impl<Self, Receiver, ::std::make_index_sequence<graph::count_of_v<Self>>>
 {
-	using fused_operation_impl<Self, Receiver, ::std::make_index_sequence<graph_detail::count_of_v<Self>>>::fused_operation_impl;
+	using fused_operation_impl<Self, Receiver, ::std::make_index_sequence<graph::count_of_v<Self>>>::fused_operation_impl;
 };
 
 }

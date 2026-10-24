@@ -1,7 +1,7 @@
 # demo/static-dag：sdag —— 静态 DAG sender 模板库（header-only），完全独立于 bvn 主工程。
 #
 # 工具链：Clang >= 22 或 GCC >= 16，C++26，Ninja。编译期计算在支持静态反射的编译器上用反射（GCC 16 + -freflection），
-# 否则用模板元编程；两份实现在 include/sdag/compute/ 下，运行期代码共享。每个依赖 / 每类设置各占 cmake/ 下一个文件。
+# 否则用模板元编程；两份实现在同一文件里用 SDAG_REFLECTION 隔开，运行期代码共享。每个依赖 / 每类设置各占 cmake/ 下一个文件。
 cmake_minimum_required(VERSION 4.4)
 
 # MSVC 运行库选择（CMP0091）必须在 project() 之前；对 clang-cl 同样生效。

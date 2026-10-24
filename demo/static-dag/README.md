@@ -41,7 +41,7 @@ static_assert(::stdexec::sender<dag>);
 | 写法 | 含义 |
 | --- | --- |
 | `make_node<key>(sender)` | 根节点，直接启动 |
-| `make_node<key, after<a, b>>(adaptor)` | 数据依赖：`adaptor` 是 sender 适配器（`then(f)`、`let_value(f)`、`continues_on(sched) \| then(f)` ……），喂给它的输入 sender 完成值是 `(a 的值..., b 的值...)` |
+| `make_node<key, after<a, b>>(adaptor)` | 数据依赖：`adaptor` 是 sender 适配器（`then(f)`、`let_value(f)`、`continues_on(sched) \| then(f)` ……），喂给它的前驱占位符（hole）完成值是 `(a 的值..., b 的值...)` |
 | `make_node<key, after<a>>(sender)` | 控制依赖：只在 `a` 之后启动，不接收它的值 |
 
 `key` 只是编译期身份，任何类型都行；`after<...>` 里的顺序就是值的顺序。每个节点至多一种 `set_value` 完成（多种先 `into_variant`），这与 `when_all` 的要求一致。
@@ -62,17 +62,17 @@ static_assert(::stdexec::sender<dag>);
 
 ## 它在 stdexec 生态里的位置
 
-`dag(nodes...)` 返回 `::sdag::graph_sender<dag_data<键表, 依赖表>, 节点 sender...>`。它实现标准的 tuple-like 协议
+`dag(nodes...)` 返回 `::sdag::graph_sender<dag_t, graph::graph_data<键表, 依赖表>, 节点 sender...>`（数据与 tuple-like 协议在 `graph::graph_description`，sender 行为在 `graph_sender`）。它实现标准的 tuple-like 协议
 （`std::tuple_size` / `std::tuple_element` 特化 + 成员 `get<I>`），stdexec 靠结构化绑定认出它的标签，不依赖 stdexec 的内部类型：
 
-- 节点 sender 原样保留在 children 里：`then(f)` 节点是 `then(input_sender<after<...>>, f)`，`continues_on(sched) | then(f)` 节点也是对应的表达式树。它们连接时照常被所在 domain 变换——`then`、`bulk`、`continues_on` 这些标准算法吃到的定制一个不少。
+- 节点 sender 原样保留在 children 里：`then(f)` 节点是 `then(hole<after<...>>, f)`，`continues_on(sched) | then(f)` 节点也是对应的表达式树。它们连接时照常被所在 domain 变换——`then`、`bulk`、`continues_on` 这些标准算法吃到的定制一个不少。
 - `tag_of_t` / `exec::sender_for<G, dag_t>` / 子节点内省都成立；domain 可以像定制任何算法一样在 `transform_sender` 里匹配 `dag_t`。
 - 属性（`get_env(g)`）按 `when_all` 属性的同一套语义回答 `get_completion_domain<...>` 与完成行为：图在汇点完成的地方完成。
-- `input_sender<after<...>>` 是一个像 `read_env` 一样"依赖环境"的叶子 sender：完成签名来自接收者环境里的整图状态类型。所以图在无环境下是 dependent sender（`sender` 成立，`sender_in<G>` 不成立，`sender_in<G, env>` 成立）。
+- 前驱占位符 `protocol::hole<after<...>>` 是一个像 `read_env` 一样"依赖环境"的叶子 sender：它不认识图，只认识**取值源协议**（`protocol/value_source.h`）——接收者环境里的转发查询 `get_value_source` 给出一个取值源，签名问它的签名接口（`completions_for<Dependency, Env>`），启动时调它的交付接口（`deliver<Dependency>(receiver)`）。图这一侧由 `graph::graph_state` 实现这两个接口，于是"占位符 → 图"的环被打断。所以图在无环境下是 dependent sender（`sender` 成立，`sender_in<G>` 不成立，`sender_in<G, env>` 成立）。
 
 ### 默认连接：融合 op-state（0 开销）
 
-`__sexpr_impl<dag_t>::__connect` 返回一个把整张图融合在一起的 operation state：
+`graph_sender::connect` 返回一个把整张图融合在一起的 operation state：
 
 - 每个节点的 op-state 是整图 op-state 的直接成员（`connect` 的纯右值原地构造，没有移动）；
 - 节点的值存一份在整图里，后继按引用读 —— **扇出不需要 `split`**，因为整图拥有所有节点，不存在"谁最后释放"的问题；
@@ -93,12 +93,12 @@ static_assert(::stdexec::sender<dag>);
 ### 自动降解：让定制了 `when_all` 的 domain 接管
 
 `dag_t::transform_sender(OpTag, g, env)` 只在"这一阶段的 domain 会定制覆盖在汇点上的 `when_all`"时才存在
-（`start_t` 阶段看 `get_domain(env)`，`set_value_t` 阶段看图自己报告的完成域）。判据：把各汇点 sender 里的输入叶子换成
-一个"完成签名与真实输入一致"的占位 sender，拼成 `when_all<汇点...>` 做探针，用 `__default_domain_like` 看这个 domain 的
+（`start_t` 阶段看 `get_domain(env)`，`set_value_t` 阶段看图自己报告的完成域）。判据：把各汇点 sender 里的占位符换成
+一个"完成签名与真实占位符一致"的占位 sender，拼成 `when_all<汇点...>` 做探针，用 `general::customizes`（`general/domain_custom.h`）看这个 domain 的
 `transform_sender` 会不会改写它。存在时整图降解为：
 
 ```
-节点 sender = 原节点 sender，其中的 input_sender 叶子换成 fanin(前驱 1, 前驱 2, ...)
+节点 sender = 原节点 sender，其中的占位符换成 fanin(前驱 1, 前驱 2, ...)
 出度 > 1 的节点先经过 fanout，各后继拿到它的拷贝；出度 1 的节点直接 move 给后继
 只有控制依赖的节点 = let_value(fanin(前驱...), 常量 sender)
 整图 = fanin(汇点...)
@@ -114,7 +114,7 @@ static_assert(::stdexec::sender<dag>);
 它是语义参照（测试里两种路径互相对照），也是"扇入扇出可配置"的入口：`fanin` 要能接收 1 个或多个 sender（1 个时原样返回，`when_all` 正是这样），
 `fanout` 接收 1 个 sender 并返回可拷贝的 sender。注意 `when_all` 会把 `split` 给的 `const&` 再拷贝一份存进自己的 op-state，降解后的共享值到后继时是右值；融合路径没有这次拷贝。
 
-降解要求节点 sender 由 stdexec 的 sexpr 算法组成（`then`、`let_value`、`continues_on`……都是），这样才能把输入叶子替换进去；不透明的自定义 sender 包着输入时会有一条 `static_assert`。
+降解要求节点 sender 由 stdexec 的 sexpr 算法组成（`then`、`let_value`、`continues_on`……都是），这样才能把占位符替换进去；不透明的自定义 sender 包着占位符时会有一条 `static_assert`。
 
 ## 常量求值
 
@@ -142,38 +142,49 @@ static_assert(::stdexec::sender<dag>);
 ## 文件
 
 ```
-include/sdag/                    （按依赖从底到顶，下层不认识上层）
-  config.h, fwd.h   编译开关；打断头文件环的前向声明
-  meta_program/     与 sdag 无关的元编程
-    type_list.h         type_list、at_t
-    utility.h           被优化掉的成员的占位类型、copy_cvref_t、to_array
-    indexed_tuple.h     运行期容器：按工厂原地构造、空元素 0 字节
-    reflection.h        反射实现共用的基础
-    index_of.h  concat.h  unique.h  transform.h  rebind.h  dependency_indices.h  sequence.h  for_each_value.h
-  concurrency/      与 stdexec 打交道的通用部分
-    completion_signatures.h  is_stdexec_completion_signatures_v、completion_trait
-    stdexec_bridge.h         对 stdexec 内部实现（双下划线名字）的全部依赖，见下文
-    constant_sender.h        给 let_value 用的"忽略参数、交出存好的 sender"
-  graph/            图本身
-    node.h              节点：after<>、node<>、make_node、payload CPO 与 concept
-    shape.h             形状：邻接矩阵、入出度、拓扑序、错误诊断
-    traits.h            类型级查询：第 I 个节点是谁、依赖谁
-    analyze/            编译期分析
-      sender_expression.h  input_count_v、substituted_t（节点 sender 里的输入叶子）
-      consumers.h          consumes_input_v、consumer_counts_v、shared_v（谁读谁的值、共享还是独占）
-      completions.h        拼装完成签名（不导出）
-      graph_analysis.h     analysis<Self, Env>：整图分析
-      input_completions.h  input_completions_t：输入 sender 的签名
-      lowered.h            lowered<Self, FanIn, FanOut>：降解后各节点的类型
-      common_domain.h      common_domain_t、common_completion_domain_t
-  execution/        图怎么作为 sender 执行
-    graph_sender.h      图 sender 的类型与 tuple-like 协议
-    node_input.h        输入 sender、节点环境、整图状态（值槽与交付表）
-    attributes.h        图 sender 的完成签名、属性、降解判据
+include/sdag/                    （目录 = 概念分组，文件 = 模块；按依赖从底到顶，下层不认识上层）
+  config.h          编译开关
+  general/          通用，与图无关
+    type_list.h         类型列表（伞头）：type_list/ 下 type_list、reflection、index_of、concat、unique、transform、rebind
+    sequence.h          编译期序列：to_array、sequence_t、for_each_value
+    tuple.h             不可移动元组：indexed_tuple、按工厂原地构造、空元素 0 字节（empty / empty_for）
+    digraph.h           有向无环图：shape<N>（邻接、入出度、拓扑序）、shape_error、roots_v / sinks_v / successors_v
+    cvref.h             copy_cvref_t
+    signatures.h        完成签名（伞头）：signatures/inspect.h 拆开（completion_trait），signatures/build.h 拼装
+    domain_merge.h      common_domain_t：一组 domain 合成哪一个
+    domain_custom.h     phase_domain / customizes：某个 domain 在某个阶段会不会改写某个 sender
+  stdexec/          对 stdexec 的适配：对其内部实现（双下划线名字）的全部依赖，见下文
+    expressions.h       拆开 / 重建 stdexec 的算法 sender
+    dependent.h         依赖型报错
+  node/             节点
+    node.h              after<>、node<>、make_node、payload CPO 与 graph_node concept
+    node_graph.h        一组节点的键与依赖 → 有向无环图（key_indices_v、shape_of），以及键相关的错误诊断
+  protocol/         节点与图之间的约定
+    value_source.h      取值源协议：get_value_source 查询 + 签名接口 + 交付接口
+    hole.h              前驱占位符 hole<after<...>>，以及 hole_count_v / hole_filled_t / fill_hole
+    node_env.h          节点看到的环境：取值源句柄 + 可选停止令牌 + 外层转发
+    node_sender.h       把占位符喂给节点载荷得到节点 sender
+  graph/            图
+    description.h       图的描述：graph_data、graph_description（tuple-like，对算法标签泛型）与类型级查询
+    readers.h           谁读谁的值 → 共享还是独占
+    node_signature.h    第 I 个节点在某个环境下的完成签名
+    analysis.h          node_analysis：每个节点有值 / 错误 / 停止，各是什么类型
+    storage_plan.h      storage_plan：哪些值要存、存时会不会抛、唯一汇点直接转发
+    pred_sigs.h         前驱的签名：取值源的签名接口
+    visibility.h        节点实际看到的环境（要不要自带停止令牌）与合法性
+    slots.h             graph_state：值槽与交付表，取值源的交付接口
+    completions.h       整图的完成签名
+    node_domain.h       节点的完成域与公共完成域
+    attributes.h        图的属性：完成域与完成行为
+  execution/        怎么执行
+    completion_state.h  运行中 / 错误 / 停止状态机，第一个错误胜出
     fused.h             融合 op-state（默认连接）：调度算法与生命周期规则写在文件开头
-    lowering.h          降解成 when_all / split / let_value，以及 lower()
-  dag.h             入口：dag_t、fused / composed 策略、dag()
-  sdag.h            总头
+    lowering.h          降解成 when_all / split / let_value（含 constant_sender），以及 lower()
+    lowering_policy.h   是否降解：当前 domain 会不会改写降解后的 when_all
+  assembly/         拼装与入口
+    graph_sender.h      图 sender = 描述 + 完成签名 + 属性 + 执行
+    dag.h               入口：dag_t（含 transform_sender）、fused / composed 策略、dag()、lower
+  sdag.h            总头（列出全部模块）
 test/
   test.cpp           编译期 + 运行期测试（两种路径、错误 / 停止传播、线程池、48 节点长链、16 路扇入、梯子、宽 when_all、生态接入）
   zero_overhead.cpp  分配计数与 op-state 大小
@@ -186,14 +197,14 @@ test/
 `include/sdag/config.h` 自动探测：编译器定义了 `__cpp_impl_reflection` 且有 `<meta>` 时 `SDAG_REFLECTION = 1`，否则为 0；
 也可以用 `-DSDAG_REFLECTION=0/1` 强制。CMake 选项 `SDAG_REFLECTION`（GCC 上默认 ON）只决定加不加 `-freflection`。
 
-编译期计算在 `meta_program/`、`concurrency/`、`graph/analyze/` 三个目录下，每个文件对外只有一两个名字，两种实现写在同一个文件里，
+有两份编译期计算的文件（`grep -rln "#if SDAG_REFLECTION" include/sdag`：`general/` 的类型列表、序列、完成签名、domain 合并，`node/node_graph.h`，`protocol/hole.h`，`graph/` 的 analysis / pred_sigs / node_domain，`execution/lowering.h`），两种实现写在同一个文件里，
 用 `#if SDAG_REFLECTION` / `#else` 隔开，对外名字完全相同；跨文件复用的反射函数放在各模块的 `refl` 命名空间，
 其余实现细节放在 `detail`。两种模式生成的实体在不同的 inline namespace 里（`SDAG_ABI_NAMESPACE`），
 同一个程序混用两种模式编译的翻译单元时链接期就会报错，而不是静默的 ODR 违规。
 
 等所用的编译器都支持反射之后，删除模板版：
 
-1. 三个目录下每个文件删掉 `#else` 分支（`grep -rn "#if SDAG_REFLECTION" include/sdag`）；
+1. 这些文件删掉 `#else` 分支（`grep -rn "#if SDAG_REFLECTION" include/sdag`）；
 2. `config.h` 里 `SDAG_REFLECTION` 为 0 的分支改成 `#error`；
 3. CMake：`cmake/build_settings.cmake` 的 `SDAG_REFLECTION` 选项改为无条件 `-freflection`，`cmake/toolchain_guard.cmake` 按新的编译器下限调整，`CMakePresets.json` 删掉 `linux-gcc-templates-release`；
 4. README 里两份实现的对照表。
@@ -203,10 +214,10 @@ test/
 | 模板实现 | 反射实现 |
 | --- | --- |
 | `index_of` / `unique` / `concat` 递归偏特化 | 对 `std::vector<std::meta::info>` 的普通循环 |
-| `completion_signatures` 的 `classify<Sig>` 偏特化 + 折叠 | `summarize(^^Completions)`：遍历 `template_arguments_of`，按 `return_type_of` 分类 |
-| `analysis_impl<Self, index_sequence<I...>>` 里十几个折叠表达式 | `analyze<Self, Env...>()`：`template for` 按拓扑序逐节点取签名，填一个 `analysis_result<N>` 结构体 |
+| `completion_trait` 的偏特化 + 折叠 | `value_lists` / `error_types` / `sends_stopped(^^Completions)`：遍历 `template_arguments_of`，按 `return_type_of` 分类 |
+| `valid_node_analysis<Self, Env, index_sequence<I...>>` 里的折叠表达式 | `analyze_nodes<Self, Env>()`：`template for` 按拓扑序逐节点取签名，填一个 `node_analysis_result<N>` 结构体 |
 | `warm_up<Self, Step>` 基类链保证实例化顺序 | 不需要：`template for` 本身就按拓扑序实例化 |
-| `substituted<CvSender, Input>` 偏特化重建 sender 表达式 | `substituted(sender, input)`：递归 consteval 函数，`substitute(^^bridge::expression_t, {tag, data, children...})` |
+| `hole_filled<CvSender, Input>` 偏特化重建 sender 表达式 | `hole_filled(sender, input)`：递归 consteval 函数，`substitute(^^stdexec_adapter::expression_t, {tag, data, children...})` |
 | `sequence_of<Array>` 偏特化 | `substitute(^^index_sequence, reflect_constant(...)...)` |
 | `for_each_value` 用 `index_sequence` 折叠 | `template for (constexpr auto value : Array)` |
 | composed 里 `node_sender<I>` / `input<I, index_sequence>` 的类模板（编译器缓存结果） | `lower_types()` 按拓扑序一次填好 `lowered_tables` 查表 |
@@ -241,20 +252,20 @@ stdexec 的位置：`$NAGISA_LIBRARY_ROOT/stdexec`，或 `-DSDAG_STDEXEC_ROOT=..
 
 ## 实现要点与边界
 
-- **对 stdexec 内部实现的依赖只在 `concurrency/stdexec_bridge.h`**。其余代码只用公开接口：sender / receiver 协议、`completion_signatures`、查询（`get_domain`、`get_completion_domain`、`get_stop_token`……）、`when_all` / `split` / `let_value`、`exec::completion_behavior` 与 `exec::get_completion_behavior_t`、`exec::sender_for`、`exec::throw_compile_time_error`。桥接层里：
-  - **读**：stdexec 的算法 sender 的 `[tag, data, child...]`（`bridge::sender_expression`、`bridge::parts_t`、`bridge::apply`）。P2300 说 sender 表达式可以结构化绑定成这个形状，但 stdexec 的 `__tuple` 超过 8 个元素就不能结构化绑定（`when_all` 有 7 个子 sender 时就是这样），所以这里用它的内部别名 `__tag_t` / `__data_t` / `__children_t` 与 `__apply`。只认 stdexec 自己的算法 sender，自定义 sender 与 sdag 的图 sender 都被当作不透明的叶子。
+- **对 stdexec 内部实现的依赖只在 `stdexec/` 目录**（`expressions.h` 读写 sender 表达式，`dependent.h` 依赖型报错）。其余代码只用公开接口：sender / receiver 协议、`completion_signatures`、查询（`get_domain`、`get_completion_domain`、`get_stop_token`……）、`when_all` / `split` / `let_value`、`exec::completion_behavior` 与 `exec::get_completion_behavior_t`、`exec::sender_for`、`exec::throw_compile_time_error`。`stdexec/` 里（命名空间 `stdexec_adapter`）：
+  - **读**：stdexec 的算法 sender 的 `[tag, data, child...]`（`stdexec_adapter::sender_expression`、`stdexec_adapter::parts_t`、`stdexec_adapter::apply`）。P2300 说 sender 表达式可以结构化绑定成这个形状，但 stdexec 的 `__tuple` 超过 8 个元素就不能结构化绑定（`when_all` 有 7 个子 sender 时就是这样），所以这里用它的内部别名 `__tag_t` / `__data_t` / `__children_t` 与 `__apply`。只认 stdexec 自己的算法 sender，自定义 sender 与 sdag 的图 sender 都被当作不透明的叶子。
   - **写**（没有公开替代）：降解时重建 sender 表达式用 `::stdexec::__sexpr`（标准里对应的 make-sender 只是说明用的）；依赖型 sender 的报错用 `::stdexec::__throw_dependent_sender_error`（stdexec 按是否支持 constexpr 异常在"返回"与"抛出"之间切换）。
-  - stdexec 升级、或者标准给出公开接口时只改这一个文件。
+  - stdexec 升级、或者标准给出公开接口时只改这个目录。
   - 原来用到的 `__default_domain_like`、`__starting_domain_t`、`__completing_domain_t`、`__completion_domain_of_t`、`__common_domain_t`、`__get_completion_behavior`、`__copy_cvref_t`、`__get<I>`、`__sexpr_impl` 都已换成公开接口或自己的实现。
-- **编译期深度**。`then(f)` 问子 sender 的签名时，节点 N 的类型计算会嵌套进节点 N-1 的，长链会撞上编译器的模板深度上限。反射实现的 `analyze` 用 `template for`、模板实现的 `warm_up` 用基类链，都按拓扑序逐个取节点签名，前驱先实例化，后面的计算全部命中编译器缓存，嵌套深度变成常数。48 节点长链 + 16 路扇入 + 梯子的测试文件在本机编译约 25 s（g++）/ 45 s（clang） —— 这是实例化总量的代价，不是深度的。
+- **编译期深度**。`then(f)` 问子 sender 的签名时，节点 N 的类型计算会嵌套进节点 N-1 的，长链会撞上编译器的模板深度上限。反射实现的 `analyze_nodes` 用 `template for`、模板实现的 `warm_up` 用基类链，都按拓扑序逐个取节点签名，前驱先实例化，后面的计算全部命中编译器缓存，嵌套深度变成常数。48 节点长链 + 16 路扇入 + 梯子的测试文件在本机编译约 25 s（g++）/ 45 s（clang） —— 这是实例化总量的代价，不是深度的。
 - **GCC 不对"可能重叠的子对象"做复制消除**（CWG2403）：`[[no_unique_address]]` 的非空成员从纯右值初始化时，GCC 要求移动构造，而 operation state 不可移动（clang 照样消除）。所以 `indexed_tuple` 的非空元素只在 clang 上加 `no_unique_address`（`SDAG_OVERLAPPING_ELEMENT`），让后面的元素复用它的尾部填充；GCC 上只给空元素加。图嵌套图时整图 op-state 就是这样的非空元素。
-- **图可以作为另一张图的节点**。内层图对外层来说是一个普通的 sender（控制依赖节点）：输入叶子的计数与替换不进入内层图；内层节点环境里的 `get_graph_state` 遮蔽外层的，停止令牌逐层转发；外层降解时内层图保持原样，由它自己在连接时决定融合还是降解。
+- **图可以作为另一张图的节点**。内层图对外层来说是一个普通的 sender（控制依赖节点）：占位符的计数与替换不进入内层图（图 sender 不是 stdexec 的算法 sender，是不透明的叶子）；内层节点环境里的 `get_value_source` 遮蔽外层的，停止令牌逐层转发；外层降解时内层图保持原样，由它自己在连接时决定融合还是降解。
 - **连接的值类别**：右值图 move 子 sender，左值（const 或非 const）图拷贝它们，对应 `connect() &&` 与 `connect() const&` 两个重载，完成签名也按这两种情况计算。
 - **GCC 16 反射的几个坑**：模板实参位置的类型拼接要写 `typename [: :]`；`^^` 不能作用于 using 声明（`std::exception_ptr` 要经别名 + `dealias`）；`template for` 的范围必须是常量表达式（静态成员可以，consteval 函数里的 constexpr 局部变量不行）；`std::array<info, 0>` 没有可用的 `operator[]`（空图用 `info_array` 留一个占位元素）；noexcept / requires 里不能引用 `auto&&` 形参本身（`payload` CPO 以类型为参数）。
 - **内联完成的栈深度**。节点在前驱的完成回调里被启动，一条全内联的链会递归 O(深度) 层；静态图的规模是编译期已知的常量，这与 `then` 链的行为一致。编译器对函数体的实例化也沿 `launch -> start -> ... -> node_done -> notify_edge -> launch` 这条路径嵌套，最长路径约 60 个节点以上会撞上 GCC 的模板深度上限（`-ftemplate-depth` 可以调）；拓扑序 `template for` 只解决了完成签名那一侧的深度。
 - **节点的值在整图 op-state 里停留到整图完成**。共享的 `const&` 因此一直有效；这也是 `split` 做不到 0 开销而整图可以的原因。
 - **错误发生后未启动的节点被跳过**，这是对 `when_all`"全部启动"语义的细化：跳过不改变结果（结果一定是错误 / 停止），只是不做无用功。
-- 节点必须恰好完成一次；完成签名不能"撒谎"（`deliver` 里有 `static_assert` 对照接收者环境与整图环境下算出的输入签名）。
-- 节点适配器必须把输入 sender 恰好用一次（构造时 `static_assert`）：前驱的值只交付一次，`repeat_n` / `retry` 这类会重启子 sender 的适配器不能套在输入上——这与把它们套在 `just(std::move(x))` 上会重复移动是同一回事。
+- 节点必须恰好完成一次；完成签名不能"撒谎"（`deliver` 里有 `static_assert` 对照接收者环境与整图环境下算出的占位符签名）。
+- 节点适配器必须把占位符恰好用一次（构造时 `static_assert`）：前驱的值只交付一次，`repeat_n` / `retry` 这类会重启子 sender 的适配器不能套在输入上——这与把它们套在 `just(std::move(x))` 上会重复移动是同一回事。
 - 外层停止回调只做一次状态切换和一次 `request_stop`，之后不再碰 op-state：`inplace_stop_source::request_stop` 自己处理"回调里把 source 销毁了"的情形，整图可能就在这次 `request_stop` 里同步完成。
 - 诊断：重复键、未知依赖、自依赖、重复依赖、成环各是一条 `static_assert`；`shape_of<Nodes...>()` 不断言，返回 `shape_error`，便于测试。
