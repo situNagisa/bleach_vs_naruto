@@ -20,3 +20,4 @@ vkfu/tools/probe/
 vkfu/tools/vulkan-headers/
 CMakeUserPresets.json
 *.local.props
+*:Zone.Identifier
