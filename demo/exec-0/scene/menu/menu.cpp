@@ -79,7 +79,7 @@ struct menu::impl
 	// 以上为常量（draw 只读管线与纹理）；以下为变量，只在持有 guard 的 permit 时访问。
 	// pool：Vulkan 要求同一 command pool 的分配、录制、释放外部同步。
 	::vkkl::command_pool pool;
-	menu::state current_state{};
+	menu::state_type state{};
 	guard_type guard{ 1 };
 
 	explicit impl(::VkDevice device, ::VkPhysicalDevice physical_device, ::VkQueue graphics_queue, ::std::uint32_t graphics_queue_family, ::VkFormat format, ::std::filesystem::path const& font_path)
@@ -103,31 +103,37 @@ menu::menu(::VkDevice device, ::VkPhysicalDevice physical_device, ::VkQueue grap
 menu::~menu() = default;
 menu::menu(menu&&) noexcept = default;
 menu& menu::operator=(menu&&) noexcept= default;
-values_sender_type<menu::access> menu::update(input::state_type const& keys)
+menu::state_type& menu::state() const noexcept { return _impl->state; }
+menu::guard_type& menu::guard() const noexcept { return _impl->guard; }
+
+values_sender_type<menu::guard_type::permit, menu::change_type> menu::update(input::change_type const& keys)
 {
-	return _impl->guard.acquire() | ::stdexec::then([&current_state = _impl->current_state, keys](guard_type::permit permit) {
-		auto current = current_state;
-		current.requested = action::none;
-		if (keys.close_requested || keys[key_code::quit].signal || keys[key_code::b].signal)
-			current.requested = action::quit;
+	return _impl->guard.acquire() | ::stdexec::let_value([&state = _impl->state, keys](guard_type::permit& permit) {
+		auto const pressed = [&keys](key_code key) { return keys[key] == key_change::pressed; };
+		auto change = change_type{};
+		if (keys.close_requested || pressed(key_code::quit) || pressed(key_code::b))
+			change.requested = action::quit;
 		else
 		{
-			auto const up = keys[key_code::up].signal;
-			auto const down = keys[key_code::down].signal;
-			if (up != down)
-				current.selected = (current.selected + 1) % 2;
-			if (keys[key_code::confirm].signal || keys[key_code::a].signal)
-				current.requested = current.selected == 0 ? action::start_game : action::quit;
+			if (pressed(key_code::up) != pressed(key_code::down))
+			{
+				state.selected = (state.selected + 1) % 2;
+				change.selection_changed = true;
+			}
+			if (pressed(key_code::confirm) || pressed(key_code::a))
+				change.requested = state.selected == 0 ? action::start_game : action::quit;
 		}
-		// 写回后状态随 permit 一起交出；permit 归还前别的 update 看不到中间状态。
-		current_state = current;
-		return access{ ._permit = ::std::move(permit), ._snapshot = current };
+		// state 已写入；permit 连同变化值交给调用方，由调用方决定何时释放。
+		return ::stdexec::just(::std::move(permit), change);
 	});
 }
 
-values_sender_type<::std::vector<::vkkl::command_buffer>, ::std::vector<buffer_type>> menu::record(access const& access, ::VkExtent2D extent) const
+values_sender_type<::std::vector<::vkkl::command_buffer>, ::std::vector<buffer_type>> menu::record([[maybe_unused]] guard_type::permit const& permit, ::VkExtent2D extent) const
 {
-	return ::stdexec::just() | ::stdexec::let_value([this, snapshot = access.snapshot(), extent] {
+	// permit 必须来自本 entity 的 guard（比较 permit 记录的信号量地址）。
+	assert(permit._semaphore == ::std::addressof(_impl->guard._semaphore));
+	// 调用方持有 permit 直到交出的命令缓冲析构，所以 sender 运行时直接读 state 是安全的。
+	return ::stdexec::just() | ::stdexec::let_value([this, extent] {
 	assert(extent.width > 0 && extent.height > 0);
 	auto commands = ::std::vector<::vkkl::command_buffer>{};
 	auto& owner = commands.emplace_back(_impl->device, _impl->pool.handle, VK_NULL_HANDLE);
@@ -177,7 +183,7 @@ values_sender_type<::std::vector<::vkkl::command_buffer>, ::std::vector<buffer_t
 	for (auto index = ::std::size_t{}; index < count; ++index)
 	{
 		auto const y = 164.0f + static_cast<float>(index) * 70.0f;
-		auto const selected = snapshot.selected == index;
+		auto const selected = _impl->state.selected == index;
 		rectangle(112, y, 432, 54, selected ? gold : ::glm::vec4{ 0.17f, 0.24f, 0.33f, 0.35f });
 		if (selected)
 			rectangle(126, y + 23, 7, 7, { 0.06f, 0.08f, 0.12f, 1.0f });

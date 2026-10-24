@@ -50,7 +50,7 @@ auto vertices = label.draw(device, physical_device, command_buffer, transform);
 
 - 上下键按下时循环选择，无计时参数或重复限频。
 - Enter、Space、小键盘 Enter 或 J 确认；Escape 或 K 退出。
-- 菜单仅含 Start Game 和 Exit。Start Game 设置返回状态的 `requested = menu::action::start_game`，main 打印事件，游戏功能后续实现。
+- 菜单仅含 Start Game 和 Exit。Start Game 使 `update` 的变化值为 `requested = menu::action::start_game`，main 打印事件，游戏功能后续实现。
 - Exit 或关闭窗口退出；关闭窗口不受焦点状态影响。窗口缩放会重建交换链，最小化时暂停绘制。
 
 `record` 返回 `values_sender_type<vector<vkkl::command_buffer>, vector<buffer_type>>`，命令缓冲每次 record 执行时从 menu 的 command pool 分配，所有权移动到返回的 vector。
@@ -59,17 +59,27 @@ auto vertices = label.draw(device, physical_device, command_buffer, transform);
 ### entity 的并发访问
 
 每个 entity 的成员分三类：构造后不变的常量（随意读）、自带线程安全的（frame 池）、会变化的变量。
-变量由 entity 内的一个 `nagisa::concurrency::binary_semaphore_guard` 保护，只能在 entity 的起始点取得访问权：
+变量集中在一个开放访问的 state 里，由 entity 的 `nagisa::concurrency::binary_semaphore_guard` 保护。
+约定：**只有持有本 entity guard 的 permit 时才能访问 state**。外部可以直接读 state，entity 不再经访问对象或 getter 中转。
 
-| entity | 变量 | 起始点 | permit 何时释放 |
-|---|---|---|---|
-| input | 上一帧按键 `_current` | `update()`：取得 permit → 泵事件 → 按旧状态算新状态 → 写回 | 写回后即释放，完成值是新状态副本 |
-| menu | 当前状态、command pool | `update(keys)`：完成值 `menu::access` 携带 permit 与新状态快照 | `access` 析构时；它必须比 record 交出的命令缓冲活得久（命令缓冲析构会释放回 pool） |
-| renderer | 交换链、图像、视图、extent，以及图形 / 呈现队列（Vulkan 要求队列外部同步） | `acquire_swapchain()`：完成值 `renderer::swapchain_access` | `access` 析构时；main 在帧 sender 完成（GPU 完成、present 完成）后析构 |
+起始点 sender 的完成值是 `(permit, 变化值)`。entity 内部不析构 permit，也不决定释放时机：
+permit 交给调用方，调用方在本帧对该 state 的访问全部结束后自行销毁或移交。
+在此之前，并发的第二次起始点不会完成，所以持有者可以在后续处理期间保证 state 不变。
+`update` 只传出变化值，不传整个状态。
 
-`resize(access&)`、`acquire_image(access, …)`、`render(access, …)`、`record(access, …)` 都要求传入访问对象，不持有访问权就无从读写变量；
-`access.extent()` / `access.graphics_queue()` 取代原来的裸 getter。并发调用两次同一个起始点时，第二次会等第一次的 permit 释放（即修改完成）后才完成。
-`device()`、`physical_device()`、`graphics_queue_family()`、`format()` 是常量（format 若在 resize 时改变会抛异常），仍直接返回。
+| entity | state 内容 | 起始点 | 变化值 | 谁在何时释放 permit |
+|---|---|---|---|---|
+| input | 成员 `state`：每个键是否按着 `pressed[]`、`close_requested` | `update()`：取得 permit → 泵事件 → 计算新状态写入 `state` | `input::change_type`：每个键 `key_change::{none, pressed, released}`，`close_requested` 是否新出现 | main：`menu.update` 用完变化值、且没人再读 `keyboard.state` 之后（`input_permit = {}`） |
+| menu | `state()`：选中项 `selected`；以及 command pool | `update(input 变化值)`：取得 permit → 计算并写入 `selected` | `menu::change_type`：`selection_changed`、本次请求的动作 `requested`（事件，不进 state） | main：帧 sender 完成后（GPU、present 完成，record 交出的命令缓冲已析构）；最小化跳帧时在循环体结束时 |
+| renderer | `state()`：`VkSwapchainKHR`、extent、`VkImage` / `VkImageView` 列表、图形 / 呈现队列（Vulkan 要求队列外部同步） | `acquire_swapchain()` | 无，只传 permit：state 只有 `resize` 会改，而 `resize` 要求调用方持有 permit，持有者自己知道是否重建过 | main：帧 sender 完成后，紧随 menu 的 permit 之后 |
+
+需要访问 state 的成员函数用参数要求调用方出示 permit：`menu::record(permit, …)`、`renderer::resize(permit)`、
+`renderer::acquire_image(permit, …)`、`renderer::render(permit, …)`。debug 构建下它们 assert 该 permit 确实来自本 entity 的 guard
+（比较 `permit._semaphore` 与 `&guard._semaphore`，不改 nagisa）；permit 必须活过这些函数返回的 sender。
+renderer 的 state 只含原始句柄与值，RAII 所有者（`vkkl::swapchain`、`vkkl::image_view`）留在 impl，`resize` 时与 state 一起更新；
+外部只读，修改只能经 `resize`。menu 与 renderer 要可移动而 guard 不可移动，所以它们的 state 与 guard 在 impl 里，经 `state()` / `guard()` 取用；
+input 不可移动，`state` 和 `guard` 直接是公开成员。
+`device()`、`physical_device()`、`graphics_queue_family()`、`format()` 是常量（format 若在 resize 时改变会抛异常），无需 permit。
 main 的取得顺序固定为 input → menu → renderer，避免多个调用方交叉持有造成死锁。
 
 nagisa 的头文件和 stdexec 一样只在 `execution.cppm` 包含一次并重新导出：多个接口单元在全局模块片段各自包含 `semaphore.h` 时，
