@@ -1,8 +1,11 @@
 module;
 
+// 薄包装：声明的唯一来源是 renderer.h（README §3）。这里只提供依赖并把声明导出。
+// export extern "C++"：声明附着到全局模块，所以普通翻译单元 renderer.cpp 里的定义合法。
+
 #include <vulkan/vulkan.h>
 
-#include <nagisa/concurrency/lease.h>
+#include <nagisa/concurrency/semaphore.h>
 
 export module demo.render;
 
@@ -10,42 +13,9 @@ import std;
 import demo.execution;
 import demo.window;
 
-export
-struct image_acquisition
+export extern "C++"
 {
-	::std::uint32_t index;
-	VkSemaphore semaphore;
-	VkImage image;
-	VkImageView view;
-};
-
-// frame 的定义只存在于 renderer.cpp（实现单元）；接口只把它当作租约令牌的指针目标。
-export struct frame;
-
-export struct surface_changed {};
-
-export
-struct renderer
-{
-	using frame_pool = ::nagisa::concurrency::bounded_lease_pool<frame*, 4>;
-
-	// window 由调用方持有，必须比 renderer 活得久；GLFW 需要先由 glfw_context 初始化。
-	explicit renderer(window const& target);
-	~renderer();
-	renderer(renderer&&) noexcept;
-	renderer& operator=(renderer&&) noexcept;
-	[[nodiscard]] ::VkDevice device() const noexcept;
-	[[nodiscard]] ::VkPhysicalDevice physical_device() const noexcept;
-	[[nodiscard]] ::VkQueue graphics_queue() const noexcept;
-	[[nodiscard]] ::std::uint32_t graphics_queue_family() const noexcept;
-	[[nodiscard]] ::VkFormat format() const noexcept;
-	[[nodiscard]] ::VkExtent2D extent() const noexcept;
-	void resize();
-
-	values_sender_type<frame_pool::lease> acquire_frame() const;
-	values_sender_type<image_acquisition> acquire_image(frame const&) const;
-	values_sender_type<> render(frame const& frame, image_acquisition const& acquisition, ::std::span<VkCommandBuffer const> commands) const;
-
-	struct impl;
-	::std::unique_ptr<impl> _impl;
-};
+#define BVN_EXEC0_MODULE_INTERFACE
+#include "renderer.h"
+#undef BVN_EXEC0_MODULE_INTERFACE
+}

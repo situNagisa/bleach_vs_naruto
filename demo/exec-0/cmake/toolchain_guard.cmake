@@ -1,4 +1,4 @@
-# 工具链守卫：exec-0 只锚定 Clang（Linux 上 clang++ + libc++，Windows 上 clang-cl + MSVC STL），
+# 工具链守卫：exec-0 只锚定 Clang（Linux 上 clang++ + libstdc++（可选 libc++），Windows 上 clang-cl + MSVC STL），
 # 且必须用 Ninja 生成器。GCC 与 MSVC 的模块 ICE 记录见仓库 bug/gcc、bug/msvc。
 function(bvn_exec0_check_toolchain)
     if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")

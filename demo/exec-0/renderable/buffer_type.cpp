@@ -1,12 +1,11 @@
-module;
-
 #include <cassert>
 #include <vkfu/vulkan/v1.4.328/version_1_0.h>
 #include <vkfu/vulkan/v1.4.328/version_1_1.h>
 #include <vkkl/buffer.h>
 #include <vkkl/device_memory.h>
 
-module demo.renderable.buffer_type;
+#include "../common/std.h"
+#include "buffer_type.h"
 
 namespace
 {

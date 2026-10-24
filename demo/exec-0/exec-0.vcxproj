@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  demo/exec-0 的 Visual Studio 工程：Makefile（NMake）类型。
-  VS 不自己编译任何东西，F5 / Ctrl+Shift+B 时由 MSBuild 调用下面的 NMakeBuildCommandLine，
-  即 `cmake -\-preset … && cmake -\-build -\-preset …`，然后调试 NMakeOutput 指向的 exec-0.exe（PDB 在同目录）。
-  本机相关路径（LLVM、CMake、依赖根目录）放在 exec-0.local.props（已 gitignore），模板见 exec-0.local.props.example。
+  demo/exec-0 的 Visual Studio 工程。两类配置（README §6）：
+    Debug / Release              ：Makefile（NMake）类型。VS 不自己编译，F5 / Ctrl+Shift+B 时由 MSBuild 调用
+                                   NMakeBuildCommandLine，即 `cmake -\-preset … && cmake -\-build -\-preset …`（具名模块构建），
+                                   然后调试 NMakeOutput 指向的 exec-0.exe（PDB 在同目录）。
+    DebugHeaders / ReleaseHeaders：Application 类型。MSBuild 原生编译头文件模式（不定义 BVN_EXEC0_MODULES，.cppm 不参与），
+                                   默认 ClangCL 工具集，依赖库走 vcpkg MSBuild 清单模式；产物在 out\vs\<配置>\。
+  所有配置的 IntelliSense 都看头文件模式。
+  本机相关路径（LLVM、CMake、vcpkg、依赖根目录）放在 exec-0.local.props（已 gitignore），模板见 exec-0.local.props.example。
 -->
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
@@ -15,6 +19,14 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugHeaders|x64">
+      <Configuration>DebugHeaders</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseHeaders|x64">
+      <Configuration>ReleaseHeaders</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -24,60 +36,91 @@
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>exec-0</ProjectName>
   </PropertyGroup>
+  <!-- 本机路径覆盖：复制 exec-0.local.props.example 为 exec-0.local.props 后修改。
+       放在最前面导入：BvnLlvmRoot / BvnHeadersToolset 要在 Microsoft.Cpp.props 选工具集之前确定。 -->
+  <Import Project="$(MSBuildProjectDirectory)\exec-0.local.props" Condition="exists('$(MSBuildProjectDirectory)\exec-0.local.props')" />
+  <!-- ======================================================= 用户宏默认值（exec-0.local.props 可覆盖） -->
+  <PropertyGroup Label="UserMacros">
+    <!-- LLVM 安装根目录；预设用 $env{BVN_LLVM_ROOT}/bin/clang-cl.exe，ClangCL 工具集用它作 LLVMInstallDir -->
+    <BvnLlvmRoot Condition="'$(BvnLlvmRoot)'==''">C:\Program Files\LLVM</BvnLlvmRoot>
+    <!-- LLVM 主版本号，即 $(BvnLlvmRoot)\lib\clang\<版本>；ClangCL 工具集用自定义 LLVM 时需要它 -->
+    <BvnLlvmToolsVersion Condition="'$(BvnLlvmToolsVersion)'==''">22</BvnLlvmToolsVersion>
+    <!-- DebugHeaders / ReleaseHeaders 的工具集：ClangCL（默认）或 v145（MSVC） -->
+    <BvnHeadersToolset Condition="'$(BvnHeadersToolset)'==''">ClangCL</BvnHeadersToolset>
+    <BvnVcpkgRoot Condition="'$(BvnVcpkgRoot)'==''">$(VCPKG_ROOT)</BvnVcpkgRoot>
+    <!-- cmake.exe：留空则用 PATH 上的 cmake（需要 >= 4.4；VS 自带的版本太旧） -->
+    <BvnCMakeExe Condition="'$(BvnCMakeExe)'==''">cmake</BvnCMakeExe>
+    <!-- 依赖根目录：默认取系统环境变量 NAGISA_LIBRARY_ROOT / NAGISA_ROOT -->
+    <BvnNagisaLibraryRoot Condition="'$(BvnNagisaLibraryRoot)'==''">$(NAGISA_LIBRARY_ROOT)</BvnNagisaLibraryRoot>
+    <BvnNagisaRoot Condition="'$(BvnNagisaRoot)'==''">$(NAGISA_ROOT)</BvnNagisaRoot>
+    <!-- 头文件模式配置（MSBuild 原生编译）与 CMake 模块配置（Makefile）的分界 -->
+    <BvnHeadersMode>false</BvnHeadersMode>
+    <BvnHeadersMode Condition="'$(Configuration)'=='DebugHeaders' or '$(Configuration)'=='ReleaseHeaders'">true</BvnHeadersMode>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Label="Configuration">
+  <PropertyGroup Condition="'$(BvnHeadersMode)'!='true'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <!-- 工具集只用来提供 MSVC STL（std.ixx）、link.exe、Windows SDK 的环境与 IntelliSense，不参与编译。 -->
     <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(BvnHeadersMode)'=='true'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>$(BvnHeadersToolset)</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <LLVMInstallDir>$(BvnLlvmRoot)</LLVMInstallDir>
+    <LLVMToolsVersion>$(BvnLlvmToolsVersion)</LLVMToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug' or '$(Configuration)'=='DebugHeaders'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)'=='Release' or '$(Configuration)'=='ReleaseHeaders'" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>
   </PropertyGroup>
+  <!-- ======================================================= vcpkg（仅头文件模式；清单 vcpkg.json，triplet x64-windows）
+       显式导入 vcpkg 自带的 MSBuild 集成，不依赖 `vcpkg integrate install`。
+       props 要在上面的 Configuration 组之后：它按 UseDebugLibraries 推导 VcpkgConfiguration。 -->
+  <PropertyGroup Condition="'$(BvnHeadersMode)'=='true'" Label="Vcpkg">
+    <VcpkgEnabled>true</VcpkgEnabled>
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+    <VcpkgTriplet>x64-windows</VcpkgTriplet>
+    <VcpkgRoot>$(BvnVcpkgRoot)</VcpkgRoot>
+    <VcpkgManifestRoot>$(MSBuildProjectDirectory)</VcpkgManifestRoot>
+    <!-- 安装到 out\vs\vcpkg_installed\x64-windows\，与 CMake 构建目录下的 vcpkg_installed 互不影响 -->
+    <VcpkgInstalledDir>$(MSBuildProjectDirectory)\out\vs\vcpkg_installed\</VcpkgInstalledDir>
+  </PropertyGroup>
+  <ImportGroup Condition="'$(BvnHeadersMode)'=='true'" Label="Vcpkg">
+    <Import Project="$(BvnVcpkgRoot)\scripts\buildsystems\msbuild\vcpkg.props" Condition="exists('$(BvnVcpkgRoot)\scripts\buildsystems\msbuild\vcpkg.props')" />
+  </ImportGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
   <ImportGroup Label="Shared" />
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VS_PROP_ROOT)\nagisa.props" Condition="exists('$(VS_PROP_ROOT)\nagisa.props')" />
     <Import Project="$(NAGISA_LIBRARY_ROOT)\nagisa_library.props" Condition="exists('$(NAGISA_LIBRARY_ROOT)\nagisa_library.props')" />
     <Import Project="$(SolutionDir)\prop\solution.props" Condition="exists('$(SolutionDir)\prop\solution.props')" />
-    <!-- 本机路径覆盖：复制 exec-0.local.props.example 为 exec-0.local.props 后修改。 -->
-    <Import Project="$(ProjectDir)exec-0.local.props" Condition="exists('$(ProjectDir)exec-0.local.props')" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VS_PROP_ROOT)\nagisa.props" Condition="exists('$(VS_PROP_ROOT)\nagisa.props')" />
-    <Import Project="$(NAGISA_LIBRARY_ROOT)\nagisa_library.props" Condition="exists('$(NAGISA_LIBRARY_ROOT)\nagisa_library.props')" />
-    <Import Project="$(SolutionDir)\prop\solution.props" Condition="exists('$(SolutionDir)\prop\solution.props')" />
-    <!-- 本机路径覆盖：复制 exec-0.local.props.example 为 exec-0.local.props 后修改。 -->
-    <Import Project="$(ProjectDir)exec-0.local.props" Condition="exists('$(ProjectDir)exec-0.local.props')" />
-  </ImportGroup>
-  <!-- ======================================================= 用户宏（exec-0.local.props 可覆盖） -->
+  <!-- ======================================================= 派生宏 -->
   <PropertyGroup Label="UserMacros">
-    <!-- LLVM 安装根目录；预设用 $env{BVN_LLVM_ROOT}/bin/clang-cl.exe -->
-    <BvnLlvmRoot Condition="'$(BvnLlvmRoot)'==''">C:\Program Files\LLVM</BvnLlvmRoot>
-    <!-- cmake.exe：留空则用 PATH 上的 cmake（需要 >= 4.4；VS 自带的版本太旧） -->
-    <BvnVcpkgRoot Condition="'$(BvnVcpkgRoot)'==''">$(VCPKG_ROOT)</BvnVcpkgRoot>
-    <BvnCMakeExe Condition="'$(BvnCMakeExe)'==''">cmake</BvnCMakeExe>
-    <!-- 依赖根目录：默认取系统环境变量 NAGISA_LIBRARY_ROOT / NAGISA_ROOT -->
-    <BvnNagisaLibraryRoot Condition="'$(BvnNagisaLibraryRoot)'==''">$(NAGISA_LIBRARY_ROOT)</BvnNagisaLibraryRoot>
-    <BvnNagisaRoot Condition="'$(BvnNagisaRoot)'==''">$(NAGISA_ROOT)</BvnNagisaRoot>
-    <!-- 对应 CMakePresets.json 里的预设名 -->
+    <!-- 对应 CMakePresets.json 里的预设名（仅 Makefile 配置） -->
     <BvnCMakePreset Condition="'$(Configuration)'=='Debug'">windows-clang-cl-debug</BvnCMakePreset>
     <BvnCMakePreset Condition="'$(Configuration)'=='Release'">windows-clang-cl-release</BvnCMakePreset>
-    <BvnBuildDir>$(ProjectDir)out\build\$(BvnCMakePreset)\</BvnBuildDir>
+    <BvnBuildDir Condition="'$(BvnHeadersMode)'!='true'">$(ProjectDir)out\build\$(BvnCMakePreset)\</BvnBuildDir>
+    <BvnBuildDir Condition="'$(BvnHeadersMode)'=='true'">$(ProjectDir)out\vs\$(Configuration)\</BvnBuildDir>
     <!-- IntelliSense 优先使用当前配置的依赖；未配置 Release 时可复用 Debug 头文件。 -->
+    <BvnVcpkgIncludeDir Condition="'$(BvnVcpkgIncludeDir)'=='' and '$(BvnHeadersMode)'=='true'">$(ProjectDir)out\vs\vcpkg_installed\x64-windows\include</BvnVcpkgIncludeDir>
     <BvnVcpkgIncludeDir Condition="'$(BvnVcpkgIncludeDir)'=='' and Exists('$(BvnBuildDir)vcpkg_installed\x64-windows\include\GLFW\glfw3.h')">$(BvnBuildDir)vcpkg_installed\x64-windows\include</BvnVcpkgIncludeDir>
     <BvnVcpkgIncludeDir Condition="'$(BvnVcpkgIncludeDir)'=='' and Exists('$(ProjectDir)out\build\windows-clang-cl-debug\vcpkg_installed\x64-windows\include\GLFW\glfw3.h')">$(ProjectDir)out\build\windows-clang-cl-debug\vcpkg_installed\x64-windows\include</BvnVcpkgIncludeDir>
     <BvnVcpkgIncludeDir Condition="'$(BvnVcpkgIncludeDir)'=='' and Exists('$(ProjectDir)out\build\windows-clang-cl-release\vcpkg_installed\x64-windows\include\GLFW\glfw3.h')">$(ProjectDir)out\build\windows-clang-cl-release\vcpkg_installed\x64-windows\include</BvnVcpkgIncludeDir>
     <BvnVcpkgIncludeDir Condition="'$(BvnVcpkgIncludeDir)'==''">$(BvnBuildDir)vcpkg_installed\x64-windows\include</BvnVcpkgIncludeDir>
+    <!-- 仓库内依赖（与 CMake 的普通 include 目录一致，参与 /W4） -->
+    <BvnProjectIncludes>$(ProjectDir)..\..\include;$(ProjectDir)..\..\vkfu\include</BvnProjectIncludes>
+    <!-- 第三方依赖（与 CMake 的 SYSTEM include 一致）；vcpkg 的 include 由 vcpkg.targets 追加 -->
+    <BvnExternalIncludes>$(BvnNagisaLibraryRoot)\stdexec\include;$(BvnNagisaRoot)\include;$(BvnNagisaLibraryRoot)\glm;$(VULKAN_SDK)\Include;$(BvnVcpkgIncludeDir)\freetype2</BvnExternalIncludes>
   </PropertyGroup>
-  <!-- ======================================================= NMake 命令 -->
-  <PropertyGroup>
+  <!-- ======================================================= Makefile 配置：NMake 命令（调用 CMake 模块构建） -->
+  <PropertyGroup Condition="'$(BvnHeadersMode)'!='true'">
     <!--
       命令在 MSBuild 给 Makefile 工程准备的环境里运行：PATH/INCLUDE/LIB 已按工具集设置。
       这里再补三件事：VS 自带的 Ninja 加入 PATH；VCToolsInstallDir 导出为环境变量（std_module.cmake 据此找 std.ixx）；
@@ -93,10 +136,11 @@
     <IntDir>$(BvnBuildDir)CMakeFiles\</IntDir>
     <!-- NMake 实际调用 Clang；空标识会让 ReSharper 的 VS API 路径误选 MSVC 方言。 -->
     <ToolsetISenseIdentifier>Clang.Windows</ToolsetISenseIdentifier>
-    <!-- 以下只喂给 IntelliSense（模块的 IntelliSense 在 VS 里仍是实验性）。 -->
-    <NMakeIncludeSearchPath>$(BvnVcpkgIncludeDir);$(ProjectDir)..\..\include;$(ProjectDir)..\..\vkfu\include;$(BvnNagisaLibraryRoot)\stdexec\include;$(BvnNagisaLibraryRoot)\glfw\include;$(BvnNagisaRoot)\include;$(VULKAN_SDK)\Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <!-- 以下只喂给 IntelliSense：头文件模式（不定义 BVN_EXEC0_MODULES），所以编辑器看到的是 .h 里的声明。 -->
+    <NMakeIncludeSearchPath>$(BvnProjectIncludes);$(BvnVcpkgIncludeDir);$(BvnExternalIncludes);$(BvnNagisaLibraryRoot)\glfw\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakePreprocessorDefinitions>_WIN32;WIN32;_WINDOWS;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <AdditionalOptions>/std:c++latest /permissive- /Zc:__cplusplus /utf-8 /EHsc</AdditionalOptions>
+    <LocalDebuggerCommand>$(NMakeOutput)</LocalDebuggerCommand>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <NMakePreprocessorDefinitions>_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
@@ -104,41 +148,144 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <NMakePreprocessorDefinitions>NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
+  <!-- ======================================================= 头文件模式配置：MSBuild 原生编译 -->
+  <PropertyGroup Condition="'$(BvnHeadersMode)'=='true'">
+    <TargetName>exec-0</TargetName>
+    <OutDir>$(BvnBuildDir)</OutDir>
+    <IntDir>$(BvnBuildDir)obj\</IntDir>
+    <ExternalIncludePath>$(BvnExternalIncludes);$(ExternalIncludePath)</ExternalIncludePath>
+    <!-- LocalDebuggerCommand 保持 Application 工程的默认值 $(TargetPath) -->
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(BvnHeadersMode)'=='true'">
+    <ClCompile>
+      <!-- 与 cmake/build_settings.cmake 的 clang-cl 选项一致 -->
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <WarningLevel>Level4</WarningLevel>
+      <DisableSpecificWarnings>4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <AdditionalOptions>/Zc:__cplusplus /utf-8 /bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(BvnProjectIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <!-- vcpkg 的 glfw3 是 DLL -->
+      <PreprocessorDefinitions>_CONSOLE;GLFW_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <!-- vcpkg 在 ClangCL 工具集下关闭自动链接（VcpkgAutoLink），所以这里显式列出导入库；
+       库目录由 vcpkg.targets 按 Debug / Release 追加（debug\lib 或 lib）。 -->
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugHeaders|x64'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>glfw3dll.lib;freetyped.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseHeaders|x64'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>glfw3dll.lib;freetype.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
   <!-- 调试器：工作目录设为工程目录，与命令行运行一致。 -->
   <PropertyGroup>
-    <LocalDebuggerCommand>$(NMakeOutput)</LocalDebuggerCommand>
     <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
-  <!-- ======================================================= 文件列表（仅供编辑器浏览） -->
+  <!-- ======================================================= 文件列表
+       .cpp：头文件模式配置下由 MSBuild 编译；Makefile 配置下 ClCompile 本就不执行，仅供编辑器浏览。
+       .cppm：只属于 CMake 模块构建，头文件模式配置下排除。 -->
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="execution\execution.cppm" />
-    <ClCompile Include="window\window.cppm" />
     <ClCompile Include="window\window.cpp" />
-    <ClCompile Include="input\input.cppm" />
     <ClCompile Include="input\input.cpp" />
-    <ClCompile Include="render\renderer.cppm" />
     <ClCompile Include="render\renderer.cpp" />
-    <ClCompile Include="renderable\image.cppm" />
-    <ClCompile Include="renderable\font.cppm" />
-    <ClCompile Include="renderable\sprite.cppm" />
     <ClCompile Include="renderable\buffer_type.cpp" />
-    <ClCompile Include="renderable\buffer_type.cppm" />
     <ClCompile Include="renderable\image.cpp" />
     <ClCompile Include="renderable\font.cpp" />
     <ClCompile Include="renderable\sprite.cpp" />
-    <ClCompile Include="renderable\vector_graph.cppm" />
     <ClCompile Include="renderable\vector_graph.cpp" />
-    <ClCompile Include="scene\menu\menu.cppm" />
     <ClCompile Include="scene\menu\menu.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="execution\execution.cppm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugHeaders|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseHeaders|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="window\window.cppm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugHeaders|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseHeaders|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="input\input.cppm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugHeaders|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseHeaders|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="render\renderer.cppm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugHeaders|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseHeaders|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="renderable\buffer_type.cppm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugHeaders|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseHeaders|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="renderable\image.cppm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugHeaders|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseHeaders|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="renderable\font.cppm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugHeaders|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseHeaders|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="renderable\sprite.cppm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugHeaders|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseHeaders|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="renderable\vector_graph.cppm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugHeaders|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseHeaders|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="scene\menu\menu.cppm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugHeaders|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseHeaders|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="common\std.h" />
+    <ClInclude Include="execution\execution.h" />
+    <ClInclude Include="window\window.h" />
+    <ClInclude Include="input\input.h" />
+    <ClInclude Include="render\renderer.h" />
+    <ClInclude Include="renderable\buffer_type.h" />
+    <ClInclude Include="renderable\image.h" />
+    <ClInclude Include="renderable\font.h" />
+    <ClInclude Include="renderable\sprite.h" />
+    <ClInclude Include="renderable\vector_graph.h" />
+    <ClInclude Include="scene\menu\menu.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
     <Text Include="cmake\build_settings.cmake" />
+    <Text Include="cmake\glfw.cmake" />
+    <Text Include="cmake\glm.cmake" />
     <Text Include="cmake\locate.cmake" />
     <Text Include="cmake\nagisa.cmake" />
-    <Text Include="cmake\glfw.cmake" />
+    <Text Include="cmake\sources.cmake" />
     <Text Include="cmake\std_module.cmake" />
     <Text Include="cmake\stdexec.cmake" />
     <Text Include="cmake\toolchain_guard.cmake" />
@@ -155,5 +302,8 @@
     <None Include="tests\smoke_windows.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Condition="'$(BvnHeadersMode)'=='true'" Label="Vcpkg">
+    <Import Project="$(BvnVcpkgRoot)\scripts\buildsystems\msbuild\vcpkg.targets" Condition="exists('$(BvnVcpkgRoot)\scripts\buildsystems\msbuild\vcpkg.targets')" />
+  </ImportGroup>
   <ImportGroup Label="ExtensionTargets" />
 </Project>

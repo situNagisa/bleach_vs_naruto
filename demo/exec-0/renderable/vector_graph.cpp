@@ -1,5 +1,3 @@
-module;
-
 #include <cassert>
 #include <cmath>
 #include <vkfu/vulkan/v1.4.328/version_1_0.h>
@@ -12,7 +10,8 @@ module;
 #include <vkkl/shader_module.h>
 #include <glm/glm.hpp>
 
-module demo.renderable.vector_graph;
+#include "../common/std.h"
+#include "vector_graph.h"
 
 namespace
 {

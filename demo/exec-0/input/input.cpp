@@ -1,9 +1,8 @@
-module;
-
-// 只为 GLFW_KEY_* 常量；窗口本身通过 demo.window 访问。
+// 只为 GLFW_KEY_* 常量；窗口本身通过 window.h 访问。
 #include <GLFW/glfw3.h>
 
-module demo.input;
+#include "../common/std.h"
+#include "input.h"
 
 input::input(window const& target)
 	: _window(::std::addressof(target))

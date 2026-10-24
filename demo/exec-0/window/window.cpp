@@ -1,9 +1,8 @@
-module;
-
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 
-module demo.window;
+#include "../common/std.h"
+#include "window.h"
 
 namespace
 {

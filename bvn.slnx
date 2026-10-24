@@ -1,7 +1,15 @@
 <Solution>
   <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Release" />
+    <!-- exec-0 的头文件模式（MSBuild 原生编译，不走 CMake 模块构建）；其它工程沿用 Debug / Release。 -->
+    <BuildType Name="DebugHeaders" />
+    <BuildType Name="ReleaseHeaders" />
     <Platform Name="x64" />
   </Configurations>
-  <Project Path="bvn.vcxproj" Id="4958090e-5dc0-49b2-961e-e0a025c33594" />
+  <Project Path="bvn.vcxproj" Id="4958090e-5dc0-49b2-961e-e0a025c33594">
+    <BuildType Solution="DebugHeaders|*" Project="Debug" />
+    <BuildType Solution="ReleaseHeaders|*" Project="Release" />
+  </Project>
   <Project Path="demo/exec-0/exec-0.vcxproj" Id="46576488-bcf2-4d20-a52b-0b8c547258cb" />
 </Solution>

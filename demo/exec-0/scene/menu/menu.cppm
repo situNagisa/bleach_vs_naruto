@@ -1,5 +1,8 @@
 module;
 
+// 薄包装：声明的唯一来源是 menu.h（README §3）。这里只提供依赖并把声明导出。
+// export extern "C++"：声明附着到全局模块，所以普通翻译单元 menu.cpp 里的定义合法。
+
 #include <vulkan/vulkan.h>
 #include <vkkl/command_buffer.h>
 
@@ -11,26 +14,9 @@ export import demo.renderable.buffer_type;
 import demo.input;
 import demo.render;
 
-export struct menu
+export extern "C++"
 {
-	enum class action { none, start_game, quit };
-
-	struct state
-	{
-		::std::size_t selected = 0;
-		action requested = action::none;
-	};
-
-	explicit menu(::VkDevice device, ::VkPhysicalDevice physical_device, ::VkQueue graphics_queue, ::std::uint32_t graphics_queue_family, ::VkFormat format, ::std::filesystem::path const& font_path = {});
-	~menu();
-	menu(menu&&) noexcept;
-	menu& operator=(menu&&) noexcept;
-
-	[[nodiscard]] values_sender_type<state> update(input::state_type const& keys) const;
-	[[nodiscard]] values_sender_type<::std::vector<::vkkl::command_buffer>, ::std::vector<buffer_type>> record(state const& snapshot, ::VkExtent2D extent) const;
-
-	state current_state{};
-
-	struct impl;
-	::std::unique_ptr<impl> _impl;
-};
+#define BVN_EXEC0_MODULE_INTERFACE
+#include "menu.h"
+#undef BVN_EXEC0_MODULE_INTERFACE
+}

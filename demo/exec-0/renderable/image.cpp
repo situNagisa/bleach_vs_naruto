@@ -1,5 +1,3 @@
-module;
-
 #include <cassert>
 #include <vkfu/vulkan/v1.4.328/version_1_0.h>
 #include <vkfu/vulkan/v1.4.328/version_1_1.h>
@@ -8,7 +6,8 @@ module;
 #include <glm/glm.hpp>
 #include <bvn/assets/sprite_clip.h>
 
-module demo.renderable.image;
+#include "../common/std.h"
+#include "image.h"
 
 
 struct image::impl

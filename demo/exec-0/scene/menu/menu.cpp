@@ -1,5 +1,3 @@
-module;
-
 #include <cassert>
 #include <cstdlib>
 #ifdef _WIN32
@@ -11,10 +9,10 @@ module;
 #include <vkkl/command_pool.h>
 #include <vkkl/command_buffer.h>
 
-module demo.scene.menu;
-
-import demo.renderable.vector_graph;
-import demo.renderable.font;
+#include "../../common/std.h"
+#include "menu.h"
+#include "../../renderable/vector_graph.h"
+#include "../../renderable/font.h"
 
 namespace
 {

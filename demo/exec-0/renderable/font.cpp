@@ -1,5 +1,3 @@
-module;
-
 #include <cassert>
 #include <vkfu/vulkan/v1.4.328/version_1_0.h>
 #include <vkfu/vulkan/v1.4.328/version_1_1.h>
@@ -10,7 +8,8 @@ module;
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-module demo.renderable.font;
+#include "../common/std.h"
+#include "font.h"
 
 
 struct font::impl

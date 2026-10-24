@@ -102,6 +102,42 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
+    },
+    {
+      "name": "windows-clang-cl-headers-debug",
+      "displayName": "Windows clang-cl Debug（头文件模式，不编译模块）",
+      "inherits": "windows-clang-cl",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "BVN_EXEC0_USE_MODULES": "OFF"
+      }
+    },
+    {
+      "name": "windows-clang-cl-headers-release",
+      "displayName": "Windows clang-cl Release（头文件模式，带 PDB）",
+      "inherits": "windows-clang-cl",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BVN_EXEC0_USE_MODULES": "OFF"
+      }
+    },
+    {
+      "name": "linux-clang-headers-debug",
+      "displayName": "Linux clang++ Debug（头文件模式，不编译模块）",
+      "inherits": "linux-clang",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "BVN_EXEC0_USE_MODULES": "OFF"
+      }
+    },
+    {
+      "name": "linux-clang-headers-release",
+      "displayName": "Linux clang++ Release（头文件模式）",
+      "inherits": "linux-clang",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BVN_EXEC0_USE_MODULES": "OFF"
+      }
     }
   ],
   "buildPresets": [
@@ -120,6 +156,22 @@
     {
       "name": "linux-clang-release",
       "configurePreset": "linux-clang-release"
+    },
+    {
+      "name": "windows-clang-cl-headers-debug",
+      "configurePreset": "windows-clang-cl-headers-debug"
+    },
+    {
+      "name": "windows-clang-cl-headers-release",
+      "configurePreset": "windows-clang-cl-headers-release"
+    },
+    {
+      "name": "linux-clang-headers-debug",
+      "configurePreset": "linux-clang-headers-debug"
+    },
+    {
+      "name": "linux-clang-headers-release",
+      "configurePreset": "linux-clang-headers-release"
     }
   ]
 }

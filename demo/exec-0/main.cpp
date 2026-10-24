@@ -1,19 +1,20 @@
 #include <cstdio>
 #include <vkkl/command_buffer.h>
 
-import std;
-import demo.execution;
-import demo.window;
-import demo.input;
-import demo.render;
-import demo.scene.menu;
+// 模块模式下这些头展开成 import，头文件模式下展开成声明（README §3）。
+#include "common/std.h"
+#include "execution/execution.h"
+#include "window/window.h"
+#include "input/input.h"
+#include "render/renderer.h"
+#include "scene/menu/menu.h"
 
 namespace
 {
 auto render_frame(renderer const& target, menu const& scene, menu::state snapshot)
 {
 	return target.acquire_frame()
-		| ::stdexec::let_value([&target, &scene, snapshot](renderer::frame_pool::lease& lease)
+		| ::stdexec::let_value([&target, &scene, snapshot](renderer::frame_pool::permit& lease)
 			{
 				auto& frame = *lease.token();
 				return target.acquire_image(frame)

@@ -1,5 +1,3 @@
-module;
-
 // 只包含真正用到的 vkfu 头，而不是囊括全部厂商扩展的 <vkfu/vulkan/v1.4.328.h>：
 // 这是本实现单元最大的一块解析开销。
 #include <vkfu/vulkan/v1.4.328/version_1_0.h>
@@ -18,11 +16,16 @@ module;
 #include <vkkl/semaphore.h>
 #include <vkkl/command_buffer.h>
 
-module demo.render;
+#include "../common/std.h"
+#include "renderer.h"
 
-// 实现单元隐式导入 demo.render 的接口；接口 import 的 std 与 demo.execution 在这里同样可见，
-// 所以 sender 算法直接用 demo.execution 导出的 just / then，不再包含 stdexec 头文件。
+// renderer.h 在模块模式下展开成 import std / demo.execution / demo.window / demo.render，
+// 头文件模式下展开成对应的 #include；两种模式下 ::stdexec::just / then 都可见。
 
+// 只在本文件使用的辅助函数与类型：实现文件现在是全局模块里的普通翻译单元，
+// 放进匿名命名空间避免与其它翻译单元的同名实体冲突（ODR）。
+namespace
+{
 inline void check(::VkResult result, char const* operation)
 {
 	if (result != ::VK_SUCCESS)
@@ -31,7 +34,8 @@ inline void check(::VkResult result, char const* operation)
 	}
 }
 
-inline ::std::vector<::std::uint32_t> read_spirv(char const* path)
+// 当前没有调用者；匿名命名空间里未使用会触发 -Wunused-function，保留待用。
+[[maybe_unused]] inline ::std::vector<::std::uint32_t> read_spirv(char const* path)
 {
 	auto file = ::std::ifstream{ path, ::std::ios::binary | ::std::ios::ate };
 	if (!file)
@@ -360,6 +364,9 @@ inline ::std::vector<::vkkl::image_view> create_swapchain_image_views( ::VkDevic
 	return views;
 }
 
+}
+
+// frame 必须留在全局命名空间：renderer.h 里前向声明的是 ::frame。
 struct frame
 {
 	::vkkl::fence in_flight;
@@ -463,7 +470,7 @@ void renderer::resize()
 	_impl->swapchain_extent = info.image_extent;
 }
 
-values_sender_type<renderer::frame_pool::lease> renderer::acquire_frame() const
+values_sender_type<renderer::frame_pool::permit> renderer::acquire_frame() const
 {
 	return _impl->frame_pool.acquire();
 }
