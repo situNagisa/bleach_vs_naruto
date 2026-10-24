@@ -94,7 +94,7 @@
     <!-- NMake 实际调用 Clang；空标识会让 ReSharper 的 VS API 路径误选 MSVC 方言。 -->
     <ToolsetISenseIdentifier>Clang.Windows</ToolsetISenseIdentifier>
     <!-- 以下只喂给 IntelliSense（模块的 IntelliSense 在 VS 里仍是实验性）。 -->
-    <NMakeIncludeSearchPath>$(BvnVcpkgIncludeDir);$(ProjectDir)..\..\include;$(ProjectDir)..\..\vkfu\include;$(BvnNagisaLibraryRoot)\stdexec\include;$(BvnNagisaLibraryRoot)\glfw\include;$(BvnNagisaRoot)\include;$(VULKAN_SDK)\Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(BvnVcpkgIncludeDir);$(ProjectDir)..\..\include;$(ProjectDir)..\..\vkfu\include;$(BvnNagisaLibraryRoot)\stdexec\include;$(BvnNagisaLibraryRoot)\glfw\include;$(BvnNagisaRoot)\include;$(ProjectDir)..\static-dag\include;$(VULKAN_SDK)\Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakePreprocessorDefinitions>_WIN32;WIN32;_WINDOWS;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <AdditionalOptions>/std:c++latest /permissive- /Zc:__cplusplus /utf-8 /EHsc</AdditionalOptions>
   </PropertyGroup>
@@ -138,6 +138,7 @@
     <Text Include="cmake\build_settings.cmake" />
     <Text Include="cmake\locate.cmake" />
     <Text Include="cmake\nagisa.cmake" />
+    <Text Include="cmake\sdag.cmake" />
     <Text Include="cmake\glfw.cmake" />
     <Text Include="cmake\std_module.cmake" />
     <Text Include="cmake\stdexec.cmake" />

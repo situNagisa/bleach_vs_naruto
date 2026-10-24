@@ -54,7 +54,7 @@ auto vertices = label.draw(device, physical_device, command_buffer, transform);
 - Exit 或关闭窗口退出；关闭窗口不受焦点状态影响。窗口缩放会重建交换链，最小化时暂停绘制。
 
 `record` 返回 `values_sender_type<vector<vkkl::command_buffer>, vector<buffer_type>>`，命令缓冲每次 record 执行时从 menu 的 command pool 分配，所有权移动到返回的 vector。
-主循环使用 `let_value` 将提交和 GPU fence 等待接在 record 后，保留命令缓冲所有者及两个完成值到 GPU 完成，然后才进入下一帧。返回的两个 vector 必须保留到 GPU 完成，menu 和设备必须比命令缓冲活得久。
+帧图里 `record` 交出的两个 vector 被 move 进 `render` 节点，保留到 GPU 完成，随帧图的 op-state 析构，然后才进入下一帧。menu 和设备必须比命令缓冲活得久。
 
 ### entity 的并发访问
 
@@ -69,9 +69,9 @@ permit 交给调用方，调用方在本帧对该 state 的访问全部结束后
 
 | entity | state 内容 | 起始点 | 变化值 | 谁在何时释放 permit |
 |---|---|---|---|---|
-| input | 成员 `state`：每个键是否按着 `pressed[]`、`close_requested` | `update()`：取得 permit → 泵事件 → 计算新状态写入 `state` | `input::change_type`：每个键 `key_change::{none, pressed, released}`，`close_requested` 是否新出现 | main：`menu.update` 用完变化值、且没人再读 `keyboard.state` 之后（`input_permit = {}`） |
-| menu | `state()`：选中项 `selected`；以及 command pool | `update(input 变化值)`：取得 permit → 计算并写入 `selected` | `menu::change_type`：`selection_changed`、本次请求的动作 `requested`（事件，不进 state） | main：帧 sender 完成后（GPU、present 完成，record 交出的命令缓冲已析构）；最小化跳帧时在循环体结束时 |
-| renderer | `state()`：`VkSwapchainKHR`、extent、`VkImage` / `VkImageView` 列表、图形 / 呈现队列（Vulkan 要求队列外部同步） | `acquire_swapchain()` | 无，只传 permit：state 只有 `resize` 会改，而 `resize` 要求调用方持有 permit，持有者自己知道是否重建过 | main：帧 sender 完成后，紧随 menu 的 permit 之后 |
+| input | 成员 `state`：每个键是否按着 `pressed[]`、`close_requested` | `update()`：取得 permit → 泵事件 → 计算新状态写入 `state` | `input::change_type`：每个键 `key_change::{none, pressed, released}`，`close_requested` 是否新出现 | 更新图：permit 与变化值被 move 进 `menu_update` 节点，更新图的 `sync_wait` 返回前随 op-state 析构 |
+| menu | `state()`：选中项 `selected`；以及 command pool | `update(input 变化值)`：取得 permit → 计算并写入 `selected` | `menu::change_type`：`selection_changed`、本次请求的动作 `requested`（事件，不进 state） | `render_on`：帧图完成且 op-state 析构后（GPU、present 完成，命令缓冲已析构）；最小化跳帧时在循环体结束时 |
+| renderer | `state()`：`VkSwapchainKHR`、extent、`VkImage` / `VkImageView` 列表、图形 / 呈现队列（Vulkan 要求队列外部同步） | `acquire_swapchain()` | 无，只传 permit：state 只有 `resize` 会改，而 `resize` 要求调用方持有 permit，持有者自己知道是否重建过 | `render_on`：紧随 menu 的 permit 之后 |
 
 需要访问 state 的成员函数用参数要求调用方出示 permit：`menu::record(permit, …)`、`renderer::resize(permit)`、
 `renderer::acquire_image(permit, …)`、`renderer::render(permit, …)`。debug 构建下它们 assert 该 permit 确实来自本 entity 的 guard
@@ -85,9 +85,36 @@ main 的取得顺序固定为 input → menu → renderer，避免多个调用�
 nagisa 的头文件和 stdexec 一样只在 `execution.cppm` 包含一次并重新导出：多个接口单元在全局模块片段各自包含 `semaphore.h` 时，
 clang 22 在导入方会报 `operator new` 二义性或在序列化 BMI 时崩溃。
 
-实际帧循环用 `schedule | then` 启动渲染线程任务，在该任务内等待帧 sender 完成，使用 promise/future 向主线程传回结果或异常。
-这样避开了当前 Clang 模块构建中 `starts_on(scheduler, 嵌套帧 sender)` 在首次调度时的访问冲突。
-主线程等待 future 时仍泵窗口事件，避免窗口呈现与阻塞事件线程互相等待。
+### 帧任务图
+
+一帧由两张 [static-dag](../static-dag/README.md)（`sdag`）静态图组成，节点键是 `main.cpp` 里 `node::` 下的空 struct：
+
+```
+更新图（主线程，sync_wait）        帧图（worker，render_on）
+input_update ──► menu_update        frame ──► image ──┐
+                    │                          record ──┴──► render
+                    ▼
+     (menu permit, 变化值) ──► main 取 renderer permit、按需 resize ──► render_on(两个 permit)
+```
+
+- **更新图** `update_graph`：`input_update` 是 `keyboard.update()`，`menu_update` 是 `let_value(scene.update(keys))`。
+  input 的 `(permit, 变化值)` 只有一个读者，被 move 进 `menu_update` 的 `let_value`，更新图结束时随 op-state 析构，
+  所以 input 的 permit 在 `menu.update` 用完变化值后立即释放，与原来的 `input_permit = {}` 同一时刻。整图的完成值是唯一汇点
+  `menu_update` 的 `(menu permit, 变化值)`。它在主线程 `sync_wait`：`input.update` 要泵 GLFW 事件。
+- **帧图** `frame_graph`：`frame` 租一个 frame，`image` 在它上面取交换链图像，`record` 与这条链并行录制菜单，`render` 等
+  `image` 与 `record` 都完成后提交、呈现并等 GPU。frame 租约、图像、命令缓冲各只有一个读者，都被 move 进读者的 `let_value`，
+  图完成（GPU、present 都已结束）后随 op-state 析构。两个 permit 以 `const&` 出示给节点，由 `render_on` 持有。
+  为了让 `render` 只依赖 `image` 与 `record`，`image_acquisition` 带上取图像时用的 `frame const* owner`，`render(permit, acquisition, commands)`
+  直接收 `span<vkkl::command_buffer const>`（句柄在 render 内部取出），不再需要 `frame` 参数与 main 里的句柄转换。
+- **`render_on`**：用 `schedule(worker) | then` 把一个 `packaged_task` 投到渲染线程，任务里 `sync_wait(帧图)`；任务的局部变量逆序析构，
+  先是帧图 op-state（命令缓冲回到 menu 的 pool），再是 menu 的 permit、renderer 的 permit，之后 future 才就绪。
+  主线程等 future 时继续泵窗口事件，避免 present 与阻塞的事件线程互相等待；帧图抛出的异常（含 `surface_changed`）经 future 回到主线程。
+  不改用 `sync_wait(starts_on(worker, 帧图))`：主线程会阻塞、不能泵事件；原先的嵌套写法在 Clang 模块构建下还出现过首次调度的访问冲突。
+  resize 要读窗口尺寸，留在主线程、取得 renderer permit 之后、进入 `render_on` 之前。
+
+sdag 依赖 stdexec，按 §3 第 1 条只在 `execution.cppm` 的全局模块片段包含 `<sdag/sdag.h>`，在 `export namespace sdag { using ::sdag::dag; using ::sdag::make_node; using ::sdag::after; }`
+里重导出；节点 sender、占位符等内部类型无需导出，`main.cpp` 只写 `::sdag::dag(::sdag::make_node<键, ::sdag::after<…>>(…))`。
+clang 上 `SDAG_REFLECTION` 自动为 0（模板实现），不需要 `-freflection`。
 
 Windows 实际启动回归测试（会打开自己的测试窗口）：
 
@@ -129,12 +156,13 @@ demo/exec-0/
 │   ├── locate.cmake                bvn_exec0_locate()：环境变量 -> 缓存变量 -> 探测文件
 │   ├── stdexec.cmake               exec0_stdexec（$NAGISA_LIBRARY_ROOT/stdexec，缺省 FetchContent）
 │   ├── nagisa.cmake                exec0_nagisa（$NAGISA_ROOT）
+│   ├── sdag.cmake                  exec0_sdag（仓库内 ../static-dag/include）
 │   ├── glfw.cmake                  glfw（$NAGISA_LIBRARY_ROOT/glfw 源码静态构建，缺省 find_package）
 │   ├── vulkan.cmake                Vulkan::Headers / Vulkan::Vulkan（FindVulkan）
 │   ├── vkfu.cmake                  vkfu::vkfu（仓库内 ../../vkfu）
 │   └── vkkl.cmake                  exec0_vkkl（仓库内 include/vkkl）
 ├── main.cpp                        普通翻译单元，只 import，不再解析任何第三方头
-├── execution/execution.cppm        module demo.execution ：唯一包含 stdexec / nagisa 头的接口单元
+├── execution/execution.cppm        module demo.execution ：唯一包含 stdexec / nagisa / sdag 头的接口单元
 ├── window/window.cppm              module demo.window    ：glfw_context + window（GLFW 原生 API 的 RAII 包装）
 ├── window/window.cpp               demo.window 的实现单元（唯一调用 glfw* 函数的地方）
 ├── input/input.cppm                module demo.input     ：键盘快照 + 退出请求
@@ -152,8 +180,10 @@ std (exec0_std) ◄── demo.execution ◄── demo.input  ◄── main.cp
                     demo.execution ◄── demo.render
 ```
 
-仓库内的依赖以普通目标形式接入：`exec0_vkkl`（`include/vkkl`，header-only）、`vkfu::vkfu`（`add_subdirectory(../../vkfu)`）。
+仓库内的依赖以普通目标形式接入：`exec0_vkkl`（`include/vkkl`，header-only）、`vkfu::vkfu`（`add_subdirectory(../../vkfu)`）、
+`exec0_sdag`（`demo/static-dag/include`，header-only，链接 `exec0_stdexec`）。
 第三方：GLFW（家目录源码，静态）、Vulkan（SDK / 系统包）、stdexec 与 nagisa（家目录源码，header-only）。
+`demo.execution` 包含 stdexec、nagisa、sdag 并重导出，`main.cpp` 经 `import demo.execution` 使用 `::sdag::dag` 构造帧任务图。
 
 ## 3. 模块写法约定（从这个 demo 总结，后续迁移都照此）
 
@@ -206,6 +236,7 @@ std (exec0_std) ◄── demo.execution ◄── demo.input  ◄── main.cp
 | nagisa | 源码（header-only） | `$NAGISA_ROOT`，或 `-DBVN_EXEC0_NAGISA_ROOT=<根>`（需含 `include/nagisa/concurrency/semaphore.h`） |
 | Vulkan headers + loader | 系统 | Windows：Vulkan SDK；Linux：`vulkan-headers` + `vulkan-icd-loader`。验证层可选，有则自动启用 |
 | vkfu / vkkl / bvn::platform | 仓库内 | 相对路径 `../../` |
+| static-dag（sdag） | 仓库内（header-only） | `../static-dag/include`（`cmake/sdag.cmake`），依赖 stdexec |
 
 ### 4.3 运行时
 

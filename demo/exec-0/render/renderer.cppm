@@ -1,12 +1,16 @@
 module;
 
 #include <vulkan/vulkan.h>
+#include <vkkl/command_buffer.h>
 
 export module demo.render;
 
 import std;
 import demo.execution;
 import demo.window;
+
+// frame 的定义只存在于 renderer.cpp（实现单元）；接口只把它当作租约令牌的指针目标。
+export struct frame;
 
 export
 struct image_acquisition
@@ -15,10 +19,10 @@ struct image_acquisition
 	VkSemaphore semaphore;
 	VkImage image;
 	VkImageView view;
+	// 取图像时用的 frame（它的 image_available 信号量就是上面的 semaphore），render 在它上面录制与提交。
+	// 指向 frame 池租约的令牌：调用方持有租约到 render 的 sender 完成。
+	frame const* owner;
 };
-
-// frame 的定义只存在于 renderer.cpp（实现单元）；接口只把它当作租约令牌的指针目标。
-export struct frame;
 
 export struct surface_changed {};
 
@@ -66,7 +70,9 @@ struct renderer
 	values_sender_type<frame_pool::permit> acquire_frame() const;
 	// 以下读 state 并使用队列，调用方必须持有 permit，且 permit 要活过返回的 sender。
 	values_sender_type<image_acquisition> acquire_image(guard_type::permit const& permit, frame const& frame) const;
-	values_sender_type<> render(guard_type::permit const& permit, frame const& frame, image_acquisition const& acquisition, ::std::span<VkCommandBuffer const> commands) const;
+	// 在 acquisition.owner 上录制主命令缓冲、执行 commands（menu::record 交出的二级命令缓冲）、提交、呈现，
+	// 等 GPU 与 present 完成后才结束。commands 的所有者由调用方保留到返回的 sender 完成。
+	values_sender_type<> render(guard_type::permit const& permit, image_acquisition const& acquisition, ::std::span<::vkkl::command_buffer const> commands) const;
 
 	struct impl;
 	::std::unique_ptr<impl> _impl;

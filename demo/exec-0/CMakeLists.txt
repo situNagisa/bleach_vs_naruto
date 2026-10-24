@@ -35,6 +35,7 @@ include(cmake/vulkan.cmake)     # Vulkan::Headers / Vulkan::Vulkan
 include(cmake/glfw.cmake)       # glfw
 include(cmake/stdexec.cmake)    # exec0_stdexec
 include(cmake/nagisa.cmake)     # exec0_nagisa
+include(cmake/sdag.cmake)       # exec0_sdag
 include(cmake/vkfu.cmake)       # vkfu::vkfu
 include(cmake/vkkl.cmake)       # exec0_vkkl
 include(cmake/glm.cmake)       # glm::glm
@@ -78,6 +79,7 @@ target_link_libraries(exec0_demo
         vkfu::vkfu
         exec0_stdexec
         exec0_nagisa
+        exec0_sdag
         glfw
         Vulkan::Vulkan
         glm::glm

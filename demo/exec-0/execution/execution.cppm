@@ -9,6 +9,8 @@ module;
 // nagisa 的 semaphore 也基于 stdexec，同样只在这里包含：多个接口单元在全局模块片段各自包含它时，
 // 导入方合并声明会出错（clang 22 报 operator new 二义性 / 序列化崩溃）。
 #include <nagisa/concurrency/semaphore.h>
+// sdag（静态 DAG sender）同理：它依赖 stdexec，只在这里包含，下游写 ::sdag::dag / ::sdag::make_node / ::sdag::after。
+#include <sdag/sdag.h>
 
 export module demo.execution;
 
@@ -51,4 +53,11 @@ export namespace nagisa::concurrency
 {
 using ::nagisa::concurrency::binary_semaphore_guard;
 using ::nagisa::concurrency::bounded_resource_pool;
+}
+
+export namespace sdag
+{
+using ::sdag::dag;
+using ::sdag::make_node;
+using ::sdag::after;
 }

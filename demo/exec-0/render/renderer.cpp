@@ -528,18 +528,19 @@ values_sender_type<image_acquisition> renderer::acquire_image([[maybe_unused]] g
 					.semaphore = frame.image_available.handle,
 					.image = state.images[index],
 					.view = state.image_views[index],
+					.owner = ::std::addressof(frame),
 				};
 			})
 	};
 }
 
-values_sender_type<> renderer::render([[maybe_unused]] guard_type::permit const& permit, frame const& frame, image_acquisition const& acquisition, ::std::span<VkCommandBuffer const> commands) const
+values_sender_type<> renderer::render([[maybe_unused]] guard_type::permit const& permit, image_acquisition const& acquisition, ::std::span<::vkkl::command_buffer const> commands) const
 {
 	// permit 必须来自本 entity 的 guard（比较 permit 记录的信号量地址）。
 	assert(permit._semaphore == ::std::addressof(_impl->guard._semaphore));
 	return {
 		::stdexec::just()
-		| ::stdexec::then([this, &state = _impl->state, &frame, &acquisition, commands]
+		| ::stdexec::then([this, &state = _impl->state, &frame = *acquisition.owner, &acquisition, commands]
 			{
 				::vkfu::reset_command_pool(_impl->device.handle, frame.primary_command_pool.handle, {});
 				::vkfu::begin_command_buffer(frame.primary_command_buffer.handle, ::vkfu::param::command_buffer_begin{ .flags = {.one_time_submit = 1}, });
@@ -572,7 +573,10 @@ values_sender_type<> renderer::render([[maybe_unused]] guard_type::permit const&
 						}) },
 				});
 				if (!commands.empty())
-					::vkfu::cmd_execute_commands(frame.primary_command_buffer.handle, commands);
+				{
+					auto const handles = commands | ::std::views::transform([](::vkkl::command_buffer const& command) { return command.handle; }) | ::std::ranges::to<::std::vector>();
+					::vkfu::cmd_execute_commands(frame.primary_command_buffer.handle, handles);
+				}
 				::vkfu::cmd_end_rendering(frame.primary_command_buffer.handle);
 
 				::vkfu::cmd_pipeline_barrier2(frame.primary_command_buffer.handle, ::vkfu::param::dependency{ .image_memory_barriers = ::std::array{ ::vkfu::evaluate(::vkfu::param::image_memory_barrier2{
