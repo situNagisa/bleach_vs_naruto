@@ -53,12 +53,27 @@ auto vertices = label.draw(device, physical_device, command_buffer, transform);
 - 菜单仅含 Start Game 和 Exit。Start Game 设置返回状态的 `requested = menu::action::start_game`，main 打印事件，游戏功能后续实现。
 - Exit 或关闭窗口退出；关闭窗口不受焦点状态影响。窗口缩放会重建交换链，最小化时暂停绘制。
 
-`menu` 直接持有 `current_state`；`update(keys) const` 返回 `values_sender_type<state>`，按捕获的状态副本计算，不修改自身。
-`record` 返回 `values_sender_type<vector<vkkl::command_buffer>, vector<buffer_type>>`，不再有 recording 类。
-command pool 由 menu 持有，命令缓冲每次 record 执行时创建，所有权移动到返回的 vector；同一池的分配、录制和释放必须串行。
+`record` 返回 `values_sender_type<vector<vkkl::command_buffer>, vector<buffer_type>>`，命令缓冲每次 record 执行时从 menu 的 command pool 分配，所有权移动到返回的 vector。
 主循环使用 `let_value` 将提交和 GPU fence 等待接在 record 后，保留命令缓冲所有者及两个完成值到 GPU 完成，然后才进入下一帧。返回的两个 vector 必须保留到 GPU 完成，menu 和设备必须比命令缓冲活得久。
 
-`renderer` 通过 `device()`、`physical_device()`、`graphics_queue()`、`graphics_queue_family()`、`format()`、`extent()` 直接返回 Vulkan 句柄或值；菜单构造显式接收所需参数。
+### entity 的并发访问
+
+每个 entity 的成员分三类：构造后不变的常量（随意读）、自带线程安全的（frame 池）、会变化的变量。
+变量由 entity 内的一个 `nagisa::concurrency::binary_semaphore_guard` 保护，只能在 entity 的起始点取得访问权：
+
+| entity | 变量 | 起始点 | permit 何时释放 |
+|---|---|---|---|
+| input | 上一帧按键 `_current` | `update()`：取得 permit → 泵事件 → 按旧状态算新状态 → 写回 | 写回后即释放，完成值是新状态副本 |
+| menu | 当前状态、command pool | `update(keys)`：完成值 `menu::access` 携带 permit 与新状态快照 | `access` 析构时；它必须比 record 交出的命令缓冲活得久（命令缓冲析构会释放回 pool） |
+| renderer | 交换链、图像、视图、extent，以及图形 / 呈现队列（Vulkan 要求队列外部同步） | `acquire_swapchain()`：完成值 `renderer::swapchain_access` | `access` 析构时；main 在帧 sender 完成（GPU 完成、present 完成）后析构 |
+
+`resize(access&)`、`acquire_image(access, …)`、`render(access, …)`、`record(access, …)` 都要求传入访问对象，不持有访问权就无从读写变量；
+`access.extent()` / `access.graphics_queue()` 取代原来的裸 getter。并发调用两次同一个起始点时，第二次会等第一次的 permit 释放（即修改完成）后才完成。
+`device()`、`physical_device()`、`graphics_queue_family()`、`format()` 是常量（format 若在 resize 时改变会抛异常），仍直接返回。
+main 的取得顺序固定为 input → menu → renderer，避免多个调用方交叉持有造成死锁。
+
+nagisa 的头文件和 stdexec 一样只在 `execution.cppm` 包含一次并重新导出：多个接口单元在全局模块片段各自包含 `semaphore.h` 时，
+clang 22 在导入方会报 `operator new` 二义性或在序列化 BMI 时崩溃。
 
 实际帧循环用 `schedule | then` 启动渲染线程任务，在该任务内等待帧 sender 完成，使用 promise/future 向主线程传回结果或异常。
 这样避开了当前 Clang 模块构建中 `starts_on(scheduler, 嵌套帧 sender)` 在首次调度时的访问冲突。
@@ -109,7 +124,7 @@ demo/exec-0/
 │   ├── vkfu.cmake                  vkfu::vkfu（仓库内 ../../vkfu）
 │   └── vkkl.cmake                  exec0_vkkl（仓库内 include/vkkl）
 ├── main.cpp                        普通翻译单元，只 import，不再解析任何第三方头
-├── execution/execution.cppm        module demo.execution ：唯一包含 stdexec 头的接口单元
+├── execution/execution.cppm        module demo.execution ：唯一包含 stdexec / nagisa 头的接口单元
 ├── window/window.cppm              module demo.window    ：glfw_context + window（GLFW 原生 API 的 RAII 包装）
 ├── window/window.cpp               demo.window 的实现单元（唯一调用 glfw* 函数的地方）
 ├── input/input.cppm                module demo.input     ：键盘快照 + 退出请求
@@ -178,7 +193,7 @@ std (exec0_std) ◄── demo.execution ◄── demo.input  ◄── main.cp
 | --- | --- | --- |
 | stdexec | 家目录源码（header-only） | `$NAGISA_LIBRARY_ROOT/stdexec`，或 `-DBVN_EXEC0_STDEXEC_ROOT=<根>`；两者都没有时 FetchContent 拉取固定提交 `633c873`（与 bug/gcc 记录一致） |
 | GLFW | 家目录源码，静态构建 | `$NAGISA_LIBRARY_ROOT/glfw`（`git clone https://github.com/glfw/glfw`），或 `-DBVN_EXEC0_GLFW_ROOT=<根>`；都没有时退回 `find_package(glfw3)`。Linux 上从源码构建需要 X11/Wayland 开发库（Arch：`libxi libxrandr libxinerama libxcursor libxkbcommon wayland-protocols`） |
-| nagisa | 源码（header-only） | `$NAGISA_ROOT`，或 `-DBVN_EXEC0_NAGISA_ROOT=<根>`（需含 `include/nagisa/concurrency/lease.h`） |
+| nagisa | 源码（header-only） | `$NAGISA_ROOT`，或 `-DBVN_EXEC0_NAGISA_ROOT=<根>`（需含 `include/nagisa/concurrency/semaphore.h`） |
 | Vulkan headers + loader | 系统 | Windows：Vulkan SDK；Linux：`vulkan-headers` + `vulkan-icd-loader`。验证层可选，有则自动启用 |
 | vkfu / vkkl / bvn::platform | 仓库内 | 相对路径 `../../` |
 

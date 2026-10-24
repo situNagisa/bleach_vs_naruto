@@ -393,6 +393,37 @@ struct frame
 	{}
 };
 
+// 会变化的成员：resize 重建交换链时整体替换。另外 Vulkan 要求同一个 VkQueue 的提交 / 呈现 / 等待
+// 由外部串行化，所以两个队列句柄虽不变，也放在这里，只能通过 swapchain_access 拿到。
+struct renderer::swapchain_state
+{
+	::VkQueue graphic_queue;
+	::VkQueue present_queue;
+	::vkfu::param::khr::swapchain info;
+	::vkkl::swapchain swapchain;
+	::VkExtent2D extent;
+	::std::vector<::VkImage> images;
+	::std::vector<::vkkl::image_view> image_views;
+};
+
+inline renderer::swapchain_state create_swapchain_state(::VkDevice device, ::VkPhysicalDevice physical_device, ::VkSurfaceKHR surface, window const& target_window,
+	::std::span<::std::uint32_t const, 2> queue_families)
+{
+	auto info = ::make_swapchain_info(physical_device, surface, target_window, queue_families);
+	auto swapchain = ::vkkl::swapchain{ device, ::vkfu::khr::create_swapchain(device, info) };
+	auto images = ::get_swapchain_images(device, swapchain.handle);
+	auto views = ::create_swapchain_image_views(device, images, info.image_format);
+	return {
+		.graphic_queue = ::get_queue(device, queue_families[0]),
+		.present_queue = ::get_queue(device, queue_families[1]),
+		.info = info,
+		.swapchain = ::std::move(swapchain),
+		.extent = info.image_extent,
+		.images = ::std::move(images),
+		.image_views = ::std::move(views),
+	};
+}
+
 struct renderer::impl
 {
 	// 引用成员放在最前面：后面所有默认成员初始化器都依赖它。
@@ -404,14 +435,12 @@ struct renderer::impl
 	::vkkl::physical_device_observer physical_device{ selected.handle };
 	::vkkl::device device{ ::create_device(selected) };
 	::std::uint32_t graphics_queue_family{ selected.graphics_family };
-	::VkQueue graphic_queue{ ::get_queue(device.handle, selected.graphics_family) };
-	::VkQueue present_queue{ ::get_queue(device.handle, selected.present_family) };
 	::std::array<::std::uint32_t, 2> queue_families{ selected.graphics_family, selected.present_family };
-	::vkfu::param::khr::swapchain swapchain_info{ ::make_swapchain_info(physical_device.handle, surface.handle, target, queue_families) };
-	::vkkl::swapchain swapchain{ device.handle, ::vkfu::khr::create_swapchain(device.handle, swapchain_info) };
-	::VkExtent2D swapchain_extent{ swapchain_info.image_extent };
-	::std::vector<::VkImage> swapchain_images{ ::get_swapchain_images(device.handle, swapchain.handle) };
-	::std::vector<::vkkl::image_view> swapchain_image_views{ ::create_swapchain_image_views(device.handle, swapchain_images, swapchain_info.image_format) };
+	// 以上为常量。format 在 resize 时若改变会抛异常，所以构造时取一次，也是常量。
+	renderer::swapchain_state swapchain{ ::create_swapchain_state(device.handle, physical_device.handle, surface.handle, target, queue_families) };
+	::VkFormat format{ static_cast<::VkFormat>(swapchain.info.image_format) };
+	// swapchain 的唯一访问权；只能经 acquire_swapchain 取得。
+	renderer::swapchain_guard swapchain_guard{ 1 };
 
 	::std::array<frame, 4> frames{
 		frame{ device.handle, graphics_queue_family },
@@ -440,42 +469,54 @@ renderer& renderer::operator=(renderer&&) noexcept = default;
 
 ::VkDevice renderer::device() const noexcept { return _impl->device.handle; }
 ::VkPhysicalDevice renderer::physical_device() const noexcept { return _impl->physical_device.handle; }
-::VkQueue renderer::graphics_queue() const noexcept { return _impl->graphic_queue; }
 ::std::uint32_t renderer::graphics_queue_family() const noexcept { return _impl->graphics_queue_family; }
-::VkFormat renderer::format() const noexcept { return static_cast<::VkFormat>(_impl->swapchain_info.image_format); }
-::VkExtent2D renderer::extent() const noexcept { return _impl->swapchain_extent; }
+::VkFormat renderer::format() const noexcept { return _impl->format; }
 
-void renderer::resize()
+::VkExtent2D renderer::swapchain_access::extent() const noexcept { return _state->extent; }
+::VkQueue renderer::swapchain_access::graphics_queue() const noexcept { return _state->graphic_queue; }
+
+values_sender_type<renderer::swapchain_access> renderer::acquire_swapchain() const
 {
+	return _impl->swapchain_guard.acquire()
+		| ::stdexec::then([state = &_impl->swapchain](swapchain_guard::permit permit) noexcept
+			{
+				return swapchain_access{ ._permit = ::std::move(permit), ._state = state };
+			});
+}
+
+void renderer::resize(swapchain_access& access) const
+{
+	// 持有访问权说明本帧之前对交换链的访问都已结束；等设备空闲，确保 GPU 端也不再引用旧图像。
+	auto& state = *access._state;
 	::check(::vkDeviceWaitIdle(_impl->device.handle), "wait before swapchain resize");
 	auto info = ::make_swapchain_info(_impl->physical_device.handle, _impl->surface.handle, _impl->target, _impl->queue_families);
-	info.old_swapchain = _impl->swapchain.handle;
-	if (info.image_format != _impl->swapchain_info.image_format)
+	info.old_swapchain = state.swapchain.handle;
+	if (info.image_format != state.info.image_format)
 		throw ::std::runtime_error{ "surface format changed; scene pipelines must be recreated" };
 	auto replacement = ::vkkl::swapchain{ _impl->device.handle, ::vkfu::khr::create_swapchain(_impl->device.handle, info) };
 	auto images = ::get_swapchain_images(_impl->device.handle, replacement.handle);
 	auto views = ::create_swapchain_image_views(_impl->device.handle, images, info.image_format);
-	_impl->swapchain_image_views.clear();
-	_impl->swapchain = ::std::move(replacement);
-	_impl->swapchain_images = ::std::move(images);
-	_impl->swapchain_image_views = ::std::move(views);
-	_impl->swapchain_info = info;
-	_impl->swapchain_extent = info.image_extent;
+	state.image_views.clear();
+	state.swapchain = ::std::move(replacement);
+	state.images = ::std::move(images);
+	state.image_views = ::std::move(views);
+	state.info = info;
+	state.extent = info.image_extent;
 }
 
-values_sender_type<renderer::frame_pool::lease> renderer::acquire_frame() const
+values_sender_type<renderer::frame_pool::permit> renderer::acquire_frame() const
 {
 	return _impl->frame_pool.acquire();
 }
 
-values_sender_type<image_acquisition> renderer::acquire_image(frame const& frame) const
+values_sender_type<image_acquisition> renderer::acquire_image(swapchain_access const& access, frame const& frame) const
 {
 	return {
 		::stdexec::just()
-		| ::stdexec::then([&]
+		| ::stdexec::then([this, &state = *access._state, &frame]
 			{
 				auto index = ::std::uint32_t{};
-				auto const result = ::vkAcquireNextImageKHR(_impl->device.handle, _impl->swapchain.handle,
+				auto const result = ::vkAcquireNextImageKHR(_impl->device.handle, state.swapchain.handle,
 					(::std::numeric_limits<::std::uint64_t>::max)(), frame.image_available.handle, VK_NULL_HANDLE, &index);
 				if (result == VK_ERROR_OUT_OF_DATE_KHR)
 					throw surface_changed{};
@@ -484,18 +525,18 @@ values_sender_type<image_acquisition> renderer::acquire_image(frame const& frame
 				return image_acquisition{
 					.index = index,
 					.semaphore = frame.image_available.handle,
-					.image = _impl->swapchain_images[index],
-					.view = _impl->swapchain_image_views[index].handle,
+					.image = state.images[index],
+					.view = state.image_views[index].handle,
 				};
 			})
 	};
 }
 
-values_sender_type<> renderer::render(frame const& frame, image_acquisition const& acquisition, ::std::span<VkCommandBuffer const> commands) const
+values_sender_type<> renderer::render(swapchain_access const& access, frame const& frame, image_acquisition const& acquisition, ::std::span<VkCommandBuffer const> commands) const
 {
 	return {
 		::stdexec::just()
-		| ::stdexec::then([this, &frame, &acquisition, commands]
+		| ::stdexec::then([this, &state = *access._state, &frame, &acquisition, commands]
 			{
 				::vkfu::reset_command_pool(_impl->device.handle, frame.primary_command_pool.handle, {});
 				::vkfu::begin_command_buffer(frame.primary_command_buffer.handle, ::vkfu::param::command_buffer_begin{ .flags = {.one_time_submit = 1}, });
@@ -517,7 +558,7 @@ values_sender_type<> renderer::render(frame const& frame, image_acquisition cons
 					})},});
 				::vkfu::cmd_begin_rendering(frame.primary_command_buffer.handle, ::vkfu::param::rendering<>{
 					.flags = { .contents_secondary_command_buffers = 1 },
-					.render_area = ::VkRect2D{ .offset = {}, .extent = _impl->swapchain_extent },
+					.render_area = ::VkRect2D{ .offset = {}, .extent = state.extent },
 					.layer_count = 1,
 					.color_attachments = ::std::array{ ::vkfu::evaluate(::vkfu::param::rendering_attachment{
 						.image_view = acquisition.view,
@@ -549,7 +590,7 @@ values_sender_type<> renderer::render(frame const& frame, image_acquisition cons
 					})}, });
 				::vkfu::end_command_buffer(frame.primary_command_buffer.handle);
 
-				::vkfu::queue_submit2(_impl->graphic_queue, ::std::array{ ::vkfu::evaluate(::vkfu::param::submit2{
+				::vkfu::queue_submit2(state.graphic_queue, ::std::array{ ::vkfu::evaluate(::vkfu::param::submit2{
 					.wait_semaphore_infos = ::std::array{ ::vkfu::evaluate(::vkfu::param::semaphore_submit{.semaphore = frame.image_available.handle, .stage_mask = {.color_attachment_output = 1}, })},
 					.command_buffer_infos = ::std::array{ ::vkfu::evaluate(::vkfu::param::command_buffer_submit{.command_buffer = frame.primary_command_buffer.handle, }) },
 					.signal_semaphore_infos = ::std::array{ ::vkfu::evaluate(::vkfu::param::semaphore_submit{.semaphore = frame.render_finished.handle, .stage_mask = {.all_commands = 1}, }) },
@@ -557,11 +598,11 @@ values_sender_type<> renderer::render(frame const& frame, image_acquisition cons
 				auto const present_waits = ::std::array{ frame.render_finished.handle };
 				auto const present_info = ::vkfu::evaluate(::vkfu::param::khr::present{
 					.wait_semaphores = present_waits,
-					.swapchain_count = 1, .swapchains = &_impl->swapchain.handle, .image_indices = &acquisition.index });
-				auto const presented = ::vkQueuePresentKHR(_impl->present_queue, &present_info);
+					.swapchain_count = 1, .swapchains = &state.swapchain.handle, .image_indices = &acquisition.index });
+				auto const presented = ::vkQueuePresentKHR(state.present_queue, &present_info);
 				::vkfu::wait_for_fences(_impl->device.handle, ::std::array{ frame.in_flight.handle }, VK_TRUE, (::std::numeric_limits<::std::uint64_t>::max)());
 				::vkfu::reset_fences(_impl->device.handle, ::std::array{ frame.in_flight.handle });
-				::vkfu::queue_wait_idle(_impl->present_queue);
+				::vkfu::queue_wait_idle(state.present_queue);
 				if (presented == VK_ERROR_OUT_OF_DATE_KHR || presented == VK_SUBOPTIMAL_KHR)
 					throw surface_changed{};
 				::check(presented, "present swapchain image");

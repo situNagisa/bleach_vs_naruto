@@ -10,11 +10,11 @@ input::input(window const& target)
 {
 }
 
-values_sender_type<input::state_type> input::poll() const
+values_sender_type<input::state_type> input::update()
 {
 	return {
-		::stdexec::just()
-		| ::stdexec::then([this]
+		_guard.acquire()
+		| ::stdexec::then([this]([[maybe_unused]] guard_type::permit permit)
 			{
 				window::poll_events();
 
@@ -33,7 +33,10 @@ values_sender_type<input::state_type> input::poll() const
 				static_assert(keys.size() == ::std::to_underlying(key_code::_max));
 
 				if (!_window->focused())
+				{
+					_current = state;
 					return state;
+				}
 
 				for (auto index = ::std::size_t{}; index < keys.size(); ++index)
 				{
@@ -48,12 +51,9 @@ values_sender_type<input::state_type> input::poll() const
 					state._status[::std::to_underlying(key_code::confirm)] = {
 						.active = confirm, .signal = confirm && !_current[key_code::confirm].active };
 
+				// 写回发生在 permit 析构之前。
+				_current = state;
 				return state;
 			})
 	};
-}
-
-void input::consume(state_type state)
-{
-	_current = state;
 }

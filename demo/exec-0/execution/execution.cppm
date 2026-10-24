@@ -6,6 +6,9 @@ module;
 #include <exec/any_sender_of.hpp>
 #include <exec/static_thread_pool.hpp>
 #include <exec/start_detached.hpp>
+// nagisa 的 semaphore 也基于 stdexec，同样只在这里包含：多个接口单元在全局模块片段各自包含它时，
+// 导入方合并声明会出错（clang 22 报 operator new 二义性 / 序列化崩溃）。
+#include <nagisa/concurrency/semaphore.h>
 
 export module demo.execution;
 
@@ -43,3 +46,9 @@ using ::experimental::execution::static_thread_pool;
 using ::experimental::execution::start_detached;
 }
 export namespace exec = ::experimental::execution;
+
+export namespace nagisa::concurrency
+{
+using ::nagisa::concurrency::binary_semaphore_guard;
+using ::nagisa::concurrency::bounded_resource_pool;
+}

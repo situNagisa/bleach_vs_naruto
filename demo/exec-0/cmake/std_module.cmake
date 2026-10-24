@@ -1,4 +1,4 @@
-# 把标准库自带的 std 模块源文件（libc++ 的 std.cppm、MSVC STL 的 std.ixx）编译成一个
+# 把标准库自带的 std 模块源文件（libstdc++ 的 std.cc、libc++ 的 std.cppm、MSVC STL 的 std.ixx）编译成一个
 # 普通的具名模块库目标，供 `import std;` 使用。
 #
 # 为什么不用 CMake 自带的 CMAKE_CXX_MODULE_STD：
@@ -29,9 +29,10 @@ function(bvn_exec0_add_std_module TARGET)
                 endforeach()
             endif()
         else()
-            # clang + libc++：问编译器要 libc++.modules.json，再按清单解析 std 的源文件。
+            # clang + libstdc++ / libc++：问编译器要 <标准库>.modules.json，再按清单解析 std 的源文件。
+            # 两家清单格式相同（libstdc++ 的清单没有 local-arguments，下面按可选处理）。
             execute_process(
-                COMMAND "${CMAKE_CXX_COMPILER}" ${BVN_EXEC0_STDLIB_FLAGS} -print-file-name=libc++.modules.json
+                COMMAND "${CMAKE_CXX_COMPILER}" ${BVN_EXEC0_STDLIB_FLAGS} -print-file-name=${BVN_EXEC0_STDLIB}.modules.json
                 OUTPUT_VARIABLE _manifest
                 OUTPUT_STRIP_TRAILING_WHITESPACE
                 RESULT_VARIABLE _result
@@ -68,7 +69,7 @@ function(bvn_exec0_add_std_module TARGET)
         message(FATAL_ERROR
             "找不到标准库的 std 模块源文件（std.cppm / std.ixx）。\n"
             "  clang-cl：请在 VS 开发者命令提示符（或 VS“打开文件夹”）里配置，确保 VCToolsInstallDir 已设置；\n"
-            "  clang   ：请安装带模块清单的 libc++（`clang++ -print-file-name=libc++.modules.json` 应返回绝对路径）；\n"
+            "  clang   ：请安装带模块清单的 ${BVN_EXEC0_STDLIB}（`clang++ -print-file-name=${BVN_EXEC0_STDLIB}.modules.json` 应返回绝对路径）；\n"
             "  或者直接传 -DBVN_EXEC0_STD_MODULE_SOURCE=<路径>。\n"
             "  当前探测结果：'${_source}'"
         )

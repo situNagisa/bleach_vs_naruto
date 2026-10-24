@@ -37,7 +37,7 @@ include(cmake/stdexec.cmake)    # exec0_stdexec
 include(cmake/nagisa.cmake)     # exec0_nagisa
 include(cmake/vkfu.cmake)       # vkfu::vkfu
 include(cmake/vkkl.cmake)       # exec0_vkkl
-find_package(glm CONFIG REQUIRED)
+include(cmake/glm.cmake)       # glm::glm
 find_package(Freetype REQUIRED)
 
 # ---------------------------------------------------------------- demo 本体
