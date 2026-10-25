@@ -194,6 +194,8 @@ inline device_selection select_physical_device(::VkInstance instance, ::VkSurfac
 			.handle = candidate,
 			.graphics_family = *graphics,
 			.present_family = *present,
+			.graphics_queue_count = families[*graphics].queueCount,
+			.present_queue_count = families[*present].queueCount,
 			.discrete = properties.deviceType == ::VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU,
 		};
 		if (!best || (found.discrete && !best->discrete))
@@ -209,17 +211,18 @@ inline ::vkkl::device create_device(device_selection const& selected)
 {
 	namespace param = ::vkfu::param;
 
-	auto const priority = 1.0f;
+	auto const graphics_priorities = ::std::vector<float>(selected.graphics_queue_count, 1.0f);
+	auto const present_priorities = ::std::vector<float>(selected.present_queue_count, 1.0f);
 	auto queues = ::std::vector<::VkDeviceQueueCreateInfo>{};
 	queues.push_back(::vkfu::evaluate(param::device_queue{
 		.queue_family_index = selected.graphics_family,
-		.queue_priorities = ::std::span{&priority, 1u},
+		.queue_priorities = graphics_priorities,
 		}));
 	if (selected.present_family != selected.graphics_family)
 	{
 		queues.push_back(::vkfu::evaluate(param::device_queue{
 			.queue_family_index = selected.present_family,
-			.queue_priorities = ::std::span{&priority, 1u},
+			.queue_priorities = present_priorities,
 			}));
 	}
 	char const* const device_extensions[]{ ::vkfu::khr::swapchain_extension_name };
@@ -349,137 +352,4 @@ inline ::std::vector<::vkkl::image_view> create_swapchain_image_views( ::VkDevic
 		}) });
 	}
 	return views;
-}
-
-void renderer::resize([[maybe_unused]] guard_type::permit const& permit) const
-{
-	// permit 必须来自本 entity 的 guard（比较 permit 记录的信号量地址）。
-	assert(permit._semaphore == ::std::addressof(_impl->guard._semaphore));
-	// 持有 permit 说明本帧之前对交换链的访问都已结束；等设备空闲，确保 GPU 端也不再引用旧图像。
-	::check(::vkDeviceWaitIdle(_impl->device.handle), "wait before swapchain resize");
-	auto const format = _impl->owner.info.image_format;
-	// 先在副本上建好新交换链与视图，成功后再一起替换，失败时 state 与 owner 保持旧值。
-	auto next = _impl->state;
-	auto replacement = ::create_swapchain_owner(_impl->device.handle, _impl->physical_device.handle, _impl->surface.handle, _impl->target, _impl->queue_families,
-		_impl->owner.swapchain.handle, next);
-	if (replacement.info.image_format != format)
-		throw ::std::runtime_error{ "surface format changed; scene pipelines must be recreated" };
-	// 旧视图先于旧交换链销毁（视图引用的是旧交换链的图像）。
-	_impl->owner.image_views.clear();
-	_impl->owner = ::std::move(replacement);
-	_impl->state = ::std::move(next);
-}
-
-values_sender_type<renderer::frame_pool::permit> renderer::acquire_frame() const
-{
-	return _impl->frame_pool.acquire();
-}
-
-values_sender_type<image_acquisition> renderer::acquire_image([[maybe_unused]] guard_type::permit const& permit, frame const& frame) const
-{
-	// permit 必须来自本 entity 的 guard（比较 permit 记录的信号量地址）。
-	assert(permit._semaphore == ::std::addressof(_impl->guard._semaphore));
-	return {
-		::stdexec::just()
-		| ::stdexec::then([this, &state = _impl->state, &frame]
-			{
-				auto index = ::std::uint32_t{};
-				auto const result = ::vkAcquireNextImageKHR(_impl->device.handle, state.swapchain,
-					(::std::numeric_limits<::std::uint64_t>::max)(), frame.image_available.handle, VK_NULL_HANDLE, &index);
-				if (result == VK_ERROR_OUT_OF_DATE_KHR)
-					throw surface_changed{};
-				if (result != VK_SUBOPTIMAL_KHR)
-					::check(result, "acquire swapchain image");
-				return image_acquisition{
-					.index = index,
-					.semaphore = frame.image_available.handle,
-					.image = state.images[index],
-					.view = state.image_views[index],
-					.owner = ::std::addressof(frame),
-				};
-			})
-	};
-}
-
-values_sender_type<> renderer::render([[maybe_unused]] guard_type::permit const& permit, image_acquisition const& acquisition, ::std::span<::vkkl::command_buffer const> commands) const
-{
-	// permit 必须来自本 entity 的 guard（比较 permit 记录的信号量地址）。
-	assert(permit._semaphore == ::std::addressof(_impl->guard._semaphore));
-	return {
-		::stdexec::just()
-		| ::stdexec::then([this, &state = _impl->state, &frame = *acquisition.owner, &acquisition, commands]
-			{
-				::vkfu::reset_command_pool(_impl->device.handle, frame.primary_command_pool.handle, {});
-				::vkfu::begin_command_buffer(frame.primary_command_buffer.handle, ::vkfu::param::command_buffer_begin{ .flags = {.one_time_submit = 1}, });
-				::vkfu::cmd_pipeline_barrier2(frame.primary_command_buffer.handle, ::vkfu::param::dependency{ .image_memory_barriers = ::std::array{ ::vkfu::evaluate(::vkfu::param::image_memory_barrier2{
-					.dst_stage_mask = {.color_attachment_output = 1},
-					.dst_access_mask = {.color_attachment_write = 1},
-					.old_layout = ::vkfu::enums::image_layout::undefined,
-					.new_layout = ::vkfu::enums::image_layout::color_attachment_optimal,
-					.src_queue_family_index = VK_QUEUE_FAMILY_IGNORED,
-					.dst_queue_family_index = VK_QUEUE_FAMILY_IGNORED,
-					.image = acquisition.image,
-					.subresource_range = {
-						.aspect_mask = { .color = true },
-						.base_mip_level = 0,
-						.level_count = 1,
-						.base_array_layer = 0,
-						.layer_count = 1,
-					},2
-					})},});
-				::vkfu::cmd_begin_rendering(frame.primary_command_buffer.handle, ::vkfu::param::rendering<>{
-					.flags = { .contents_secondary_command_buffers = 1 },
-					.render_area = ::VkRect2D{ .offset = {}, .extent = state.extent },
-					.layer_count = 1,
-					.color_attachments = ::std::array{ ::vkfu::evaluate(::vkfu::param::rendering_attachment{
-						.image_view = acquisition.view,
-						.image_layout = ::vkfu::enums::image_layout::color_attachment_optimal,
-						.load_op = ::vkfu::enums::attachment_load_op::clear,
-						.store_op = ::vkfu::enums::attachment_store_op::store,
-						.clear_value = ::VkClearValue{},
-						}) },
-				});
-				if (!commands.empty())
-				{
-					auto const handles = commands | ::std::views::transform([](::vkkl::command_buffer const& command) { return command.handle; }) | ::std::ranges::to<::std::vector>();
-					::vkfu::cmd_execute_commands(frame.primary_command_buffer.handle, handles);
-				}
-				::vkfu::cmd_end_rendering(frame.primary_command_buffer.handle);
-
-				::vkfu::cmd_pipeline_barrier2(frame.primary_command_buffer.handle, ::vkfu::param::dependency{ .image_memory_barriers = ::std::array{ ::vkfu::evaluate(::vkfu::param::image_memory_barrier2{
-					.src_stage_mask = {.color_attachment_output = 1},
-					.src_access_mask = {.color_attachment_write = 1},
-					.old_layout = ::vkfu::enums::image_layout::color_attachment_optimal,
-					.new_layout = ::vkfu::enums::image_layout::present_src,
-					.src_queue_family_index = VK_QUEUE_FAMILY_IGNORED,
-					.dst_queue_family_index = VK_QUEUE_FAMILY_IGNORED,
-					.image = acquisition.image,
-					.subresource_range = {
-						.aspect_mask = {.color = true },
-						.base_mip_level = 0,
-						.level_count = 1,
-						.base_array_layer = 0,
-						.layer_count = 1,
-					},
-					})}, });
-				::vkfu::end_command_buffer(frame.primary_command_buffer.handle);
-
-				::vkfu::queue_submit2(state.graphics_queue, ::std::array{ ::vkfu::evaluate(::vkfu::param::submit2{
-					.wait_semaphore_infos = ::std::array{ ::vkfu::evaluate(::vkfu::param::semaphore_submit{.semaphore = frame.image_available.handle, .stage_mask = {.color_attachment_output = 1}, })},
-					.command_buffer_infos = ::std::array{ ::vkfu::evaluate(::vkfu::param::command_buffer_submit{.command_buffer = frame.primary_command_buffer.handle, }) },
-					.signal_semaphore_infos = ::std::array{ ::vkfu::evaluate(::vkfu::param::semaphore_submit{.semaphore = frame.render_finished.handle, .stage_mask = {.all_commands = 1}, }) },
-					}) }, frame.in_flight.handle);
-				auto const present_waits = ::std::array{ frame.render_finished.handle };
-				auto const present_info = ::vkfu::evaluate(::vkfu::param::khr::present{
-					.wait_semaphores = present_waits,
-					.swapchain_count = 1, .swapchains = &state.swapchain, .image_indices = &acquisition.index });
-				auto const presented = ::vkQueuePresentKHR(state.present_queue, &present_info);
-				::vkfu::wait_for_fences(_impl->device.handle, ::std::array{ frame.in_flight.handle }, VK_TRUE, (::std::numeric_limits<::std::uint64_t>::max)());
-				::vkfu::reset_fences(_impl->device.handle, ::std::array{ frame.in_flight.handle });
-				::vkfu::queue_wait_idle(state.present_queue);
-				if (presented == VK_ERROR_OUT_OF_DATE_KHR || presented == VK_SUBOPTIMAL_KHR)
-					throw surface_changed{};
-				::check(presented, "present swapchain image");
-			})
-	};
 }

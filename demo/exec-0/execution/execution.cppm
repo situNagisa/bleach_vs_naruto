@@ -69,6 +69,7 @@ export namespace nagisa::concurrency
 {
 using ::nagisa::concurrency::binary_semaphore_guard;
 using ::nagisa::concurrency::bounded_resource_pool;
+using ::nagisa::concurrency::resource_pool;
 using ::nagisa::concurrency::simple_task;
 }
 

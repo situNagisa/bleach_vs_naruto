@@ -121,7 +121,6 @@
     <ClCompile Include="window\window.cppm" />
     <ClCompile Include="window\window.cpp" />
     <ClCompile Include="input\input.cppm" />
-    <ClCompile Include="render\renderer2.cppm" />
     <ClCompile Include="render\renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
