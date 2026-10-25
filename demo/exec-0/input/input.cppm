@@ -5,74 +5,65 @@ import demo.execution;
 import demo.window;
 
 export
-enum class key_code : ::std::uint8_t
+struct toggle_button
 {
-	quit,
-	up,
-	down,
-	left,
-	right,
-	a,
-	b,
-	c,
-	d,
-	e,
-	f,
-	g,
-	confirm,
-	_max,
+	enum class change_type : ::std::uint8_t
+	{
+		no_change,
+		to_press,
+		to_release,
+	};
+
+	bool is_pressed : 1;
+	bool hover : 1;
+	change_type change : 2;
+
+	constexpr void apply(bool pressed) noexcept
+	{
+		if (is_pressed == pressed)
+			change = change_type::no_change;
+		else if (is_pressed && !pressed)
+			change = change_type::to_release;
+		else if (!is_pressed && pressed)
+			change = change_type::to_press;
+		is_pressed = pressed;
+	}
 };
 
-// 一次 update 内某个键的变化：按下 / 抬起 / 不变。
 export
-enum class key_change : ::std::uint8_t
+struct tri_state_button
 {
-	none,
-	pressed,
-	released,
-};
-
-export struct input
-{
-	static constexpr auto key_count = ::std::to_underlying(key_code::_max);
-
-	// 持久状态：本次 update 之后每个键是否按着，以及窗口是否已请求关闭。
-	struct state_type
+	enum class state_type : ::std::uint8_t
 	{
-		::std::array<bool, key_count> pressed{};
-		bool close_requested = false;
-
-		[[nodiscard]] constexpr bool operator[](key_code key) const noexcept
-		{
-			return pressed[::std::to_underlying(key)];
-		}
+		unchecked,
+		checked,
+		indeterminate,
 	};
 
-	// 变化值：本次 update 相对上一次 state 的差异。close_requested 只在关闭请求新出现的那次为 true。
-	struct change_type
+	enum class change_type : ::std::uint8_t
 	{
-		::std::array<key_change, key_count> keys{};
-		bool close_requested = false;
-
-		[[nodiscard]] constexpr key_change operator[](key_code key) const noexcept
-		{
-			return keys[::std::to_underlying(key)];
-		}
+		no_change,
+		to_unchecked,
+		to_checked,
+		to_indeterminate,
 	};
 
-	using guard_type = ::nagisa::concurrency::binary_semaphore_guard;
+	state_type state : 2;
+	change_type change : 3;
+	bool hover : 1;
 
-	// 起始点：取得 guard 的 permit 后泵事件，按 state 计算新状态并写入 state，完成值是 (permit, 变化值)。
-	// input 不析构 permit：调用方在本帧不再读 state 之后自行销毁（或移交），在此之前并发的第二次 update 不会完成。
-	// 必须在主线程启动（GLFW 的事件泵约束）。
-	[[nodiscard]] values_sender_type<guard_type::permit, change_type> update();
-
-	// window 由调用方持有，必须比 input 活得久。
-	explicit input(window const& target);
-
-	// 常量：构造后不变。
-	window const* _window;
-	// 开放访问：只有持有 guard 的 permit 时才能读写 state。guard 不可移动，所以 input 也不可移动。
-	state_type state{};
-	guard_type guard{ 1 };
+	constexpr void apply(state_type new_state) noexcept
+	{
+		if (state == new_state)
+			change = change_type::no_change;
+		else if (new_state == state_type::unchecked)
+			change = change_type::to_unchecked;
+		else if (new_state == state_type::checked)
+			change = change_type::to_checked;
+		else if (new_state == state_type::indeterminate)
+			change = change_type::to_indeterminate;
+		state = new_state;
+	}
 };
+
+module : private;

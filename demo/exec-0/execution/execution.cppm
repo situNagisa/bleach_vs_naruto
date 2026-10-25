@@ -9,6 +9,8 @@ module;
 // nagisa 的 semaphore 也基于 stdexec，同样只在这里包含：多个接口单元在全局模块片段各自包含它时，
 // 导入方合并声明会出错（clang 22 报 operator new 二义性 / 序列化崩溃）。
 #include <nagisa/concurrency/semaphore.h>
+#include <nagisa/concurrency/coroutine.h>
+#include <nagisa/concurrency/simple_task.h>
 // sdag（静态 DAG sender）同理：它依赖 stdexec，只在这里包含，下游写 ::sdag::dag / ::sdag::make_node / ::sdag::after。
 #include <sdag/sdag.h>
 
@@ -39,6 +41,20 @@ using ::stdexec::when_all;
 using ::stdexec::starts_on;
 using ::stdexec::continues_on;
 using ::stdexec::sync_wait;
+using ::stdexec::run_loop;
+using ::stdexec::read_env;
+using ::stdexec::write_env;
+using ::stdexec::get_allocator;
+using ::stdexec::get_stop_token;
+using ::stdexec::get_scheduler;
+using ::stdexec::get_start_scheduler;
+using ::stdexec::get_completion_scheduler;
+using ::stdexec::inplace_stop_source;
+using ::stdexec::inplace_stop_token;
+using ::stdexec::counting_scope;
+using ::stdexec::simple_counting_scope;
+using ::stdexec::spawn;
+using ::stdexec::upon_error;
 }
 
 // stdexec 里 exec 只是 experimental::execution 的命名空间别名，别名本身也要导出，下游才能写 ::exec::。
@@ -53,6 +69,7 @@ export namespace nagisa::concurrency
 {
 using ::nagisa::concurrency::binary_semaphore_guard;
 using ::nagisa::concurrency::bounded_resource_pool;
+using ::nagisa::concurrency::simple_task;
 }
 
 export namespace sdag

@@ -112,26 +112,17 @@
   </PropertyGroup>
   <!-- ======================================================= 文件列表（仅供编辑器浏览） -->
   <ItemGroup>
+    <ClCompile Include="frame\frame.cppm" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="execution\execution.cppm" />
+    <ClCompile Include="renderable\buffer.cppm" />
+    <ClCompile Include="render\renderer.cppm" />
+    <ClCompile Include="scene\menu\menu.cppm" />
     <ClCompile Include="window\window.cppm" />
     <ClCompile Include="window\window.cpp" />
     <ClCompile Include="input\input.cppm" />
-    <ClCompile Include="input\input.cpp" />
-    <ClCompile Include="render\renderer.cppm" />
+    <ClCompile Include="render\renderer2.cppm" />
     <ClCompile Include="render\renderer.cpp" />
-    <ClCompile Include="renderable\image.cppm" />
-    <ClCompile Include="renderable\font.cppm" />
-    <ClCompile Include="renderable\sprite.cppm" />
-    <ClCompile Include="renderable\buffer_type.cpp" />
-    <ClCompile Include="renderable\buffer_type.cppm" />
-    <ClCompile Include="renderable\image.cpp" />
-    <ClCompile Include="renderable\font.cpp" />
-    <ClCompile Include="renderable\sprite.cpp" />
-    <ClCompile Include="renderable\vector_graph.cppm" />
-    <ClCompile Include="renderable\vector_graph.cpp" />
-    <ClCompile Include="scene\menu\menu.cppm" />
-    <ClCompile Include="scene\menu\menu.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />

@@ -53,23 +53,11 @@ target_sources(exec0_demo
         window/window.cpp
         input/input.cpp
         render/renderer.cpp
-        renderable/buffer_type.cpp
-        renderable/image.cpp
-        renderable/font.cpp
-        renderable/sprite.cpp
-        renderable/vector_graph.cpp
-        scene/menu/menu.cpp
     PRIVATE FILE_SET CXX_MODULES FILES
         execution/execution.cppm
         window/window.cppm
         input/input.cppm
         render/renderer.cppm
-        renderable/buffer_type.cppm
-        renderable/image.cppm
-        renderable/font.cppm
-        renderable/sprite.cppm
-        renderable/vector_graph.cppm
-        scene/menu/menu.cppm
 )
 target_link_libraries(exec0_demo
     PRIVATE

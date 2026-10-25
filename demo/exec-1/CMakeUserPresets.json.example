@@ -1,0 +1,32 @@
+{
+  "//": "复制为 CMakeUserPresets.json（已被 .gitignore 忽略）后按本机路径修改；命令行与 VS 工程都会读取它。",
+  "version": 8,
+  "configurePresets": [
+    {
+      "name": "my-windows-debug",
+      "displayName": "我的 Windows clang-cl Debug",
+      "inherits": "windows-clang-cl-debug",
+      "environment": {
+        "BVN_LLVM_ROOT": "D:/tools/LLVM",
+      }
+    },
+    {
+      "name": "my-windows-release",
+      "displayName": "我的 Windows clang-cl Release",
+      "inherits": [
+        "my-windows-debug",
+        "windows-clang-cl-release"
+      ]
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "my-windows-debug",
+      "configurePreset": "my-windows-debug"
+    },
+    {
+      "name": "my-windows-release",
+      "configurePreset": "my-windows-release"
+    }
+  ]
+}

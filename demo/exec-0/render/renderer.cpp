@@ -103,7 +103,7 @@ inline VKAPI_ATTR ::VkBool32 VKAPI_CALL report_debug_message(::VkDebugUtilsMessa
 }
 
 
-inline auto create_instance(::std::vector<char const*> enabled_extensions)
+inline ::vkkl::instance create_instance(::std::vector<char const*> enabled_extensions)
 {
 	namespace param = ::vkfu::param;
 
@@ -117,7 +117,7 @@ inline auto create_instance(::std::vector<char const*> enabled_extensions)
 		enabled_extensions.push_back(::vkfu::ext::debug_utils_extension_name);
 	}
 
-	return ::vkkl::instance{ ::vkfu::create_instance(param::instance{
+	return { ::vkfu::create_instance(param::instance{
 		.application_info = param::application{
 			.name = "bvn consumer architecture triangle",
 			.version = VK_MAKE_API_VERSION(0, 1, 0, 0),
@@ -140,14 +140,6 @@ inline ::vkkl::debug_utils_messenger create_debug_messenger(::VkInstance instanc
 		::VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | ::VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | ::VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
 		&::report_debug_message);
 }
-
-struct device_selection
-{
-	::VkPhysicalDevice handle;
-	::std::uint32_t graphics_family;
-	::std::uint32_t present_family;
-	bool discrete;
-};
 
 inline device_selection select_physical_device(::VkInstance instance, ::VkSurfaceKHR surface)
 {
@@ -247,20 +239,15 @@ inline ::vkkl::device create_device(device_selection const& selected)
 	) };
 	
 }
-
-
-inline ::VkQueue get_queue(::VkDevice device, ::std::uint32_t family) noexcept
-{
-	auto queue = ::VkQueue{};
-	::vkGetDeviceQueue(device, family, 0, &queue);
-	return queue;
-}
+// ::vkfu::get_device_queue(device, family, 0)
 
 inline ::vkfu::param::khr::swapchain make_swapchain_info(
-	::VkPhysicalDevice physical_device,
-	::VkSurfaceKHR surface,
-	window const& target_window,
-	::std::span<::std::uint32_t const, 2> queue_families)
+	::VkPhysicalDevice physical_device
+	, ::VkSurfaceKHR surface
+	, window const& target_window
+	, ::std::span<::std::uint32_t const, 2> queue_families
+	, ::VkSwapchainKHR old_swapchain
+	)
 {
 	using namespace ::vkfu::enums;
 	auto capabilities = ::VkSurfaceCapabilitiesKHR{};
@@ -307,6 +294,7 @@ inline ::vkfu::param::khr::swapchain make_swapchain_info(
 	if (alpha_modes == 0)
 		throw ::std::runtime_error{ "surface has no composite alpha mode" };
 	return {
+		.flags = {},
 		.surface = surface,
 		.min_image_count = image_count,
 		.image_format = static_cast<format>(surface_format.format),
@@ -320,6 +308,7 @@ inline ::vkfu::param::khr::swapchain make_swapchain_info(
 		.composite_alpha = static_cast<composite_alpha>(alpha_modes & (~alpha_modes + 1u)),
 		.present_mode = present_mode::fifo,
 		.clipped = true,
+		.old_swapchain = old_swapchain,
 	};
 }
 
@@ -360,128 +349,6 @@ inline ::std::vector<::vkkl::image_view> create_swapchain_image_views( ::VkDevic
 		}) });
 	}
 	return views;
-}
-
-struct frame
-{
-	::vkkl::fence in_flight;
-	::vkkl::command_pool primary_command_pool;
-	::vkkl::command_buffer primary_command_buffer;
-	::vkkl::semaphore image_available;
-	::vkkl::semaphore render_finished;
-
-	frame(VkDevice device, ::std::uint32_t graphics_queue_family)
-		: in_flight(device, ::vkfu::create_fence(device, ::vkfu::param::fence{}))
-		, primary_command_pool(device, ::vkfu::create_command_pool(device, ::vkfu::param::command_pool{
-			.flags = {.transient = 1, .reset_command_buffer = 1},
-			.queue_family_index = graphics_queue_family,
-			}))
-		, primary_command_buffer([&]
-			{
-				auto raw_command_buffer = ::VkCommandBuffer{};
-				::vkfu::allocate_command_buffers(
-					device,
-					::vkfu::param::command_buffer{
-						.command_pool = primary_command_pool.handle,
-						.level = ::vkfu::enums::command_buffer_level::primary,
-						.command_buffer_count = 1,
-					},
-					::std::span{ &raw_command_buffer, 1u }
-					);
-				return ::vkkl::command_buffer(device, primary_command_pool.handle, raw_command_buffer);
-			}())
-		, image_available(device, ::vkfu::create_semaphore(device, ::vkfu::param::semaphore{}))
-		, render_finished(device, ::vkfu::create_semaphore(device, ::vkfu::param::semaphore{}))
-	{}
-};
-
-// 交换链的 RAII 所有者：resize 时整体替换。对外只暴露 renderer::state_type 里的原始句柄视图，
-// 两者在构造与 resize 时一起更新，且都只在持有 guard 的 permit 时访问。
-struct swapchain_owner
-{
-	::vkfu::param::khr::swapchain info;
-	::vkkl::swapchain swapchain;
-	::std::vector<::vkkl::image_view> image_views;
-};
-
-inline swapchain_owner create_swapchain_owner(::VkDevice device, ::VkPhysicalDevice physical_device, ::VkSurfaceKHR surface, window const& target_window,
-	::std::span<::std::uint32_t const, 2> queue_families, ::VkSwapchainKHR old_swapchain, renderer::state_type& state)
-{
-	auto info = ::make_swapchain_info(physical_device, surface, target_window, queue_families);
-	info.old_swapchain = old_swapchain;
-	auto swapchain = ::vkkl::swapchain{ device, ::vkfu::khr::create_swapchain(device, info) };
-	auto images = ::get_swapchain_images(device, swapchain.handle);
-	auto views = ::create_swapchain_image_views(device, images, info.image_format);
-	state.swapchain = swapchain.handle;
-	state.extent = info.image_extent;
-	state.images = ::std::move(images);
-	state.image_views = views | ::std::views::transform([](::vkkl::image_view const& view) noexcept { return view.handle; }) | ::std::ranges::to<::std::vector>();
-	return { .info = info, .swapchain = ::std::move(swapchain), .image_views = ::std::move(views) };
-}
-
-struct renderer::impl
-{
-	// 引用成员放在最前面：后面所有默认成员初始化器都依赖它。
-	window const& target;
-	::vkkl::instance instance{ ::create_instance(target.required_vulkan_extensions()) };
-	::vkkl::debug_utils_messenger debug_messenger{ ::create_debug_messenger(instance.handle) };
-	::vkkl::surface surface{ instance.handle, target.vulkan_surface(instance.handle) };
-	device_selection selected{ ::select_physical_device(instance.handle, surface.handle)  };
-	::vkkl::physical_device_observer physical_device{ selected.handle };
-	::vkkl::device device{ ::create_device(selected) };
-	::std::uint32_t graphics_queue_family{ selected.graphics_family };
-	::std::array<::std::uint32_t, 2> queue_families{ selected.graphics_family, selected.present_family };
-	// 以下 state 与 owner 为变量，只在持有 guard 的 permit 时访问；owner 的初始化器会写入 state，所以 state 在前。
-	renderer::state_type state{
-		.graphics_queue = ::get_queue(device.handle, queue_families[0]),
-		.present_queue = ::get_queue(device.handle, queue_families[1]),
-		.swapchain = VK_NULL_HANDLE,
-		.extent = {},
-		.images = {},
-		.image_views = {},
-	};
-	swapchain_owner owner{ ::create_swapchain_owner(device.handle, physical_device.handle, surface.handle, target, queue_families, VK_NULL_HANDLE, state) };
-	// format 在 resize 时若改变会抛异常，所以构造时取一次，是常量。
-	::VkFormat format{ static_cast<::VkFormat>(owner.info.image_format) };
-	// state 的唯一访问权；只能经 acquire_swapchain 取得。
-	renderer::guard_type guard{ 1 };
-
-	::std::array<frame, 4> frames{
-		frame{ device.handle, graphics_queue_family },
-		frame{ device.handle, graphics_queue_family },
-		frame{ device.handle, graphics_queue_family },
-		frame{ device.handle, graphics_queue_family },
-	};
-	renderer::frame_pool frame_pool{ ::std::in_place, ::std::from_range, frames | ::std::views::transform([](frame& frame) noexcept { return &frame; }) };
-
-	explicit impl(window const& target_window)
-		: target(target_window)
-	{}
-};
-
-renderer::renderer(window const& target)
-	: _impl(::std::make_unique<impl>(target))
-{}
-
-renderer::~renderer()
-{
-	if (_impl)
-		::vkDeviceWaitIdle(_impl->device.handle);
-}
-renderer::renderer(renderer&&) noexcept = default;
-renderer& renderer::operator=(renderer&&) noexcept = default;
-
-::VkDevice renderer::device() const noexcept { return _impl->device.handle; }
-::VkPhysicalDevice renderer::physical_device() const noexcept { return _impl->physical_device.handle; }
-::std::uint32_t renderer::graphics_queue_family() const noexcept { return _impl->graphics_queue_family; }
-::VkFormat renderer::format() const noexcept { return _impl->format; }
-
-renderer::state_type const& renderer::state() const noexcept { return _impl->state; }
-renderer::guard_type& renderer::guard() const noexcept { return _impl->guard; }
-
-values_sender_type<renderer::guard_type::permit> renderer::acquire_swapchain() const
-{
-	return _impl->guard.acquire();
 }
 
 void renderer::resize([[maybe_unused]] guard_type::permit const& permit) const
@@ -558,7 +425,7 @@ values_sender_type<> renderer::render([[maybe_unused]] guard_type::permit const&
 						.level_count = 1,
 						.base_array_layer = 0,
 						.layer_count = 1,
-					},
+					},2
 					})},});
 				::vkfu::cmd_begin_rendering(frame.primary_command_buffer.handle, ::vkfu::param::rendering<>{
 					.flags = { .contents_secondary_command_buffers = 1 },

@@ -1,7 +1,24 @@
 module;
 
+#include <cassert>
+
 #include <vulkan/vulkan.h>
+
+#include <vkfu/vulkan/v1.4.328/version_1_0.h>
+#include <vkfu/vulkan/v1.4.328/version_1_1.h>
+#include <vkfu/vulkan/v1.4.328/version_1_3.h>
+#include <vkfu/vulkan/v1.4.328/khr/swapchain.h>
+#include <vkfu/vulkan/v1.4.328/ext/debug_utils.h>
+#include <vkfu/vulkan/v1.4.328/layer/names.h>
+
+#include <vkkl/instance.h>
+#include <vkkl/device.h>
+#include <vkkl/physical_device.h>
 #include <vkkl/command_buffer.h>
+#include <vkkl/swapchain.h>
+#include <vkkl/image_view.h>
+#include <vkkl/surface.h>
+#include <vkkl/semaphore.h>
 
 export module demo.render;
 
@@ -9,71 +26,289 @@ import std;
 import demo.execution;
 import demo.window;
 
-// frame 的定义只存在于 renderer.cpp（实现单元）；接口只把它当作租约令牌的指针目标。
-export struct frame;
-
-export
-struct image_acquisition
-{
-	::std::uint32_t index;
-	VkSemaphore semaphore;
-	VkImage image;
-	VkImageView view;
-	// 取图像时用的 frame（它的 image_available 信号量就是上面的 semaphore），render 在它上面录制与提交。
-	// 指向 frame 池租约的令牌：调用方持有租约到 render 的 sender 完成。
-	frame const* owner;
-};
-
 export struct surface_changed {};
+
+struct device_selection
+{
+	::VkPhysicalDevice handle;
+	::std::uint32_t graphics_family;
+	::std::uint32_t present_family;
+	bool discrete;
+};
 
 export
 struct renderer
 {
-	using frame_pool = ::nagisa::concurrency::bounded_resource_pool<frame*, 4>;
-	using guard_type = ::nagisa::concurrency::binary_semaphore_guard;
+	explicit renderer(window const& target_window);
 
-	// 开放访问的交换链状态：只含原始 Vulkan 句柄与值，RAII 所有者留在 impl，resize 时与所有者一起更新。
-	// 只有持有 guard 的 permit 时才能读；两个队列句柄虽不变也归它管，因为 Vulkan 要求同一 VkQueue 的
-	// 提交 / 呈现 / 等待由外部串行化。外部只读：句柄的生命周期由 impl 里的所有者决定，写入只能经 resize。
-	struct state_type
+	struct frame_type
 	{
-		::VkQueue graphics_queue = VK_NULL_HANDLE;
-		::VkQueue present_queue = VK_NULL_HANDLE;
-		::VkSwapchainKHR swapchain = VK_NULL_HANDLE;
-		::VkExtent2D extent{};
-		::std::vector<::VkImage> images;
-		::std::vector<::VkImageView> image_views;
+		::vkkl::fence in_flight;
+		::vkkl::command_pool primary_command_pool;
+		::vkkl::command_buffer primary_command_buffer;
+		::vkkl::semaphore image_available;
+		::vkkl::semaphore render_finished;
+
+		frame_type(VkDevice device, ::std::uint32_t graphics_queue_family);
 	};
+	struct swapchain_type
+	{
+		::vkkl::swapchain swapchain;
+		::VkExtent2D extent;
+		::vkfu::enums::format format;
+		::std::vector<::VkImage> images;
+		::std::vector<::vkkl::image_view> image_views;
 
-	// window 由调用方持有，必须比 renderer 活得久；GLFW 需要先由 glfw_context 初始化。
-	explicit renderer(window const& target);
-	~renderer();
-	renderer(renderer&&) noexcept;
-	renderer& operator=(renderer&&) noexcept;
-	// 以下都是构造后不再改变的常量，无需 permit；format 变化时 resize 会抛异常，所以也是常量。
-	[[nodiscard]] ::VkDevice device() const noexcept;
-	[[nodiscard]] ::VkPhysicalDevice physical_device() const noexcept;
-	[[nodiscard]] ::std::uint32_t graphics_queue_family() const noexcept;
-	[[nodiscard]] ::VkFormat format() const noexcept;
+		swapchain_type(
+			::VkDevice device
+			, ::VkPhysicalDevice physical_device
+			, ::VkSurfaceKHR surface
+			, window const& target_window
+			, ::std::span<::std::uint32_t const, 2> queue_families
+			, ::VkSwapchainKHR old_swapchain);
+	};
+	using frame_pool = ::nagisa::concurrency::bounded_resource_pool<frame_type*, 4>;
+	using swapchain_pool = ::nagisa::concurrency::bounded_resource_pool<swapchain_type*, 4>;
 
-	// state 与 guard 放在 impl 里（renderer 要可移动，guard 不可移动），经这两个成员函数取用。
-	[[nodiscard]] state_type const& state() const noexcept;
-	[[nodiscard]] guard_type& guard() const noexcept;
+	[[nodiscard]] ::VkDevice device() const noexcept { return _device.handle; }
+	[[nodiscard]] ::VkPhysicalDevice physical_device() const noexcept { return _selected_physical_device.handle; }
+	[[nodiscard]] ::std::uint32_t graphics_queue_family() const noexcept { return _selected_physical_device.graphics_family; }
 
-	// 一帧的起始点：等到上一位持有者归还 permit 后完成，完成值只有 permit。
-	// 没有变化值：state 唯一的修改者是 resize，而 resize 要求调用方持有 permit，持有者自己就知道是否重建过。
-	// renderer 不析构 permit：调用方在 GPU、present 都完成后自行销毁。
-	[[nodiscard]] values_sender_type<guard_type::permit> acquire_swapchain() const;
-	// 重建交换链并更新 state；调用方必须持有 permit。要读窗口尺寸，必须在主线程调用。
-	void resize(guard_type::permit const& permit) const;
+	values_sender_type<swapchain_pool::permit> acquire_swapchain();
+	values_sender_type<frame_pool::permit> acquire_frame();
+	// 持有 swapchain 的租约，并在主线程调用以读取窗口尺寸。
+	void resize(swapchain_type& swapchain) const;
+	values_sender_type<::std::uint32_t> acquire_swapchain_image(frame_type const& frame, swapchain_type const& swapchain) const noexcept;
+	values_sender_type<> render(frame_type const& frame, swapchain_type const& swapchain, ::std::uint32_t image_index, ::std::span<::vkkl::command_buffer const> commands) const;
 
-	values_sender_type<frame_pool::permit> acquire_frame() const;
-	// 以下读 state 并使用队列，调用方必须持有 permit，且 permit 要活过返回的 sender。
-	values_sender_type<image_acquisition> acquire_image(guard_type::permit const& permit, frame const& frame) const;
-	// 在 acquisition.owner 上录制主命令缓冲、执行 commands（menu::record 交出的二级命令缓冲）、提交、呈现，
-	// 等 GPU 与 present 完成后才结束。commands 的所有者由调用方保留到返回的 sender 完成。
-	values_sender_type<> render(guard_type::permit const& permit, image_acquisition const& acquisition, ::std::span<::vkkl::command_buffer const> commands) const;
 
-	struct impl;
-	::std::unique_ptr<impl> _impl;
+	window const& _target;
+	::vkkl::instance _instance;
+	::vkkl::debug_utils_messenger _debug_messenger;
+	::vkkl::surface _surface;
+	device_selection _selected_physical_device;
+	::vkkl::device _device;
+	::VkQueue _graphics_queue;
+	::VkQueue _present_queue;
+	::std::array<swapchain_type, 1> _swapchains;
+	swapchain_pool _swapchain_pool;
+	::std::array<frame_type, 4> _frames;
+	frame_pool _frame_pool;
+
 };
+
+module : private;
+
+renderer::frame_type::frame_type(VkDevice device, ::std::uint32_t graphics_queue_family)
+	: in_flight(device, ::vkfu::create_fence(device, ::vkfu::param::fence{}))
+	, primary_command_pool(device, ::vkfu::create_command_pool(device, ::vkfu::param::command_pool{
+		.flags = {.transient = 1, .reset_command_buffer = 1},
+		.queue_family_index = graphics_queue_family,
+		}))
+		, primary_command_buffer([&]
+			{
+				auto raw_command_buffer = ::VkCommandBuffer{};
+				::vkfu::allocate_command_buffers(
+					device,
+					::vkfu::param::command_buffer{
+						.command_pool = primary_command_pool.handle,
+						.level = ::vkfu::enums::command_buffer_level::primary,
+						.command_buffer_count = 1,
+					},
+					::std::span{ &raw_command_buffer, 1u }
+					);
+				return ::vkkl::command_buffer(device, primary_command_pool.handle, raw_command_buffer);
+			}())
+	, image_available(device, ::vkfu::create_semaphore(device, ::vkfu::param::semaphore{}))
+	, render_finished(device, ::vkfu::create_semaphore(device, ::vkfu::param::semaphore{}))
+{
+}
+
+::vkfu::param::khr::swapchain make_swapchain_info(
+	::VkPhysicalDevice physical_device
+	, ::VkSurfaceKHR surface
+	, window const& target_window
+	, ::std::span<::std::uint32_t const, 2> queue_families
+	, ::VkSwapchainKHR old_swapchain
+);
+::std::vector<::VkImage> get_swapchain_images(::VkDevice device, ::VkSwapchainKHR swapchain);
+::std::vector<::vkkl::image_view> create_swapchain_image_views(::VkDevice device, ::std::span<::VkImage const> images, ::vkfu::enums::format format);
+
+renderer::swapchain_type::swapchain_type(
+	::VkDevice device
+	, ::VkPhysicalDevice physical_device
+	, ::VkSurfaceKHR surface
+	, window const& target_window
+	, ::std::span<::std::uint32_t const, 2> queue_families
+	, ::VkSwapchainKHR old_swapchain)
+	: swapchain(device, ::vkfu::khr::create_swapchain(device, ::make_swapchain_info(physical_device, surface, target_window, queue_families, old_swapchain)))
+	, extent(::make_swapchain_info(physical_device, surface, target_window, queue_families, old_swapchain).image_extent)
+	, format(::make_swapchain_info(physical_device, surface, target_window, queue_families, old_swapchain).image_format)
+	, images(::get_swapchain_images(device, swapchain.handle))
+	, image_views(::create_swapchain_image_views(device, images, format))
+{
+	
+}
+
+::vkkl::instance create_instance(::std::vector<char const*> enabled_extensions);
+::vkkl::debug_utils_messenger create_debug_messenger(::VkInstance instance);
+device_selection select_physical_device(::VkInstance instance, ::VkSurfaceKHR surface);
+::vkkl::device create_device(device_selection const& selected);
+
+renderer::renderer(window const& target_window)
+	: _target(target_window)
+	, _instance(::create_instance(_target.required_vulkan_extensions()))
+	, _debug_messenger(::create_debug_messenger(_instance.handle))
+	, _surface(_instance.handle, _target.vulkan_surface(_instance.handle))
+	, _selected_physical_device(::select_physical_device(_instance.handle, _surface.handle))
+	, _device(::create_device(_selected_physical_device))
+	, _graphics_queue(::vkfu::get_device_queue(_device.handle, _selected_physical_device.graphics_family, 0))
+	, _present_queue(::vkfu::get_device_queue(_device.handle, _selected_physical_device.present_family, 0))
+	, _swapchains{
+		swapchain_type{ _device.handle, _selected_physical_device.handle, _surface.handle, target_window, ::std::array{ _selected_physical_device.graphics_family, _selected_physical_device.present_family }, VK_NULL_HANDLE }
+	}
+	, _swapchain_pool(::std::in_place, ::std::from_range, _swapchains | ::std::views::transform([](swapchain_type& value) noexcept { return ::std::addressof(value); }))
+	, _frames{
+		frame_type{ _device.handle, _selected_physical_device.graphics_family },
+		frame_type{ _device.handle, _selected_physical_device.graphics_family },
+		frame_type{ _device.handle, _selected_physical_device.graphics_family },
+		frame_type{ _device.handle, _selected_physical_device.graphics_family },
+	}
+	, _frame_pool(::std::in_place, ::std::from_range, _frames | ::std::views::transform([](frame_type& value) noexcept { return ::std::addressof(value); }))
+{}
+
+
+values_sender_type<renderer::swapchain_pool::permit> renderer::acquire_swapchain()
+{
+	return _swapchain_pool.acquire();
+}
+values_sender_type<::std::uint32_t> renderer::acquire_swapchain_image(frame_type const& frame, swapchain_type const& swapchain) const noexcept
+{
+	return {
+		::stdexec::just()
+		| ::stdexec::then([&]
+			{
+				// auto index = ::vkfu::khr::acquire_next_image2(_device.handle, ::vkfu::param::khr::acquire_next_image{
+				// 	.swapchain = swapchain.swapchain.handle,
+				// 	.timeout = (::std::numeric_limits<::std::uint64_t>::max)(),
+				// 	.semaphore = frame.image_available.handle,
+				// 	.fence = VK_NULL_HANDLE,
+				// 	.device_mask = 1,
+				// 	});
+				::std::uint32_t index;
+				auto const result = ::vkAcquireNextImageKHR(
+					_device.handle
+					, swapchain.swapchain.handle
+					, (::std::numeric_limits<::std::uint64_t>::max)()
+					, frame.image_available.handle
+					, VK_NULL_HANDLE
+					, &index
+					);
+				if (result == VK_ERROR_OUT_OF_DATE_KHR)
+					throw surface_changed{};
+				if (result != VK_SUBOPTIMAL_KHR)
+					if (result != VK_SUCCESS)
+						throw ::std::runtime_error{ "acquire swapchain image" };
+				return index;
+			})
+	};
+}
+values_sender_type<renderer::frame_pool::permit> renderer::acquire_frame()
+{
+	return _frame_pool.acquire();
+}
+
+values_sender_type<> renderer::render(frame_type const& frame, swapchain_type const& swapchain, ::std::uint32_t image_index, ::std::span<::vkkl::command_buffer const> commands) const
+{
+	return {
+		::stdexec::just()
+		| ::stdexec::then([this, &frame, &swapchain, image_index, commands]
+			{
+				::vkfu::reset_command_pool(_device.handle, frame.primary_command_pool.handle, {});
+				::vkfu::begin_command_buffer(frame.primary_command_buffer.handle, ::vkfu::param::command_buffer_begin{ .flags = {.one_time_submit = 1}, });
+				::vkfu::cmd_pipeline_barrier2(frame.primary_command_buffer.handle, ::vkfu::param::dependency{ .image_memory_barriers = ::std::array{ ::vkfu::evaluate(::vkfu::param::image_memory_barrier2{
+					.dst_stage_mask = {.color_attachment_output = 1},
+					.dst_access_mask = {.color_attachment_write = 1},
+					.old_layout = ::vkfu::enums::image_layout::undefined,
+					.new_layout = ::vkfu::enums::image_layout::color_attachment_optimal,
+					.src_queue_family_index = VK_QUEUE_FAMILY_IGNORED,
+					.dst_queue_family_index = VK_QUEUE_FAMILY_IGNORED,
+					.image = swapchain.images[image_index],
+					.subresource_range = {
+						.aspect_mask = { .color = true },
+						.base_mip_level = 0,
+						.level_count = 1,
+						.base_array_layer = 0,
+						.layer_count = 1,
+					},
+					})},});
+				::vkfu::cmd_begin_rendering(frame.primary_command_buffer.handle, ::vkfu::param::rendering<>{
+					.flags = { .contents_secondary_command_buffers = 1 },
+					.render_area = ::VkRect2D{ .offset = {}, .extent = swapchain.extent },
+					.layer_count = 1,
+					.color_attachments = ::std::array{ ::vkfu::evaluate(::vkfu::param::rendering_attachment{
+						.image_view = swapchain.image_views[image_index].handle,
+						.image_layout = ::vkfu::enums::image_layout::color_attachment_optimal,
+						.load_op = ::vkfu::enums::attachment_load_op::clear,
+						.store_op = ::vkfu::enums::attachment_store_op::store,
+						.clear_value = ::VkClearValue{},
+						}) },
+				});
+				if (!commands.empty())
+				{
+					auto const handles = commands | ::std::views::transform([](::vkkl::command_buffer const& command) { return command.handle; }) | ::std::ranges::to<::std::vector>();
+					::vkfu::cmd_execute_commands(frame.primary_command_buffer.handle, handles);
+				}
+				::vkfu::cmd_end_rendering(frame.primary_command_buffer.handle);
+
+				::vkfu::cmd_pipeline_barrier2(frame.primary_command_buffer.handle, ::vkfu::param::dependency{ .image_memory_barriers = ::std::array{ ::vkfu::evaluate(::vkfu::param::image_memory_barrier2{
+					.src_stage_mask = {.color_attachment_output = 1},
+					.src_access_mask = {.color_attachment_write = 1},
+					.old_layout = ::vkfu::enums::image_layout::color_attachment_optimal,
+					.new_layout = ::vkfu::enums::image_layout::present_src,
+					.src_queue_family_index = VK_QUEUE_FAMILY_IGNORED,
+					.dst_queue_family_index = VK_QUEUE_FAMILY_IGNORED,
+					.image = swapchain.images[image_index],
+					.subresource_range = {
+						.aspect_mask = {.color = true },
+						.base_mip_level = 0,
+						.level_count = 1,
+						.base_array_layer = 0,
+						.layer_count = 1,
+					},
+					})}, });
+				::vkfu::end_command_buffer(frame.primary_command_buffer.handle);
+
+				::vkfu::queue_submit2(_graphics_queue, ::std::array{ ::vkfu::evaluate(::vkfu::param::submit2{
+					.wait_semaphore_infos = ::std::array{ ::vkfu::evaluate(::vkfu::param::semaphore_submit{.semaphore = frame.image_available.handle, .stage_mask = {.color_attachment_output = 1}, })},
+					.command_buffer_infos = ::std::array{ ::vkfu::evaluate(::vkfu::param::command_buffer_submit{.command_buffer = frame.primary_command_buffer.handle, }) },
+					.signal_semaphore_infos = ::std::array{ ::vkfu::evaluate(::vkfu::param::semaphore_submit{.semaphore = frame.render_finished.handle, .stage_mask = {.all_commands = 1}, }) },
+					}) }, frame.in_flight.handle);
+
+				::vkfu::khr::queue_present(_present_queue, ::vkfu::param::khr::present{
+					.wait_semaphores = ::std::array{ frame.render_finished.handle },
+					.swapchain_count = 1, .swapchains = &swapchain.swapchain.handle, .image_indices = &image_index });
+				// if (presented == VK_ERROR_OUT_OF_DATE_KHR || presented == VK_SUBOPTIMAL_KHR)
+				// 	throw surface_changed{};
+
+				::vkfu::wait_for_fences(_device.handle, ::std::array{ frame.in_flight.handle }, VK_TRUE, (::std::numeric_limits<::std::uint64_t>::max)());
+				::vkfu::reset_fences(_device.handle, ::std::array{ frame.in_flight.handle });
+				::vkfu::queue_wait_idle(_present_queue);
+			})
+	};
+}
+
+void renderer::resize(swapchain_type& swapchain) const
+{
+	auto replacement = swapchain_type{
+		_device.handle,
+		_selected_physical_device.handle,
+		_surface.handle,
+		_target,
+		::std::array{ _selected_physical_device.graphics_family, _selected_physical_device.present_family },
+		swapchain.swapchain.handle,
+	};
+	// 先销毁旧视图，再由赋值释放旧交换链。
+	swapchain.image_views.clear();
+	swapchain = ::std::move(replacement);
+}
