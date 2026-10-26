@@ -137,7 +137,7 @@ struct previous_layer;
 template<class Graph, ::std::size_t Layer, ::std::size_t... J>
 struct previous_layer<Graph, Layer, ::std::index_sequence<J...>>
 {
-	using type = ::sdag::after<key<Graph, Layer - 1, J>...>;
+	using type = ::sdag::data<key<Graph, Layer - 1, J>...>;
 };
 
 /// 第 Layer 层依赖第 Layer - 1 层的全部节点。
@@ -146,7 +146,7 @@ template<class Graph, class Layers, ::std::size_t Layer>
 {
 	if constexpr (Layer == 0)
 	{
-		return ::std::type_identity<::sdag::after<>>{};
+		return ::std::type_identity<::sdag::data<>>{};
 	}
 	else
 	{
@@ -422,9 +422,9 @@ void test_nested()
 			::std::this_thread::sleep_for(5ms);
 			started.store(true, ::std::memory_order_release);
 		})),
-		::sdag::make_node<a_key, ::sdag::after<start_key>>(::std::move(a)),
-		::sdag::make_node<b_key, ::sdag::after<start_key>>(::std::move(b)),
-		::sdag::make_node<join_key, ::sdag::after<a_key, b_key>>(::stdexec::then([&](int from_a, int from_b)
+		::sdag::make_node<a_key, ::sdag::control<start_key>>(::std::move(a)),
+		::sdag::make_node<b_key, ::sdag::control<start_key>>(::std::move(b)),
+		::sdag::make_node<join_key, ::sdag::data<a_key, b_key>>(::stdexec::then([&](int from_a, int from_b)
 		{
 			if (state_a.done[shape_a::depth - 1].load() != 1 || state_b.done[shape_b::depth - 1].load() != 1)
 			{

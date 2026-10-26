@@ -14,9 +14,11 @@
 ///   shape_of_v<Self>, count_of_v<Self>
 ///   child_t<Self, I>                   节点 I 的 sender 类型（不带值类别）
 ///   node_sender_t<Self, I>             节点 I 的 sender 类型，带上 Self 的值类别
-///   dependency_t<Self, I>              节点 I 声明的 after<...>
-///   dependency_indices_v<Self, after<...>>   after<...> 里的键换成节点索引（std::array）
-///   dependencies_t<Self, I>            节点 I 的前驱索引（std::index_sequence，按声明顺序）
+///   dependency_t<Self, I>              节点 I 的 dependencies<data<...>, control<...>>
+///   data_dependency_t<Self, I>         节点 I 的 data<...>（它的前驱占位符就是 hole<data<...>>）
+///   dependency_indices_v<Self, L<K...>>      data<...> / control<...> / type_list<...> 里的键换成节点索引（std::array）
+///   data_dependencies_t<Self, I>       只含数据依赖
+///   control_dependencies_t<Self, I>    只含控制依赖
 
 #include <cstddef>
 #include <tuple>
@@ -107,7 +109,13 @@ template<class Self, class Dependency>
 inline constexpr auto dependency_indices_v = key_indices_v<typename description_of<Self>::data_type::keys, Dependency>;
 
 template<class Self, size_t I>
-using dependencies_t = general::sequence_t<dependency_indices_v<Self, dependency_t<Self, I>>>;
+using data_dependency_t = typename dependency_t<Self, I>::data_type;
+
+template<class Self, size_t I>
+using data_dependencies_t = general::sequence_t<dependency_indices_v<Self, data_dependency_t<Self, I>>>;
+
+template<class Self, size_t I>
+using control_dependencies_t = general::sequence_t<dependency_indices_v<Self, typename dependency_t<Self, I>::control_type>>;
 
 }
 

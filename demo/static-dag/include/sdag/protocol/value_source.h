@@ -6,7 +6,7 @@
 /// get_value_source，返回一个指向"取值源"的指针。取值源实现两个接口：
 ///
 ///   签名接口   template<class Dependency, class Env> using completions_for = ...;
-///              Dependency（节点的 after<...>）对应的前驱值，在环境 Env 下交给接收者时的完成签名
+///              Dependency（节点的 data<...>）对应的前驱值，在环境 Env 下交给接收者时的完成签名
 ///   交付接口   template<class Dependency, class Receiver> void deliver(Receiver&&) noexcept;
 ///              把这些值交给接收者（一次 set_value）
 ///

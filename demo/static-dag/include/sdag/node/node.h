@@ -2,20 +2,23 @@
 
 /// 节点：键（编译期身份）+ 依赖声明 + 载荷。
 ///
-/// 载荷有两种，决定节点怎么用前驱：
-///   sender      控制依赖。make_node<b, after<a>>(just(1))：a 结束后启动 just(1)，不看 a 的值。
-///   适配器      数据依赖。make_node<b, after<a>>(then(f))：dag 把一个前驱占位符喂给 then，
-///               得到 then(占位符, f) 作为节点 sender；占位符启动时把 a 的值交出来，f 就收到了它。
-///               任何"接收一个 sender、返回一个 sender"的可调用对象都行（continues_on(sch) | then(f)、自写的 lambda……）。
+/// 依赖分两种，写在 make_node 的键后面，各至多一个、顺序随意：
+///   data<a, b>      数据依赖：a、b 完成后启动，并按声明顺序接收它们的值。载荷必须是 sender 适配器——
+///                   dag 把一个前驱占位符喂给它，make_node<c, data<a, b>>(then(f)) 的节点 sender 就是 then(占位符, f)，
+///                   占位符启动时交出 (a 的值..., b 的值...)。任何"接收一个 sender、返回一个 sender"的可调用对象都行。
+///   control<a>      控制依赖：只在 a 完成后启动，不接收、不碰它的值。载荷（没有数据依赖时）必须是 sender。
+///   make_node<d, data<b>, control<c>>(then(f))   两种都有：等 b、c 都完成，f 只收到 b 的值。
+///
+/// 载荷是什么由依赖声明决定，不从载荷类型去猜：声明了 data<...> 却给了 sender、或者没有 data<...> 却给了适配器，都是编译错误。
 ///
 /// 原语：
-///   - node_key<N> / node_dependencies<N>   —— 类型特征，可特化
+///   - node_key<N> / node_dependencies<N>   —— 类型特征，可特化；node_dependencies 给出 dependencies<data<...>, control<...>>
 ///   - payload(n)                           —— CPO，成员优先，其次 ADL
 /// concept：
-///   - dependency_list<T>                   —— after<Keys...>
+///   - dependency_list<T>                   —— dependencies<data<...>, control<...>>
 ///   - graph_node<N>                        —— 三个原语齐备
-///   - node_payload<P, Hole>                —— 载荷能变成 sender：本身是 sender（只有控制依赖），
-///                                             或者是接受前驱占位符的适配器（数据依赖）
+///   - sender_payload<P>                    —— 载荷是 sender（没有数据依赖的节点）
+///   - adaptor_payload<P, Hole>             —— 载荷是接受前驱占位符的 sender 适配器（有数据依赖的节点）
 
 #include <concepts>
 #include <type_traits>
@@ -29,21 +32,84 @@
 namespace sdag
 {
 
-/// 依赖声明：本节点在 Keys... 对应的节点全部完成后才启动；数据依赖时按此顺序接收它们的值。
+/// 数据依赖：Keys... 全部完成后启动，并按此顺序接收它们的值。
 template<class... Keys>
-struct after
+struct data
 {
 	using keys = general::type_list<Keys...>;
 };
 
-template<class T>
-inline constexpr bool is_after = false;
-
+/// 控制依赖：Keys... 全部完成后启动，不接收它们的值。
 template<class... Keys>
-inline constexpr bool is_after<after<Keys...>> = true;
+struct control
+{
+	using keys = general::type_list<Keys...>;
+};
+
+/// 一个节点的全部依赖：数据依赖 + 控制依赖。make_node 的依赖实参经 dependencies_of_t 归一成这个形状。
+template<class Data = data<>, class Control = control<>>
+struct dependencies;
+
+template<class... DataKeys, class... ControlKeys>
+struct dependencies<data<DataKeys...>, control<ControlKeys...>>
+{
+	using data_type = data<DataKeys...>;
+	using control_type = control<ControlKeys...>;
+	/// 全部前驱：先数据依赖，后控制依赖。
+	using keys = general::type_list<DataKeys..., ControlKeys...>;
+	static constexpr bool has_data = sizeof...(DataKeys) != 0;
+};
 
 template<class T>
-concept dependency_list = is_after<::std::remove_cvref_t<T>>;
+inline constexpr bool is_dependencies = false;
+
+template<class Data, class Control>
+inline constexpr bool is_dependencies<dependencies<Data, Control>> = requires { typename dependencies<Data, Control>::keys; };
+
+template<class T>
+concept dependency_list = is_dependencies<::std::remove_cvref_t<T>>;
+
+namespace dependency_detail
+{
+
+template<template<class...> class Kind, class T>
+inline constexpr bool is_kind = false;
+
+template<template<class...> class Kind, class... Keys>
+inline constexpr bool is_kind<Kind, Kind<Keys...>> = true;
+
+/// Deps... 里第一个 Kind<...>；没有时为 Kind<>。
+template<template<class...> class Kind, class... Deps>
+struct find
+{
+	using type = Kind<>;
+};
+
+template<template<class...> class Kind, class First, class... Rest>
+struct find<Kind, First, Rest...> : find<Kind, Rest...>
+{
+};
+
+template<template<class...> class Kind, class... Keys, class... Rest>
+struct find<Kind, Kind<Keys...>, Rest...>
+{
+	using type = Kind<Keys...>;
+};
+
+template<class... Deps>
+struct normalize
+{
+	static_assert(((is_kind<data, Deps> || is_kind<control, Deps>) && ...), "sdag: 依赖只能写 ::sdag::data<...>（数据依赖）或 ::sdag::control<...>（控制依赖）");
+	static_assert((0 + ... + (is_kind<data, Deps> ? 1 : 0)) <= 1, "sdag: 一个节点至多写一个 data<...>，多个前驱写在同一个 data<...> 里");
+	static_assert((0 + ... + (is_kind<control, Deps> ? 1 : 0)) <= 1, "sdag: 一个节点至多写一个 control<...>，多个前驱写在同一个 control<...> 里");
+	using type = dependencies<typename find<data, Deps...>::type, typename find<control, Deps...>::type>;
+};
+
+}
+
+/// make_node<key, Deps...> 的依赖实参（0～2 个 data<...> / control<...>，顺序随意）→ dependencies<data<...>, control<...>>。
+template<class... Deps>
+using dependencies_of_t = typename dependency_detail::normalize<Deps...>::type;
 
 // ---------------------------------------------------------------- 原语：类型特征
 //
@@ -155,19 +221,16 @@ concept graph_node =
 	&& dependency_list<node_dependencies_t<Node>>
 	&& requires(Node&& node) { ::sdag::payload(::std::forward<Node>(node)); };
 
-/// 载荷本身是 sender：依赖只表达先后，不接收前驱的值。
+/// 载荷本身是 sender：没有数据依赖的节点。
 template<class Payload>
 concept sender_payload = ::stdexec::sender<Payload>;
 
-/// 载荷是 sender 适配器（例如 ::stdexec::then(f)）：喂给它输入 sender 得到节点 sender。
-template<class Payload, class Input>
+/// 载荷是 sender 适配器（例如 ::stdexec::then(f)）：喂给它前驱占位符得到节点 sender。
+template<class Payload, class Hole>
 concept adaptor_payload =
 	!sender_payload<Payload>
-	&& ::std::invocable<Payload, Input>
-	&& ::stdexec::sender<::std::invoke_result_t<Payload, Input>>;
-
-template<class Payload, class Input>
-concept node_payload = sender_payload<Payload> || adaptor_payload<Payload, Input>;
+	&& ::std::invocable<Payload, Hole>
+	&& ::stdexec::sender<::std::invoke_result_t<Payload, Hole>>;
 
 // ---------------------------------------------------------------- 默认节点类型
 
@@ -187,11 +250,12 @@ struct node
 	}
 };
 
-/// make_node<key>(sender)                   —— 根节点
-/// make_node<key, after<a, b>>(then(f))     —— 依赖 a、b，f 收到 (a 的值..., b 的值...)
-/// make_node<key, after<a>>(sender)         —— 只在 a 之后启动，不接收 a 的值
-template<class Key, dependency_list Dependencies = after<>, class Payload>
-[[nodiscard]] constexpr node<Key, Dependencies, ::std::decay_t<Payload>> make_node(Payload&& payload)
+/// make_node<key>(sender)                              —— 根节点
+/// make_node<key, data<a, b>>(then(f))                 —— f 收到 (a 的值..., b 的值...)
+/// make_node<key, control<a>>(sender)                  —— 只在 a 之后启动，不接收 a 的值
+/// make_node<key, data<a>, control<b>>(then(f))        —— 等 a、b 都完成，f 只收到 a 的值
+template<class Key, class... Deps, class Payload>
+[[nodiscard]] constexpr node<Key, dependencies_of_t<Deps...>, ::std::decay_t<Payload>> make_node(Payload&& payload)
 	noexcept(::std::is_nothrow_constructible_v<::std::decay_t<Payload>, Payload>)
 {
 	return {::std::forward<Payload>(payload)};

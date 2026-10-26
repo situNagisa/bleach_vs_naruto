@@ -2,7 +2,7 @@
 
 /// 前驱占位符：节点 sender 里「这里是前驱的值」的标记，以及找它、数它、换掉它。依赖：依赖型报错、sender 表达式、类型列表、取值源协议。
 ///
-/// 用户写 make_node<b, after<a>>(then(f))。dag 把一个空的 hole<after<a>> 喂给 then，得到 then(hole<after<a>>, f)
+/// 用户写 make_node<b, data<a>>(then(f))。dag 把一个空的 hole<data<a>> 喂给 then，得到 then(hole<data<a>>, f)
 /// 作为节点 b 的 sender——节点 sender 是普通的 stdexec 表达式，then 的一切（包括 domain 对 then 的定制）都照常生效。
 ///
 /// hole 本身不存值。连接时它从接收者环境里拿到取值源（protocol/value_source.h），启动时请取值源把前驱的值交给接收者；

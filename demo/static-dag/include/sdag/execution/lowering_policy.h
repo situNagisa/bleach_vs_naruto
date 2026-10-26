@@ -52,7 +52,7 @@ struct placeholder_sender
 /// 汇点 S 的 sender，占位符换成占位 sender：保留了汇点的属性（完成调度器等），又不需要整图环境就能算签名。
 template<template<class, class> class SourceOf, class Self, class Env, size_t S>
 using probe_sink_t = protocol::hole_filled_t<graph::child_t<Self, S>,
-	placeholder_sender<graph::pred_completions_t<Self, graph::dependency_t<Self, S>, graph::node_env_t<SourceOf, Self, Env>>>>;
+	placeholder_sender<graph::pred_completions_t<Self, graph::data_dependency_t<Self, S>, graph::node_env_t<SourceOf, Self, Env>>>>;
 
 template<template<class, class> class SourceOf, class Self, class Env, class Sinks = general::sequence_t<general::sinks_v<graph::shape_of_v<Self>>>>
 struct when_all_probe;

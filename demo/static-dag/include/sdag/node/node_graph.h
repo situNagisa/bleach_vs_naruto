@@ -2,9 +2,10 @@
 
 /// 节点集合成图：一组节点的键与依赖 → 一张有向无环图，以及键相关的错误诊断。依赖：有向无环图、节点、类型列表。
 ///
-///   key_indices_v<Keys, after<K...>>       after<...> 里的键换成它们在键表 Keys（type_list）里的下标，按声明顺序放进 std::array；
+///   key_indices_v<Keys, L<K...>>          L<K...>（data<...> / control<...> / type_list<...>）里的键换成它们在键表 Keys（type_list）里的下标，按声明顺序放进 std::array；
 ///                                         不存在的键给出 Keys::size（据此报"依赖了不存在的键"）
-///   shape_of_lists<Keys, Dependencies>()  Keys = type_list<键...>，Dependencies = type_list<after<...>...>，一一对应 → shape<N>。
+///   shape_of_lists<Keys, Dependencies>()  Keys = type_list<键...>，Dependencies = type_list<dependencies<...>...>，一一对应 → shape<N>。
+///                                         边不分数据 / 控制：两种依赖都是"先后"，同一个前驱在两边各写一次算重复依赖。
 ///                                         不做断言，错误写在 error 里（便于测试）
 ///   shape_of<Nodes...>()                  同上，直接从节点类型取键与依赖
 ///   checked_shape_of_lists<...>()         同上，并把每类错误变成一条独立的 static_assert 消息
@@ -42,8 +43,8 @@ namespace detail
 template<class Keys, class Dependency>
 struct key_indices;
 
-template<class Keys, template<class...> class After, class... Dependencies>
-struct key_indices<Keys, After<Dependencies...>>
+template<class Keys, template<class...> class List, class... Dependencies>
+struct key_indices<Keys, List<Dependencies...>>
 {
 	static constexpr ::std::array<::std::size_t, sizeof...(Dependencies)> value{general::index_of_v<Dependencies, Keys>...};
 };
@@ -57,7 +58,7 @@ inline constexpr auto key_indices_v = detail::key_indices<Keys, Dependency>::val
 
 }
 
-/// Keys = type_list<键...>，Dependencies = type_list<after<...>...>，一一对应。不做断言，错误写在 error 里（便于测试）。
+/// Keys = type_list<键...>，Dependencies = type_list<dependencies<...>...>，一一对应。不做断言，错误写在 error 里（便于测试）。
 template<class Keys, class Dependencies>
 [[nodiscard]] consteval auto shape_of_lists() noexcept
 {
@@ -72,7 +73,7 @@ template<class Keys, class Dependencies>
 				{
 					result.fail(general::shape_error::duplicate_key, I);
 				}
-				for (::std::size_t from : key_indices_v<Keys, general::at_t<I, Dependencies>>)
+				for (::std::size_t from : key_indices_v<Keys, typename general::at_t<I, Dependencies>::keys>)
 				{
 					result.add_edge(from, I);
 				}

@@ -144,7 +144,7 @@ struct graph_state
 		}
 	}
 
-	/// Dependency（after<...>）对应前驱的值，按声明顺序铺平。
+	/// Dependency（data<...>）对应前驱的值，按声明顺序铺平。
 	template<class Dependency>
 	static constexpr auto delivery_table = graph::delivery_plan<Self, env_type, dependency_indices_v<Self, Dependency>>(true);
 

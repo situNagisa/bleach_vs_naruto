@@ -18,9 +18,9 @@ struct load {};  struct parse {};  struct index {};  struct report {};
 
 auto g = ::sdag::dag(
 	::sdag::make_node<load>(::stdexec::just(::std::string{"..."})),
-	::sdag::make_node<parse, ::sdag::after<load>>(::stdexec::then([](::std::string const& text) { return text.size(); })),
-	::sdag::make_node<index, ::sdag::after<load>>(::stdexec::then([](::std::string const& text) { return text.front(); })),
-	::sdag::make_node<report, ::sdag::after<parse, index>>(::stdexec::then([](::std::size_t n, char c) { return ::std::format("{}x{}", n, c); })));
+	::sdag::make_node<parse, ::sdag::data<load>>(::stdexec::then([](::std::string const& text) { return text.size(); })),
+	::sdag::make_node<index, ::sdag::data<load>>(::stdexec::then([](::std::string const& text) { return text.front(); })),
+	::sdag::make_node<report, ::sdag::data<parse, index>>(::stdexec::then([](::std::size_t n, char c) { return ::std::format("{}x{}", n, c); })));
 
 static_assert(::stdexec::sender<decltype(g)>);
 static_assert(::exec::sender_for<decltype(g), ::sdag::dag_t>);
@@ -30,8 +30,8 @@ auto [text] = ::stdexec::sync_wait(::std::move(g)).value();
 纯类型写法也成立，对应最初设想的 `xxx<pack<sndr1, fanin<sndr2, sndr3>>, ...>`：
 
 ```cpp
-using root = ::sdag::node<load, ::sdag::after<>, decltype(::stdexec::just(1))>;
-using next = ::sdag::node<parse, ::sdag::after<load>, decltype(::stdexec::then([](int) { return 1.0; }))>;
+using root = ::sdag::node<load, ::sdag::dependencies<>, decltype(::stdexec::just(1))>;
+using next = ::sdag::node<parse, ::sdag::dependencies_of_t<::sdag::data<load>>, decltype(::stdexec::then([](int) { return 1.0; }))>;
 using dag = ::sdag::dag_sender<::sdag::fused, root, next>;
 static_assert(::stdexec::sender<dag>);
 ```
@@ -41,10 +41,15 @@ static_assert(::stdexec::sender<dag>);
 | 写法 | 含义 |
 | --- | --- |
 | `make_node<key>(sender)` | 根节点，直接启动 |
-| `make_node<key, after<a, b>>(adaptor)` | 数据依赖：`adaptor` 是 sender 适配器（`then(f)`、`let_value(f)`、`continues_on(sched) \| then(f)` ……），喂给它的前驱占位符（hole）完成值是 `(a 的值..., b 的值...)` |
-| `make_node<key, after<a>>(sender)` | 控制依赖：只在 `a` 之后启动，不接收它的值 |
+| `make_node<key, data<a, b>>(adaptor)` | 数据依赖：`adaptor` 是 sender 适配器（`then(f)`、`let_value(f)`、`continues_on(sched) \| then(f)` ……），喂给它的前驱占位符（hole）完成值是 `(a 的值..., b 的值...)` |
+| `make_node<key, control<a>>(sender)` | 控制依赖：只在 `a` 之后启动，不接收、不碰它的值 |
+| `make_node<key, data<a>, control<b>>(adaptor)` | 两种都有：等 `a`、`b` 都完成，`adaptor` 只收到 `a` 的值 |
 
-`key` 只是编译期身份，任何类型都行；`after<...>` 里的顺序就是值的顺序。每个节点至多一种 `set_value` 完成（多种先 `into_variant`），这与 `when_all` 的要求一致。
+`key` 只是编译期身份，任何类型都行；`data<...>` 里的顺序就是值的顺序。`data<...>` 与 `control<...>` 各至多一个、顺序随意，
+`make_node` 把它们归一成 `dependencies<data<...>, control<...>>`；同一个前驱不能同时写在两边。
+载荷由依赖决定、不从载荷类型去猜：有 `data<...>` 时载荷必须是适配器，否则必须是 sender，写错了各有一条 `static_assert`。
+值的共享按 `data<...>` 计数：只被一个后继 `data<>` 的值 move 给它，被多个后继 `data<>` 的按 `const&` 共享；`control<>` 的后继不算读者。
+每个节点至多一种 `set_value` 完成（多种先 `into_variant`），这与 `when_all` 的要求一致。
 
 自定义节点类型只要满足三个原语：`node_key<N>::type`、`node_dependencies<N>::type`（可特化的类型特征，默认取嵌套的 `key_type` / `dependencies_type`）和 `payload(n)`（CPO，成员优先、其次 ADL）。`graph_node` concept 组合它们。
 
@@ -65,10 +70,10 @@ static_assert(::stdexec::sender<dag>);
 `dag(nodes...)` 返回 `::sdag::graph_sender<dag_t, graph::graph_data<键表, 依赖表>, 节点 sender...>`（数据与 tuple-like 协议在 `graph::graph_description`，sender 行为在 `graph_sender`）。它实现标准的 tuple-like 协议
 （`std::tuple_size` / `std::tuple_element` 特化 + 成员 `get<I>`），stdexec 靠结构化绑定认出它的标签，不依赖 stdexec 的内部类型：
 
-- 节点 sender 原样保留在 children 里：`then(f)` 节点是 `then(hole<after<...>>, f)`，`continues_on(sched) | then(f)` 节点也是对应的表达式树。它们连接时照常被所在 domain 变换——`then`、`bulk`、`continues_on` 这些标准算法吃到的定制一个不少。
+- 节点 sender 原样保留在 children 里：`then(f)` 节点是 `then(hole<data<...>>, f)`，`continues_on(sched) | then(f)` 节点也是对应的表达式树。它们连接时照常被所在 domain 变换——`then`、`bulk`、`continues_on` 这些标准算法吃到的定制一个不少。
 - `tag_of_t` / `exec::sender_for<G, dag_t>` / 子节点内省都成立；domain 可以像定制任何算法一样在 `transform_sender` 里匹配 `dag_t`。
 - 属性（`get_env(g)`）按 `when_all` 属性的同一套语义回答 `get_completion_domain<...>` 与完成行为：图在汇点完成的地方完成。
-- 前驱占位符 `protocol::hole<after<...>>` 是一个像 `read_env` 一样"依赖环境"的叶子 sender：它不认识图，只认识**取值源协议**（`protocol/value_source.h`）——接收者环境里的转发查询 `get_value_source` 给出一个取值源，签名问它的签名接口（`completions_for<Dependency, Env>`），启动时调它的交付接口（`deliver<Dependency>(receiver)`）。图这一侧由 `graph::graph_state` 实现这两个接口，于是"占位符 → 图"的环被打断。所以图在无环境下是 dependent sender（`sender` 成立，`sender_in<G>` 不成立，`sender_in<G, env>` 成立）。
+- 前驱占位符 `protocol::hole<data<...>>` 是一个像 `read_env` 一样"依赖环境"的叶子 sender：它不认识图，只认识**取值源协议**（`protocol/value_source.h`）——接收者环境里的转发查询 `get_value_source` 给出一个取值源，签名问它的签名接口（`completions_for<Dependency, Env>`），启动时调它的交付接口（`deliver<Dependency>(receiver)`）。图这一侧由 `graph::graph_state` 实现这两个接口，于是"占位符 → 图"的环被打断。所以图在无环境下是 dependent sender（`sender` 成立，`sender_in<G>` 不成立，`sender_in<G, env>` 成立）。
 
 ### 默认连接：融合 op-state（0 开销）
 
@@ -78,7 +83,7 @@ static_assert(::stdexec::sender<dag>);
 - 节点的值存一份在整图里，后继按引用读 —— **扇出不需要 `split`**，因为整图拥有所有节点，不存在"谁最后释放"的问题；
 - 入度 ≥ 2 的节点有一个原子倒计数，入度 1 的节点由前驱直接启动 —— **扇入不需要 `when_all`**；
 - 不会失败 / 停止 / 抛异常的图连停止源、状态字、错误槽都不存在（与 `when_all` 的 `__uses_stop_source` 同理）；外层令牌是 `unstoppable_token` 时连回调槽也没有；只有一个汇点的图没有汇点计数，**唯一汇点的值不存槽位，完成时直接转发给整图的接收者**（像 `then` 一样不物化，整图的值签名就是它的原始签名）；值没人读的节点没有值槽。被优化掉的成员是真正的 0 字节。
-- 共享还是独占按"读值的后继个数"判断：只有控制依赖的后继不算，所以 `a -> b`（读值）、`a -> c`（只等先后）时 `a` 的值仍然 move 给 `b`。
+- 共享还是独占按"读值的后继个数"判断：`control<>` 的后继不算，所以 `b` 写 `data<a>`、`c` 写 `control<a>` 时 `a` 的值仍然 move 给 `b`。
 
 `test/zero_overhead.cpp` 的实测（g++ 16.2，libstdc++，Release）：
 
@@ -98,9 +103,9 @@ static_assert(::stdexec::sender<dag>);
 `transform_sender` 会不会改写它。存在时整图降解为：
 
 ```
-节点 sender = 原节点 sender，其中的占位符换成 fanin(前驱 1, 前驱 2, ...)
+有数据依赖的节点 = 原节点 sender，其中的占位符换成 fanin(数据前驱 1, 数据前驱 2, ..., [then(fanin(控制前驱...), 丢掉值)])
+只有控制依赖的节点 = let_value(fanin(控制前驱...), 常量 sender)
 出度 > 1 的节点先经过 fanout，各后继拿到它的拷贝；出度 1 的节点直接 move 给后继
-只有控制依赖的节点 = let_value(fanin(前驱...), 常量 sender)
 整图 = fanin(汇点...)
 ```
 
@@ -157,11 +162,11 @@ include/sdag/                    （目录 = 概念分组，文件 = 模块；�
     expressions.h       拆开 / 重建 stdexec 的算法 sender
     dependent.h         依赖型报错
   node/             节点
-    node.h              after<>、node<>、make_node、payload CPO 与 graph_node concept
+    node.h              data<> / control<> / dependencies<>、node<>、make_node、payload CPO 与 graph_node concept
     node_graph.h        一组节点的键与依赖 → 有向无环图（key_indices_v、shape_of），以及键相关的错误诊断
   protocol/         节点与图之间的约定
     value_source.h      取值源协议：get_value_source 查询 + 签名接口 + 交付接口
-    hole.h              前驱占位符 hole<after<...>>，以及 hole_count_v / hole_filled_t / fill_hole
+    hole.h              前驱占位符 hole<data<...>>，以及 hole_count_v / hole_filled_t / fill_hole
     node_env.h          节点看到的环境：取值源句柄 + 可选停止令牌 + 外层转发
     node_sender.h       把占位符喂给节点载荷得到节点 sender
   graph/            图

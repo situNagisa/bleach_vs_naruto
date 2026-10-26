@@ -112,8 +112,8 @@ input_update ──► menu_update        frame ──► image ──┐
   不改用 `sync_wait(starts_on(worker, 帧图))`：主线程会阻塞、不能泵事件；原先的嵌套写法在 Clang 模块构建下还出现过首次调度的访问冲突。
   resize 要读窗口尺寸，留在主线程、取得 renderer permit 之后、进入 `render_on` 之前。
 
-sdag 依赖 stdexec，按 §3 第 1 条只在 `execution.cppm` 的全局模块片段包含 `<sdag/sdag.h>`，在 `export namespace sdag { using ::sdag::dag; using ::sdag::make_node; using ::sdag::after; }`
-里重导出；节点 sender、占位符等内部类型无需导出，`main.cpp` 只写 `::sdag::dag(::sdag::make_node<键, ::sdag::after<…>>(…))`。
+sdag 依赖 stdexec，按 §3 第 1 条只在 `execution.cppm` 的全局模块片段包含 `<sdag/sdag.h>`，在 `export namespace sdag { using ::sdag::dag; using ::sdag::make_node; using ::sdag::data; using ::sdag::control; }`
+里重导出；节点 sender、占位符等内部类型无需导出，下游写 `::sdag::dag(::sdag::make_node<键, ::sdag::data<…>, ::sdag::control<…>>(…))`。
 clang 上 `SDAG_REFLECTION` 自动为 0（模板实现），不需要 `-freflection`。
 
 Windows 实际启动回归测试（会打开自己的测试窗口）：

@@ -2,9 +2,10 @@
 
 /// 降解：把图 sender 改写成由现成的扇入 / 扇出算法（默认 when_all + split）拼成的普通 sender 树。
 ///
-///   节点 sender = 节点原来的 sender，其中的占位符换成 fanin(前驱 1, 前驱 2, ...)
+///   有数据依赖的节点 = 节点原来的 sender，其中的占位符换成 fanin(数据前驱 1, 数据前驱 2, ...)；
+///                      另有控制依赖时再多一个子 sender：then(fanin(控制前驱...), discard_values{})——只等先后，不贡献值
+///   只有控制依赖的节点 = let_value(fanin(控制前驱...), constant_sender{载荷})
 ///   出度 > 1 的节点先套 fanout，各后继拿到它的一份拷贝；出度 1 的节点直接 move 给唯一的后继
-///   只有控制依赖的节点 = let_value(fanin(前驱...), constant_sender{载荷})
 ///   整图 = fanin(汇点...)
 ///
 /// 用途有两个：domain 定制了 when_all 时 dag_t::transform_sender 自动走这里，让 domain 看到它认识的标准算法；
@@ -57,10 +58,19 @@ struct constant_sender
 	}
 };
 
+/// 丢掉全部参数：then(fanin(控制前驱...), discard_values{}) 把控制依赖变成一个不带值的子 sender。
+struct discard_values
+{
+	template<class... Args>
+	constexpr void operator()(Args&&...) const noexcept
+	{
+	}
+};
+
 /// lowered_types<Self, FanIn, FanOut>：图降解后每个节点的类型。
 ///
-///   input_t<I>         节点 I 的输入：根是 just()，否则 fanin(前驱...)
-///   node_sender_t<I>   节点 I 的 sender：占位符换成 input_t<I>；只有控制依赖的节点是 let_value(input_t<I>, constant_sender{载荷})
+///   input_t<I>         节点 I 的输入：根是 just()；有数据依赖时是 fanin(数据前驱..., [控制前驱的闸门])；只有控制依赖时是 fanin(控制前驱...)
+///   node_sender_t<I>   节点 I 的 sender：有数据依赖时占位符换成 input_t<I>；只有控制依赖的节点是 let_value(input_t<I>, constant_sender{载荷})
 ///   built_t<I>         存进构造表的东西：出度 > 1 的节点存 fanout(node_sender_t<I>)
 ///   storage_t          tuple<optional<built_t<I>>...>
 ///
@@ -91,6 +101,7 @@ template<class Self, class FanIn, class FanOut>
 	constexpr auto shape = graph::shape_of_v<Self>;
 	lowered_tables<shape.count> tables;
 	infos const keys = arguments(^^typename graph::description_of<Self>::data_type::keys);
+	// 每项是 dependencies<data<...>, control<...>>。
 	infos const dependencies = arguments(^^typename graph::description_of<Self>::data_type::dependencies);
 	infos const children = arguments(^^typename graph::description_of<Self>::children);
 
@@ -101,19 +112,45 @@ template<class Self, class FanIn, class FanOut>
 			: ::std::meta::add_rvalue_reference(tables.built[from]);
 	};
 
+	auto fanin_arguments = [&](infos const& from_keys)
+	{
+		infos result{^^FanIn const&};
+		for (::std::size_t from : ::sdag::general::refl::indices_of(from_keys, keys))
+		{
+			result.push_back(dependency_input(from));
+		}
+		return result;
+	};
+	auto invoke = [](infos const& arguments)
+	{
+		return ::std::meta::dealias(::std::meta::substitute(^^::std::invoke_result_t, arguments));
+	};
+
 	for (::std::size_t index : shape.order)
 	{
-		infos fanin_arguments{^^FanIn const&};
-		for (::std::size_t from : ::sdag::general::refl::indices_of(arguments(dependencies[index]), keys))
+		infos const kinds = arguments(dependencies[index]);
+		infos const data_keys = arguments(kinds[0]);
+		infos const control_keys = arguments(kinds[1]);
+		if (data_keys.empty() && control_keys.empty())
 		{
-			fanin_arguments.push_back(dependency_input(from));
+			tables.input[index] = ::std::meta::dealias(^^decltype(::stdexec::just()));
 		}
-		tables.input[index] = fanin_arguments.size() == 1
-			? ::std::meta::dealias(^^decltype(::stdexec::just()))
-			: ::std::meta::dealias(::std::meta::substitute(^^::std::invoke_result_t, fanin_arguments));
+		else if (data_keys.empty())
+		{
+			tables.input[index] = invoke(fanin_arguments(control_keys));
+		}
+		else
+		{
+			infos input_arguments = fanin_arguments(data_keys);
+			if (!control_keys.empty())
+			{
+				input_arguments.push_back(invoke({^^::stdexec::then_t const&, invoke(fanin_arguments(control_keys)), ^^discard_values}));
+			}
+			tables.input[index] = invoke(input_arguments);
+		}
 
 		info const child = ::std::meta::substitute(^^general::copy_cvref_t, {^^Self, children[index]});
-		if (protocol::refl::hole_count(child) != 0)
+		if (!data_keys.empty())
 		{
 			tables.node_sender[index] = protocol::refl::hole_filled(child, tables.input[index]);
 		}
@@ -186,24 +223,48 @@ struct lowered_types
 	template<size_t D>
 	using dependency_input_t = ::std::conditional_t<(shape.out_degree[D] > 1), built_t<D> const&, built_t<D>&&>;
 
-	template<size_t I, class Dependencies>
-	struct input;
+	/// fanin(前驱...)，Extra... 是追加在后面的子 sender（控制前驱的闸门）。
+	template<class Dependencies, class... Extra>
+	struct fanin;
 
-	template<size_t I>
-	struct input<I, ::std::index_sequence<>>
+	template<size_t... D, class... Extra>
+	struct fanin<::std::index_sequence<D...>, Extra...>
 	{
-		using type = decltype(::stdexec::just());
-	};
-
-	template<size_t I, size_t... D>
-		requires (sizeof...(D) > 0)
-	struct input<I, ::std::index_sequence<D...>>
-	{
-		using type = ::std::invoke_result_t<FanIn const&, dependency_input_t<D>...>;
+		using type = ::std::invoke_result_t<FanIn const&, dependency_input_t<D>..., Extra...>;
 	};
 
 	template<size_t I>
-	using input_t = typename input<I, graph::dependencies_t<Self, I>>::type;
+	struct input
+	{
+		using data = graph::data_dependencies_t<Self, I>;
+		using control = graph::control_dependencies_t<Self, I>;
+
+		static consteval auto compute() noexcept
+		{
+			if constexpr (data::size() == 0 && control::size() == 0)
+			{
+				return ::std::type_identity<decltype(::stdexec::just())>{};
+			}
+			else if constexpr (data::size() == 0)
+			{
+				return ::std::type_identity<typename fanin<control>::type>{};
+			}
+			else if constexpr (control::size() == 0)
+			{
+				return ::std::type_identity<typename fanin<data>::type>{};
+			}
+			else
+			{
+				using gate = ::std::invoke_result_t<::stdexec::then_t const&, typename fanin<control>::type, discard_values>;
+				return ::std::type_identity<typename fanin<data, gate>::type>{};
+			}
+		}
+
+		using type = typename decltype(compute())::type;
+	};
+
+	template<size_t I>
+	using input_t = typename input<I>::type;
 
 	template<size_t I>
 	struct node_sender
@@ -212,7 +273,7 @@ struct lowered_types
 
 		static consteval auto compute() noexcept
 		{
-			if constexpr (protocol::hole_count_v<child> != 0)
+			if constexpr (graph::data_dependencies_t<Self, I>::size() != 0)
 			{
 				return ::std::type_identity<protocol::hole_filled_t<child, input_t<I>>>{};
 			}
@@ -291,16 +352,33 @@ struct builder
 		}
 	}
 
-	template<size_t I, size_t... D>
-	[[nodiscard]] constexpr input_t<I> make_input(::std::index_sequence<D...>)
+	template<size_t... D, class... Extra>
+	[[nodiscard]] constexpr decltype(auto) make_fanin(::std::index_sequence<D...>, Extra&&... extra)
 	{
-		if constexpr (sizeof...(D) == 0)
+		return _fanin(take_dependency<D>()..., ::std::forward<Extra>(extra)...);
+	}
+
+	template<size_t I>
+	[[nodiscard]] constexpr input_t<I> make_input()
+	{
+		using data = graph::data_dependencies_t<Self, I>;
+		using control = graph::control_dependencies_t<Self, I>;
+		if constexpr (data::size() == 0 && control::size() == 0)
 		{
 			return ::stdexec::just();
 		}
+		else if constexpr (data::size() == 0)
+		{
+			return make_fanin(control{});
+		}
+		else if constexpr (control::size() == 0)
+		{
+			return make_fanin(data{});
+		}
 		else
 		{
-			return _fanin(take_dependency<D>()...);
+			// 控制前驱只等先后：then 丢掉它们的值，作为一个不带值的子 sender 并进 fanin。
+			return make_fanin(data{}, ::stdexec::then(make_fanin(control{}), discard_values{}));
 		}
 	}
 
@@ -308,12 +386,11 @@ struct builder
 	[[nodiscard]] constexpr node_sender_t<I> make_node_sender()
 	{
 		using child = child_t<I>;
-		using dependencies = graph::dependencies_t<Self, I>;
 		decltype(auto) sender = ::std::forward<Self>(_graph).template get<I + 2>();
-		if constexpr (protocol::hole_count_v<child> != 0)
+		if constexpr (graph::data_dependencies_t<Self, I>::size() != 0)
 		{
-			// 数据依赖：占位符换成 fanin(前驱...)。
-			return protocol::fill_hole(::std::forward<child>(sender), make_input<I>(dependencies{}));
+			// 数据依赖：占位符换成 fanin(数据前驱..., [控制闸门])。
+			return protocol::fill_hole(::std::forward<child>(sender), make_input<I>());
 		}
 		else if constexpr (shape.is_root(I))
 		{
@@ -322,7 +399,7 @@ struct builder
 		else
 		{
 			// 控制依赖：等前驱都结束，丢掉它们的值，再启动载荷 sender。
-			return ::stdexec::let_value(make_input<I>(dependencies{}),
+			return ::stdexec::let_value(make_input<I>(),
 				execution::constant_sender<::std::remove_cvref_t<child>>{::std::forward<child>(sender)});
 		}
 	}

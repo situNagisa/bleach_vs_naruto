@@ -3,8 +3,8 @@
 /// 前驱的签名：占位符的签名 = 前驱节点的值签名（共享的给 const&）；实现取值源的「签名接口」。
 /// 依赖：图的描述、节点的签名、值的读者、编译期序列、完成签名、类型列表、取值源协议。
 ///
-///   pred_completions_t<Self, after<...>, Env>
-///       前驱的值按 after<...> 的声明顺序拼接：只有一个读者的值给 V（move 过去），多个读者共享的值给 V const&；
+///   pred_completions_t<Self, data<...>, Env>
+///       前驱的值按 data<...> 的声明顺序拼接：只有一个读者的值给 V（move 过去），多个读者共享的值给 V const&；
 ///       某个前驱没有值完成（例如 just_stopped）时是 completion_signatures<>（这个节点永远不会被启动）；
 ///       某个前驱的签名算不出来时，是那个不合法的结果本身（原样透传给 stdexec 诊断）。
 ///   pred_signatures<Self>

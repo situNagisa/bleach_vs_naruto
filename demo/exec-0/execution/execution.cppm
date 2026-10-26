@@ -11,7 +11,7 @@ module;
 #include <nagisa/concurrency/semaphore.h>
 #include <nagisa/concurrency/coroutine.h>
 #include <nagisa/concurrency/simple_task.h>
-// sdag（静态 DAG sender）同理：它依赖 stdexec，只在这里包含，下游写 ::sdag::dag / ::sdag::make_node / ::sdag::after。
+// sdag（静态 DAG sender）同理：它依赖 stdexec，只在这里包含，下游写 ::sdag::dag / ::sdag::make_node / ::sdag::data / ::sdag::control。
 #include <sdag/sdag.h>
 
 export module demo.execution;
@@ -77,5 +77,6 @@ export namespace sdag
 {
 using ::sdag::dag;
 using ::sdag::make_node;
-using ::sdag::after;
+using ::sdag::data;
+using ::sdag::control;
 }

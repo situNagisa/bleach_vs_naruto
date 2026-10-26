@@ -22,7 +22,7 @@ auto update_graph(input& keyboard, menu& scene)
 {
 	return ::sdag::dag(
 		::sdag::make_node<node::input_update>(keyboard.update()),
-		::sdag::make_node<node::menu_update, ::sdag::after<node::input_update>>(::stdexec::let_value([&scene](input::guard_type::permit&, input::change_type& keys) { return scene.update(keys); })));
+		::sdag::make_node<node::menu_update, ::sdag::data<node::input_update>>(::stdexec::let_value([&scene](input::guard_type::permit&, input::change_type& keys) { return scene.update(keys); })));
 }
 
 // 帧图（worker）：frame -> image ─┐
@@ -33,9 +33,9 @@ auto frame_graph(renderer const& target, renderer::guard_type::permit const& swa
 {
 	return ::sdag::dag(
 		::sdag::make_node<node::frame>(target.acquire_frame()),
-		::sdag::make_node<node::image, ::sdag::after<node::frame>>(::stdexec::let_value([&target, &swapchain](renderer::frame_pool::permit& lease) { return target.acquire_image(swapchain, *lease.token()); })),
+		::sdag::make_node<node::image, ::sdag::data<node::frame>>(::stdexec::let_value([&target, &swapchain](renderer::frame_pool::permit& lease) { return target.acquire_image(swapchain, *lease.token()); })),
 		::sdag::make_node<node::record>(scene.record(scene_permit, target.state().extent)),
-		::sdag::make_node<node::render, ::sdag::after<node::image, node::record>>(::stdexec::let_value([&target, &swapchain](image_acquisition& acquisition, auto& commands, auto&) { return target.render(swapchain, acquisition, commands); })));
+		::sdag::make_node<node::render, ::sdag::data<node::image, node::record>>(::stdexec::let_value([&target, &swapchain](image_acquisition& acquisition, auto& commands, auto&) { return target.render(swapchain, acquisition, commands); })));
 }
 
 // 在 worker 上跑完一帧的渲染图，主线程等待时继续泵窗口事件（present 可能等事件线程）。异常（含 surface_changed）经 future 回到主线程。

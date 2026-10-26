@@ -40,9 +40,9 @@ auto diamond(Policy policy)
 {
 	return ::sdag::dag(policy,
 		::sdag::make_node<a>(::stdexec::just(1)),
-		::sdag::make_node<b, ::sdag::after<a>>(::stdexec::then([](int const& x) noexcept { return x + 1; })),
-		::sdag::make_node<c, ::sdag::after<a>>(::stdexec::then([](int const& x) noexcept { return x * 2; })),
-		::sdag::make_node<d, ::sdag::after<b, c>>(::stdexec::then([](int y, int z) noexcept { return y + z; })));
+		::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([](int const& x) noexcept { return x + 1; })),
+		::sdag::make_node<c, ::sdag::data<a>>(::stdexec::then([](int const& x) noexcept { return x * 2; })),
+		::sdag::make_node<d, ::sdag::data<b, c>>(::stdexec::then([](int y, int z) noexcept { return y + z; })));
 }
 
 struct null_receiver
@@ -138,7 +138,7 @@ int main()
 
 		using throwing_graph = decltype(::sdag::dag(
 			::sdag::make_node<a>(::stdexec::just(1)),
-			::sdag::make_node<b, ::sdag::after<a>>(::stdexec::then([](int x) { return x + 1; }))));
+			::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([](int x) { return x + 1; }))));
 		using throwing_operation = ::stdexec::connect_result_t<throwing_graph, null_receiver>;
 		static_assert(throwing_operation::stoppable, "可能抛异常的节点需要停止源");
 		::std::println("  可失败的两节点链 sizeof(op-state) = {}（含 inplace_stop_source、状态字、exception_ptr 槽）", sizeof(throwing_operation));

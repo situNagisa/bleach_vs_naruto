@@ -14,21 +14,25 @@
 namespace sdag::protocol
 {
 
-/// 节点的 sender：载荷是 sender 就原样取出（控制依赖）；是适配器就把前驱占位符喂给它（数据依赖）。
+/// 节点的 sender：没有数据依赖时载荷就是 sender，原样取出；有数据依赖时载荷是适配器，把前驱占位符 hole<data<...>> 喂给它。
 template<class Node>
 [[nodiscard]] constexpr auto make_node_sender(Node&& node)
 {
-	using dependency = node_dependencies_t<Node>;
+	using dependencies = node_dependencies_t<Node>;
+	using dependency = typename dependencies::data_type;
 	using payload_type = decltype(::sdag::payload(::std::forward<Node>(node)));
-	static_assert(node_payload<payload_type, protocol::hole<dependency>>,
-		"sdag: 节点载荷既不是 sender，也不是能接受前驱占位符的适配器（例如 ::stdexec::then(f)）");
-	if constexpr (sender_payload<payload_type>)
+	if constexpr (!dependencies::has_data)
 	{
-		static_assert(protocol::hole_count_v<::std::decay_t<payload_type>> == 0, "sdag: 只有控制依赖的节点 sender 里不能出现前驱占位符");
+		static_assert(sender_payload<payload_type>,
+			"sdag: 没有数据依赖（data<...>）的节点，载荷必须是 sender；要接收前驱的值请把前驱写进 data<...>");
+		static_assert(protocol::hole_count_v<::std::decay_t<payload_type>> == 0, "sdag: 没有数据依赖的节点 sender 里不能出现前驱占位符");
 		return ::std::decay_t<payload_type>(::sdag::payload(::std::forward<Node>(node)));
 	}
 	else
 	{
+		static_assert(adaptor_payload<payload_type, protocol::hole<dependency>>,
+			"sdag: 有数据依赖（data<...>）的节点，载荷必须是能接受前驱占位符的 sender 适配器（例如 ::stdexec::then(f)）；"
+			"只想等先后、不要值，请把前驱写进 control<...>");
 		using child = decltype(::sdag::payload(::std::forward<Node>(node))(protocol::hole<dependency>{}));
 		static_assert(protocol::hole_count_v<child> == 1,
 			"sdag: 节点适配器必须把前驱占位符恰好用一次，而且中间只能隔着 stdexec 的算法层："

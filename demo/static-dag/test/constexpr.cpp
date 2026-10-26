@@ -72,8 +72,8 @@ constexpr int run(Graph&& graph)
 // 链：唯一汇点直接转发，不会失败（没有停止源）
 static_assert(run(::sdag::dag(
 	::sdag::make_node<a>(::stdexec::just(1)),
-	::sdag::make_node<b, ::sdag::after<a>>(::stdexec::then([](int x) noexcept { return x + 1; })),
-	::sdag::make_node<c, ::sdag::after<b>>(::stdexec::then([](int x) noexcept { return x * 3; })))) == 6);
+	::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([](int x) noexcept { return x + 1; })),
+	::sdag::make_node<c, ::sdag::data<b>>(::stdexec::then([](int x) noexcept { return x * 3; })))) == 6);
 
 // 空图
 static_assert([]
