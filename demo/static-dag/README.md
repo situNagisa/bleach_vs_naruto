@@ -45,8 +45,8 @@ static_assert(::stdexec::sender<dag>);
 | `make_node<key, control<a>>(sender)` | 控制依赖：只在 `a` 之后启动，不接收、不碰它的值 |
 | `make_node<key, data<a>, control<b>>(adaptor)` | 两种都有：等 `a`、`b` 都完成，`adaptor` 只收到 `a` 的值 |
 
-`key` 只是编译期身份，任何类型都行；`data<...>` 里的顺序就是值的顺序。`data<...>` 与 `control<...>` 各至多一个、顺序随意，
-`make_node` 把它们归一成 `dependencies<data<...>, control<...>>`；同一个前驱不能同时写在两边。
+`key` 只是编译期身份，任何类型都行；`data<...>` 里的顺序就是值的顺序。`data<...>` 与 `control<...>` 各至多一个、数据依赖在前，
+`make_node` 把它们补齐成 `dependencies<data<...>, control<...>>`；同一个前驱不能同时写在两边。
 载荷由依赖决定、不从载荷类型去猜：有 `data<...>` 时载荷必须是适配器，否则必须是 sender，写错了各有一条 `static_assert`。
 值的共享按 `data<...>` 计数：只被一个后继 `data<>` 的值 move 给它，被多个后继 `data<>` 的按 `const&` 共享；`control<>` 的后继不算读者。
 每个节点至多一种 `set_value` 完成（多种先 `into_variant`），这与 `when_all` 的要求一致。

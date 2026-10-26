@@ -2,7 +2,7 @@
 
 /// 节点：键（编译期身份）+ 依赖声明 + 载荷。
 ///
-/// 依赖分两种，写在 make_node 的键后面，各至多一个、顺序随意：
+/// 依赖分两种，写在 make_node 的键后面，各至多一个，数据依赖在前：
 ///   data<a, b>      数据依赖：a、b 完成后启动，并按声明顺序接收它们的值。载荷必须是 sender 适配器——
 ///                   dag 把一个前驱占位符喂给它，make_node<c, data<a, b>>(then(f)) 的节点 sender 就是 then(占位符, f)，
 ///                   占位符启动时交出 (a 的值..., b 的值...)。任何"接收一个 sender、返回一个 sender"的可调用对象都行。
@@ -46,7 +46,7 @@ struct control
 	using keys = general::type_list<Keys...>;
 };
 
-/// 一个节点的全部依赖：数据依赖 + 控制依赖。make_node 的依赖实参经 dependencies_of_t 归一成这个形状。
+/// 一个节点的全部依赖：数据依赖 + 控制依赖。make_node 的依赖实参经 dependencies_of_t 补齐成这个形状。
 template<class Data = data<>, class Control = control<>>
 struct dependencies;
 
@@ -72,42 +72,40 @@ concept dependency_list = is_dependencies<::std::remove_cvref_t<T>>;
 namespace dependency_detail
 {
 
-template<template<class...> class Kind, class T>
-inline constexpr bool is_kind = false;
-
-template<template<class...> class Kind, class... Keys>
-inline constexpr bool is_kind<Kind, Kind<Keys...>> = true;
-
-/// Deps... 里第一个 Kind<...>；没有时为 Kind<>。
-template<template<class...> class Kind, class... Deps>
-struct find
-{
-	using type = Kind<>;
-};
-
-template<template<class...> class Kind, class First, class... Rest>
-struct find<Kind, First, Rest...> : find<Kind, Rest...>
-{
-};
-
-template<template<class...> class Kind, class... Keys, class... Rest>
-struct find<Kind, Kind<Keys...>, Rest...>
-{
-	using type = Kind<Keys...>;
-};
-
+/// 只接受四种写法：无依赖、data<...>、control<...>、data<...> 后跟 control<...>。
 template<class... Deps>
 struct normalize
 {
-	static_assert(((is_kind<data, Deps> || is_kind<control, Deps>) && ...), "sdag: 依赖只能写 ::sdag::data<...>（数据依赖）或 ::sdag::control<...>（控制依赖）");
-	static_assert((0 + ... + (is_kind<data, Deps> ? 1 : 0)) <= 1, "sdag: 一个节点至多写一个 data<...>，多个前驱写在同一个 data<...> 里");
-	static_assert((0 + ... + (is_kind<control, Deps> ? 1 : 0)) <= 1, "sdag: 一个节点至多写一个 control<...>，多个前驱写在同一个 control<...> 里");
-	using type = dependencies<typename find<data, Deps...>::type, typename find<control, Deps...>::type>;
+	static_assert(sizeof...(Deps) < 0, "sdag: 依赖写作 data<...>、control<...> 或 data<...>, control<...>（数据依赖在前）");
+};
+
+template<>
+struct normalize<>
+{
+	using type = dependencies<>;
+};
+
+template<class... Keys>
+struct normalize<data<Keys...>>
+{
+	using type = dependencies<data<Keys...>>;
+};
+
+template<class... Keys>
+struct normalize<control<Keys...>>
+{
+	using type = dependencies<data<>, control<Keys...>>;
+};
+
+template<class... DataKeys, class... ControlKeys>
+struct normalize<data<DataKeys...>, control<ControlKeys...>>
+{
+	using type = dependencies<data<DataKeys...>, control<ControlKeys...>>;
 };
 
 }
 
-/// make_node<key, Deps...> 的依赖实参（0～2 个 data<...> / control<...>，顺序随意）→ dependencies<data<...>, control<...>>。
+/// make_node<key, Deps...> 的依赖实参 → dependencies<data<...>, control<...>>。
 template<class... Deps>
 using dependencies_of_t = typename dependency_detail::normalize<Deps...>::type;
 

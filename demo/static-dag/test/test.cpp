@@ -309,7 +309,7 @@ static_assert(!::sdag::graph_node<int>);
 static_assert(!::sdag::graph_node<::sdag::data<a>>);
 static_assert(::sdag::dependency_list<::sdag::dependencies<>>);
 static_assert(!::sdag::dependency_list<::sdag::data<a>>);
-static_assert(::std::same_as<::sdag::dependencies_of_t<::sdag::control<b>, ::sdag::data<a>>, ::sdag::dependencies<::sdag::data<a>, ::sdag::control<b>>>);
+static_assert(::std::same_as<::sdag::dependencies_of_t<::sdag::control<b>>, ::sdag::dependencies<::sdag::data<>, ::sdag::control<b>>>);
 static_assert(!::sdag::dependency_list<::std::tuple<>>);
 static_assert(::sdag::graph_policy_for<::sdag::fused, root, inc>);
 static_assert(::sdag::graph_policy_for<::sdag::composed<>, root, inc>);
@@ -508,8 +508,8 @@ void test_mixed_dependencies()
 			// c 只依赖 a 的先后：a 的值只有 b 一个读者，所以 move 给 b，不共享
 			::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([&](auto&& x) { a_shared = shared_access<decltype(x)>; sequence.push_back(2); return x * 2; })),
 			::sdag::make_node<c, ::sdag::control<a>>(::stdexec::just(::std::string("c")) | ::stdexec::then([&](::std::string s) { sequence.push_back(3); return s; })),
-			// 顺序随意：control 写在 data 前面也行；d 等 b、c 都完成，但只收到 c 的值
-			::sdag::make_node<d, ::sdag::control<b>, ::sdag::data<c>>(::stdexec::then([&](::std::string const& s) { sequence.push_back(4); return s + "d"; })));
+			// d 等 b、c 都完成，但只收到 c 的值
+			::sdag::make_node<d, ::sdag::data<c>, ::sdag::control<b>>(::stdexec::then([&](::std::string const& s) { sequence.push_back(4); return s + "d"; })));
 	};
 	using graph = decltype(build(::sdag::fused{}, ::std::declval<::std::vector<int>&>(), ::std::declval<bool&>()));
 	static_assert(::std::same_as<::stdexec::completion_signatures_of_t<graph, ::stdexec::env<>>,
