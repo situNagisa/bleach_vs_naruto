@@ -6,6 +6,8 @@ module;
 #include <vkfu/vulkan/v1.4.328/version_1_1.h>
 #include <vkfu/vulkan/v1.4.328/version_1_3.h>
 #include <vkfu/vulkan/v1.4.328/khr/swapchain.h>
+#include <vkfu/vulkan/v1.4.328/khr/swapchain_maintenance1.h>
+#include <vkfu/vulkan/v1.4.328/ext/swapchain_maintenance1.h>
 #include <vkfu/vulkan/v1.4.328/ext/debug_utils.h>
 #include <vkfu/vulkan/v1.4.328/layer/names.h>
 
@@ -157,11 +159,20 @@ device_selection select_physical_device(::VkInstance instance, ::VkSurfaceKHR su
 		::vkGetPhysicalDeviceProperties(candidate, &properties);
 		if (properties.apiVersion < VK_API_VERSION_1_3)
 			continue;
-		if (!::has_extension(::device_extensions(candidate), ::vkfu::khr::swapchain_extension_name))
+		auto const extensions = ::device_extensions(candidate);
+		if (!::has_extension(extensions, ::vkfu::khr::swapchain_extension_name))
 			continue;
 
+		// present fence 只要设备扩展（KHR 或同名前身 EXT）与特性；它所依赖的实例扩展 surface_maintenance1
+		// 只在查询 / 修改呈现模式时才需要，这里不用。
+		auto const maintenance_name = ::has_extension(extensions, ::vkfu::khr::swapchain_maintenance_1_extension_name) ? ::vkfu::khr::swapchain_maintenance_1_extension_name
+			: ::has_extension(extensions, ::vkfu::ext::swapchain_maintenance_1_extension_name) ? ::vkfu::ext::swapchain_maintenance_1_extension_name
+			: nullptr;
+		auto maintenance = ::VkPhysicalDeviceSwapchainMaintenance1FeaturesKHR{};
+		maintenance.sType = ::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SWAPCHAIN_MAINTENANCE_1_FEATURES_KHR;
 		auto vulkan13 = ::VkPhysicalDeviceVulkan13Features{};
 		vulkan13.sType = ::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+		vulkan13.pNext = maintenance_name ? &maintenance : nullptr;
 		auto supported = ::VkPhysicalDeviceFeatures2{};
 		supported.sType = ::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
 		supported.pNext = &vulkan13;
@@ -204,6 +215,7 @@ device_selection select_physical_device(::VkInstance instance, ::VkSurfaceKHR su
 			.graphics_queue_count = families[*graphics].queueCount,
 			.present_queue_count = families[*present].queueCount,
 			.discrete = properties.deviceType == ::VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU,
+			.swapchain_maintenance = maintenance.swapchainMaintenance1 == VK_TRUE ? maintenance_name : nullptr,
 		};
 		if (!best || (found.discrete && !best->discrete))
 			best = found;
@@ -232,21 +244,22 @@ device_selection select_physical_device(::VkInstance instance, ::VkSurfaceKHR su
 			.queue_priorities = present_priorities,
 			}));
 	}
-	char const* const device_extensions[]{ ::vkfu::khr::swapchain_extension_name };
+	auto device_extensions = ::std::vector<char const*>{ ::vkfu::khr::swapchain_extension_name };
+	if (selected.swapchain_maintenance)
+		device_extensions.push_back(selected.swapchain_maintenance);
 
-	return ::vkkl::device{ ::vkfu::create_device(
-		selected.handle,
-		::vkfu::chain(
-			param::device{
-				.queue_create_infos = queues,
-				.enabled_extension_names = device_extensions,
-			},
-			param::feature::vulkan13{
-				.synchronization2 = true,
-				.dynamic_rendering = true,
-			}
-		)
-	) };
+	auto const device = param::device{
+		.queue_create_infos = queues,
+		.enabled_extension_names = device_extensions,
+	};
+	auto const vulkan13 = param::feature::vulkan13{
+		.synchronization2 = true,
+		.dynamic_rendering = true,
+	};
+	// 扩展的特性结构只有在扩展启用时才能出现在 pNext 链里。
+	if (selected.swapchain_maintenance)
+		return ::vkkl::device{ ::vkfu::create_device(selected.handle, ::vkfu::chain(device, vulkan13, param::feature::khr::swapchain_maintenance1{ .enable = true })) };
+	return ::vkkl::device{ ::vkfu::create_device(selected.handle, ::vkfu::chain(device, vulkan13)) };
 	
 }
 // ::vkfu::get_device_queue(device, family, 0)
@@ -254,7 +267,7 @@ device_selection select_physical_device(::VkInstance instance, ::VkSurfaceKHR su
 ::vkfu::param::khr::swapchain make_swapchain_info(
 	::VkPhysicalDevice physical_device
 	, ::VkSurfaceKHR surface
-	, window const& target_window
+	, window_extent drawable
 	, ::std::span<::std::uint32_t const, 2> queue_families
 	, ::VkSwapchainKHR old_swapchain
 	)
@@ -287,7 +300,6 @@ device_selection select_physical_device(::VkInstance instance, ::VkSurfaceKHR su
 	auto extent = capabilities.currentExtent;
 	if (extent.width == (::std::numeric_limits<::std::uint32_t>::max)())
 	{
-		auto const drawable = target_window.drawable_extent();
 		extent = {
 			.width = ::std::clamp(drawable.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width),
 			.height = ::std::clamp(drawable.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height),

@@ -51,13 +51,15 @@ target_sources(exec0_demo
     PRIVATE
         main.cpp
         window/window.cpp
-        input/input.cpp
         render/renderer.cpp
     PRIVATE FILE_SET CXX_MODULES FILES
         execution/execution.cppm
         window/window.cppm
         input/input.cppm
         render/renderer.cppm
+        scene/menu/menu.cppm
+        frame/frame.cppm
+        renderable/buffer.cppm
 )
 target_link_libraries(exec0_demo
     PRIVATE
