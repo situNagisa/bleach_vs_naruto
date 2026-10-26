@@ -34,7 +34,7 @@ namespace sdag
 template<class Tag, graph_node... Nodes>
 [[nodiscard]] constexpr auto make_graph(Nodes&&... nodes)
 {
-	using data = graph::graph_data<general::type_list<node_key_t<Nodes>...>, general::type_list<node_dependencies_t<Nodes>...>>;
+	using data = graph::graph_data<keys_of_v<Nodes...>, general::type_list<node_dependencies_t<Nodes>...>>;
 	using children = general::indexed_tuple<protocol::node_sender_of_t<Nodes>...>;
 	using sender = graph_sender<Tag, data, protocol::node_sender_of_t<Nodes>...>;
 	// stdexec 靠结构化绑定识别标签；编译器缺少结构化绑定内省时这里会失效，domain 对标签的匹配也就静默失效，所以显式检查。

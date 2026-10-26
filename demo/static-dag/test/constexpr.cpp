@@ -13,18 +13,14 @@
 namespace
 {
 
-struct a
+enum class key
 {
+	a, b, c, d,
 };
-struct b
-{
-};
-struct c
-{
-};
-struct d
-{
-};
+inline constexpr key a = key::a;
+inline constexpr key b = key::b;
+inline constexpr key c = key::c;
+inline constexpr key d = key::d;
 
 /// 常量求值里也能用的接收者：结果写进一个局部变量。
 struct result_receiver
@@ -78,9 +74,9 @@ static_assert(run(::sdag::dag(
 // take 链：值槽复用（a 与 c 共用一块存储，在常量求值里切换在世的成员）
 static_assert(run(::sdag::dag(
 	::sdag::make_node<a>(::stdexec::just(1)),
-	::sdag::make_node<b, ::sdag::data<::sdag::take<a>>>(::stdexec::then([](int x) noexcept { return x + 1; })),
-	::sdag::make_node<c, ::sdag::data<::sdag::take<b>>>(::stdexec::then([](int x) noexcept { return x * 3; })),
-	::sdag::make_node<d, ::sdag::data<::sdag::take<c>>>(::stdexec::then([](int x) noexcept { return x - 1; })))) == 5);
+	::sdag::make_node<b, ::sdag::data<::sdag::take{a}>>(::stdexec::then([](int x) noexcept { return x + 1; })),
+	::sdag::make_node<c, ::sdag::data<::sdag::take{b}>>(::stdexec::then([](int x) noexcept { return x * 3; })),
+	::sdag::make_node<d, ::sdag::data<::sdag::take{c}>>(::stdexec::then([](int x) noexcept { return x - 1; })))) == 5);
 
 // 空图
 static_assert([]

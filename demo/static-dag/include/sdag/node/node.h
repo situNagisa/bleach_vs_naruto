@@ -1,6 +1,6 @@
 #pragma once
 
-/// 节点：键（编译期身份）+ 依赖声明 + 载荷。
+/// 节点：键（编译期身份，一个值）+ 依赖声明 + 载荷。键的类型由用户定，受 key_value 约束；一张图的键必须同一类型。
 ///
 /// 依赖分两种，写在 make_node 的键后面，各至多一个，数据依赖在前：
 ///   data<a, b>      数据依赖：a、b 完成后启动，并按声明顺序接收它们的值。载荷必须是 sender 适配器——
@@ -10,13 +10,13 @@
 ///   make_node<d, data<b>, control<c>>(then(f))   两种都有：等 b、c 都完成，f 只收到 b 的值。
 ///
 /// 值的交付：data<a> 里的 a 默认以 V const& 交给本节点，值留在整图里，活到整图结束。
-/// 写成 data<take<a>> 则本节点按值（move）拿到它，并在本节点结束时析构它（之后它占的空间可以给别的值用）。
-/// 一个值至多被 take 一次，take 它的节点必须排在它所有其它读者之后（编译期检查，见 node/node_graph.h）。
+/// 写成 data<take{a}> 则本节点按值（move）拿到它，并在本节点结束时析构它（之后它占的空间可以给别的值用）。
+/// 一个值至多被 take 一次，take 它的节点必须排在它所有其它读者之后（编译期检查，见 assembly/dag.h）。
 ///
 /// 载荷是什么由依赖声明决定，不从载荷类型去猜：声明了 data<...> 却给了 sender、或者没有 data<...> 却给了适配器，都是编译错误。
 ///
 /// 原语：
-///   - node_key<N> / node_dependencies<N>   —— 类型特征，可特化；node_dependencies 给出 dependencies<data<...>, control<...>>
+///   - node_key<N>::value / node_dependencies<N>::type   —— 可特化；键是值（node_key_v<N>），依赖是 dependencies<data<...>, control<...>>
 ///   - payload(n)                           —— CPO，成员优先，其次 ADL
 /// concept：
 ///   - dependency_list<T>                   —— dependencies<data<...>, control<...>>
@@ -26,37 +26,31 @@
 
 #include <array>
 #include <concepts>
+#include <cstddef>
 #include <type_traits>
 #include <utility>
 
 #include <stdexec/execution.hpp>
 
 #include "../config.h"
-#include "../general/type_list.h"
 
 namespace sdag
 {
 
-/// 写在 data<...> 里：取走 Key 的值——本节点按值（move）拿到它，本节点结束时析构它。
-template<class Key>
+/// 键：节点的编译期身份，是一个值（非类型模板实参）。键的类型由用户自己定（枚举、整数、可比较的结构体……），
+/// 一张图里所有键必须是同一个类型（编译期检查）。
+template<class T>
+concept key_value = ::std::equality_comparable<T>;
+
+/// 写在 data<...> 里：取走 key 的值——本节点按值（move）拿到它，本节点结束时析构它。写作 take{key}。
+template<key_value Key>
 struct take
 {
+	Key key;
 };
 
 namespace dependency_detail
 {
-
-template<class T>
-struct key_of
-{
-	using type = T;
-};
-
-template<class Key>
-struct key_of<take<Key>>
-{
-	using type = Key;
-};
 
 template<class T>
 inline constexpr bool is_take_v = false;
@@ -64,38 +58,70 @@ inline constexpr bool is_take_v = false;
 template<class Key>
 inline constexpr bool is_take_v<take<Key>> = true;
 
+/// take{k} 换成 k，其它原样。
+template<class T>
+[[nodiscard]] consteval auto key_of(T value)
+{
+	if constexpr (is_take_v<T>)
+	{
+		return value.key;
+	}
+	else
+	{
+		return value;
+	}
 }
 
-/// 数据依赖：Keys... 全部完成后启动，并按此顺序接收它们的值。Keys 里可以写 take<K>。
-template<class... Keys>
+/// 没有任何键时的占位类型（data<> / control<> / 空图）。
+struct no_key
+{
+	friend constexpr bool operator==(no_key, no_key) noexcept = default;
+};
+
+/// 一组键排成 std::array；空时是 std::array<no_key, 0>。
+template<auto... Keys>
+[[nodiscard]] consteval auto key_array()
+{
+	if constexpr (sizeof...(Keys) == 0)
+	{
+		return ::std::array<no_key, 0>{};
+	}
+	else
+	{
+		static_assert((::std::same_as<decltype(Keys), decltype(Keys...[0])> && ...), "sdag: 一张图里所有键必须是同一个类型");
+		return ::std::array{Keys...};
+	}
+}
+
+}
+
+/// 数据依赖：Keys... 全部完成后启动，并按此顺序接收它们的值。Keys 里可以写 take{key}。
+template<auto... Keys>
 struct data
 {
-	/// 前驱的键（take<K> 换成 K）。
-	using keys = general::type_list<typename dependency_detail::key_of<Keys>::type...>;
+	/// 前驱的键（take{k} 换成 k）。
+	static constexpr auto keys = dependency_detail::key_array<dependency_detail::key_of(Keys)...>();
 	/// 第 i 个前驱是不是 take。
-	static constexpr ::std::array<bool, sizeof...(Keys)> taken{dependency_detail::is_take_v<Keys>...};
+	static constexpr ::std::array<bool, sizeof...(Keys)> taken{dependency_detail::is_take_v<decltype(Keys)>...};
 };
 
 /// 控制依赖：Keys... 全部完成后启动，不接收它们的值。
-template<class... Keys>
+template<auto... Keys>
 struct control
 {
-	using keys = general::type_list<Keys...>;
+	static_assert(!(dependency_detail::is_take_v<decltype(Keys)> || ...), "sdag: take{...} 只能写在 data<...> 里（控制依赖不碰值）");
+	static constexpr auto keys = dependency_detail::key_array<Keys...>();
 };
 
 /// 一个节点的全部依赖：数据依赖 + 控制依赖。make_node 的依赖实参经 dependencies_of_t 补齐成这个形状。
 template<class Data = data<>, class Control = control<>>
 struct dependencies;
 
-template<class... DataKeys, class... ControlKeys>
+template<auto... DataKeys, auto... ControlKeys>
 struct dependencies<data<DataKeys...>, control<ControlKeys...>>
 {
-	static_assert(!(dependency_detail::is_take_v<ControlKeys> || ...), "sdag: take<...> 只能写在 data<...> 里（控制依赖不碰值）");
-
 	using data_type = data<DataKeys...>;
 	using control_type = control<ControlKeys...>;
-	/// 全部前驱：先数据依赖，后控制依赖。
-	using keys = general::type_list<typename dependency_detail::key_of<DataKeys>::type..., ControlKeys...>;
 	static constexpr bool has_data = sizeof...(DataKeys) != 0;
 };
 
@@ -103,7 +129,7 @@ template<class T>
 inline constexpr bool is_dependencies = false;
 
 template<class Data, class Control>
-inline constexpr bool is_dependencies<dependencies<Data, Control>> = requires { typename dependencies<Data, Control>::keys; };
+inline constexpr bool is_dependencies<dependencies<Data, Control>> = requires { dependencies<Data, Control>::has_data; };
 
 template<class T>
 concept dependency_list = is_dependencies<::std::remove_cvref_t<T>>;
@@ -124,19 +150,19 @@ struct normalize<>
 	using type = dependencies<>;
 };
 
-template<class... Keys>
+template<auto... Keys>
 struct normalize<data<Keys...>>
 {
 	using type = dependencies<data<Keys...>>;
 };
 
-template<class... Keys>
+template<auto... Keys>
 struct normalize<control<Keys...>>
 {
 	using type = dependencies<data<>, control<Keys...>>;
 };
 
-template<class... DataKeys, class... ControlKeys>
+template<auto... DataKeys, auto... ControlKeys>
 struct normalize<data<DataKeys...>, control<ControlKeys...>>
 {
 	using type = dependencies<data<DataKeys...>, control<ControlKeys...>>;
@@ -150,8 +176,8 @@ using dependencies_of_t = typename dependency_detail::normalize<Deps...>::type;
 
 // ---------------------------------------------------------------- 原语：类型特征
 //
-// 默认从节点类型的嵌套 key_type / dependencies_type 取；自定义节点类型也可以直接特化这两个模板。
-// 没有嵌套类型时主模板是空的，于是 node_key_t / node_dependencies_t 替换失败，graph_node 为假（不是硬错误）。
+// 默认从节点类型的静态成员 key / 嵌套类型 dependencies_type 取；自定义节点类型也可以直接特化这两个模板。
+// 没有时主模板是空的，于是 node_key_v / node_dependencies_t 替换失败，graph_node 为假（不是硬错误）。
 
 template<class Node>
 struct node_key
@@ -159,14 +185,14 @@ struct node_key
 };
 
 template<class Node>
-	requires requires { typename ::std::remove_cvref_t<Node>::key_type; }
+	requires requires { ::std::remove_cvref_t<Node>::key; }
 struct node_key<Node>
 {
-	using type = typename ::std::remove_cvref_t<Node>::key_type;
+	static constexpr auto value = ::std::remove_cvref_t<Node>::key;
 };
 
 template<class Node>
-using node_key_t = typename node_key<Node>::type;
+inline constexpr auto node_key_v = node_key<Node>::value;
 
 template<class Node>
 struct node_dependencies
@@ -251,7 +277,8 @@ inline constexpr payload_cpo::payload_t payload{};
 
 template<class Node>
 concept graph_node =
-	requires { typename node_key_t<Node>; }
+	requires { node_key<Node>::value; }
+	&& key_value<::std::remove_cvref_t<decltype(node_key<Node>::value)>>
 	&& requires { typename node_dependencies_t<Node>; }
 	&& dependency_list<node_dependencies_t<Node>>
 	&& requires(Node&& node) { ::sdag::payload(::std::forward<Node>(node)); };
@@ -269,10 +296,11 @@ concept adaptor_payload =
 
 // ---------------------------------------------------------------- 默认节点类型
 
-template<class Key, dependency_list Dependencies, class Payload>
+template<auto Key, dependency_list Dependencies, class Payload>
+	requires key_value<decltype(Key)>
 struct node
 {
-	using key_type = Key;
+	static constexpr auto key = Key;
 	using dependencies_type = Dependencies;
 
 	SDAG_NO_UNIQUE_ADDRESS Payload _payload;
@@ -288,7 +316,8 @@ struct node
 /// make_node<key, data<a, b>>(then(f))                 —— f 收到 (a 的值..., b 的值...)
 /// make_node<key, control<a>>(sender)                  —— 只在 a 之后启动，不接收 a 的值
 /// make_node<key, data<a>, control<b>>(then(f))        —— 等 a、b 都完成，f 只收到 a 的值
-template<class Key, class... Deps, class Payload>
+template<auto Key, class... Deps, class Payload>
+	requires key_value<decltype(Key)>
 [[nodiscard]] constexpr node<Key, dependencies_of_t<Deps...>, ::std::decay_t<Payload>> make_node(Payload&& payload)
 	noexcept(::std::is_nothrow_constructible_v<::std::decay_t<Payload>, Payload>)
 {

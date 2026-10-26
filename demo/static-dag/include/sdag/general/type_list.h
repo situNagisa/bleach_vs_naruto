@@ -8,7 +8,7 @@
 ///   unique_t<List>            去重，保留首次出现的顺序
 ///   transform_t<Fn, List>     每个元素套一层单参数模板
 ///   rebind_t<To, List>        元素喂给另一个模板：rebind_t<std::tuple, type_list<int, char>> 是 std::tuple<int, char>
-///   general::refl::*          反射实现共用的基础（arguments、list、plain、index_of、indices_of……）
+///   general::refl::*          反射实现共用的基础（arguments、list、plain、index_of……）
 ///
 /// 写法约定（凡是有两种实现的文件都一样）：两种实现用 #if SDAG_REFLECTION 隔开，对外名字完全相同。
 /// 反射实现里类型用 std::meta::info 表示，类型列表就是 std::vector<info>（infos），运算都是普通的 consteval 函数，
@@ -101,17 +101,6 @@ using info_array = ::std::array<info, N == 0 ? 1 : N>;
 		}
 	}
 	return types.size();
-}
-
-/// wanted 里每个类型在 keys 里的位置。
-[[nodiscard]] consteval ::std::vector<::std::size_t> indices_of(infos const& wanted, infos const& keys)
-{
-	::std::vector<::std::size_t> result;
-	for (info key : wanted)
-	{
-		result.push_back(index_of(key, keys));
-	}
-	return result;
 }
 
 [[nodiscard]] consteval infos concat(::std::vector<infos> const& lists)

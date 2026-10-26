@@ -2,7 +2,7 @@
 
 /// 图的描述：纯数据——有哪些节点、谁依赖谁；以及 tuple-like 协议。
 ///
-///   graph_data<Keys, Dependencies>     键表与依赖表，运行期是空对象。形状在这里一次算好并检查（重复键、成环等直接 static_assert）
+///   graph_data<Keys, Dependencies>     键表（std::array）与依赖表，运行期是空对象。形状在这里一次算好并检查（重复键、成环等直接 static_assert）
 ///   graph_description<Tag, Data, Children...>
 ///                                      图的数据：data + 节点 sender。按 [Tag, data, 节点 sender...] 实现标准的 tuple-like 协议
 ///                                      （std::tuple_size / std::tuple_element / 成员 get<I>），和 stdexec 自己的算法 sender 是同一个形状，
@@ -16,7 +16,7 @@
 ///   node_completions_t<Self, I, Env...>  节点 I 的完成签名
 ///   dependency_t<Self, I>              节点 I 的 dependencies<data<...>, control<...>>
 ///   data_dependency_t<Self, I>         节点 I 的 data<...>（它的前驱占位符就是 hole<data<...>>）
-///   dependency_indices_v<Self, L>      data<...> / control<...> / dependencies<...> 的前驱键（L::keys，take<K> 已换成 K）换成节点索引（std::array）
+///   dependency_indices_v<Self, L>      data<...> / control<...> 的前驱键（L::keys，take{k} 已换成 k）换成节点索引（std::array）
 ///   data_dependencies_t<Self, I>       只含数据依赖
 ///   control_dependencies_t<Self, I>    只含控制依赖
 
@@ -40,10 +40,10 @@ namespace sdag::graph
 
 using ::std::size_t;
 
-template<class Keys, class Dependencies>
+template<auto Keys, class Dependencies>
 struct graph_data
 {
-	using keys = Keys;
+	static constexpr auto keys = Keys;
 	using dependencies = Dependencies;
 	static constexpr auto shape = checked_shape_of_lists<Keys, Dependencies>();
 };
@@ -102,7 +102,7 @@ template<class Self, size_t I>
 using dependency_t = general::at_t<I, typename description_of<Self>::data_type::dependencies>;
 
 template<class Self, class Dependency>
-inline constexpr auto dependency_indices_v = key_indices_v<typename description_of<Self>::data_type::keys, typename Dependency::keys>;
+inline constexpr auto dependency_indices_v = key_indices_v<description_of<Self>::data_type::keys, Dependency::keys>;
 
 template<class Self, size_t I>
 using data_dependency_t = typename dependency_t<Self, I>::data_type;

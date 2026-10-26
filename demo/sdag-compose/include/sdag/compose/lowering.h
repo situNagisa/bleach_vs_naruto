@@ -98,9 +98,6 @@ template<class Self, class FanIn, class FanOut>
 {
 	constexpr auto shape = graph::shape_of_v<Self>;
 	lowered_tables<shape.count> tables;
-	infos const keys = arguments(^^typename graph::description_of<Self>::data_type::keys);
-	// 每项是 dependencies<data<...>, control<...>>。
-	infos const dependencies = arguments(^^typename graph::description_of<Self>::data_type::dependencies);
 	infos const children = arguments(^^typename graph::description_of<Self>::children);
 
 	auto dependency_input = [&](::std::size_t from)
@@ -110,10 +107,10 @@ template<class Self, class FanIn, class FanOut>
 			: ::std::meta::add_rvalue_reference(tables.built[from]);
 	};
 
-	auto fanin_arguments = [&](infos const& from_keys)
+	auto fanin_arguments = [&](auto const& froms)
 	{
 		infos result{^^FanIn const&};
-		for (::std::size_t from : ::sdag::general::refl::indices_of(from_keys, keys))
+		for (::std::size_t from : froms)
 		{
 			result.push_back(dependency_input(from));
 		}
@@ -124,11 +121,10 @@ template<class Self, class FanIn, class FanOut>
 		return ::std::meta::dealias(::std::meta::substitute(^^::std::invoke_result_t, arguments));
 	};
 
-	for (::std::size_t index : shape.order)
+	template for (constexpr ::std::size_t index : graph::shape_of_v<Self>.order)
 	{
-		infos const kinds = arguments(dependencies[index]);
-		infos const data_keys = arguments(kinds[0]);
-		infos const control_keys = arguments(kinds[1]);
+		constexpr auto data_keys = graph::dependency_indices_v<Self, graph::data_dependency_t<Self, index>>;
+		constexpr auto control_keys = graph::dependency_indices_v<Self, typename graph::dependency_t<Self, index>::control_type>;
 		if (data_keys.empty() && control_keys.empty())
 		{
 			tables.input[index] = ::std::meta::dealias(^^decltype(::stdexec::just()));

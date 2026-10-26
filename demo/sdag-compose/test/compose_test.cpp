@@ -92,24 +92,32 @@ void test_mixed_dependencies()
 	test::check(respects_order(fused_sequence) && respects_order(composed_sequence), "两条路径都遵守先后");
 }
 
-template<::std::size_t I>
-struct left
+struct side
 {
+	bool right;
+	::std::size_t index;
+
+	friend constexpr bool operator==(side, side) noexcept = default;
 };
 
-template<::std::size_t I>
-struct right
+constexpr side left(::std::size_t index) noexcept
 {
-};
+	return {false, index};
+}
+
+constexpr side right(::std::size_t index) noexcept
+{
+	return {true, index};
+}
 
 template<::std::size_t... I>
 auto make_ladder(::std::index_sequence<I...>, auto entry)
 {
 	return entry(
-		::sdag::make_node<left<0>>(::stdexec::just(1)),
-		::sdag::make_node<right<0>>(::stdexec::just(2)),
-		::sdag::make_node<left<I + 1>, ::sdag::data<left<I>, right<I>>>(::stdexec::then([](int const& x, int const& y) { return x + y; }))...,
-		::sdag::make_node<right<I + 1>, ::sdag::data<left<I>, right<I>>>(::stdexec::then([](int const& x, int const& y) { return x * 2 + y; }))...);
+		::sdag::make_node<left(0)>(::stdexec::just(1)),
+		::sdag::make_node<right(0)>(::stdexec::just(2)),
+		::sdag::make_node<left(I + 1), ::sdag::data<left(I), right(I)>>(::stdexec::then([](int const& x, int const& y) { return x + y; }))...,
+		::sdag::make_node<right(I + 1), ::sdag::data<left(I), right(I)>>(::stdexec::then([](int const& x, int const& y) { return x * 2 + y; }))...);
 }
 
 void test_shapes_agree()

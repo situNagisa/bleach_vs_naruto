@@ -10,11 +10,11 @@ import demo.scene.menu;
 namespace
 {
 // 任务图的节点键。
-namespace node
+enum class node
 {
-struct input_update {}; struct menu_update {};
-struct frame {}; struct image {}; struct record {}; struct render {};
-}
+	input_update, menu_update,
+	frame, image, record, render,
+};
 
 // 更新图（主线程：input.update 要泵 GLFW 事件）：input_update -> menu_update，完成值 (menu 的 permit, menu 的变化值)。
 // input 的 (permit, 变化值) 被 take 进 menu_update 的 let_value，menu_update 结束时析构，即用完即放。
@@ -22,7 +22,7 @@ auto update_graph(input& keyboard, menu& scene)
 {
 	return ::sdag::dag(
 		::sdag::make_node<node::input_update>(keyboard.update()),
-		::sdag::make_node<node::menu_update, ::sdag::data<::sdag::take<node::input_update>>>(::stdexec::let_value([&scene](input::guard_type::permit&, input::change_type& keys) { return scene.update(keys); })));
+		::sdag::make_node<node::menu_update, ::sdag::data<::sdag::take{node::input_update}>>(::stdexec::let_value([&scene](input::guard_type::permit&, input::change_type& keys) { return scene.update(keys); })));
 }
 
 // 帧图（worker）：frame -> image ─┐
@@ -33,9 +33,9 @@ auto frame_graph(renderer const& target, renderer::guard_type::permit const& swa
 {
 	return ::sdag::dag(
 		::sdag::make_node<node::frame>(target.acquire_frame()),
-		::sdag::make_node<node::image, ::sdag::data<::sdag::take<node::frame>>>(::stdexec::let_value([&target, &swapchain](renderer::frame_pool::permit& lease) { return target.acquire_image(swapchain, *lease.token()); })),
+		::sdag::make_node<node::image, ::sdag::data<::sdag::take{node::frame}>>(::stdexec::let_value([&target, &swapchain](renderer::frame_pool::permit& lease) { return target.acquire_image(swapchain, *lease.token()); })),
 		::sdag::make_node<node::record>(scene.record(scene_permit, target.state().extent)),
-		::sdag::make_node<node::render, ::sdag::data<::sdag::take<node::image>, ::sdag::take<node::record>>>(::stdexec::let_value([&target, &swapchain](image_acquisition& acquisition, auto& commands, auto&) { return target.render(swapchain, acquisition, commands); })));
+		::sdag::make_node<node::render, ::sdag::data<::sdag::take{node::image}, ::sdag::take{node::record}>>(::stdexec::let_value([&target, &swapchain](image_acquisition& acquisition, auto& commands, auto&) { return target.render(swapchain, acquisition, commands); })));
 }
 
 // 在 worker 上跑完一帧的渲染图，主线程等待时继续泵窗口事件（present 可能等事件线程）。异常（含 surface_changed）经 future 回到主线程。

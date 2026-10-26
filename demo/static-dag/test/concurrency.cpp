@@ -125,26 +125,30 @@ struct layers
 	}();
 };
 
-template<class Graph, ::std::size_t Layer, ::std::size_t Index>
+/// 分层图的键：第几层的第几个节点。外层图另用 outer_key。
 struct key
 {
+	::std::size_t layer;
+	::std::size_t index;
+
+	friend constexpr bool operator==(key, key) noexcept = default;
 };
 
-template<class Graph, ::std::size_t Layer, class Indices>
+template<::std::size_t Layer, class Indices>
 struct previous_layer;
 
 /// 这一层只有一个节点时它是上一层每个节点唯一的读者：take 走（按值 move）；否则大家读 const&。
-template<class Graph, ::std::size_t Layer, ::std::size_t... J>
-struct previous_layer<Graph, Layer, ::std::index_sequence<J...>>
+template<::std::size_t Layer, ::std::size_t... J>
+struct previous_layer<Layer, ::std::index_sequence<J...>>
 {
 	template<class Layers>
 	using type = ::std::conditional_t<Layers::sizes[Layer] == 1,
-		::sdag::data<::sdag::take<key<Graph, Layer - 1, J>>...>,
-		::sdag::data<key<Graph, Layer - 1, J>...>>;
+		::sdag::data<::sdag::take{key{Layer - 1, J}}...>,
+		::sdag::data<key{Layer - 1, J}...>>;
 };
 
 /// 第 Layer 层依赖第 Layer - 1 层的全部节点。
-template<class Graph, class Layers, ::std::size_t Layer>
+template<class Layers, ::std::size_t Layer>
 [[nodiscard]] consteval auto dependencies_of() noexcept
 {
 	if constexpr (Layer == 0)
@@ -153,12 +157,12 @@ template<class Graph, class Layers, ::std::size_t Layer>
 	}
 	else
 	{
-		return ::std::type_identity<typename previous_layer<Graph, Layer, ::std::make_index_sequence<Layers::sizes[Layer - 1]>>::template type<Layers>>{};
+		return ::std::type_identity<typename previous_layer<Layer, ::std::make_index_sequence<Layers::sizes[Layer - 1]>>::template type<Layers>>{};
 	}
 }
 
-template<class Graph, class Layers, ::std::size_t Layer>
-using dependencies_t = typename decltype(dependencies_of<Graph, Layers, Layer>())::type;
+template<class Layers, ::std::size_t Layer>
+using dependencies_t = typename decltype(dependencies_of<Layers, Layer>())::type;
 
 /// 一张分层图运行时的观测状态：每层结束了几个节点、每层用哪个会合点（空指针表示不等）。
 template<class Layers>
@@ -253,13 +257,13 @@ struct pool_payloads
 	}
 };
 
-template<class Graph, class Layers, class Payloads>
+template<class Layers, class Payloads>
 [[nodiscard]] auto make_layered(Payloads const& payloads)
 {
 	return [&]<::std::size_t... N>(::std::index_sequence<N...>)
 	{
 		return ::sdag::dag(
-			::sdag::make_node<key<Graph, Layers::layer_of[N], Layers::index_of[N]>, dependencies_t<Graph, Layers, Layers::layer_of[N]>>(
+			::sdag::make_node<key{Layers::layer_of[N], Layers::index_of[N]}, dependencies_t<Layers, Layers::layer_of[N]>>(
 				payloads.template make<Layers::layer_of[N]>())...);
 	}(::std::make_index_sequence<Layers::total>{});
 }
@@ -276,12 +280,13 @@ template<class Layers>
 	return value;
 }
 
-struct graph_a;
-struct graph_b;
-struct start_key;
-struct a_key;
-struct b_key;
-struct join_key;
+enum class outer_key
+{
+	start,
+	a,
+	b,
+	join,
+};
 
 /// 扇出后继要能被别的 worker 立刻窃取，见文件开头的说明。
 [[nodiscard]] ::exec::bwos_params stealable() noexcept
@@ -336,7 +341,7 @@ void test_inline()
 	using shape = layers<1, 8, 1>;
 	tracker probe;
 	layered_state<shape> state{&probe};
-	auto graph = make_layered<graph_a, shape>(inline_payloads<shape>{&state});
+	auto graph = make_layered<shape>(inline_payloads<shape>{&state});
 	auto [value] = ::stdexec::sync_wait(::std::move(graph)).value();
 	report("sdag", probe, 1);
 	test::check(value == expected_sink<shape>(), "汇点收到 8 路输入之和");
@@ -360,7 +365,7 @@ void run_layered_on_pool(char const* name, ::exec::static_thread_pool& pool, int
 			state.meet[layer] = &*meets[layer];
 		}
 	}
-	auto graph = make_layered<graph_a, Shape>(pool_payloads<Shape, decltype(pool.get_scheduler())>{&state, pool.get_scheduler()});
+	auto graph = make_layered<Shape>(pool_payloads<Shape, decltype(pool.get_scheduler())>{&state, pool.get_scheduler()});
 	auto [value] = ::stdexec::sync_wait(::std::move(graph)).value();
 	report(name, probe, expected_peak);
 	bool timed_out = false;
@@ -412,20 +417,20 @@ void test_nested()
 	state_a.gate = &started;
 	state_b.gate = &started;
 
-	auto a = make_layered<graph_a, shape_a>(pool_payloads<shape_a, decltype(scheduler)>{&state_a, scheduler});
-	auto b = make_layered<graph_b, shape_b>(pool_payloads<shape_b, decltype(scheduler)>{&state_b, scheduler});
+	auto a = make_layered<shape_a>(pool_payloads<shape_a, decltype(scheduler)>{&state_a, scheduler});
+	auto b = make_layered<shape_b>(pool_payloads<shape_b, decltype(scheduler)>{&state_b, scheduler});
 	static_assert(::exec::sender_for<decltype(a), ::sdag::dag_t>, "内层图本身就是一个图 sender");
 
 	auto outer = ::sdag::dag(
 		// 先等一会儿再置位：内层图的根若被提前启动，就一定会看到 started 还是假。
-		::sdag::make_node<start_key>(::stdexec::schedule(scheduler) | ::stdexec::then([&]
+		::sdag::make_node<outer_key::start>(::stdexec::schedule(scheduler) | ::stdexec::then([&]
 		{
 			::std::this_thread::sleep_for(5ms);
 			started.store(true, ::std::memory_order_release);
 		})),
-		::sdag::make_node<a_key, ::sdag::control<start_key>>(::std::move(a)),
-		::sdag::make_node<b_key, ::sdag::control<start_key>>(::std::move(b)),
-		::sdag::make_node<join_key, ::sdag::data<::sdag::take<a_key>, ::sdag::take<b_key>>>(::stdexec::then([&](int from_a, int from_b)
+		::sdag::make_node<outer_key::a, ::sdag::control<outer_key::start>>(::std::move(a)),
+		::sdag::make_node<outer_key::b, ::sdag::control<outer_key::start>>(::std::move(b)),
+		::sdag::make_node<outer_key::join, ::sdag::data<::sdag::take{outer_key::a}, ::sdag::take{outer_key::b}>>(::stdexec::then([&](int from_a, int from_b)
 		{
 			if (state_a.done[shape_a::depth - 1].load() != 1 || state_b.done[shape_b::depth - 1].load() != 1)
 			{

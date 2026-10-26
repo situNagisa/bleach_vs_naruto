@@ -1,6 +1,6 @@
 #pragma once
 
-/// 测试共用的键、测试用 sender / 接收者、模拟定制 when_all 的 domain。
+/// 测试共用的键（枚举值）、测试用 sender / 接收者、模拟定制 when_all 的 domain。
 
 #include <atomic>
 #include <exception>
@@ -14,24 +14,17 @@
 namespace
 {
 
-struct a
+/// 测试用的键：同一个枚举类型的值。
+enum class key
 {
+	a, b, c, d, e, f,
 };
-struct b
-{
-};
-struct c
-{
-};
-struct d
-{
-};
-struct e
-{
-};
-struct f
-{
-};
+inline constexpr key a = key::a;
+inline constexpr key b = key::b;
+inline constexpr key c = key::c;
+inline constexpr key d = key::d;
+inline constexpr key e = key::e;
+inline constexpr key f = key::f;
 
 // ---------------------------------------------------------------- 测试用 sender / 接收者
 

@@ -13,13 +13,13 @@
 ```cpp
 #include <sdag/sdag.h>
 
-struct load {};  struct parse {};  struct index {};  struct report {};
+enum class step { load, parse, index, report };
 
 auto g = ::sdag::dag(
-	::sdag::make_node<load>(::stdexec::just(::std::string{"..."})),
-	::sdag::make_node<parse, ::sdag::data<load>>(::stdexec::then([](::std::string const& text) { return text.size(); })),
-	::sdag::make_node<index, ::sdag::data<load>>(::stdexec::then([](::std::string const& text) { return text.front(); })),
-	::sdag::make_node<report, ::sdag::data<::sdag::take<parse>, ::sdag::take<index>>>(::stdexec::then([](::std::size_t n, char c) { return ::std::format("{}x{}", n, c); })));
+	::sdag::make_node<step::load>(::stdexec::just(::std::string{"..."})),
+	::sdag::make_node<step::parse, ::sdag::data<step::load>>(::stdexec::then([](::std::string const& text) { return text.size(); })),
+	::sdag::make_node<step::index, ::sdag::data<step::load>>(::stdexec::then([](::std::string const& text) { return text.front(); })),
+	::sdag::make_node<step::report, ::sdag::data<::sdag::take{step::parse}, ::sdag::take{step::index}>>(::stdexec::then([](::std::size_t n, char c) { return ::std::format("{}x{}", n, c); })));
 
 static_assert(::stdexec::sender<decltype(g)>);
 static_assert(::exec::sender_for<decltype(g), ::sdag::dag_t>);
@@ -29,8 +29,8 @@ auto [text] = ::stdexec::sync_wait(::std::move(g)).value();
 纯类型写法也成立，对应最初设想的 `xxx<pack<sndr1, fanin<sndr2, sndr3>>, ...>`：
 
 ```cpp
-using root = ::sdag::node<load, ::sdag::dependencies<>, decltype(::stdexec::just(1))>;
-using next = ::sdag::node<parse, ::sdag::dependencies_of_t<::sdag::data<load>>, decltype(::stdexec::then([](int) { return 1.0; }))>;
+using root = ::sdag::node<step::load, ::sdag::dependencies<>, decltype(::stdexec::just(1))>;
+using next = ::sdag::node<step::parse, ::sdag::dependencies_of_t<::sdag::data<step::load>>, decltype(::stdexec::then([](int) { return 1.0; }))>;
 using dag = ::sdag::dag_sender<root, next>;
 static_assert(::stdexec::sender<dag>);
 ```
@@ -44,15 +44,15 @@ static_assert(::stdexec::sender<dag>);
 | `make_node<key, control<a>>(sender)` | 控制依赖：只在 `a` 之后启动，不接收、不碰它的值 |
 | `make_node<key, data<a>, control<b>>(adaptor)` | 两种都有：等 `a`、`b` 都完成，`adaptor` 只收到 `a` 的值 |
 
-`key` 只是编译期身份，任何类型都行；`data<...>` 里的顺序就是值的顺序。`data<...>` 与 `control<...>` 各至多一个、数据依赖在前，
+`key` 是节点的编译期身份，是一个**值**（非类型模板实参）。键的类型由用户自己定——枚举、整数、可比较的结构体都行，受 `key_value`（`std::equality_comparable`）约束；一张图里所有键必须是同一个类型（编译期检查）。`data<...>` 里的顺序就是值的顺序。`data<...>` 与 `control<...>` 各至多一个、数据依赖在前，
 `make_node` 把它们补齐成 `dependencies<data<...>, control<...>>`；同一个前驱不能同时写在两边。
 载荷由依赖决定、不从载荷类型去猜：有 `data<...>` 时载荷必须是适配器，否则必须是 sender，写错了各有一条 `static_assert`。
-值的交付只有一条规则：`data<a>` 给 `a` 的 `V const&`，值留在整图里、活到整图结束；`data<take<a>>` 按值（move）给出，
+值的交付只有一条规则：`data<a>` 给 `a` 的 `V const&`，值留在整图里、活到整图结束；`data<take{a}>` 按值（move）给出，
 并在这个节点结束时析构 `a` 的值，之后它占的空间可以给别的值复用。一个值至多被 take 一次，take 它的节点必须排在它所有其它
 数据读者之后（编译期检查；把其它读者写进它的 `data<>` 或 `control<>` 即可）。take 之后，其它读者手里指向它的视图不再有效。
 每个节点至多一种 `set_value` 完成（多种先 `into_variant`），这与 `when_all` 的要求一致。
 
-自定义节点类型只要满足三个原语：`node_key<N>::type`、`node_dependencies<N>::type`（可特化的类型特征，默认取嵌套的 `key_type` / `dependencies_type`）和 `payload(n)`（CPO，成员优先、其次 ADL）。`graph_node` concept 组合它们。
+自定义节点类型只要满足三个原语：`node_key<N>::value`（即 `node_key_v<N>`）、`node_dependencies<N>::type`（可特化，默认取静态成员 `key` / 嵌套类型 `dependencies_type`）和 `payload(n)`（CPO，成员优先、其次 ADL）。`graph_node` concept 组合它们。
 
 ## 完成语义（与 `when_all` 一致）
 
@@ -143,8 +143,8 @@ include/sdag/                    （目录 = 概念分组，文件 = 模块；�
   stdexec/          对 stdexec 的适配：对其内部实现（双下划线名字）的全部依赖，见下文
     expressions.h       拆开 stdexec 的算法 sender
   node/             节点
-    node.h              data<> / control<> / take<> / dependencies<>、node<>、make_node、payload CPO 与 graph_node concept
-    node_graph.h        一组节点的键与依赖 → 有向无环图（key_indices_v、shape_of），以及键相关的错误诊断
+    node.h              key_value、data<> / control<> / take{} / dependencies<>、node<>、make_node、payload CPO 与 graph_node concept
+    node_graph.h        一组节点的键与依赖 → 有向无环图（keys_of_v、key_indices_v、shape_of），以及键相关的错误诊断；键是值，全是普通 constexpr 循环
   protocol/         节点与图之间的约定
     value_source.h      取值源协议：get_value_source 查询 + 签名接口 + 交付接口
     hole.h              前驱占位符 hole<data<...>>，以及 hole_count_v
@@ -180,7 +180,7 @@ test/
 `include/sdag/config.h` 自动探测：编译器定义了 `__cpp_impl_reflection` 且有 `<meta>` 时 `SDAG_REFLECTION = 1`，否则为 0；
 也可以用 `-DSDAG_REFLECTION=0/1` 强制。CMake 选项 `SDAG_REFLECTION`（GCC 上默认 ON）只决定加不加 `-freflection`。
 
-有两份编译期计算的文件（`grep -rln "#if SDAG_REFLECTION" include/sdag`：`general/` 的类型列表、序列、完成签名、domain 合并，`node/node_graph.h`，`protocol/hole.h`，`graph/` 的 analysis / pred_sigs / node_domain），两种实现写在同一个文件里，
+有两份编译期计算的文件（`grep -rln "#if SDAG_REFLECTION" include/sdag`：`general/` 的类型列表、序列、完成签名、domain 合并，`protocol/hole.h`，`graph/` 的 analysis / pred_sigs / node_domain），两种实现写在同一个文件里，
 用 `#if SDAG_REFLECTION` / `#else` 隔开，对外名字完全相同；跨文件复用的反射函数放在各模块的 `refl` 命名空间，
 其余实现细节放在 `detail`。两种模式生成的实体在不同的 inline namespace 里（`SDAG_ABI_NAMESPACE`），
 同一个程序混用两种模式编译的翻译单元时链接期就会报错，而不是静默的 ODR 违规。

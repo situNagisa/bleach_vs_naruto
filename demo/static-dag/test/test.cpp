@@ -46,6 +46,7 @@ static_assert(::sdag::graph_node<root>);
 static_assert(::sdag::graph_node<inc const&>);
 static_assert(!::sdag::graph_node<int>);
 static_assert(!::sdag::graph_node<::sdag::data<a>>);
+static_assert(::sdag::node_key_v<root> == a);
 static_assert(::sdag::dependency_list<::sdag::dependencies<>>);
 static_assert(!::sdag::dependency_list<::sdag::data<a>>);
 static_assert(::std::same_as<::sdag::dependencies_of_t<::sdag::control<b>>, ::sdag::dependencies<::sdag::data<>, ::sdag::control<b>>>);
@@ -111,7 +112,7 @@ auto diamond(bool& b_shared, bool& c_shared, bool& d_unique)
 		::sdag::make_node<a>(::stdexec::just(1)),
 		::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([&](auto&& x) { b_shared = shared_access<decltype(x)>; return x + 1; })),
 		::sdag::make_node<c, ::sdag::data<a>>(::stdexec::then([&](auto&& x) { c_shared = shared_access<decltype(x)>; return x * 2; })),
-		::sdag::make_node<d, ::sdag::data<::sdag::take<b>, ::sdag::take<c>>>(::stdexec::then([&](auto&& y, auto&& z)
+		::sdag::make_node<d, ::sdag::data<::sdag::take{b}, ::sdag::take{c}>>(::stdexec::then([&](auto&& y, auto&& z)
 		{
 			d_unique = !shared_access<decltype(y)> && !shared_access<decltype(z)>;
 			return y + z;
@@ -142,7 +143,7 @@ void test_triangle()
 			return ::sdag::dag(
 				::sdag::make_node<a>(::stdexec::just(::std::string("a")) | ::stdexec::then([&](::std::string s) { sequence.push_back(1); return s; })),
 				::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([&](::std::string const& s) { sequence.push_back(2); return s + "b"; })),
-				::sdag::make_node<c, ::sdag::data<::sdag::take<a>, b>>(::stdexec::then([&](auto&& from_a, auto&& from_b)
+				::sdag::make_node<c, ::sdag::data<::sdag::take{a}, b>>(::stdexec::then([&](auto&& from_a, auto&& from_b)
 				{
 					sequence.push_back(3);
 					a_shared_in_c = shared_access<decltype(from_a)>;
@@ -169,8 +170,8 @@ void test_move_only_chain()
 	test::section("链：move-only 值沿 take 边移动；左值 sender 可重复连接");
 	auto g = ::sdag::dag(
 		::sdag::make_node<a>(::stdexec::just(::std::make_unique<int>(41))),
-		::sdag::make_node<b, ::sdag::data<::sdag::take<a>>>(::stdexec::then([](::std::unique_ptr<int> p) { return ::std::make_unique<int>(*p + 1); })),
-		::sdag::make_node<c, ::sdag::data<::sdag::take<b>>>(::stdexec::then([](::std::unique_ptr<int> p) { return *p; })));
+		::sdag::make_node<b, ::sdag::data<::sdag::take{a}>>(::stdexec::then([](::std::unique_ptr<int> p) { return ::std::make_unique<int>(*p + 1); })),
+		::sdag::make_node<c, ::sdag::data<::sdag::take{b}>>(::stdexec::then([](::std::unique_ptr<int> p) { return *p; })));
 	auto [value] = ::stdexec::sync_wait(::std::move(g)).value();
 	test::check(value == 42, "链式传递");
 
@@ -218,7 +219,7 @@ void test_mixed_dependencies()
 		return ::sdag::dag(
 			::sdag::make_node<a>(::stdexec::just(5) | ::stdexec::then([&](int x) { sequence.push_back(1); return x; })),
 			// c 只依赖 a 的先后，不读值：b 是 a 唯一的数据读者，可以 take
-			::sdag::make_node<b, ::sdag::data<::sdag::take<a>>>(::stdexec::then([&](auto&& x) { a_shared = shared_access<decltype(x)>; sequence.push_back(2); return x * 2; })),
+			::sdag::make_node<b, ::sdag::data<::sdag::take{a}>>(::stdexec::then([&](auto&& x) { a_shared = shared_access<decltype(x)>; sequence.push_back(2); return x * 2; })),
 			::sdag::make_node<c, ::sdag::control<a>>(::stdexec::just(::std::string("c")) | ::stdexec::then([&](::std::string s) { sequence.push_back(3); return s; })),
 			// d 等 b、c 都完成，但只收到 c 的值
 			::sdag::make_node<d, ::sdag::data<c>, ::sdag::control<b>>(::stdexec::then([&](::std::string const& s) { sequence.push_back(4); return s + "d"; })));
@@ -274,7 +275,7 @@ void test_take()
 		::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([&](tracked const& t) { log.push_back(10 + t.id); return 0; })),
 		::sdag::make_node<c, ::sdag::data<a>>(::stdexec::then([&](tracked const& t) { log.push_back(20 + t.id); return 0; })),
 		// d 在 b、c 之后 take a：拿到右值。这里只按引用看一眼、不 move 走，值仍在槽位里——由 d 结束时的析构负责
-		::sdag::make_node<d, ::sdag::data<::sdag::take<a>>, ::sdag::control<b, c>>(::stdexec::then([&](tracked&& t) { log.push_back(30 + t.id); return 0; })),
+		::sdag::make_node<d, ::sdag::data<::sdag::take{a}>, ::sdag::control<b, c>>(::stdexec::then([&](tracked&& t) { log.push_back(30 + t.id); return 0; })),
 		// e 在 d 之后跑：此时 a 的值已经析构
 		::sdag::make_node<e, ::sdag::control<d>>(::stdexec::then(::stdexec::just(), [&] { log.push_back(40); return 0; })));
 	static_assert(::sdag::graph::readers_v<decltype(g)&&>.taker[0] == 3, "a 被 d take");
@@ -293,8 +294,8 @@ void test_slot_reuse()
 	{
 		return ::sdag::dag(
 			::sdag::make_node<a>(::stdexec::then(::stdexec::just(), [&] { log.push_back(1); return tracked{&log, 1}; })),
-			::sdag::make_node<b, ::sdag::data<::sdag::take<a>>>(::stdexec::then([&](tracked&&) { log.push_back(2); return tracked{&log, 2}; })),
-			::sdag::make_node<c, ::sdag::data<::sdag::take<b>>>(::stdexec::then([&, fail_c](tracked&&) -> tracked
+			::sdag::make_node<b, ::sdag::data<::sdag::take{a}>>(::stdexec::then([&](tracked&&) { log.push_back(2); return tracked{&log, 2}; })),
+			::sdag::make_node<c, ::sdag::data<::sdag::take{b}>>(::stdexec::then([&, fail_c](tracked&&) -> tracked
 			{
 				if (fail_c)
 				{
@@ -303,7 +304,7 @@ void test_slot_reuse()
 				log.push_back(3);
 				return tracked{&log, 3};
 			})),
-			::sdag::make_node<d, ::sdag::data<::sdag::take<c>>>(::stdexec::then([&](tracked&&) { log.push_back(4); return 0; })));
+			::sdag::make_node<d, ::sdag::data<::sdag::take{c}>>(::stdexec::then([&](tracked&&) { log.push_back(4); return 0; })));
 	};
 	using graph = decltype(chain(::std::declval<::std::vector<int>&>(), false));
 	using operation = ::stdexec::connect_result_t<graph, probe_receiver>;
@@ -429,7 +430,7 @@ void test_error_propagation()
 	bool explode = false;
 	auto storing = ::sdag::dag(
 		::sdag::make_node<a>(::stdexec::just(fragile{&explode})),
-		::sdag::make_node<b, ::sdag::data<::sdag::take<a>>>(::stdexec::then([](fragile) noexcept { return 1; })));
+		::sdag::make_node<b, ::sdag::data<::sdag::take{a}>>(::stdexec::then([](fragile) noexcept { return 1; })));
 	static_assert(::std::same_as<::stdexec::completion_signatures_of_t<decltype(storing), ::stdexec::env<>>,
 		::stdexec::completion_signatures<::stdexec::set_value_t(int), ::stdexec::set_error_t(::std::exception_ptr)>>);
 	using single = decltype(::sdag::dag(::sdag::make_node<a>(::stdexec::just(fragile{&explode}))));
@@ -539,47 +540,56 @@ void test_thread_pool()
 	test::check(true, "200 次执行全部正确");
 }
 
-template<::std::size_t I>
-struct step
+/// 批量生成的键：一个可比较的结构体（结构化类型，可以当非类型模板实参）。
+struct gen
 {
+	char kind;
+	::std::size_t index;
+
+	friend constexpr bool operator==(gen, gen) noexcept = default;
 };
 
-template<::std::size_t I>
-struct left
+constexpr gen step(::std::size_t index) noexcept
 {
-};
+	return {'s', index};
+}
 
-template<::std::size_t I>
-struct right
+constexpr gen left(::std::size_t index) noexcept
 {
-};
+	return {'l', index};
+}
+
+constexpr gen right(::std::size_t index) noexcept
+{
+	return {'r', index};
+}
 
 /// 叠起来的菱形梯子：每一层的两个节点都依赖上一层的两个节点；节点刻意不按拓扑序声明。
 template<::std::size_t... I>
 auto make_ladder(::std::index_sequence<I...>)
 {
 	return ::sdag::dag(
-		::sdag::make_node<left<0>>(::stdexec::just(1)),
-		::sdag::make_node<right<0>>(::stdexec::just(2)),
-		::sdag::make_node<left<I + 1>, ::sdag::data<left<I>, right<I>>>(::stdexec::then([](int const& x, int const& y) { return x + y; }))...,
-		::sdag::make_node<right<I + 1>, ::sdag::data<left<I>, right<I>>>(::stdexec::then([](int const& x, int const& y) { return x * 2 + y; }))...);
+		::sdag::make_node<left(0)>(::stdexec::just(1)),
+		::sdag::make_node<right(0)>(::stdexec::just(2)),
+		::sdag::make_node<left(I + 1), ::sdag::data<left(I), right(I)>>(::stdexec::then([](int const& x, int const& y) { return x + y; }))...,
+		::sdag::make_node<right(I + 1), ::sdag::data<left(I), right(I)>>(::stdexec::then([](int const& x, int const& y) { return x * 2 + y; }))...);
 }
 
 template<::std::size_t... I>
 auto make_chain(::std::index_sequence<I...>)
 {
 	return ::sdag::dag(
-		::sdag::make_node<step<0>>(::stdexec::just(0)),
-		::sdag::make_node<step<I + 1>, ::sdag::data<step<I>>>(::stdexec::then([](int x) { return x + 1; }))...);
+		::sdag::make_node<step(0)>(::stdexec::just(0)),
+		::sdag::make_node<step(I + 1), ::sdag::data<step(I)>>(::stdexec::then([](int x) { return x + 1; }))...);
 }
 
 template<::std::size_t... I>
 auto make_fan(::std::index_sequence<I...>)
 {
 	return ::sdag::dag(
-		::sdag::make_node<step<0>>(::stdexec::just(1)),
-		::sdag::make_node<step<I + 1>, ::sdag::data<step<0>>>(::stdexec::then([](int const& x) { return x + static_cast<int>(I); }))...,
-		::sdag::make_node<step<sizeof...(I) + 1>, ::sdag::data<step<I + 1>...>>(::stdexec::then([](auto... xs) { return (xs + ...); })));
+		::sdag::make_node<step(0)>(::stdexec::just(1)),
+		::sdag::make_node<step(I + 1), ::sdag::data<step(0)>>(::stdexec::then([](int const& x) { return x + static_cast<int>(I); }))...,
+		::sdag::make_node<step(sizeof...(I) + 1), ::sdag::data<step(I + 1)...>>(::stdexec::then([](auto... xs) { return (xs + ...); })));
 }
 
 void test_scale()

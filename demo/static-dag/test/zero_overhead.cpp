@@ -24,21 +24,15 @@ namespace
 
 ::std::atomic<::std::size_t> allocation_count{0};
 
-struct a
+enum class key
 {
+	a, b, c, d, e,
 };
-struct b
-{
-};
-struct c
-{
-};
-struct d
-{
-};
-struct e
-{
-};
+inline constexpr key a = key::a;
+inline constexpr key b = key::b;
+inline constexpr key c = key::c;
+inline constexpr key d = key::d;
+inline constexpr key e = key::e;
 
 auto diamond()
 {
@@ -46,7 +40,7 @@ auto diamond()
 		::sdag::make_node<a>(::stdexec::just(1)),
 		::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([](int const& x) noexcept { return x + 1; })),
 		::sdag::make_node<c, ::sdag::data<a>>(::stdexec::then([](int const& x) noexcept { return x * 2; })),
-		::sdag::make_node<d, ::sdag::data<::sdag::take<b>, ::sdag::take<c>>>(::stdexec::then([](int y, int z) noexcept { return y + z; })));
+		::sdag::make_node<d, ::sdag::data<::sdag::take{b}, ::sdag::take{c}>>(::stdexec::then([](int y, int z) noexcept { return y + z; })));
 }
 
 struct null_receiver
@@ -137,7 +131,7 @@ int main()
 
 		using throwing_graph = decltype(::sdag::dag(
 			::sdag::make_node<a>(::stdexec::just(1)),
-			::sdag::make_node<b, ::sdag::data<::sdag::take<a>>>(::stdexec::then([](int x) { return x + 1; }))));
+			::sdag::make_node<b, ::sdag::data<::sdag::take{a}>>(::stdexec::then([](int x) { return x + 1; }))));
 		using throwing_operation = ::stdexec::connect_result_t<throwing_graph, null_receiver>;
 		static_assert(throwing_operation::stoppable, "可能抛异常的节点需要停止源");
 		::std::println("  可失败的两节点链 sizeof(op-state) = {}（含 inplace_stop_source、状态字、exception_ptr 槽）", sizeof(throwing_operation));
@@ -149,10 +143,10 @@ int main()
 		// b 的值也已产生：任一时刻至多两个中间值在世，4 个中间值共用两块（a、c 一块，b、d 一块）。
 		using chain = decltype(::sdag::dag(
 			::sdag::make_node<a>(::stdexec::just(::std::array<int, 16>{})),
-			::sdag::make_node<b, ::sdag::data<::sdag::take<a>>>(::stdexec::then([](::std::array<int, 16> v) noexcept { return v; })),
-			::sdag::make_node<c, ::sdag::data<::sdag::take<b>>>(::stdexec::then([](::std::array<int, 16> v) noexcept { return v; })),
-			::sdag::make_node<d, ::sdag::data<::sdag::take<c>>>(::stdexec::then([](::std::array<int, 16> v) noexcept { return v; })),
-			::sdag::make_node<e, ::sdag::data<::sdag::take<d>>>(::stdexec::then([](::std::array<int, 16> v) noexcept { return v[0]; }))));
+			::sdag::make_node<b, ::sdag::data<::sdag::take{a}>>(::stdexec::then([](::std::array<int, 16> v) noexcept { return v; })),
+			::sdag::make_node<c, ::sdag::data<::sdag::take{b}>>(::stdexec::then([](::std::array<int, 16> v) noexcept { return v; })),
+			::sdag::make_node<d, ::sdag::data<::sdag::take{c}>>(::stdexec::then([](::std::array<int, 16> v) noexcept { return v; })),
+			::sdag::make_node<e, ::sdag::data<::sdag::take{d}>>(::stdexec::then([](::std::array<int, 16> v) noexcept { return v[0]; }))));
 		using chain_operation = ::stdexec::connect_result_t<chain, null_receiver>;
 		constexpr auto chain_slots = sizeof(chain_operation::state_base::_slots);
 		::std::println("  take 链（4 个 64 字节的中间值）：值槽 {} 字节", chain_slots);

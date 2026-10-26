@@ -2,149 +2,84 @@
 
 /// 节点集合成图：一组节点的键与依赖 → 一张有向无环图，以及键相关的错误诊断。
 ///
-///   key_indices_v<Keys, type_list<K...>>  K... 换成它们在键表 Keys（type_list）里的下标，按声明顺序放进 std::array；
-///                                         不存在的键给出 Keys::size（据此报"依赖了不存在的键"）
-///   shape_of_lists<Keys, Dependencies>()  Keys = type_list<键...>，Dependencies = type_list<dependencies<...>...>，一一对应 → shape<N>。
+///   key_indices<Keys>(wanted)             wanted 里的键换成它们在键表 Keys（std::array）里的下标；不存在的键给出 Keys.size()
+///   shape_of_lists<Keys, Dependencies>()  Keys = 键的 std::array，Dependencies = type_list<dependencies<...>...>，一一对应 → shape<N>。
 ///                                         边不分数据 / 控制：两种依赖都是"先后"，同一个前驱在两边各写一次算重复依赖。
 ///                                         不做断言，错误写在 error 里（便于测试）
-///   shape_of<Nodes...>()                  同上，直接从节点类型取键与依赖
+///   shape_of<Nodes...>()                  同上，直接从节点取键与依赖
 ///   checked_shape_of_lists<...>()         同上，并把每类错误变成一条独立的 static_assert 消息
 ///
-/// key_indices_v 与 shape_of_lists 有反射与模板两种实现，用 SDAG_REFLECTION 隔开。
+/// 键是值，这里全是普通的 constexpr 循环。
 
+#include <algorithm>
 #include <array>
+#include <concepts>
 #include <cstddef>
 #include <utility>
-#include <vector>
 
 #include "../config.h"
 #include "../general/type_list.h"
-#include "../general/sequence.h"
 #include "../general/digraph.h"
 #include "node.h"
 
 namespace sdag
 {
 
-inline namespace SDAG_ABI_NAMESPACE
+/// 一张图的键表（各节点的键按声明顺序）。
+template<class... Nodes>
+inline constexpr auto keys_of_v = dependency_detail::key_array<node_key_v<Nodes>...>();
+
+/// key 在 Keys 里的位置；不存在时等于 Keys.size()。
+template<auto Keys>
+[[nodiscard]] constexpr ::std::size_t key_index(typename decltype(Keys)::value_type const& key) noexcept
 {
-
-#if SDAG_REFLECTION
-
-namespace refl
-{
-
-using namespace ::sdag::general::refl;
-
-/// 整张图共用的键表，元素先 dealias：之后的查找只比较 info，不再每次重取 template_arguments_of。
-template<class Keys>
-inline constexpr auto key_table = []
-{
-	infos const keys = arguments(^^Keys);
-	info_array<Keys::size> table{};
-	for (::std::size_t index = 0; index < keys.size(); ++index)
-	{
-		table[index] = ::std::meta::dealias(keys[index]);
-	}
-	return table;
-}();
-
-/// key 在键表里的位置；不存在时等于 Keys::size。
-template<class Keys>
-[[nodiscard]] consteval ::std::size_t key_index(info key)
-{
-	key = ::std::meta::dealias(key);
-	for (::std::size_t index = 0; index < Keys::size; ++index)
-	{
-		if (key_table<Keys>[index] == key)
-		{
-			return index;
-		}
-	}
-	return Keys::size;
+	return static_cast<::std::size_t>(::std::ranges::find(Keys, key) - Keys.begin());
 }
 
-}
-
-template<class Keys, class Wanted>
+/// Wanted（键的 std::array）里每个键在 Keys 里的下标。
+template<auto Keys, auto Wanted>
 inline constexpr auto key_indices_v = []
 {
-	::std::array<::std::size_t, Wanted::size> result{};
-	::std::size_t cursor = 0;
-	for (refl::info key : refl::arguments(^^Wanted))
+	::std::array<::std::size_t, Wanted.size()> result{};
+	if constexpr (Wanted.size() != 0)
 	{
-		result[cursor++] = refl::key_index<Keys>(key);
+		static_assert(::std::same_as<typename decltype(Keys)::value_type, typename decltype(Wanted)::value_type>,
+			"sdag: 依赖里的键与节点的键不是同一个类型");
+		for (::std::size_t index = 0; index < Wanted.size(); ++index)
+		{
+			result[index] = key_index<Keys>(Wanted[index]);
+		}
 	}
 	return result;
 }();
 
-#else
-
-namespace detail
-{
-
-template<class Keys, class Wanted>
-struct key_indices;
-
-template<class Keys, class... Wanted>
-struct key_indices<Keys, general::type_list<Wanted...>>
-{
-	static constexpr ::std::array<::std::size_t, sizeof...(Wanted)> value{general::index_of_v<Wanted, Keys>...};
-};
-
-}
-
-template<class Keys, class Wanted>
-inline constexpr auto key_indices_v = detail::key_indices<Keys, Wanted>::value;
-
-#endif
-
-}
-
-template<class Dependencies>
-using dependency_keys_t = typename Dependencies::keys;
-
-/// Keys = type_list<键...>，Dependencies = type_list<dependencies<...>...>，一一对应。不做断言，错误写在 error 里（便于测试）。
-template<class Keys, class Dependencies>
+/// Keys = 键的 std::array，Dependencies = type_list<dependencies<...>...>，一一对应。不做断言，错误写在 error 里（便于测试）。
+template<auto Keys, class Dependencies>
 [[nodiscard]] consteval auto shape_of_lists() noexcept
 {
-	constexpr ::std::size_t count = Keys::size;
+	constexpr ::std::size_t count = Keys.size();
 	general::shape<count> result{};
-#if SDAG_REFLECTION
-	// 一次取出键与依赖，循环里只查键表：避免每个节点都重新展开整张键表（O(N²) 次反射调用）。
-	general::refl::infos const keys = general::refl::arguments(^^Keys);
-	general::refl::infos const dependencies = general::refl::arguments(^^Dependencies);
-	for (::std::size_t index = 0; index < count; ++index)
-	{
-		if (refl::key_index<Keys>(keys[index]) != index)
-		{
-			result.fail(general::shape_error::duplicate_key);
-		}
-		// dependencies<...>::keys：全部前驱（take<K> 已换成 K），先数据、后控制。
-		for (general::refl::info key : general::refl::arguments(::std::meta::dealias(
-			::std::meta::substitute(^^dependency_keys_t, {dependencies[index]}))))
-		{
-			result.add_edge(refl::key_index<Keys>(key), index);
-		}
-	}
-#else
 	[&]<::std::size_t... I>(::std::index_sequence<I...>)
 	{
 		(
 			[&]
 			{
-				if (general::index_of_v<general::at_t<I, Keys>, Keys> != I)
+				if (key_index<Keys>(Keys[I]) != I)
 				{
 					result.fail(general::shape_error::duplicate_key);
 				}
-				for (::std::size_t from : key_indices_v<Keys, typename general::at_t<I, Dependencies>::keys>)
+				using dependencies = general::at_t<I, Dependencies>;
+				for (::std::size_t from : key_indices_v<Keys, dependencies::data_type::keys>)
+				{
+					result.add_edge(from, I);
+				}
+				for (::std::size_t from : key_indices_v<Keys, dependencies::control_type::keys>)
 				{
 					result.add_edge(from, I);
 				}
 			}(),
 			...);
 	}(::std::make_index_sequence<count>{});
-#endif
 	if (result.error == general::shape_error::none)
 	{
 		result.sort();
@@ -156,11 +91,11 @@ template<class Keys, class Dependencies>
 template<graph_node... Nodes>
 [[nodiscard]] consteval general::shape<sizeof...(Nodes)> shape_of() noexcept
 {
-	return shape_of_lists<general::type_list<node_key_t<Nodes>...>, general::type_list<node_dependencies_t<Nodes>...>>();
+	return shape_of_lists<keys_of_v<Nodes...>, general::type_list<node_dependencies_t<Nodes>...>>();
 }
 
 /// 分析并把每类错误变成一条独立的 static_assert 消息。
-template<class Keys, class Dependencies>
+template<auto Keys, class Dependencies>
 [[nodiscard]] consteval auto checked_shape_of_lists() noexcept
 {
 	constexpr auto result = shape_of_lists<Keys, Dependencies>();

@@ -43,7 +43,7 @@ using namespace ::sdag::general::refl;
 template<class Dependency>
 inline constexpr auto positions_v = []
 {
-	::std::array<::std::size_t, Dependency::keys::size> result{};
+	::std::array<::std::size_t, Dependency::keys.size()> result{};
 	for (::std::size_t index = 0; index < result.size(); ++index)
 	{
 		result[index] = index;
@@ -155,7 +155,7 @@ struct pred_completions<Self, Dependency, Env, ::std::index_sequence<K...>, ::st
 
 template<class Self, class Dependency, class Env>
 using pred_completions_t = typename detail::pred_completions<Self, Dependency, Env,
-	::std::make_index_sequence<Dependency::keys::size>, general::sequence_t<dependency_indices_v<Self, Dependency>>>::type;
+	::std::make_index_sequence<Dependency::keys.size()>, general::sequence_t<dependency_indices_v<Self, Dependency>>>::type;
 
 #endif
 
