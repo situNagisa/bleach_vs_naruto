@@ -8,8 +8,8 @@
 ///   出度 > 1 的节点先套 fanout，各后继拿到它的一份拷贝；出度 1 的节点直接 move 给唯一的后继
 ///   整图 = fanin(汇点...)
 ///
-/// 用途有两个：domain 定制了 when_all 时 dag_t::transform_sender 自动走这里，让 domain 看到它认识的标准算法；
-/// composed 策略则无条件走这里，作为语义参照与"扇入扇出可配置"的入口。
+/// 入口是 lower(graph, fanin, fanout)：扇入扇出可配置，也是融合路径的语义参照。sdag-adaptive 的自适配图在
+/// domain 定制了 when_all 时用 lower(graph, when_all, split) 自动走这里。
 /// 这条路不追求 0 开销：split 必须堆分配共享状态，这是组合现成算法的固有代价。
 ///
 /// 构造顺序：节点按拓扑序逐个构造，前驱的 sender 已经在 _built 里了，后继再把它取走（独占）或拷贝（共享）。
@@ -23,19 +23,17 @@
 #include <utility>
 
 #include <stdexec/execution.hpp>
-#include <exec/sender_for.hpp>
 
-#include "../config.h"
-#include "../general/type_list.h"
-#include "../general/cvref.h"
-#include "../general/sequence.h"
-#include "../general/digraph.h"
-#include "../stdexec/expressions.h"
-#include "../protocol/hole.h"
-#include "../node/node_graph.h"
-#include "../graph/description.h"
+#include <sdag/config.h>
+#include <sdag/general/type_list.h>
+#include <sdag/general/cvref.h>
+#include <sdag/general/sequence.h>
+#include <sdag/general/digraph.h>
+#include <sdag/graph/description.h>
 
-namespace sdag::execution
+#include "hole_fill.h"
+
+namespace sdag::compose
 {
 
 /// constant_sender<Sender>：忽略参数、交出一个事先存好的 sender 的可调用对象。
@@ -152,7 +150,7 @@ template<class Self, class FanIn, class FanOut>
 		info const child = ::std::meta::substitute(^^general::copy_cvref_t, {^^Self, children[index]});
 		if (!data_keys.empty())
 		{
-			tables.node_sender[index] = protocol::refl::hole_filled(child, tables.input[index]);
+			tables.node_sender[index] = compose::refl::hole_filled(child, tables.input[index]);
 		}
 		else if (shape.is_root(index))
 		{
@@ -161,7 +159,7 @@ template<class Self, class FanIn, class FanOut>
 		else
 		{
 			tables.node_sender[index] = ::std::meta::dealias(::std::meta::substitute(^^::std::invoke_result_t,
-				{^^::stdexec::let_value_t const&, tables.input[index], ::std::meta::substitute(^^execution::constant_sender, {plain(child)})}));
+				{^^::stdexec::let_value_t const&, tables.input[index], ::std::meta::substitute(^^compose::constant_sender, {plain(child)})}));
 		}
 
 		tables.built[index] = shape.out_degree[index] > 1
@@ -275,7 +273,7 @@ struct lowered_types
 		{
 			if constexpr (graph::data_dependencies_t<Self, I>::size() != 0)
 			{
-				return ::std::type_identity<protocol::hole_filled_t<child, input_t<I>>>{};
+				return ::std::type_identity<compose::hole_filled_t<child, input_t<I>>>{};
 			}
 			else if constexpr (shape.is_root(I))
 			{
@@ -284,7 +282,7 @@ struct lowered_types
 			else
 			{
 				return ::std::type_identity<::std::invoke_result_t<::stdexec::let_value_t const&, input_t<I>,
-					execution::constant_sender<::std::remove_cvref_t<child>>>>{};
+					compose::constant_sender<::std::remove_cvref_t<child>>>>{};
 			}
 		}
 
@@ -390,7 +388,7 @@ struct builder
 		if constexpr (graph::data_dependencies_t<Self, I>::size() != 0)
 		{
 			// 数据依赖：占位符换成 fanin(数据前驱..., [控制闸门])。
-			return protocol::fill_hole(::std::forward<child>(sender), make_input<I>());
+			return compose::fill_hole(::std::forward<child>(sender), make_input<I>());
 		}
 		else if constexpr (shape.is_root(I))
 		{
@@ -400,7 +398,7 @@ struct builder
 		{
 			// 控制依赖：等前驱都结束，丢掉它们的值，再启动载荷 sender。
 			return ::stdexec::let_value(make_input<I>(),
-				execution::constant_sender<::std::remove_cvref_t<child>>{::std::forward<child>(sender)});
+				compose::constant_sender<::std::remove_cvref_t<child>>{::std::forward<child>(sender)});
 		}
 	}
 
@@ -449,7 +447,7 @@ struct lower_t
 	template<class Graph, class FanIn, class FanOut>
 	[[nodiscard]] constexpr auto operator()(Graph&& graph, FanIn const& fanin, FanOut const& fanout) const
 	{
-		static_assert(requires { typename graph::description_of<Graph>; }, "sdag: lower 只接受 dag(...) 得到的图 sender");
+		static_assert(requires { typename graph::description_of<Graph>; }, "sdag-compose: lower 只接受 sdag 的图 sender");
 		lowering_detail::builder<Graph&&, FanIn, FanOut> builder{fanin, fanout, ::std::forward<Graph>(graph)};
 		return builder.build();
 	}

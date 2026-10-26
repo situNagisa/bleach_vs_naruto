@@ -11,7 +11,7 @@
 
 #include <stdexec/execution.hpp>
 
-namespace sdag::general
+namespace sdag::adaptive
 {
 
 /// transform_sender 这一阶段问的是哪个 domain。规则与 stdexec 相同：

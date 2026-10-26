@@ -9,7 +9,6 @@
 ///   3. 1 -> 4 -> 8 -> 1，线程池     理论峰值 8（相邻两层全连接，4 与 8 不会重叠）
 ///   4. (1 -> 4 -> 8 -> 1) + (x -> y -> z)：两张图作为节点组装进一张外层图，线程池
 ///                                   理论峰值 8 + 1 = 9（8 宽的那层与链上的一个节点同时跑）
-///   2、3 两种形状也用降解路径（when_all + split）跑一遍，对照峰值。
 ///
 /// 线程池用 bwos_params{.blockSize = 1}。exec::static_thread_pool 默认 blockSize = 8：worker 线程自己提交的任务
 /// 先进本地块，块写满才发布给别的线程窃取，所以"在 worker 上扇出"的任务会全部滞留在这一个 worker 上。
@@ -250,12 +249,12 @@ struct pool_payloads
 	}
 };
 
-template<class Graph, class Layers, class Policy, class Payloads>
-[[nodiscard]] auto make_layered(Policy policy, Payloads const& payloads)
+template<class Graph, class Layers, class Payloads>
+[[nodiscard]] auto make_layered(Payloads const& payloads)
 {
 	return [&]<::std::size_t... N>(::std::index_sequence<N...>)
 	{
-		return ::sdag::dag(policy,
+		return ::sdag::dag(
 			::sdag::make_node<key<Graph, Layers::layer_of[N], Layers::index_of[N]>, dependencies_t<Graph, Layers, Layers::layer_of[N]>>(
 				payloads.template make<Layers::layer_of[N]>())...);
 	}(::std::make_index_sequence<Layers::total>{});
@@ -333,9 +332,9 @@ void test_inline()
 	using shape = layers<1, 8, 1>;
 	tracker probe;
 	layered_state<shape> state{&probe};
-	auto graph = make_layered<graph_a, shape>(::sdag::fused{}, inline_payloads<shape>{&state});
+	auto graph = make_layered<graph_a, shape>(inline_payloads<shape>{&state});
 	auto [value] = ::stdexec::sync_wait(::std::move(graph)).value();
-	report("fused", probe, 1);
+	report("sdag", probe, 1);
 	test::check(value == expected_sink<shape>(), "汇点收到 8 路输入之和");
 	test::check(probe.peak.load() == 1, "峰值 1");
 	test::check(probe.violations.load() == 0, "没有节点在前驱结束之前启动");
@@ -343,8 +342,8 @@ void test_inline()
 
 // ---------------------------------------------------------------- 2、3. 线程池上的分层图
 
-template<class Shape, class Policy>
-void run_layered_on_pool(char const* name, Policy policy, ::exec::static_thread_pool& pool, int expected_peak)
+template<class Shape>
+void run_layered_on_pool(char const* name, ::exec::static_thread_pool& pool, int expected_peak)
 {
 	tracker probe;
 	layered_state<Shape> state{&probe};
@@ -357,7 +356,7 @@ void run_layered_on_pool(char const* name, Policy policy, ::exec::static_thread_
 			state.meet[layer] = &*meets[layer];
 		}
 	}
-	auto graph = make_layered<graph_a, Shape>(policy, pool_payloads<Shape, decltype(pool.get_scheduler())>{&state, pool.get_scheduler()});
+	auto graph = make_layered<graph_a, Shape>(pool_payloads<Shape, decltype(pool.get_scheduler())>{&state, pool.get_scheduler()});
 	auto [value] = ::stdexec::sync_wait(::std::move(graph)).value();
 	report(name, probe, expected_peak);
 	bool timed_out = false;
@@ -375,16 +374,14 @@ void test_pool_fan()
 {
 	test::section("1 -> 8 -> 1，线程池：峰值 8");
 	::exec::static_thread_pool pool{16, stealable()};
-	run_layered_on_pool<layers<1, 8, 1>>("fused", ::sdag::fused{}, pool, 8);
-	run_layered_on_pool<layers<1, 8, 1>>("composed（when_all + split）", ::sdag::composed{}, pool, 8);
+	run_layered_on_pool<layers<1, 8, 1>>("sdag", pool, 8);
 }
 
 void test_pool_two_layers()
 {
 	test::section("1 -> 4 -> 8 -> 1，线程池：峰值 8");
 	::exec::static_thread_pool pool{16, stealable()};
-	run_layered_on_pool<layers<1, 4, 8, 1>>("fused", ::sdag::fused{}, pool, 8);
-	run_layered_on_pool<layers<1, 4, 8, 1>>("composed（when_all + split）", ::sdag::composed{}, pool, 8);
+	run_layered_on_pool<layers<1, 4, 8, 1>>("sdag", pool, 8);
 }
 
 // ---------------------------------------------------------------- 4. 图组装成图
@@ -411,8 +408,8 @@ void test_nested()
 	state_a.gate = &started;
 	state_b.gate = &started;
 
-	auto a = make_layered<graph_a, shape_a>(::sdag::fused{}, pool_payloads<shape_a, decltype(scheduler)>{&state_a, scheduler});
-	auto b = make_layered<graph_b, shape_b>(::sdag::fused{}, pool_payloads<shape_b, decltype(scheduler)>{&state_b, scheduler});
+	auto a = make_layered<graph_a, shape_a>(pool_payloads<shape_a, decltype(scheduler)>{&state_a, scheduler});
+	auto b = make_layered<graph_b, shape_b>(pool_payloads<shape_b, decltype(scheduler)>{&state_b, scheduler});
 	static_assert(::exec::sender_for<decltype(a), ::sdag::dag_t>, "内层图本身就是一个图 sender");
 
 	auto outer = ::sdag::dag(
@@ -434,7 +431,7 @@ void test_nested()
 		})));
 
 	auto [value] = ::stdexec::sync_wait(::std::move(outer)).value();
-	report("fused", probe, 9);
+	report("sdag", probe, 9);
 	test::check(!meet_a1.timed_out.load() && !meet_wide.timed_out.load(), "两张内层图真的并行（会合点到齐）");
 	test::check(probe.peak.load() == 9, "峰值达到理论最大 8 + 1");
 	test::check(value == expected_sink<shape_a>() + expected_sink<shape_b>(), "外层汇点收到两张内层图的值");

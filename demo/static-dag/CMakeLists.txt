@@ -30,13 +30,19 @@ target_link_libraries(sdag INTERFACE sdag_stdexec)
 target_compile_features(sdag INTERFACE cxx_std_26)
 sdag_add_reflection_flags(sdag)
 
+# 测试辅助（check.h、fixtures.h）：扩展库的测试也可以用，但 sdag 不认识它们。
+add_library(sdag_test_support INTERFACE)
+add_library(sdag::test_support ALIAS sdag_test_support)
+target_include_directories(sdag_test_support INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/test")
+target_link_libraries(sdag_test_support INTERFACE sdag_build_settings)
+
 # ---------------------------------------------------------------- 测试
-option(SDAG_BUILD_TESTS "构建 sdag 的测试" ON)
+option(SDAG_BUILD_TESTS "构建 sdag 的测试（作为子项目引入时默认关闭）" ${PROJECT_IS_TOP_LEVEL})
 if(SDAG_BUILD_TESTS)
     enable_testing()
 
     function(sdag_add_test NAME SOURCE)
-        add_executable(${NAME} ${SOURCE} test/check.h)
+        add_executable(${NAME} ${SOURCE} test/check.h test/fixtures.h)
         target_link_libraries(${NAME} PRIVATE sdag::sdag sdag_build_settings)
         string(REPLACE "_" "-" _output "${NAME}")
         set_target_properties(${NAME} PROPERTIES OUTPUT_NAME ${_output} CXX_SCAN_FOR_MODULES OFF)

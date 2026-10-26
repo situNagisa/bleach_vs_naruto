@@ -1,5 +1,5 @@
 /// 0 开销验证：
-///   1. 融合策略一次连接 + 启动的堆分配次数为 0；组合策略（split）不为 0。
+///   1. 一次构造 + 连接 + 启动的堆分配次数为 0。
 ///   2. 整图 op-state 的大小 = 节点 op-state 之和 + 值槽 + 必要的原子量，没有多余的间接层。
 ///   3. 不会失败的图没有停止源、没有状态字；只有一个汇点的图没有汇点计数；入度 1 的节点没有倒计数。
 
@@ -35,10 +35,9 @@ struct d
 {
 };
 
-template<class Policy>
-auto diamond(Policy policy)
+auto diamond()
 {
-	return ::sdag::dag(policy,
+	return ::sdag::dag(
 		::sdag::make_node<a>(::stdexec::just(1)),
 		::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([](int const& x) noexcept { return x + 1; })),
 		::sdag::make_node<c, ::sdag::data<a>>(::stdexec::then([](int const& x) noexcept { return x * 2; })),
@@ -72,11 +71,10 @@ struct null_receiver
 };
 
 /// 从构造 sender 到启动完成（内联调度，整图同步跑完）的堆分配次数。
-template<class Policy>
-::std::size_t allocations_of_one_run(Policy policy, int& sink)
+::std::size_t allocations_of_one_run(int& sink)
 {
 	auto const before = allocation_count.load();
-	auto operation = ::stdexec::connect(diamond(policy), null_receiver{&sink});
+	auto operation = ::stdexec::connect(diamond(), null_receiver{&sink});
 	::stdexec::start(operation);
 	return allocation_count.load() - before;
 }
@@ -108,18 +106,14 @@ int main()
 	test::section("堆分配");
 	{
 		int sink = 0;
-		auto fused_allocations = allocations_of_one_run(::sdag::fused{}, sink);
-		test::check(sink == 4 && fused_allocations == 0, "融合策略：构造 + 连接 + 启动 0 次分配");
-		::std::println("  fused:    {} 次分配", fused_allocations);
-
-		auto composed_allocations = allocations_of_one_run(::sdag::composed{}, sink);
-		test::check(sink == 4 && composed_allocations > 0, "组合策略：split 在构造时就要分配共享状态");
-		::std::println("  composed: {} 次分配（split）", composed_allocations);
+		auto allocations = allocations_of_one_run(sink);
+		test::check(sink == 4 && allocations == 0, "构造 + 连接 + 启动 0 次分配");
+		::std::println("  {} 次分配", allocations);
 	}
 
 	test::section("op-state 大小");
 	{
-		using graph = decltype(diamond(::sdag::fused{}));
+		using graph = decltype(diamond());
 		using operation = ::stdexec::connect_result_t<graph, null_receiver>;
 		static_assert(!operation::stoppable, "全 noexcept 的菱形不需要停止源");
 		static_assert(operation::sink_count == 1);

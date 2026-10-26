@@ -20,7 +20,6 @@
 ///     cvref.h                cv/引用转抄：让一个类型带上另一个类型的 const 与值类别
 ///     signatures.h           完成签名：怎么拆开 / 拼装一组完成签名
 ///     domain_merge.h         domain 合并：一组 domain 合成哪一个
-///     domain_custom.h        domain 改写：某个 domain 在某个阶段会不会改写某个 sender
 ///   stdexec/     对 stdexec 的适配
 ///     expressions.h          sender 表达式：拆开 / 重建 stdexec 的算法 sender
 ///     dependent.h            依赖型报错：「没有环境，算不出签名」怎么向 stdexec 报告
@@ -47,11 +46,9 @@
 ///   execution/   怎么执行
 ///     completion_state.h     完成状态机：运行中 / 错误 / 停止；第一个错误胜出；外层停止请求怎么传
 ///     fused.h                融合执行：整张图作为一个 operation state 怎么调度：根、后继、入度计数、汇点
-///     lowering.h             降解：把图改写成 when_all / split / let_value
-///     lowering_policy.h      是否降解：当前 domain 会不会改写降解后的 when_all
 ///   assembly/    拼装与入口
 ///     graph_sender.h         图 sender：把 描述 + 完成签名 + 属性 + 执行 拼成一个 stdexec sender；并保证取值源的两个接口都有实现者
-///     dag.h                  公开入口：dag / fused / composed；定义算法标签 dag_t 及其 transform_sender
+///     dag.h                  公开入口：dag / make_graph；定义算法标签 dag_t
 ///
 /// 有反射与模板两种实现的文件，用 SDAG_REFLECTION 隔开（见 config.h）。
 
@@ -63,7 +60,6 @@
 #include "general/cvref.h"
 #include "general/signatures.h"
 #include "general/domain_merge.h"
-#include "general/domain_custom.h"
 #include "stdexec/expressions.h"
 #include "stdexec/dependent.h"
 #include "node/node.h"
@@ -85,7 +81,5 @@
 #include "graph/attributes.h"
 #include "execution/completion_state.h"
 #include "execution/fused.h"
-#include "execution/lowering.h"
-#include "execution/lowering_policy.h"
 #include "assembly/graph_sender.h"
 #include "assembly/dag.h"

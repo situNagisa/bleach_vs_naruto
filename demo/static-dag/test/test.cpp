@@ -1,4 +1,4 @@
-/// sdag 功能测试：编译期（concept、形状分析、完成签名）与运行期（各种形状、两种策略、错误 / 停止传播、线程池）。
+/// sdag 功能测试：编译期（concept、形状分析、完成签名）与运行期（各种形状、错误 / 停止传播、线程池）。
 
 #include <algorithm>
 #include <atomic>
@@ -22,271 +22,10 @@
 #include <sdag/sdag.h>
 
 #include "check.h"
+#include "fixtures.h"
 
 namespace
 {
-
-struct a
-{
-};
-struct b
-{
-};
-struct c
-{
-};
-struct d
-{
-};
-struct e
-{
-};
-struct f
-{
-};
-
-// ---------------------------------------------------------------- 测试用 sender / 接收者
-
-/// 启动时已请求停止 -> set_stopped，否则 set_value()。
-struct stop_probe
-{
-	using sender_concept = ::stdexec::sender_t;
-
-	template<class Self, class... Env>
-	static consteval auto get_completion_signatures()
-	{
-		return ::stdexec::completion_signatures<::stdexec::set_value_t(), ::stdexec::set_stopped_t()>{};
-	}
-
-	template<class Receiver>
-	struct operation
-	{
-		Receiver _receiver;
-
-		void start() noexcept
-		{
-			if (::stdexec::get_stop_token(::stdexec::get_env(_receiver)).stop_requested())
-			{
-				::stdexec::set_stopped(::std::move(_receiver));
-			}
-			else
-			{
-				::stdexec::set_value(::std::move(_receiver));
-			}
-		}
-	};
-
-	template<::stdexec::receiver Receiver>
-	operation<Receiver> connect(Receiver receiver) const noexcept
-	{
-		return {::std::move(receiver)};
-	}
-};
-
-/// 永远 set_stopped，但声明自己也可能 set_value()。
-struct always_stopped
-{
-	using sender_concept = ::stdexec::sender_t;
-
-	template<class Self, class... Env>
-	static consteval auto get_completion_signatures()
-	{
-		return ::stdexec::completion_signatures<::stdexec::set_value_t(), ::stdexec::set_stopped_t()>{};
-	}
-
-	template<class Receiver>
-	struct operation
-	{
-		Receiver _receiver;
-
-		void start() noexcept
-		{
-			::stdexec::set_stopped(::std::move(_receiver));
-		}
-	};
-
-	template<::stdexec::receiver Receiver>
-	operation<Receiver> connect(Receiver receiver) const noexcept
-	{
-		return {::std::move(receiver)};
-	}
-};
-
-/// 移动时按开关抛异常：用来触发"存值时抛异常 -> exception_ptr"路径（开关在 sync_wait 前才打开）。
-struct fragile
-{
-	bool* _explode;
-
-	explicit fragile(bool* explode) noexcept : _explode(explode)
-	{
-	}
-
-	fragile(fragile&& other) : _explode(other._explode)
-	{
-		if (*_explode)
-		{
-			throw ::std::runtime_error("fragile");
-		}
-	}
-};
-
-enum class outcome
-{
-	none,
-	value,
-	error,
-	stopped,
-};
-
-struct stop_env
-{
-	::stdexec::inplace_stop_token _token;
-
-	[[nodiscard]] ::stdexec::inplace_stop_token query(::stdexec::get_stop_token_t) const noexcept
-	{
-		return _token;
-	}
-};
-
-/// 带外层停止令牌的接收者；值只记录个数。
-struct probe_receiver
-{
-	using receiver_concept = ::stdexec::receiver_t;
-
-	outcome* _outcome;
-	int* _value_count;
-	::stdexec::inplace_stop_token _token;
-
-	template<class... Args>
-	void set_value(Args&&...) noexcept
-	{
-		*_outcome = outcome::value;
-		*_value_count = sizeof...(Args);
-	}
-
-	template<class Error>
-	void set_error(Error&&) noexcept
-	{
-		*_outcome = outcome::error;
-	}
-
-	void set_stopped() noexcept
-	{
-		*_outcome = outcome::stopped;
-	}
-
-	[[nodiscard]] stop_env get_env() const noexcept
-	{
-		return {_token};
-	}
-};
-
-/// 完成时顺带唤醒等待线程。
-struct notify_receiver
-{
-	using receiver_concept = ::stdexec::receiver_t;
-
-	probe_receiver _inner;
-	::std::atomic<bool>* _done;
-
-	template<class... Args>
-	void set_value(Args&&... args) noexcept
-	{
-		_inner.set_value(::std::forward<Args>(args)...);
-		_done->store(true);
-		_done->notify_all();
-	}
-
-	template<class Error>
-	void set_error(Error&& error) noexcept
-	{
-		_inner.set_error(::std::forward<Error>(error));
-		_done->store(true);
-		_done->notify_all();
-	}
-
-	void set_stopped() noexcept
-	{
-		_inner.set_stopped();
-		_done->store(true);
-		_done->notify_all();
-	}
-
-	[[nodiscard]] stop_env get_env() const noexcept
-	{
-		return _inner.get_env();
-	}
-};
-
-template<class V>
-constexpr bool shared_access = ::std::is_const_v<::std::remove_reference_t<V>>;
-
-// ---------------------------------------------------------------- 模拟一个会定制 when_all 的 domain
-
-inline int custom_when_all_uses = 0;
-
-template<class Sender>
-struct counted_when_all
-{
-	Sender _sender;
-
-	auto operator()() const
-	{
-		++custom_when_all_uses;
-		// 内层 when_all 连接时环境里的 domain 换回默认，避免被再次定制。
-		return ::stdexec::write_env(_sender, ::stdexec::prop{::stdexec::get_domain, ::stdexec::default_domain{}});
-	}
-};
-
-/// 只定制 when_all（起始阶段）：把它包进一个计数的 let_value。
-struct mock_domain : ::stdexec::default_domain
-{
-	template<::exec::sender_for<::stdexec::when_all_t> Sender, class Env>
-	static auto transform_sender(::stdexec::start_t, Sender&& sender, Env const&)
-	{
-		return ::stdexec::let_value(::stdexec::just(), counted_when_all<::std::remove_cvref_t<Sender>>{::std::forward<Sender>(sender)});
-	}
-};
-
-struct domain_env
-{
-	[[nodiscard]] mock_domain query(::stdexec::get_domain_t) const noexcept
-	{
-		return {};
-	}
-};
-
-/// 环境里带 mock_domain 的接收者。
-struct domain_receiver
-{
-	using receiver_concept = ::stdexec::receiver_t;
-
-	outcome* _outcome;
-	int* _value_count;
-
-	template<class... Args>
-	void set_value(Args&&...) noexcept
-	{
-		*_outcome = outcome::value;
-		*_value_count = sizeof...(Args);
-	}
-
-	template<class Error>
-	void set_error(Error&&) noexcept
-	{
-		*_outcome = outcome::error;
-	}
-
-	void set_stopped() noexcept
-	{
-		*_outcome = outcome::stopped;
-	}
-
-	[[nodiscard]] domain_env get_env() const noexcept
-	{
-		return {};
-	}
-};
 
 // ---------------------------------------------------------------- 编译期
 
@@ -295,7 +34,7 @@ namespace compile_time
 
 using root = ::sdag::node<a, ::sdag::dependencies<>, decltype(::stdexec::just(1))>;
 using inc = ::sdag::node<b, ::sdag::dependencies_of_t<::sdag::data<a>>, decltype(::stdexec::then([](int) { return 1.0; }))>;
-using dag_type = ::sdag::dag_sender<::sdag::fused, root, inc>;
+using dag_type = ::sdag::dag_sender<root, inc>;
 
 static_assert(::stdexec::sender<dag_type>);
 static_assert(::stdexec::sender_in<dag_type, ::stdexec::env<>>);
@@ -311,9 +50,6 @@ static_assert(::sdag::dependency_list<::sdag::dependencies<>>);
 static_assert(!::sdag::dependency_list<::sdag::data<a>>);
 static_assert(::std::same_as<::sdag::dependencies_of_t<::sdag::control<b>>, ::sdag::dependencies<::sdag::data<>, ::sdag::control<b>>>);
 static_assert(!::sdag::dependency_list<::std::tuple<>>);
-static_assert(::sdag::graph_policy_for<::sdag::fused, root, inc>);
-static_assert(::sdag::graph_policy_for<::sdag::composed<>, root, inc>);
-static_assert(!::sdag::graph_policy_for<int, root, inc>);
 
 // 形状诊断
 using n_a = ::sdag::node<a, ::sdag::dependencies<>, int>;
@@ -336,17 +72,17 @@ static_assert(shape.root_count() == 1 && shape.sink_count() == 1);
 using nothrow_root = ::sdag::node<a, ::sdag::dependencies<>, decltype(::stdexec::just(1))>;
 using nothrow_inc = ::sdag::node<b, ::sdag::dependencies_of_t<::sdag::data<a>>, decltype(::stdexec::then([](int x) noexcept { return x + 1; }))>;
 using throwing_inc = ::sdag::node<b, ::sdag::dependencies_of_t<::sdag::data<a>>, decltype(::stdexec::then([](int x) { return x + 1; }))>;
-using nothrow_op = ::stdexec::connect_result_t<::sdag::dag_sender<::sdag::fused, nothrow_root, nothrow_inc>, probe_receiver>;
-using throwing_op = ::stdexec::connect_result_t<::sdag::dag_sender<::sdag::fused, nothrow_root, throwing_inc>, probe_receiver>;
+using nothrow_op = ::stdexec::connect_result_t<::sdag::dag_sender<nothrow_root, nothrow_inc>, probe_receiver>;
+using throwing_op = ::stdexec::connect_result_t<::sdag::dag_sender<nothrow_root, throwing_inc>, probe_receiver>;
 static_assert(!nothrow_op::stoppable);
 static_assert(throwing_op::stoppable);
-static_assert(::std::same_as<::stdexec::completion_signatures_of_t<::sdag::dag_sender<::sdag::fused, nothrow_root, nothrow_inc>, ::stdexec::env<>>,
+static_assert(::std::same_as<::stdexec::completion_signatures_of_t<::sdag::dag_sender<nothrow_root, nothrow_inc>, ::stdexec::env<>>,
 	::stdexec::completion_signatures<::stdexec::set_value_t(int)>>);
 
 // 依赖环境的节点：无环境时算不出签名（sender 仍成立），给环境就能算
 using env_dependent = ::sdag::node<a, ::sdag::dependencies<>,
 	decltype(::stdexec::read_env(::stdexec::get_stop_token) | ::stdexec::then([](auto) { return 1; }))>;
-using env_dag = ::sdag::dag_sender<::sdag::fused, env_dependent>;
+using env_dag = ::sdag::dag_sender<env_dependent>;
 static_assert(::stdexec::sender<env_dag>);
 static_assert(!::stdexec::sender_in<env_dag>);
 static_assert(::stdexec::sender_in<env_dag, ::stdexec::env<>>);
@@ -354,26 +90,24 @@ static_assert(::stdexec::sender_in<env_dag, ::stdexec::env<>>);
 // 节点签名在某个环境下算不出来时，结果原样透传给 stdexec：sender 成立、sender_in 不成立，不是硬错误
 using needs_scheduler = ::sdag::node<a, ::sdag::dependencies<>,
 	decltype(::stdexec::read_env(::stdexec::get_scheduler) | ::stdexec::then([](auto) { return 1; }))>;
-using scheduler_dag = ::sdag::dag_sender<::sdag::fused, needs_scheduler>;
+using scheduler_dag = ::sdag::dag_sender<needs_scheduler>;
 static_assert(::stdexec::sender<scheduler_dag>);
 static_assert(!::stdexec::sender_in<scheduler_dag, ::stdexec::env<>>, "env<> 里没有调度器");
-// 属性查询与降解判据这两条实例化路径同样不能硬错误：完成域退回默认 domain，不降解
+// 属性查询这条实例化路径同样不能硬错误：完成域退回默认 domain
 static_assert(::std::same_as<decltype(::stdexec::get_completion_domain<::stdexec::set_value_t>(::stdexec::get_env(::std::declval<scheduler_dag&>()), ::stdexec::env<>{})),
 	::stdexec::default_domain>);
-static_assert(!::sdag::execution::lowering_wanted<::stdexec::start_t, ::sdag::graph::graph_state, scheduler_dag&&, ::stdexec::env<>>());
 
 // 空图：立即以 set_value() 完成
-static_assert(::std::same_as<::stdexec::completion_signatures_of_t<::sdag::dag_sender<::sdag::fused>, ::stdexec::env<>>,
+static_assert(::std::same_as<::stdexec::completion_signatures_of_t<::sdag::dag_sender<>, ::stdexec::env<>>,
 	::stdexec::completion_signatures<::stdexec::set_value_t()>>);
 
 }
 
 // ---------------------------------------------------------------- 运行期
 
-template<class Policy>
-auto diamond(Policy policy, bool& b_shared, bool& c_shared, bool& d_unique)
+auto diamond(bool& b_shared, bool& c_shared, bool& d_unique)
 {
-	return ::sdag::dag(policy,
+	return ::sdag::dag(
 		::sdag::make_node<a>(::stdexec::just(1)),
 		::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([&](auto&& x) { b_shared = shared_access<decltype(x)>; return x + 1; })),
 		::sdag::make_node<c, ::sdag::data<a>>(::stdexec::then([&](auto&& x) { c_shared = shared_access<decltype(x)>; return x * 2; })),
@@ -386,38 +120,26 @@ auto diamond(Policy policy, bool& b_shared, bool& c_shared, bool& d_unique)
 
 void test_diamond()
 {
-	test::section("菱形：扇出按 const& 共享，扇入按值独占，两种策略同结果");
-	for (auto policy_index : {0, 1})
-	{
-		bool b_shared = false;
-		bool c_shared = false;
-		bool d_unique = false;
-		int result = 0;
-		if (policy_index == 0)
-		{
-			result = ::std::get<0>(::stdexec::sync_wait(diamond(::sdag::fused{}, b_shared, c_shared, d_unique)).value());
-		}
-		else
-		{
-			result = ::std::get<0>(::stdexec::sync_wait(diamond(::sdag::composed{}, b_shared, c_shared, d_unique)).value());
-		}
-		test::check(result == 4, "结果 = (1+1) + (1*2)");
-		test::check(b_shared && c_shared, "a 有两个后继，按 const& 共享");
-		test::check(d_unique, "b、c 各只有一个后继，按值移动");
-	}
+	test::section("菱形：扇出按 const& 共享，扇入按值独占");
+	bool b_shared = false;
+	bool c_shared = false;
+	bool d_unique = false;
+	int result = ::std::get<0>(::stdexec::sync_wait(diamond(b_shared, c_shared, d_unique)).value());
+	test::check(result == 4, "结果 = (1+1) + (1*2)");
+	test::check(b_shared && c_shared, "a 有两个后继，按 const& 共享");
+	test::check(d_unique, "b、c 各只有一个后继，按值移动");
 }
 
 void test_triangle()
 {
 	test::section("三角形 a -> b -> c, a -> c：传递边不去重，a 共享、b 独占，c 等两个前驱都到齐");
-	for (auto policy_index : {0, 1})
 	{
 		::std::vector<int> sequence;
 		bool a_shared_in_c = false;
 		bool b_unique_in_c = false;
-		auto build = [&](auto policy)
+		auto build = [&]
 		{
-			return ::sdag::dag(policy,
+			return ::sdag::dag(
 				::sdag::make_node<a>(::stdexec::just(::std::string("a")) | ::stdexec::then([&](::std::string s) { sequence.push_back(1); return s; })),
 				::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([&](::std::string const& s) { sequence.push_back(2); return s + "b"; })),
 				::sdag::make_node<c, ::sdag::data<a, b>>(::stdexec::then([&](auto&& from_a, auto&& from_b)
@@ -428,27 +150,17 @@ void test_triangle()
 					return from_a + from_b;
 				})));
 		};
-		using fused_graph = decltype(build(::sdag::fused{}));
+		using fused_graph = decltype(build());
 		static_assert(::std::same_as<::stdexec::completion_signatures_of_t<fused_graph, ::stdexec::env<>>,
 			::stdexec::completion_signatures<::stdexec::set_value_t(::std::string), ::stdexec::set_error_t(::std::exception_ptr)>>);
 		constexpr auto shape = ::sdag::shape_v<fused_graph>;
 		static_assert(shape.in_degree[2] == 2 && shape.out_degree[0] == 2 && shape.out_degree[1] == 1);
 		static_assert(shape.order[0] == 0 && shape.order[1] == 1 && shape.order[2] == 2);
 
-		::std::string text = policy_index == 0
-			? ::std::get<0>(::stdexec::sync_wait(build(::sdag::fused{})).value())
-			: ::std::get<0>(::stdexec::sync_wait(build(::sdag::composed{})).value());
+		::std::string text = ::std::get<0>(::stdexec::sync_wait(build()).value());
 		test::check(text == "aab", "c 同时拿到 a 的值和 b 的值");
 		test::check(sequence == ::std::vector<int>{1, 2, 3}, "c 只启动一次，且在 a、b 之后");
-		if (policy_index == 0)
-		{
-			test::check(a_shared_in_c && b_unique_in_c, "fused：a 有两个后继按 const& 共享，b 只有 c 一个后继按值移动");
-		}
-		else
-		{
-			// when_all 会把 split 给的 const& 再拷贝一份存进自己的 op-state，然后按右值交给后继
-			test::check(!a_shared_in_c && b_unique_in_c, "composed：when_all 把共享值拷贝后按右值交给后继");
-		}
+		test::check(a_shared_in_c && b_unique_in_c, "a 有两个后继按 const& 共享，b 只有 c 一个后继按值移动");
 	}
 }
 
@@ -501,9 +213,9 @@ void test_multi_sink_and_control()
 void test_mixed_dependencies()
 {
 	test::section("数据依赖 + 控制依赖：data<> 给值，control<> 只定先后");
-	auto build = [](auto policy, ::std::vector<int>& sequence, bool& a_shared)
+	auto build = [](::std::vector<int>& sequence, bool& a_shared)
 	{
-		return ::sdag::dag(policy,
+		return ::sdag::dag(
 			::sdag::make_node<a>(::stdexec::just(5) | ::stdexec::then([&](int x) { sequence.push_back(1); return x; })),
 			// c 只依赖 a 的先后：a 的值只有 b 一个读者，所以 move 给 b，不共享
 			::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([&](auto&& x) { a_shared = shared_access<decltype(x)>; sequence.push_back(2); return x * 2; })),
@@ -511,7 +223,7 @@ void test_mixed_dependencies()
 			// d 等 b、c 都完成，但只收到 c 的值
 			::sdag::make_node<d, ::sdag::data<c>, ::sdag::control<b>>(::stdexec::then([&](::std::string const& s) { sequence.push_back(4); return s + "d"; })));
 	};
-	using graph = decltype(build(::sdag::fused{}, ::std::declval<::std::vector<int>&>(), ::std::declval<bool&>()));
+	using graph = decltype(build(::std::declval<::std::vector<int>&>(), ::std::declval<bool&>()));
 	static_assert(::std::same_as<::stdexec::completion_signatures_of_t<graph, ::stdexec::env<>>,
 		::stdexec::completion_signatures<::stdexec::set_value_t(::std::string), ::stdexec::set_error_t(::std::exception_ptr)>>);
 	static_assert(::sdag::graph::reader_counts_v<graph&&>[0] == 1, "a 的值只有 b 读（c 是控制依赖）");
@@ -524,13 +236,8 @@ void test_mixed_dependencies()
 	};
 	::std::vector<int> fused_sequence;
 	bool fused_shared = true;
-	auto [fused_value] = ::stdexec::sync_wait(build(::sdag::fused{}, fused_sequence, fused_shared)).value();
-	test::check(fused_value == "cd" && respects_order(fused_sequence) && !fused_shared, "融合：d 只收到 c 的值，且在 b、c 之后跑；a 的值 move 给唯一读者 b");
-
-	::std::vector<int> composed_sequence;
-	bool composed_shared = true;
-	auto [composed_value] = ::stdexec::sync_wait(build(::sdag::composed{}, composed_sequence, composed_shared)).value();
-	test::check(composed_value == "cd" && respects_order(composed_sequence), "降解：数据前驱进 fanin，控制前驱丢掉值后并进 fanin");
+	auto [fused_value] = ::stdexec::sync_wait(build(fused_sequence, fused_shared)).value();
+	test::check(fused_value == "cd" && respects_order(fused_sequence) && !fused_shared, "d 只收到 c 的值，且在 b、c 之后跑；a 的值 move 给唯一读者 b");
 }
 
 void test_error_propagation()
@@ -755,9 +462,9 @@ struct right
 
 /// 叠起来的菱形梯子：每一层的两个节点都依赖上一层的两个节点；节点刻意不按拓扑序声明。
 template<::std::size_t... I>
-auto make_ladder(::std::index_sequence<I...>, auto policy)
+auto make_ladder(::std::index_sequence<I...>)
 {
-	return ::sdag::dag(policy,
+	return ::sdag::dag(
 		::sdag::make_node<left<0>>(::stdexec::just(1)),
 		::sdag::make_node<right<0>>(::stdexec::just(2)),
 		::sdag::make_node<left<I + 1>, ::sdag::data<left<I>, right<I>>>(::stdexec::then([](int const& x, int const& y) { return x + y; }))...,
@@ -789,19 +496,18 @@ void test_scale()
 	auto [fan] = ::stdexec::sync_wait(make_fan(::std::make_index_sequence<16>{})).value();
 	test::check(fan == 16 + (15 * 16) / 2, "扇入收齐 16 路");
 
-	// 8 层菱形梯子（18 个节点，路径数指数级）：两种路径都应线性编译、结果一致
-	auto [fused_left, fused_right] = ::stdexec::sync_wait(make_ladder(::std::make_index_sequence<8>{}, ::sdag::fused{})).value();
-	auto [composed_left, composed_right] = ::stdexec::sync_wait(make_ladder(::std::make_index_sequence<8>{}, ::sdag::composed{})).value();
-	test::check(fused_left == composed_left && fused_right == composed_right && fused_left > 0, "梯子：融合与降解结果一致");
+	// 8 层菱形梯子（18 个节点，路径数指数级）：应线性编译
+	auto [ladder_left, ladder_right] = ::stdexec::sync_wait(make_ladder(::std::make_index_sequence<8>{})).value();
+	test::check(ladder_left == 1393 && ladder_right == 1970, "梯子：逐层 (x + y, 2x + y)");
 }
 
 void test_wide_expressions()
 {
 	test::section("节点里是子 sender 多于 6 个的 stdexec 算法（when_all 有 7 个子 sender）");
-	auto seven = [](auto policy)
+	auto seven = []
 	{
 		auto ones = [] { return ::stdexec::just(1); };
-		return ::sdag::dag(policy,
+		return ::sdag::dag(
 			::sdag::make_node<a>(::stdexec::when_all(ones(), ones(), ones(), ones(), ones(), ones(), ones())
 				| ::stdexec::then([](auto... xs) { return (xs + ...); })),
 			::sdag::make_node<b, ::sdag::data<a>>([ones](auto input)
@@ -810,60 +516,13 @@ void test_wide_expressions()
 					| ::stdexec::then([](auto... xs) { return (xs + ...); });
 			}));
 	};
-	auto [fused_value] = ::stdexec::sync_wait(seven(::sdag::fused{})).value();
-	auto [composed_value] = ::stdexec::sync_wait(seven(::sdag::composed{})).value();
-	test::check(fused_value == 13 && composed_value == 13, "根节点 7 路 when_all，后继把输入与 6 个 sender 一起 when_all");
-}
-
-void test_policies_agree()
-{
-	test::section("复杂形状：两种策略结果一致");
-	auto build = [](auto policy)
-	{
-		return ::sdag::dag(policy,
-			::sdag::make_node<a>(::stdexec::just(2)),
-			::sdag::make_node<b>(::stdexec::just(3)),
-			::sdag::make_node<c, ::sdag::data<a, b>>(::stdexec::then([](int const& x, int const& y) { return x * y; })),
-			::sdag::make_node<d, ::sdag::data<a>>(::stdexec::then([](int const& x) { return x + 100; })),
-			::sdag::make_node<e, ::sdag::data<c, b>>(::stdexec::then([](int const& xy, int const& y) { return xy - y; })),
-			::sdag::make_node<f, ::sdag::data<c, d, e>>(::stdexec::then([](int const& xy, int dx, int diff) { return xy + dx + diff; })));
-	};
-	auto [fused_value] = ::stdexec::sync_wait(build(::sdag::fused{})).value();
-	auto [composed_value] = ::stdexec::sync_wait(build(::sdag::composed{})).value();
-	test::check(fused_value == 6 + 102 + 3, "fused");
-	test::check(composed_value == fused_value, "composed 与 fused 一致");
-
-	// 显式传入扇入 / 扇出算法
-	auto custom = ::sdag::composed{::stdexec::when_all, ::exec::split};
-	auto [custom_value] = ::stdexec::sync_wait(build(custom)).value();
-	test::check(custom_value == fused_value, "显式传入 when_all / split");
-
-	// 控制依赖 + 多汇点在两种策略下一致
-	auto control = [](auto policy, ::std::vector<int>& sequence)
-	{
-		return ::sdag::dag(policy,
-			::sdag::make_node<a>(::stdexec::just(1) | ::stdexec::then([&](int x) { sequence.push_back(1); return x; })),
-			::sdag::make_node<b, ::sdag::control<a>>(::stdexec::just(::std::string("b")) | ::stdexec::then([&](::std::string s) { sequence.push_back(2); return s; })),
-			::sdag::make_node<c, ::sdag::data<a, b>>(::stdexec::then([&](int const& x, ::std::string const& s) { sequence.push_back(3); return x + static_cast<int>(s.size()); })),
-			::sdag::make_node<d, ::sdag::data<b>>(::stdexec::then([&](::std::string const& s) { sequence.push_back(4); return s + "!"; })));
-	};
-	::std::vector<int> fused_sequence;
-	::std::vector<int> composed_sequence;
-	auto [fused_sum, fused_text] = ::stdexec::sync_wait(control(::sdag::fused{}, fused_sequence)).value();
-	auto [composed_sum, composed_text] = ::stdexec::sync_wait(control(::sdag::composed{}, composed_sequence)).value();
-	test::check(fused_sum == 2 && fused_text == "b!" && composed_sum == 2 && composed_text == "b!", "控制依赖节点的值与数据依赖节点一起到达汇点");
-	// 只约束偏序：a < b < c，b < d。并行度不同的实现（以及内联启动的先后）给出的全序可以不同。
-	auto respects_order = [](::std::vector<int> const& sequence)
-	{
-		auto position = [&](int node) { return ::std::ranges::find(sequence, node) - sequence.begin(); };
-		return sequence.size() == 4 && position(1) < position(2) && position(2) < position(3) && position(2) < position(4);
-	};
-	test::check(respects_order(fused_sequence) && respects_order(composed_sequence), "控制依赖保证了先后顺序");
+	auto [fused_value] = ::stdexec::sync_wait(seven()).value();
+	test::check(fused_value == 13, "根节点 7 路 when_all，后继把输入与 6 个 sender 一起 when_all");
 }
 
 void test_ecosystem()
 {
-	test::section("stdexec 生态：图是 dag_t 标签的 sexpr；定制 when_all 的 domain 看到降解后的标准算法，其它 domain 走融合");
+	test::section("stdexec 生态：图是 dag_t 标签的 sender；任何 domain 下都走融合 op-state");
 	auto build = []
 	{
 		return ::sdag::dag(
@@ -881,8 +540,8 @@ void test_ecosystem()
 	// 没有 domain：连接结果是融合 op-state
 	static_assert(::std::same_as<::stdexec::connect_result_t<graph, probe_receiver>,
 		::sdag::execution::fused_operation<graph&&, probe_receiver>>);
-	// mock_domain：连接结果不是融合 op-state，而是降解后的标准算法树
-	static_assert(!::std::same_as<::stdexec::connect_result_t<graph, domain_receiver>,
+	// 定制了 when_all 的 domain 也一样：dag_t 没有 transform_sender，图不会被改写
+	static_assert(::std::same_as<::stdexec::connect_result_t<graph, domain_receiver>,
 		::sdag::execution::fused_operation<graph&&, domain_receiver>>);
 
 	custom_when_all_uses = 0;
@@ -898,13 +557,8 @@ void test_ecosystem()
 		int count = 0;
 		auto op = ::stdexec::connect(build(), domain_receiver{&result, &count});
 		::stdexec::start(op);
-		test::check(result == outcome::value && count == 2, "降解后的图完成值与融合一致（两个汇点）");
-		test::check(custom_when_all_uses > 0, "domain 对 when_all 的定制在降解后的图上生效");
+		test::check(result == outcome::value && count == 2 && custom_when_all_uses == 0, "定制 when_all 的 domain 下仍走融合，定制不被触发");
 	}
-
-	// 手动降解与 composed 策略是同一条路
-	auto [x, y] = ::stdexec::sync_wait(::sdag::lower(build(), ::stdexec::when_all, ::exec::split)).value();
-	test::check(x == 4 && y == 20, "lower(graph, when_all, split)");
 
 	// 完成域属性：图在汇点完成的地方完成
 	{
@@ -941,7 +595,6 @@ int main()
 	test_thread_pool();
 	test_scale();
 	test_wide_expressions();
-	test_policies_agree();
 	test_ecosystem();
 	return test::report();
 }
