@@ -1,6 +1,6 @@
 #pragma once
 
-/// cv/引用转抄：让一个类型带上另一个类型的 const 与值类别。依赖：无。
+/// cv/引用转抄：让一个类型带上另一个类型的 const 与值类别。
 
 #include <utility>
 

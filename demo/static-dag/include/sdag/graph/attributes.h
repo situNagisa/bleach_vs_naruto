@@ -1,7 +1,6 @@
 #pragma once
 
 /// 图的属性：图的完成域与完成行为（值完成在汇点，失败可能来自任一节点）。
-/// 依赖：节点完成分析、图的描述、有向无环图、domain 合并、节点的完成域、完成签名、类型列表、节点所见环境。
 ///
 ///   graph_attributes<SourceOf, Self>   图 sender 的 get_env() 返回它（SourceOf 见 graph/visibility.h）
 ///     get_completion_domain<set_value_t>     各汇点在节点所见环境下的公共完成域
@@ -9,6 +8,7 @@
 ///     get_completion_behavior<Tag>           全部节点的合成（空图是 inline_completion）
 ///   节点签名在某个环境下不合法时，这些查询安静地不回答，把诊断留给 connect。
 
+#include <concepts>
 #include <cstddef>
 #include <type_traits>
 #include <utility>
@@ -32,26 +32,24 @@ namespace sdag::graph
 template<template<class, class> class SourceOf, class Self>
 struct graph_attributes
 {
-	using self_type = Self;
-	using description = description_of<Self>;
-	using data_type = typename description::data_type;
+	template<class Indices = general::sequence_t<general::sinks_v<shape_of_v<Self>>>>
+	struct sinks;
 
-	template<class Env, class Indices = general::sequence_t<general::sinks_v<data_type::shape>>>
-	struct sink_children;
-
-	template<class Env, size_t... S>
-	struct sink_children<Env, ::std::index_sequence<S...>>
+	template<size_t... S>
+	struct sinks<::std::index_sequence<S...>>
 	{
 		using type = general::type_list<child_t<Self, S>...>;
 	};
 
+	using sink_children = typename sinks<>::type;
+
 	/// 汇点在节点环境下的公共值完成域；有汇点给不出时为 void。
 	template<class Env>
-	using value_domain_t = common_completion_domain_t<node_env_t<SourceOf, Self, Env>, typename sink_children<Env>::type>;
+	using value_domain_t = common_completion_domain_t<node_env_t<SourceOf, Self, Env>, sink_children>;
 
 	/// 全部节点的公共值完成域；有节点给不出时为 void。
 	template<class Env>
-	using any_node_domain_t = common_completion_domain_t<node_env_t<SourceOf, Self, Env>, typename description::children>;
+	using any_node_domain_t = common_completion_domain_t<node_env_t<SourceOf, Self, Env>, typename description_of<Self>::children>;
 
 	template<class Env>
 	using failure_domain_t = general::common_domain_t<general::type_list<value_domain_t<Env>, any_node_domain_t<Env>>>;
@@ -64,17 +62,11 @@ struct graph_attributes
 		return {};
 	}
 
-	template<class Env>
-		requires (evaluable_in<SourceOf, Self, Env>()) && (!::std::is_void_v<value_domain_t<Env>>) && (!::std::is_void_v<any_node_domain_t<Env>>)
-	[[nodiscard]] constexpr auto query(::stdexec::get_completion_domain_t<::stdexec::set_error_t>, Env const&) const noexcept
-		-> failure_domain_t<Env>
-	{
-		return {};
-	}
-
-	template<class Env>
-		requires (evaluable_in<SourceOf, Self, Env>()) && (!::std::is_void_v<value_domain_t<Env>>) && (!::std::is_void_v<any_node_domain_t<Env>>)
-	[[nodiscard]] constexpr auto query(::stdexec::get_completion_domain_t<::stdexec::set_stopped_t>, Env const&) const noexcept
+	/// 失败（set_error / set_stopped）可能来自任一节点。
+	template<class Tag, class Env>
+		requires (::std::same_as<Tag, ::stdexec::set_error_t> || ::std::same_as<Tag, ::stdexec::set_stopped_t>)
+			&& (evaluable_in<SourceOf, Self, Env>()) && (!::std::is_void_v<value_domain_t<Env>>) && (!::std::is_void_v<any_node_domain_t<Env>>)
+	[[nodiscard]] constexpr auto query(::stdexec::get_completion_domain_t<Tag>, Env const&) const noexcept
 		-> failure_domain_t<Env>
 	{
 		return {};

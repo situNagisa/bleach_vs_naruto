@@ -1,12 +1,14 @@
 #pragma once
 
-/// 值的读者：谁读谁的值 → 每个值是共享还是独占。依赖：图的描述、有向无环图。
+/// 值的读者：谁读谁的值 → 每个值是共享还是独占。
 ///
 ///   reader_counts_v<Self>          每个节点"读它的值的后继"有几个：只数把它写在 data<...> 里的后继，写在 control<...> 里的不碰值
 ///   shared_v<Self, D>              节点 D 的值共不共享。只有一个读者时把值 move 给它（签名写 V），多个读者时都给 V const&（值留在整图里）
+///   access_t<Self, D, V>           读者看到的 D 的值类型：共享时 V const&，否则 V
 
 #include <array>
 #include <cstddef>
+#include <type_traits>
 #include <utility>
 
 #include "../config.h"
@@ -38,5 +40,8 @@ inline constexpr auto reader_counts_v = []<size_t... I>(::std::index_sequence<I.
 
 template<class Self, size_t D>
 inline constexpr bool shared_v = reader_counts_v<Self>[D] > 1;
+
+template<class Self, size_t D, class V>
+using access_t = ::std::conditional_t<shared_v<Self, D>, V const&, V>;
 
 }

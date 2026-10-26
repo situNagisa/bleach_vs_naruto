@@ -1,6 +1,6 @@
 #pragma once
 
-/// 有向无环图：拓扑序、入出度、根与汇点、成环检查。依赖：无。
+/// 有向无环图：拓扑序、入出度、根与汇点、成环检查。
 ///
 /// 节点用下标 0..N-1 表示，与节点"是什么"无关。shape<N> 是一个字面量：edge[from][to] 表示 to 依赖 from；
 /// 根是没有前驱的节点，汇点是没有后继的节点。所有结果都是编译期常量，运行期不存在。
@@ -8,6 +8,7 @@
 ///   shape<N>, shape_error           邻接矩阵、入出度、拓扑序（Kahn，入度相同的保持下标顺序），以及建图时发现的错误
 ///   sinks_v / roots_v / successors_v  把编译期的汇点 / 根 / 后继列表固定成 std::array，供展开使用
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <utility>
@@ -40,8 +41,6 @@ struct shape
 	/// 拓扑序；入度相同的节点保持声明顺序。
 	::std::array<::std::size_t, N> order{};
 	shape_error error = shape_error::none;
-	/// 出错的节点索引（声明顺序）。
-	::std::size_t offending = 0;
 
 	[[nodiscard]] constexpr bool is_root(::std::size_t index) const noexcept
 	{
@@ -55,71 +54,51 @@ struct shape
 
 	[[nodiscard]] constexpr ::std::size_t root_count() const noexcept
 	{
-		::std::size_t total = 0;
-		for (::std::size_t index = 0; index < N; ++index)
-		{
-			total += is_root(index) ? 1 : 0;
-		}
-		return total;
+		return static_cast<::std::size_t>(::std::ranges::count(in_degree, ::std::size_t{0}));
 	}
 
 	[[nodiscard]] constexpr ::std::size_t sink_count() const noexcept
 	{
-		::std::size_t total = 0;
-		for (::std::size_t index = 0; index < N; ++index)
-		{
-			total += is_sink(index) ? 1 : 0;
-		}
-		return total;
+		return static_cast<::std::size_t>(::std::ranges::count(out_degree, ::std::size_t{0}));
 	}
 
 	/// 下面三个只在编译期用（返回 vector）；运行期要遍历时用 roots_v / sinks_v / successors_v。
 	[[nodiscard]] consteval ::std::vector<::std::size_t> roots() const
 	{
-		::std::vector<::std::size_t> result;
-		for (::std::size_t index = 0; index < N; ++index)
-		{
-			if (is_root(index))
-			{
-				result.push_back(index);
-			}
-		}
-		return result;
+		return indices_where(in_degree, ::std::size_t{0});
 	}
 
 	[[nodiscard]] consteval ::std::vector<::std::size_t> sinks() const
 	{
-		::std::vector<::std::size_t> result;
-		for (::std::size_t index = 0; index < N; ++index)
-		{
-			if (is_sink(index))
-			{
-				result.push_back(index);
-			}
-		}
-		return result;
+		return indices_where(out_degree, ::std::size_t{0});
 	}
 
 	/// from 的后继（索引升序）。
 	[[nodiscard]] consteval ::std::vector<::std::size_t> successors(::std::size_t from) const
 	{
+		return indices_where(edge[from], true);
+	}
+
+	/// values 里等于 wanted 的下标（升序）。
+	template<class T>
+	[[nodiscard]] static consteval ::std::vector<::std::size_t> indices_where(::std::array<T, N> const& values, T wanted)
+	{
 		::std::vector<::std::size_t> result;
-		for (::std::size_t to = 0; to < N; ++to)
+		for (::std::size_t index = 0; index < N; ++index)
 		{
-			if (edge[from][to])
+			if (values[index] == wanted)
 			{
-				result.push_back(to);
+				result.push_back(index);
 			}
 		}
 		return result;
 	}
 
-	constexpr void fail(shape_error what, ::std::size_t where) noexcept
+	constexpr void fail(shape_error what) noexcept
 	{
 		if (error == shape_error::none)
 		{
 			error = what;
-			offending = where;
 		}
 	}
 
@@ -127,17 +106,17 @@ struct shape
 	{
 		if (from == N)
 		{
-			fail(shape_error::unknown_dependency, to);
+			fail(shape_error::unknown_dependency);
 			return;
 		}
 		if (from == to)
 		{
-			fail(shape_error::self_dependency, to);
+			fail(shape_error::self_dependency);
 			return;
 		}
 		if (edge[from][to])
 		{
-			fail(shape_error::duplicate_dependency, to);
+			fail(shape_error::duplicate_dependency);
 			return;
 		}
 		edge[from][to] = true;
@@ -164,14 +143,8 @@ struct shape
 			}
 			if (pick == N)
 			{
-				for (::std::size_t index = 0; index < N; ++index)
-				{
-					if (!placed[index])
-					{
-						fail(shape_error::cycle, index);
-						break;
-					}
-				}
+				// 还有没排上的节点，却没有入度为 0 的了：剩下的节点成环。
+				fail(shape_error::cycle);
 				return;
 			}
 			placed[pick] = true;

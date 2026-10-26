@@ -1,14 +1,11 @@
 #pragma once
 
-/// 前驱的签名：占位符的签名 = 前驱节点的值签名（共享的给 const&）；实现取值源的「签名接口」。
-/// 依赖：图的描述、节点的签名、值的读者、编译期序列、完成签名、类型列表、取值源协议。
+/// 前驱的签名：占位符的签名 = 前驱节点的值签名（共享的给 const&）；它就是取值源的「签名接口」（graph/slots.h）。
 ///
 ///   pred_completions_t<Self, data<...>, Env>
 ///       前驱的值按 data<...> 的声明顺序拼接：只有一个读者的值给 V（move 过去），多个读者共享的值给 V const&；
 ///       某个前驱没有值完成（例如 just_stopped）时是 completion_signatures<>（这个节点永远不会被启动）；
 ///       某个前驱的签名算不出来时，是那个不合法的结果本身（原样透传给 stdexec 诊断）。
-///   pred_signatures<Self>
-///       取值源的签名接口的实现：completions_for<Dependency, Env> = pred_completions_t<Self, Dependency, Env>
 ///
 /// 只看前驱节点的签名，不碰整图分析：整图分析要算每个节点的签名，节点的签名又要问它的占位符——
 /// 如果占位符反过来要整图分析，就成环了。
@@ -27,7 +24,6 @@
 #include "description.h"
 #include "analysis.h"
 #include "readers.h"
-#include "node_signature.h"
 
 namespace sdag::graph
 {
@@ -64,15 +60,11 @@ template<class Self, class Dependency, class Env>
 			}
 			for (info value : arguments(^^typename trait::values))
 			{
-				values.push_back(access_type(value, shared_v<Self, from>));
+				values.push_back(::std::meta::substitute(^^access_t, {^^Self, ::std::meta::reflect_constant(from), value}));
 			}
 		}
 	}
-	if (!has_values)
-	{
-		return ^^::stdexec::completion_signatures<>;
-	}
-	return general::refl::value_completions(list(values));
+	return general::refl::make_completions(has_values, list(values), ^^general::type_list<>, false);
 }
 
 }
@@ -87,12 +79,11 @@ namespace detail
 
 using ::std::size_t;
 
-template<bool Shared>
+template<class Self, size_t D>
 struct accessor
 {
-	/// 共享的值按 const& 交给后继；独占的值 move 过去（签名写成按值）。
 	template<class V>
-	using fn = ::std::conditional_t<Shared, V const&, V>;
+	using fn = access_t<Self, D, V>;
 };
 
 template<class Self, class Env, class Indices>
@@ -136,8 +127,8 @@ struct pred_completions<Self, Env, ::std::index_sequence<D...>>
 		}
 		else
 		{
-			return ::std::type_identity<general::value_completions_t<general::concat_t<
-				general::transform_t<accessor<shared_v<Self, D>>::template fn, typename trait<D>::values>...>>>{};
+			return ::std::type_identity<general::make_completions_t<true, general::concat_t<
+				general::transform_t<accessor<Self, D>::template fn, typename trait<D>::values>...>, general::type_list<>, false>>{};
 		}
 	}
 
@@ -153,13 +144,5 @@ using pred_completions_t = typename detail::pred_completions<Self, Env,
 #endif
 
 }
-
-/// 取值源的签名接口（见 protocol/value_source.h）。整图状态经 protocol::value_source_traits 的特化使用它（graph/slots.h）。
-template<class Self>
-struct pred_signatures
-{
-	template<class Dependency, class Env>
-	using completions_for = pred_completions_t<Self, Dependency, Env>;
-};
 
 }

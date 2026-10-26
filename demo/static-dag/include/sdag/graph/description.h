@@ -1,7 +1,6 @@
 #pragma once
 
 /// 图的描述：纯数据——有哪些节点、谁依赖谁；以及 tuple-like 协议。
-/// 依赖：cv/引用转抄、有向无环图、节点集合成图、编译期序列、不可移动元组、类型列表。
 ///
 ///   graph_data<Keys, Dependencies>     键表与依赖表，运行期是空对象。形状在这里一次算好并检查（重复键、成环等直接 static_assert）
 ///   graph_description<Tag, Data, Children...>
@@ -10,10 +9,11 @@
 ///                                      所以 stdexec 靠结构化绑定就能认出它的标签。标签由使用者给出（对算法标签泛型），描述不认识 dag_t
 ///
 /// 类型级查询（凡是名为 Self 的模板形参，都是图的**引用类型** G&& 或 G const&，值类别决定节点 sender 被移动还是被拷贝）：
-///   description_of<Self>               Self 去引用后的 graph_description 基类
+///   description_of<Self>               Self 去引用后的 graph_description（图 sender 的基类）
 ///   shape_of_v<Self>, count_of_v<Self>
 ///   child_t<Self, I>                   节点 I 的 sender 类型（不带值类别）
 ///   node_sender_t<Self, I>             节点 I 的 sender 类型，带上 Self 的值类别
+///   node_completions_t<Self, I, Env...>  节点 I 的完成签名
 ///   dependency_t<Self, I>              节点 I 的 dependencies<data<...>, control<...>>
 ///   data_dependency_t<Self, I>         节点 I 的 data<...>（它的前驱占位符就是 hole<data<...>>）
 ///   dependency_indices_v<Self, L<K...>>      data<...> / control<...> / type_list<...> 里的键换成节点索引（std::array）
@@ -24,6 +24,8 @@
 #include <tuple>
 #include <type_traits>
 #include <utility>
+
+#include <stdexec/execution.hpp>
 
 #include "../config.h"
 #include "../general/type_list.h"
@@ -49,11 +51,10 @@ struct graph_data
 template<class Tag, class Data, class... Children>
 struct graph_description
 {
-	using tag_type = Tag;
+	/// 派生类型（图 sender）也经由它找回描述：description_of<Self> = remove_cvref_t<Self>::description。
+	using description = graph_description;
 	using data_type = Data;
 	using children = general::type_list<Children...>;
-	static constexpr auto shape = Data::shape;
-	static constexpr size_t count = sizeof...(Children);
 
 	SDAG_NO_UNIQUE_ADDRESS Data _data;
 	/// 节点 sender。构造者用工厂把它们直接构造在这里，不经过临时对象再移动。
@@ -78,29 +79,24 @@ struct graph_description
 	}
 };
 
-namespace description_detail
-{
-
-/// 派生类型（图 sender）也要能用 description_of 找回描述：按基类匹配。
-template<class Tag, class Data, class... Children>
-graph_description<Tag, Data, Children...> base_description(graph_description<Tag, Data, Children...> const&);
-
-}
+template<class Self>
+using description_of = typename ::std::remove_cvref_t<Self>::description;
 
 template<class Self>
-using description_of = decltype(description_detail::base_description(::std::declval<::std::remove_cvref_t<Self> const&>()));
+inline constexpr auto shape_of_v = description_of<Self>::data_type::shape;
 
 template<class Self>
-inline constexpr auto shape_of_v = description_of<Self>::shape;
-
-template<class Self>
-inline constexpr size_t count_of_v = description_of<Self>::count;
+inline constexpr size_t count_of_v = description_of<Self>::children::size;
 
 template<class Self, size_t I>
 using child_t = general::at_t<I, typename description_of<Self>::children>;
 
 template<class Self, size_t I>
 using node_sender_t = general::copy_cvref_t<Self, child_t<Self, I>>;
+
+/// 节点 I 在环境 Env... 下的完成签名；算不出来时是 stdexec 给出的错误类型（不是硬错误）。
+template<class Self, size_t I, class... Env>
+using node_completions_t = decltype(::stdexec::get_completion_signatures<node_sender_t<Self, I>, Env...>());
 
 template<class Self, size_t I>
 using dependency_t = general::at_t<I, typename description_of<Self>::data_type::dependencies>;
@@ -126,21 +122,8 @@ struct std::tuple_size<::sdag::graph::graph_description<Tag, Data, Children...>>
 {
 };
 
-template<class Tag, class Data, class... Children>
-struct std::tuple_element<0, ::sdag::graph::graph_description<Tag, Data, Children...>>
-{
-	using type = Tag;
-};
-
-template<class Tag, class Data, class... Children>
-struct std::tuple_element<1, ::sdag::graph::graph_description<Tag, Data, Children...>>
-{
-	using type = Data;
-};
-
 template<::std::size_t I, class Tag, class Data, class... Children>
-	requires (I >= 2)
 struct std::tuple_element<I, ::sdag::graph::graph_description<Tag, Data, Children...>>
 {
-	using type = Children...[I - 2];
+	using type = ::sdag::general::at_t<I, ::sdag::general::type_list<Tag, Data, Children...>>;
 };

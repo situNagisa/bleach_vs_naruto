@@ -1,6 +1,6 @@
 #pragma once
 
-/// 节点变 sender：把占位符喂给节点载荷得到节点 sender，并检查占位符恰好用一次。依赖：前驱占位符、节点。
+/// 节点变 sender：把占位符喂给节点载荷得到节点 sender，并检查占位符恰好用一次。
 ///
 ///   make_node_sender(node)      节点 → 节点 sender
 ///   node_sender_of_t<Node>      它的类型

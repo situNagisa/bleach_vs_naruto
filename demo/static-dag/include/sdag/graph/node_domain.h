@@ -1,7 +1,6 @@
 #pragma once
 
 /// 节点的完成域：一个节点在某个环境下的值完成域，以及一组节点的公共值完成域。
-/// 依赖：图的描述、domain 合并、完成签名、类型列表。
 ///
 ///   node_domain_t<Node, Env>                 节点在 Env 下的值完成域（公开接口 get_completion_domain<set_value_t>）；给不出时替换失败
 ///   common_completion_domain_t<Env, type_list<Node...>>

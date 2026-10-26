@@ -1,8 +1,8 @@
 #pragma once
 
-/// 不可移动元组：按序存放、就地构造不可移动对象、空元素 0 字节。依赖：无。
+/// 不可移动元组：按序存放、就地构造不可移动对象、空元素 0 字节。
 ///
-///   empty, empty_for<Tag>       被优化掉的成员的占位类型
+///   empty, empty_for<Owner, N>  被优化掉的成员的占位类型
 ///   indexed_tuple<Ts...>        sdag 运行期唯一的容器，get<I>(t)
 
 #include <cstddef>
@@ -19,9 +19,9 @@ struct empty
 {
 };
 
-/// 一个类里有多个被优化掉的成员时，各用一个互不相同的空类型：两个同类型的空成员必须有不同地址，
-/// no_unique_address 也压不掉其中一个。
-template<class Tag>
+/// 一个类里有多个被优化掉的成员时，各用一个互不相同的空类型（Owner 是那个类，N 区分成员）：
+/// 两个同类型的空成员必须有不同地址，no_unique_address 也压不掉其中一个。
+template<class Owner, ::std::size_t N = 0>
 struct empty_for
 {
 };
@@ -113,28 +113,22 @@ struct indexed_tuple : indexed_tuple_impl<::std::index_sequence_for<Ts...>, Ts..
 	using indexed_tuple_impl<::std::index_sequence_for<Ts...>, Ts...>::indexed_tuple_impl;
 };
 
-template<::std::size_t I, class T>
-[[nodiscard]] constexpr T& get(leaf<I, T>& l) noexcept
+namespace tuple_detail
 {
-	return l.value;
+
+/// 按基类 leaf<I, T> 推导出 T。
+template<::std::size_t I, class T>
+T leaf_type(leaf<I, T> const&);
+
 }
 
-template<::std::size_t I, class T>
-[[nodiscard]] constexpr T const& get(leaf<I, T> const& l) noexcept
+/// 第 I 个元素，值类别跟随 tuple。
+template<::std::size_t I, class Tuple>
+[[nodiscard]] constexpr auto&& get(Tuple&& tuple) noexcept
 {
-	return l.value;
-}
-
-template<::std::size_t I, class T>
-[[nodiscard]] constexpr T&& get(leaf<I, T>&& l) noexcept
-{
-	return static_cast<T&&>(l.value);
-}
-
-template<::std::size_t I, class T>
-[[nodiscard]] constexpr T const&& get(leaf<I, T> const&& l) noexcept
-{
-	return static_cast<T const&&>(l.value);
+	using element = decltype(tuple_detail::leaf_type<I>(tuple));
+	using base = ::std::conditional_t<::std::is_const_v<::std::remove_reference_t<Tuple>>, leaf<I, element> const, leaf<I, element>>;
+	return ::std::forward_like<Tuple>(static_cast<base&>(tuple).value);
 }
 
 }

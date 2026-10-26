@@ -31,7 +31,7 @@ auto g = ::sdag::compose::composed{fanin, fanout}(nodes...);   // 建图并立�
 
 ```
 include/sdag/compose/
-  expressions.h   由 [tag, data, child...] 重建 stdexec 的算法 sender——本库对 stdexec 内部实现的全部依赖（__sexpr）
+  expressions.h   按值类别拆开（__apply）、由 [tag, data, child...] 重建（__sexpr）stdexec 的算法 sender——本库对 stdexec 内部实现的全部依赖
   hole_fill.h     hole_filled_t / fill_hole：把节点 sender 里的占位符换成输入 sender（反射 / 模板两份实现）
   lowering.h      lowered_types（反射版按拓扑序一次填好 lowered_tables 查表）、builder、lower
   compose.h       composed，总头
@@ -39,7 +39,7 @@ test/compose_test.cpp   降解与融合结果一致、扇入扇出可配置、da
 ```
 
 用到的 sdag 内部接口（待 sdag 整理出正式的公开接口后替换）：`graph::description_of` / `shape_of_v` / `child_t` / `node_sender_t`、
-`graph::data_dependencies_t` / `control_dependencies_t`、图 sender 的 `get<I>`，以及 `protocol::hole`、`hole_count_v`、`stdexec_adapter::parts_t` / `apply`。
+`graph::data_dependencies_t` / `control_dependencies_t`、图 sender 的 `get<I>`，以及 `protocol::hole`、`hole_count_v`、`stdexec_adapter::parts_t`（`apply` 已移到本库的 expressions.h）。
 
 ## 构建
 

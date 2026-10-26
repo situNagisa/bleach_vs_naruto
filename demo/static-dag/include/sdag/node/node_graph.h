@@ -1,6 +1,6 @@
 #pragma once
 
-/// 节点集合成图：一组节点的键与依赖 → 一张有向无环图，以及键相关的错误诊断。依赖：有向无环图、节点、类型列表。
+/// 节点集合成图：一组节点的键与依赖 → 一张有向无环图，以及键相关的错误诊断。
 ///
 ///   key_indices_v<Keys, L<K...>>          L<K...>（data<...> / control<...> / type_list<...>）里的键换成它们在键表 Keys（type_list）里的下标，按声明顺序放进 std::array；
 ///                                         不存在的键给出 Keys::size（据此报"依赖了不存在的键"）
@@ -10,7 +10,7 @@
 ///   shape_of<Nodes...>()                  同上，直接从节点类型取键与依赖
 ///   checked_shape_of_lists<...>()         同上，并把每类错误变成一条独立的 static_assert 消息
 ///
-/// key_indices_v 有反射与模板两种实现，用 SDAG_REFLECTION 隔开。
+/// key_indices_v 与 shape_of_lists 有反射与模板两种实现，用 SDAG_REFLECTION 隔开。
 
 #include <array>
 #include <cstddef>
@@ -31,9 +31,53 @@ inline namespace SDAG_ABI_NAMESPACE
 
 #if SDAG_REFLECTION
 
+namespace refl
+{
+
+using namespace ::sdag::general::refl;
+
+/// 整张图共用的键表，元素先 dealias：之后的查找只比较 info，不再每次重取 template_arguments_of。
+template<class Keys>
+inline constexpr auto key_table = []
+{
+	infos const keys = arguments(^^Keys);
+	info_array<Keys::size> table{};
+	for (::std::size_t index = 0; index < keys.size(); ++index)
+	{
+		table[index] = ::std::meta::dealias(keys[index]);
+	}
+	return table;
+}();
+
+/// key 在键表里的位置；不存在时等于 Keys::size。
+template<class Keys>
+[[nodiscard]] consteval ::std::size_t key_index(info key)
+{
+	key = ::std::meta::dealias(key);
+	for (::std::size_t index = 0; index < Keys::size; ++index)
+	{
+		if (key_table<Keys>[index] == key)
+		{
+			return index;
+		}
+	}
+	return Keys::size;
+}
+
+}
+
 template<class Keys, class Dependency>
-inline constexpr auto key_indices_v = general::to_array<general::refl::arguments(^^Dependency).size()>(
-	general::refl::indices_of(general::refl::arguments(^^Dependency), general::refl::arguments(^^Keys)));
+inline constexpr auto key_indices_v = []
+{
+	constexpr auto size = refl::arguments(^^Dependency).size();
+	::std::array<::std::size_t, size> result{};
+	::std::size_t cursor = 0;
+	for (refl::info key : refl::arguments(^^Dependency))
+	{
+		result[cursor++] = refl::key_index<Keys>(key);
+	}
+	return result;
+}();
 
 #else
 
@@ -64,6 +108,26 @@ template<class Keys, class Dependencies>
 {
 	constexpr ::std::size_t count = Keys::size;
 	general::shape<count> result{};
+#if SDAG_REFLECTION
+	// 一次取出键与依赖，循环里只查键表：避免每个节点都重新展开整张键表（O(N²) 次反射调用）。
+	general::refl::infos const keys = general::refl::arguments(^^Keys);
+	general::refl::infos const dependencies = general::refl::arguments(^^Dependencies);
+	for (::std::size_t index = 0; index < count; ++index)
+	{
+		if (refl::key_index<Keys>(keys[index]) != index)
+		{
+			result.fail(general::shape_error::duplicate_key);
+		}
+		// dependencies<data<...>, control<...>>：全部前驱，先数据、后控制。
+		for (general::refl::info kind : general::refl::arguments(dependencies[index]))
+		{
+			for (general::refl::info key : general::refl::arguments(kind))
+			{
+				result.add_edge(refl::key_index<Keys>(key), index);
+			}
+		}
+	}
+#else
 	[&]<::std::size_t... I>(::std::index_sequence<I...>)
 	{
 		(
@@ -71,7 +135,7 @@ template<class Keys, class Dependencies>
 			{
 				if (general::index_of_v<general::at_t<I, Keys>, Keys> != I)
 				{
-					result.fail(general::shape_error::duplicate_key, I);
+					result.fail(general::shape_error::duplicate_key);
 				}
 				for (::std::size_t from : key_indices_v<Keys, typename general::at_t<I, Dependencies>::keys>)
 				{
@@ -80,6 +144,7 @@ template<class Keys, class Dependencies>
 			}(),
 			...);
 	}(::std::make_index_sequence<count>{});
+#endif
 	if (result.error == general::shape_error::none)
 	{
 		result.sort();

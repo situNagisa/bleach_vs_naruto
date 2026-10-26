@@ -1,7 +1,6 @@
 #pragma once
 
 /// 公开入口：dag；定义算法标签 dag_t。
-/// 依赖：图的描述、图 sender、节点、节点集合成图、节点变 sender、不可移动元组、类型列表。
 ///
 ///   dag(nodes...)                                     建图；连接时融合成一个 op-state，0 开销
 ///   dag_t                                             图算法的标签；dag_t{}(nodes...) 构造图 sender

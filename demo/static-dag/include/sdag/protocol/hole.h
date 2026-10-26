@@ -1,6 +1,6 @@
 #pragma once
 
-/// 前驱占位符：节点 sender 里「这里是前驱的值」的标记，以及数它。依赖：依赖型报错、sender 表达式、类型列表、取值源协议。
+/// 前驱占位符：节点 sender 里「这里是前驱的值」的标记，以及数它。
 ///
 /// 用户写 make_node<b, data<a>>(then(f))。dag 把一个空的 hole<data<a>> 喂给 then，得到 then(hole<data<a>>, f)
 /// 作为节点 b 的 sender——节点 sender 是普通的 stdexec 表达式，then 的一切（包括 domain 对 then 的定制）都照常生效。
@@ -26,7 +26,6 @@
 #include "../config.h"
 #include "../general/type_list.h"
 #include "../stdexec/expressions.h"
-#include "../stdexec/dependent.h"
 #include "value_source.h"
 
 namespace sdag::protocol
@@ -46,13 +45,6 @@ struct _A_HOLE_WAS_CONNECTED_WITHOUT_A_VALUE_SOURCE_IN_ITS_ENVIRONMENT_;
 
 namespace detail
 {
-
-/// 单独写成函数：get_completion_signatures 的 Env 是包，不能直接展开进只接受一个 Env 的别名模板。
-template<class Dependency, class Env>
-[[nodiscard]] consteval auto hole_completions()
-{
-	return source_completions_t<value_source_of_t<Env>, Dependency, Env>{};
-}
 
 template<class Dependency, class Receiver>
 struct hole_operation
@@ -98,7 +90,7 @@ struct hole
 	{
 		if constexpr (sizeof...(Env) == 0)
 		{
-			return stdexec_adapter::dependent_sender_error<Self>();
+			return ::exec::throw_compile_time_error<::stdexec::dependent_sender_error, ::stdexec::_WITH_SENDER_<Self>>();
 		}
 		else if constexpr (!(has_value_source<Env> && ...))
 		{
@@ -106,7 +98,7 @@ struct hole
 		}
 		else
 		{
-			return detail::hole_completions<Dependency, Env...>();
+			return source_completions_t<value_source_of_t<Env...[0]>, Dependency, Env...[0]>{};
 		}
 	}
 

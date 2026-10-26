@@ -1,6 +1,6 @@
 #pragma once
 
-/// 编译期序列：一串编译期整数怎么展开成逐项调用 / 参数包。依赖：无。
+/// 编译期序列：一串编译期整数怎么展开成逐项调用 / 参数包。
 ///
 ///   to_array<N>(vector)         编译期的 vector 固定成 std::array（长度要先用另一次常量求值算出来）
 ///   sequence_t<Array>           std::array<size_t, N> 变成 std::index_sequence<Array[0], ..., Array[N - 1]>，供包展开使用
@@ -14,7 +14,7 @@
 #include <vector>
 
 #include "../config.h"
-#include "type_list/reflection.h"
+#include "type_list.h"
 
 namespace sdag::general
 {

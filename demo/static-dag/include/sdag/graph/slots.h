@@ -1,10 +1,9 @@
 #pragma once
 
 /// 值槽与交付：前驱的值存哪里、怎么按序交给读者；实现取值源的「交付接口」。
-/// 依赖：图的描述、值的读者、编译期序列、存储计划、不可移动元组、取值源协议、节点所见环境。
 ///
 ///   graph_state<Self, Env>   整图 op-state 里存值的那一层，也是这张图的取值源：
-///                            签名接口由 protocol::value_source_traits 的特化转到 pred_signatures<Self>（graph/pred_sigs.h），交付接口是这里的 deliver。
+///                            签名接口由 protocol::value_source_traits 的特化转到 pred_completions_t（graph/pred_sigs.h），交付接口是这里的 deliver。
 ///                            融合 op-state 从它派生；节点环境里只暴露这一层的指针。
 ///   slot_access              交付表的一项：从哪个节点的槽位取第几个值，按 const& 共享还是 move
 ///   delivery_plan<...>(…)    把一组节点的值按顺序铺平成一张交付表
@@ -35,27 +34,24 @@
 #include "pred_sigs.h"
 #include "visibility.h"
 
+/// 整图状态的签名接口在类外提供：节点签名算出来之前 graph_state 还是不完整类型（见 protocol/value_source.h）。
 namespace sdag::graph
 {
 
 template<class Self, class Env>
 struct graph_state;
 
-/// 这张图在环境 Env 下的节点环境：取值源就是整图状态本身。
-template<class Self, class Env>
-using graph_node_env_t = node_env_t<graph_state, Self, Env>;
-
 }
 
-/// 整图状态的签名接口在类外提供：节点签名算出来之前 graph_state 还是不完整类型（见 protocol/value_source.h）。
 template<class Self, class Env>
-struct sdag::protocol::value_source_traits<sdag::graph::graph_state<Self, Env>> : sdag::graph::pred_signatures<Self>
+struct sdag::protocol::value_source_traits<sdag::graph::graph_state<Self, Env>>
 {
+	template<class Dependency, class NodeEnv>
+	using completions_for = sdag::graph::pred_completions_t<Self, Dependency, NodeEnv>;
 };
 
 namespace sdag::graph
 {
-
 
 namespace slots_detail
 {
@@ -76,7 +72,6 @@ struct slots<Self, Env, ::std::index_sequence<I...>>
 		general::empty>;
 
 	using type = general::indexed_tuple<slot_t<I>...>;
-	static constexpr ::std::array<size_t, sizeof...(I)> value_counts{analysis::template values_t<I>::size...};
 };
 
 }
@@ -92,7 +87,10 @@ struct slot_access
 template<class Self, class Env, auto Nodes>
 [[nodiscard]] consteval auto delivery_plan(bool allow_shared)
 {
-	constexpr auto counts = slots_detail::slots<Self, Env>::value_counts;
+	constexpr auto counts = []<size_t... I>(::std::index_sequence<I...>)
+	{
+		return ::std::array<size_t, sizeof...(I)>{node_analysis<Self, Env>::template values_t<I>::size...};
+	}(::std::make_index_sequence<count_of_v<Self>>{});
 	constexpr size_t total = [&]
 	{
 		size_t sum = 0;
@@ -117,15 +115,16 @@ template<class Self, class Env, auto Nodes>
 template<class Self, class Env>
 struct graph_state
 {
-	using env_type = graph_node_env_t<Self, Env>;
-	using analysis_type = node_analysis<Self, env_type>;
-	using plan_type = storage_plan<Self, env_type>;
+	/// 节点环境里的取值源就是整图状态本身。
+	using view = node_view<graph::graph_state, Self, Env>;
+	using env_type = typename view::env_type;
+	using analysis_type = typename view::analysis;
+	using plan_type = typename view::plan;
 
-	static_assert(node_analysis<Self, probe_env_t<graph::graph_state, Self, Env>>::valid, "sdag: 有节点在接收者环境下无法给出完成签名");
-	static_assert(analysis_type::valid, "sdag: 有节点在整图环境下无法给出完成签名");
+	static_assert(view::valid, "sdag: 有节点在接收者环境（或整图的节点环境）下无法给出完成签名");
 
 	static constexpr auto shape = shape_of_v<Self>;
-	static constexpr bool stoppable = stoppable_v<graph::graph_state, Self, Env>;
+	static constexpr bool stoppable = view::stoppable;
 
 	SDAG_NO_UNIQUE_ADDRESS typename slots_detail::slots<Self, env_type>::type _slots{};
 

@@ -1,6 +1,6 @@
 #pragma once
 
-/// domain 合并：一组 domain 合成哪一个。依赖：类型列表。
+/// domain 合并：一组 domain 合成哪一个。
 ///
 ///   common_domain_t<type_list<Domain...>>
 ///       规则与 stdexec 相同：都相同就是它；否则取 common_type；再否则带上 default_domain 取 common_type；

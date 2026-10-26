@@ -127,7 +127,6 @@ struct node_key<Node>
 };
 
 template<class Node>
-	requires requires { typename node_key<Node>::type; }
 using node_key_t = typename node_key<Node>::type;
 
 template<class Node>
@@ -143,7 +142,6 @@ struct node_dependencies<Node>
 };
 
 template<class Node>
-	requires requires { typename node_dependencies<Node>::type; }
 using node_dependencies_t = typename node_dependencies<Node>::type;
 
 // ---------------------------------------------------------------- 原语：payload CPO
@@ -237,7 +235,6 @@ struct node
 {
 	using key_type = Key;
 	using dependencies_type = Dependencies;
-	using payload_type = Payload;
 
 	SDAG_NO_UNIQUE_ADDRESS Payload _payload;
 
