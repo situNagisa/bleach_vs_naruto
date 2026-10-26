@@ -103,7 +103,7 @@ inline VKAPI_ATTR ::VkBool32 VKAPI_CALL report_debug_message(::VkDebugUtilsMessa
 }
 
 
-inline ::vkkl::instance create_instance(::std::vector<char const*> enabled_extensions)
+::vkkl::instance create_instance(::std::vector<char const*> enabled_extensions)
 {
 	namespace param = ::vkfu::param;
 
@@ -131,7 +131,7 @@ inline ::vkkl::instance create_instance(::std::vector<char const*> enabled_exten
 
 }
 
-inline ::vkkl::debug_utils_messenger create_debug_messenger(::VkInstance instance)
+::vkkl::debug_utils_messenger create_debug_messenger(::VkInstance instance)
 {
 	if (!::has_layer(::instance_layers(), ::vkfu::layer::khronos_validation))
 		return {};
@@ -141,7 +141,7 @@ inline ::vkkl::debug_utils_messenger create_debug_messenger(::VkInstance instanc
 		&::report_debug_message);
 }
 
-inline device_selection select_physical_device(::VkInstance instance, ::VkSurfaceKHR surface)
+device_selection select_physical_device(::VkInstance instance, ::VkSurfaceKHR surface)
 {
 	auto device_count = ::std::uint32_t{};
 	::check(::vkEnumeratePhysicalDevices(instance, &device_count, nullptr), "failed to count physical devices");
@@ -176,14 +176,21 @@ inline device_selection select_physical_device(::VkInstance instance, ::VkSurfac
 		auto families = ::std::vector<::VkQueueFamilyProperties>(family_count);
 		::vkGetPhysicalDeviceQueueFamilyProperties(candidate, &family_count, families.data());
 
+		// 优先选同时支持图形与呈现的族：这样一条图形队列提交完可以直接拿来呈现（见 renderer::acquire_present_queue）。
 		auto graphics = ::std::optional<::std::uint32_t>{};
 		auto present = ::std::optional<::std::uint32_t>{};
 		for (auto index = ::std::uint32_t{}; index < family_count; ++index)
 		{
-			if (!graphics && (families[index].queueFlags & ::VK_QUEUE_GRAPHICS_BIT) != 0)
-				graphics = index;
+			auto const can_draw = (families[index].queueFlags & ::VK_QUEUE_GRAPHICS_BIT) != 0;
 			auto can_present = ::VkBool32{ VK_FALSE };
 			::check(::vkGetPhysicalDeviceSurfaceSupportKHR(candidate, index, surface, &can_present), "failed to query presentation support");
+			if (can_draw && can_present == VK_TRUE)
+			{
+				graphics = present = index;
+				break;
+			}
+			if (!graphics && can_draw)
+				graphics = index;
 			if (!present && can_present == VK_TRUE)
 				present = index;
 		}
@@ -207,7 +214,7 @@ inline device_selection select_physical_device(::VkInstance instance, ::VkSurfac
 	return *best;
 }
 
-inline ::vkkl::device create_device(device_selection const& selected)
+::vkkl::device create_device(device_selection const& selected)
 {
 	namespace param = ::vkfu::param;
 
@@ -244,7 +251,7 @@ inline ::vkkl::device create_device(device_selection const& selected)
 }
 // ::vkfu::get_device_queue(device, family, 0)
 
-inline ::vkfu::param::khr::swapchain make_swapchain_info(
+::vkfu::param::khr::swapchain make_swapchain_info(
 	::VkPhysicalDevice physical_device
 	, ::VkSurfaceKHR surface
 	, window const& target_window
@@ -316,7 +323,7 @@ inline ::vkfu::param::khr::swapchain make_swapchain_info(
 }
 
 
-inline ::std::vector<::VkImage> get_swapchain_images(::VkDevice device, ::VkSwapchainKHR swapchain)
+::std::vector<::VkImage> get_swapchain_images(::VkDevice device, ::VkSwapchainKHR swapchain)
 {
 	for (;;)
 	{
@@ -332,7 +339,7 @@ inline ::std::vector<::VkImage> get_swapchain_images(::VkDevice device, ::VkSwap
 	}
 }
 
-inline ::std::vector<::vkkl::image_view> create_swapchain_image_views( ::VkDevice device, ::std::span<::VkImage const> images, ::vkfu::enums::format format)
+::std::vector<::vkkl::image_view> create_swapchain_image_views( ::VkDevice device, ::std::span<::VkImage const> images, ::vkfu::enums::format format)
 {
 	auto views = ::std::vector<::vkkl::image_view>{};
 	views.reserve(images.size());
