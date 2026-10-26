@@ -5,7 +5,7 @@
 ///   graph_state<Self, Env>   整图 op-state 里存值的那一层，也是这张图的取值源：
 ///                            签名接口由 protocol::value_source_traits 的特化转到 pred_completions_t（graph/pred_sigs.h），交付接口是这里的 deliver。
 ///                            融合 op-state 从它派生；节点环境里只暴露这一层的指针。
-///   slot_access              交付表的一项：从哪个节点的槽位取第几个值，按 const& 共享还是 move
+///   slot_access              交付表的一项：从哪个节点的槽位取第几个值，move（take）还是给 const&
 ///   delivery_plan<...>(…)    把一组节点的值按顺序铺平成一张交付表
 ///
 /// 为什么要交付表：一个节点可能依赖多个前驱，每个前驱又有多个值，最后要拼成一次 set_value(值...)。
@@ -26,6 +26,7 @@
 #include "../config.h"
 #include "../general/type_list.h"
 #include "../general/tuple.h"
+#include "../general/relay.h"
 #include "../protocol/value_source.h"
 #include "description.h"
 #include "readers.h"
@@ -59,19 +60,56 @@ namespace slots_detail
 template<class Self, class Env, class Indices = ::std::make_index_sequence<count_of_v<Self>>>
 struct slots;
 
-/// 每个节点一个值槽：optional<tuple<衰变后的值...>>。不需要存值的节点（没人读、或唯一汇点直接转发）是 0 字节的 empty。
+/// 值槽按 storage_plan::layout 的链存放：每条链一块存储，放在链头节点的位置上，其它位置是 0 字节的 empty。
+///   链只有一个节点（没有复用）：optional<tuple<衰变后的值...>>
+///   链有多个节点：relay<各节点的 tuple...>（general/relay.h），按链里的先后轮流占用
+/// 不需要存值的节点（没人读、或唯一汇点直接转发）不在任何链里。
 template<class Self, class Env, size_t... I>
 struct slots<Self, Env, ::std::index_sequence<I...>>
 {
 	using analysis = node_analysis<Self, Env>;
 	using plan = storage_plan<Self, Env>;
+	static constexpr auto layout = plan::layout;
 
 	template<size_t J>
-	using slot_t = ::std::conditional_t<plan::slot_needed[J],
-		::std::optional<general::rebind_t<::std::tuple, typename analysis::template values_t<J>>>,
-		general::empty>;
+	using value_t = general::rebind_t<::std::tuple, typename analysis::template values_t<J>>;
 
-	using type = general::indexed_tuple<slot_t<I>...>;
+	/// 链头 H 的链上的节点，按先后。
+	template<size_t H>
+	static constexpr auto chain_v = []
+	{
+		::std::array<size_t, layout.size[H]> members{};
+		for (size_t node = 0; node < sizeof...(I); ++node)
+		{
+			if (plan::slot_needed[node] && layout.head[node] == H)
+			{
+				members[layout.position[node]] = node;
+			}
+		}
+		return members;
+	}();
+
+	template<size_t H>
+	static consteval auto storage_of()
+	{
+		if constexpr (!plan::slot_needed[H] || layout.head[H] != H)
+		{
+			return ::std::type_identity<general::empty>{};
+		}
+		else if constexpr (layout.size[H] == 1)
+		{
+			return ::std::type_identity<::std::optional<value_t<H>>>{};
+		}
+		else
+		{
+			return []<size_t... K>(::std::index_sequence<K...>)
+			{
+				return ::std::type_identity<general::relay<value_t<chain_v<H>[K]>...>>{};
+			}(::std::make_index_sequence<layout.size[H]>{});
+		}
+	}
+
+	using type = general::indexed_tuple<typename decltype(storage_of<I>())::type...>;
 };
 
 }
@@ -80,12 +118,12 @@ struct slot_access
 {
 	size_t node;
 	size_t element;
-	bool shared;
+	bool move;
 };
 
-/// allow_shared 为假时一律 move（汇点的值交给整图接收者，之后没人再读）。
-template<class Self, class Env, auto Nodes>
-[[nodiscard]] consteval auto delivery_plan(bool allow_shared)
+/// Nodes 的值按顺序铺平成一张交付表；Moved[i] 为真的节点 move 出去，否则给 const&。
+template<class Self, class Env, auto Nodes, auto Moved>
+[[nodiscard]] consteval auto delivery_plan()
 {
 	constexpr auto counts = []<size_t... I>(::std::index_sequence<I...>)
 	{
@@ -102,11 +140,11 @@ template<class Self, class Env, auto Nodes>
 	}();
 	::std::array<slot_access, total> plan{};
 	size_t cursor = 0;
-	for (size_t node : Nodes)
+	for (size_t position = 0; position < Nodes.size(); ++position)
 	{
-		for (size_t element = 0; element < counts[node]; ++element)
+		for (size_t element = 0; element < counts[Nodes[position]]; ++element)
 		{
-			plan[cursor++] = {node, element, allow_shared && reader_counts_v<Self>[node] > 1};
+			plan[cursor++] = {Nodes[position], element, Moved[position]};
 		}
 	}
 	return plan;
@@ -128,24 +166,79 @@ struct graph_state
 
 	SDAG_NO_UNIQUE_ADDRESS typename slots_detail::slots<Self, env_type>::type _slots{};
 
-	/// 按交付表的一项取值：共享的给 const&，独占的 move 出去。
-	template<slot_access Access>
-	[[nodiscard]] constexpr decltype(auto) access() noexcept
+	static constexpr auto layout = plan_type::layout;
+
+	/// 节点 J 的值所在的存储（链头的那一块），以及在其中的位置。
+	template<size_t J>
+	[[nodiscard]] constexpr auto& storage_of() noexcept
 	{
-		auto& value = ::std::get<Access.element>(*general::get<Access.node>(_slots));
-		if constexpr (Access.shared)
+		return general::get<layout.head[J]>(_slots);
+	}
+
+	/// 节点 J 的值（调用方保证它在世）。
+	template<size_t J>
+	[[nodiscard]] constexpr auto& slot_value() noexcept
+	{
+		if constexpr (layout.size[J] == 1)
 		{
-			return ::std::as_const(value);
+			return *storage_of<J>();
 		}
 		else
 		{
+			return storage_of<J>().template get<layout.position[J]>();
+		}
+	}
+
+	/// 把节点 J 的值存进它的槽位。
+	template<size_t J, class... Args>
+	constexpr void slot_emplace(Args&&... args)
+		noexcept(::std::is_nothrow_constructible_v<typename slots_detail::slots<Self, env_type>::template value_t<J>, Args&&...>)
+	{
+		if constexpr (layout.size[J] == 1)
+		{
+			storage_of<J>().emplace(::std::forward<Args>(args)...);
+		}
+		else
+		{
+			storage_of<J>().template emplace<layout.position[J]>(::std::forward<Args>(args)...);
+		}
+	}
+
+	/// 析构节点 J 的值（它被 take 了，取走它的节点已经结束）；之后这块存储可以给链上的下一个值用。
+	template<size_t J>
+	constexpr void slot_reset() noexcept
+	{
+		if constexpr (layout.size[J] == 1)
+		{
+			if constexpr (!::std::is_trivially_destructible_v<typename slots_detail::slots<Self, env_type>::template value_t<J>>)
+			{
+				storage_of<J>().reset();
+			}
+		}
+		else
+		{
+			storage_of<J>().template reset<layout.position[J]>();
+		}
+	}
+
+	/// 按交付表的一项取值：take 的 move 出去，其余给 const&。
+	template<slot_access Access>
+	[[nodiscard]] constexpr decltype(auto) access() noexcept
+	{
+		auto& value = ::std::get<Access.element>(slot_value<Access.node>());
+		if constexpr (Access.move)
+		{
 			return ::std::move(value);
+		}
+		else
+		{
+			return ::std::as_const(value);
 		}
 	}
 
 	/// Dependency（data<...>）对应前驱的值，按声明顺序铺平。
 	template<class Dependency>
-	static constexpr auto delivery_table = graph::delivery_plan<Self, env_type, dependency_indices_v<Self, Dependency>>(true);
+	static constexpr auto delivery_table = graph::delivery_plan<Self, env_type, dependency_indices_v<Self, Dependency>, Dependency::taken>();
 
 	/// 交付接口：占位符启动时调用，把 Dependency 对应前驱的值交给接收者。
 	template<class Dependency, class Receiver>

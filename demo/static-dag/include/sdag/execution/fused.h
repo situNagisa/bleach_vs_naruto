@@ -30,6 +30,7 @@
 #include "../general/digraph.h"
 #include "../graph/description.h"
 #include "../graph/analysis.h"
+#include "../graph/readers.h"
 #include "../graph/storage_plan.h"
 #include "../graph/completions.h"
 #include "../graph/slots.h"
@@ -211,16 +212,15 @@ struct fused_core : graph::graph_state<Self, ::stdexec::env_of_t<Receiver>>
 		{
 			using tuple_type = general::rebind_t<::std::tuple, typename analysis_type::template values_t<J>>;
 			static_assert(::std::is_constructible_v<tuple_type, Args&&...>, "sdag: 节点实际发出的值与它声明的完成签名不符");
-			auto& slot = general::get<J>(this->_slots);
 			if constexpr (::std::is_nothrow_constructible_v<tuple_type, Args&&...>)
 			{
-				slot.emplace(::std::forward<Args>(args)...);
+				this->template slot_emplace<J>(::std::forward<Args>(args)...);
 			}
 			else
 			{
 				try
 				{
-					slot.emplace(::std::forward<Args>(args)...);
+					this->template slot_emplace<J>(::std::forward<Args>(args)...);
 				}
 				catch (...)
 				{
@@ -289,6 +289,11 @@ struct fused_core : graph::graph_state<Self, ::stdexec::env_of_t<Receiver>>
 	template<size_t J>
 	constexpr void node_done() noexcept
 	{
+		// J take 的值到此用完：先析构，再通知后继。其它读者都在 J 之前结束（编译期检查过），没人再碰它。
+		general::for_each_value<graph::released_by_v<Self, J>>([this]<size_t From>() noexcept
+		{
+			this->template release<From>();
+		});
 		if constexpr (shape.is_sink(J))
 		{
 			sink_arrive();
@@ -302,6 +307,16 @@ struct fused_core : graph::graph_state<Self, ::stdexec::env_of_t<Receiver>>
 			{
 				this->template notify_edge<J, To>();
 			});
+		}
+	}
+
+	/// 析构节点 From 的值（它被 take 了，取走它的节点已经结束）。
+	template<size_t From>
+	constexpr void release() noexcept
+	{
+		if constexpr (plan_type::slot_needed[From])
+		{
+			this->template slot_reset<From>();
 		}
 	}
 
@@ -430,7 +445,13 @@ struct fused_core : graph::graph_state<Self, ::stdexec::env_of_t<Receiver>>
 	}
 
 	/// 各汇点的值按声明顺序铺平，全部 move 给外层接收者。
-	static constexpr auto sink_table = graph::delivery_plan<Self, node_env_type, general::sinks_v<shape>>(false);
+	static constexpr auto sink_moves = []
+	{
+		::std::array<bool, sink_count> moves{};
+		moves.fill(true);
+		return moves;
+	}();
+	static constexpr auto sink_table = graph::delivery_plan<Self, node_env_type, general::sinks_v<shape>, sink_moves>();
 
 	template<size_t... E>
 	constexpr void emit_values(::std::index_sequence<E...>) noexcept

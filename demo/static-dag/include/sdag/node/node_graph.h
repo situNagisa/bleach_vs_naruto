@@ -2,7 +2,7 @@
 
 /// 节点集合成图：一组节点的键与依赖 → 一张有向无环图，以及键相关的错误诊断。
 ///
-///   key_indices_v<Keys, L<K...>>          L<K...>（data<...> / control<...> / type_list<...>）里的键换成它们在键表 Keys（type_list）里的下标，按声明顺序放进 std::array；
+///   key_indices_v<Keys, type_list<K...>>  K... 换成它们在键表 Keys（type_list）里的下标，按声明顺序放进 std::array；
 ///                                         不存在的键给出 Keys::size（据此报"依赖了不存在的键"）
 ///   shape_of_lists<Keys, Dependencies>()  Keys = type_list<键...>，Dependencies = type_list<dependencies<...>...>，一一对应 → shape<N>。
 ///                                         边不分数据 / 控制：两种依赖都是"先后"，同一个前驱在两边各写一次算重复依赖。
@@ -66,13 +66,12 @@ template<class Keys>
 
 }
 
-template<class Keys, class Dependency>
+template<class Keys, class Wanted>
 inline constexpr auto key_indices_v = []
 {
-	constexpr auto size = refl::arguments(^^Dependency).size();
-	::std::array<::std::size_t, size> result{};
+	::std::array<::std::size_t, Wanted::size> result{};
 	::std::size_t cursor = 0;
-	for (refl::info key : refl::arguments(^^Dependency))
+	for (refl::info key : refl::arguments(^^Wanted))
 	{
 		result[cursor++] = refl::key_index<Keys>(key);
 	}
@@ -84,23 +83,26 @@ inline constexpr auto key_indices_v = []
 namespace detail
 {
 
-template<class Keys, class Dependency>
+template<class Keys, class Wanted>
 struct key_indices;
 
-template<class Keys, template<class...> class List, class... Dependencies>
-struct key_indices<Keys, List<Dependencies...>>
+template<class Keys, class... Wanted>
+struct key_indices<Keys, general::type_list<Wanted...>>
 {
-	static constexpr ::std::array<::std::size_t, sizeof...(Dependencies)> value{general::index_of_v<Dependencies, Keys>...};
+	static constexpr ::std::array<::std::size_t, sizeof...(Wanted)> value{general::index_of_v<Wanted, Keys>...};
 };
 
 }
 
-template<class Keys, class Dependency>
-inline constexpr auto key_indices_v = detail::key_indices<Keys, Dependency>::value;
+template<class Keys, class Wanted>
+inline constexpr auto key_indices_v = detail::key_indices<Keys, Wanted>::value;
 
 #endif
 
 }
+
+template<class Dependencies>
+using dependency_keys_t = typename Dependencies::keys;
 
 /// Keys = type_list<键...>，Dependencies = type_list<dependencies<...>...>，一一对应。不做断言，错误写在 error 里（便于测试）。
 template<class Keys, class Dependencies>
@@ -118,13 +120,11 @@ template<class Keys, class Dependencies>
 		{
 			result.fail(general::shape_error::duplicate_key);
 		}
-		// dependencies<data<...>, control<...>>：全部前驱，先数据、后控制。
-		for (general::refl::info kind : general::refl::arguments(dependencies[index]))
+		// dependencies<...>::keys：全部前驱（take<K> 已换成 K），先数据、后控制。
+		for (general::refl::info key : general::refl::arguments(::std::meta::dealias(
+			::std::meta::substitute(^^dependency_keys_t, {dependencies[index]}))))
 		{
-			for (general::refl::info key : general::refl::arguments(kind))
-			{
-				result.add_edge(refl::key_index<Keys>(key), index);
-			}
+			result.add_edge(refl::key_index<Keys>(key), index);
 		}
 	}
 #else

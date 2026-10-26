@@ -3,10 +3,12 @@
 ///   2. 整图 op-state 的大小 = 节点 op-state 之和 + 值槽 + 必要的原子量，没有多余的间接层。
 ///   3. 不会失败的图没有停止源、没有状态字；只有一个汇点的图没有汇点计数；入度 1 的节点没有倒计数。
 
+#include <array>
 #include <atomic>
 #include <cstddef>
 #include <cstdlib>
 #include <new>
+#include <optional>
 #include <print>
 #include <tuple>
 #include <utility>
@@ -34,6 +36,9 @@ struct c
 struct d
 {
 };
+struct e
+{
+};
 
 auto diamond()
 {
@@ -41,7 +46,7 @@ auto diamond()
 		::sdag::make_node<a>(::stdexec::just(1)),
 		::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([](int const& x) noexcept { return x + 1; })),
 		::sdag::make_node<c, ::sdag::data<a>>(::stdexec::then([](int const& x) noexcept { return x * 2; })),
-		::sdag::make_node<d, ::sdag::data<b, c>>(::stdexec::then([](int y, int z) noexcept { return y + z; })));
+		::sdag::make_node<d, ::sdag::data<::sdag::take<b>, ::sdag::take<c>>>(::stdexec::then([](int y, int z) noexcept { return y + z; })));
 }
 
 struct null_receiver
@@ -132,10 +137,38 @@ int main()
 
 		using throwing_graph = decltype(::sdag::dag(
 			::sdag::make_node<a>(::stdexec::just(1)),
-			::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([](int x) { return x + 1; }))));
+			::sdag::make_node<b, ::sdag::data<::sdag::take<a>>>(::stdexec::then([](int x) { return x + 1; }))));
 		using throwing_operation = ::stdexec::connect_result_t<throwing_graph, null_receiver>;
 		static_assert(throwing_operation::stoppable, "可能抛异常的节点需要停止源");
 		::std::println("  可失败的两节点链 sizeof(op-state) = {}（含 inplace_stop_source、状态字、exception_ptr 槽）", sizeof(throwing_operation));
+	}
+
+	test::section("值槽复用：take 了的值析构之后，空间给后面的值用");
+	{
+		// 链 a -> b -> c -> d -> e，每一步 take 前驱。b 运行时 a 的值还在（b 拿的是指向槽位的右值，直到 b 结束才析构），
+		// b 的值也已产生：任一时刻至多两个中间值在世，4 个中间值共用两块（a、c 一块，b、d 一块）。
+		using chain = decltype(::sdag::dag(
+			::sdag::make_node<a>(::stdexec::just(::std::array<int, 16>{})),
+			::sdag::make_node<b, ::sdag::data<::sdag::take<a>>>(::stdexec::then([](::std::array<int, 16> v) noexcept { return v; })),
+			::sdag::make_node<c, ::sdag::data<::sdag::take<b>>>(::stdexec::then([](::std::array<int, 16> v) noexcept { return v; })),
+			::sdag::make_node<d, ::sdag::data<::sdag::take<c>>>(::stdexec::then([](::std::array<int, 16> v) noexcept { return v; })),
+			::sdag::make_node<e, ::sdag::data<::sdag::take<d>>>(::stdexec::then([](::std::array<int, 16> v) noexcept { return v[0]; }))));
+		using chain_operation = ::stdexec::connect_result_t<chain, null_receiver>;
+		constexpr auto chain_slots = sizeof(chain_operation::state_base::_slots);
+		::std::println("  take 链（4 个 64 字节的中间值）：值槽 {} 字节", chain_slots);
+		test::check(chain_slots == 2 * sizeof(::std::array<int, 16>), "4 个中间值共用两块 64 字节的存储（平凡析构，没有在世标记）");
+
+		// 不 take：每个中间值活到整图结束，各占一块。
+		using kept = decltype(::sdag::dag(
+			::sdag::make_node<a>(::stdexec::just(::std::array<int, 16>{})),
+			::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([](::std::array<int, 16> const& v) noexcept { return v; })),
+			::sdag::make_node<c, ::sdag::data<b>>(::stdexec::then([](::std::array<int, 16> const& v) noexcept { return v; })),
+			::sdag::make_node<d, ::sdag::data<c>>(::stdexec::then([](::std::array<int, 16> const& v) noexcept { return v; })),
+			::sdag::make_node<e, ::sdag::data<d>>(::stdexec::then([](::std::array<int, 16> const& v) noexcept { return v[0]; }))));
+		using kept_operation = ::stdexec::connect_result_t<kept, null_receiver>;
+		constexpr auto kept_slots = sizeof(kept_operation::state_base::_slots);
+		::std::println("  不 take 的同一条链：值槽 {} 字节", kept_slots);
+		test::check(kept_slots == 4 * sizeof(::std::optional<::std::array<int, 16>>), "不 take 时每个值各占一块（optional）");
 	}
 
 	return test::report();

@@ -133,10 +133,14 @@ struct key
 template<class Graph, ::std::size_t Layer, class Indices>
 struct previous_layer;
 
+/// 这一层只有一个节点时它是上一层每个节点唯一的读者：take 走（按值 move）；否则大家读 const&。
 template<class Graph, ::std::size_t Layer, ::std::size_t... J>
 struct previous_layer<Graph, Layer, ::std::index_sequence<J...>>
 {
-	using type = ::sdag::data<key<Graph, Layer - 1, J>...>;
+	template<class Layers>
+	using type = ::std::conditional_t<Layers::sizes[Layer] == 1,
+		::sdag::data<::sdag::take<key<Graph, Layer - 1, J>>...>,
+		::sdag::data<key<Graph, Layer - 1, J>...>>;
 };
 
 /// 第 Layer 层依赖第 Layer - 1 层的全部节点。
@@ -149,7 +153,7 @@ template<class Graph, class Layers, ::std::size_t Layer>
 	}
 	else
 	{
-		return ::std::type_identity<typename previous_layer<Graph, Layer, ::std::make_index_sequence<Layers::sizes[Layer - 1]>>::type>{};
+		return ::std::type_identity<typename previous_layer<Graph, Layer, ::std::make_index_sequence<Layers::sizes[Layer - 1]>>::template type<Layers>>{};
 	}
 }
 
@@ -421,7 +425,7 @@ void test_nested()
 		})),
 		::sdag::make_node<a_key, ::sdag::control<start_key>>(::std::move(a)),
 		::sdag::make_node<b_key, ::sdag::control<start_key>>(::std::move(b)),
-		::sdag::make_node<join_key, ::sdag::data<a_key, b_key>>(::stdexec::then([&](int from_a, int from_b)
+		::sdag::make_node<join_key, ::sdag::data<::sdag::take<a_key>, ::sdag::take<b_key>>>(::stdexec::then([&](int from_a, int from_b)
 		{
 			if (state_a.done[shape_a::depth - 1].load() != 1 || state_b.done[shape_b::depth - 1].load() != 1)
 			{

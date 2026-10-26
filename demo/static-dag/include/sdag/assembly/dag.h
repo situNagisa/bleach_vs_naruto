@@ -23,6 +23,7 @@
 #include "../node/node_graph.h"
 #include "../protocol/node_sender.h"
 #include "../graph/description.h"
+#include "../graph/readers.h"
 #include "../graph/slots.h"
 #include "graph_sender.h"
 
@@ -38,6 +39,9 @@ template<class Tag, graph_node... Nodes>
 	using sender = graph_sender<Tag, data, protocol::node_sender_of_t<Nodes>...>;
 	// stdexec 靠结构化绑定识别标签；编译器缺少结构化绑定内省时这里会失效，domain 对标签的匹配也就静默失效，所以显式检查。
 	static_assert(::std::same_as<::stdexec::tag_of_t<sender>, Tag>, "sdag: stdexec 认不出图 sender 的标签（编译器缺少结构化绑定内省）");
+	static_assert(graph::readers_v<sender&&>.taken_twice == sizeof...(Nodes), "sdag: 同一个值被 take 了两次；一个值至多只能被一个节点取走");
+	static_assert(graph::readers_v<sender&&>.reader_after_taker == sizeof...(Nodes),
+		"sdag: take 某个值的节点必须排在它所有其它读者之后；请把其它读者写进 take 它的节点的 data<...> 或 control<...>");
 	return sender{{data{}, children(general::from_factory, [&] { return protocol::make_node_sender(::std::forward<Nodes>(nodes)); }...)}};
 }
 

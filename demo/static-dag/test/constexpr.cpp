@@ -75,6 +75,13 @@ static_assert(run(::sdag::dag(
 	::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([](int x) noexcept { return x + 1; })),
 	::sdag::make_node<c, ::sdag::data<b>>(::stdexec::then([](int x) noexcept { return x * 3; })))) == 6);
 
+// take 链：值槽复用（a 与 c 共用一块存储，在常量求值里切换在世的成员）
+static_assert(run(::sdag::dag(
+	::sdag::make_node<a>(::stdexec::just(1)),
+	::sdag::make_node<b, ::sdag::data<::sdag::take<a>>>(::stdexec::then([](int x) noexcept { return x + 1; })),
+	::sdag::make_node<c, ::sdag::data<::sdag::take<b>>>(::stdexec::then([](int x) noexcept { return x * 3; })),
+	::sdag::make_node<d, ::sdag::data<::sdag::take<c>>>(::stdexec::then([](int x) noexcept { return x - 1; })))) == 5);
+
 // 空图
 static_assert([]
 {

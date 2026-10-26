@@ -6,6 +6,7 @@
 /// 根是没有前驱的节点，汇点是没有后继的节点。所有结果都是编译期常量，运行期不存在。
 ///
 ///   shape<N>, shape_error           邻接矩阵、入出度、拓扑序（Kahn，入度相同的保持下标顺序），以及建图时发现的错误
+///   reach_v<Shape>                  可达关系：reach_v<Shape>[u][v] 表示 u 经过一条或多条边能到 v（u 是 v 的严格祖先）
 ///   sinks_v / roots_v / successors_v  把编译期的汇点 / 根 / 后继列表固定成 std::array，供展开使用
 
 #include <algorithm>
@@ -159,6 +160,30 @@ struct shape
 		}
 	}
 };
+
+/// 可达关系（传递闭包）：按拓扑序倒着走，每个节点能到的 = 它的后继 + 后继能到的。
+template<auto Shape>
+inline constexpr auto reach_v = []
+{
+	constexpr ::std::size_t n = Shape.count;
+	::std::array<::std::array<bool, n>, n> reach{};
+	for (::std::size_t step = n; step-- > 0;)
+	{
+		::std::size_t const from = Shape.order[step];
+		for (::std::size_t to = 0; to < n; ++to)
+		{
+			if (Shape.edge[from][to])
+			{
+				reach[from][to] = true;
+				for (::std::size_t further = 0; further < n; ++further)
+				{
+					reach[from][further] = reach[from][further] || reach[to][further];
+				}
+			}
+		}
+	}
+	return reach;
+}();
 
 /// 汇点 / 根 / 后继，固定成 std::array，供 general::for_each_value 与 general::sequence_t 使用。
 template<auto Shape>

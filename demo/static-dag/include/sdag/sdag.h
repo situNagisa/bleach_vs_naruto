@@ -19,6 +19,8 @@
 #include "general/type_list.h"
 #include "general/sequence.h"
 #include "general/tuple.h"
+#include "general/relay.h"
+#include "general/chains.h"
 #include "general/digraph.h"
 #include "general/cvref.h"
 #include "general/signatures.h"

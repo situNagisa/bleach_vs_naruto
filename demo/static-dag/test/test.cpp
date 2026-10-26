@@ -111,7 +111,7 @@ auto diamond(bool& b_shared, bool& c_shared, bool& d_unique)
 		::sdag::make_node<a>(::stdexec::just(1)),
 		::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([&](auto&& x) { b_shared = shared_access<decltype(x)>; return x + 1; })),
 		::sdag::make_node<c, ::sdag::data<a>>(::stdexec::then([&](auto&& x) { c_shared = shared_access<decltype(x)>; return x * 2; })),
-		::sdag::make_node<d, ::sdag::data<b, c>>(::stdexec::then([&](auto&& y, auto&& z)
+		::sdag::make_node<d, ::sdag::data<::sdag::take<b>, ::sdag::take<c>>>(::stdexec::then([&](auto&& y, auto&& z)
 		{
 			d_unique = !shared_access<decltype(y)> && !shared_access<decltype(z)>;
 			return y + z;
@@ -120,19 +120,19 @@ auto diamond(bool& b_shared, bool& c_shared, bool& d_unique)
 
 void test_diamond()
 {
-	test::section("菱形：扇出按 const& 共享，扇入按值独占");
+	test::section("菱形：没写 take 的给 const&，take 的按值 move");
 	bool b_shared = false;
 	bool c_shared = false;
 	bool d_unique = false;
 	int result = ::std::get<0>(::stdexec::sync_wait(diamond(b_shared, c_shared, d_unique)).value());
 	test::check(result == 4, "结果 = (1+1) + (1*2)");
-	test::check(b_shared && c_shared, "a 有两个后继，按 const& 共享");
-	test::check(d_unique, "b、c 各只有一个后继，按值移动");
+	test::check(b_shared && c_shared, "b、c 没写 take：拿到 a 的 const&");
+	test::check(d_unique, "d 写了 take<b>、take<c>：按值 move");
 }
 
 void test_triangle()
 {
-	test::section("三角形 a -> b -> c, a -> c：传递边不去重，a 共享、b 独占，c 等两个前驱都到齐");
+	test::section("三角形 a -> b -> c, a -> c：传递边不去重，c take a（排在 b 之后），c 等两个前驱都到齐");
 	{
 		::std::vector<int> sequence;
 		bool a_shared_in_c = false;
@@ -142,7 +142,7 @@ void test_triangle()
 			return ::sdag::dag(
 				::sdag::make_node<a>(::stdexec::just(::std::string("a")) | ::stdexec::then([&](::std::string s) { sequence.push_back(1); return s; })),
 				::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([&](::std::string const& s) { sequence.push_back(2); return s + "b"; })),
-				::sdag::make_node<c, ::sdag::data<a, b>>(::stdexec::then([&](auto&& from_a, auto&& from_b)
+				::sdag::make_node<c, ::sdag::data<::sdag::take<a>, b>>(::stdexec::then([&](auto&& from_a, auto&& from_b)
 				{
 					sequence.push_back(3);
 					a_shared_in_c = shared_access<decltype(from_a)>;
@@ -160,17 +160,17 @@ void test_triangle()
 		::std::string text = ::std::get<0>(::stdexec::sync_wait(build()).value());
 		test::check(text == "aab", "c 同时拿到 a 的值和 b 的值");
 		test::check(sequence == ::std::vector<int>{1, 2, 3}, "c 只启动一次，且在 a、b 之后");
-		test::check(a_shared_in_c && b_unique_in_c, "a 有两个后继按 const& 共享，b 只有 c 一个后继按值移动");
+		test::check(!a_shared_in_c && !b_unique_in_c, "c take 了 a：按值 move；b 没写 take：const&");
 	}
 }
 
 void test_move_only_chain()
 {
-	test::section("链：move-only 值沿独占边移动；左值 sender 可重复连接");
+	test::section("链：move-only 值沿 take 边移动；左值 sender 可重复连接");
 	auto g = ::sdag::dag(
 		::sdag::make_node<a>(::stdexec::just(::std::make_unique<int>(41))),
-		::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([](::std::unique_ptr<int> p) { return ::std::make_unique<int>(*p + 1); })),
-		::sdag::make_node<c, ::sdag::data<b>>(::stdexec::then([](::std::unique_ptr<int> p) { return *p; })));
+		::sdag::make_node<b, ::sdag::data<::sdag::take<a>>>(::stdexec::then([](::std::unique_ptr<int> p) { return ::std::make_unique<int>(*p + 1); })),
+		::sdag::make_node<c, ::sdag::data<::sdag::take<b>>>(::stdexec::then([](::std::unique_ptr<int> p) { return *p; })));
 	auto [value] = ::stdexec::sync_wait(::std::move(g)).value();
 	test::check(value == 42, "链式传递");
 
@@ -217,8 +217,8 @@ void test_mixed_dependencies()
 	{
 		return ::sdag::dag(
 			::sdag::make_node<a>(::stdexec::just(5) | ::stdexec::then([&](int x) { sequence.push_back(1); return x; })),
-			// c 只依赖 a 的先后：a 的值只有 b 一个读者，所以 move 给 b，不共享
-			::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([&](auto&& x) { a_shared = shared_access<decltype(x)>; sequence.push_back(2); return x * 2; })),
+			// c 只依赖 a 的先后，不读值：b 是 a 唯一的数据读者，可以 take
+			::sdag::make_node<b, ::sdag::data<::sdag::take<a>>>(::stdexec::then([&](auto&& x) { a_shared = shared_access<decltype(x)>; sequence.push_back(2); return x * 2; })),
 			::sdag::make_node<c, ::sdag::control<a>>(::stdexec::just(::std::string("c")) | ::stdexec::then([&](::std::string s) { sequence.push_back(3); return s; })),
 			// d 等 b、c 都完成，但只收到 c 的值
 			::sdag::make_node<d, ::sdag::data<c>, ::sdag::control<b>>(::stdexec::then([&](::std::string const& s) { sequence.push_back(4); return s + "d"; })));
@@ -226,8 +226,8 @@ void test_mixed_dependencies()
 	using graph = decltype(build(::std::declval<::std::vector<int>&>(), ::std::declval<bool&>()));
 	static_assert(::std::same_as<::stdexec::completion_signatures_of_t<graph, ::stdexec::env<>>,
 		::stdexec::completion_signatures<::stdexec::set_value_t(::std::string), ::stdexec::set_error_t(::std::exception_ptr)>>);
-	static_assert(::sdag::graph::reader_counts_v<graph&&>[0] == 1, "a 的值只有 b 读（c 是控制依赖）");
-	static_assert(::sdag::graph::reader_counts_v<graph&&>[1] == 0, "b 的值没人读（d 对 b 是控制依赖）");
+	static_assert(::sdag::graph::readers_v<graph&&>.read[0] && ::sdag::graph::readers_v<graph&&>.taker[0] == 1, "a 被 b take（c 是控制依赖）");
+	static_assert(!::sdag::graph::readers_v<graph&&>.read[1], "b 的值没人读（d 对 b 是控制依赖）");
 
 	auto respects_order = [](::std::vector<int> const& sequence)
 	{
@@ -237,7 +237,101 @@ void test_mixed_dependencies()
 	::std::vector<int> fused_sequence;
 	bool fused_shared = true;
 	auto [fused_value] = ::stdexec::sync_wait(build(fused_sequence, fused_shared)).value();
-	test::check(fused_value == "cd" && respects_order(fused_sequence) && !fused_shared, "d 只收到 c 的值，且在 b、c 之后跑；a 的值 move 给唯一读者 b");
+	test::check(fused_value == "cd" && respects_order(fused_sequence) && !fused_shared, "d 只收到 c 的值，且在 b、c 之后跑；b take 了 a：按值 move");
+}
+
+/// 析构时记一笔：观察值在什么时候被析构。
+struct tracked
+{
+	::std::vector<int>* log;
+	int id;
+
+	tracked(::std::vector<int>* log_, int id_) noexcept : log(log_), id(id_)
+	{
+	}
+
+	tracked(tracked&& other) noexcept : log(::std::exchange(other.log, nullptr)), id(other.id)
+	{
+	}
+
+	tracked(tracked const&) = delete;
+
+	~tracked()
+	{
+		if (log)
+		{
+			log->push_back(-id);
+		}
+	}
+};
+
+void test_take()
+{
+	test::section("take：按值 move，取走它的节点结束时析构；没写 take 的读者拿 const&，值活到整图结束");
+	::std::vector<int> log;
+	auto g = ::sdag::dag(
+		::sdag::make_node<a>(::stdexec::then(::stdexec::just(), [&] { return tracked{&log, 1}; })),
+		::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([&](tracked const& t) { log.push_back(10 + t.id); return 0; })),
+		::sdag::make_node<c, ::sdag::data<a>>(::stdexec::then([&](tracked const& t) { log.push_back(20 + t.id); return 0; })),
+		// d 在 b、c 之后 take a：拿到右值。这里只按引用看一眼、不 move 走，值仍在槽位里——由 d 结束时的析构负责
+		::sdag::make_node<d, ::sdag::data<::sdag::take<a>>, ::sdag::control<b, c>>(::stdexec::then([&](tracked&& t) { log.push_back(30 + t.id); return 0; })),
+		// e 在 d 之后跑：此时 a 的值已经析构
+		::sdag::make_node<e, ::sdag::control<d>>(::stdexec::then(::stdexec::just(), [&] { log.push_back(40); return 0; })));
+	static_assert(::sdag::graph::readers_v<decltype(g)&&>.taker[0] == 3, "a 被 d take");
+	auto position = [&](int entry) { return ::std::ranges::find(log, entry) - log.begin(); };
+	(void)::stdexec::sync_wait(::std::move(g));
+	test::check(position(11) < position(31) && position(21) < position(31), "b、c 读完（const&）之后 d 才 take");
+	test::check(position(31) < position(-1) && position(-1) < position(40), "a 的值在 d 结束时析构，早于 e 启动（而不是整图结束时）");
+	test::check(::std::ranges::count(log, -1) == 1, "只析构一次");
+}
+
+void test_slot_reuse()
+{
+	test::section("值槽复用：take 链上的值依次共用存储，析构之后才构造下一个；失败时在世的值仍被析构");
+	// a -> b -> c -> d，每一步 take：a 与 c 共用一块，b 单独一块（d 是唯一汇点，值直接转发，不占槽位）
+	auto chain = [](::std::vector<int>& log, bool fail_c)
+	{
+		return ::sdag::dag(
+			::sdag::make_node<a>(::stdexec::then(::stdexec::just(), [&] { log.push_back(1); return tracked{&log, 1}; })),
+			::sdag::make_node<b, ::sdag::data<::sdag::take<a>>>(::stdexec::then([&](tracked&&) { log.push_back(2); return tracked{&log, 2}; })),
+			::sdag::make_node<c, ::sdag::data<::sdag::take<b>>>(::stdexec::then([&, fail_c](tracked&&) -> tracked
+			{
+				if (fail_c)
+				{
+					throw ::std::runtime_error("c");
+				}
+				log.push_back(3);
+				return tracked{&log, 3};
+			})),
+			::sdag::make_node<d, ::sdag::data<::sdag::take<c>>>(::stdexec::then([&](tracked&&) { log.push_back(4); return 0; })));
+	};
+	using graph = decltype(chain(::std::declval<::std::vector<int>&>(), false));
+	using operation = ::stdexec::connect_result_t<graph, probe_receiver>;
+	static_assert(operation::plan_type::layout.head[0] == operation::plan_type::layout.head[2], "a 与 c 共用一块");
+	static_assert(operation::plan_type::layout.head[1] != operation::plan_type::layout.head[0], "b 与 a、c 都同时在世，单独一块");
+
+	{
+		::std::vector<int> log;
+		auto [value] = ::stdexec::sync_wait(chain(log, false)).value();
+		auto position = [&](int entry) { return ::std::ranges::find(log, entry) - log.begin(); };
+		test::check(value == 0 && position(-1) < position(3), "a 在 b 结束时析构，早于 c 产生值（c 复用 a 的空间）");
+		test::check(position(-2) < position(4), "b 在 c 结束时析构，早于 d 运行");
+		test::check(::std::ranges::count(log, -1) == 1 && ::std::ranges::count(log, -2) == 1 && ::std::ranges::count(log, -3) == 1, "每个值恰好析构一次");
+	}
+	{
+		::std::vector<int> log;
+		bool caught = false;
+		try
+		{
+			::stdexec::sync_wait(chain(log, true));
+		}
+		catch (::std::runtime_error const&)
+		{
+			caught = true;
+		}
+		test::check(caught && ::std::ranges::count(log, -1) == 1 && ::std::ranges::count(log, -2) == 1, "c 失败：a、b 仍各析构一次（b 在被跳过的 c 结束时析构）");
+		test::check(::std::ranges::count(log, 4) == 0, "d 被跳过");
+	}
 }
 
 void test_error_propagation()
@@ -335,7 +429,7 @@ void test_error_propagation()
 	bool explode = false;
 	auto storing = ::sdag::dag(
 		::sdag::make_node<a>(::stdexec::just(fragile{&explode})),
-		::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([](fragile) noexcept { return 1; })));
+		::sdag::make_node<b, ::sdag::data<::sdag::take<a>>>(::stdexec::then([](fragile) noexcept { return 1; })));
 	static_assert(::std::same_as<::stdexec::completion_signatures_of_t<decltype(storing), ::stdexec::env<>>,
 		::stdexec::completion_signatures<::stdexec::set_value_t(int), ::stdexec::set_error_t(::std::exception_ptr)>>);
 	using single = decltype(::sdag::dag(::sdag::make_node<a>(::stdexec::just(fragile{&explode}))));
@@ -590,6 +684,8 @@ int main()
 	test_move_only_chain();
 	test_multi_sink_and_control();
 	test_mixed_dependencies();
+	test_take();
+	test_slot_reuse();
 	test_error_propagation();
 	test_stop_propagation();
 	test_thread_pool();

@@ -19,7 +19,7 @@ auto g = ::sdag::dag(
 	::sdag::make_node<load>(::stdexec::just(::std::string{"..."})),
 	::sdag::make_node<parse, ::sdag::data<load>>(::stdexec::then([](::std::string const& text) { return text.size(); })),
 	::sdag::make_node<index, ::sdag::data<load>>(::stdexec::then([](::std::string const& text) { return text.front(); })),
-	::sdag::make_node<report, ::sdag::data<parse, index>>(::stdexec::then([](::std::size_t n, char c) { return ::std::format("{}x{}", n, c); })));
+	::sdag::make_node<report, ::sdag::data<::sdag::take<parse>, ::sdag::take<index>>>(::stdexec::then([](::std::size_t n, char c) { return ::std::format("{}x{}", n, c); })));
 
 static_assert(::stdexec::sender<decltype(g)>);
 static_assert(::exec::sender_for<decltype(g), ::sdag::dag_t>);
@@ -47,7 +47,9 @@ static_assert(::stdexec::sender<dag>);
 `key` 只是编译期身份，任何类型都行；`data<...>` 里的顺序就是值的顺序。`data<...>` 与 `control<...>` 各至多一个、数据依赖在前，
 `make_node` 把它们补齐成 `dependencies<data<...>, control<...>>`；同一个前驱不能同时写在两边。
 载荷由依赖决定、不从载荷类型去猜：有 `data<...>` 时载荷必须是适配器，否则必须是 sender，写错了各有一条 `static_assert`。
-值的共享按 `data<...>` 计数：只被一个后继 `data<>` 的值 move 给它，被多个后继 `data<>` 的按 `const&` 共享；`control<>` 的后继不算读者。
+值的交付只有一条规则：`data<a>` 给 `a` 的 `V const&`，值留在整图里、活到整图结束；`data<take<a>>` 按值（move）给出，
+并在这个节点结束时析构 `a` 的值，之后它占的空间可以给别的值复用。一个值至多被 take 一次，take 它的节点必须排在它所有其它
+数据读者之后（编译期检查；把其它读者写进它的 `data<>` 或 `control<>` 即可）。take 之后，其它读者手里指向它的视图不再有效。
 每个节点至多一种 `set_value` 完成（多种先 `into_variant`），这与 `when_all` 的要求一致。
 
 自定义节点类型只要满足三个原语：`node_key<N>::type`、`node_dependencies<N>::type`（可特化的类型特征，默认取嵌套的 `key_type` / `dependencies_type`）和 `payload(n)`（CPO，成员优先、其次 ADL）。`graph_node` concept 组合它们。
@@ -58,7 +60,7 @@ static_assert(::stdexec::sender<dag>);
 - 任一节点 `set_error`：向所有在飞节点请求停止；**还没启动的后继直接跳过**；全部结束后以第一个错误完成。
 - 任一节点 `set_stopped`：同上，以 `set_stopped` 完成；错误优先于停止。
 - 外层停止令牌：图能以 `stopped` 完成时切换到停止态；否则只把请求转给节点，图仍以它们的值完成。
-- 值的传递：**只有一个后继的前驱把值 move 给它**（签名按值），**多个后继的前驱按 `V const&` 共享**。汇点的值 move 给整图的接收者。
+- 值的传递：写了 `take` 的按值 move，并在取走它的节点结束时析构；其余按 `V const&`，活到整图结束。汇点的值 move 给整图的接收者。
 - 存值时抛异常（拷贝 / 移动构造抛）会变成 `set_error(exception_ptr)`。
 - 任一节点没有 `set_value` 完成（例如 `just_stopped()`），整图也没有 —— 每个节点都是某个汇点的祖先。
 
@@ -82,16 +84,17 @@ static_assert(::stdexec::sender<dag>);
 - 节点的值存一份在整图里，后继按引用读 —— **扇出不需要 `split`**，因为整图拥有所有节点，不存在"谁最后释放"的问题；
 - 入度 ≥ 2 的节点有一个原子倒计数，入度 1 的节点由前驱直接启动 —— **扇入不需要 `when_all`**；
 - 不会失败 / 停止 / 抛异常的图连停止源、状态字、错误槽都不存在（与 `when_all` 的 `__uses_stop_source` 同理）；外层令牌是 `unstoppable_token` 时连回调槽也没有；只有一个汇点的图没有汇点计数，**唯一汇点的值不存槽位，完成时直接转发给整图的接收者**（像 `then` 一样不物化，整图的值签名就是它的原始签名）；值没人读的节点没有值槽。被优化掉的成员是真正的 0 字节。
-- 共享还是独占按"读值的后继个数"判断：`control<>` 的后继不算，所以 `b` 写 `data<a>`、`c` 写 `control<a>` 时 `a` 的值仍然 move 给 `b`。
+- **值槽复用**：被 take 的值在取走它的节点结束时析构，它的空间可以给"一定在那之后才产生"的值用（取走它的节点是那个值所在节点的祖先）。存值的节点在编译期按这个先后关系划分成最少的链（偏序的最小链划分，链数 = 最多同时在世的值的个数），同一条链的值依次共用一块存储（`general/relay.h`）。只有一个值的链就是原来的 `optional`；不写 take 的图布局与机器码不变。
 
 `test/zero_overhead.cpp` 的实测（g++ 16.2，libstdc++，Release）：
 
 | | 分配次数 | `sizeof(op-state)` |
 | --- | --- | --- |
 | 菱形 `a -> {b, c} -> d`，融合 | **0** | 128 = 节点 op-state 88 + 接收者 8 + 3 个值槽 24 + 1 个入度计数 8（汇点 d 不存槽位） |
+| 链 `a -> b -> c -> d -> e`，每步 take，中间值 64 字节 | **0** | 值槽 128（4 个中间值共用两块；不 take 时 272） |
 
 `-O2` 下 `just(1) -> then(+1) -> then(*3)` 这条链经 `sync_wait` 跑完的函数是 30 条指令，手写 `just(1) | then | then` 是 29 条，节点全部折叠成常量。
-相对手写 `then` 链，融合路径唯一多出来的是**链式边上的一次值物化**（出度 1 → 入度 1 的值先存进槽位再 move 给后继）：后继的输入 op 什么时候启动是后继自己决定的（`starts_on`、`let_value` 都可能推迟），值必须有个地方待着。这是"与扇入 / 扇出同等调度的最小成本"，不是 `then` 链的成本。
+相对手写 `then` 链，融合路径唯一多出来的是**链式边上的一次值物化**（值先存进槽位，再 take 给后继）：后继的输入 op 什么时候启动是后继自己决定的（`starts_on`、`let_value` 都可能推迟），值必须有个地方待着。这是"与扇入 / 扇出同等调度的最小成本"，不是 `then` 链的成本。
 
 ### 让 domain 接管整张图
 
@@ -131,14 +134,16 @@ include/sdag/                    （目录 = 概念分组，文件 = 模块；�
     type_list.h         类型列表：type_list、at_t、index_of、concat、unique、transform、rebind，以及反射共用的 refl 基础
     sequence.h          编译期序列：to_array、sequence_t、for_each_value
     tuple.h             不可移动元组：indexed_tuple、按工厂原地构造、空元素 0 字节（empty / empty_for）
-    digraph.h           有向无环图：shape<N>（邻接、入出度、拓扑序）、shape_error、roots_v / sinks_v / successors_v
+    digraph.h           有向无环图：shape<N>（邻接、入出度、拓扑序）、shape_error、可达关系 reach_v、roots_v / sinks_v / successors_v
+    chains.h            偏序的最小链划分（二分图最大匹配）：哪些值可以依次共用一块存储
+    relay.h             接力存储：一组类型轮流占用同一块内存
     cvref.h             copy_cvref_t
     signatures.h        完成签名：拆开（completion_trait）与拼装（make_completions_t）
     domain_merge.h      common_domain_t：一组 domain 合成哪一个
   stdexec/          对 stdexec 的适配：对其内部实现（双下划线名字）的全部依赖，见下文
     expressions.h       拆开 stdexec 的算法 sender
   node/             节点
-    node.h              data<> / control<> / dependencies<>、node<>、make_node、payload CPO 与 graph_node concept
+    node.h              data<> / control<> / take<> / dependencies<>、node<>、make_node、payload CPO 与 graph_node concept
     node_graph.h        一组节点的键与依赖 → 有向无环图（key_indices_v、shape_of），以及键相关的错误诊断
   protocol/         节点与图之间的约定
     value_source.h      取值源协议：get_value_source 查询 + 签名接口 + 交付接口
@@ -147,12 +152,12 @@ include/sdag/                    （目录 = 概念分组，文件 = 模块；�
     node_sender.h       把占位符喂给节点载荷得到节点 sender
   graph/            图
     description.h       图的描述：graph_data、graph_description（tuple-like，对算法标签泛型）、类型级查询与节点签名
-    readers.h           谁读谁的值 → 共享（const&）还是独占（move）
+    readers.h           谁读谁的值、谁 take 谁的值（take 给 V，否则 V const&），take 用法的编译期检查所需的信息
     analysis.h          node_analysis：每个节点有值 / 错误 / 停止，各是什么类型
-    storage_plan.h      storage_plan：哪些值要存、存时会不会抛、哪个节点直接转发（forward[J]）
+    storage_plan.h      storage_plan：哪些值要存、存时会不会抛、哪个节点直接转发（forward[J]）、值槽怎么复用（layout）
     pred_sigs.h         前驱的签名：取值源的签名接口
     visibility.h        node_view：节点实际看到的环境（要不要自带停止令牌）、在其中的分析与合法性
-    slots.h             graph_state：值槽与交付表，取值源的交付接口
+    slots.h             graph_state：值槽（按 layout 共用存储）与交付表，取值源的交付接口
     completions.h       整图的完成签名
     node_domain.h       节点的完成域与公共完成域
     attributes.h        图的属性：完成域与完成行为
@@ -239,7 +244,7 @@ stdexec 的位置：`$NAGISA_LIBRARY_ROOT/stdexec`，或 `-DSDAG_STDEXEC_ROOT=..
 - **连接的值类别**：右值图 move 子 sender，左值（const 或非 const）图拷贝它们，对应 `connect() &&` 与 `connect() const&` 两个重载，完成签名也按这两种情况计算。
 - **GCC 16 反射的几个坑**：模板实参位置的类型拼接要写 `typename [: :]`；`^^` 不能作用于 using 声明（`std::exception_ptr` 要经别名 + `dealias`）；`template for` 的范围必须是常量表达式（静态成员可以，consteval 函数里的 constexpr 局部变量不行）；`std::array<info, 0>` 没有可用的 `operator[]`（空图用 `info_array` 留一个占位元素）；noexcept / requires 里不能引用 `auto&&` 形参本身（`payload` CPO 以类型为参数）。
 - **内联完成的栈深度**。节点在前驱的完成回调里被启动，一条全内联的链会递归 O(深度) 层；静态图的规模是编译期已知的常量，这与 `then` 链的行为一致。编译器对函数体的实例化也沿 `launch -> start -> ... -> node_done -> notify_edge -> launch` 这条路径嵌套，最长路径约 60 个节点以上会撞上 GCC 的模板深度上限（`-ftemplate-depth` 可以调）；拓扑序 `template for` 只解决了完成签名那一侧的深度。
-- **节点的值在整图 op-state 里停留到整图完成**。共享的 `const&` 因此一直有效；这也是 `split` 做不到 0 开销而整图可以的原因。
+- **没 take 的值在整图 op-state 里停留到整图完成**。给出的 `const&` 因此一直有效；这也是 `split` 做不到 0 开销而整图可以的原因。take 让用户显式决定提前结束一个值的生命周期，析构点在编译期确定，不需要引用计数。
 - **错误发生后未启动的节点被跳过**，这是对 `when_all`"全部启动"语义的细化：跳过不改变结果（结果一定是错误 / 停止），只是不做无用功。
 - 节点必须恰好完成一次；完成签名不能"撒谎"（`deliver` 里有 `static_assert` 对照接收者环境与整图环境下算出的占位符签名）。
 - 节点适配器必须把占位符恰好用一次（构造时 `static_assert`）：前驱的值只交付一次，`repeat_n` / `retry` 这类会重启子 sender 的适配器不能套在输入上——这与把它们套在 `just(std::move(x))` 上会重复移动是同一回事。

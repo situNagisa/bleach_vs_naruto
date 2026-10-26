@@ -9,6 +9,10 @@
 ///   control<a>      控制依赖：只在 a 完成后启动，不接收、不碰它的值。载荷（没有数据依赖时）必须是 sender。
 ///   make_node<d, data<b>, control<c>>(then(f))   两种都有：等 b、c 都完成，f 只收到 b 的值。
 ///
+/// 值的交付：data<a> 里的 a 默认以 V const& 交给本节点，值留在整图里，活到整图结束。
+/// 写成 data<take<a>> 则本节点按值（move）拿到它，并在本节点结束时析构它（之后它占的空间可以给别的值用）。
+/// 一个值至多被 take 一次，take 它的节点必须排在它所有其它读者之后（编译期检查，见 node/node_graph.h）。
+///
 /// 载荷是什么由依赖声明决定，不从载荷类型去猜：声明了 data<...> 却给了 sender、或者没有 data<...> 却给了适配器，都是编译错误。
 ///
 /// 原语：
@@ -20,6 +24,7 @@
 ///   - sender_payload<P>                    —— 载荷是 sender（没有数据依赖的节点）
 ///   - adaptor_payload<P, Hole>             —— 载荷是接受前驱占位符的 sender 适配器（有数据依赖的节点）
 
+#include <array>
 #include <concepts>
 #include <type_traits>
 #include <utility>
@@ -32,11 +37,43 @@
 namespace sdag
 {
 
-/// 数据依赖：Keys... 全部完成后启动，并按此顺序接收它们的值。
+/// 写在 data<...> 里：取走 Key 的值——本节点按值（move）拿到它，本节点结束时析构它。
+template<class Key>
+struct take
+{
+};
+
+namespace dependency_detail
+{
+
+template<class T>
+struct key_of
+{
+	using type = T;
+};
+
+template<class Key>
+struct key_of<take<Key>>
+{
+	using type = Key;
+};
+
+template<class T>
+inline constexpr bool is_take_v = false;
+
+template<class Key>
+inline constexpr bool is_take_v<take<Key>> = true;
+
+}
+
+/// 数据依赖：Keys... 全部完成后启动，并按此顺序接收它们的值。Keys 里可以写 take<K>。
 template<class... Keys>
 struct data
 {
-	using keys = general::type_list<Keys...>;
+	/// 前驱的键（take<K> 换成 K）。
+	using keys = general::type_list<typename dependency_detail::key_of<Keys>::type...>;
+	/// 第 i 个前驱是不是 take。
+	static constexpr ::std::array<bool, sizeof...(Keys)> taken{dependency_detail::is_take_v<Keys>...};
 };
 
 /// 控制依赖：Keys... 全部完成后启动，不接收它们的值。
@@ -53,10 +90,12 @@ struct dependencies;
 template<class... DataKeys, class... ControlKeys>
 struct dependencies<data<DataKeys...>, control<ControlKeys...>>
 {
+	static_assert(!(dependency_detail::is_take_v<ControlKeys> || ...), "sdag: take<...> 只能写在 data<...> 里（控制依赖不碰值）");
+
 	using data_type = data<DataKeys...>;
 	using control_type = control<ControlKeys...>;
 	/// 全部前驱：先数据依赖，后控制依赖。
-	using keys = general::type_list<DataKeys..., ControlKeys...>;
+	using keys = general::type_list<typename dependency_detail::key_of<DataKeys>::type..., ControlKeys...>;
 	static constexpr bool has_data = sizeof...(DataKeys) != 0;
 };
 

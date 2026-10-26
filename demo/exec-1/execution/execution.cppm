@@ -61,4 +61,5 @@ using ::sdag::dag;
 using ::sdag::make_node;
 using ::sdag::data;
 using ::sdag::control;
+using ::sdag::take;
 }

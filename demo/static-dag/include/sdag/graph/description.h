@@ -16,7 +16,7 @@
 ///   node_completions_t<Self, I, Env...>  节点 I 的完成签名
 ///   dependency_t<Self, I>              节点 I 的 dependencies<data<...>, control<...>>
 ///   data_dependency_t<Self, I>         节点 I 的 data<...>（它的前驱占位符就是 hole<data<...>>）
-///   dependency_indices_v<Self, L<K...>>      data<...> / control<...> / type_list<...> 里的键换成节点索引（std::array）
+///   dependency_indices_v<Self, L>      data<...> / control<...> / dependencies<...> 的前驱键（L::keys，take<K> 已换成 K）换成节点索引（std::array）
 ///   data_dependencies_t<Self, I>       只含数据依赖
 ///   control_dependencies_t<Self, I>    只含控制依赖
 
@@ -102,7 +102,7 @@ template<class Self, size_t I>
 using dependency_t = general::at_t<I, typename description_of<Self>::data_type::dependencies>;
 
 template<class Self, class Dependency>
-inline constexpr auto dependency_indices_v = key_indices_v<typename description_of<Self>::data_type::keys, Dependency>;
+inline constexpr auto dependency_indices_v = key_indices_v<typename description_of<Self>::data_type::keys, typename Dependency::keys>;
 
 template<class Self, size_t I>
 using data_dependency_t = typename dependency_t<Self, I>::data_type;

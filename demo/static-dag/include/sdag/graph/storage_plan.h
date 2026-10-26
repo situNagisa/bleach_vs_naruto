@@ -5,6 +5,8 @@
 /// storage_plan<Self, Env>
 ///   forward[J]                  节点 J 的值不存槽位、完成时直接转发给整图的接收者：J 是唯一的汇点
 ///   slot_needed[J]              节点 J 的值要不要存：有值、不直接转发，并且（是汇点，或者有后继读它的值）
+///   layout                      值槽的复用：存值的节点划分成链（general/chains.h），同一条链的值依次共用一块存储
+///                               （u 先于 v：u 被 take，且取走它的节点是 v 的严格祖先——u 析构之后 v 才产生值）
 ///   nothrow_store               所有要存的值、所有错误存进 op-state 时都不抛
 ///   can_fail                    有节点可能出错 / 停止 / 存值时抛异常——决定整图要不要自己的停止源
 ///
@@ -15,6 +17,7 @@
 
 #include "../config.h"
 #include "../general/digraph.h"
+#include "../general/chains.h"
 #include "description.h"
 #include "readers.h"
 #include "analysis.h"
@@ -35,10 +38,26 @@ struct storage_plan
 
 	static constexpr auto slot_needed = []<size_t... I>(::std::index_sequence<I...>)
 	{
-		constexpr auto readers = reader_counts_v<Self>;
+		constexpr auto read = readers_v<Self>.read;
 		return ::std::array<bool, sizeof...(I)>{
-			(analysis::template values_t<I>::size != 0 && !forward[I] && (shape.is_sink(I) || readers[I] != 0))...};
+			(analysis::template values_t<I>::size != 0 && !forward[I] && (shape.is_sink(I) || read[I]))...};
 	}(::std::make_index_sequence<count_of_v<Self>>{});
+
+	static constexpr auto layout = []
+	{
+		constexpr size_t count = count_of_v<Self>;
+		constexpr auto taker = readers_v<Self>.taker;
+		constexpr auto reach = general::reach_v<shape>;
+		::std::array<::std::array<bool, count>, count> before{};
+		for (size_t u = 0; u < count; ++u)
+		{
+			for (size_t v = 0; v < count; ++v)
+			{
+				before[u][v] = taker[u] != count && reach[taker[u]][v];
+			}
+		}
+		return general::min_chain_cover(before, slot_needed);
+	}();
 
 	static constexpr bool nothrow_store = []
 	{
