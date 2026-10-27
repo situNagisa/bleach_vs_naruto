@@ -10,7 +10,7 @@ enum class step
 {
 	swapchain, record, image, render,
 	graphics_queue, submit, present_queue, present,
-	wait, release_swapchain,
+	wait, extent, release_swapchain,
 };
 
 struct application
@@ -41,22 +41,24 @@ struct application
 
 	// 一帧的任务图。边只表示真实的数据 / 资源依赖，没有依赖的节点同时在飞：
 	//
-	//   swapchain ──► image ──┬──► render ──► graphics_queue ──► submit ──► present_queue ──► present ──► wait ──► release_swapchain
-	//   record ───────────────┘
+	//   swapchain ──► image ──┬──► render ──► graphics_queue ──► submit ──► present_queue ──► present ──► wait ──┬──► release_swapchain
+	//   record ───────────────┘                                                                      extent ◄──┘
 	//
-	// - 交换链 permit 从 swapchain 一直留到 release_swapchain：期间交换链与它的图像都归这一帧，
-	//   wait 等到 GPU 工作与呈现都结束，permit 才在 release_swapchain 结束时析构。重建只在持有 permit 时做：
-	//   取图像报过期、尺寸不符时在 image 里重建；呈现报次优 / 过期时 present 交出 true，release_swapchain 重建。
+	// - 交换链 permit 从 swapchain 一直留到 release_swapchain：期间交换链与它的图像都归这一帧。
+	//   销毁交换链（重建）是 permit 的最后一件工作，只在 permit 的最后一个持有节点里做：
+	//   正常路径是 release_swapchain（wait 之后，extent 读到的是此刻的窗口尺寸）；
+	//   取图像就过期时本帧到此为止，image 是最后一个持有节点，在它的错误路径里重建再丢帧。
 	// - record 录场景的二级命令缓冲（暂时为空），与取图像并行。
 	// - 图形队列在录制完成后才取（提前取到只会让别的帧等），提交完换成呈现队列（同族时就是它自己），呈现完析构。
 	// - render 出错时图像已经取到却不会呈现：在 render 里把图像还给交换链、等掉 image_available 的触发，再把错误交出去。
 	//   submit 之后都是 noexcept，错误只可能发生在 render 及以前。
-	// permit 都经 take 传递，sdag 在取走它的节点结束时析构它，资源在用完的那一刻归还。
-	// 阻塞或耗 CPU 的节点放到 worker / queue_thread 上；只调一次 Vulkan 入队的节点就地执行。
-	auto frame_graph(renderer::frame_type& frame, window_extent drawable)
+	// permit 都经 take 传递，sdag 在取走它的节点结束时析构它。
+	// 阻塞或耗 CPU 的节点放到 worker / queue_thread 上；GLFW 只在主线程；只调一次 Vulkan 入队的节点就地执行。
+	auto frame_graph(renderer::frame_type& frame)
 	{
 		auto const workers = pool.get_scheduler();
 		auto const waiter = queue_thread.get_scheduler();
+		auto const main = main_thread.get_scheduler();
 		return ::sdag::dag(
 			::sdag::make_node<step::swapchain>(graphics.acquire_swapchain()),
 			::sdag::make_node<step::record>(
@@ -67,7 +69,28 @@ struct application
 			::sdag::make_node<step::image, ::sdag::data<step::swapchain>>(
 				::stdexec::then([](swapchain_permit const& swapchain) noexcept { return swapchain.token(); })
 				| ::stdexec::continues_on(workers)
-				| ::stdexec::then([this, &frame, drawable](renderer::swapchain_type* swapchain) { return graphics.acquire_swapchain_image(frame, *swapchain, drawable); })),
+				| ::stdexec::let_value([this, &frame, workers, main](renderer::swapchain_type* swapchain)
+					{
+						return ::stdexec::just()
+							| ::stdexec::then([this, &frame, swapchain] { return graphics.acquire_swapchain_image(frame, *swapchain); })
+							| ::stdexec::let_error([this, swapchain, workers, main](::std::exception_ptr error)
+								{
+									return ::stdexec::schedule(main)
+										| ::stdexec::then([this] { return main_window.drawable_extent(); })
+										| ::stdexec::continues_on(workers)
+										| ::stdexec::then([this, swapchain, error](window_extent drawable) -> renderer::image_index
+											{
+												try { ::std::rethrow_exception(error); }
+												catch (surface_changed const&)
+												{
+													if (renderer::needs_rebuild(*swapchain, drawable, true))
+														graphics.rebuild_swapchain(*swapchain, drawable);
+												}
+												catch (...) {}
+												::std::rethrow_exception(error);
+											});
+								});
+					})),
 			::sdag::make_node<step::render, ::sdag::data<step::swapchain, step::image, ::sdag::take{ step::record }>>(
 				::stdexec::then([](swapchain_permit const& swapchain, renderer::image_index image, renderer::command_view commands) noexcept
 					{ return ::std::tuple{ swapchain.token(), image, commands }; })
@@ -109,13 +132,16 @@ struct application
 						graphics.wait_frame(frame);
 						return stale;
 					})),
-			::sdag::make_node<step::release_swapchain, ::sdag::data<::sdag::take{ step::swapchain }, ::sdag::take{ step::wait }>>(
-				::stdexec::let_value([this, workers, drawable](swapchain_permit& swapchain, bool stale)
+			::sdag::make_node<step::extent, ::sdag::control<step::wait>>(
+				::stdexec::schedule(main)
+				| ::stdexec::then([this] { return main_window.drawable_extent(); })),
+			::sdag::make_node<step::release_swapchain, ::sdag::data<::sdag::take{ step::swapchain }, ::sdag::take{ step::wait }, ::sdag::take{ step::extent }>>(
+				::stdexec::let_value([this, workers](swapchain_permit& swapchain, bool stale, window_extent drawable)
 					{
 						return ::stdexec::schedule(workers)
 							| ::stdexec::then([this, &swapchain, stale, drawable]
 								{
-									if (stale)
+									if (renderer::needs_rebuild(*swapchain.token(), drawable, stale))
 										graphics.rebuild_swapchain(*swapchain.token(), drawable);
 								});
 					})));
@@ -123,15 +149,16 @@ struct application
 
 	// 帧 permit 包住整张帧图：图完成时帧的 GPU 工作已经等完（或 render 出错时已经排空），permit 才析构归还。
 	// 出错的帧丢掉，不影响后面的帧。
-	auto frame_work(frame_permit permit, window_extent drawable)
+	auto frame_work(frame_permit permit)
 	{
-		return ::stdexec::let_value(::stdexec::just(::std::move(permit)), [this, drawable](frame_permit& permit)
+		return ::stdexec::let_value(::stdexec::just(::std::move(permit)), [this](frame_permit& permit)
 			{
-				return frame_graph(*permit.token(), drawable);
+				return frame_graph(*permit.token());
 			})
 			| ::stdexec::upon_error([](::std::exception_ptr error) noexcept
 				{
 					try { ::std::rethrow_exception(error); }
+					catch (surface_changed const&) {}
 					catch (::std::exception const& exception) { ::std::println("frame dropped: {}", exception.what()); }
 					catch (...) { ::std::println("frame dropped"); }
 				});
@@ -153,7 +180,7 @@ struct application
 			auto const drawable = main_window.drawable_extent();
 			if (drawable.width == 0 || drawable.height == 0)
 				continue;
-			::stdexec::spawn(frame_work(::std::move(frame), drawable), frame_scope.get_token());
+			::stdexec::spawn(frame_work(::std::move(frame)), frame_scope.get_token());
 		}
 		co_await ::stdexec::starts_on(main_thread.get_scheduler(), frame_scope.join());
 		request_stop();

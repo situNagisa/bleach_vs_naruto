@@ -27,6 +27,9 @@ import std;
 import demo.execution;
 import demo.window;
 
+// 交换链过期：取图像时没有取到图像。本帧到此为止，交换链由最后一个持有它的节点重建。
+export struct surface_changed {};
+
 struct device_selection
 {
 	::VkPhysicalDevice handle;
@@ -116,8 +119,10 @@ struct renderer
 
 	// 以下都是同步函数，在调用线程上执行；放到哪个调度器上由调用方决定。
 	// 参数里的交换链都是 permit 下的交换链：调用方持有 permit 才能调用。
-	// 交换链过期或尺寸与 drawable 不符时就地重建，阻塞到取得图像。drawable 不能为 0（最小化由调用方分流）。
-	[[nodiscard]] image_index acquire_swapchain_image(frame_type const& frame, swapchain_type& swapchain, window_extent drawable) const;
+	// 阻塞到取得图像；只取，不重建。过期时抛 surface_changed（没有取到图像，信号量也没有挂上操作）。
+	[[nodiscard]] image_index acquire_swapchain_image(frame_type const& frame, swapchain_type const& swapchain) const;
+	// 交换链是否要按 drawable 重建：呈现报过 stale、或尺寸不符。最小化（尺寸为 0）时不重建。
+	[[nodiscard]] static bool needs_rebuild(swapchain_type const& swapchain, window_extent drawable, bool stale) noexcept;
 	void render(frame_type const& frame, swapchain_type const& swapchain, image_index image, command_view commands) const;
 	// 入队失败只可能是设备丢失 / 内存耗尽，不可恢复，直接终止。
 	void submit_graphic_queue(queue_pool::permit const& queue, frame_type const& frame) const noexcept;
@@ -126,7 +131,7 @@ struct renderer
 	[[nodiscard]] bool submit_present_queue(queue_pool::permit const& queue, frame_type const& frame, swapchain_type const& swapchain, image_index image) const noexcept;
 	// 阻塞到帧的 GPU 工作与呈现都结束，复位 fence：之后帧与交换链都可以归还。
 	void wait_frame(frame_type const& frame) const noexcept;
-	// 要求本帧的呈现已经结束（wait_frame 之后）。
+	// 销毁旧交换链、建新的。只在持有交换链 permit 的最后一个节点里调用：此时它的图像上已经没有任何工作。
 	void rebuild_swapchain(swapchain_type& swapchain, window_extent drawable) const;
 
 	// 取到图像却没有呈现（录制出错）时的回滚，依次调用：
@@ -248,30 +253,30 @@ values_sender_type<renderer::swapchain_pool::permit> renderer::acquire_swapchain
 {
 	return _swapchain_pool.acquire();
 }
-renderer::image_index renderer::acquire_swapchain_image(frame_type const& frame, swapchain_type& swapchain, window_extent drawable) const
+renderer::image_index renderer::acquire_swapchain_image(frame_type const& frame, swapchain_type const& swapchain) const
 {
-	assert(drawable.width != 0 && drawable.height != 0);
-	for (;;)
-	{
-		if (swapchain.drawable.width != drawable.width || swapchain.drawable.height != drawable.height)
-			rebuild_swapchain(swapchain, drawable);
-		auto index = image_index{};
-		auto const result = ::vkAcquireNextImageKHR(
-			_device.handle
-			, swapchain.swapchain.handle
-			, (::std::numeric_limits<::std::uint64_t>::max)()
-			, frame.image_available.handle
-			, VK_NULL_HANDLE
-			, &index
-			);
-		// 次优时已经取到图像、image_available 会被触发：照常用完这一张，呈现时会再报次优，那时重建。
-		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
-			return index;
-		if (result != VK_ERROR_OUT_OF_DATE_KHR)
-			throw ::std::runtime_error{ "acquire swapchain image" };
-		// 过期时没有取到图像，信号量也没有挂上操作。持有 permit 意味着上一次呈现已经结束，直接重建。
-		rebuild_swapchain(swapchain, drawable);
-	}
+	auto index = image_index{};
+	auto const result = ::vkAcquireNextImageKHR(
+		_device.handle
+		, swapchain.swapchain.handle
+		, (::std::numeric_limits<::std::uint64_t>::max)()
+		, frame.image_available.handle
+		, VK_NULL_HANDLE
+		, &index
+		);
+	// 次优时已经取到图像、image_available 会被触发：照常用完这一张，呈现时会再报次优。
+	if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
+		return index;
+	if (result == VK_ERROR_OUT_OF_DATE_KHR)
+		throw surface_changed{};
+	throw ::std::runtime_error{ "acquire swapchain image" };
+}
+
+bool renderer::needs_rebuild(swapchain_type const& swapchain, window_extent drawable, bool stale) noexcept
+{
+	if (drawable.width == 0 || drawable.height == 0)
+		return false;
+	return stale || swapchain.drawable.width != drawable.width || swapchain.drawable.height != drawable.height;
 }
 
 void renderer::rebuild_swapchain(swapchain_type& swapchain, window_extent drawable) const
