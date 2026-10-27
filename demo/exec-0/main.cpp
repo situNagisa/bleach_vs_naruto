@@ -40,51 +40,43 @@ struct application
 	//   image_slot ──► access ──► image ──┬──► render ──► graphics_queue ──► submit ──► present_queue ──► present ──► wait
 	//   record ───────────────────────────┘
 	//
-	// - image_slot：这一代交换链的图像 permit，持有到 wait 等完 present fence 才析构——这一帧对这一代的使用到此结束。
+	// - image_slot：交换链的图像 permit，持有到 wait 等完 present fence 才析构——这一帧对交换链的使用到此结束。
 	//   交换链 permit 等它所有图像 permit 析构后才重建、析构，所以帧里不重建、不碰交换链的生命周期。
 	// - access：交换链的外部同步（acquire / present / release），从取图像持有到呈现完：呈现顺序就是取得它的顺序。
 	//   在图像 permit 之后才取，等图像时不挡别的帧。
-	// - 取图像报过期、呈现报次优 / 过期时让这一代退役：持有交换链 permit 的一方不再开新帧，等在途帧结束后重建。
+	// - 取图像报过期、呈现报次优 / 过期时标记 stale：持有交换链 permit 的一方不再开新帧，等在途帧结束后重建。
 	// - record 录场景的二级命令缓冲（暂时为空），与取图像并行。
 	// - 图形队列在录制完成后才取（提前取到只会让别的帧等），提交完换成呈现队列（同族时就是它自己），呈现完析构。
 	// - render 出错时图像已经取到却不会呈现：在 render 里把图像还给交换链、等掉 image_available 的触发，再把错误交出去。
 	//   submit 之后都是 noexcept，错误只可能发生在 render 及以前。
 	// permit 都经 take 传递，sdag 在取走它的节点结束时析构它。
 	// 阻塞或耗 CPU 的节点放到 worker / queue_thread 上；只调一次 Vulkan 入队的节点就地执行。
-	auto frame_graph(renderer::frame_type& frame, renderer::swapchain_state& swapchain)
+	auto frame_graph(renderer::frame_type& frame, renderer::swapchain_type& swapchain)
 	{
 		auto const workers = pool.get_scheduler();
 		auto const waiter = queue_thread.get_scheduler();
-		return ::sdag::dag(
-			::sdag::make_node<step::image_slot>(swapchain.images.acquire()),
-			::sdag::make_node<step::access, ::sdag::control<step::image_slot>>(swapchain.access.acquire()),
-			::sdag::make_node<step::record>(
+		return ::sdag::dag<step>(
+			::sdag::make<::sdag::basic_node{ step::image_slot }>(graphics.acquire_swapchain_image_slot()),
+			::sdag::make<::sdag::basic_node{ step::access, ::sdag::wait(step::image_slot) }>(graphics.acquire_swapchain_access()),
+			::sdag::make<::sdag::basic_node{ step::record }>(
 				::stdexec::schedule(workers)
 				| ::stdexec::then([] { return renderer::command_view{}; })),
-			::sdag::make_node<step::image, ::sdag::control<step::access>>(
+			::sdag::make<::sdag::basic_node{ step::image, ::sdag::wait(step::access) }>(
 				::stdexec::schedule(workers)
 				| ::stdexec::then([this, &frame, &swapchain]
 					{
-						try
-						{
-							return graphics.acquire_swapchain_image(frame, swapchain.chain);
-						}
-						catch (surface_changed const&)
-						{
-							swapchain.retire.request_stop();
-							throw;
-						}
+						return graphics.acquire_swapchain_image(frame, swapchain);
 					})),
-			::sdag::make_node<step::render, ::sdag::data<step::image, ::sdag::take{ step::record }>>(
+			::sdag::make<::sdag::basic_node{ step::render, ::sdag::let(step::image), ::sdag::move(step::record) }>(
 				::stdexec::continues_on(workers)
 				| ::stdexec::let_value([this, &frame, &swapchain, waiter](renderer::image_index image, renderer::command_view commands)
 					{
 						return ::stdexec::just()
-							| ::stdexec::then([this, &frame, &swapchain, image, commands] { graphics.render(frame, swapchain.chain, image, commands); })
+							| ::stdexec::then([this, &frame, &swapchain, image, commands] { graphics.render(frame, swapchain, image, commands); })
 							// access 仍在图里（present 才取走它），归还图像满足外部同步。
 							| ::stdexec::let_error([this, &frame, &swapchain, image, waiter](::std::exception_ptr error)
 								{
-									graphics.release_swapchain_image(swapchain.chain, image);
+									graphics.release_swapchain_image(swapchain, image);
 									return graphics.acquire_graphics_queue()
 										| ::stdexec::then([this, &frame](queue_permit queue) noexcept { graphics.drain_frame(queue, frame); })
 										| ::stdexec::continues_on(waiter)
@@ -95,19 +87,19 @@ struct application
 											});
 								});
 					})),
-			::sdag::make_node<step::graphics_queue, ::sdag::control<step::render>>(graphics.acquire_graphics_queue()),
-			::sdag::make_node<step::submit, ::sdag::data<::sdag::take{ step::graphics_queue }>>(
+			::sdag::make<::sdag::basic_node{ step::graphics_queue, ::sdag::wait(step::render) }>(graphics.acquire_graphics_queue()),
+			::sdag::make<::sdag::basic_node{ step::submit, ::sdag::move(step::graphics_queue) }>(
 				::stdexec::then([this, &frame](queue_permit queue) noexcept
 					{
 						graphics.submit_graphic_queue(queue, frame);
 						return queue;
 					})),
-			::sdag::make_node<step::present_queue, ::sdag::data<::sdag::take{ step::submit }>>(
+			::sdag::make<::sdag::basic_node{ step::present_queue, ::sdag::move(step::submit) }>(
 				::stdexec::let_value([this](queue_permit& queue) { return graphics.acquire_present_queue(::std::move(queue)); })),
-			::sdag::make_node<step::present, ::sdag::data<::sdag::take{ step::access }, step::image, ::sdag::take{ step::present_queue }>>(
+			::sdag::make<::sdag::basic_node{ step::present, ::sdag::move(step::access), ::sdag::let(step::image), ::sdag::move(step::present_queue) }>(
 				::stdexec::then([this, &frame, &swapchain](renderer::access_permit, renderer::image_index image, queue_permit queue) noexcept
 					{ graphics.submit_present_queue(queue, frame, swapchain, image); })),
-			::sdag::make_node<step::wait, ::sdag::data<::sdag::take{ step::image_slot }>, ::sdag::control<step::present>>(
+			::sdag::make<::sdag::basic_node{ step::wait, ::sdag::move(step::image_slot), ::sdag::wait(step::present) }>(
 				::stdexec::let_value([this, &frame, waiter](renderer::image_permit&)
 					{
 						return ::stdexec::schedule(waiter)
@@ -117,7 +109,7 @@ struct application
 
 	// 帧 permit 包住整张帧图：图完成时帧的 GPU 工作已经等完（或 render 出错时已经排空），permit 才析构归还。
 	// 出错的帧丢掉，不影响后面的帧。
-	auto frame_work(frame_permit permit, renderer::swapchain_state& swapchain)
+	auto frame_work(frame_permit permit, renderer::swapchain_type& swapchain)
 	{
 		return ::stdexec::let_value(::stdexec::just(::std::move(permit)), [this, &swapchain](frame_permit& permit)
 			{
@@ -140,8 +132,7 @@ struct application
 		{
 			// 一代交换链一个作用域：在它上面跑帧，帧全部结束（所有图像 permit 析构）后重建，最后析构交换链 permit。
 			auto swapchain_permit = co_await graphics.acquire_swapchain();
-			auto& storage = *swapchain_permit.token();
-			auto& swapchain = *storage;
+			auto& swapchain = *swapchain_permit.token();
 			auto frames = ::stdexec::counting_scope{};
 			for (;;)
 			{
@@ -162,7 +153,10 @@ struct application
 					window::wait_events();
 					continue;
 				}
-				if (swapchain.retire.stop_requested() || !renderer::fits(swapchain.chain, drawable))
+				// stale 由取图像 / 呈现在 access 下写入，这里同样在 access 下读。
+				auto const stale = co_await (graphics.acquire_swapchain_access()
+					| ::stdexec::then([&swapchain](renderer::access_permit) noexcept { return swapchain.stale; }));
+				if (stale || !renderer::fits(swapchain, drawable))
 					break;
 				::stdexec::spawn(frame_work(::std::move(frame), swapchain), frames.get_token());
 			}
@@ -178,7 +172,7 @@ struct application
 			}
 			if (main_window.should_close())
 				break;
-			graphics.rebuild_swapchain(storage, drawable);
+			graphics.rebuild_swapchain(swapchain, drawable);
 		}
 		request_stop();
 	}

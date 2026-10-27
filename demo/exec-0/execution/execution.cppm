@@ -81,8 +81,9 @@ using ::nagisa::concurrency::simple_task;
 export namespace sdag
 {
 using ::sdag::dag;
-using ::sdag::make_node;
-using ::sdag::data;
-using ::sdag::control;
-using ::sdag::take;
+using ::sdag::make;
+using ::sdag::basic_node;
+using ::sdag::let;
+using ::sdag::move;
+using ::sdag::wait;
 }
