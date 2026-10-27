@@ -20,7 +20,7 @@
 #include "../general/type_list.h"
 #include "analysis.h"
 #include "../general/sequence.h"
-#include "../general/digraph.h"
+#include "../topology/digraph.h"
 #include "../general/domain_merge.h"
 #include "description.h"
 #include "node_domain.h"

@@ -5,7 +5,7 @@
 /// storage_plan<Self, Env>
 ///   forward[J]                  节点 J 的值不存槽位、完成时直接转发给整图的接收者：J 是唯一的汇点
 ///   slot_needed[J]              节点 J 的值要不要存：有值、不直接转发，并且（是汇点，或者有后继读它的值）
-///   layout                      值槽的复用：存值的节点划分成链（general/chains.h），同一条链的值依次共用一块存储
+///   layout                      值槽的复用：存值的节点划分成链（topology/dependencies.h 的 released_before + topology/chains.h），同一条链的值依次共用一块存储
 ///                               （u 先于 v：u 被 move，且取走它的节点是 v 的严格祖先——u 析构之后 v 才产生值）
 ///   nothrow_store               所有要存的值、所有错误存进 op-state 时都不抛
 ///   can_fail                    有节点可能出错 / 停止 / 存值时抛异常——决定整图要不要自己的停止源
@@ -16,10 +16,10 @@
 #include <cstddef>
 
 #include "../config.h"
-#include "../general/digraph.h"
-#include "../general/chains.h"
+#include "../topology/digraph.h"
+#include "../topology/chains.h"
+#include "../topology/dependencies.h"
 #include "description.h"
-#include "readers.h"
 #include "analysis.h"
 
 namespace sdag::graph
@@ -46,18 +46,10 @@ struct storage_plan
 	static constexpr auto layout = []
 	{
 		constexpr size_t count = count_of_v<Self>;
-		auto const& taker = readers_of<Self>().taker;
-		auto const reach = shape.reach();
 		::std::array<bool, count * count> before_storage{};
-		general::bool_matrix before(before_storage.data(), count, count);
-		for (size_t u = 0; u < count; ++u)
-		{
-			for (size_t v = 0; v < count; ++v)
-			{
-				before[u, v] = taker[u] != count && reach[taker[u], v];
-			}
-		}
-		return general::chain_cover<count>::build(before, slot_needed);
+		topology::bool_matrix before(before_storage.data(), count, count);
+		topology::released_before(readers_of<Self>().taker, shape.reach(), before);
+		return topology::chain_cover<count>::build(before, slot_needed);
 	}();
 
 	static constexpr bool nothrow_store = []

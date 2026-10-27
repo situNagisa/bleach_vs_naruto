@@ -85,13 +85,13 @@ static_assert(::sdag::node_spec_of<my_spec, key>);
 constexpr basic_node n_a{a};
 constexpr basic_node n_b{b, ::sdag::let(a)};
 constexpr basic_node n_c{c, ::sdag::let(a), ::sdag::let(b)};
-static_assert(::sdag::shape_of<key, n_a, n_b, n_c>().error == ::sdag::general::shape_error::none);
-static_assert(::sdag::shape_of<key, n_a, n_a>().error == ::sdag::general::shape_error::duplicate_key);
-static_assert(::sdag::shape_of<key, n_b>().error == ::sdag::general::shape_error::unknown_dependency);
-static_assert(::sdag::shape_of<key, basic_node{a, ::sdag::let(a)}>().error == ::sdag::general::shape_error::self_dependency);
-static_assert(::sdag::shape_of<key, n_a, basic_node{b, ::sdag::let(a), ::sdag::wait(a)}>().error == ::sdag::general::shape_error::duplicate_dependency);
-static_assert(::sdag::shape_of<key, basic_node{a, ::sdag::let(b)}, basic_node{b, ::sdag::let(a)}>().error == ::sdag::general::shape_error::cycle);
-static_assert(::sdag::shape_of<key, n_a, my_spec{b, {{{a, true}}}}>().error == ::sdag::general::shape_error::none, "自定义规格类型");
+static_assert(::sdag::shape_of<key, n_a, n_b, n_c>().error == ::sdag::topology::shape_error::none);
+static_assert(::sdag::shape_of<key, n_a, n_a>().error == ::sdag::topology::shape_error::duplicate_key);
+static_assert(::sdag::shape_of<key, n_b>().error == ::sdag::topology::shape_error::unknown_dependency);
+static_assert(::sdag::shape_of<key, basic_node{a, ::sdag::let(a)}>().error == ::sdag::topology::shape_error::self_dependency);
+static_assert(::sdag::shape_of<key, n_a, basic_node{b, ::sdag::let(a), ::sdag::wait(a)}>().error == ::sdag::topology::shape_error::duplicate_dependency);
+static_assert(::sdag::shape_of<key, basic_node{a, ::sdag::let(b)}, basic_node{b, ::sdag::let(a)}>().error == ::sdag::topology::shape_error::cycle);
+static_assert(::sdag::shape_of<key, n_a, my_spec{b, {{{a, true}}}}>().error == ::sdag::topology::shape_error::none, "自定义规格类型");
 
 // 拓扑序：声明顺序 c, a, b（c 依赖 a、b）-> 顺序 a, b, c
 constexpr auto shape = ::sdag::shape_of<key, n_c, n_a, n_b>();
@@ -363,33 +363,84 @@ void test_slot_reuse()
 	}
 }
 
-void test_runtime_shape()
+void test_runtime_topology()
 {
-	test::section("形状算法是普通 constexpr 函数：运行期用 vector 当存储同样能算（给动态图铺路）");
-	// 菱形 a -> {b, c} -> d 的前驱表
-	::std::vector<::std::size_t> const first{0, 0, 1, 2, 4};
-	::std::vector<::std::size_t> const preds{0, 0, 1, 2};
+	test::section("拓扑层是普通 constexpr 函数：运行期用 vector 从依赖表算到值槽方案，与编译期结果一致（给动态图铺路）");
+	using ::sdag::topology::mode;
+	using entry = ::sdag::topology::dependency_entry;
+
+	// 菱形 a -> {b, c} -> d 的前驱表：形状
+	{
+		::std::vector<::std::size_t> const first{0, 0, 1, 2, 4};
+		::std::vector<::std::size_t> const preds{0, 0, 1, 2};
+		::std::size_t const n = first.size() - 1;
+		::std::vector<::std::size_t> succ_first(n + 1);
+		::std::vector<::std::size_t> succs(preds.size());
+		::sdag::topology::invert(first, preds, succ_first, succs);
+		::std::vector<::std::size_t> order(n);
+		bool const acyclic = ::sdag::topology::topological_order(first, succ_first, succs, order);
+		// vector<bool> 没有 data()，所以 bool 的矩阵存储用 unique_ptr<bool[]>。
+		auto reach_storage = ::std::make_unique<bool[]>(n * n);
+		::sdag::topology::bool_matrix reach(reach_storage.get(), n, n);
+		::sdag::topology::reachability(order, succ_first, succs, reach);
+		test::check(acyclic && order == ::std::vector<::std::size_t>{0, 1, 2, 3}, "拓扑序");
+		test::check(reach[0, 3] && reach[1, 3] && !reach[1, 2] && !reach[3, 0], "可达关系");
+	}
+
+	// 链 a -> b -> c -> d，每一步 move：依赖表 -> 形状 -> 读者 -> 值的先后 -> 链划分，全在运行期
+	auto g = ::sdag::dag<key>(
+		::sdag::make<::sdag::basic_node{a}>(::stdexec::just(1)),
+		::sdag::make<::sdag::basic_node{b, ::sdag::move(a)}>(::stdexec::then([](int x) noexcept { return x + 1; })),
+		::sdag::make<::sdag::basic_node{c, ::sdag::move(b)}>(::stdexec::then([](int x) noexcept { return x + 1; })),
+		::sdag::make<::sdag::basic_node{d, ::sdag::move(c)}>(::stdexec::then([](int x) noexcept { return x + 1; })));
+	using graph = decltype(g)&&;
+	using plan = ::stdexec::connect_result_t<decltype(g), probe_receiver>::plan_type;
+
+	::std::vector<::std::size_t> const first{0, 0, 1, 2, 3};
+	::std::vector<entry> const entries{{0, mode::move}, {1, mode::move}, {2, mode::move}};
 	::std::size_t const n = first.size() - 1;
+	::std::vector<::std::size_t> preds(entries.size());
+	::std::ranges::transform(entries, preds.begin(), &entry::from);
+	bool valid = true;
+	for (::std::size_t v = 0; v < n; ++v)
+	{
+		valid = valid
+			&& ::sdag::topology::node_error(n, v, ::std::span{preds}.subspan(first[v], first[v + 1] - first[v])) == ::sdag::topology::shape_error::none;
+	}
 	::std::vector<::std::size_t> succ_first(n + 1);
 	::std::vector<::std::size_t> succs(preds.size());
-	::sdag::general::invert(first, preds, succ_first, succs);
+	::sdag::topology::invert(first, preds, succ_first, succs);
 	::std::vector<::std::size_t> order(n);
-	bool const acyclic = ::sdag::general::topological_order(first, succ_first, succs, order);
-	// vector<bool> 没有 data()，所以 bool 的矩阵存储用 unique_ptr<bool[]>。
+	valid = valid && ::sdag::topology::topological_order(first, succ_first, succs, order);
 	auto reach_storage = ::std::make_unique<bool[]>(n * n);
-	::sdag::general::bool_matrix reach(reach_storage.get(), n, n);
-	::sdag::general::reachability(order, succ_first, succs, reach);
-	test::check(acyclic && order == ::std::vector<::std::size_t>{0, 1, 2, 3}, "拓扑序");
-	test::check(reach[0, 3] && reach[1, 3] && !reach[1, 2] && !reach[3, 0], "可达关系");
+	::sdag::topology::bool_matrix reach(reach_storage.get(), n, n);
+	::sdag::topology::reachability(order, succ_first, succs, reach);
 
-	// 链 a -> b -> c，每一步 move：before[u, v] = u 被 move 且取走者是 v 的祖先 -> 链划分
-	auto before_storage = ::std::make_unique<bool[]>(9);
-	::sdag::general::bool_matrix before(before_storage.get(), 3, 3);
-	before[0, 2] = true;
-	bool const present[]{true, true, true};
-	::std::vector<::std::size_t> head(3), position(3), size(3);
-	::sdag::general::min_chain_cover(before, present, head, position, size);
-	test::check(head[0] == head[2] && head[1] != head[0] && size[0] == 2, "a、c 共用一块，b 单独一块");
+	auto read = ::std::make_unique<bool[]>(n);
+	::std::vector<::std::size_t> taker(n);
+	auto const error = ::sdag::topology::find_readers(first, entries, reach, ::std::span{read.get(), n}, taker);
+
+	auto before_storage = ::std::make_unique<bool[]>(n * n);
+	::sdag::topology::bool_matrix before(before_storage.get(), n, n);
+	::sdag::topology::released_before(taker, reach, before);
+	// 哪些值要存是类型层的事（有值、不直接转发）；这里直接用编译期算出的那份
+	bool const present[]{plan::slot_needed[0], plan::slot_needed[1], plan::slot_needed[2], plan::slot_needed[3]};
+	::std::vector<::std::size_t> head(n), position(n), size(n);
+	::sdag::topology::min_chain_cover(before, present, head, position, size);
+
+	constexpr auto const& shape = ::sdag::graph::shape_of<graph>();
+	constexpr auto const& readers = ::sdag::graph::readers_of<graph>();
+	test::check(valid && error == readers.error, "形状合法、move 用法合法");
+	test::check(::std::ranges::equal(order, shape.order) && ::std::ranges::equal(succs, shape.succs), "拓扑序、后继表与编译期一致");
+	test::check(::std::ranges::equal(::std::span{read.get(), n}, readers.read) && ::std::ranges::equal(taker, readers.taker), "读者、取走者与编译期一致");
+	bool same_layout = true;
+	for (::std::size_t v = 0; v < n; ++v)
+	{
+		same_layout = same_layout
+			&& (!present[v] || (head[v] == plan::layout.head[v] && position[v] == plan::layout.position[v] && size[v] == plan::layout.size[v]));
+	}
+	test::check(same_layout && head[0] == head[2] && head[1] != head[0], "值槽方案与编译期一致：a、c 共用一块，b 单独一块");
+	test::check(::stdexec::sync_wait(::std::move(g)).value() == ::std::tuple{4}, "这张图照常运行");
 }
 
 void test_error_propagation()
@@ -753,7 +804,7 @@ int main()
 	test_mixed_dependencies();
 	test_move();
 	test_slot_reuse();
-	test_runtime_shape();
+	test_runtime_topology();
 	test_error_propagation();
 	test_stop_propagation();
 	test_thread_pool();

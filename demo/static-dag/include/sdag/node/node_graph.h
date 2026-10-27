@@ -1,8 +1,9 @@
 #pragma once
 
 /// 节点集合成图：一组节点规格 → 一张表（每个节点的依赖：前驱下标 + 用法）与一张有向无环图，以及键相关的错误诊断。
+/// 键只在这里出现：换成下标之后，形状、读者、值槽方案都交给只认下标的拓扑层（topology/）。
 ///
-///   dependency_entry               表里的一项：前驱的下标（键不存在时等于节点数）+ mode
+///   dependency_entry               表里的一项：前驱的下标（键不存在时等于节点数）+ mode（定义在 topology/dependencies.h）
 ///   graph_table<N, E>              N 个节点、共 E 个依赖；节点 I 的依赖是 entries[first[I], first[I + 1])；shape 是图的形状；
 ///                                  dependencies(I)：节点 I 的依赖（span）；has_values(I)：节点 I 有没有 let / move 依赖
 ///   make_table<K, Specs...>()      由规格建表（键在这里一次换成下标，之后全用下标）。不做断言，错误写在 shape.error 里
@@ -18,24 +19,21 @@
 #include <span>
 
 #include "../config.h"
-#include "../general/digraph.h"
+#include "../topology/digraph.h"
+#include "../topology/dependencies.h"
 #include "node.h"
 
 namespace sdag
 {
 
-struct dependency_entry
-{
-	::std::size_t from;
-	mode how;
-};
+using topology::dependency_entry;
 
 template<::std::size_t N, ::std::size_t E>
 struct graph_table
 {
 	::std::array<::std::size_t, N + 1> first{};
 	::std::array<dependency_entry, E> entries{};
-	general::shape<N, E> shape{};
+	topology::shape<N, E> shape{};
 
 	/// 节点 node 的依赖（前驱下标 + mode，按声明顺序）。
 	[[nodiscard]] constexpr ::std::span<dependency_entry const> dependencies(::std::size_t node) const noexcept
@@ -64,7 +62,7 @@ template<key_value K, auto... Specs>
 		return static_cast<::std::size_t>(::std::ranges::find(keys, key) - keys.begin());
 	};
 
-	general::shape_error error = general::shape_error::none;
+	topology::shape_error error = topology::shape_error::none;
 	::std::array<::std::size_t, total> preds{};
 	::std::size_t node = 0;
 	::std::size_t cursor = 0;
@@ -72,7 +70,7 @@ template<key_value K, auto... Specs>
 	{
 		if (index_of(keys[node]) != node)
 		{
-			error = general::shape_error::duplicate_key;
+			error = topology::shape_error::duplicate_key;
 		}
 		table.first[node] = cursor;
 		for (auto const& dependency : ::sdag::dependencies(spec))
@@ -85,7 +83,7 @@ template<key_value K, auto... Specs>
 	};
 	(add(Specs), ...);
 	table.first[count] = cursor;
-	table.shape = general::shape<count, total>::build(table.first, preds, error);
+	table.shape = topology::shape<count, total>::build(table.first, preds, error);
 	return table;
 }
 
@@ -101,11 +99,11 @@ template<key_value K, auto... Specs>
 {
 	constexpr auto table = make_table<K, Specs...>();
 	constexpr auto error = table.shape.error;
-	static_assert(error != general::shape_error::duplicate_key, "sdag: 两个节点使用了同一个键");
-	static_assert(error != general::shape_error::unknown_dependency, "sdag: 节点依赖了不存在的键");
-	static_assert(error != general::shape_error::self_dependency, "sdag: 节点依赖了自己");
-	static_assert(error != general::shape_error::duplicate_dependency, "sdag: 节点对同一个前驱声明了两次依赖");
-	static_assert(error != general::shape_error::cycle, "sdag: 依赖图有环");
+	static_assert(error != topology::shape_error::duplicate_key, "sdag: 两个节点使用了同一个键");
+	static_assert(error != topology::shape_error::unknown_dependency, "sdag: 节点依赖了不存在的键");
+	static_assert(error != topology::shape_error::self_dependency, "sdag: 节点依赖了自己");
+	static_assert(error != topology::shape_error::duplicate_dependency, "sdag: 节点对同一个前驱声明了两次依赖");
+	static_assert(error != topology::shape_error::cycle, "sdag: 依赖图有环");
 	return table;
 }
 

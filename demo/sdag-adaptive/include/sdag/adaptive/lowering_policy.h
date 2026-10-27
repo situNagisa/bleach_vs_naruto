@@ -21,7 +21,7 @@
 
 #include <sdag/config.h>
 #include <sdag/general/sequence.h>
-#include <sdag/general/digraph.h>
+#include <sdag/topology/digraph.h>
 #include <sdag/protocol/hole.h>
 #include <sdag/graph/description.h>
 #include <sdag/graph/pred_sigs.h>

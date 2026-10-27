@@ -29,7 +29,7 @@
 #include <sdag/general/type_list.h>
 #include <sdag/general/cvref.h>
 #include <sdag/general/sequence.h>
-#include <sdag/general/digraph.h>
+#include <sdag/topology/digraph.h>
 #include <sdag/graph/description.h>
 
 #include "hole_fill.h"

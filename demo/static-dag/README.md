@@ -99,13 +99,15 @@ auto [text] = ::stdexec::sync_wait(::std::move(g)).value();
 里匹配 `dag_t<K>` 即可（`exec::sender_for<G, dag_t<K>>`，子 sender 就是节点 sender）。也可以用 `make_graph<Tag, K>(nodes...)`
 以自己的标签建图，在标签上定制 `transform_sender`。
 
-## 形状层：值的算法，编译期与运行期共用
+## 拓扑层：只认下标的图算法，编译期与运行期共用
 
-建图、拓扑序、可达关系、读者与取走者、值槽的链划分都是普通的 `constexpr` 函数（`general/digraph.h`、`general/chains.h`、
-`graph/readers.h`），输入输出是 `std::span` / `std::mdspan`，存储由调用方给：编译期给 `std::array`，运行期给 `vector` 等。
+`topology/` 是独立的一层：只依赖标准库，不认识键、节点、sender 与 stdexec。输入是"节点 v 的依赖 = 前驱下标 + 用法
+（let / move / wait）"的压缩表，算出形状（后继表、拓扑序、可达关系、根与汇点）、读者与取走者（含 move 用法的校验）、
+值的先后关系（`released_before`）与值槽的链划分。全是普通的 `constexpr` 函数，输入输出是 `std::span` / `std::mdspan`，
+存储由调用方给：编译期给 `std::array`，运行期给 `vector` 等。键只在 `node/node_graph.h` 里出现一次，换成下标后就交给这一层。
 静态图只在一处缓存结果——`graph_data` 的 `static constexpr` 成员（节点表含形状、读者），其它地方经 `table_of` / `shape_of` /
 `readers_of` 取它的引用；需要把结果当模板实参展开时（根、后继、汇点列表），在用的地方 `static constexpr` 固定一次。
-`test_runtime_shape` 用 vector 在运行期跑了同一套算法。
+`test_runtime_topology` 在运行期用 vector 从依赖表一路跑到值槽方案，与同一张图的编译期结果逐项比对。
 
 ## 常量求值
 
@@ -139,16 +141,18 @@ include/sdag/                    （目录 = 概念分组，文件 = 模块；�
     type_list.h         类型列表：type_list、at_t、index_of、concat、unique、transform、rebind，以及反射共用的 refl 基础
     sequence.h          编译期序列：to_array、sequence_t、for_each_value
     tuple.h             不可移动元组：indexed_tuple、按工厂原地构造、空元素 0 字节（empty / empty_for）
-    digraph.h           有向无环图：前驱表 -> 后继表、拓扑序、可达关系（普通 constexpr 函数，span / mdspan 进出，运行期也能用），shape<N, E> 固定容量的结果
-    chains.h            偏序的最小链划分（二分图最大匹配，constexpr 函数）：哪些值可以依次共用一块存储
     relay.h             接力存储：一组类型轮流占用同一块内存
     cvref.h             copy_cvref_t
     signatures.h        完成签名：拆开（completion_trait）与拼装（make_completions_t）
     domain_merge.h      common_domain_t：一组 domain 合成哪一个
+  topology/         拓扑层：只认下标的图算法（只依赖标准库；constexpr 函数，span / mdspan 进出，运行期也能用）
+    digraph.h           有向无环图：前驱表 -> 后继表、拓扑序、可达关系，shape<N, E> 固定容量的结果
+    dependencies.h      依赖的用法（mode、dependency_entry）、读者与取走者（find_readers）及 move 用法的错误、值的先后（released_before）
+    chains.h            偏序的最小链划分（二分图最大匹配）：哪些值可以依次共用一块存储
   stdexec/          对 stdexec 的适配：对其内部实现（双下划线名字）的全部依赖，见下文
     expressions.h       拆开 stdexec 的算法 sender
   node/             节点
-    node.h              mode、CPO（id / dependencies / mode_of）、概念（key_value / node_spec_of / node_of）、basic_node、let / move / wait、make
+    node.h              CPO（id / dependencies / mode_of）、概念（key_value / node_spec_of / node_of）、basic_node、let / move / wait、make
     node_graph.h        节点规格 → 节点表（graph_table：每个依赖换成前驱下标 + mode）与有向无环图，以及键相关的错误诊断
   protocol/         节点与图之间的约定
     value_source.h      取值源协议：get_value_source 查询 + 签名接口 + 交付接口
@@ -157,7 +161,6 @@ include/sdag/                    （目录 = 概念分组，文件 = 模块；�
     node_sender.h       把占位符喂给节点载荷得到节点 sender
   graph/            图
     description.h       图的描述：graph_data（节点表 / 形状 / 读者的唯一缓存）、graph_description（tuple-like，对算法标签泛型）、类型级查询与节点签名
-    readers.h           谁读谁的值、谁 move 谁的值（find_readers：constexpr 函数），以及 move 用法的错误
     analysis.h          node_analysis：每个节点有值 / 错误 / 停止，各是什么类型
     storage_plan.h      storage_plan：哪些值要存、存时会不会抛、哪个节点直接转发（forward[J]）、值槽怎么复用（layout）
     pred_sigs.h         前驱的签名：取值源的签名接口

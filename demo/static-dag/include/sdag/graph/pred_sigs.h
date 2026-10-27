@@ -24,7 +24,6 @@
 #include "../protocol/value_source.h"
 #include "description.h"
 #include "analysis.h"
-#include "readers.h"
 
 namespace sdag::graph
 {

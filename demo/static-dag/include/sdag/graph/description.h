@@ -34,9 +34,9 @@
 #include "../general/sequence.h"
 #include "../general/tuple.h"
 #include "../general/cvref.h"
-#include "../general/digraph.h"
+#include "../topology/digraph.h"
+#include "../topology/dependencies.h"
 #include "../node/node_graph.h"
-#include "readers.h"
 
 namespace sdag::graph
 {
@@ -50,7 +50,7 @@ struct graph_data
 	using key_type = K;
 	/// 整张图唯一的一份缓存：节点表（含形状）与读者。其它地方经 table_of / shape_of / readers_of 取它的引用。
 	static constexpr auto table = checked_table<K, Specs...>();
-	static constexpr auto readers = graph::readers<sizeof...(Specs)>::build(table);
+	static constexpr auto readers = topology::readers<sizeof...(Specs)>::build(table.first, table.entries, table.shape.reach());
 };
 
 template<class Tag, class Data, class... Children>

@@ -30,17 +30,13 @@
 #include <stdexec/execution.hpp>
 
 #include "../config.h"
+#include "../topology/dependencies.h"
 
 namespace sdag
 {
 
-/// 依赖怎么用前驱的值。
-enum class mode : unsigned char
-{
-	let,
-	move,
-	wait,
-};
+/// 依赖怎么用前驱的值（定义在拓扑层，与键、sender 无关）。
+using topology::mode;
 
 // ---------------------------------------------------------------- CPO：id / dependencies / mode
 //

@@ -23,7 +23,7 @@
 #include "../node/node_graph.h"
 #include "../protocol/node_sender.h"
 #include "../graph/description.h"
-#include "../graph/readers.h"
+#include "../topology/dependencies.h"
 #include "../graph/slots.h"
 #include "graph_sender.h"
 
@@ -41,8 +41,8 @@ template<class Tag, key_value K, node_of<K>... Nodes>
 		using sender = graph_sender<Tag, data, decltype(protocol::make_node_sender<I, data::table.has_values(I)>(::std::declval<Nodes>()))...>;
 		// stdexec 靠结构化绑定识别标签；编译器缺少结构化绑定内省时这里会失效，domain 对标签的匹配也就静默失效，所以显式检查。
 		static_assert(::std::same_as<::stdexec::tag_of_t<sender>, Tag>, "sdag: stdexec 认不出图 sender 的标签（编译器缺少结构化绑定内省）");
-		static_assert(data::readers.error != graph::move_error::taken_twice, "sdag: 同一个值被 move 了两次；一个值至多只能被一个节点取走");
-		static_assert(data::readers.error != graph::move_error::reader_after_taker,
+		static_assert(data::readers.error != topology::move_error::taken_twice, "sdag: 同一个值被 move 了两次；一个值至多只能被一个节点取走");
+		static_assert(data::readers.error != topology::move_error::reader_after_taker,
 			"sdag: move 某个值的节点必须排在它所有其它读者之后；请把其它读者写进 move 它的节点的依赖（let 或 wait）");
 		return sender{{data{}, typename sender::description::children_tuple(general::from_factory,
 			[&] { return protocol::make_node_sender<I, data::table.has_values(I)>(::std::forward<Nodes>(nodes)); }...)}};

@@ -18,7 +18,7 @@
 #include <span>
 #include <vector>
 
-namespace sdag::general
+namespace sdag::topology
 {
 
 enum class shape_error

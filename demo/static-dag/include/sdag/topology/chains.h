@@ -18,7 +18,7 @@
 
 #include "digraph.h"
 
-namespace sdag::general
+namespace sdag::topology
 {
 
 namespace chains_detail
