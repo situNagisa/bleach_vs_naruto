@@ -56,6 +56,7 @@ using ::stdexec::counting_scope;
 using ::stdexec::simple_counting_scope;
 using ::stdexec::spawn;
 using ::stdexec::upon_error;
+using ::stdexec::let_error;
 }
 
 // stdexec 里 exec 只是 experimental::execution 的命名空间别名，别名本身也要导出，下游才能写 ::exec::。

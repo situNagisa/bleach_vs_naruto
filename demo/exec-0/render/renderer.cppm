@@ -52,7 +52,6 @@ struct renderer
 {
 	explicit renderer(window const& target_window);
 
-	// 交换链的一代。重建产生新的一代，旧的一代由仍在途的帧经 swapchain_lease 持有，最后一帧归还时销毁。
 	struct swapchain_type
 	{
 		::vkkl::swapchain swapchain;
@@ -71,23 +70,10 @@ struct renderer
 			, ::std::span<::std::uint32_t const, 2> queue_families
 			, ::VkSwapchainKHR old_swapchain);
 	};
-	using swapchain_lease = ::std::shared_ptr<swapchain_type const>;
-	// 本帧取到的图像，持有它所在的那一代交换链。
-	struct swapchain_image
-	{
-		swapchain_lease generation;
-		::std::uint32_t index;
-	};
-	// 交换链本身（acquire / present / 重建都要求外部同步）。它的 permit 是这把锁；代次的生命周期由租约管。
-	struct swapchain_slot
-	{
-		::std::shared_ptr<swapchain_type> current;
-		// 呈现报告次优 / 过期：下一次取图像前重建。
-		bool stale = false;
-	};
+	// 取到的图像。持有它的一定也持有交换链 permit。
+	using image_index = ::std::uint32_t;
 
-	// 帧是一份完整的帧资源。permit 的语义：池里的帧一定空闲——帧图最后一步等到它的 GPU 工作
-	// 与呈现都结束后才归还，所以取到即可用，不需要先等。
+	// 一份完整的帧资源。池里的帧一定空闲：帧末等到 GPU 工作与呈现都结束后 permit 才析构。
 	struct frame_type
 	{
 		::vkkl::fence in_flight;
@@ -98,12 +84,6 @@ struct renderer
 		::vkkl::semaphore image_available;
 		::vkkl::semaphore render_finished;
 
-		// 本帧实际做到了哪一步，wait_frame 只等真正发生了的操作。帧图的边保证这些字段的访问有先后。
-		// image 同时是交换链那一代的租约：帧归还前一直持有，旧的一代因此活到用过它的帧都结束。
-		::std::optional<swapchain_image> image;
-		bool submitted = false;
-		bool presenting = false;
-
 		frame_type(VkDevice device, ::std::uint32_t graphics_queue_family);
 	};
 
@@ -113,13 +93,14 @@ struct renderer
 	using command_view = ::std::span<::vkkl::command_buffer const>;
 	// 在途帧数 = 帧流水线里"跨帧互斥"的阶段数。一帧依次经过：
 	//   1. 取图像之前的 CPU 工作（读窗口、录制……）；
-	//   2. 交换链段：取图像 → 录主命令缓冲 → 提交 → 呈现，由交换链 permit 串行；
-	//   3. GPU 执行与呈现，帧末 wait_frame 等到它结束。
-	// 三个阶段同时各有一帧时每个阶段都不空闲，吞吐只受最慢的阶段限制；第四帧只能排在某个阶段前面，
-	// 不增加吞吐，只增加输入到上屏的延迟。帧里加入新的串行阶段（别的模块）时这个数随之加一。
-	static constexpr auto frame_count = ::std::size_t{ 3 };
+	//   2. 交换链段：取图像 → 录主命令缓冲 → 提交 → 呈现 → 等到 GPU 与呈现结束，由交换链 permit 串行。
+	// 两个阶段同时各有一帧时都不空闲；第三帧只能排在某个阶段前面，只增加延迟。
+	// 帧里加入新的串行阶段（别的模块）时这个数随之加一。
+	static constexpr auto frame_count = ::std::size_t{ 2 };
 	using frame_pool = ::nagisa::concurrency::bounded_resource_pool<frame_type*, frame_count>;
-	using swapchain_pool = ::nagisa::concurrency::bounded_resource_pool<swapchain_slot*, 1>;
+	// 交换链 permit 从取图像一直持有到该帧的 present fence 触发：期间交换链与它的图像都归这一帧。
+	// 重建（销毁旧的、建新的）只在持有 permit 时做，此时上一个持有者的呈现一定已经结束。
+	using swapchain_pool = ::nagisa::concurrency::bounded_resource_pool<swapchain_type*, 1>;
 
 	[[nodiscard]] ::VkDevice device() const noexcept { return _device.handle; }
 	[[nodiscard]] ::VkPhysicalDevice physical_device() const noexcept { return _selected_physical_device.handle; }
@@ -134,16 +115,27 @@ struct renderer
 	values_sender_type<frame_pool::permit> acquire_frame();
 
 	// 以下都是同步函数，在调用线程上执行；放到哪个调度器上由调用方决定。
-	// 要求持有交换链 permit。交换链过期、次优或尺寸与 drawable 不符时就地重建，阻塞到有可用图像。
-	// 窗口最小化（drawable 为 0）时不取图像，本帧后续的录制、提交、呈现都跳过。
-	void acquire_swapchain_image(frame_type& frame, swapchain_slot& swapchain, window_extent drawable) const;
-	void render(frame_type& frame, command_view commands) const;
-	// 只入队、不等待；完成信号是帧的 in_flight / presented，由 wait_frame 等待。
-	void submit_graphic_queue(queue_pool::permit const& queue, frame_type& frame) const;
-	// 要求持有交换链 permit。次优 / 过期只标记 stale：呈现的队列操作照样入队。
-	void submit_present_queue(queue_pool::permit const& queue, frame_type& frame, swapchain_slot& swapchain) const;
-	// 阻塞到帧的 GPU 工作与呈现都结束，复位 fence、放下交换链租约：之后帧回到空闲状态，可以归还。
-	void wait_frame(frame_type& frame) const;
+	// 参数里的交换链都是 permit 下的交换链：调用方持有 permit 才能调用。
+	// 交换链过期或尺寸与 drawable 不符时就地重建，阻塞到取得图像。drawable 不能为 0（最小化由调用方分流）。
+	[[nodiscard]] image_index acquire_swapchain_image(frame_type const& frame, swapchain_type& swapchain, window_extent drawable) const;
+	void render(frame_type const& frame, swapchain_type const& swapchain, image_index image, command_view commands) const;
+	// 入队失败只可能是设备丢失 / 内存耗尽，不可恢复，直接终止。
+	void submit_graphic_queue(queue_pool::permit const& queue, frame_type const& frame) const noexcept;
+	// 呈现的队列操作一定已入队（次优 / 过期也是），其它错误不可恢复，直接终止。
+	// 返回交换链是否需要重建：由等到这次呈现结束的节点重建。
+	[[nodiscard]] bool submit_present_queue(queue_pool::permit const& queue, frame_type const& frame, swapchain_type const& swapchain, image_index image) const noexcept;
+	// 阻塞到帧的 GPU 工作与呈现都结束，复位 fence：之后帧与交换链都可以归还。
+	void wait_frame(frame_type const& frame) const noexcept;
+	// 要求本帧的呈现已经结束（wait_frame 之后）。
+	void rebuild_swapchain(swapchain_type& swapchain, window_extent drawable) const;
+
+	// 取到图像却没有呈现（录制出错）时的回滚，依次调用：
+	// 把图像还给交换链（swapchain_maintenance1），不支持时终止程序；
+	void release_swapchain_image(swapchain_type const& swapchain, image_index image) const noexcept;
+	// 取图像时挂在 image_available 上的触发没人等：提交一个只等它的空批次，以 in_flight 为完成信号；
+	void drain_frame(queue_pool::permit const& queue, frame_type const& frame) const noexcept;
+	// 阻塞到这个空批次完成，复位 in_flight。
+	void wait_drained(frame_type const& frame) const noexcept;
 
 	window const& _target;
 	::vkkl::instance _instance;
@@ -153,7 +145,9 @@ struct renderer
 	::vkkl::device _device;
 	queue_pool _graphics_queue_pool;
 	queue_pool _present_queue_pool;
-	swapchain_slot _swapchain;
+	// 交换链扩展的设备函数，loader 不导出，经 vkGetDeviceProcAddr 取得；不支持时为空。
+	::PFN_vkReleaseSwapchainImagesKHR _release_swapchain_images;
+	swapchain_type _swapchain;
 	swapchain_pool _swapchain_pool;
 	::std::array<frame_type, frame_count> _frames;
 	frame_pool _frame_pool;
@@ -238,8 +232,10 @@ renderer::renderer(window const& target_window)
 	// 同族时只有一个池，呈现池为空，acquire_present_queue 直接复用图形队列。
 	, _graphics_queue_pool(::get_device_queues(_device.handle, _selected_physical_device.graphics_family, _selected_physical_device.graphics_queue_count, _selected_physical_device.present_family == _selected_physical_device.graphics_family))
 	, _present_queue_pool(::get_device_queues(_device.handle, _selected_physical_device.present_family, _selected_physical_device.present_family == _selected_physical_device.graphics_family ? 0u : _selected_physical_device.present_queue_count, true))
-	// 第一代交换链在第一帧取图像时创建：那时才知道窗口尺寸，且已持有交换链 permit。
-	, _swapchain{}
+	, _release_swapchain_images(_selected_physical_device.swapchain_maintenance
+		? reinterpret_cast<::PFN_vkReleaseSwapchainImagesKHR>(::vkGetDeviceProcAddr(_device.handle, "vkReleaseSwapchainImagesKHR"))
+		: nullptr)
+	, _swapchain{ _device.handle, _selected_physical_device.handle, _surface.handle, target_window.drawable_extent(), ::std::array{ _selected_physical_device.graphics_family, _selected_physical_device.present_family }, VK_NULL_HANDLE }
 	, _swapchain_pool(::std::in_place, ::std::from_range, ::std::views::single(::std::addressof(_swapchain)))
 	, _frames{ [this]<::std::size_t... I>(::std::index_sequence<I...>)
 		{
@@ -252,46 +248,45 @@ values_sender_type<renderer::swapchain_pool::permit> renderer::acquire_swapchain
 {
 	return _swapchain_pool.acquire();
 }
-void renderer::acquire_swapchain_image(frame_type& frame, swapchain_slot& swapchain, window_extent drawable) const
+renderer::image_index renderer::acquire_swapchain_image(frame_type const& frame, swapchain_type& swapchain, window_extent drawable) const
 {
-	if (drawable.width == 0 || drawable.height == 0)
-		return;
+	assert(drawable.width != 0 && drawable.height != 0);
 	for (;;)
 	{
-		if (!swapchain.current || swapchain.stale || swapchain.current->drawable.width != drawable.width || swapchain.current->drawable.height != drawable.height)
-		{
-			// 旧的一代退役但不销毁：用过它的帧各持有一份租约，最后一帧 wait_frame 后才析构。
-			auto const old_swapchain = swapchain.current ? swapchain.current->swapchain.handle : VK_NULL_HANDLE;
-			swapchain.current = ::std::make_shared<swapchain_type>(
-				_device.handle,
-				_selected_physical_device.handle,
-				_surface.handle,
-				drawable,
-				::std::array{ _selected_physical_device.graphics_family, _selected_physical_device.present_family },
-				old_swapchain);
-			swapchain.stale = false;
-		}
-		auto index = ::std::uint32_t{};
+		if (swapchain.drawable.width != drawable.width || swapchain.drawable.height != drawable.height)
+			rebuild_swapchain(swapchain, drawable);
+		auto index = image_index{};
 		auto const result = ::vkAcquireNextImageKHR(
 			_device.handle
-			, swapchain.current->swapchain.handle
+			, swapchain.swapchain.handle
 			, (::std::numeric_limits<::std::uint64_t>::max)()
 			, frame.image_available.handle
 			, VK_NULL_HANDLE
 			, &index
 			);
+		// 次优时已经取到图像、image_available 会被触发：照常用完这一张，呈现时会再报次优，那时重建。
 		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
-		{
-			// 次优时已经取到图像且 image_available 会被触发，照常用完这一张，下一帧再重建。
-			swapchain.stale = result == VK_SUBOPTIMAL_KHR;
-			frame.image = swapchain_image{ swapchain.current, index };
-			return;
-		}
-		// 过期时没有取到图像，信号量也没有挂上操作，重建后再取。
+			return index;
 		if (result != VK_ERROR_OUT_OF_DATE_KHR)
 			throw ::std::runtime_error{ "acquire swapchain image" };
-		swapchain.stale = true;
+		// 过期时没有取到图像，信号量也没有挂上操作。持有 permit 意味着上一次呈现已经结束，直接重建。
+		rebuild_swapchain(swapchain, drawable);
 	}
+}
+
+void renderer::rebuild_swapchain(swapchain_type& swapchain, window_extent drawable) const
+{
+	// 新交换链以旧的为 oldSwapchain 创建，之后旧的（连同它的视图）随赋值销毁：它的图像上已经没有任何工作。
+	auto replacement = swapchain_type{
+		_device.handle,
+		_selected_physical_device.handle,
+		_surface.handle,
+		drawable,
+		::std::array{ _selected_physical_device.graphics_family, _selected_physical_device.present_family },
+		swapchain.swapchain.handle,
+	};
+	swapchain.image_views.clear();
+	swapchain = ::std::move(replacement);
 }
 
 values_sender_type<renderer::frame_pool::permit> renderer::acquire_frame()
@@ -299,12 +294,8 @@ values_sender_type<renderer::frame_pool::permit> renderer::acquire_frame()
 	return _frame_pool.acquire();
 }
 
-void renderer::render(frame_type& frame, command_view commands) const
+void renderer::render(frame_type const& frame, swapchain_type const& swapchain, image_index image_index, command_view commands) const
 {
-	if (!frame.image)
-		return;
-	auto const& swapchain = *frame.image->generation;
-	auto const image_index = frame.image->index;
 	::vkfu::reset_command_pool(_device.handle, frame.primary_command_pool.handle, {});
 	::vkfu::begin_command_buffer(frame.primary_command_buffer.handle, ::vkfu::param::command_buffer_begin{ .flags = {.one_time_submit = 1}, });
 	::vkfu::cmd_pipeline_barrier2(frame.primary_command_buffer.handle, ::vkfu::param::dependency{ .image_memory_barriers = ::std::array{ ::vkfu::evaluate(::vkfu::param::image_memory_barrier2{
@@ -375,10 +366,8 @@ values_sender_type<renderer::queue_pool::permit> renderer::acquire_present_queue
 	return _present_queue_pool.acquire();
 }
 
-void renderer::submit_graphic_queue(queue_pool::permit const& queue, frame_type& frame) const
+void renderer::submit_graphic_queue(queue_pool::permit const& queue, frame_type const& frame) const noexcept
 {
-	if (!frame.image)
-		return;
 	::vkfu::queue_submit2(queue.token().handle, ::std::array{ ::vkfu::evaluate(::vkfu::param::submit2{
 		.wait_semaphore_infos = ::std::array{ ::vkfu::evaluate(::vkfu::param::semaphore_submit{
 			.semaphore = frame.image_available.handle,
@@ -392,50 +381,66 @@ void renderer::submit_graphic_queue(queue_pool::permit const& queue, frame_type&
 			.stage_mask = { .all_commands = 1 },
 		}) },
 		}) }, frame.in_flight.handle);
-	frame.submitted = true;
 }
 
-void renderer::submit_present_queue(queue_pool::permit const& queue, frame_type& frame, swapchain_slot& swapchain) const
+bool renderer::submit_present_queue(queue_pool::permit const& queue, frame_type const& frame, swapchain_type const& swapchain, image_index image) const noexcept
 {
-	if (!frame.submitted)
-		return;
 	assert(queue.token().presentable);
-	auto const& image = *frame.image;
 	auto const present_fence = ::std::array{ frame.presented.handle };
 	auto const present = ::vkfu::param::khr::present{
 		.wait_semaphores = ::std::array{ frame.render_finished.handle },
 		.swapchain_count = 1,
-		.swapchains = &image.generation->swapchain.handle,
-		.image_indices = &image.index,
+		.swapchains = &swapchain.swapchain.handle,
+		.image_indices = &image,
 	};
 	auto const outcome = _selected_physical_device.swapchain_maintenance
 		? ::vkfu::khr::queue_present(queue.token().handle, ::vkfu::chain(present, ::vkfu::param::option::khr::swapchain_present_fence{ .fences = present_fence }), ::std::nothrow)
 		: ::vkfu::khr::queue_present(queue.token().handle, present, ::std::nothrow);
-	// 次优 / 过期也是"队列操作已入队"：信号量被消费、present fence 会触发。只有其它错误才算没发生。
-	if (outcome || outcome.error() == VK_SUBOPTIMAL_KHR || outcome.error() == VK_ERROR_OUT_OF_DATE_KHR)
-	{
-		frame.presenting = _selected_physical_device.swapchain_maintenance != nullptr;
-		if (!outcome && image.generation == swapchain.current)
-			swapchain.stale = true;
-		return;
-	}
-	throw ::std::runtime_error{ "present swapchain image" };
+	if (outcome)
+		return false;
+	// 次优 / 过期也是"队列操作已入队"：信号量被消费、present fence 会触发。
+	if (outcome.error() == VK_SUBOPTIMAL_KHR || outcome.error() == VK_ERROR_OUT_OF_DATE_KHR)
+		return true;
+	::std::terminate();
 }
 
-void renderer::wait_frame(frame_type& frame) const
+// 等齐并复位：fence 只在这里复位，复位之后帧才归还，下一次提交拿到的一定是未触发的 fence。
+inline void wait_and_reset(::VkDevice device, ::std::span<::VkFence const> fences) noexcept
 {
-	auto fences = ::std::vector<::VkFence>{};
-	if (frame.submitted)
-		fences.push_back(frame.in_flight.handle);
-	if (frame.presenting)
-		fences.push_back(frame.presented.handle);
-	if (!fences.empty())
-	{
-		::vkfu::wait_for_fences(_device.handle, fences, VK_TRUE, (::std::numeric_limits<::std::uint64_t>::max)());
-		::vkfu::reset_fences(_device.handle, fences);
-	}
-	frame.submitted = false;
-	frame.presenting = false;
-	// 放下这一代交换链的租约；最后一份租约在这里析构旧交换链（它的图像已不再被任何工作使用）。
-	frame.image.reset();
+	::vkfu::wait_for_fences(device, fences, VK_TRUE, (::std::numeric_limits<::std::uint64_t>::max)());
+	::vkfu::reset_fences(device, fences);
+}
+
+void renderer::wait_frame(frame_type const& frame) const noexcept
+{
+	// 不支持 present fence 时只等图形提交，无从得知呈现是否用完 render_finished：按约定不支持就不管。
+	auto const fences = ::std::array{ frame.in_flight.handle, frame.presented.handle };
+	::wait_and_reset(_device.handle, ::std::span{ fences }.first(_selected_physical_device.swapchain_maintenance ? 2 : 1));
+}
+
+void renderer::wait_drained(frame_type const& frame) const noexcept
+{
+	::wait_and_reset(_device.handle, ::std::array{ frame.in_flight.handle });
+}
+
+void renderer::release_swapchain_image(swapchain_type const& swapchain, image_index image) const noexcept
+{
+	if (!_release_swapchain_images)
+		::std::terminate();
+	auto const info = ::vkfu::evaluate(::vkfu::param::khr::release_swapchain_images{
+		.swapchain = swapchain.swapchain.handle,
+		.image_indices = ::std::span{ &image, 1u },
+	});
+	if (_release_swapchain_images(_device.handle, &info) != VK_SUCCESS)
+		::std::terminate();
+}
+
+void renderer::drain_frame(queue_pool::permit const& queue, frame_type const& frame) const noexcept
+{
+	::vkfu::queue_submit2(queue.token().handle, ::std::array{ ::vkfu::evaluate(::vkfu::param::submit2{
+		.wait_semaphore_infos = ::std::array{ ::vkfu::evaluate(::vkfu::param::semaphore_submit{
+			.semaphore = frame.image_available.handle,
+			.stage_mask = { .all_commands = 1 },
+		}) },
+		}) }, frame.in_flight.handle);
 }
