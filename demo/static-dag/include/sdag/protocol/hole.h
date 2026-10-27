@@ -2,13 +2,13 @@
 
 /// 前驱占位符：节点 sender 里「这里是前驱的值」的标记，以及数它。
 ///
-/// 用户写 make_node<b, data<a>>(then(f))。dag 把一个空的 hole<data<a>> 喂给 then，得到 then(hole<data<a>>, f)
+/// 用户写 make<basic_node{b, let(a)}>(then(f))。dag 把一个空的 hole<b 的下标> 喂给 then，得到 then(hole<I>, f)
 /// 作为节点 b 的 sender——节点 sender 是普通的 stdexec 表达式，then 的一切（包括 domain 对 then 的定制）都照常生效。
 ///
 /// hole 本身不存值。连接时它从接收者环境里拿到取值源（protocol/value_source.h），启动时请取值源把前驱的值交给接收者；
 /// 完成签名也问取值源。所以它（以及含有它的节点 sender、整个图）是依赖环境的 sender，无环境时报 dependent_sender_error。
 ///
-///   hole<Dependency>               占位符
+///   hole<Node>                     第 Node 个节点的占位符
 ///   hole_count_v<Sender>           节点 sender 里占位符的个数。只递归穿过 stdexec 的算法层（then / let_value / when_all ……）；
 ///                                  其它 sender 都是不透明的叶子——包括嵌套的图：图 sender 不是 stdexec 的算法 sender，
 ///                                  它里面的占位符属于内层图，自然不会被数到。所以占位符不需要认识图
@@ -46,20 +46,20 @@ struct _A_HOLE_WAS_CONNECTED_WITHOUT_A_VALUE_SOURCE_IN_ITS_ENVIRONMENT_;
 namespace detail
 {
 
-template<class Dependency, class Receiver>
+template<::std::size_t Node, class Receiver>
 struct hole_operation
 {
 	Receiver _receiver;
 
 	constexpr void start() noexcept
 	{
-		protocol::get_value_source(::stdexec::get_env(_receiver))->template deliver<Dependency>(::std::move(_receiver));
+		protocol::get_value_source(::stdexec::get_env(_receiver))->template deliver<Node>(::std::move(_receiver));
 	}
 };
 
 }
 
-template<class Dependency>
+template<::std::size_t Node>
 struct hole;
 
 /// 是不是占位符。两种计算模式共用这一份。
@@ -69,16 +69,17 @@ namespace hole_traits
 template<class T>
 inline constexpr bool is_hole_v = false;
 
-template<class Dependency>
-inline constexpr bool is_hole_v<hole<Dependency>> = true;
+template<::std::size_t Node>
+inline constexpr bool is_hole_v<hole<Node>> = true;
 
 }
 
-template<class Dependency>
+template<::std::size_t Node>
 struct hole
 {
 	using sender_concept = ::stdexec::sender_t;
-	using dependency = Dependency;
+	/// 这个占位符属于第几个节点：取值源按这个节点的 let / move 依赖交出前驱的值。
+	static constexpr ::std::size_t node = Node;
 
 	[[nodiscard]] static constexpr hole_attrs get_env() noexcept
 	{
@@ -98,12 +99,12 @@ struct hole
 		}
 		else
 		{
-			return source_completions_t<value_source_of_t<Env...[0]>, Dependency, Env...[0]>{};
+			return source_completions_t<value_source_of_t<Env...[0]>, Node, Env...[0]>{};
 		}
 	}
 
 	template<::stdexec::receiver Receiver>
-	[[nodiscard]] constexpr detail::hole_operation<Dependency, Receiver> connect(Receiver receiver) const
+	[[nodiscard]] constexpr detail::hole_operation<Node, Receiver> connect(Receiver receiver) const
 		noexcept(::std::is_nothrow_move_constructible_v<Receiver>)
 	{
 		return {::std::move(receiver)};

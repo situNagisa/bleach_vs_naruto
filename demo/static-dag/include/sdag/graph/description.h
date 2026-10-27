@@ -2,7 +2,7 @@
 
 /// 图的描述：纯数据——有哪些节点、谁依赖谁；以及 tuple-like 协议。
 ///
-///   graph_data<Keys, Dependencies>     键表（std::array）与依赖表，运行期是空对象。形状在这里一次算好并检查（重复键、成环等直接 static_assert）
+///   graph_data<K, Specs...>            键类型与节点规格，建好的节点表；运行期是空对象。形状在这里一次算好并检查（重复键、成环等直接 static_assert）
 ///   graph_description<Tag, Data, Children...>
 ///                                      图的数据：data + 节点 sender。按 [Tag, data, 节点 sender...] 实现标准的 tuple-like 协议
 ///                                      （std::tuple_size / std::tuple_element / 成员 get<I>），和 stdexec 自己的算法 sender 是同一个形状，
@@ -14,11 +14,10 @@
 ///   child_t<Self, I>                   节点 I 的 sender 类型（不带值类别）
 ///   node_sender_t<Self, I>             节点 I 的 sender 类型，带上 Self 的值类别
 ///   node_completions_t<Self, I, Env...>  节点 I 的完成签名
-///   dependency_t<Self, I>              节点 I 的 dependencies<data<...>, control<...>>
-///   data_dependency_t<Self, I>         节点 I 的 data<...>（它的前驱占位符就是 hole<data<...>>）
-///   dependency_indices_v<Self, L>      data<...> / control<...> 的前驱键（L::keys，take{k} 已换成 k）换成节点索引（std::array）
-///   data_dependencies_t<Self, I>       只含数据依赖
-///   control_dependencies_t<Self, I>    只含控制依赖
+///   table_of_v<Self>                   节点表（node/node_graph.h 的 graph_table）
+///   value_dependencies_v<Self, I>      节点 I 的 let / move 依赖（前驱下标 + mode，按声明顺序），它的占位符就是 hole<I>
+///   data_dependencies_t<Self, I>       节点 I 的 let / move 前驱下标（index_sequence）
+///   control_dependencies_t<Self, I>    节点 I 的 wait 前驱下标（index_sequence）
 
 #include <cstddef>
 #include <tuple>
@@ -40,12 +39,13 @@ namespace sdag::graph
 
 using ::std::size_t;
 
-template<auto Keys, class Dependencies>
+/// 图的数据：键类型 K 下的一组节点规格，建好的表（graph_table）在这里一次算好并检查。运行期是空对象。
+template<class K, auto... Specs>
 struct graph_data
 {
-	static constexpr auto keys = Keys;
-	using dependencies = Dependencies;
-	static constexpr auto shape = checked_shape_of_lists<Keys, Dependencies>();
+	using key_type = K;
+	static constexpr auto table = checked_table<K, Specs...>();
+	static constexpr auto shape = table.shape;
 };
 
 template<class Tag, class Data, class... Children>
@@ -55,10 +55,11 @@ struct graph_description
 	using description = graph_description;
 	using data_type = Data;
 	using children = general::type_list<Children...>;
+	using children_tuple = general::indexed_tuple<Children...>;
 
 	SDAG_NO_UNIQUE_ADDRESS Data _data;
 	/// 节点 sender。构造者用工厂把它们直接构造在这里，不经过临时对象再移动。
-	general::indexed_tuple<Children...> _children;
+	children_tuple _children;
 
 	/// tuple-like 协议：[0] 是标签，[1] 是 data，[2...] 是节点 sender。返回的引用跟随 self 的值类别。
 	template<size_t I, class Self>
@@ -86,6 +87,9 @@ template<class Self>
 inline constexpr auto shape_of_v = description_of<Self>::data_type::shape;
 
 template<class Self>
+inline constexpr auto table_of_v = description_of<Self>::data_type::table;
+
+template<class Self>
 inline constexpr size_t count_of_v = description_of<Self>::children::size;
 
 template<class Self, size_t I>
@@ -98,20 +102,60 @@ using node_sender_t = general::copy_cvref_t<Self, child_t<Self, I>>;
 template<class Self, size_t I, class... Env>
 using node_completions_t = decltype(::stdexec::get_completion_signatures<node_sender_t<Self, I>, Env...>());
 
-template<class Self, size_t I>
-using dependency_t = general::at_t<I, typename description_of<Self>::data_type::dependencies>;
+namespace description_detail
+{
 
-template<class Self, class Dependency>
-inline constexpr auto dependency_indices_v = key_indices_v<description_of<Self>::data_type::keys, Dependency::keys>;
+/// 节点 I 中用法满足 wanted 的依赖（按声明顺序）；values 为真时只要 let / move，为假时只要 wait。
+template<class Self, size_t I, bool Values>
+[[nodiscard]] consteval auto select()
+{
+	constexpr auto table = table_of_v<Self>;
+	constexpr size_t begin = table.first[I];
+	constexpr size_t end = table.first[I + 1];
+	constexpr size_t size = [&]
+	{
+		size_t n = 0;
+		for (size_t e = begin; e < end; ++e)
+		{
+			n += ((table.entries[e].how != mode::wait) == Values) ? 1 : 0;
+		}
+		return n;
+	}();
+	::std::array<dependency_entry, size> result{};
+	size_t cursor = 0;
+	for (size_t e = begin; e < end; ++e)
+	{
+		if ((table.entries[e].how != mode::wait) == Values)
+		{
+			result[cursor++] = table.entries[e];
+		}
+	}
+	return result;
+}
+
+template<auto Entries>
+inline constexpr auto froms_v = []
+{
+	::std::array<size_t, Entries.size()> result{};
+	for (size_t index = 0; index < Entries.size(); ++index)
+	{
+		result[index] = Entries[index].from;
+	}
+	return result;
+}();
+
+}
+
+/// 节点 I 的值依赖（let / move，按声明顺序，交给载荷的就是这些值）：dependency_entry 的 std::array。
+template<class Self, size_t I>
+inline constexpr auto value_dependencies_v = description_detail::select<Self, I, true>();
+
+/// 节点 I 的值依赖的前驱下标、wait 依赖的前驱下标（std::index_sequence）。
+template<class Self, size_t I>
+using data_dependencies_t = general::sequence_t<description_detail::froms_v<value_dependencies_v<Self, I>>>;
 
 template<class Self, size_t I>
-using data_dependency_t = typename dependency_t<Self, I>::data_type;
-
-template<class Self, size_t I>
-using data_dependencies_t = general::sequence_t<dependency_indices_v<Self, data_dependency_t<Self, I>>>;
-
-template<class Self, size_t I>
-using control_dependencies_t = general::sequence_t<dependency_indices_v<Self, typename dependency_t<Self, I>::control_type>>;
+using control_dependencies_t = general::sequence_t<description_detail::froms_v<description_detail::select<Self, I, false>()>>;
 
 }
 

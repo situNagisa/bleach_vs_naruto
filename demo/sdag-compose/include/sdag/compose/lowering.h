@@ -21,6 +21,7 @@
 #include <tuple>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 #include <stdexec/execution.hpp>
 
@@ -93,6 +94,12 @@ struct lowered_tables
 	info_array<N> built{};
 };
 
+template<::std::size_t... I>
+[[nodiscard]] consteval ::std::vector<::std::size_t> index_vector(::std::index_sequence<I...>)
+{
+	return {I...};
+}
+
 template<class Self, class FanIn, class FanOut>
 [[nodiscard]] consteval auto lower_types()
 {
@@ -123,8 +130,8 @@ template<class Self, class FanIn, class FanOut>
 
 	template for (constexpr ::std::size_t index : graph::shape_of_v<Self>.order)
 	{
-		constexpr auto data_keys = graph::dependency_indices_v<Self, graph::data_dependency_t<Self, index>>;
-		constexpr auto control_keys = graph::dependency_indices_v<Self, typename graph::dependency_t<Self, index>::control_type>;
+		constexpr auto data_keys = general::to_array<graph::data_dependencies_t<Self, index>::size()>(index_vector(graph::data_dependencies_t<Self, index>{}));
+		constexpr auto control_keys = general::to_array<graph::control_dependencies_t<Self, index>::size()>(index_vector(graph::control_dependencies_t<Self, index>{}));
 		if (data_keys.empty() && control_keys.empty())
 		{
 			tables.input[index] = ::std::meta::dealias(^^decltype(::stdexec::just()));

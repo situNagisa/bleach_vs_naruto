@@ -134,35 +134,24 @@ struct key
 	friend constexpr bool operator==(key, key) noexcept = default;
 };
 
-template<::std::size_t Layer, class Indices>
-struct previous_layer;
-
-/// 这一层只有一个节点时它是上一层每个节点唯一的读者：take 走（按值 move）；否则大家读 const&。
-template<::std::size_t Layer, ::std::size_t... J>
-struct previous_layer<Layer, ::std::index_sequence<J...>>
-{
-	template<class Layers>
-	using type = ::std::conditional_t<Layers::sizes[Layer] == 1,
-		::sdag::data<::sdag::take{key{Layer - 1, J}}...>,
-		::sdag::data<key{Layer - 1, J}...>>;
-};
-
-/// 第 Layer 层依赖第 Layer - 1 层的全部节点。
-template<class Layers, ::std::size_t Layer>
-[[nodiscard]] consteval auto dependencies_of() noexcept
+/// 第 Layer 层第 Index 个节点的规格：依赖上一层的全部节点。这一层只有一个节点时它是上一层每个节点唯一的读者：
+/// move 走（按值）；否则大家 let（const&）。规格是普通的值，按层生成即可。
+template<class Layers, ::std::size_t Layer, ::std::size_t Index>
+[[nodiscard]] consteval auto spec_of() noexcept
 {
 	if constexpr (Layer == 0)
 	{
-		return ::std::type_identity<::sdag::data<>>{};
+		return ::sdag::basic_node{key{Layer, Index}};
 	}
 	else
 	{
-		return ::std::type_identity<typename previous_layer<Layer, ::std::make_index_sequence<Layers::sizes[Layer - 1]>>::template type<Layers>>{};
+		return [&]<::std::size_t... J>(::std::index_sequence<J...>)
+		{
+			constexpr bool move = Layers::sizes[Layer] == 1;
+			return ::sdag::basic_node{key{Layer, Index}, (move ? ::sdag::move(key{Layer - 1, J}) : ::sdag::let(key{Layer - 1, J}))...};
+		}(::std::make_index_sequence<Layers::sizes[Layer - 1]>{});
 	}
 }
-
-template<class Layers, ::std::size_t Layer>
-using dependencies_t = typename decltype(dependencies_of<Layers, Layer>())::type;
 
 /// 一张分层图运行时的观测状态：每层结束了几个节点、每层用哪个会合点（空指针表示不等）。
 template<class Layers>
@@ -262,9 +251,8 @@ template<class Layers, class Payloads>
 {
 	return [&]<::std::size_t... N>(::std::index_sequence<N...>)
 	{
-		return ::sdag::dag(
-			::sdag::make_node<key{Layers::layer_of[N], Layers::index_of[N]}, dependencies_t<Layers, Layers::layer_of[N]>>(
-				payloads.template make<Layers::layer_of[N]>())...);
+		return ::sdag::dag<key>(
+			::sdag::make<spec_of<Layers, Layers::layer_of[N], Layers::index_of[N]>()>(payloads.template make<Layers::layer_of[N]>())...);
 	}(::std::make_index_sequence<Layers::total>{});
 }
 
@@ -419,18 +407,18 @@ void test_nested()
 
 	auto a = make_layered<shape_a>(pool_payloads<shape_a, decltype(scheduler)>{&state_a, scheduler});
 	auto b = make_layered<shape_b>(pool_payloads<shape_b, decltype(scheduler)>{&state_b, scheduler});
-	static_assert(::exec::sender_for<decltype(a), ::sdag::dag_t>, "内层图本身就是一个图 sender");
+	static_assert(::exec::sender_for<decltype(a), ::sdag::dag_t<key>>, "内层图本身就是一个图 sender");
 
-	auto outer = ::sdag::dag(
+	auto outer = ::sdag::dag<outer_key>(
 		// 先等一会儿再置位：内层图的根若被提前启动，就一定会看到 started 还是假。
-		::sdag::make_node<outer_key::start>(::stdexec::schedule(scheduler) | ::stdexec::then([&]
+		::sdag::make<::sdag::basic_node{outer_key::start}>(::stdexec::schedule(scheduler) | ::stdexec::then([&]
 		{
 			::std::this_thread::sleep_for(5ms);
 			started.store(true, ::std::memory_order_release);
 		})),
-		::sdag::make_node<outer_key::a, ::sdag::control<outer_key::start>>(::std::move(a)),
-		::sdag::make_node<outer_key::b, ::sdag::control<outer_key::start>>(::std::move(b)),
-		::sdag::make_node<outer_key::join, ::sdag::data<::sdag::take{outer_key::a}, ::sdag::take{outer_key::b}>>(::stdexec::then([&](int from_a, int from_b)
+		::sdag::make<::sdag::basic_node{outer_key::a, ::sdag::wait(outer_key::start)}>(::std::move(a)),
+		::sdag::make<::sdag::basic_node{outer_key::b, ::sdag::wait(outer_key::start)}>(::std::move(b)),
+		::sdag::make<::sdag::basic_node{outer_key::join, ::sdag::move(outer_key::a), ::sdag::move(outer_key::b)}>(::stdexec::then([&](int from_a, int from_b)
 		{
 			if (state_a.done[shape_a::depth - 1].load() != 1 || state_b.done[shape_b::depth - 1].load() != 1)
 			{

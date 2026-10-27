@@ -2,11 +2,12 @@
 
 /// sdag：静态 DAG sender。
 ///
-///   auto g = ::sdag::dag(
-///       ::sdag::make_node<a>(::stdexec::just(1)),
-///       ::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([](int const& x) { return x + 1; })),
-///       ::sdag::make_node<c, ::sdag::data<a>>(::stdexec::then([](int const& x) { return x * 2; })),
-///       ::sdag::make_node<d, ::sdag::data<b, c>>(::stdexec::then([](int y, int z) { return y + z; })));
+///   enum class k { a, b, c, d };
+///   auto g = ::sdag::dag<k>(
+///       ::sdag::make<::sdag::basic_node{k::a}>(::stdexec::just(1)),
+///       ::sdag::make<::sdag::basic_node{k::b, ::sdag::let(k::a)}>(::stdexec::then([](int const& x) { return x + 1; })),
+///       ::sdag::make<::sdag::basic_node{k::c, ::sdag::let(k::a)}>(::stdexec::then([](int const& x) { return x * 2; })),
+///       ::sdag::make<::sdag::basic_node{k::d, ::sdag::move(k::b), ::sdag::move(k::c)}>(::stdexec::then([](int y, int z) { return y + z; })));
 ///   static_assert(::stdexec::sender<decltype(g)>);
 ///   auto [sum] = ::stdexec::sync_wait(::std::move(g)).value();   // 4
 ///

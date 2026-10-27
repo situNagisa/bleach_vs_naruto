@@ -5,7 +5,7 @@
 ///   graph_state<Self, Env>   整图 op-state 里存值的那一层，也是这张图的取值源：
 ///                            签名接口由 protocol::value_source_traits 的特化转到 pred_completions_t（graph/pred_sigs.h），交付接口是这里的 deliver。
 ///                            融合 op-state 从它派生；节点环境里只暴露这一层的指针。
-///   slot_access              交付表的一项：从哪个节点的槽位取第几个值，move（take）还是给 const&
+///   slot_access              交付表的一项：从哪个节点的槽位取第几个值，move 还是给 const&
 ///   delivery_plan<...>(…)    把一组节点的值按顺序铺平成一张交付表
 ///
 /// 为什么要交付表：一个节点可能依赖多个前驱，每个前驱又有多个值，最后要拼成一次 set_value(值...)。
@@ -47,8 +47,8 @@ struct graph_state;
 template<class Self, class Env>
 struct sdag::protocol::value_source_traits<sdag::graph::graph_state<Self, Env>>
 {
-	template<class Dependency, class NodeEnv>
-	using completions_for = sdag::graph::pred_completions_t<Self, Dependency, NodeEnv>;
+	template<::std::size_t Node, class NodeEnv>
+	using completions_for = sdag::graph::pred_completions_t<Self, Node, NodeEnv>;
 };
 
 namespace sdag::graph
@@ -121,8 +121,8 @@ struct slot_access
 	bool move;
 };
 
-/// Nodes 的值按顺序铺平成一张交付表；Moved[i] 为真的节点 move 出去，否则给 const&。
-template<class Self, class Env, auto Nodes, auto Moved>
+/// Entries（dependency_entry 的 std::array：前驱下标 + mode）的值按顺序铺平成一张交付表；move 的 move 出去，否则给 const&。
+template<class Self, class Env, auto Entries>
 [[nodiscard]] consteval auto delivery_plan()
 {
 	constexpr auto counts = []<size_t... I>(::std::index_sequence<I...>)
@@ -132,19 +132,19 @@ template<class Self, class Env, auto Nodes, auto Moved>
 	constexpr size_t total = [&]
 	{
 		size_t sum = 0;
-		for (size_t node : Nodes)
+		for (auto const& entry : Entries)
 		{
-			sum += counts[node];
+			sum += counts[entry.from];
 		}
 		return sum;
 	}();
 	::std::array<slot_access, total> plan{};
 	size_t cursor = 0;
-	for (size_t position = 0; position < Nodes.size(); ++position)
+	for (auto const& entry : Entries)
 	{
-		for (size_t element = 0; element < counts[Nodes[position]]; ++element)
+		for (size_t element = 0; element < counts[entry.from]; ++element)
 		{
-			plan[cursor++] = {Nodes[position], element, Moved[position]};
+			plan[cursor++] = {entry.from, element, entry.how == mode::move};
 		}
 	}
 	return plan;
@@ -204,7 +204,7 @@ struct graph_state
 		}
 	}
 
-	/// 析构节点 J 的值（它被 take 了，取走它的节点已经结束）；之后这块存储可以给链上的下一个值用。
+	/// 析构节点 J 的值（它被 move 了，取走它的节点已经结束）；之后这块存储可以给链上的下一个值用。
 	template<size_t J>
 	constexpr void slot_reset() noexcept
 	{
@@ -221,7 +221,7 @@ struct graph_state
 		}
 	}
 
-	/// 按交付表的一项取值：take 的 move 出去，其余给 const&。
+	/// 按交付表的一项取值：move 的 move 出去，let 给 const&。
 	template<slot_access Access>
 	[[nodiscard]] constexpr decltype(auto) access() noexcept
 	{
@@ -236,18 +236,18 @@ struct graph_state
 		}
 	}
 
-	/// Dependency（data<...>）对应前驱的值，按声明顺序铺平。
-	template<class Dependency>
-	static constexpr auto delivery_table = graph::delivery_plan<Self, env_type, dependency_indices_v<Self, Dependency>, Dependency::taken>();
+	/// 节点 Node 的 let / move 前驱的值，按声明顺序铺平。
+	template<size_t Node>
+	static constexpr auto delivery_plan_v = graph::delivery_plan<Self, env_type, value_dependencies_v<Self, Node>>();
 
-	/// 交付接口：占位符启动时调用，把 Dependency 对应前驱的值交给接收者。
-	template<class Dependency, class Receiver>
+	/// 交付接口：占位符启动时调用，把节点 Node 的前驱的值交给接收者。
+	template<size_t Node, class Receiver>
 	constexpr void deliver(Receiver&& receiver) noexcept
 	{
 		// 接收者那一侧是在它自己的环境（node_env 外面可能又包了几层适配器）下算出占位符签名的，
 		// 这里是在整图环境下存的值。两边必须一致，否则说明某个节点 sender 在不同环境下报告了不同的值类型。
-		using declared = pred_completions_t<Self, Dependency, ::stdexec::env_of_t<Receiver>>;
-		using stored = pred_completions_t<Self, Dependency, env_type>;
+		using declared = pred_completions_t<Self, Node, ::stdexec::env_of_t<Receiver>>;
+		using stored = pred_completions_t<Self, Node, env_type>;
 		static_assert(::std::same_as<declared, stored>, "sdag: 节点在接收者环境与整图环境下报告的值类型不一致");
 		if constexpr (::std::same_as<stored, ::stdexec::completion_signatures<>>)
 		{
@@ -256,14 +256,14 @@ struct graph_state
 		}
 		else
 		{
-			deliver_entries<Dependency>(::std::make_index_sequence<delivery_table<Dependency>.size()>{}, ::std::forward<Receiver>(receiver));
+			deliver_entries<Node>(::std::make_index_sequence<delivery_plan_v<Node>.size()>{}, ::std::forward<Receiver>(receiver));
 		}
 	}
 
-	template<class Dependency, size_t... E, class Receiver>
+	template<size_t Node, size_t... E, class Receiver>
 	constexpr void deliver_entries(::std::index_sequence<E...>, Receiver&& receiver) noexcept
 	{
-		::stdexec::set_value(::std::forward<Receiver>(receiver), access<delivery_table<Dependency>[E]>()...);
+		::stdexec::set_value(::std::forward<Receiver>(receiver), access<delivery_plan_v<Node>[E]>()...);
 	}
 };
 

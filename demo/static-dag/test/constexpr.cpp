@@ -66,17 +66,17 @@ constexpr int run(Graph&& graph)
 }
 
 // 链：唯一汇点直接转发，不会失败（没有停止源）
-static_assert(run(::sdag::dag(
-	::sdag::make_node<a>(::stdexec::just(1)),
-	::sdag::make_node<b, ::sdag::data<a>>(::stdexec::then([](int x) noexcept { return x + 1; })),
-	::sdag::make_node<c, ::sdag::data<b>>(::stdexec::then([](int x) noexcept { return x * 3; })))) == 6);
+static_assert(run(::sdag::dag<key>(
+	::sdag::make<::sdag::basic_node{a}>(::stdexec::just(1)),
+	::sdag::make<::sdag::basic_node{b, ::sdag::let(a)}>(::stdexec::then([](int x) noexcept { return x + 1; })),
+	::sdag::make<::sdag::basic_node{c, ::sdag::let(b)}>(::stdexec::then([](int x) noexcept { return x * 3; })))) == 6);
 
-// take 链：值槽复用（a 与 c 共用一块存储，在常量求值里切换在世的成员）
-static_assert(run(::sdag::dag(
-	::sdag::make_node<a>(::stdexec::just(1)),
-	::sdag::make_node<b, ::sdag::data<::sdag::take{a}>>(::stdexec::then([](int x) noexcept { return x + 1; })),
-	::sdag::make_node<c, ::sdag::data<::sdag::take{b}>>(::stdexec::then([](int x) noexcept { return x * 3; })),
-	::sdag::make_node<d, ::sdag::data<::sdag::take{c}>>(::stdexec::then([](int x) noexcept { return x - 1; })))) == 5);
+// move 链：值槽复用（a 与 c 共用一块存储，在常量求值里切换在世的成员）
+static_assert(run(::sdag::dag<key>(
+	::sdag::make<::sdag::basic_node{a}>(::stdexec::just(1)),
+	::sdag::make<::sdag::basic_node{b, ::sdag::move(a)}>(::stdexec::then([](int x) noexcept { return x + 1; })),
+	::sdag::make<::sdag::basic_node{c, ::sdag::move(b)}>(::stdexec::then([](int x) noexcept { return x * 3; })),
+	::sdag::make<::sdag::basic_node{d, ::sdag::move(c)}>(::stdexec::then([](int x) noexcept { return x - 1; })))) == 5);
 
 // 空图
 static_assert([]
@@ -89,7 +89,7 @@ static_assert([]
 		[[nodiscard]] constexpr ::stdexec::env<> get_env() const noexcept { return {}; }
 	};
 	bool done = false;
-	auto operation = ::stdexec::connect(::sdag::dag(), empty_receiver{&done});
+	auto operation = ::stdexec::connect(::sdag::dag<key>(), empty_receiver{&done});
 	::stdexec::start(operation);
 	return done;
 }());

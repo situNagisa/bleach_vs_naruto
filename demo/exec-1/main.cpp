@@ -17,25 +17,25 @@ enum class node
 };
 
 // 更新图（主线程：input.update 要泵 GLFW 事件）：input_update -> menu_update，完成值 (menu 的 permit, menu 的变化值)。
-// input 的 (permit, 变化值) 被 take 进 menu_update 的 let_value，menu_update 结束时析构，即用完即放。
+// input 的 (permit, 变化值) 被 move 进 menu_update 的 let_value，menu_update 结束时析构，即用完即放。
 auto update_graph(input& keyboard, menu& scene)
 {
-	return ::sdag::dag(
-		::sdag::make_node<node::input_update>(keyboard.update()),
-		::sdag::make_node<node::menu_update, ::sdag::data<::sdag::take{node::input_update}>>(::stdexec::let_value([&scene](input::guard_type::permit&, input::change_type& keys) { return scene.update(keys); })));
+	return ::sdag::dag<node>(
+		::sdag::make<::sdag::basic_node{node::input_update}>(keyboard.update()),
+		::sdag::make<::sdag::basic_node{node::menu_update, ::sdag::move(node::input_update)}>(::stdexec::let_value([&scene](input::guard_type::permit&, input::change_type& keys) { return scene.update(keys); })));
 }
 
 // 帧图（worker）：frame -> image ─┐
 //                        record ─┴-> render
-// 两个 permit 由调用方持有到 sender 完成之后。frame 租约、图像、命令缓冲都只有一个读者，被 take 进读者的 let_value，
+// 两个 permit 由调用方持有到 sender 完成之后。frame 租约、图像、命令缓冲都只有一个读者，被 move 进读者的 let_value，
 // 在读者结束时析构——render 结束时它已等到 GPU 与 present 完成。
 auto frame_graph(renderer const& target, renderer::guard_type::permit const& swapchain, menu const& scene, menu::guard_type::permit const& scene_permit)
 {
-	return ::sdag::dag(
-		::sdag::make_node<node::frame>(target.acquire_frame()),
-		::sdag::make_node<node::image, ::sdag::data<::sdag::take{node::frame}>>(::stdexec::let_value([&target, &swapchain](renderer::frame_pool::permit& lease) { return target.acquire_image(swapchain, *lease.token()); })),
-		::sdag::make_node<node::record>(scene.record(scene_permit, target.state().extent)),
-		::sdag::make_node<node::render, ::sdag::data<::sdag::take{node::image}, ::sdag::take{node::record}>>(::stdexec::let_value([&target, &swapchain](image_acquisition& acquisition, auto& commands, auto&) { return target.render(swapchain, acquisition, commands); })));
+	return ::sdag::dag<node>(
+		::sdag::make<::sdag::basic_node{node::frame}>(target.acquire_frame()),
+		::sdag::make<::sdag::basic_node{node::image, ::sdag::move(node::frame)}>(::stdexec::let_value([&target, &swapchain](renderer::frame_pool::permit& lease) { return target.acquire_image(swapchain, *lease.token()); })),
+		::sdag::make<::sdag::basic_node{node::record}>(scene.record(scene_permit, target.state().extent)),
+		::sdag::make<::sdag::basic_node{node::render, ::sdag::move(node::image), ::sdag::move(node::record)}>(::stdexec::let_value([&target, &swapchain](image_acquisition& acquisition, auto& commands, auto&) { return target.render(swapchain, acquisition, commands); })));
 }
 
 // 在 worker 上跑完一帧的渲染图，主线程等待时继续泵窗口事件（present 可能等事件线程）。异常（含 surface_changed）经 future 回到主线程。

@@ -15,44 +15,41 @@
 
 enum class step { load, parse, index, report };
 
-auto g = ::sdag::dag(
-	::sdag::make_node<step::load>(::stdexec::just(::std::string{"..."})),
-	::sdag::make_node<step::parse, ::sdag::data<step::load>>(::stdexec::then([](::std::string const& text) { return text.size(); })),
-	::sdag::make_node<step::index, ::sdag::data<step::load>>(::stdexec::then([](::std::string const& text) { return text.front(); })),
-	::sdag::make_node<step::report, ::sdag::data<::sdag::take{step::parse}, ::sdag::take{step::index}>>(::stdexec::then([](::std::size_t n, char c) { return ::std::format("{}x{}", n, c); })));
+using ::sdag::basic_node;  using ::sdag::let;  using ::sdag::move;
+
+auto g = ::sdag::dag<step>(
+	::sdag::make<basic_node{step::load}>(::stdexec::just(::std::string{"..."})),
+	::sdag::make<basic_node{step::parse, let(step::load)}>(::stdexec::then([](::std::string const& text) { return text.size(); })),
+	::sdag::make<basic_node{step::index, let(step::load)}>(::stdexec::then([](::std::string const& text) { return text.front(); })),
+	::sdag::make<basic_node{step::report, move(step::parse), move(step::index)}>(::stdexec::then([](::std::size_t n, char c) { return ::std::format("{}x{}", n, c); })));
 
 static_assert(::stdexec::sender<decltype(g)>);
-static_assert(::exec::sender_for<decltype(g), ::sdag::dag_t>);
+static_assert(::exec::sender_for<decltype(g), ::sdag::dag_t<step>>);
 auto [text] = ::stdexec::sync_wait(::std::move(g)).value();
 ```
 
-纯类型写法也成立，对应最初设想的 `xxx<pack<sndr1, fanin<sndr2, sndr3>>, ...>`：
-
-```cpp
-using root = ::sdag::node<step::load, ::sdag::dependencies<>, decltype(::stdexec::just(1))>;
-using next = ::sdag::node<step::parse, ::sdag::dependencies_of_t<::sdag::data<step::load>>, decltype(::stdexec::then([](int) { return 1.0; }))>;
-using dag = ::sdag::dag_sender<root, next>;
-static_assert(::stdexec::sender<dag>);
-```
+纯类型写法也成立：`::sdag::dag_sender<step, decltype(::sdag::make<...>(...))...>`。
 
 ## 节点
 
-| 写法 | 含义 |
+一个节点 = 规格（编译期的**值**）+ 载荷。`dag<K>` 在建图时给出键类型 `K`；规格只要满足概念 `node_spec_of<N, K>`：
+
+- `::sdag::id(n)` 给出 `K`；`::sdag::dependencies(n)` 给出一个 range，正好是这个节点的全部依赖；
+- range 的每个元素 `e`：`::sdag::id(e)` 给出前驱的键，`::sdag::mode_of(e)` 给出 `::sdag::mode`；
+- 这三个都是 CPO（成员函数优先，其次 ADL 的自由函数），所以用户可以用自己的类型。
+
+库给的便利类型是 `basic_node{id, let(a), move(b), wait(c)}`，依赖个数由构造推导（不定长）。
+
+| 依赖 | 含义 |
 | --- | --- |
-| `make_node<key>(sender)` | 根节点，直接启动 |
-| `make_node<key, data<a, b>>(adaptor)` | 数据依赖：`adaptor` 是 sender 适配器（`then(f)`、`let_value(f)`、`continues_on(sched) \| then(f)` ……），喂给它的前驱占位符（hole）完成值是 `(a 的值..., b 的值...)` |
-| `make_node<key, control<a>>(sender)` | 控制依赖：只在 `a` 之后启动，不接收、不碰它的值 |
-| `make_node<key, data<a>, control<b>>(adaptor)` | 两种都有：等 `a`、`b` 都完成，`adaptor` 只收到 `a` 的值 |
+| `let(a)` | 读：载荷拿到 `a` 的 `V const&`，值留在整图里、活到整图结束 |
+| `move(a)` | 取走：载荷按值（move）拿到 `a` 的值，本节点结束时析构它，之后它占的空间可以给别的值复用 |
+| `wait(a)` | 只在 `a` 之后启动，不接收、不碰它的值 |
 
-`key` 是节点的编译期身份，是一个**值**（非类型模板实参）。键的类型由用户自己定——枚举、整数、可比较的结构体都行，受 `key_value`（`std::equality_comparable`）约束；一张图里所有键必须是同一个类型（编译期检查）。`data<...>` 里的顺序就是值的顺序。`data<...>` 与 `control<...>` 各至多一个、数据依赖在前，
-`make_node` 把它们补齐成 `dependencies<data<...>, control<...>>`；同一个前驱不能同时写在两边。
-载荷由依赖决定、不从载荷类型去猜：有 `data<...>` 时载荷必须是适配器，否则必须是 sender，写错了各有一条 `static_assert`。
-值的交付只有一条规则：`data<a>` 给 `a` 的 `V const&`，值留在整图里、活到整图结束；`data<take{a}>` 按值（move）给出，
-并在这个节点结束时析构 `a` 的值，之后它占的空间可以给别的值复用。一个值至多被 take 一次，take 它的节点必须排在它所有其它
-数据读者之后（编译期检查；把其它读者写进它的 `data<>` 或 `control<>` 即可）。take 之后，其它读者手里指向它的视图不再有效。
-每个节点至多一种 `set_value` 完成（多种先 `into_variant`），这与 `when_all` 的要求一致。
-
-自定义节点类型只要满足三个原语：`node_key<N>::value`（即 `node_key_v<N>`）、`node_dependencies<N>::type`（可特化，默认取静态成员 `key` / 嵌套类型 `dependencies_type`）和 `payload(n)`（CPO，成员优先、其次 ADL）。`graph_node` concept 组合它们。
+`let` / `move` 的前驱按依赖里的顺序把值交给载荷（可以交错，`wait` 不占位置）。有 `let` / `move` 时载荷必须是 sender 适配器
+（`then(f)`、`let_value(f)`、`continues_on(sched) | then(f)` ……），dag 把前驱占位符喂给它；否则载荷必须是 sender。写错了各有一条 `static_assert`。
+一个值至多被 `move` 一次，`move` 它的节点必须排在它所有其它读者之后（编译期检查；把其它读者写进它的依赖即可）。`move` 之后，
+其它读者手里指向它的视图不再有效。同一个前驱只能写一次（不管用法）。每个节点至多一种 `set_value` 完成（多种先 `into_variant`）。
 
 ## 完成语义（与 `when_all` 一致）
 
@@ -60,7 +57,7 @@ static_assert(::stdexec::sender<dag>);
 - 任一节点 `set_error`：向所有在飞节点请求停止；**还没启动的后继直接跳过**；全部结束后以第一个错误完成。
 - 任一节点 `set_stopped`：同上，以 `set_stopped` 完成；错误优先于停止。
 - 外层停止令牌：图能以 `stopped` 完成时切换到停止态；否则只把请求转给节点，图仍以它们的值完成。
-- 值的传递：写了 `take` 的按值 move，并在取走它的节点结束时析构；其余按 `V const&`，活到整图结束。汇点的值 move 给整图的接收者。
+- 值的传递：`move` 的按值交出，并在取走它的节点结束时析构；`let` 按 `V const&`，活到整图结束。汇点的值 move 给整图的接收者。
 - 存值时抛异常（拷贝 / 移动构造抛）会变成 `set_error(exception_ptr)`。
 - 任一节点没有 `set_value` 完成（例如 `just_stopped()`），整图也没有 —— 每个节点都是某个汇点的祖先。
 
@@ -68,13 +65,13 @@ static_assert(::stdexec::sender<dag>);
 
 ## 它在 stdexec 生态里的位置
 
-`dag(nodes...)` 返回 `::sdag::graph_sender<dag_t, graph::graph_data<键表, 依赖表>, 节点 sender...>`（数据与 tuple-like 协议在 `graph::graph_description`，sender 行为在 `graph_sender`）。它实现标准的 tuple-like 协议
+`dag<K>(nodes...)` 返回 `::sdag::graph_sender<dag_t<K>, graph::graph_data<K, 规格...>, 节点 sender...>`（数据与 tuple-like 协议在 `graph::graph_description`，sender 行为在 `graph_sender`）。它实现标准的 tuple-like 协议
 （`std::tuple_size` / `std::tuple_element` 特化 + 成员 `get<I>`），stdexec 靠结构化绑定认出它的标签，不依赖 stdexec 的内部类型：
 
-- 节点 sender 原样保留在 children 里：`then(f)` 节点是 `then(hole<data<...>>, f)`，`continues_on(sched) | then(f)` 节点也是对应的表达式树。它们连接时照常被所在 domain 变换——`then`、`bulk`、`continues_on` 这些标准算法吃到的定制一个不少。
-- `tag_of_t` / `exec::sender_for<G, dag_t>` / 子节点内省都成立；domain 可以像定制任何算法一样在 `transform_sender` 里匹配 `dag_t`。
+- 节点 sender 原样保留在 children 里：`then(f)` 节点是 `then(hole<I>, f)`，`continues_on(sched) | then(f)` 节点也是对应的表达式树。它们连接时照常被所在 domain 变换——`then`、`bulk`、`continues_on` 这些标准算法吃到的定制一个不少。
+- `tag_of_t` / `exec::sender_for<G, dag_t<K>>` / 子节点内省都成立；domain 可以像定制任何算法一样在 `transform_sender` 里匹配 `dag_t<K>`。
 - 属性（`get_env(g)`）按 `when_all` 属性的同一套语义回答 `get_completion_domain<...>` 与完成行为：图在汇点完成的地方完成。
-- 前驱占位符 `protocol::hole<data<...>>` 是一个像 `read_env` 一样"依赖环境"的叶子 sender：它不认识图，只认识**取值源协议**（`protocol/value_source.h`）——接收者环境里的转发查询 `get_value_source` 给出一个取值源，签名问它的签名接口（`completions_for<Dependency, Env>`），启动时调它的交付接口（`deliver<Dependency>(receiver)`）。图这一侧由 `graph::graph_state` 实现这两个接口，于是"占位符 → 图"的环被打断。所以图在无环境下是 dependent sender（`sender` 成立，`sender_in<G>` 不成立，`sender_in<G, env>` 成立）。
+- 前驱占位符 `protocol::hole<I>`（第 I 个节点的） 是一个像 `read_env` 一样"依赖环境"的叶子 sender：它不认识图，只认识**取值源协议**（`protocol/value_source.h`）——接收者环境里的转发查询 `get_value_source` 给出一个取值源，签名问它的签名接口（`completions_for<Dependency, Env>`），启动时调它的交付接口（`deliver<Dependency>(receiver)`）。图这一侧由 `graph::graph_state` 实现这两个接口，于是"占位符 → 图"的环被打断。所以图在无环境下是 dependent sender（`sender` 成立，`sender_in<G>` 不成立，`sender_in<G, env>` 成立）。
 
 ### 默认连接：融合 op-state（0 开销）
 
@@ -84,22 +81,22 @@ static_assert(::stdexec::sender<dag>);
 - 节点的值存一份在整图里，后继按引用读 —— **扇出不需要 `split`**，因为整图拥有所有节点，不存在"谁最后释放"的问题；
 - 入度 ≥ 2 的节点有一个原子倒计数，入度 1 的节点由前驱直接启动 —— **扇入不需要 `when_all`**；
 - 不会失败 / 停止 / 抛异常的图连停止源、状态字、错误槽都不存在（与 `when_all` 的 `__uses_stop_source` 同理）；外层令牌是 `unstoppable_token` 时连回调槽也没有；只有一个汇点的图没有汇点计数，**唯一汇点的值不存槽位，完成时直接转发给整图的接收者**（像 `then` 一样不物化，整图的值签名就是它的原始签名）；值没人读的节点没有值槽。被优化掉的成员是真正的 0 字节。
-- **值槽复用**：被 take 的值在取走它的节点结束时析构，它的空间可以给"一定在那之后才产生"的值用（取走它的节点是那个值所在节点的祖先）。存值的节点在编译期按这个先后关系划分成最少的链（偏序的最小链划分，链数 = 最多同时在世的值的个数），同一条链的值依次共用一块存储（`general/relay.h`）。只有一个值的链就是原来的 `optional`；不写 take 的图布局与机器码不变。
+- **值槽复用**：被 move 的值在取走它的节点结束时析构，它的空间可以给"一定在那之后才产生"的值用（取走它的节点是那个值所在节点的祖先）。存值的节点在编译期按这个先后关系划分成最少的链（偏序的最小链划分，链数 = 最多同时在世的值的个数），同一条链的值依次共用一块存储（`general/relay.h`）。只有一个值的链就是原来的 `optional`；不用 move 的图布局与机器码不变。
 
 `test/zero_overhead.cpp` 的实测（g++ 16.2，libstdc++，Release）：
 
 | | 分配次数 | `sizeof(op-state)` |
 | --- | --- | --- |
 | 菱形 `a -> {b, c} -> d`，融合 | **0** | 128 = 节点 op-state 88 + 接收者 8 + 3 个值槽 24 + 1 个入度计数 8（汇点 d 不存槽位） |
-| 链 `a -> b -> c -> d -> e`，每步 take，中间值 64 字节 | **0** | 值槽 128（4 个中间值共用两块；不 take 时 272） |
+| 链 `a -> b -> c -> d -> e`，每步 move，中间值 64 字节 | **0** | 值槽 128（4 个中间值共用两块；全用 let 时 272） |
 
 `-O2` 下 `just(1) -> then(+1) -> then(*3)` 这条链经 `sync_wait` 跑完的函数是 30 条指令，手写 `just(1) | then | then` 是 29 条，节点全部折叠成常量。
-相对手写 `then` 链，融合路径唯一多出来的是**链式边上的一次值物化**（值先存进槽位，再 take 给后继）：后继的输入 op 什么时候启动是后继自己决定的（`starts_on`、`let_value` 都可能推迟），值必须有个地方待着。这是"与扇入 / 扇出同等调度的最小成本"，不是 `then` 链的成本。
+相对手写 `then` 链，融合路径唯一多出来的是**链式边上的一次值物化**（值先存进槽位，再 move 给后继）：后继的输入 op 什么时候启动是后继自己决定的（`starts_on`、`let_value` 都可能推迟），值必须有个地方待着。这是"与扇入 / 扇出同等调度的最小成本"，不是 `then` 链的成本。
 
 ### 让 domain 接管整张图
 
-`dag_t` 没有 `transform_sender`，图在任何 domain 下都走融合 op-state。domain 要接管整张图，在自己的 `transform_sender`
-里匹配 `dag_t` 即可（`exec::sender_for<G, dag_t>`，子 sender 就是节点 sender）。也可以用 `make_graph<Tag>(nodes...)`
+`dag_t<K>` 没有 `transform_sender`，图在任何 domain 下都走融合 op-state。domain 要接管整张图，在自己的 `transform_sender`
+里匹配 `dag_t<K>` 即可（`exec::sender_for<G, dag_t<K>>`，子 sender 就是节点 sender）。也可以用 `make_graph<Tag, K>(nodes...)`
 以自己的标签建图，在标签上定制 `transform_sender`。
 
 ## 常量求值
@@ -143,16 +140,16 @@ include/sdag/                    （目录 = 概念分组，文件 = 模块；�
   stdexec/          对 stdexec 的适配：对其内部实现（双下划线名字）的全部依赖，见下文
     expressions.h       拆开 stdexec 的算法 sender
   node/             节点
-    node.h              key_value、data<> / control<> / take{} / dependencies<>、node<>、make_node、payload CPO 与 graph_node concept
-    node_graph.h        一组节点的键与依赖 → 有向无环图（keys_of_v、key_indices_v、shape_of），以及键相关的错误诊断；键是值，全是普通 constexpr 循环
+    node.h              mode、CPO（id / dependencies / mode_of）、概念（key_value / node_spec_of / node_of）、basic_node、let / move / wait、make
+    node_graph.h        节点规格 → 节点表（graph_table：每个依赖换成前驱下标 + mode）与有向无环图，以及键相关的错误诊断
   protocol/         节点与图之间的约定
     value_source.h      取值源协议：get_value_source 查询 + 签名接口 + 交付接口
-    hole.h              前驱占位符 hole<data<...>>，以及 hole_count_v
+    hole.h              前驱占位符 hole<I>，以及 hole_count_v
     node_env.h          节点看到的环境：取值源句柄 + 可选停止令牌 + 外层转发
     node_sender.h       把占位符喂给节点载荷得到节点 sender
   graph/            图
     description.h       图的描述：graph_data、graph_description（tuple-like，对算法标签泛型）、类型级查询与节点签名
-    readers.h           谁读谁的值、谁 take 谁的值（take 给 V，否则 V const&），take 用法的编译期检查所需的信息
+    readers.h           谁读谁的值、谁 move 谁的值（move 给 V，let 给 V const&），move 用法的编译期检查所需的信息
     analysis.h          node_analysis：每个节点有值 / 错误 / 停止，各是什么类型
     storage_plan.h      storage_plan：哪些值要存、存时会不会抛、哪个节点直接转发（forward[J]）、值槽怎么复用（layout）
     pred_sigs.h         前驱的签名：取值源的签名接口
@@ -165,7 +162,7 @@ include/sdag/                    （目录 = 概念分组，文件 = 模块；�
     fused.h             融合 op-state（默认连接）：状态机、调度与生命周期规则
   assembly/         拼装与入口
     graph_sender.h      图 sender = 描述 + 完成签名 + 属性 + 执行
-    dag.h               入口：dag_t、make_graph、dag
+    dag.h               入口：dag<K>、dag_t<K>、make_graph<Tag, K>
   sdag.h            总头（列出全部模块）
 test/
   fixtures.h         测试共用的键、测试 sender / 接收者、mock domain
@@ -244,7 +241,7 @@ stdexec 的位置：`$NAGISA_LIBRARY_ROOT/stdexec`，或 `-DSDAG_STDEXEC_ROOT=..
 - **连接的值类别**：右值图 move 子 sender，左值（const 或非 const）图拷贝它们，对应 `connect() &&` 与 `connect() const&` 两个重载，完成签名也按这两种情况计算。
 - **GCC 16 反射的几个坑**：模板实参位置的类型拼接要写 `typename [: :]`；`^^` 不能作用于 using 声明（`std::exception_ptr` 要经别名 + `dealias`）；`template for` 的范围必须是常量表达式（静态成员可以，consteval 函数里的 constexpr 局部变量不行）；`std::array<info, 0>` 没有可用的 `operator[]`（空图用 `info_array` 留一个占位元素）；noexcept / requires 里不能引用 `auto&&` 形参本身（`payload` CPO 以类型为参数）。
 - **内联完成的栈深度**。节点在前驱的完成回调里被启动，一条全内联的链会递归 O(深度) 层；静态图的规模是编译期已知的常量，这与 `then` 链的行为一致。编译器对函数体的实例化也沿 `launch -> start -> ... -> node_done -> notify_edge -> launch` 这条路径嵌套，最长路径约 60 个节点以上会撞上 GCC 的模板深度上限（`-ftemplate-depth` 可以调）；拓扑序 `template for` 只解决了完成签名那一侧的深度。
-- **没 take 的值在整图 op-state 里停留到整图完成**。给出的 `const&` 因此一直有效；这也是 `split` 做不到 0 开销而整图可以的原因。take 让用户显式决定提前结束一个值的生命周期，析构点在编译期确定，不需要引用计数。
+- **let 的值在整图 op-state 里停留到整图完成**。给出的 `const&` 因此一直有效；这也是 `split` 做不到 0 开销而整图可以的原因。move 让用户显式决定提前结束一个值的生命周期，析构点在编译期确定，不需要引用计数。
 - **错误发生后未启动的节点被跳过**，这是对 `when_all`"全部启动"语义的细化：跳过不改变结果（结果一定是错误 / 停止），只是不做无用功。
 - 节点必须恰好完成一次；完成签名不能"撒谎"（`deliver` 里有 `static_assert` 对照接收者环境与整图环境下算出的占位符签名）。
 - 节点适配器必须把占位符恰好用一次（构造时 `static_assert`）：前驱的值只交付一次，`repeat_n` / `retry` 这类会重启子 sender 的适配器不能套在输入上——这与把它们套在 `just(std::move(x))` 上会重复移动是同一回事。

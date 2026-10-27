@@ -4,8 +4,8 @@
 /// （例如 GPU 的 stream domain），自动降解成 when_all / split / let_value，让 domain 拿到它认识的标准算法。
 /// 依赖 sdag 核心与 sdag-compose；两者都不认识它。
 ///
-///   ::sdag::adaptive::adaptive_dag(nodes...)    建一张自适配图
-///   ::sdag::adaptive::adaptive_dag_t            它的算法标签（带 transform_sender）
+///   ::sdag::adaptive::adaptive_dag<K>(nodes...) 建一张自适配图（K 是键类型）
+///   ::sdag::adaptive::adaptive_dag_t<K>         它的算法标签（带 transform_sender）
 ///
 /// 为什么是独立的标签：stdexec 在 connect 前调用"标签的 transform_sender"，核心的 dag_t 没有它，图总是融合；
 /// 自适配要在建图时就选定——用 ::sdag::dag 建的图不会降解，用 adaptive_dag 建的才会。
@@ -27,12 +27,13 @@
 namespace sdag::adaptive
 {
 
+template<key_value K>
 struct adaptive_dag_t
 {
-	template<graph_node... Nodes>
+	template<node_of<K>... Nodes>
 	[[nodiscard]] constexpr auto operator()(Nodes&&... nodes) const
 	{
-		return ::sdag::make_graph<adaptive_dag_t>(::std::forward<Nodes>(nodes)...);
+		return ::sdag::make_graph<adaptive_dag_t, K>(::std::forward<Nodes>(nodes)...);
 	}
 
 	/// 所在 domain 会定制 when_all 时，把整图降解成 when_all / split / let_value 组合，让它吃到定制。
@@ -45,6 +46,7 @@ struct adaptive_dag_t
 	}
 };
 
-inline constexpr adaptive_dag_t adaptive_dag{};
+template<key_value K>
+inline constexpr adaptive_dag_t<K> adaptive_dag{};
 
 }

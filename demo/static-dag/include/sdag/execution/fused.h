@@ -289,7 +289,7 @@ struct fused_core : graph::graph_state<Self, ::stdexec::env_of_t<Receiver>>
 	template<size_t J>
 	constexpr void node_done() noexcept
 	{
-		// J take 的值到此用完：先析构，再通知后继。其它读者都在 J 之前结束（编译期检查过），没人再碰它。
+		// J move 的值到此用完：先析构，再通知后继。其它读者都在 J 之前结束（编译期检查过），没人再碰它。
 		general::for_each_value<graph::released_by_v<Self, J>>([this]<size_t From>() noexcept
 		{
 			this->template release<From>();
@@ -310,7 +310,7 @@ struct fused_core : graph::graph_state<Self, ::stdexec::env_of_t<Receiver>>
 		}
 	}
 
-	/// 析构节点 From 的值（它被 take 了，取走它的节点已经结束）。
+	/// 析构节点 From 的值（它被 move 了，取走它的节点已经结束）。
 	template<size_t From>
 	constexpr void release() noexcept
 	{
@@ -445,13 +445,17 @@ struct fused_core : graph::graph_state<Self, ::stdexec::env_of_t<Receiver>>
 	}
 
 	/// 各汇点的值按声明顺序铺平，全部 move 给外层接收者。
-	static constexpr auto sink_moves = []
+	/// 汇点的值全部 move 给外层接收者（之后没人再读）。
+	static constexpr auto sink_entries = []
 	{
-		::std::array<bool, sink_count> moves{};
-		moves.fill(true);
-		return moves;
+		::std::array<dependency_entry, sink_count> entries{};
+		for (size_t index = 0; index < sink_count; ++index)
+		{
+			entries[index] = {general::sinks_v<shape>[index], mode::move};
+		}
+		return entries;
 	}();
-	static constexpr auto sink_table = graph::delivery_plan<Self, node_env_type, general::sinks_v<shape>, sink_moves>();
+	static constexpr auto sink_table = graph::delivery_plan<Self, node_env_type, sink_entries>();
 
 	template<size_t... E>
 	constexpr void emit_values(::std::index_sequence<E...>) noexcept

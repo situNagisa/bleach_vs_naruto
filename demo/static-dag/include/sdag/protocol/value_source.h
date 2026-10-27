@@ -5,9 +5,9 @@
 /// 节点 sender 里的占位符（protocol/hole.h）自己不存值，也不认识图。它连接时拿到的接收者环境里有一个转发查询
 /// get_value_source，返回一个指向"取值源"的指针。取值源实现两个接口：
 ///
-///   签名接口   template<class Dependency, class Env> using completions_for = ...;
-///              Dependency（节点的 data<...>）对应的前驱值，在环境 Env 下交给接收者时的完成签名
-///   交付接口   template<class Dependency, class Receiver> void deliver(Receiver&&) noexcept;
+///   签名接口   template<size_t Node, class Env> using completions_for = ...;
+///              第 Node 个节点的 let / move 前驱的值，在环境 Env 下交给接收者时的完成签名
+///   交付接口   template<size_t Node, class Receiver> void deliver(Receiver&&) noexcept;
 ///              把这些值交给接收者（一次 set_value）
 ///
 /// 图这一侧由整图状态（graph/slots.h）实现交付接口、由前驱的签名（graph/pred_sigs.h）实现签名接口。
@@ -17,8 +17,9 @@
 ///   has_value_source<Env>       环境里有没有取值源
 ///   value_source_of_t<Env>      取值源的类型
 ///   value_source_traits<Source> 签名接口的定制点（默认转到 Source::completions_for）
-///   source_completions_t<Source, Dependency, Env>   签名接口
+///   source_completions_t<Source, Node, Env>   签名接口
 
+#include <cstddef>
 #include <type_traits>
 #include <utility>
 
@@ -52,11 +53,11 @@ using value_source_of_t = ::std::remove_pointer_t<decltype(protocol::get_value_s
 template<class Source>
 struct value_source_traits
 {
-	template<class Dependency, class Env>
-	using completions_for = typename Source::template completions_for<Dependency, Env>;
+	template<::std::size_t Node, class Env>
+	using completions_for = typename Source::template completions_for<Node, Env>;
 };
 
-template<class Source, class Dependency, class Env>
-using source_completions_t = typename value_source_traits<Source>::template completions_for<Dependency, Env>;
+template<class Source, ::std::size_t Node, class Env>
+using source_completions_t = typename value_source_traits<Source>::template completions_for<Node, Env>;
 
 }

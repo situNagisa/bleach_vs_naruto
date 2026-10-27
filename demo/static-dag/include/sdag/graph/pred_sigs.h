@@ -2,8 +2,8 @@
 
 /// 前驱的签名：占位符的签名 = 前驱节点的值签名（共享的给 const&）；它就是取值源的「签名接口」（graph/slots.h）。
 ///
-///   pred_completions_t<Self, data<...>, Env>
-///       前驱的值按 data<...> 的声明顺序拼接：take<K> 的给 V（move 过去），其余给 V const&；
+///   pred_completions_t<Self, I, Env>
+///       节点 I 的 let / move 前驱的值按声明顺序拼接：move 的给 V（move 过去），let 的给 V const&；
 ///       某个前驱没有值完成（例如 just_stopped）时是 completion_signatures<>（这个节点永远不会被启动）；
 ///       某个前驱的签名算不出来时，是那个不合法的结果本身（原样透传给 stdexec 诊断）。
 ///
@@ -39,11 +39,11 @@ namespace detail
 
 using namespace ::sdag::general::refl;
 
-/// 0, 1, ..., data<...> 的前驱个数 - 1。
-template<class Dependency>
+/// 0, 1, ..., 节点 I 的值依赖个数 - 1。
+template<class Self, ::std::size_t I>
 inline constexpr auto positions_v = []
 {
-	::std::array<::std::size_t, Dependency::keys.size()> result{};
+	::std::array<::std::size_t, value_dependencies_v<Self, I>.size()> result{};
 	for (::std::size_t index = 0; index < result.size(); ++index)
 	{
 		result[index] = index;
@@ -51,15 +51,15 @@ inline constexpr auto positions_v = []
 	return result;
 }();
 
-template<class Self, class Dependency, class Env>
+template<class Self, ::std::size_t I, class Env>
 [[nodiscard]] consteval info pred_completions()
 {
 	infos values;
 	bool has_values = true;
 	// 范围必须是常量表达式：用变量模板，不用局部变量。
-	template for (constexpr ::std::size_t position : positions_v<Dependency>)
+	template for (constexpr ::std::size_t position : positions_v<Self, I>)
 	{
-		constexpr ::std::size_t from = dependency_indices_v<Self, Dependency>[position];
+		constexpr ::std::size_t from = value_dependencies_v<Self, I>[position].from;
 		static_assert(from < count_of_v<Self>, "sdag: 占位符引用了图里不存在的键");
 		using completions = node_completions_t<Self, from, Env>;
 		if constexpr (!general::is_stdexec_completion_signatures_v<completions>)
@@ -75,7 +75,7 @@ template<class Self, class Dependency, class Env>
 			}
 			for (info value : arguments(^^typename trait::values))
 			{
-				values.push_back(::std::meta::substitute(^^access_t, {^^Dependency, ::std::meta::reflect_constant(position), value}));
+				values.push_back(::std::meta::substitute(^^access_t, {^^Self, ::std::meta::reflect_constant(I), ::std::meta::reflect_constant(position), value}));
 			}
 		}
 	}
@@ -84,8 +84,8 @@ template<class Self, class Dependency, class Env>
 
 }
 
-template<class Self, class Dependency, class Env>
-using pred_completions_t = typename [: detail::pred_completions<Self, Dependency, Env>() :];
+template<class Self, ::std::size_t I, class Env>
+using pred_completions_t = typename [: detail::pred_completions<Self, I, Env>() :];
 
 #else
 
@@ -94,19 +94,19 @@ namespace detail
 
 using ::std::size_t;
 
-template<class Dependency, size_t K>
+template<class Self, size_t I, size_t K>
 struct accessor
 {
 	template<class V>
-	using fn = access_t<Dependency, K, V>;
+	using fn = access_t<Self, I, K, V>;
 };
 
-template<class Self, class Dependency, class Env, class Positions, class Indices>
+template<class Self, size_t I, class Env, class Positions, class Indices>
 struct pred_completions;
 
 /// K... 是位置（0, 1, ...），D... 是对应前驱的节点下标。
-template<class Self, class Dependency, class Env, size_t... K, size_t... D>
-struct pred_completions<Self, Dependency, Env, ::std::index_sequence<K...>, ::std::index_sequence<D...>>
+template<class Self, size_t I, class Env, size_t... K, size_t... D>
+struct pred_completions<Self, I, Env, ::std::index_sequence<K...>, ::std::index_sequence<D...>>
 {
 	static_assert(((D < count_of_v<Self>) && ...), "sdag: 占位符引用了图里不存在的键");
 
@@ -144,7 +144,7 @@ struct pred_completions<Self, Dependency, Env, ::std::index_sequence<K...>, ::st
 		else
 		{
 			return ::std::type_identity<general::make_completions_t<true, general::concat_t<
-				general::transform_t<accessor<Dependency, K>::template fn, typename trait<D>::values>...>, general::type_list<>, false>>{};
+				general::transform_t<accessor<Self, I, K>::template fn, typename trait<D>::values>...>, general::type_list<>, false>>{};
 		}
 	}
 
@@ -153,9 +153,9 @@ struct pred_completions<Self, Dependency, Env, ::std::index_sequence<K...>, ::st
 
 }
 
-template<class Self, class Dependency, class Env>
-using pred_completions_t = typename detail::pred_completions<Self, Dependency, Env,
-	::std::make_index_sequence<Dependency::keys.size()>, general::sequence_t<dependency_indices_v<Self, Dependency>>>::type;
+template<class Self, size_t I, class Env>
+using pred_completions_t = typename detail::pred_completions<Self, I, Env,
+	::std::make_index_sequence<value_dependencies_v<Self, I>.size()>, data_dependencies_t<Self, I>>::type;
 
 #endif
 
