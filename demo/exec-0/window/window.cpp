@@ -102,6 +102,11 @@ void window::poll_events()
 	::glfwPollEvents();
 }
 
+void window::wait_events()
+{
+	::glfwWaitEvents();
+}
+
 bool window::should_close() const noexcept
 {
 	return ::glfwWindowShouldClose(handle) == GLFW_TRUE;

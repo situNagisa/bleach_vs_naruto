@@ -308,7 +308,8 @@ device_selection select_physical_device(::VkInstance instance, ::VkSurfaceKHR su
 	if (extent.width == 0 || extent.height == 0)
 		throw ::std::runtime_error{ "cannot create a swapchain for an empty surface" };
 
-	auto image_count = capabilities.minImageCount + 1;
+	// 能同时取得的图像数 = 图像数 - minImageCount + 1，要不少于在途帧数：每个在途帧都持有一张图像的 permit。
+	auto image_count = capabilities.minImageCount + static_cast<::std::uint32_t>(renderer::frame_count) - 1;
 	if (capabilities.maxImageCount != 0)
 		image_count = ::std::min(image_count, capabilities.maxImageCount);
 	auto const concurrent = queue_families[0] != queue_families[1];
@@ -349,6 +350,13 @@ device_selection select_physical_device(::VkInstance instance, ::VkSurfaceKHR su
 		images.resize(count);
 		return images;
 	}
+}
+
+::std::uint32_t query_min_image_count(::VkPhysicalDevice physical_device, ::VkSurfaceKHR surface)
+{
+	auto capabilities = ::VkSurfaceCapabilitiesKHR{};
+	::check(::vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, &capabilities), "failed to query surface capabilities");
+	return capabilities.minImageCount;
 }
 
 ::std::vector<::vkkl::image_view> create_swapchain_image_views( ::VkDevice device, ::std::span<::VkImage const> images, ::vkfu::enums::format format)

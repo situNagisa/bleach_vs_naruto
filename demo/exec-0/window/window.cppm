@@ -50,6 +50,8 @@ struct window
 
 	// 事件处理：泵一次事件队列；关闭请求；按键是否按下（GLFW_KEY_*）；窗口是否有键盘焦点。
 	static void poll_events();
+	// 阻塞到有事件（最小化时等窗口恢复，不空转）。
+	static void wait_events();
 	bool should_close() const noexcept;
 	bool key_pressed(int key) const noexcept;
 	bool focused() const noexcept;
