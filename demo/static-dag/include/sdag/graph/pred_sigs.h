@@ -43,7 +43,7 @@ using namespace ::sdag::general::refl;
 template<class Self, ::std::size_t I>
 inline constexpr auto positions_v = []
 {
-	::std::array<::std::size_t, value_dependencies_v<Self, I>.size()> result{};
+	::std::array<::std::size_t, value_dependencies<Self, I>().size()> result{};
 	for (::std::size_t index = 0; index < result.size(); ++index)
 	{
 		result[index] = index;
@@ -59,7 +59,7 @@ template<class Self, ::std::size_t I, class Env>
 	// 范围必须是常量表达式：用变量模板，不用局部变量。
 	template for (constexpr ::std::size_t position : positions_v<Self, I>)
 	{
-		constexpr ::std::size_t from = value_dependencies_v<Self, I>[position].from;
+		constexpr ::std::size_t from = value_dependencies<Self, I>()[position].from;
 		static_assert(from < count_of_v<Self>, "sdag: 占位符引用了图里不存在的键");
 		using completions = node_completions_t<Self, from, Env>;
 		if constexpr (!general::is_stdexec_completion_signatures_v<completions>)
@@ -155,7 +155,7 @@ struct pred_completions<Self, I, Env, ::std::index_sequence<K...>, ::std::index_
 
 template<class Self, size_t I, class Env>
 using pred_completions_t = typename detail::pred_completions<Self, I, Env,
-	::std::make_index_sequence<value_dependencies_v<Self, I>.size()>, data_dependencies_t<Self, I>>::type;
+	::std::make_index_sequence<value_dependencies<Self, I>().size()>, data_dependencies_t<Self, I>>::type;
 
 #endif
 

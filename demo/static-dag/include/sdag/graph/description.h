@@ -10,15 +10,18 @@
 ///
 /// 类型级查询（凡是名为 Self 的模板形参，都是图的**引用类型** G&& 或 G const&，值类别决定节点 sender 被移动还是被拷贝）：
 ///   description_of<Self>               Self 去引用后的 graph_description（图 sender 的基类）
-///   shape_of_v<Self>, count_of_v<Self>
+///   table_of<Self>(), shape_of<Self>(), readers_of<Self>()   节点表、形状、读者（graph_data 里唯一的缓存）
+///   access_t<Self, I, K, V>            节点 I 的第 K 个值依赖交出的值类型
+///   count_of_v<Self>
 ///   child_t<Self, I>                   节点 I 的 sender 类型（不带值类别）
 ///   node_sender_t<Self, I>             节点 I 的 sender 类型，带上 Self 的值类别
 ///   node_completions_t<Self, I, Env...>  节点 I 的完成签名
-///   table_of_v<Self>                   节点表（node/node_graph.h 的 graph_table）
-///   value_dependencies_v<Self, I>      节点 I 的 let / move 依赖（前驱下标 + mode，按声明顺序），它的占位符就是 hole<I>
+///   value_dependencies<Self, I>()      节点 I 的 let / move 依赖（前驱下标 + mode，按声明顺序），它的占位符就是 hole<I>
 ///   data_dependencies_t<Self, I>       节点 I 的 let / move 前驱下标（index_sequence）
 ///   control_dependencies_t<Self, I>    节点 I 的 wait 前驱下标（index_sequence）
 
+#include <algorithm>
+#include <array>
 #include <cstddef>
 #include <tuple>
 #include <type_traits>
@@ -33,6 +36,7 @@
 #include "../general/cvref.h"
 #include "../general/digraph.h"
 #include "../node/node_graph.h"
+#include "readers.h"
 
 namespace sdag::graph
 {
@@ -44,8 +48,9 @@ template<class K, auto... Specs>
 struct graph_data
 {
 	using key_type = K;
+	/// 整张图唯一的一份缓存：节点表（含形状）与读者。其它地方经 table_of / shape_of / readers_of 取它的引用。
 	static constexpr auto table = checked_table<K, Specs...>();
-	static constexpr auto shape = table.shape;
+	static constexpr auto readers = graph::readers<sizeof...(Specs)>::build(table);
 };
 
 template<class Tag, class Data, class... Children>
@@ -83,11 +88,24 @@ struct graph_description
 template<class Self>
 using description_of = typename ::std::remove_cvref_t<Self>::description;
 
+/// 整张图的节点表与形状：graph_data 里唯一的一份缓存（static constexpr），这里只是取它的引用，不再另存一份。
 template<class Self>
-inline constexpr auto shape_of_v = description_of<Self>::data_type::shape;
+[[nodiscard]] constexpr auto const& table_of() noexcept
+{
+	return description_of<Self>::data_type::table;
+}
 
 template<class Self>
-inline constexpr auto table_of_v = description_of<Self>::data_type::table;
+[[nodiscard]] constexpr auto const& shape_of() noexcept
+{
+	return description_of<Self>::data_type::table.shape;
+}
+
+template<class Self>
+[[nodiscard]] constexpr auto const& readers_of() noexcept
+{
+	return description_of<Self>::data_type::readers;
+}
 
 template<class Self>
 inline constexpr size_t count_of_v = description_of<Self>::children::size;
@@ -105,36 +123,26 @@ using node_completions_t = decltype(::stdexec::get_completion_signatures<node_se
 namespace description_detail
 {
 
-/// 节点 I 中用法满足 wanted 的依赖（按声明顺序）；values 为真时只要 let / move，为假时只要 wait。
+/// 节点 I 中 let / move（Values 为真）或 wait（为假）的依赖，按声明顺序，固定成 std::array。
 template<class Self, size_t I, bool Values>
-[[nodiscard]] consteval auto select()
+[[nodiscard]] consteval auto select() noexcept
 {
-	constexpr auto table = table_of_v<Self>;
-	constexpr size_t begin = table.first[I];
-	constexpr size_t end = table.first[I + 1];
-	constexpr size_t size = [&]
-	{
-		size_t n = 0;
-		for (size_t e = begin; e < end; ++e)
-		{
-			n += ((table.entries[e].how != mode::wait) == Values) ? 1 : 0;
-		}
-		return n;
-	}();
+	constexpr auto deps = table_of<Self>().dependencies(I);
+	constexpr size_t size = static_cast<size_t>(::std::ranges::count_if(deps, [](dependency_entry const& e) { return (e.how != mode::wait) == Values; }));
 	::std::array<dependency_entry, size> result{};
 	size_t cursor = 0;
-	for (size_t e = begin; e < end; ++e)
+	for (dependency_entry const& e : deps)
 	{
-		if ((table.entries[e].how != mode::wait) == Values)
+		if ((e.how != mode::wait) == Values)
 		{
-			result[cursor++] = table.entries[e];
+			result[cursor++] = e;
 		}
 	}
 	return result;
 }
 
 template<auto Entries>
-inline constexpr auto froms_v = []
+[[nodiscard]] consteval auto froms() noexcept
 {
 	::std::array<size_t, Entries.size()> result{};
 	for (size_t index = 0; index < Entries.size(); ++index)
@@ -142,20 +150,27 @@ inline constexpr auto froms_v = []
 		result[index] = Entries[index].from;
 	}
 	return result;
-}();
+}
 
 }
 
-/// 节点 I 的值依赖（let / move，按声明顺序，交给载荷的就是这些值）：dependency_entry 的 std::array。
+/// 节点 I 的值依赖（let / move，按声明顺序，交给载荷的就是这些值）。
 template<class Self, size_t I>
-inline constexpr auto value_dependencies_v = description_detail::select<Self, I, true>();
+[[nodiscard]] consteval auto value_dependencies() noexcept
+{
+	return description_detail::select<Self, I, true>();
+}
 
-/// 节点 I 的值依赖的前驱下标、wait 依赖的前驱下标（std::index_sequence）。
+/// 节点 I 的值依赖 / wait 依赖的前驱下标（std::index_sequence）。
 template<class Self, size_t I>
-using data_dependencies_t = general::sequence_t<description_detail::froms_v<value_dependencies_v<Self, I>>>;
+using data_dependencies_t = general::sequence_t<description_detail::froms<description_detail::select<Self, I, true>()>()>;
+
+/// 节点 I 的第 K 个值依赖交出的值类型：move 时 V，let 时 V const&（值留在整图里）。
+template<class Self, size_t I, size_t K, class V>
+using access_t = ::std::conditional_t<value_dependencies<Self, I>()[K].how == mode::move, V, V const&>;
 
 template<class Self, size_t I>
-using control_dependencies_t = general::sequence_t<description_detail::froms_v<description_detail::select<Self, I, false>()>>;
+using control_dependencies_t = general::sequence_t<description_detail::froms<description_detail::select<Self, I, false>()>()>;
 
 }
 

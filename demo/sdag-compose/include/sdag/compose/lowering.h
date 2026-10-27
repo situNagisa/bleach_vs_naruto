@@ -103,7 +103,7 @@ template<::std::size_t... I>
 template<class Self, class FanIn, class FanOut>
 [[nodiscard]] consteval auto lower_types()
 {
-	constexpr auto shape = graph::shape_of_v<Self>;
+	constexpr auto const& shape = graph::shape_of<Self>();
 	lowered_tables<shape.count> tables;
 	infos const children = arguments(^^typename graph::description_of<Self>::children);
 
@@ -128,7 +128,7 @@ template<class Self, class FanIn, class FanOut>
 		return ::std::meta::dealias(::std::meta::substitute(^^::std::invoke_result_t, arguments));
 	};
 
-	template for (constexpr ::std::size_t index : graph::shape_of_v<Self>.order)
+	template for (constexpr ::std::size_t index : graph::shape_of<Self>().order)
 	{
 		constexpr auto data_keys = general::to_array<graph::data_dependencies_t<Self, index>::size()>(index_vector(graph::data_dependencies_t<Self, index>{}));
 		constexpr auto control_keys = general::to_array<graph::control_dependencies_t<Self, index>::size()>(index_vector(graph::control_dependencies_t<Self, index>{}));
@@ -208,7 +208,7 @@ template<class Self, class FanIn, class FanOut>
 struct lowered_types
 {
 	using size_t = ::std::size_t;
-	static constexpr auto shape = graph::shape_of_v<Self>;
+	static constexpr auto const& shape = graph::shape_of<Self>();
 
 	template<size_t I>
 	struct node_sender;
@@ -317,7 +317,8 @@ template<class Self, class FanIn, class FanOut>
 struct builder
 {
 	using types = lowered_types<Self, FanIn, FanOut>;
-	static constexpr auto shape = graph::shape_of_v<Self>;
+	static constexpr auto const& shape = graph::shape_of<Self>();
+	static constexpr auto sink_list = general::to_array<shape.sink_count()>(shape.sinks());
 
 	template<size_t I>
 	using child_t = graph::node_sender_t<Self, I>;
@@ -437,7 +438,7 @@ struct builder
 		{
 			this->template build_one<I>();
 		});
-		return join_sinks(general::sequence_t<general::sinks_v<shape>>{});
+		return join_sinks(general::sequence_t<sink_list>{});
 	}
 };
 

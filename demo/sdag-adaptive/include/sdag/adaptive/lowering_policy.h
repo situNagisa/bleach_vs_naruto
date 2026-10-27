@@ -56,7 +56,10 @@ template<template<class, class> class SourceOf, class Self, class Env, size_t S>
 using probe_sink_t = compose::hole_filled_t<graph::child_t<Self, S>,
 	placeholder_sender<graph::pred_completions_t<Self, S, graph::node_env_t<SourceOf, Self, Env>>>>;
 
-template<template<class, class> class SourceOf, class Self, class Env, class Sinks = general::sequence_t<general::sinks_v<graph::shape_of_v<Self>>>>
+template<class Self>
+inline constexpr auto sink_list = general::to_array<graph::shape_of<Self>().sink_count()>(graph::shape_of<Self>().sinks());
+
+template<template<class, class> class SourceOf, class Self, class Env, class Sinks = general::sequence_t<sink_list<Self>>>
 struct when_all_probe;
 
 /// 探针 when_all(汇点...)。when_all 只有一个子 sender 时会原样返回它（不再是 when_all），所以只有一个汇点时重复一次。

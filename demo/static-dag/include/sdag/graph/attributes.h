@@ -32,7 +32,9 @@ namespace sdag::graph
 template<template<class, class> class SourceOf, class Self>
 struct graph_attributes
 {
-	template<class Indices = general::sequence_t<general::sinks_v<shape_of_v<Self>>>>
+	static constexpr auto sink_list = general::to_array<shape_of<Self>().sink_count()>(shape_of<Self>().sinks());
+
+	template<class Indices = general::sequence_t<sink_list>>
 	struct sinks;
 
 	template<size_t... S>

@@ -62,10 +62,10 @@ template<class Errors>
 using error_variant_t = general::rebind_t<::std::variant, general::concat_t<general::type_list<::std::monostate>, Errors>>;
 
 /// 入度 > 1 的节点一个倒计数（初值是入度），其余节点 0 字节。
-template<auto Shape, class Indices = ::std::make_index_sequence<Shape.count>>
+template<auto const& Shape, class Indices = ::std::make_index_sequence<Shape.count>>
 struct pending;
 
-template<auto Shape, size_t... I>
+template<auto const& Shape, size_t... I>
 struct pending<Shape, ::std::index_sequence<I...>>
 {
 	using type = general::indexed_tuple<::std::conditional_t<(Shape.in_degree[I] > 1), counter<Shape.in_degree[I]>, general::empty>...>;
@@ -117,8 +117,32 @@ struct fused_core : graph::graph_state<Self, ::stdexec::env_of_t<Receiver>>
 	using completions_type = graph::graph_completions<Self, node_env_type>;
 	using operation_type = fused_operation<Self, Receiver>;
 
-	static constexpr auto shape = state_base::shape;
+	static constexpr auto const& shape = state_base::shape;
 	static constexpr size_t sink_count = shape.sink_count();
+
+	// 调度要展开的编译期列表：从形状 / 读者里取一次，固定成 std::array。
+	static constexpr auto roots = general::to_array<shape.root_count()>(shape.roots());
+
+	template<size_t J>
+	static constexpr auto successors = general::to_array<shape.out_degree[J]>(shape.successors(J));
+
+	/// 节点 J 结束时要析构的值：J move 的那些前驱（节点下标，升序）。
+	template<size_t J>
+	static constexpr auto released_by = []
+	{
+		constexpr auto const& taker = graph::readers_of<Self>().taker;
+		constexpr size_t size = static_cast<size_t>(::std::ranges::count(taker, J));
+		::std::array<size_t, size> result{};
+		size_t cursor = 0;
+		for (size_t node = 0; node < taker.size(); ++node)
+		{
+			if (taker[node] == J)
+			{
+				result[cursor++] = node;
+			}
+		}
+		return result;
+	}();
 
 	// ------------------------------------------------------------ 这张图需要哪些状态
 
@@ -290,7 +314,7 @@ struct fused_core : graph::graph_state<Self, ::stdexec::env_of_t<Receiver>>
 	constexpr void node_done() noexcept
 	{
 		// J move 的值到此用完：先析构，再通知后继。其它读者都在 J 之前结束（编译期检查过），没人再碰它。
-		general::for_each_value<graph::released_by_v<Self, J>>([this]<size_t From>() noexcept
+		general::for_each_value<released_by<J>>([this]<size_t From>() noexcept
 		{
 			this->template release<From>();
 		});
@@ -303,7 +327,7 @@ struct fused_core : graph::graph_state<Self, ::stdexec::env_of_t<Receiver>>
 			// 通知后继可能启动它们，后继又可能同步完成整张图。但在通知完最后一个后继之前整图不可能结束：
 			// 每个后继都是某个汇点的祖先，还没被通知的后继所在的那条路还没走完。所以循环里一直可以碰 this，
 			// 最后一次通知之后不再碰。
-			general::for_each_value<general::successors_v<shape, J>>([this]<size_t To>() noexcept
+			general::for_each_value<successors<J>>([this]<size_t To>() noexcept
 			{
 				this->template notify_edge<J, To>();
 			});
@@ -451,7 +475,7 @@ struct fused_core : graph::graph_state<Self, ::stdexec::env_of_t<Receiver>>
 		::std::array<dependency_entry, sink_count> entries{};
 		for (size_t index = 0; index < sink_count; ++index)
 		{
-			entries[index] = {general::sinks_v<shape>[index], mode::move};
+			entries[index] = {shape.sinks()[index], mode::move};
 		}
 		return entries;
 	}();
@@ -509,7 +533,7 @@ struct fused_operation_impl<Self, Receiver, ::std::index_sequence<I...>> : fused
 			this->_on_stop.emplace(::stdexec::get_stop_token(::stdexec::get_env(this->_receiver)), typename core::forward_stop{this});
 		}
 		// 启动完最后一个根之前整图不可能结束：整图要等所有汇点，而还没启动的根下面的汇点还没到。
-		general::for_each_value<general::roots_v<core::shape>>([this]<size_t Root>() noexcept
+		general::for_each_value<core::roots>([this]<size_t Root>() noexcept
 		{
 			this->template launch<Root>();
 		});

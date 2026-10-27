@@ -2,113 +2,88 @@
 
 /// 值的读者：谁读谁的值（let）、谁取走谁的值（move）。
 ///
-///   readers_v<Self>.read[J]     节点 J 的值有没有 let / move 读者
-///   readers_v<Self>.taker[J]    节点 J 的值被哪个节点 move；没人 move 时等于节点数
-///   released_by_v<Self, J>      节点 J 结束时要析构的值（J move 的前驱）
-///   access_t<Self, I, K, V>     节点 I 的第 K 个值依赖交出的值类型：move 时 V，let 时 V const&（值留在整图里）
+///   find_readers(table, read, taker)    普通 constexpr 函数（编译期 / 运行期都能用）：read[J] 节点 J 的值有没有 let / move 读者；
+///                                       taker[J] 被哪个节点 move（没有时等于节点数）。返回 move 用法的错误（move_error）
+///   readers<N>::build(table)            固定容量的结果；整张图的那一份缓存在 graph_data::readers（graph/description.h）
 ///
 /// 规则只有一条：move 就按值交出，并在取走它的节点结束时析构；let 给 const&，值活到整图结束。
 
 #include <array>
 #include <cstddef>
-#include <type_traits>
-#include <utility>
-#include <vector>
+#include <span>
 
 #include "../config.h"
-#include "../general/sequence.h"
-#include "../general/digraph.h"
-#include "description.h"
+#include "../node/node_graph.h"
 
 namespace sdag::graph
 {
 
-namespace readers_detail
+enum class move_error
 {
-
-/// 每个节点的读者与取走它的节点；顺带记下 move 用法的两种错误（第一个出错的值）。
-template<size_t N>
-struct readers
-{
-	::std::array<bool, N> read{};
-	::std::array<size_t, N> taker{};
+	none,
 	/// 同一个值被 move 了两次。
-	size_t taken_twice = N;
+	taken_twice,
 	/// move 它的节点之后还有别的读者（或与它并行的读者）：move 会和那个读者的读冲突。
-	size_t reader_after_taker = N;
+	reader_after_taker,
 };
 
-}
-
-template<class Self>
-inline constexpr auto readers_v = []
+/// 读者与取走者。table 要求形状合法（shape.error == none）。
+template<class Table>
+[[nodiscard]] constexpr move_error find_readers(Table const& table, ::std::span<bool> read, ::std::span<::std::size_t> taker) noexcept
 {
-	constexpr auto table = table_of_v<Self>;
-	constexpr size_t count = table.shape.count;
-	constexpr auto reach = general::reach_v<table.shape>;
-	readers_detail::readers<count> result{};
-	result.taker.fill(count);
-	for (size_t node = 0; node < count; ++node)
+	::std::size_t const count = read.size();
+	auto const reach = table.shape.reach();
+	move_error error = move_error::none;
+	::std::ranges::fill(read, false);
+	::std::ranges::fill(taker, count);
+	for (::std::size_t node = 0; node < count; ++node)
 	{
-		for (size_t e = table.first[node]; e < table.first[node + 1]; ++e)
+		for (dependency_entry const& entry : table.dependencies(node))
 		{
-			auto const [from, how] = table.entries[e];
-			// 不存在的键（下标 = 节点数）由 graph_data 的形状检查报错，这里跳过。
-			if (from >= count || how == mode::wait)
+			if (entry.how == mode::wait)
 			{
 				continue;
 			}
-			result.read[from] = true;
-			if (how == mode::move)
+			read[entry.from] = true;
+			if (entry.how == mode::move)
 			{
-				if (result.taker[from] != count && result.taken_twice == count)
+				if (taker[entry.from] != count && error == move_error::none)
 				{
-					result.taken_twice = from;
+					error = move_error::taken_twice;
 				}
-				result.taker[from] = node;
+				taker[entry.from] = node;
 			}
 		}
 	}
 	// move 它的节点必须是它所有其它读者的严格后代：其它读者读完（const&）之后才轮到 move。
-	for (size_t node = 0; node < count; ++node)
+	for (::std::size_t node = 0; node < count; ++node)
 	{
-		for (size_t e = table.first[node]; e < table.first[node + 1]; ++e)
+		for (dependency_entry const& entry : table.dependencies(node))
 		{
-			auto const [from, how] = table.entries[e];
-			if (from < count && how == mode::let && result.taker[from] != count
-				&& !reach[node][result.taker[from]] && result.reader_after_taker == count)
+			::std::size_t const owner = taker[entry.from];
+			if (entry.how == mode::let && owner != count && !reach[node, owner] && error == move_error::none)
 			{
-				result.reader_after_taker = from;
+				error = move_error::reader_after_taker;
 			}
 		}
 	}
-	return result;
-}();
+	return error;
+}
 
-namespace readers_detail
+template<::std::size_t N>
+struct readers
 {
+	::std::array<bool, N> read{};
+	::std::array<::std::size_t, N> taker{};
+	move_error error = move_error::none;
 
-template<class Self, size_t J>
-[[nodiscard]] consteval ::std::vector<size_t> released_by()
-{
-	::std::vector<size_t> result;
-	for (size_t node = 0; node < count_of_v<Self>; ++node)
+	template<class Table>
+	[[nodiscard]] static constexpr readers build(Table const& table) noexcept
 	{
-		if (readers_v<Self>.taker[node] == J)
-		{
-			result.push_back(node);
-		}
+		readers result{};
+		result.error = find_readers(table, result.read, result.taker);
+		return result;
 	}
-	return result;
-}
-
-}
-
-/// 节点 J 结束时要析构的值：J move 的那些前驱（节点下标，升序）。
-template<class Self, size_t J>
-inline constexpr auto released_by_v = general::to_array<readers_detail::released_by<Self, J>().size()>(readers_detail::released_by<Self, J>());
-
-template<class Self, size_t I, size_t K, class V>
-using access_t = ::std::conditional_t<value_dependencies_v<Self, I>[K].how == mode::move, V, V const&>;
+};
 
 }

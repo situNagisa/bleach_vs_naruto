@@ -68,7 +68,7 @@ template<class Self, class Env>
 {
 	node_analysis_result<count_of_v<Self>> result;
 	// 范围必须是常量表达式：用静态成员，不用局部变量。
-	template for (constexpr ::std::size_t index : shape_of_v<Self>.order)
+	template for (constexpr ::std::size_t index : shape_of<Self>().order)
 	{
 		using completions = node_completions_t<Self, index, Env>;
 		if constexpr (!general::is_stdexec_completion_signatures_v<completions>)
@@ -134,7 +134,7 @@ template<class Self, size_t Step, class Env>
 struct walk : walk<Self, Step - 1, Env>
 {
 	using base = walk<Self, Step - 1, Env>;
-	using completions = node_completions_t<Self, shape_of_v<Self>.order[Step - 1], Env>;
+	using completions = node_completions_t<Self, shape_of<Self>().order[Step - 1], Env>;
 	static constexpr bool ok = general::is_stdexec_completion_signatures_v<completions>;
 	static constexpr bool valid = base::valid && ok;
 	using first_invalid_t = ::std::conditional_t<!base::valid || ok, typename base::first_invalid_t, completions>;

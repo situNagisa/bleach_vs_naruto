@@ -99,6 +99,14 @@ auto [text] = ::stdexec::sync_wait(::std::move(g)).value();
 里匹配 `dag_t<K>` 即可（`exec::sender_for<G, dag_t<K>>`，子 sender 就是节点 sender）。也可以用 `make_graph<Tag, K>(nodes...)`
 以自己的标签建图，在标签上定制 `transform_sender`。
 
+## 形状层：值的算法，编译期与运行期共用
+
+建图、拓扑序、可达关系、读者与取走者、值槽的链划分都是普通的 `constexpr` 函数（`general/digraph.h`、`general/chains.h`、
+`graph/readers.h`），输入输出是 `std::span` / `std::mdspan`，存储由调用方给：编译期给 `std::array`，运行期给 `vector` 等。
+静态图只在一处缓存结果——`graph_data` 的 `static constexpr` 成员（节点表含形状、读者），其它地方经 `table_of` / `shape_of` /
+`readers_of` 取它的引用；需要把结果当模板实参展开时（根、后继、汇点列表），在用的地方 `static constexpr` 固定一次。
+`test_runtime_shape` 用 vector 在运行期跑了同一套算法。
+
 ## 常量求值
 
 图这一层的函数都标了 `constexpr`，常量求值止步于原子量与停止源：入度计数、汇点计数、状态字是 `std::atomic`，停止源是
@@ -131,8 +139,8 @@ include/sdag/                    （目录 = 概念分组，文件 = 模块；�
     type_list.h         类型列表：type_list、at_t、index_of、concat、unique、transform、rebind，以及反射共用的 refl 基础
     sequence.h          编译期序列：to_array、sequence_t、for_each_value
     tuple.h             不可移动元组：indexed_tuple、按工厂原地构造、空元素 0 字节（empty / empty_for）
-    digraph.h           有向无环图：shape<N>（邻接、入出度、拓扑序）、shape_error、可达关系 reach_v、roots_v / sinks_v / successors_v
-    chains.h            偏序的最小链划分（二分图最大匹配）：哪些值可以依次共用一块存储
+    digraph.h           有向无环图：前驱表 -> 后继表、拓扑序、可达关系（普通 constexpr 函数，span / mdspan 进出，运行期也能用），shape<N, E> 固定容量的结果
+    chains.h            偏序的最小链划分（二分图最大匹配，constexpr 函数）：哪些值可以依次共用一块存储
     relay.h             接力存储：一组类型轮流占用同一块内存
     cvref.h             copy_cvref_t
     signatures.h        完成签名：拆开（completion_trait）与拼装（make_completions_t）
@@ -148,8 +156,8 @@ include/sdag/                    （目录 = 概念分组，文件 = 模块；�
     node_env.h          节点看到的环境：取值源句柄 + 可选停止令牌 + 外层转发
     node_sender.h       把占位符喂给节点载荷得到节点 sender
   graph/            图
-    description.h       图的描述：graph_data、graph_description（tuple-like，对算法标签泛型）、类型级查询与节点签名
-    readers.h           谁读谁的值、谁 move 谁的值（move 给 V，let 给 V const&），move 用法的编译期检查所需的信息
+    description.h       图的描述：graph_data（节点表 / 形状 / 读者的唯一缓存）、graph_description（tuple-like，对算法标签泛型）、类型级查询与节点签名
+    readers.h           谁读谁的值、谁 move 谁的值（find_readers：constexpr 函数），以及 move 用法的错误
     analysis.h          node_analysis：每个节点有值 / 错误 / 停止，各是什么类型
     storage_plan.h      storage_plan：哪些值要存、存时会不会抛、哪个节点直接转发（forward[J]）、值槽怎么复用（layout）
     pred_sigs.h         前驱的签名：取值源的签名接口

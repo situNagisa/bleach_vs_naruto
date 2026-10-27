@@ -161,7 +161,7 @@ struct graph_state
 
 	static_assert(view::valid, "sdag: 有节点在接收者环境（或整图的节点环境）下无法给出完成签名");
 
-	static constexpr auto shape = shape_of_v<Self>;
+	static constexpr auto const& shape = shape_of<Self>();
 	static constexpr bool stoppable = view::stoppable;
 
 	SDAG_NO_UNIQUE_ADDRESS typename slots_detail::slots<Self, env_type>::type _slots{};
@@ -238,7 +238,7 @@ struct graph_state
 
 	/// 节点 Node 的 let / move 前驱的值，按声明顺序铺平。
 	template<size_t Node>
-	static constexpr auto delivery_plan_v = graph::delivery_plan<Self, env_type, value_dependencies_v<Self, Node>>();
+	static constexpr auto delivery_plan_v = graph::delivery_plan<Self, env_type, value_dependencies<Self, Node>()>();
 
 	/// 交付接口：占位符启动时调用，把节点 Node 的前驱的值交给接收者。
 	template<size_t Node, class Receiver>

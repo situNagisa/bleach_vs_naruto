@@ -2,7 +2,7 @@
 
 /// 编译期序列：一串编译期整数怎么展开成逐项调用 / 参数包。
 ///
-///   to_array<N>(vector)         编译期的 vector 固定成 std::array（长度要先用另一次常量求值算出来）
+///   to_array<N>(range)          编译期的 range 固定成 std::array（长度要先用另一次常量求值算出来）
 ///   sequence_t<Array>           std::array<size_t, N> 变成 std::index_sequence<Array[0], ..., Array[N - 1]>，供包展开使用
 ///   for_each_value<Array>(fn)   对编译期数组的每个元素依次调用 fn.template operator()<Array[i]>()，按下标顺序
 ///
@@ -10,6 +10,7 @@
 
 #include <array>
 #include <cstddef>
+#include <ranges>
 #include <utility>
 #include <vector>
 
@@ -19,14 +20,16 @@
 namespace sdag::general
 {
 
-/// 把编译期的 vector 固定成 std::array（长度要先用另一次常量求值算出来）。
-template<::std::size_t N, class T>
-[[nodiscard]] constexpr ::std::array<T, N> to_array(::std::vector<T> const& values)
+/// 把一段编译期的 range（span / vector ……）固定成 std::array（长度要先用另一次常量求值算出来）。
+/// 用法：static constexpr auto fixed = to_array<range.size()>(range); 之后 fixed 可以当非类型模板实参。
+template<::std::size_t N, ::std::ranges::input_range Range>
+[[nodiscard]] constexpr auto to_array(Range const& values)
 {
-	::std::array<T, N> result{};
-	for (::std::size_t index = 0; index < N; ++index)
+	::std::array<::std::ranges::range_value_t<Range>, N> result{};
+	::std::size_t index = 0;
+	for (auto const& value : values)
 	{
-		result[index] = values[index];
+		result[index++] = value;
 	}
 	return result;
 }

@@ -6,6 +6,7 @@
 #include <exception>
 #include <memory>
 #include <optional>
+#include <span>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -181,7 +182,7 @@ void test_triangle()
 		using fused_graph = decltype(build());
 		static_assert(::std::same_as<::stdexec::completion_signatures_of_t<fused_graph, ::stdexec::env<>>,
 			::stdexec::completion_signatures<::stdexec::set_value_t(::std::string), ::stdexec::set_error_t(::std::exception_ptr)>>);
-		constexpr auto shape = ::sdag::shape_v<fused_graph>;
+		constexpr auto const& shape = ::sdag::shape_of<fused_graph>();
 		static_assert(shape.in_degree[2] == 2 && shape.out_degree[0] == 2 && shape.out_degree[1] == 1);
 		static_assert(shape.order[0] == 0 && shape.order[1] == 1 && shape.order[2] == 2);
 
@@ -254,8 +255,8 @@ void test_mixed_dependencies()
 	using graph = decltype(build(::std::declval<::std::vector<int>&>(), ::std::declval<bool&>()));
 	static_assert(::std::same_as<::stdexec::completion_signatures_of_t<graph, ::stdexec::env<>>,
 		::stdexec::completion_signatures<::stdexec::set_value_t(::std::string), ::stdexec::set_error_t(::std::exception_ptr)>>);
-	static_assert(::sdag::graph::readers_v<graph&&>.read[0] && ::sdag::graph::readers_v<graph&&>.taker[0] == 1, "a 被 b move（c 是控制依赖）");
-	static_assert(!::sdag::graph::readers_v<graph&&>.read[1], "b 的值没人读（d 对 b 是控制依赖）");
+	static_assert(::sdag::graph::readers_of<graph&&>().read[0] && ::sdag::graph::readers_of<graph&&>().taker[0] == 1, "a 被 b move（c 是控制依赖）");
+	static_assert(!::sdag::graph::readers_of<graph&&>().read[1], "b 的值没人读（d 对 b 是控制依赖）");
 
 	auto respects_order = [](::std::vector<int> const& sequence)
 	{
@@ -305,7 +306,7 @@ void test_move()
 		::sdag::make<::sdag::basic_node{d, ::sdag::move(a), ::sdag::wait(b), ::sdag::wait(c)}>(::stdexec::then([&](tracked&& t) { log.push_back(30 + t.id); return 0; })),
 		// e 在 d 之后跑：此时 a 的值已经析构
 		::sdag::make<::sdag::basic_node{e, ::sdag::wait(d)}>(::stdexec::then(::stdexec::just(), [&] { log.push_back(40); return 0; })));
-	static_assert(::sdag::graph::readers_v<decltype(g)&&>.taker[0] == 3, "a 被 d move");
+	static_assert(::sdag::graph::readers_of<decltype(g)&&>().taker[0] == 3, "a 被 d move");
 	auto position = [&](int entry) { return ::std::ranges::find(log, entry) - log.begin(); };
 	(void)::stdexec::sync_wait(::std::move(g));
 	test::check(position(11) < position(31) && position(21) < position(31), "b、c 读完（const&）之后 d 才 move");
@@ -360,6 +361,35 @@ void test_slot_reuse()
 		test::check(caught && ::std::ranges::count(log, -1) == 1 && ::std::ranges::count(log, -2) == 1, "c 失败：a、b 仍各析构一次（b 在被跳过的 c 结束时析构）");
 		test::check(::std::ranges::count(log, 4) == 0, "d 被跳过");
 	}
+}
+
+void test_runtime_shape()
+{
+	test::section("形状算法是普通 constexpr 函数：运行期用 vector 当存储同样能算（给动态图铺路）");
+	// 菱形 a -> {b, c} -> d 的前驱表
+	::std::vector<::std::size_t> const first{0, 0, 1, 2, 4};
+	::std::vector<::std::size_t> const preds{0, 0, 1, 2};
+	::std::size_t const n = first.size() - 1;
+	::std::vector<::std::size_t> succ_first(n + 1);
+	::std::vector<::std::size_t> succs(preds.size());
+	::sdag::general::invert(first, preds, succ_first, succs);
+	::std::vector<::std::size_t> order(n);
+	bool const acyclic = ::sdag::general::topological_order(first, succ_first, succs, order);
+	// vector<bool> 没有 data()，所以 bool 的矩阵存储用 unique_ptr<bool[]>。
+	auto reach_storage = ::std::make_unique<bool[]>(n * n);
+	::sdag::general::bool_matrix reach(reach_storage.get(), n, n);
+	::sdag::general::reachability(order, succ_first, succs, reach);
+	test::check(acyclic && order == ::std::vector<::std::size_t>{0, 1, 2, 3}, "拓扑序");
+	test::check(reach[0, 3] && reach[1, 3] && !reach[1, 2] && !reach[3, 0], "可达关系");
+
+	// 链 a -> b -> c，每一步 move：before[u, v] = u 被 move 且取走者是 v 的祖先 -> 链划分
+	auto before_storage = ::std::make_unique<bool[]>(9);
+	::sdag::general::bool_matrix before(before_storage.get(), 3, 3);
+	before[0, 2] = true;
+	bool const present[]{true, true, true};
+	::std::vector<::std::size_t> head(3), position(3), size(3);
+	::sdag::general::min_chain_cover(before, present, head, position, size);
+	test::check(head[0] == head[2] && head[1] != head[0] && size[0] == 2, "a、c 共用一块，b 单独一块");
 }
 
 void test_error_propagation()
@@ -723,6 +753,7 @@ int main()
 	test_mixed_dependencies();
 	test_move();
 	test_slot_reuse();
+	test_runtime_shape();
 	test_error_propagation();
 	test_stop_propagation();
 	test_thread_pool();

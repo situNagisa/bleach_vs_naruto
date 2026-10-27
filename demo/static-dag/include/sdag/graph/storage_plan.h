@@ -29,7 +29,7 @@ template<class Self, class Env>
 struct storage_plan
 {
 	using analysis = node_analysis<Self, Env>;
-	static constexpr auto shape = shape_of_v<Self>;
+	static constexpr auto const& shape = shape_of<Self>();
 
 	static constexpr auto forward = []<size_t... I>(::std::index_sequence<I...>)
 	{
@@ -38,7 +38,7 @@ struct storage_plan
 
 	static constexpr auto slot_needed = []<size_t... I>(::std::index_sequence<I...>)
 	{
-		constexpr auto read = readers_v<Self>.read;
+		constexpr auto const& read = readers_of<Self>().read;
 		return ::std::array<bool, sizeof...(I)>{
 			(analysis::template values_t<I>::size != 0 && !forward[I] && (shape.is_sink(I) || read[I]))...};
 	}(::std::make_index_sequence<count_of_v<Self>>{});
@@ -46,17 +46,18 @@ struct storage_plan
 	static constexpr auto layout = []
 	{
 		constexpr size_t count = count_of_v<Self>;
-		constexpr auto taker = readers_v<Self>.taker;
-		constexpr auto reach = general::reach_v<shape>;
-		::std::array<::std::array<bool, count>, count> before{};
+		auto const& taker = readers_of<Self>().taker;
+		auto const reach = shape.reach();
+		::std::array<bool, count * count> before_storage{};
+		general::bool_matrix before(before_storage.data(), count, count);
 		for (size_t u = 0; u < count; ++u)
 		{
 			for (size_t v = 0; v < count; ++v)
 			{
-				before[u][v] = taker[u] != count && reach[taker[u]][v];
+				before[u, v] = taker[u] != count && reach[taker[u], v];
 			}
 		}
-		return general::min_chain_cover(before, slot_needed);
+		return general::chain_cover<count>::build(before, slot_needed);
 	}();
 
 	static constexpr bool nothrow_store = []
